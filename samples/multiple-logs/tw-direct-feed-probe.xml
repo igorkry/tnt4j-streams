@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tw-direct-feed
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tw-direct-feed-probe.xsd">
+
+    <parser name="ExampleTokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value=","/>
+        <field name="ServerName" locator="1"/>
+        <field name="ResMgrType" locator="2">
+            <field-map source="Standalone Server" target="3"/>
+            <field-map source="Application Server" target="1"/>
+        </field>
+        <field name="ResourceMgr" locator="3"/>
+        <field name="ApplName" locator="4"/>
+        <field name="Tag" locator="8"/>
+        <field name="ActivityName" locator="9"/>
+        <field name="ActivityType" locator="10"/>
+        <field name="ElapsedTime" locator="11" units="Microseconds"/>
+        <field name="StartTime" locator="13" format="yyyy-MM-dd HH:mm:ss.SSSSSS"/>
+        <field name="StatusCode" locator="14"/>
+        <field name="ReasonCode" locator="15"/>
+        <field name="Resource" locator="16"/>
+        <field name="ResType" locator="17">
+            <field-map source="Java Runtime" target="JAVA_RUNTIME"/>
+            <field-map source="Web Application" target="WEB_APP"/>
+        </field>
+        <field name="UserName" locator="18"/>
+    </parser>
+
+    <feeder name="ExampleFileFeeder" class="com.jkool.tnt4j.streams.inputs.FileLineFeeder">
+        <ta-conn protocol="TCP" host="localhost" port="6400"/>
+        <property name="FileName" value="orders.log"/>
+        <parser-ref name="ExampleTokenParser"/>
+    </feeder>
+</tw-direct-feed>

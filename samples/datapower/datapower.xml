@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tracking_event xsi:noNamespaceSchemaLocation="wp.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <HostName>ix52</HostName>
+  <HostInfo>719942XXI50XI52DataPower XI50DataPower XI52(unknown)6803664XI50.5.0.0.0XI52.5.0.0.02146352012/06/19 15:40:442013-09-2709:42:34 EDT2013-09-0712:21:26 EDTenable</HostInfo>
+  <Service>WMQ_MPGateway</Service>
+  <Domain>default</Domain>
+  <Policy>WMQ_ProcessingPolicy</Policy>
+  <Rule>WMQ_ProcessingPolicy_rule_0</Rule>
+  <EventType>RECEIVE</EventType>
+  <Signature>5b68c889-485f-4fdf-a2d1-1d47815b62c2</Signature>
+  <Tag>10445665</Tag>
+  <StartTime datatype="Timestamp" units="Milliseconds">1380289354192</StartTime>
+  <ResponseMode>2</ResponseMode>
+  <ErrorCode>0x00000000</ErrorCode>
+  <ErrorSubCode>0x00000000</ErrorSubCode>
+  <ErrorMsg/>
+  <MsgData format="string">Simple XSL Transformation:</MsgData>
+</tracking_event>

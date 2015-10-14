@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:annotation>
+    <xs:documentation>
+      This schema defines the format of XML messages to use in reporting tracking events for processing
+      by TransactionWorks Direct Feed Probe.
+    </xs:documentation>
+  </xs:annotation>
+
+  <!-- Definition for Data Formats -->
+  <xs:simpleType name="DataFormats">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="base64Binary">
+        <xs:annotation>
+          <xs:documentation>
+            Data is binary, in base64 encoding
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+
+      <xs:enumeration value="hexBinary">
+        <xs:annotation>
+          <xs:documentation>
+            Data is binary, represented as a hex string
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation>
+            Data is a string of characters
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Precision of durations and numeric timestamps -->
+  <xs:simpleType name="TimeUnits">
+    <xs:annotation>
+      <xs:documentation>
+        Set of internally-supported precision units for field data.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Seconds"/>
+      <xs:enumeration value="Milliseconds"/>
+      <xs:enumeration value="Microseconds"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Definition for date/time fields -->
+  <xs:complexType name="DateTimestamp">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="datatype" use="optional" default="Timestamp">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="DateTime">
+                <xs:annotation>
+                  <xs:documentation>
+                    Value is a date, time, or date/time expression with a specific format.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="Timestamp">
+                <xs:annotation>
+                  <xs:documentation>
+                    Value is a numeric value representing a date/time in the specified resolution.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="format" type="xs:string" use="optional"/>
+        <xs:attribute name="units" type="TimeUnits" use="optional" default="Milliseconds"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Definition for data fields -->
+  <xs:complexType name="DataField">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="format" type="DataFormats" use="optional" default="string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <!-- Root of tracking event tree -->
+  <xs:element name="tracking_event">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="HostName" type="xs:string" minOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Host Alias name of server where tracking event occurred.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="HostIp" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              IP Address of server where tracking event occurred.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="HostInfo" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              String identifying information (e.g. type, version) about system where tracking event occurred.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Service" type="xs:string" minOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Name of Service associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="User" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Name of User associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Domain" type ="xs:string" minOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Name of Domain associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Policy" type="xs:string" minOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Name of Policy associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Rule" type="xs:string" minOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              String identifying the operation (e.g. function/method name)
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="EventType" minOccurs="0" default="OTHER">
+          <xs:annotation>
+            <xs:documentation>
+              Type of operation associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="OTHER"/>
+              <xs:enumeration value="START"/>
+              <xs:enumeration value="OPEN"/>
+              <xs:enumeration value="SEND"/>
+              <xs:enumeration value="RECEIVE"/>
+              <xs:enumeration value="CLOSE"/>
+              <xs:enumeration value="END"/>
+              <xs:enumeration value="INQUIRE"/>
+              <xs:enumeration value="SET"/>
+              <xs:enumeration value="CALL"/>
+              <xs:enumeration value="URL"/>
+              <xs:enumeration value="BROWSE"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+
+        <xs:element name="Correlator" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Identifier used to correlate/relate tracking event entries to group them into logical tasks.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Signature" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Unique identifier for message in tracking event (message with same signature are treated as same message).
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="Tag" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              User-defined label to associate with message, used for searching.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="StartTime" type="DateTimestamp" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Start time of the tracking event, in specified format.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="EndTime" type="DateTimestamp" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              End time of the tracking event, in specified format.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="ElapsedTime" minOccurs="0" default="0">
+          <xs:annotation>
+            <xs:documentation>
+              Elapsed time of the tracking event in specified units (default: microseconds).
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:nonNegativeInteger">
+                <xs:attribute name="units" type="TimeUnits" use="required"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="ErrorCode" minOccurs="0" default="SUCCEEDED">
+          <xs:annotation>
+            <xs:documentation>
+              Error/status code for the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="SUCCEEDED"/>
+              <xs:enumeration value="WARNING"/>
+              <xs:enumeration value="FAILED"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+
+        <xs:element name="ErrorSubCode" type="xs:integer" minOccurs="0" default="0">
+          <xs:annotation>
+            <xs:documentation>
+              Numeric reason/sub-error code associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="ErrorMsg" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Error/exception message associated with the tracking event.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+
+        <xs:element name="MsgData" type="DataField" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Message data (payload).
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

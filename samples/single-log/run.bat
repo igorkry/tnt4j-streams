@@ -1,0 +1,1 @@
+..\..\bin\tnt4j-streams.bat -f:tw-direct-feed-probe.xml

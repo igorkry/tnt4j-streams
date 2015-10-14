@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tw-direct-feed
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tw-direct-feed-probe.xsd">
+
+    <parser name="DatapowerParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="SignatureDelim" value="#!#"/>
+        <field name="ActivityData" locator="/tracking_event/MsgData" locator-type="Label" datatype="String" format="string"/>
+        <field name="ActivityName" separator=":">
+            <field-locator locator="/tracking_event/ResponseMode" locator-type="Label"/>
+            <field-locator locator="/tracking_event/Rule" locator-type="Label"/>
+        </field>
+        <field name="ActivityType" locator="/tracking_event/EventType" locator-type="Label"/>
+        <field name="ApplName" locator="/tracking_event/Service" locator-type="Label"/>
+        <field name="Resource" locator="/tracking_event/Policy" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+        <field name="ResourceMgr" locator="/tracking_event/Domain" locator-type="Label"/>
+        <field name="ResType" value="UNKNOWN"/>
+        <field name="ReasonCode" locator="/tracking_event/ErrorSubCode" locator-type="Label" datatype="Number"/>
+        <field name="ServerName" locator="/tracking_event/HostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/tracking_event/HostInfo" locator-type="Label"/>
+        <field name="Signature" locator="/tracking_event/Signature" locator-type="Label"/>
+        <field name="StartTime" locator="/tracking_event/StartTime" locator-type="Label" datatype="Timestamp"/>
+        <field name="StatusCode" locator="/tracking_event/ErrorCode" locator-type="Label" datatype="Number">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="" target="ERROR"/>
+        </field>
+        <field name="ErrorMsg" separator=":">
+            <field-locator locator="/tracking_event/ErrorSubCode" locator-type="Label"/>
+            <field-locator locator="/tracking_event/ErrorMsg" locator-type="Label"/>
+        </field>
+        <field name="Tag" locator="/tracking_event/Tag" locator-type="Label"/>
+    </parser>
+
+    <feeder name="WmqFeeder" class="com.jkool.tnt4j.streams.inputs.WmqFeeder">
+        <ta-conn protocol="TCP" host="localhost" port="6400"/>
+        <property name="QueueManager" value="QMGR.NAME"/>
+        <property name="Queue" value="QUEUE.NAME"/>
+        <parser-ref name="DatapowerParser"/>
+    </feeder>
+</tw-direct-feed>
