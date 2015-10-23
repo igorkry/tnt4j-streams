@@ -22,8 +22,8 @@ package com.jkool.tnt4j.streams;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
-import com.jkool.tnt4j.streams.inputs.FeederThread;
+import com.jkool.tnt4j.streams.inputs.StreamThread;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -59,22 +59,22 @@ public final class StreamsAgent
   public static void main (String... args)
   {
     LOGGER.log (OpLevel.INFO, "jKool TNT4J Streams session starting ...");
-    ThreadGroup feederThreads = new ThreadGroup (StreamsAgent.class.getName () + "Threads");
+    ThreadGroup streamThreads = new ThreadGroup (StreamsAgent.class.getName () + "Threads");
     try
     {
       processArgs (args);
       StreamsConfig cfg = StringUtils.isEmpty (cfgFileName) ? new StreamsConfig () : new StreamsConfig (cfgFileName);
-      Map<String, ActivityFeeder> feederMap = cfg.getFeeders ();
-      if (feederMap == null || feederMap.isEmpty ())
+      Map<String, TNTInputStream> streamsMap = cfg.getStreams ();
+      if (streamsMap == null || streamsMap.isEmpty ())
       {
-        throw new IllegalStateException ("No Activity Feeders found in configuration");
+        throw new IllegalStateException ("No Activity Streams found in configuration");
       }
-      FeederThread ft;
-      for (Map.Entry<String, ActivityFeeder> feederEntry : feederMap.entrySet ())
+      StreamThread ft;
+      for (Map.Entry<String, TNTInputStream> streamEntry : streamsMap.entrySet ())
       {
-        String feederName = feederEntry.getKey ();
-        ActivityFeeder feeder = feederEntry.getValue ();
-        ft = new FeederThread (feederThreads, feeder, feeder.getClass ().getSimpleName () + ":" + feederName);
+        String streamName = streamEntry.getKey ();
+        TNTInputStream stream = streamEntry.getValue ();
+        ft = new StreamThread (streamThreads, stream, stream.getClass ().getSimpleName () + ":" + streamName);
         ft.start ();
       }
     }

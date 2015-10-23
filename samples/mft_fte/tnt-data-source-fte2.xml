@@ -37,10 +37,10 @@
 
     </parser>
 
-    <feeder name="WmqFeeder" class="com.jkool.tnt4j.streams.inputs.WmqFeeder">
+    <stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
         <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="QueueManager" value="MB8QMGR"/>
         <property name="Queue" value="NASTEL.FTE.EVENTS"/>
         <parser-ref name="MQFTEParser"/>
-    </feeder>
+    </stream>
 </tnt-data-source>

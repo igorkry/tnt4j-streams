@@ -24,27 +24,27 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * Base class for threads running an ActivityFeeder.
+ * Base class for threads running an TNTInputStream.
  *
  * @version $Revision: 3 $
- * @see ActivityFeeder
+ * @see TNTInputStream
  */
-public class FeederThread extends StreamsThread
+public class StreamThread extends StreamsThread
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (FeederThread.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamThread.class);
   /**
-   * ActivityFeeder being executed by this thread.
+   * TNTInputStream being executed by this thread.
    */
-  protected final ActivityFeeder target;
+  protected final TNTInputStream target;
 
   /**
-   * Creates thread to run specified ActivityFeeder.
+   * Creates thread to run specified TNTInputStream.
    *
-   * @param target the ActivityFeeder to run
+   * @param target the TNTInputStream to run
    *
    * @see java.lang.Thread#Thread(Runnable)
    */
-  public FeederThread (ActivityFeeder target)
+  public StreamThread (TNTInputStream target)
   {
     super (target);
     this.target = target;
@@ -53,14 +53,14 @@ public class FeederThread extends StreamsThread
   }
 
   /**
-   * Creates thread to run specified ActivityFeeder.
+   * Creates thread to run specified TNTInputStream.
    *
-   * @param target the ActivityFeeder to run
+   * @param target the TNTInputStream to run
    * @param name   the name for thread
    *
    * @see java.lang.Thread#Thread(Runnable, String)
    */
-  public FeederThread (ActivityFeeder target, String name)
+  public StreamThread (TNTInputStream target, String name)
   {
     super (target, name);
     this.target = target;
@@ -69,15 +69,15 @@ public class FeederThread extends StreamsThread
   }
 
   /**
-   * Creates thread to run specified ActivityFeeder.
+   * Creates thread to run specified TNTInputStream.
    *
    * @param group  the thread group new thread is to belong to
-   * @param target the ActivityFeeder to run
+   * @param target the TNTInputStream to run
    * @param name   the name for thread
    *
    * @see java.lang.Thread#Thread(ThreadGroup, Runnable, String)
    */
-  public FeederThread (ThreadGroup group, ActivityFeeder target, String name)
+  public StreamThread (ThreadGroup group, TNTInputStream target, String name)
   {
     super (group, target, name);
     this.target = target;
@@ -86,14 +86,14 @@ public class FeederThread extends StreamsThread
   }
 
   /**
-   * Creates thread to run specified ActivityFeeder.
+   * Creates thread to run specified TNTInputStream.
    *
    * @param group  the thread group new thread is to belong to
-   * @param target the ActivityFeeder to run
+   * @param target the TNTInputStream to run
    *
    * @see java.lang.Thread#Thread(ThreadGroup, Runnable)
    */
-  public FeederThread (ThreadGroup group, ActivityFeeder target)
+  public StreamThread (ThreadGroup group, TNTInputStream target)
   {
     super (group, target);
     this.target = target;
@@ -102,11 +102,11 @@ public class FeederThread extends StreamsThread
   }
 
   /**
-   * Gets the ActivityFeeder being run by this thread.
+   * Gets the TNTInputStream being run by this thread.
    *
-   * @return ActivityFeeder being run
+   * @return TNTInputStream being run
    */
-  public ActivityFeeder getTarget ()
+  public TNTInputStream getTarget ()
   {
     return target;
   }

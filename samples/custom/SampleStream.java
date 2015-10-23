@@ -27,24 +27,24 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * Sample custom feeder.
+ * Sample custom stream.
  */
-public class SampleFeeder extends ActivityFeeder
+public class SampleStream extends TNTInputStream
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleStream.class);
 
   private String fileName;
   private File activityFile;
   private LineNumberReader lineReader;
   private int lineNumber;
 
-  private SampleFeeder ()
+  private SampleStream ()
   {
     super (LOGGER);
   }
@@ -67,7 +67,7 @@ public class SampleFeeder extends ActivityFeeder
   }
 
   /**
-   * Set properties for activity feeder.
+   * Set properties for activity stream.
    *
    * @param props properties to set
    *
@@ -92,9 +92,9 @@ public class SampleFeeder extends ActivityFeeder
   }
 
   /**
-   * Initialize the feeder.
+   * Initialize the stream.
    *
-   * @throws Throwable indicates that feeder is not configured properly and
+   * @throws Throwable indicates that stream is not configured properly and
    *                   cannot continue.
    */
   @Override
@@ -103,7 +103,7 @@ public class SampleFeeder extends ActivityFeeder
     super.initialize ();
     if (fileName == null)
     {
-      throw new IllegalStateException ("SampleFeeder: File name not defined");
+      throw new IllegalStateException ("SampleStream: File name not defined");
     }
     LOGGER.log (OpLevel.DEBUG, "Opening file: {0}", fileName);
     activityFile = new File (fileName);
@@ -120,7 +120,7 @@ public class SampleFeeder extends ActivityFeeder
   {
     if (lineReader == null)
     {
-      throw new IllegalStateException ("SampleFeeder: File is not opened for reading");
+      throw new IllegalStateException ("SampleStream: File is not opened for reading");
     }
     String line = lineReader.readLine ();
     lineNumber = lineReader.getLineNumber ();

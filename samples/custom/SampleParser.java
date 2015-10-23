@@ -26,7 +26,7 @@ import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -88,7 +88,7 @@ public class SampleParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
+  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
   {
     if (fieldDelim == null)
     {
@@ -131,7 +131,7 @@ public class SampleParser extends ActivityParser
           if (locations.size () == 1)
           {
             // field value is based on single raw data location, get the value of this location
-            value = getLocatorValue (feeder, locations.get (0), fields);
+            value = getLocatorValue (stream, locations.get (0), fields);
           }
           else
           {
@@ -140,7 +140,7 @@ public class SampleParser extends ActivityParser
             Object[] values = new Object[locations.size ()];
             for (int l = 0; l < locations.size (); l++)
             {
-              values[l] = getLocatorValue (feeder, locations.get (l), fields);
+              values[l] = getLocatorValue (stream, locations.get (l), fields);
             }
             value = values;
           }
@@ -157,7 +157,7 @@ public class SampleParser extends ActivityParser
     return ai;
   }
 
-  private Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, String[] fields) throws ParseException
+  private Object getLocatorValue (TNTInputStream stream, ActivityFieldLocator locator, String[] fields) throws ParseException
   {
     Object val = null;
     if (locator != null)
@@ -165,9 +165,9 @@ public class SampleParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (locStr != null && locStr.length () > 0)
       {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp)
+        if (locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp)
         {
-          val = feeder.getProperty (locStr);
+          val = stream.getProperty (locStr);
         }
         else
         {

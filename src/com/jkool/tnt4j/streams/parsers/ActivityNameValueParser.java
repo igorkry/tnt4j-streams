@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -152,7 +152,7 @@ public class ActivityNameValueParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
+  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
   {
     if (fieldDelim == null)
     {
@@ -222,14 +222,14 @@ public class ActivityNameValueParser extends ActivityParser
         {
           if (locations.size () == 1)
           {
-            value = getLocatorValue (feeder, locations.get (0), nameValues);
+            value = getLocatorValue (stream, locations.get (0), nameValues);
           }
           else
           {
             Object[] values = new Object[locations.size ()];
             for (int li = 0; li < locations.size (); li++)
             {
-              values[li] = getLocatorValue (feeder, locations.get (li), nameValues);
+              values[li] = getLocatorValue (stream, locations.get (li), nameValues);
             }
             value = values;
           }
@@ -246,7 +246,7 @@ public class ActivityNameValueParser extends ActivityParser
     return ai;
   }
 
-  private static Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, Map<String, String> nameValues)
+  private static Object getLocatorValue (TNTInputStream stream, ActivityFieldLocator locator, Map<String, String> nameValues)
       throws ParseException
   {
     Object val = null;
@@ -255,7 +255,7 @@ public class ActivityNameValueParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (!StringUtils.isEmpty (locStr))
       {
-        val = locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp ? feeder.getProperty (locStr) : nameValues.get (locStr);
+        val = locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp ? stream.getProperty (locStr) : nameValues.get (locStr);
       }
       val = locator.formatValue (val);
     }

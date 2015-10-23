@@ -33,10 +33,10 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * <p>Implements a file activity feeder, where each line of the file is
+ * <p>Implements a file activity stream, where each line of the file is
  * assumed to represent a single activity or event which should be recorded.</p>
- * <p>This activity feeder requires parsers that can support {@code String} data.</p>
- * <p>This activity feeder supports the following properties:
+ * <p>This activity stream requires parsers that can support {@code String} data.</p>
+ * <p>This activity stream supports the following properties:
  * <ul>
  * <li>FileName</li>
  * </ul>
@@ -44,9 +44,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 3 $
  * @see ActivityParser#isDataClassSupported(Object)
  */
-public class FileLineFeeder extends ActivityFeeder
+public class FileLineStream extends TNTInputStream
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (FileLineFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (FileLineStream.class);
 
   private String fileName = null;
   private File activityFile = null;
@@ -54,9 +54,9 @@ public class FileLineFeeder extends ActivityFeeder
   private int lineNumber = 0;
 
   /**
-   * Constructs an FileLineFeeder.
+   * Constructs an FileLineStream.
    */
-  public FileLineFeeder ()
+  public FileLineStream ()
   {
     super (LOGGER);
   }
@@ -104,7 +104,7 @@ public class FileLineFeeder extends ActivityFeeder
     super.initialize ();
     if (fileName == null)
     {
-      throw new IllegalStateException ("FileLineFeeder: File name not defined");
+      throw new IllegalStateException ("FileLineStream: File name not defined");
     }
     LOGGER.log (OpLevel.DEBUG, "Opening file: {0}", fileName);
     activityFile = new File (fileName);
@@ -120,7 +120,7 @@ public class FileLineFeeder extends ActivityFeeder
   {
     if (lineReader == null)
     {
-      throw new IllegalStateException ("FileLineFeeder: File is not opened for reading");
+      throw new IllegalStateException ("FileLineStream: File is not opened for reading");
     }
     String line = lineReader.readLine ();
     lineNumber = lineReader.getLineNumber ();

@@ -35,7 +35,7 @@ public final class Constants
   public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>";
   //////////////////////////////////////////////////////////////////////////////////////
   //
-  // Streams transaction data XML definitions
+  // Streams activity data XML definitions
 
   // XML schema version
   public static final int XML_MSG_VERSION = 2;

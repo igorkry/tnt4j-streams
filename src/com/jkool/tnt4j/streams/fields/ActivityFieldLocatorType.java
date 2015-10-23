@@ -30,9 +30,9 @@ package com.jkool.tnt4j.streams.fields;
 public enum ActivityFieldLocatorType
 {
   /**
-   * Indicates that raw data value is the value of a named property of the current feeder.
+   * Indicates that raw data value is the value of a named property of the current stream.
    */
-  FeederProp,
+  StreamProp,
 
   /**
    * Indicates that raw data value is at a specified index location, offset, etc.

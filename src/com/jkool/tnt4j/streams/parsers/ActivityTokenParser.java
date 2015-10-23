@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -138,7 +138,7 @@ public class ActivityTokenParser extends ActivityParser
    * Parses the specified raw activity data item, converting each field in raw data
    * to its corresponding value for passing to jKool Cloud Service.
    *
-   * @param feeder parent feeder
+   * @param stream parent stream
    * @param data   raw activity data to parse
    *
    * @return converted activity info, or {@code null} if raw data string does not
@@ -148,7 +148,7 @@ public class ActivityTokenParser extends ActivityParser
    * @throws ParseException        if an error parsing raw data string
    */
   @Override
-  public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
+  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
   {
     if (fieldDelim == null)
     {
@@ -203,7 +203,7 @@ public class ActivityTokenParser extends ActivityParser
           if (locations.size () == 1)
           {
             // field value is based on single raw data location, get the value of this location
-            value = getLocatorValue (feeder, locations.get (0), fields);
+            value = getLocatorValue (stream, locations.get (0), fields);
           }
           else
           {
@@ -212,7 +212,7 @@ public class ActivityTokenParser extends ActivityParser
             Object[] values = new Object[locations.size ()];
             for (int li = 0; li < locations.size (); li++)
             {
-              values[li] = getLocatorValue (feeder, locations.get (li), fields);
+              values[li] = getLocatorValue (stream, locations.get (li), fields);
             }
             value = values;
           }
@@ -229,7 +229,7 @@ public class ActivityTokenParser extends ActivityParser
     return ai;
   }
 
-  private static Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, String[] fields) throws ParseException
+  private static Object getLocatorValue (TNTInputStream stream, ActivityFieldLocator locator, String[] fields) throws ParseException
   {
     Object val = null;
     if (locator != null)
@@ -237,9 +237,9 @@ public class ActivityTokenParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (!StringUtils.isEmpty (locStr))
       {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp)
+        if (locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp)
         {
-          val = feeder.getProperty (locStr);
+          val = stream.getProperty (locStr);
         }
         else
         {

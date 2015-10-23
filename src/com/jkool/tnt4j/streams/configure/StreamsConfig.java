@@ -25,7 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -33,7 +33,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * This class will load the specified Feed configuration.
+ * This class will load the specified stream configuration.
  *
  * @version $Revision: 5 $
  */
@@ -134,14 +134,13 @@ public class StreamsConfig
    * Name of default configuration file name ({@value})
    */
   public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml";
-  //TODO: maybe change to something like "tnt4j-streams-probe"???
 
   private static final String DFLT_CONFIG_FILE_PATH = "config" + File.separator + DFLT_CFG_FILE_NAME;
 
   private final SAXParserFactory parserFactory = SAXParserFactory.newInstance ();
 
   private Map<String, ActivityParser> parsers = null;
-  private Map<String, ActivityFeeder> feeders = null;
+  private Map<String, TNTInputStream> streams = null;
 
   /**
    * Creates a new TNT4J-Streams Configuration loader, using the default
@@ -230,30 +229,30 @@ public class StreamsConfig
     SAXParser parser = parserFactory.newSAXParser ();
     ConfigParserHandler hndlr = new ConfigParserHandler ();
     parser.parse (new InputSource (config), hndlr);
-    feeders = hndlr.getFeeders ();
+    streams = hndlr.getStreams ();
     parsers = hndlr.getParsers ();
   }
 
   /**
-   * Returns the feeder with the specified name.
+   * Returns the stream with the specified name.
    *
-   * @param feederName name of feeder, as specified in configuration file
+   * @param streamName name of stream, as specified in configuration file
    *
-   * @return feeder with specified name, or {@code null} if no such feeder
+   * @return stream with specified name, or {@code null} if no such stream
    */
-  public ActivityFeeder getFeeder (String feederName)
+  public TNTInputStream getStream (String streamName)
   {
-    return feeders == null ? null : feeders.get (feederName);
+    return streams == null ? null : streams.get (streamName);
   }
 
   /**
-   * Returns the set of feeders found in the configuration.
+   * Returns the set of streams found in the configuration.
    *
-   * @return set of feeders found
+   * @return set of streams found
    */
-  public Map<String, ActivityFeeder> getFeeders ()
+  public Map<String, TNTInputStream> getStreams ()
   {
-    return feeders;
+    return streams;
   }
 
   /**

@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -173,7 +173,7 @@ public class ActivityRegExParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
+  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
   {
     if (pattern == null || StringUtils.isEmpty (pattern.pattern ()))
     {
@@ -225,14 +225,14 @@ public class ActivityRegExParser extends ActivityParser
             LOGGER.log (OpLevel.TRACE, "Setting field {0} from match locations", field);
             if (locations.size () == 1)
             {
-              value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REMatchNum, matcher, matches);
+              value = getLocatorValue (stream, locations.get (0), ActivityFieldLocatorType.REMatchNum, matcher, matches);
             }
             else
             {
               Object[] values = new Object[locations.size ()];
               for (int li = 0; li < locations.size (); li++)
               {
-                values[li] = getLocatorValue (feeder, locations.get (li), ActivityFieldLocatorType.REMatchNum, matcher, matches);
+                values[li] = getLocatorValue (stream, locations.get (li), ActivityFieldLocatorType.REMatchNum, matcher, matches);
               }
               value = values;
             }
@@ -260,14 +260,14 @@ public class ActivityRegExParser extends ActivityParser
           LOGGER.log (OpLevel.TRACE, "Setting field {0} from group locations", field);
           if (locations.size () == 1)
           {
-            value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REGroupNum, matcher, null);
+            value = getLocatorValue (stream, locations.get (0), ActivityFieldLocatorType.REGroupNum, matcher, null);
           }
           else
           {
             Object[] values = new Object[locations.size ()];
             for (int li = 0; li < locations.size (); li++)
             {
-              values[li] = getLocatorValue (feeder, locations.get (li), ActivityFieldLocatorType.REGroupNum, matcher, null);
+              values[li] = getLocatorValue (stream, locations.get (li), ActivityFieldLocatorType.REGroupNum, matcher, null);
             }
             value = values;
           }
@@ -285,7 +285,7 @@ public class ActivityRegExParser extends ActivityParser
   }
 
   private static Object getLocatorValue (
-      ActivityFeeder feeder, ActivityFieldLocator locator, ActivityFieldLocatorType locType, Matcher matcher, List<String> matches)
+      TNTInputStream stream, ActivityFieldLocator locator, ActivityFieldLocatorType locType, Matcher matcher, List<String> matches)
       throws ParseException
   {
     Object val = null;
@@ -294,9 +294,9 @@ public class ActivityRegExParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (!StringUtils.isEmpty (locStr))
       {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp)
+        if (locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp)
         {
-          val = feeder.getProperty (locStr);
+          val = stream.getProperty (locStr);
         }
         else
         {

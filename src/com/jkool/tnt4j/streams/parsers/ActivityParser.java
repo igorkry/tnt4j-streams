@@ -29,7 +29,7 @@ import java.util.Map;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -87,7 +87,7 @@ public abstract class ActivityParser
    * Parse the specified raw activity data, converting each field in raw data
    * to its corresponding value for passing to jKool Cloud Service.
    *
-   * @param feeder parent feeder
+   * @param stream parent stream
    * @param data   raw activity data to parse
    *
    * @return converted activity info, or {@code null} if raw data string does not
@@ -97,12 +97,12 @@ public abstract class ActivityParser
    * @throws ParseException        if an error parsing raw data string
    * @see #isDataClassSupported(Object)
    */
-  public abstract ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException;
+  public abstract ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException;
 
   /**
    * Returns whether this parser supports the given format of the activity data.
-   * This is used by activity feeders to determine if the parser can parse the data
-   * in the format that the feeder has it.
+   * This is used by activity streams to determine if the parser can parse the data
+   * in the format that the stream has it.
    *
    * @param data data object whose class is to be verified
    *

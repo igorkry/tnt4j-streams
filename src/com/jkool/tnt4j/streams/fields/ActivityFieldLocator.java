@@ -84,7 +84,7 @@ public class ActivityFieldLocator
     catch (Exception e)
     {
     }
-    if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.FeederProp)
+    if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.StreamProp)
     {
       int loc = Integer.valueOf (locator);
       if (loc <= 0)

@@ -35,12 +35,12 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p>Implements a WebSphere MQ activity feeder, where activity data is read from the
+ * <p>Implements a WebSphere MQ activity stream, where activity data is read from the
  * specified WMQ Object (queue or topic) on the given (possibly remote) queue manager.</p>
- * <p>This activity feeder requires parsers that can support {@code String} data.
+ * <p>This activity stream requires parsers that can support {@code String} data.
  * It currently does not strip off any WMQ headers, assuming that the message
  * data only contains the actual input for the configured parsers.</p>
- * <p>This activity feeder supports the following properties:
+ * <p>This activity stream supports the following properties:
  * <ul>
  * <li>QueueManager</li>
  * <li>Queue</li>
@@ -55,9 +55,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @version $Revision: 10 $
  */
-public class WmqFeeder extends ActivityFeeder
+public class WmqStream extends TNTInputStream
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (WmqFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (WmqStream.class);
 
   /**
    * Limit on number of consecutive read failures.  When limit is reached, we're
@@ -93,7 +93,7 @@ public class WmqFeeder extends ActivityFeeder
    */
   protected int curFailCount = 0;
 
-  // Feeder properties
+  // Stream properties
   private String qmgrName = null;
   private String queueName = null;
   private String topicName = null;
@@ -105,9 +105,9 @@ public class WmqFeeder extends ActivityFeeder
   private boolean stripHeaders = true;
 
   /**
-   * Construct empty WmqFeeder.  Requires configuration settings to set input source.
+   * Construct empty WmqStream.  Requires configuration settings to set input source.
    */
-  public WmqFeeder ()
+  public WmqStream ()
   {
     super (LOGGER);
   }

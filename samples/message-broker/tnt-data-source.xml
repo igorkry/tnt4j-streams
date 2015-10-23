@@ -6,7 +6,7 @@
     <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace" value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
-        <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where Direct Feed probe is running -->
+        <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
         <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
         <!--field name="ServerOs" locator="/wmb:event/wmb:eventPointData/ServerOs" locator-type="Label"/-->
         <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
@@ -173,10 +173,10 @@
         <!--field name="UserName" locator="/wmb:event/wmb:eventPointData/UserName" locator-type="Label"/-->
     </parser>
 
-    <feeder name="EventFeeder" class="com.jkool.tnt4j.streams.inputs.WmqFeeder">
+    <stream name="EventStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
         <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="QueueManager" value="QMGR"/>
         <property name="Queue" value="EVENT.QUEUE"/>
         <parser-ref name="EventParser"/>
-    </feeder>
+    </stream>
 </tnt-data-source>

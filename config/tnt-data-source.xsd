@@ -3,11 +3,11 @@
 
     <xs:annotation>
         <xs:appinfo>
-            TransactionWorks Direct Feed Probe configuration schema
+            jKool LLC TNT4J-Streams data source configuration schema
             Copyright (c) 2011-2014 Nastel Technologies, Inc. All rights reserved.
         </xs:appinfo>
         <xs:documentation>
-            This schema defines the format for the configuration for the TransactionWorks Direct Feed Probe.
+            This schema defines configuration format of the jKool LLC TNT4J-Streams data source.
         </xs:documentation>
     </xs:annotation>
 
@@ -107,7 +107,7 @@
         </xs:restriction>
     </xs:simpleType>
     <!-- Allow user-defined types for custom units types in addition to built-in types
-         for use with user-defined parsers/feeders -->
+         for use with user-defined parsers/streams -->
     <xs:annotation>
         <xs:documentation>
             Can be either one of the internally-supported unit types or a custom one.
@@ -131,7 +131,7 @@
         </xs:restriction>
     </xs:simpleType>
     <!-- Allow user-defined types for custom units types in addition to built-in types
-         for use with user-defined parsers/feeders -->
+         for use with user-defined parsers/streams -->
     <xs:annotation>
         <xs:documentation>
             Can be either one of the internally-supported unit types or a custom one.
@@ -141,11 +141,11 @@
         <xs:union memberTypes="UnitsTypes xs:string"/>
     </xs:simpleType>
 
-    <!-- TransactionWorks Analyzer Connection Types -->
+    <!-- jKool Cloud Service Connection Types -->
     <xs:simpleType name="TAConnectionTypes">
         <xs:annotation>
             <xs:documentation>
-                Supported connection protocols for connecting to TransactionWorks Analyzer.
+                Supported connection protocols for connecting to jKool Cloud Service.
             </xs:documentation>
         </xs:annotation>
 
@@ -153,7 +153,7 @@
             <xs:enumeration value="FILE">
                 <xs:annotation>
                     <xs:documentation>
-                        Write data for TransactionWorks Analyzer to a file.
+                        Write data for jKool Cloud Service to a file.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -161,7 +161,7 @@
             <xs:enumeration value="HTTP">
                 <xs:annotation>
                     <xs:documentation>
-                        Connect to TransactionWorks Analyzer using HTTP.
+                        Connect to jKool Cloud Service using HTTP.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -169,7 +169,7 @@
             <xs:enumeration value="HTTPS">
                 <xs:annotation>
                     <xs:documentation>
-                        Connect to TransactionWorks Analyzer using HTTPS.
+                        Connect to jKool Cloud Service using HTTPS.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -177,7 +177,7 @@
             <xs:enumeration value="TCP">
                 <xs:annotation>
                     <xs:documentation>
-                        Connect to TransactionWorks Analyzer using TCP/IP.
+                        Connect to jKool Cloud Service using TCP/IP.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -406,10 +406,10 @@
         </xs:annotation>
 
         <xs:restriction base="xs:string">
-            <xs:enumeration value="FeederProp">
+            <xs:enumeration value="StreamProp">
                 <xs:annotation>
                     <xs:documentation>
-                        Field value is the value for the specified feeder property.
+                        Field value is the value for the specified stream property.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -448,7 +448,7 @@
         </xs:restriction>
     </xs:simpleType>
     <!-- Allow user-defined types for custom location types in addition to built-in types
-         for use with user-defined parsers/feeders -->
+         for use with user-defined parsers/streams -->
     <xs:simpleType name="FieldLocatorTypes">
         <xs:annotation>
             <xs:documentation>
@@ -462,7 +462,7 @@
     <xs:simpleType name="Properties">
         <xs:annotation>
             <xs:documentation>
-                Set of internally-supported parser and feeder properties.
+                Set of internally-supported parser and stream properties.
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
@@ -564,7 +564,7 @@
         </xs:restriction>
     </xs:simpleType>
     <!-- Allow user-defined types for custom properties in addition to built-in types
-         for use with user-defined parsers/feeders -->
+         for use with user-defined parsers/streams -->
     <xs:simpleType name="PropertyTypes">
         <xs:annotation>
             <xs:documentation>
@@ -634,7 +634,7 @@
         <xs:attribute name="locator" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Position/location/label of field value in activity string, or feeder property name -
+                    Position/location/label of field value in activity string, or stream property name -
                     can be a comma-separated list if multiple values from activity string are needed for a field.
                 </xs:documentation>
             </xs:annotation>
@@ -710,7 +710,7 @@
     <xs:complexType name="FieldMap">
         <xs:annotation>
             <xs:documentation>
-                Maps a raw value from the activity string to the required field value for TransactionWorks Analyzer.
+                Maps a raw value from the activity string to the required field value for jKool Cloud Service.
             </xs:documentation>
         </xs:annotation>
         <xs:attribute name="source" use="required" type="xs:string">
@@ -734,7 +734,7 @@
     <xs:element name="tnt-data-source">
         <xs:annotation>
             <xs:documentation>
-                Root element for TransactionWorks Direct Feed Probe configuration.
+                Root element for jKool LLC TNT4J-Streams data source configuration.
             </xs:documentation>
         </xs:annotation>
 
@@ -779,7 +779,7 @@
                                                         <xs:annotation>
                                                             <xs:documentation>
                                                                 Maps a field value from the activity string to the required field value for
-                                                                TransactionWorks Analyzer.
+                                                                jKool Cloud Service.
                                                             </xs:documentation>
                                                         </xs:annotation>
                                                     </xs:element>
@@ -792,7 +792,7 @@
                                             <xs:annotation>
                                                 <xs:documentation>
                                                     Maps a field value from the activity string to the required field value for
-                                                    TransactionWorks Analyzer.
+                                                    jKool Cloud Service.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
@@ -829,21 +829,21 @@
                     </xs:complexType>
                 </xs:element>
 
-                <!-- Feeder definition -->
-                <xs:element name="feeder" minOccurs="1" maxOccurs="unbounded">
+                <!-- Stream definition -->
+                <xs:element name="stream" minOccurs="1" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="ta-conn" minOccurs="1" maxOccurs="1">
                                 <xs:annotation>
                                     <xs:documentation>
-                                        Specifies properties for connecting to TransactionWorks Analyzer.
+                                        Specifies properties for connecting to jKool Cloud Service.
                                     </xs:documentation>
                                 </xs:annotation>
                                 <xs:complexType>
                                     <xs:attribute name="protocol" type="TAConnectionTypes" use="required">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Identifies protocol to use to communicate with TransactionWorks Analyzer.
+                                                Identifies protocol to use to communicate with jKool Cloud Service.
                                             </xs:documentation>
                                         </xs:annotation>
                                     </xs:attribute>
@@ -877,7 +877,7 @@
                                     <xs:attribute name="access-token" type="xs:string" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Access token to use when TransactionWorks Analyzer requires authenticated connections.
+                                                Access token to use when jKool Cloud Service requires authenticated connections.
                                             </xs:documentation>
                                         </xs:annotation>
                                     </xs:attribute>
@@ -885,7 +885,7 @@
                                     <xs:attribute name="proxy-host" type="xs:string" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Host name of proxy through which to connect to TransactionWorks Analyzer (only used for
+                                                Host name of proxy through which to connect to jKool Cloud Service (only used for
                                                 HTTP[S] connections).
                                             </xs:documentation>
                                         </xs:annotation>
@@ -894,7 +894,7 @@
                                     <xs:attribute name="proxy-port" type="xs:nonNegativeInteger" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Port number for proxy through which to connect to TransactionWorks Analyzer (only used for
+                                                Port number for proxy through which to connect to jKool Cloud Service (only used for
                                                 HTTP[S] connections).
                                             </xs:documentation>
                                         </xs:annotation>
@@ -903,7 +903,7 @@
                                     <xs:attribute name="keystore" type="xs:string" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Path to keystore containing TransactionWorks Analyzer's SSL certificate (only used for
+                                                Path to keystore containing jKool Cloud Service's SSL certificate (only used for
                                                 HTTP[S] connections).
                                             </xs:documentation>
                                         </xs:annotation>
@@ -912,7 +912,7 @@
                                     <xs:attribute name="keystore-pwd" type="xs:string" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Password for keystore containing TransactionWorks Analyzer's SSL certificate (only used for
+                                                Password for keystore containing jKool Cloud Service's SSL certificate (only used for
                                                 HTTP[S] connections).
                                             </xs:documentation>
                                         </xs:annotation>
@@ -923,7 +923,7 @@
                             <xs:element name="property" type="Property" minOccurs="0" maxOccurs="unbounded">
                                 <xs:annotation>
                                     <xs:documentation>
-                                        Specifies a configuration property for the feeder - property names are feeder-specific.
+                                        Specifies a configuration property for the stream - property names are stream-specific.
                                     </xs:documentation>
                                 </xs:annotation>
                             </xs:element>
@@ -931,7 +931,7 @@
                             <xs:element name="parser-ref" minOccurs="1" maxOccurs="unbounded">
                                 <xs:annotation>
                                     <xs:documentation>
-                                        Associates a parser with this feeder - if multiple parsers, they are applied in the order specified
+                                        Associates a parser with this stream - if multiple parsers, they are applied in the order specified
                                         here until one successfully parses activity string.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -951,7 +951,7 @@
                         <xs:attributeGroup ref="EntityAttributeGroup">
                             <xs:annotation>
                                 <xs:documentation>
-                                    Defines name and implementing class for feeder.
+                                    Defines name and implementing class for stream.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attributeGroup>
@@ -966,15 +966,15 @@
             <xs:field xpath="@name"/>
         </xs:key>
 
-        <!-- Make sure feeder names are unique -->
-        <xs:key name="UniqueFeederName">
-            <xs:selector xpath="feeder"/>
+        <!-- Make sure stream names are unique -->
+        <xs:key name="UniqueStreamName">
+            <xs:selector xpath="stream"/>
             <xs:field xpath="@name"/>
         </xs:key>
 
         <!-- Make sure parser references are to valid parser names -->
         <xs:keyref name="ValidParserRef" refer="UniqueParserName">
-            <xs:selector xpath="feeder/parser-ref"/>
+            <xs:selector xpath="stream/parser-ref"/>
             <xs:field xpath="@name"/>
         </xs:keyref>
     </xs:element>

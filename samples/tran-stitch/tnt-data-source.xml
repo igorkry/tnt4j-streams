@@ -77,9 +77,9 @@
         <field name="UserName" locator="/messaging_operation/UserName" locator-type="Label"/>
     </parser>
 
-    <feeder name="MessageStream" class="com.jkool.tnt4j.streams.inputs.StreamFeeder">
+    <stream name="MessageStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="Port" value="6450"/>
         <parser-ref name="WmqMsgOpXmlParser"/>
-    </feeder>
+    </stream>
 </tnt-data-source>

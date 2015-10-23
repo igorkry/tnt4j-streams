@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:annotation>
         <xs:documentation>
-            This schema defines the format of XML messages to use in reporting tracking events for processing
-            by jKool LLC TNT4J-Streams.
+            This schema defines the format of XML messages to use in reporting messaging server
+            activity (operations, events, etc.) for processing by jKool LLC TNT4J-Streams
+            built-in XML Messaging Activity Parser.
         </xs:documentation>
     </xs:annotation>
 
@@ -89,142 +90,38 @@
         </xs:simpleContent>
     </xs:complexType>
 
-    <!-- Root of tracking event tree -->
-    <xs:element name="tracking_event">
+    <!-- Root of activity tree -->
+    <xs:element name="messaging_operation">
         <xs:complexType>
             <xs:all>
-                <xs:element name="HostName" type="xs:string" minOccurs="1">
+                <xs:element name="ApplName" type="xs:string">
                     <xs:annotation>
                         <xs:documentation>
-                            Host Alias name of server where tracking event occurred.
+                            Name of application associated with the activity.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
 
-                <xs:element name="HostIp" type="xs:string" minOccurs="0">
+                <xs:element name="CompCode" type="xs:nonNegativeInteger" minOccurs="0" default="0">
                     <xs:annotation>
                         <xs:documentation>
-                            IP Address of server where tracking event occurred.
+                            Completion code for the activity (MQCC_ value for WMQ operation).
                         </xs:documentation>
                     </xs:annotation>
-                </xs:element>
-
-                <xs:element name="HostInfo" type="xs:string" minOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            String identifying information (e.g. type, version) about system where tracking event occurred.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="Service" type="xs:string" minOccurs="1">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Name of Service associated with the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="User" type="xs:string" minOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Name of User associated with the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="Domain" type="xs:string" minOccurs="1">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Name of Domain associated with the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="Policy" type="xs:string" minOccurs="1">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Name of Policy associated with the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="Rule" type="xs:string" minOccurs="1">
-                    <xs:annotation>
-                        <xs:documentation>
-                            String identifying the operation (e.g. function/method name)
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="EventType" minOccurs="0" default="OTHER">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Type of operation associated with the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                    <xs:simpleType>
-                        <xs:restriction base="xs:string">
-                            <xs:enumeration value="OTHER"/>
-                            <xs:enumeration value="START"/>
-                            <xs:enumeration value="OPEN"/>
-                            <xs:enumeration value="SEND"/>
-                            <xs:enumeration value="RECEIVE"/>
-                            <xs:enumeration value="CLOSE"/>
-                            <xs:enumeration value="END"/>
-                            <xs:enumeration value="INQUIRE"/>
-                            <xs:enumeration value="SET"/>
-                            <xs:enumeration value="CALL"/>
-                            <xs:enumeration value="URL"/>
-                            <xs:enumeration value="BROWSE"/>
-                        </xs:restriction>
-                    </xs:simpleType>
                 </xs:element>
 
                 <xs:element name="Correlator" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Identifier used to correlate/relate tracking event entries to group them into logical tasks.
+                            Identifier used to correlate/relate activity entries to group them into logical tasks.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
 
-                <xs:element name="Signature" type="xs:string" minOccurs="0">
+                <xs:element name="ElapsedTime" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Unique identifier for message in tracking event (message with same signature are treated as same message).
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="Tag" type="xs:string" minOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            User-defined label to associate with message, used for searching.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="StartTime" type="DateTimestamp" minOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Start time of the tracking event, in specified format.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="EndTime" type="DateTimestamp" minOccurs="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            End time of the tracking event, in specified format.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-
-                <xs:element name="ElapsedTime" minOccurs="0" default="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Elapsed time of the tracking event in specified units (default: microseconds).
+                            Elapsed time of the activity in specified units (default: microseconds).
                         </xs:documentation>
                     </xs:annotation>
                     <xs:complexType>
@@ -236,25 +133,10 @@
                     </xs:complexType>
                 </xs:element>
 
-                <xs:element name="ErrorCode" minOccurs="0" default="SUCCEEDED">
+                <xs:element name="EndTime" type="DateTimestamp" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Error/status code for the tracking event.
-                        </xs:documentation>
-                    </xs:annotation>
-                    <xs:simpleType>
-                        <xs:restriction base="xs:string">
-                            <xs:enumeration value="SUCCEEDED"/>
-                            <xs:enumeration value="WARNING"/>
-                            <xs:enumeration value="FAILED"/>
-                        </xs:restriction>
-                    </xs:simpleType>
-                </xs:element>
-
-                <xs:element name="ErrorSubCode" type="xs:integer" minOccurs="0" default="0">
-                    <xs:annotation>
-                        <xs:documentation>
-                            Numeric reason/sub-error code associated with the tracking event.
+                            End time of the activity, in specified format.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -262,7 +144,7 @@
                 <xs:element name="ErrorMsg" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Error/exception message associated with the tracking event.
+                            Error/exception message associated with the activity.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -271,6 +153,158 @@
                     <xs:annotation>
                         <xs:documentation>
                             Message data (payload).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgFormat" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Message format (value from MQMD.Format for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgId" type="DataField" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Message identifier (value from MQMD.MsgId for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgPutApplName" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of application that put the message (value from MQMD.PutApplName for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgPutApplType" type="xs:nonNegativeInteger" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Type of application that put the message (MQAT_ value from MQMD.PutApplType for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgPutDate" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            GMT date the message was put (value from MQMD.PutDate for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgPutTime" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            GMT time the message was put (value from MQMD.PutTime for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgType" type="xs:nonNegativeInteger" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Type of message (MQMT_ value from MQMD.MsgType for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="MsgUser" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of user originating message (value from MQMD.UserIdentifier for WMQ message).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ObjectName" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of object (queue, topic, etc.) associated with the activity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ObjectType" type="xs:nonNegativeInteger">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Type of Object (MQOT_ value for WMQ operation) associated with the activity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="OperationName" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            String identifying the operation (e.g. function/method name)
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ReasonCode" type="xs:integer" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Numeric reason/error code associated with the activity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ResMgr" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of resource manager owning object associated with the activity (queue manager name for WMQ operation).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ServerIp" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            IP Address of server where activity occurred.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ServerName" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Host name of server where activity occurred.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="ServerOs" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            String identifying information (e.g. type, version) about operating system on server where activity occurred.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="StartTime" type="DateTimestamp" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Start time of the activity, in specified format.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="Tag" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            User-defined label to associate with the activity, generally for locating activity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="UserName" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of user associated with the activity.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>

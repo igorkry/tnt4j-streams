@@ -25,7 +25,7 @@ import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldType;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.types.GatewayProtocolTypes;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -52,7 +52,7 @@ public class ConfigParserHandler extends DefaultHandler
   private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed";
   private static final String CONFIG_ROOT_ELMT = "tnt-data-source";
   private static final String PARSER_ELMT = "parser";
-  private static final String FEEDER_ELMT = "feeder";
+  private static final String STREAM_ELMT = "stream";
   private static final String TACONN_ELMT = "ta-conn";
   private static final String PROPERTY_ELMT = "property";
   private static final String FIELD_ELMT = "field";
@@ -86,7 +86,7 @@ public class ConfigParserHandler extends DefaultHandler
 
   private static final String REQUIRED_VALUE = "required";
 
-  private ActivityFeeder currFeeder = null;
+  private TNTInputStream currStream = null;
   private Collection<Map.Entry<String, String>> currProperties = null;
   private ActivityParser currParser = null;
   private ActivityField currField = null;
@@ -97,7 +97,7 @@ public class ConfigParserHandler extends DefaultHandler
   private boolean currFieldHasMapElmt = false;
 
   private Map<String, ActivityParser> parsers = null;
-  private Map<String, ActivityFeeder> feeders = null;
+  private Map<String, TNTInputStream> streams = null;
 
   private Locator currParseLocation = null;
 
@@ -109,13 +109,13 @@ public class ConfigParserHandler extends DefaultHandler
   }
 
   /**
-   * Returns the set of feeders found in the configuration.
+   * Returns the set of streams found in the configuration.
    *
-   * @return set of feeders found
+   * @return set of streams found
    */
-  public Map<String, ActivityFeeder> getFeeders ()
+  public Map<String, TNTInputStream> getStreams ()
   {
-    return feeders;
+    return streams;
   }
 
   /**
@@ -143,7 +143,7 @@ public class ConfigParserHandler extends DefaultHandler
   @Override
   public void startDocument () throws SAXException
   {
-    currFeeder = null;
+    currStream = null;
     currProperties = null;
     currParser = null;
     currField = null;
@@ -151,7 +151,7 @@ public class ConfigParserHandler extends DefaultHandler
     currFieldHasLocValAttr = false;
     currFieldHasLocElmt = false;
     currFieldHasMapElmt = false;
-    feeders = new HashMap<String, ActivityFeeder> ();
+    streams = new HashMap<String, TNTInputStream> ();
     parsers = new HashMap<String, ActivityParser> ();
   }
 
@@ -163,7 +163,7 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (qName.equals (CONFIG_ROOT_ELMT) || qName.equals (CONFIG_ROOT_ELMT_OLD))
     {
-      if (feeders != null && !feeders.isEmpty ())
+      if (streams != null && !streams.isEmpty ())
       {
         throw new SAXParseException ("Cannot have multiple " + qName + " elements", currParseLocation);
       }
@@ -196,9 +196,9 @@ public class ConfigParserHandler extends DefaultHandler
     {
       processParser (attributes);
     }
-    else if (qName.equals (FEEDER_ELMT))
+    else if (qName.equals (STREAM_ELMT))
     {
-      processFeeder (attributes);
+      processStream (attributes);
     }
   }
 
@@ -245,15 +245,15 @@ public class ConfigParserHandler extends DefaultHandler
     try
     {
       ClassLoader cl = getClass ().getClassLoader ();
-      Class<?> feederClass = cl.loadClass (className);
-      Object newFeeder = feederClass.newInstance ();
-      if (!(newFeeder instanceof ActivityParser))
+      Class<?> streamClass = cl.loadClass (className);
+      Object newStream = streamClass.newInstance ();
+      if (!(newStream instanceof ActivityParser))
       {
         throw new SAXNotSupportedException (PARSER_ELMT + " " + CLASS_ATTR + " '" + className +
                                             "' does not implement interface '" + ActivityParser.class.getName () + "'" +
                                             getLocationInfo ());
       }
-      currParser = (ActivityParser) newFeeder;
+      currParser = (ActivityParser) newStream;
     }
     catch (ClassNotFoundException cnfe)
     {
@@ -655,17 +655,17 @@ public class ConfigParserHandler extends DefaultHandler
   }
 
   /**
-   * Processes a feeder element.
+   * Processes a stream element.
    *
    * @param attrs List of element attributes
    *
    * @throws SAXException if error parsing element
    */
-  private void processFeeder (Attributes attrs) throws SAXException
+  private void processStream (Attributes attrs) throws SAXException
   {
-    if (currFeeder != null)
+    if (currStream != null)
     {
-      throw new SAXParseException ("Malformed configuration: Detected nested " + FEEDER_ELMT + " definitions", currParseLocation);
+      throw new SAXParseException ("Malformed configuration: Detected nested " + STREAM_ELMT + " definitions", currParseLocation);
     }
     String name = null;
     String className = null;
@@ -684,41 +684,41 @@ public class ConfigParserHandler extends DefaultHandler
     }
     if (StringUtils.isEmpty (name))
     {
-      throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+      throw new SAXParseException ("Missing " + STREAM_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
     }
     if (StringUtils.isEmpty (className))
     {
-      throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation);
+      throw new SAXParseException ("Missing " + STREAM_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation);
     }
-    if (feeders.containsKey (name))
+    if (streams.containsKey (name))
     {
-      throw new SAXParseException ("Duplicate " + FEEDER_ELMT + " '" + name + "'", currParseLocation);
+      throw new SAXParseException ("Duplicate " + STREAM_ELMT + " '" + name + "'", currParseLocation);
     }
     try
     {
       ClassLoader cl = getClass ().getClassLoader ();
-      Class<?> feederClass = cl.loadClass (className);
-      Object newFeeder = feederClass.newInstance ();
-      if (!(newFeeder instanceof ActivityFeeder))
+      Class<?> streamClass = cl.loadClass (className);
+      Object newStream = streamClass.newInstance ();
+      if (!(newStream instanceof TNTInputStream))
       {
-        throw new SAXNotSupportedException (FEEDER_ELMT + " " + CLASS_ATTR + " '" + className + "' does not extend class '" +
-                                            ActivityFeeder.class.getName () + "'" + getLocationInfo ());
+        throw new SAXNotSupportedException (STREAM_ELMT + " " + CLASS_ATTR + " '" + className + "' does not extend class '" +
+                                            TNTInputStream.class.getName () + "'" + getLocationInfo ());
       }
-      currFeeder = (ActivityFeeder) newFeeder;
+      currStream = (TNTInputStream) newStream;
     }
     catch (ClassNotFoundException cnfe)
     {
-      throw new SAXException ("Failed to load " + FEEDER_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), cnfe);
+      throw new SAXException ("Failed to load " + STREAM_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), cnfe);
     }
     catch (InstantiationException ie)
     {
-      throw new SAXException ("Failed to load " + FEEDER_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), ie);
+      throw new SAXException ("Failed to load " + STREAM_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), ie);
     }
     catch (IllegalAccessException iae)
     {
-      throw new SAXException ("Failed to load " + FEEDER_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), iae);
+      throw new SAXException ("Failed to load " + STREAM_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), iae);
     }
-    feeders.put (name, currFeeder);
+    streams.put (name, currStream);
   }
 
   /**
@@ -730,9 +730,9 @@ public class ConfigParserHandler extends DefaultHandler
    */
   private void processProperty (Attributes attrs) throws SAXException
   {
-    if (currFeeder == null && currParser == null)
+    if (currStream == null && currParser == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + PROPERTY_ELMT + " expected to have " + FEEDER_ELMT +
+      throw new SAXParseException ("Malformed configuration: " + PROPERTY_ELMT + " expected to have " + STREAM_ELMT +
                                    " or " + PARSER_ELMT + " as parent", currParseLocation);
     }
     String name = null;
@@ -774,10 +774,10 @@ public class ConfigParserHandler extends DefaultHandler
    */
   private void processTaConnection (Attributes attrs) throws SAXException
   {
-    if (currFeeder == null)
+    if (currStream == null)
     {
       throw new SAXParseException ("Malformed configuration: " + TACONN_ELMT + " expected to have " +
-                                   FEEDER_ELMT + " as parent", currParseLocation);
+                                   STREAM_ELMT + " as parent", currParseLocation);
     }
     GatewayProtocolTypes protocol = null;
     String host = null;
@@ -847,32 +847,32 @@ public class ConfigParserHandler extends DefaultHandler
         throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + HOST_ATTR + "'", currParseLocation);
       }
     }
-    currFeeder.setTaConnType (protocol);
+    currStream.setTaConnType (protocol);
     if (!StringUtils.isEmpty (host))
     {
-      currFeeder.setTaHost (host);
+      currStream.setTaHost (host);
     }
     if (port >= 0)
     {
-      currFeeder.setTaPort (port);
+      currStream.setTaPort (port);
     }
     if (!StringUtils.isEmpty (file))
     {
-      currFeeder.setTaFileName (file);
+      currStream.setTaFileName (file);
     }
     if (!StringUtils.isEmpty (token))
     {
-      currFeeder.setTaAccessToken (token);
+      currStream.setTaAccessToken (token);
     }
     if (!StringUtils.isEmpty (proxyHost))
     {
-      currFeeder.setTaProxyHost (proxyHost);
-      currFeeder.setTaProxyPort (proxyPort);
+      currStream.setTaProxyHost (proxyHost);
+      currStream.setTaProxyPort (proxyPort);
     }
     if (!StringUtils.isEmpty (keystore))
     {
-      currFeeder.setTaKeystore (keystore);
-      currFeeder.setTaKeystorePwd (keystorePwd);
+      currStream.setTaKeystore (keystore);
+      currStream.setTaKeystorePwd (keystorePwd);
     }
   }
 
@@ -885,10 +885,10 @@ public class ConfigParserHandler extends DefaultHandler
    */
   private void processParserRef (Attributes attrs) throws SAXException
   {
-    if (currFeeder == null)
+    if (currStream == null)
     {
       throw new SAXParseException ("Malformed configuration: " + PARSER_REF_ELMT + " expected to have " +
-                                   FEEDER_ELMT + " as parent", currParseLocation);
+                                   STREAM_ELMT + " as parent", currParseLocation);
     }
     String parserName = null;
     for (int i = 0; i < attrs.getLength (); i++)
@@ -909,7 +909,7 @@ public class ConfigParserHandler extends DefaultHandler
     {
       throw new SAXParseException ("Undefined " + PARSER_REF_ELMT + " reference '" + parserName + "'", currParseLocation);
     }
-    currFeeder.addParser (parser);
+    currStream.addParser (parser);
   }
 
   /**
@@ -920,13 +920,13 @@ public class ConfigParserHandler extends DefaultHandler
   {
     try
     {
-      if (qName.equals (FEEDER_ELMT))
+      if (qName.equals (STREAM_ELMT))
       {
         if (currProperties != null)
         {
-          currFeeder.setProperties (currProperties);
+          currStream.setProperties (currProperties);
         }
-        currFeeder = null;
+        currStream = null;
         currProperties = null;
       }
       else if (qName.equals (PARSER_ELMT))

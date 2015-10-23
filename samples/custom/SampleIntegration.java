@@ -22,8 +22,8 @@ package com.jkool.tnt4j.streams.samples.custom;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
-import com.jkool.tnt4j.streams.inputs.FeederThread;
+import com.jkool.tnt4j.streams.inputs.StreamThread;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -38,11 +38,11 @@ public final class SampleIntegration
   private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleIntegration.class);
 
   /**
-   * Configure feeders and parsers, and run each feed in its own thread.
+   * Configure streams and parsers, and run each stream in its own thread.
    */
   public static void loadConfigAndRun (String cfgFileName)
   {
-    ThreadGroup feederThreads = new ThreadGroup ("Feeders");
+    ThreadGroup streamThreads = new ThreadGroup ("Streams");
     try
     {
       StreamsConfig cfg;
@@ -54,16 +54,16 @@ public final class SampleIntegration
       {
         cfg = new StreamsConfig (cfgFileName);
       }
-      Map<String, ActivityFeeder> feederMap = cfg.getFeeders ();
-      if (feederMap == null || feederMap.size () == 0)
+      Map<String, TNTInputStream> streamsMap = cfg.getStreams ();
+      if (streamsMap == null || streamsMap.size () == 0)
       {
-        throw new IllegalStateException ("No Activity Feeders found in configuration");
+        throw new IllegalStateException ("No Activity Streams found in configuration");
       }
-      for (Map.Entry<String, ActivityFeeder> f : feederMap.entrySet ())
+      for (Map.Entry<String, TNTInputStream> f : streamsMap.entrySet ())
       {
-        String feederName = f.getKey ();
-        ActivityFeeder feeder = f.getValue ();
-        FeederThread ft = new FeederThread (feederThreads, feeder, feederName);
+        String streamName = f.getKey ();
+        TNTInputStream stream = f.getValue ();
+        StreamThread ft = new StreamThread (streamThreads, stream, streamName);
         ft.start ();
       }
     }
@@ -75,15 +75,15 @@ public final class SampleIntegration
 
   /**
    * The following can be used if using the default configuration file
-   * with a single feeder.
+   * with a single stream.
    */
   public static void simpleConfigAndRun (String cfgFileName)
   {
     try
     {
       StreamsConfig cfg = new StreamsConfig ();
-      ActivityFeeder feeder = cfg.getFeeder ("FeederName");
-      FeederThread ft = new FeederThread (feeder);
+      TNTInputStream stream = cfg.getStream ("StreamName");
+      StreamThread ft = new StreamThread (stream);
       ft.start ();
     }
     catch (Throwable t)

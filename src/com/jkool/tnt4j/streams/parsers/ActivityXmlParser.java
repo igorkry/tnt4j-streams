@@ -31,7 +31,7 @@ import javax.xml.xpath.*;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
-import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -153,7 +153,7 @@ public class ActivityXmlParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
+  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
   {
     if (data == null)
     {
@@ -201,7 +201,7 @@ public class ActivityXmlParser extends ActivityParser
             ActivityFieldLocator loc = locations.get (0);
             savedFormats[0] = loc.getFormat ();
             savedUnits[0] = loc.getUnits ();
-            value = getLocatorValue (feeder, loc, xmlDoc);
+            value = getLocatorValue (stream, loc, xmlDoc);
             if (value == null && requireAll && !"false".equalsIgnoreCase (loc.getRequired ()))
             {
               LOGGER.log (OpLevel.TRACE, "Required locator not found: {0}", field);
@@ -216,7 +216,7 @@ public class ActivityXmlParser extends ActivityParser
               ActivityFieldLocator loc = locations.get (li);
               savedFormats[li] = loc.getFormat ();
               savedUnits[li] = loc.getUnits ();
-              values[li] = getLocatorValue (feeder, loc, xmlDoc);
+              values[li] = getLocatorValue (stream, loc, xmlDoc);
               if (values[li] == null && requireAll && !"false".equalsIgnoreCase (loc.getRequired ()))
               {
                 LOGGER.log (OpLevel.TRACE, "Required locator not found: {0}", field);
@@ -247,7 +247,7 @@ public class ActivityXmlParser extends ActivityParser
     return ai;
   }
 
-  private Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, Document xmlDoc)
+  private Object getLocatorValue (TNTInputStream stream, ActivityFieldLocator locator, Document xmlDoc)
       throws XPathExpressionException, ParseException
   {
     Object val = null;
@@ -256,9 +256,9 @@ public class ActivityXmlParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (!StringUtils.isEmpty (locStr))
       {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp)
+        if (locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp)
         {
-          val = feeder.getProperty (locStr);
+          val = stream.getProperty (locStr);
         }
         else
         {

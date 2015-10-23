@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<messaging_operation
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-msg-activity.xsd">
+
+    <ServerName>Routing.Server</ServerName>
+    <ApplName>MsgTranslator.exe</ApplName>
+    <UserName>SYSTEM</UserName>
+    <OperationName>MQGET</OperationName>
+    <Correlator>0DE21495-D960-412e-BB94-0F151507D691</Correlator>
+    <EndTime datatype="Timestamp" units="Milliseconds">1313762989583</EndTime>
+    <ElapsedTime units="Microseconds">142</ElapsedTime>
+    <ResMgr>QMGR_A</ResMgr>
+    <ObjectName>Queue.Test</ObjectName>
+    <ObjectType>1</ObjectType>
+    <CompCode>1</CompCode>
+    <ReasonCode>2079</ReasonCode>
+    <MsgData format="string">Message Body</MsgData>
+    <MsgFormat>MQSTR</MsgFormat>
+    <MsgId format="hexBinary">4e535549443a3aa7746c4802883d787b60a81d433bfe4d3a</MsgId>
+    <MsgPutApplName>c:\nastel\aptm\bin\nsrpl.exe</MsgPutApplName>
+    <MsgPutApplType>11</MsgPutApplType>
+    <MsgPutDate>20110819</MsgPutDate>
+    <MsgPutTime>20164597</MsgPutTime>
+    <MsgType>2</MsgType>
+    <MsgUser>user</MsgUser>
+</messaging_operation>
