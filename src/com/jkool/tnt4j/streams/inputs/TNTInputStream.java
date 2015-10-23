@@ -36,26 +36,26 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 
 /**
- * <p>Base class that all activity feeders must extend.  It provides some base functionality
- * useful for all activity feeders.</p>
- * <p>All activity feeders should support the following properties:
+ * <p>Base class that all activity streams must extend.  It provides some base functionality
+ * useful for all activity streams.</p>
+ * <p>All activity streams should support the following properties:
  * <ul>
  * <li>DateTime - default date/time to associate with activities</li>
  * </ul>
  *
  * @version $Revision: 8 $
  */
-public abstract class ActivityFeeder implements Runnable
+public abstract class TNTInputStream implements Runnable
 {
   private final EventSink logger;
 
   /**
-   * Feeder thread running this feeder.
+   * StreamThread running this stream.
    */
-  protected FeederThread ownerThread = null;
+  protected StreamThread ownerThread = null;
 
   /**
-   * List of parsers being used by feeder.
+   * List of parsers being used by stream.
    */
   protected final List<ActivityParser> parsers = new LinkedList<ActivityParser> ();
 
@@ -116,39 +116,39 @@ public abstract class ActivityFeeder implements Runnable
   protected static final long CONN_RETRY_INTERVAL = 15000L;
 
   /**
-   * Initializes ActivityFeeder.
+   * Initializes TNTInputStream.
    *
-   * @param logger debug logger used by activity feeder
+   * @param logger debug logger used by activity stream
    */
-  protected ActivityFeeder (EventSink logger)
+  protected TNTInputStream (EventSink logger)
   {
     this.logger = logger;
   }
 
   /**
-   * Get the thread owning this feeder.
+   * Get the thread owning this stream.
    *
    * @return owner thread
    */
-  public FeederThread getOwnerThread ()
+  public StreamThread getOwnerThread ()
   {
     return ownerThread;
   }
 
   /**
-   * Set the thread owning this feeder.
+   * Set the thread owning this stream.
    *
-   * @param ownerThread thread owning this feeder
+   * @param ownerThread thread owning this stream
    */
-  public void setOwnerThread (FeederThread ownerThread)
+  public void setOwnerThread (StreamThread ownerThread)
   {
     this.ownerThread = ownerThread;
   }
 
   /**
-   * Set properties for activity feeder.  This method is invoked by the configuration loader
+   * Set properties for activity stream.  This method is invoked by the configuration loader
    * in response to the {@code property} configuration elements.  It is invoked once per
-   * feeder definition, with all property names and values specified for this feeder.
+   * stream definition, with all property names and values specified for this stream.
    * Subclasses should generally override this method to process custom properties, and
    * invoke the base class method to handle any built-in properties.
    *
@@ -179,15 +179,15 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Initialize the feeder.
+   * Initialize the stream.
    * <p>This method is called by default {@code run} method to perform any necessary
-   * initializations before the feeder starts processing, including verifying that
+   * initializations before the stream starts processing, including verifying that
    * all required properties are set.  If subclasses override this method to perform
    * any custom initializations, they must call the base class method.  If subclass
    * also overrides the {@code run} method, it must call this at start of {@code run}
    * method before entering into processing loop.
    *
-   * @throws Throwable indicates that feeder is not configured properly and
+   * @throws Throwable indicates that stream is not configured properly and
    *                   cannot continue.
    */
   protected void initialize () throws Throwable
@@ -197,7 +197,7 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Adds the specified parser to the list of parsers being used by this feeder.
+   * Adds the specified parser to the list of parsers being used by this stream.
    *
    * @param parser parser to add
    */
@@ -263,7 +263,7 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Applies all defined parsers for this feeder that support the format that the raw
+   * Applies all defined parsers for this stream that support the format that the raw
    * activity data is in the order added until one successfully matches the specified
    * activity data item.
    *
@@ -498,7 +498,7 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Signals that this feeder should stop processing so that controlling
+   * Signals that this stream should stop processing so that controlling
    * thread will terminate.
    */
   public void halt ()
@@ -507,9 +507,9 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Indicates whether this feeder has stopped.
+   * Indicates whether this stream has stopped.
    *
-   * @return {@code true} if feeder has stopped processing, {@code false} otherwise
+   * @return {@code true} if stream has stopped processing, {@code false} otherwise
    */
   public boolean isHalted ()
   {
@@ -517,9 +517,9 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Cleanup the feeder.
+   * Cleanup the stream.
    * <p>This method is called by default {@code run} method to perform any necessary
-   * cleanup before the feeder stops processing, releasing any resources created
+   * cleanup before the stream stops processing, releasing any resources created
    * by {@link #initialize()} method.  If subclasses override this method to perform
    * any custom cleanup, they must call the base class method.  If subclass also
    * overrides the {@code run} method, it must call this at end of {@code run}

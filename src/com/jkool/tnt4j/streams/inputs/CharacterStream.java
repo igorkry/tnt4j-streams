@@ -32,13 +32,13 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * <p>Implements a stream activity feeder, where activity data is read
+ * <p>Implements a character arrays based activity stream, where activity data is read
  * from the specified InputStream-based stream or Reader-based reader.
  * This class wraps the raw {@code InputStream} or {@code Reader} with
  * a {@code BufferedReader}.</p>
- * <p>This activity feeder requires parsers that can support {@code InputStream}s
+ * <p>This activity stream requires parsers that can support {@code InputStream}s
  * or {@code Reader}s as the source for activity data.</p>
- * <p>This activity feeder supports the following properties:
+ * <p>This activity stream supports the following properties:
  * <ul>
  * <li>FileName</li>
  * <li>Port</li>
@@ -47,9 +47,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 4 $
  * @see ActivityParser#isDataClassSupported(Object)
  */
-public class StreamFeeder extends ActivityFeeder
+public class CharacterStream extends TNTInputStream
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (CharacterStream.class);
 
   private String fileName = null;
   private Integer socketPort = null;
@@ -73,33 +73,33 @@ public class StreamFeeder extends ActivityFeeder
   protected FeedReader dataReader = null;
 
   /**
-   * Construct empty StreamFeeder.  Requires configuration settings to
+   * Construct empty CharacterStream.  Requires configuration settings to
    * set input stream source.
    */
-  public StreamFeeder ()
+  public CharacterStream ()
   {
     super (LOGGER);
   }
 
   /**
-   * Constructs StreamFeeder to obtain activity data from the specified
+   * Constructs CharacterStream to obtain activity data from the specified
    * InputStream.
    *
    * @param stream input stream to read data from
    */
-  public StreamFeeder (InputStream stream)
+  public CharacterStream (InputStream stream)
   {
     super (LOGGER);
     this.rawStream = stream;
   }
 
   /**
-   * Constructs StreamFeeder to obtain activity data from the specified
+   * Constructs CharacterStream to obtain activity data from the specified
    * Reader.
    *
    * @param reader reader to read data from
    */
-  public StreamFeeder (Reader reader)
+  public CharacterStream (Reader reader)
   {
     super (LOGGER);
     this.rawReader = reader;
@@ -194,7 +194,7 @@ public class StreamFeeder extends ActivityFeeder
       }
       else
       {
-        throw new IllegalStateException ("StreamFeeder: Input stream source type not specified");
+        throw new IllegalStateException ("CharacterStream: Input stream source type not specified");
       }
     }
   }
