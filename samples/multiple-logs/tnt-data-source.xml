@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tw-direct-feed
+<tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tw-direct-feed-probe.xsd">
+        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
 
     <parser name="ExampleTokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value=","/>
@@ -32,4 +32,4 @@
         <property name="FileName" value="orders.log"/>
         <parser-ref name="ExampleTokenParser"/>
     </feeder>
-</tw-direct-feed>
+</tnt-data-source>

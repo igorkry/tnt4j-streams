@@ -48,7 +48,7 @@ public final class StreamsAgent
    *             <table summary="TNT4J-Streams agent command line arguments">
    *             <tr><td>&nbsp;&nbsp;</td>
    *             <td>&nbsp;-f:&lt;cfg_file_name&gt;</td>
-   *             <td>(optional) Load direct feed probe configuration from &lt;cfg_file_name&gt;</td>
+   *             <td>(optional) Load TNT4J Streams data source configuration from &lt;cfg_file_name&gt;</td>
    *             </tr>
    *             <tr><td>&nbsp;&nbsp;</td>
    *             <td>&nbsp;-h | -?</td>
@@ -58,7 +58,7 @@ public final class StreamsAgent
    */
   public static void main (String... args)
   {
-    LOGGER.log (OpLevel.INFO, "jKool TNT4J Streams Probe starting ...");
+    LOGGER.log (OpLevel.INFO, "jKool TNT4J Streams session starting ...");
     ThreadGroup feederThreads = new ThreadGroup (StreamsAgent.class.getName () + "Threads");
     try
     {
@@ -121,7 +121,7 @@ public final class StreamsAgent
     System.out.println ("\nValid arguments:\n");
     System.out.println ("    [-f:<cfg_file_name>] [-h|-?]");
     System.out.println ("where:");
-    System.out.println ("    -f      -  Load direct feed probe configuration from <cfg_file_name>");
+    System.out.println ("    -f      -  Load TNT4J Streams data source configuration from <cfg_file_name>");
     System.out.println ("    -h, -?  -  Print usage");
   }
 }

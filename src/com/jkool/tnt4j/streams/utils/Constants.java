@@ -35,7 +35,7 @@ public final class Constants
   public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>";
   //////////////////////////////////////////////////////////////////////////////////////
   //
-  // Probe transaction data XML definitions
+  // Streams transaction data XML definitions
 
   // XML schema version
   public static final int XML_MSG_VERSION = 2;
@@ -149,7 +149,7 @@ public final class Constants
   public static final String XML_PROPERTY_TIME_USEC_LABEL = "pr_tm_u";
   //////////////////////////////////////////////////////////////////////////////////////
   //
-  // Probe statistics XML definitions
+  // Streams statistics XML definitions
 
   // XML schema version
   public static final int XML_STAT_MSG_VERSION = 1;
@@ -168,7 +168,7 @@ public final class Constants
 
   //////////////////////////////////////////////////////////////////////////////////////
   //
-  // Probe statistics grouping types
+  // Streams statistics grouping types
   public static final String PRB_STATS_GROUP_HOST_TYPE = "Host/Type";
   public static final String PRB_STATS_GROUP_TYPE_HOST = "Type/Host";
 }

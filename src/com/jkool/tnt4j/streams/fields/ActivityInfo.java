@@ -55,7 +55,7 @@ public class ActivityInfo
 
   private String serverName = null;      //??
   private String serverIp = null;                     //??
-  private String osInfo = " ";    // so probe API does not fill in local information        //??
+  private String osInfo = " ";    // so streams API does not fill in local information        //??
   private String applName = null;      //??
   private String userName = null;
 
@@ -498,7 +498,7 @@ public class ActivityInfo
     {
       serverName = Utils.getLocalHostName ();
       serverIp = Utils.getLocalHostAddress ();
-      osInfo = null;    // probe API will then fill in local information
+      osInfo = null;    // streams API will then fill in local information
     }
     else if (StringUtils.isEmpty (serverName))
     {
@@ -506,7 +506,7 @@ public class ActivityInfo
       {
         serverName = Utils.getLocalHostName ();
         serverIp = Utils.getLocalHostAddress ();
-        osInfo = null;    // probe API will then fill in local information
+        osInfo = null;    // streams API will then fill in local information
       }
       else
       {
@@ -554,7 +554,7 @@ public class ActivityInfo
     }
     if (StringUtils.isEmpty (serverIp))
     {
-      serverIp = " "; // prevents probe API from resolving it to the local IP address
+      serverIp = " "; // prevents streams API from resolving it to the local IP address
     }
   }
 

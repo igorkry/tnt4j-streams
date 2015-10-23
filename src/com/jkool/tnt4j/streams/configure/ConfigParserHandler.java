@@ -50,7 +50,7 @@ public class ConfigParserHandler extends DefaultHandler
   public static final String LOC_DELIM = ",";
 
   private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed";
-  private static final String CONFIG_ROOT_ELMT = "tnt4j-streams";
+  private static final String CONFIG_ROOT_ELMT = "tnt-data-source";
   private static final String PARSER_ELMT = "parser";
   private static final String FEEDER_ELMT = "feeder";
   private static final String TACONN_ELMT = "ta-conn";

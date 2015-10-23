@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="ActivityName" locator="5"/>
+        <field name="ActivityType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="Value" locator="9"/>
+    </parser>
+
+    <feeder name="FileFeeder" class="com.jkool.tnt4j.streams.inputs.FileLineFeeder">
+        <ta-conn protocol="TCP" host="172.16.6.54" port="6400"/>
+        <property name="FileName" value="orders.log"/>
+        <parser-ref name="TokenParser"/>
+    </feeder>
+</tnt-data-source>

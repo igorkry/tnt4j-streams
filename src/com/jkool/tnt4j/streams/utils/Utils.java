@@ -103,9 +103,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
    * <p>Generates a new unique message signature.  This signature is expected to be
    * used for creating a new message instance, and is intended to uniquely
    * identify the message regardless of which application is processing it.</p>
-   * <p>It is up to the individual probe to determine which of these attributes is
+   * <p>It is up to the individual stream to determine which of these attributes is
    * available/required to uniquely identify a message.  In order to identify a message
-   * within two different transports, the probes for each transport must provide the
+   * within two different transports, the streams for each transport must provide the
    * same values.</p>
    *
    * @param msgType     message type
@@ -133,9 +133,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
    * <p>Generates a new unique message signature.  This signature is expected to be
    * used for creating a new message instance, and is intended to uniquely
    * identify the message regardless of which application is processing it.</p>
-   * <p>It is up to the individual probe to determine which of these attributes is
+   * <p>It is up to the individual stream to determine which of these attributes is
    * available/required to uniquely identify a message.  In order to identify a message
-   * within two different transports, the probes for each transport must provide the
+   * within two different transports, the streams for each transport must provide the
    * same values.</p>
    *
    * @param _msgDigest  message type

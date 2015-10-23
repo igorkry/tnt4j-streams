@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema id="TwDirectFeedProbe" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema id="TNTDataSource" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:annotation>
         <xs:appinfo>
@@ -731,7 +731,7 @@
     </xs:complexType>
 
     <!-- Configuration root -->
-    <xs:element name="tw-direct-feed">
+    <xs:element name="tnt-data-source">
         <xs:annotation>
             <xs:documentation>
                 Root element for TransactionWorks Direct Feed Probe configuration.

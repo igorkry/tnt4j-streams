@@ -1,1 +1,1 @@
-..\..\bin\tnt4j-streams.bat -f:tw-direct-feed-probe.xml
+..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml

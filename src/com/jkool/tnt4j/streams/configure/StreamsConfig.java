@@ -133,7 +133,7 @@ public class StreamsConfig
   /**
    * Name of default configuration file name ({@value})
    */
-  public static final String DFLT_CFG_FILE_NAME = "tw-direct-feed-probe.xml";
+  public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml";
   //TODO: maybe change to something like "tnt4j-streams-probe"???
 
   private static final String DFLT_CONFIG_FILE_PATH = "config" + File.separator + DFLT_CFG_FILE_NAME;

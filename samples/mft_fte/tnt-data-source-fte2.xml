@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tw-direct-feed
+<tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tw-direct-feed-probe.xsd">
+        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
 
     <parser name="MQFTEParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
@@ -43,4 +43,4 @@
         <property name="Queue" value="NASTEL.FTE.EVENTS"/>
         <parser-ref name="MQFTEParser"/>
     </feeder>
-</tw-direct-feed>
+</tnt-data-source>
