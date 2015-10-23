@@ -17,11 +17,11 @@
  *
  */
 /**
- * Provides the API (classes and interfaces) defining data entities (fields)
- * which can be parsed from data stream by the jKool LLC TNT4J-Streams.
+ * Contains the TNT4J event sink and event sink factory implementation
+ * dedicated for the jKool LLC TNT4J-Streams.
  *
  * @author akausinis
  * @version 1.0
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.tnt4j;

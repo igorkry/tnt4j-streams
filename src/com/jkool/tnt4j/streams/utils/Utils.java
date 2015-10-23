@@ -27,14 +27,19 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * General utility methods.
  *
  * @version $Revision: 16 $
  */
-public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
+public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
 {
+
+  private Utils ()
+  {
+  }
 
   /**
    * Base64 encodes the specified sequence of bytes.
@@ -86,11 +91,13 @@ public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
     {
       ba = Hex.decodeHex (str.toCharArray ());
     }
-    catch (DecoderException e) {}
+    catch (DecoderException e)
+    {
+    }
     return ba;
   }
 
-  private static MessageDigest msgDigest = Utils.getMD5Digester ();
+  private static final MessageDigest MSG_DIGEST = getMD5Digester ();
 
   /**
    * <p>Generates a new unique message signature.  This signature is expected to be
@@ -116,9 +123,9 @@ public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
       MessageType msgType, String msgFormat, byte[] msgId, String userId, String putApplType, String putApplName, String putDate,
       String putTime)
   {
-    synchronized (msgDigest)
+    synchronized (MSG_DIGEST)
     {
-      return computeSignature (msgDigest, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate, putTime);
+      return computeSignature (MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate, putTime);
     }
   }
 
@@ -149,22 +156,38 @@ public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
   {
     _msgDigest.reset ();
     if (msgType != null)
-    { _msgDigest.update (Long.toString (msgType.value ()).getBytes ()); }
+    {
+      _msgDigest.update (String.valueOf (msgType.value ()).getBytes ());
+    }
     if (msgFormat != null)
-    { _msgDigest.update (msgFormat.trim ().getBytes ()); }
+    {
+      _msgDigest.update (msgFormat.trim ().getBytes ());
+    }
     if (msgId != null)
-    { _msgDigest.update (msgId); }
+    {
+      _msgDigest.update (msgId);
+    }
     if (userId != null)
-    { _msgDigest.update (userId.trim ().toLowerCase ().getBytes ()); }
+    {
+      _msgDigest.update (userId.trim ().toLowerCase ().getBytes ());
+    }
     if (putApplType != null)
-    { _msgDigest.update (putApplType.trim ().getBytes ()); }
+    {
+      _msgDigest.update (putApplType.trim ().getBytes ());
+    }
     if (putApplName != null)
-    { _msgDigest.update (putApplName.trim ().getBytes ()); }
+    {
+      _msgDigest.update (putApplName.trim ().getBytes ());
+    }
     if (putDate != null)
-    { _msgDigest.update (putDate.trim ().getBytes ()); }
+    {
+      _msgDigest.update (putDate.trim ().getBytes ());
+    }
     if (putTime != null)
-    { _msgDigest.update (putTime.trim ().getBytes ()); }
-    return new String (Utils.base64Encode (_msgDigest.digest ()));
+    {
+      _msgDigest.update (putTime.trim ().getBytes ());
+    }
+    return new String (base64Encode (_msgDigest.digest ()));
   }
 
   public static OpType mapOpType (Object opType)
@@ -186,47 +209,47 @@ public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
     {
       return OpType.OTHER;
     }
-    else if (opType.equalsIgnoreCase ("START"))
+    if (opType.equalsIgnoreCase ("START"))
     {
       return OpType.START;
     }
-    else if (opType.equalsIgnoreCase ("OPEN"))
+    if (opType.equalsIgnoreCase ("OPEN"))
     {
       return OpType.OPEN;
     }
-    else if (opType.equalsIgnoreCase ("SEND"))
+    if (opType.equalsIgnoreCase ("SEND"))
     {
       return OpType.SEND;
     }
-    else if (opType.equalsIgnoreCase ("RECEIVE"))
+    if (opType.equalsIgnoreCase ("RECEIVE"))
     {
       return OpType.RECEIVE;
     }
-    else if (opType.equalsIgnoreCase ("CLOSE"))
+    if (opType.equalsIgnoreCase ("CLOSE"))
     {
       return OpType.CLOSE;
     }
-    else if (opType.equalsIgnoreCase ("END"))
+    if (opType.equalsIgnoreCase ("END"))
     {
       return OpType.STOP;
     }
-    else if (opType.equalsIgnoreCase ("INQUIRE"))
+    if (opType.equalsIgnoreCase ("INQUIRE"))
     {
       return OpType.INQUIRE;
     }
-    else if (opType.equalsIgnoreCase ("SET"))
+    if (opType.equalsIgnoreCase ("SET"))
     {
       return OpType.SET;
     }
-    else if (opType.equalsIgnoreCase ("CALL"))
+    if (opType.equalsIgnoreCase ("CALL"))
     {
       return OpType.CALL;
     }
-    else if (opType.equalsIgnoreCase ("URL"))
+    if (opType.equalsIgnoreCase ("URL"))
     {
       return OpType.OTHER;
     }
-    else if (opType.equalsIgnoreCase ("BROWSE"))
+    if (opType.equalsIgnoreCase ("BROWSE"))
     {
       return OpType.BROWSE;
     }
@@ -268,7 +291,7 @@ public class Utils extends com.nastel.jkool.tnt4j.utils.Utils
 
   public static String getConnectUrl (String protocol, String... urlArgs) throws IllegalArgumentException
   {
-    if (org.apache.commons.lang.StringUtils.isEmpty (protocol))
+    if (StringUtils.isEmpty (protocol))
     {
       throw new IllegalArgumentException ("Protocol for URL can't be empty");
     }

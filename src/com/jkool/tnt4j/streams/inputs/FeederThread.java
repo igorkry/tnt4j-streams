@@ -20,6 +20,8 @@
 package com.jkool.tnt4j.streams.inputs;
 
 import com.jkool.tnt4j.streams.utils.StreamsThread;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Base class for threads running an ActivityFeeder.
@@ -29,11 +31,11 @@ import com.jkool.tnt4j.streams.utils.StreamsThread;
  */
 public class FeederThread extends StreamsThread
 {
-
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (FeederThread.class);
   /**
    * ActivityFeeder being executed by this thread.
    */
-  protected ActivityFeeder target;
+  protected final ActivityFeeder target;
 
   /**
    * Creates thread to run specified ActivityFeeder.

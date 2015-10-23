@@ -20,21 +20,24 @@
 package com.jkool.tnt4j.streams.samples.custom;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Sample custom parser.
  */
 public class SampleParser extends ActivityParser
 {
-  private static final Logger logger = Logger.getLogger (SampleParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleParser.class);
 
   /**
    * Defines field separator.
@@ -52,14 +55,14 @@ public class SampleParser extends ActivityParser
   public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
+    {
+      return;
+    }
     for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Setting " + name + " to '" + value + "'"); }
+      LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
       if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase (name))
       {
         fieldDelim = value;
@@ -88,24 +91,27 @@ public class SampleParser extends ActivityParser
   public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
   {
     if (fieldDelim == null)
-    { throw new IllegalStateException ("SampleParser: field delimiter not specified or empty"); }
+    {
+      throw new IllegalStateException ("SampleParser: field delimiter not specified or empty");
+    }
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     // Get next string to parse
     String dataStr = getNextString (data);
     if (dataStr == null || dataStr.length () == 0)
-    { return null; }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Parsing: " + dataStr); }
+    {
+      return null;
+    }
+    LOGGER.log (OpLevel.DEBUG, "Parsing: {0}", dataStr);
     String[] fields = dataStr.split (fieldDelim);
     if (fields == null || fields.length == 0)
     {
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Did not find any fields in input string"); }
+      LOGGER.log (OpLevel.DEBUG, "Did not find any fields in input string");
       return null;
     }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Split input into " + fields.length + " fields"); }
+    LOGGER.log (OpLevel.DEBUG, "Split input into {0} fields", fields.length);
     ActivityInfo ai = new ActivityInfo ();
     ActivityField field = null;
     Object value = null;
@@ -115,11 +121,11 @@ public class SampleParser extends ActivityParser
       field = new ActivityField (ActivityFieldType.ActivityData);
       applyFieldValue (ai, field, dataStr);
       // apply fields for parser
-      for (Map.Entry<ActivityField, ArrayList<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
+      for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
       {
         value = null;
         field = fieldEntry.getKey ();
-        ArrayList<ActivityFieldLocator> locations = fieldEntry.getValue ();
+        List<ActivityFieldLocator> locations = fieldEntry.getValue ();
         if (locations != null)
         {
           if (locations.size () == 1)
@@ -133,7 +139,9 @@ public class SampleParser extends ActivityParser
             // build array to hold data from each location
             Object[] values = new Object[locations.size ()];
             for (int l = 0; l < locations.size (); l++)
-            { values[l] = getLocatorValue (feeder, locations.get (l), fields); }
+            {
+              values[l] = getLocatorValue (feeder, locations.get (l), fields);
+            }
             value = values;
           }
         }
@@ -165,7 +173,9 @@ public class SampleParser extends ActivityParser
         {
           int loc = Integer.parseInt (locStr);
           if (loc <= fields.length)
-          { val = fields[loc - 1].trim (); }
+          {
+            val = fields[loc - 1].trim ();
+          }
         }
       }
       val = locator.formatValue (val);

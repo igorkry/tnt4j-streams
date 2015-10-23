@@ -20,6 +20,10 @@
 package com.jkool.tnt4j.streams.fields;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Represents a specific activity field, containing the necessary information on
@@ -29,26 +33,28 @@ import java.util.ArrayList;
  */
 public class ActivityField
 {
-//	privateClasses static final Logger logger = Logger.getLogger(ActivityField.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityField.class);
 
-  private ActivityFieldType fieldType;
-  private ArrayList<ActivityFieldLocator> locators;
-  private String format;
-  private String locale;
+  private final ActivityFieldType fieldType;
+  private List<ActivityFieldLocator> locators = null;
+  private String format = null;
+  private String locale = null;
   private String separator = "";
-  private String reqvalue = ""; /* string to allow no value */
+  private String reqValue = ""; /* string to allow no value */
 
   /**
    * Creates a new activity field entry.
    *
    * @param fieldType type of activity field
    *
-   * @throws NullPointerException if field type is {@code null}
+   * @throws IllegalArgumentException if field type is {@code null}
    */
   public ActivityField (ActivityFieldType fieldType)
   {
     if (fieldType == null)
-    { throw new NullPointerException ("Activity field type cannot be null"); }
+    {
+      throw new IllegalArgumentException ("Activity field type cannot be null");
+    }
     this.fieldType = fieldType;
   }
 
@@ -56,6 +62,9 @@ public class ActivityField
    * Creates a new activity field entry.
    *
    * @param fieldType type of activity field
+   * @param dataType  type of field data type
+   *
+   * @throws NullPointerException if field type is {@code null}
    */
   public ActivityField (ActivityFieldType fieldType, ActivityFieldDataType dataType)
   {
@@ -88,20 +97,26 @@ public class ActivityField
   }
 
   /**
-   * @return the locators
+   * Gets activity field locators list.
+   *
+   * @return the locators list
    */
-  public ArrayList<ActivityFieldLocator> getLocators ()
+  public List<ActivityFieldLocator> getLocators ()
   {
     return locators;
   }
 
   /**
+   * Adds activity field locator.
+   *
    * @param locator the locator to add
    */
   public void addLocator (ActivityFieldLocator locator)
   {
     if (locators == null)
-    { locators = new ArrayList<ActivityFieldLocator> (); }
+    {
+      locators = new ArrayList<ActivityFieldLocator> ();
+    }
     locators.add (locator);
   }
 
@@ -176,22 +191,23 @@ public class ActivityField
   }
 
   /**
-   * Gets the required flag  indicates where field is required or optional.
+   * Gets the required flag indicating whether field is required or optional.
+   *
+   * @return flag indicating whether field is required or optional
    */
-
   public String getRequired ()
   {
-    return reqvalue;
+    return reqValue;
   }
 
   /**
    * Sets the required flag  indicates where field is required or optional.
    *
-   * @param reqvalue true/false string to use to separate raw values
+   * @param reqValue true/false string to use to separate raw values
    */
-  public void setRequired (String reqvalue)
+  public void setRequired (String reqValue)
   {
-    this.reqvalue = reqvalue;
+    this.reqValue = reqValue;
   }
 
   /**
@@ -201,9 +217,13 @@ public class ActivityField
   public boolean equals (Object obj)
   {
     if (obj == null)
-    { return false; }
+    {
+      return false;
+    }
     if (!(obj instanceof ActivityField))
-    { return false; }
+    {
+      return false;
+    }
     ActivityField other = (ActivityField) obj;
     return this.fieldType == other.fieldType;
   }
@@ -234,10 +254,7 @@ public class ActivityField
    */
   public String toDebugString ()
   {
-    StringBuilder sb = new StringBuilder ();
-    sb.append ("{fieldType='").append (getFieldType ()).append ("' ").append ("format='").append (getFormat ()).append ("' ").append (
-        "locale='").append (getLocale ()).append ("' ").append ("separator='").append (getSeparator ()).append ("' ").append (
-        "required='").append (getRequired ()).append ("'}");
-    return sb.toString ();
+    return "{fieldType='" + fieldType + "' " + "format='" + format + "' " + "locale='" + locale + "' " + "separator='" + separator + "' "
+           + "required='" + reqValue + "'}";
   }
 }

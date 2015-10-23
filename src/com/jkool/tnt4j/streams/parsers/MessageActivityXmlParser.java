@@ -21,7 +21,7 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
@@ -29,8 +29,10 @@ import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.types.MessageType;
 import com.jkool.tnt4j.streams.utils.Utils;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * <p>This class extends the basic activity XML parser for handling data specific
@@ -38,19 +40,18 @@ import org.apache.log4j.Logger;
  * activity data collected for specific fields.</p>
  * <p>In particular, this class will convert the signature and correlation field
  * values from a tokenized list of items into a value in the appropriate form
- * required by the analyzer.</p>
+ * required by the jKool Cloud Service.</p>
  * <p>This parser supports the following properties (in addition to those
  * supported by {@link ActivityXmlParser}):
  * <ul>
  * <li>SignatureDelim</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 6 $
  */
 public class MessageActivityXmlParser extends ActivityXmlParser
 {
-  private static final Logger logger = Logger.getLogger (MessageActivityXmlParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (MessageActivityXmlParser.class);
   /**
    * Contains the field separator (set by {@code SignatureDelim} property) - Default: ","
    */
@@ -63,19 +64,20 @@ public class MessageActivityXmlParser extends ActivityXmlParser
    */
   public MessageActivityXmlParser () throws ParserConfigurationException
   {
-    super ();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
+    {
+      return;
+    }
     super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
@@ -119,12 +121,16 @@ public class MessageActivityXmlParser extends ActivityXmlParser
       case Signature:
         Object[] sigItems = null;
         if (value instanceof Object[])
-        { sigItems = (Object[]) value; }
+        {
+          sigItems = (Object[]) value;
+        }
         else if (value instanceof String)
         {
           String sigStr = (String) value;
           if (sigStr.contains (sigDelim))
-          { sigItems = sigStr.split (sigDelim); }
+          {
+            sigItems = sigStr.split (sigDelim);
+          }
         }
         if (sigItems != null)
         {
@@ -140,23 +146,20 @@ public class MessageActivityXmlParser extends ActivityXmlParser
           {
             Object item = sigItems[i];
             if (item == null)
-            { continue; }
+            {
+              continue;
+            }
             switch (i)
             {
               case 0:
-                if (item instanceof Number)
-                { msgType = MessageType.valueOf (((Number) item).intValue ()); }
-                else
-                { msgType = MessageType.valueOf (Integer.parseInt (item.toString ())); }
+                msgType = item instanceof Number ? MessageType.valueOf (((Number) item).intValue ())
+                                                 : MessageType.valueOf (Integer.parseInt (item.toString ()));
                 break;
               case 1:
                 msgFormat = item.toString ();
                 break;
               case 2:
-                if (item instanceof byte[])
-                { msgId = (byte[]) item; }
-                else
-                { msgId = item.toString ().getBytes (); }
+                msgId = item instanceof byte[] ? (byte[]) item : item.toString ().getBytes ();
                 break;
               case 3:
                 msgUser = item.toString ();
@@ -178,14 +181,10 @@ public class MessageActivityXmlParser extends ActivityXmlParser
             }
           }
           value = Utils.computeSignature (msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime);
-          if (logger.isTraceEnabled ())
-          {
-            logger.trace ("Message Signature (" + value + "):  msgType=" + msgType + "  msgFormat=" + msgFormat +
-                          "  msgId=" + (msgId == null ? "null" : new String (Utils.encodeHex (msgId))) +
-                          " [" + (msgId == null ? "null" : new String (msgId)) + "]" +
-                          "  userId=" + msgUser + "  putApplType=" + msgApplType + "  putApplName=" + msgApplName +
-                          "  putDate=" + msgPutDate + "  putTime=" + msgPutTime);
-          }
+          LOGGER.log (OpLevel.TRACE,
+                      "Message Signature ({0}):  msgType={1}  msgFormat={2}  msgId={3} [{4}]  userId={5}  putApplType={6}  putApplName={7}  putDate={8}  putTime={9}",
+                      value, msgType, msgFormat, msgId == null ? "null" : new String (Utils.encodeHex (msgId)),
+                      msgId == null ? "null" : new String (msgId), msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime);
         }
         break;
       default:

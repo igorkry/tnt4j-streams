@@ -28,14 +28,16 @@ import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Sample custom feeder.
  */
 public class SampleFeeder extends ActivityFeeder
 {
-  private static final Logger logger = Logger.getLogger (SampleFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleFeeder.class);
 
   private String fileName;
   private File activityFile;
@@ -44,7 +46,7 @@ public class SampleFeeder extends ActivityFeeder
 
   private SampleFeeder ()
   {
-    super (logger);
+    super (LOGGER);
   }
 
   /**
@@ -58,7 +60,9 @@ public class SampleFeeder extends ActivityFeeder
   public Object getProperty (String name)
   {
     if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
-    { return fileName; }
+    {
+      return fileName;
+    }
     return super.getProperty (name);
   }
 
@@ -73,14 +77,17 @@ public class SampleFeeder extends ActivityFeeder
   public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
+    {
+      return;
+    }
     for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
       if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
-      { fileName = value; }
+      {
+        fileName = value;
+      }
     }
   }
 
@@ -95,9 +102,10 @@ public class SampleFeeder extends ActivityFeeder
   {
     super.initialize ();
     if (fileName == null)
-    { throw new IllegalStateException ("SampleFeeder: File name not defined"); }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Opening file: " + fileName); }
+    {
+      throw new IllegalStateException ("SampleFeeder: File name not defined");
+    }
+    LOGGER.log (OpLevel.DEBUG, "Opening file: {0}", fileName);
     activityFile = new File (fileName);
     lineReader = new LineNumberReader (new FileReader (activityFile));
   }
@@ -111,7 +119,9 @@ public class SampleFeeder extends ActivityFeeder
   public Object getNextItem () throws Throwable
   {
     if (lineReader == null)
-    { throw new IllegalStateException ("SampleFeeder: File is not opened for reading"); }
+    {
+      throw new IllegalStateException ("SampleFeeder: File is not opened for reading");
+    }
     String line = lineReader.readLine ();
     lineNumber = lineReader.getLineNumber ();
     return line;
@@ -134,7 +144,13 @@ public class SampleFeeder extends ActivityFeeder
   {
     if (lineReader != null)
     {
-      try {lineReader.close ();} catch (IOException e) {}
+      try
+      {
+        lineReader.close ();
+      }
+      catch (IOException e)
+      {
+      }
       lineReader = null;
       activityFile = null;
     }

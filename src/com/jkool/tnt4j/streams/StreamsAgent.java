@@ -19,15 +19,15 @@
 
 package com.jkool.tnt4j.streams;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
 import com.jkool.tnt4j.streams.inputs.FeederThread;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Main class for jKool LLC TNT4J-Streams application.
@@ -36,13 +36,16 @@ import org.apache.log4j.Logger;
  */
 public final class StreamsAgent
 {
-  private static final Logger logger = Logger.getLogger (StreamsAgent.class);
-  private static Level logLevel = Level.INFO;
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamsAgent.class);
   private static String cfgFileName = null;
+
+  private StreamsAgent ()
+  {
+  }
 
   /**
    * @param args command-line arguments. Supported arguments:
-   *             <table>
+   *             <table summary="TNT4J-Streams agent command line arguments">
    *             <tr><td>&nbsp;&nbsp;</td>
    *             <td>&nbsp;-f:&lt;cfg_file_name&gt;</td>
    *             <td>(optional) Load direct feed probe configuration from &lt;cfg_file_name&gt;</td>
@@ -51,86 +54,44 @@ public final class StreamsAgent
    *             <td>&nbsp;-h | -?</td>
    *             <td>(optional) Print usage</td>
    *             </tr>
-   *             <tr><td>&nbsp;&nbsp;</td>
-   *             <td>&nbsp;-d</td>
-   *             <td>(optional) Enable debug-level logging</td>
-   *             </tr>
-   *             <tr><td>&nbsp;&nbsp;</td>
-   *             <td>&nbsp;-t</td>
-   *             <td>(optional) Enable trace-level logging</td>
-   *             </tr>
    *             </table>
    */
-  public static void main (String[] args)
+  public static void main (String... args)
   {
-    logger.info ("jKool TNT4J Streams Probe starting ...");
+    LOGGER.log (OpLevel.INFO, "jKool TNT4J Streams Probe starting ...");
     ThreadGroup feederThreads = new ThreadGroup (StreamsAgent.class.getName () + "Threads");
     try
     {
       processArgs (args);
-      setLogLevel (logLevel);
-      StreamsConfig cfg = (StringUtils.isEmpty (cfgFileName) ? new StreamsConfig () : new StreamsConfig (cfgFileName));
-      HashMap<String, ActivityFeeder> feederMap = cfg.getFeeders ();
+      StreamsConfig cfg = StringUtils.isEmpty (cfgFileName) ? new StreamsConfig () : new StreamsConfig (cfgFileName);
+      Map<String, ActivityFeeder> feederMap = cfg.getFeeders ();
       if (feederMap == null || feederMap.isEmpty ())
-      { throw new IllegalStateException ("No Activity Feeders found in configuration"); }
-      for (Map.Entry<String, ActivityFeeder> f : feederMap.entrySet ())
       {
-        String feederName = f.getKey ();
-        ActivityFeeder feeder = f.getValue ();
-        FeederThread ft = new FeederThread (feederThreads, feeder, feeder.getClass ().getSimpleName () + ":" + feederName);
+        throw new IllegalStateException ("No Activity Feeders found in configuration");
+      }
+      FeederThread ft;
+      for (Map.Entry<String, ActivityFeeder> feederEntry : feederMap.entrySet ())
+      {
+        String feederName = feederEntry.getKey ();
+        ActivityFeeder feeder = feederEntry.getValue ();
+        ft = new FeederThread (feederThreads, feeder, feeder.getClass ().getSimpleName () + ":" + feederName);
         ft.start ();
       }
     }
     catch (Throwable t)
     {
-      logger.error (t.getMessage (), t);
+      LOGGER.log (OpLevel.ERROR, t.getMessage (), t);
     }
   }
 
-  /**
-   * Set log4j logging level for use by TNT4J-Streams classes.
-   * Useful for overriding default log level to enable troubleshooting.
-   *
-   * @param logLevel log4j logging level to use
-   */
-  public static void setLogLevel (Level logLevel)
+  private static void processArgs (String... args)
   {
-    Logger probeLogger = Logger.getLogger ("com.jkool.tnt4j.streams");
-    if (probeLogger != null)
+    for (String arg : args)
     {
-      if (logLevel == null)
-      { logLevel = Level.INFO; }
-      if (probeLogger.getLevel () != logLevel)
+      if (StringUtils.isEmpty (arg))
       {
-        logger.info ("Changing logging level to " + logLevel);
-        probeLogger.setLevel (logLevel);
+        continue;
       }
-      else
-      {
-        logger.debug ("Using logging level of " + logLevel);
-      }
-      logger.setLevel (logLevel);
-      StreamsAgent.logLevel = logLevel;
-    }
-  }
-
-  /**
-   * Gets the current log4j logging level.
-   *
-   * @return current log4j logging level
-   */
-  public static Level getLogLevel ()
-  {
-    return logLevel;
-  }
-
-  private static void processArgs (String[] args)
-  {
-    for (int i = 0; i < args.length; i++)
-    {
-      String arg = args[i];
-      if (arg == null)
-      { continue; }
       if (arg.startsWith ("-f:"))
       {
         cfgFileName = arg.substring (3);
@@ -140,16 +101,6 @@ public final class StreamsAgent
           printUsage ();
           System.exit (1);
         }
-      }
-      else if (arg.equals ("-d"))
-      {
-        if (logLevel.isGreaterOrEqual (Level.DEBUG))
-        { logLevel = Level.DEBUG; }
-      }
-      else if (arg.equals ("-t"))
-      {
-        if (logLevel.isGreaterOrEqual (Level.TRACE))
-        { logLevel = Level.TRACE; }
       }
       else if (arg.equals ("-h") || arg.equals ("-?"))
       {
@@ -171,8 +122,6 @@ public final class StreamsAgent
     System.out.println ("    [-f:<cfg_file_name>] [-h|-?]");
     System.out.println ("where:");
     System.out.println ("    -f      -  Load direct feed probe configuration from <cfg_file_name>");
-    System.out.println ("    -d      -  Enable debug-level logging");
-    System.out.println ("    -t      -  Enable trace-level logging");
     System.out.println ("    -h, -?  -  Print usage");
   }
 }

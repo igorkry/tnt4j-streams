@@ -22,6 +22,8 @@ package com.jkool.tnt4j.streams.utils;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -33,6 +35,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class NumericFormatter
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (NumericFormatter.class);
+
   private int radix = 10;
   private String pattern = null;
   private DecimalFormat formatter = null;
@@ -42,7 +46,7 @@ public class NumericFormatter
    */
   public NumericFormatter ()
   {
-    setPattern (null);
+    this (null);
   }
 
   /**
@@ -104,7 +108,7 @@ public class NumericFormatter
   public void setPattern (String pattern)
   {
     this.pattern = pattern;
-    formatter = (StringUtils.isEmpty (pattern) ? null : new DecimalFormat (pattern));
+    formatter = StringUtils.isEmpty (pattern) ? null : new DecimalFormat (pattern);
   }
 
   /**
@@ -144,13 +148,15 @@ public class NumericFormatter
    * Formats the specified object using the defined pattern, or using the default
    * numeric formatting if no pattern was defined.
    *
-   * @param value value to convert
-   * @param scale value to multiply the formatted value by
+   * @param pattern number format pattern
+   * @param value   value to convert
+   * @param scale   value to multiply the formatted value by
    *
    * @return formatted value of field in required internal data type
    *
    * @throws ParseException if an error parsing the specified value based on the field
    *                        definition (e.g. does not match defined pattern, etc.)
+   * @see java.text.DecimalFormat#DecimalFormat(String)
    */
   public static Number parse (String pattern, Object value, Number scale) throws ParseException
   {
@@ -174,9 +180,13 @@ public class NumericFormatter
   private static Number parse (DecimalFormat formatter, int radix, Object value, Number scale) throws ParseException
   {
     if (value == null)
-    { return null; }
+    {
+      return null;
+    }
     if (scale == null)
-    { scale = new Double (1.0); }
+    {
+      scale = 1.0;
+    }
     try
     {
       Number numValue = null;
@@ -184,20 +194,26 @@ public class NumericFormatter
       {
         String strValue = (String) value;
         if (strValue.startsWith ("0x") || strValue.startsWith ("0X"))
-        { numValue = Long.parseLong (strValue.substring (2), 16); }
+        {
+          numValue = Long.parseLong (strValue.substring (2), 16);
+        }
       }
       if (numValue == null)
       {
         if (formatter != null)
-        { numValue = formatter.parse (value.toString ()); }
+        {
+          numValue = formatter.parse (value.toString ());
+        }
         else if (radix != 10)
-        { numValue = Long.parseLong (value.toString (), radix); }
-        else if (value instanceof Number)
-        { numValue = (Number) value; }
+        {
+          numValue = Long.parseLong (value.toString (), radix);
+        }
         else
-        { numValue = Double.valueOf (value.toString ()); }
+        {
+          numValue = value instanceof Number ? (Number) value : Double.valueOf (value.toString ());
+        }
       }
-      return new Double (numValue.doubleValue () * scale.doubleValue ());
+      return numValue.doubleValue () * scale.doubleValue ();
     }
     catch (NumberFormatException nfe)
     {

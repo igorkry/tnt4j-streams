@@ -19,13 +19,14 @@
 
 package com.jkool.tnt4j.streams.samples.custom;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
 import com.jkool.tnt4j.streams.inputs.FeederThread;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Sample integration of TNT4J-Streams into an application.
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public final class SampleIntegration
 {
-  private static final Logger logger = Logger.getLogger (SampleIntegration.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleIntegration.class);
 
   /**
    * Configure feeders and parsers, and run each feed in its own thread.
@@ -46,12 +47,18 @@ public final class SampleIntegration
     {
       StreamsConfig cfg;
       if (cfgFileName == null || cfgFileName.length () == 0)
-      { cfg = new StreamsConfig (); }
+      {
+        cfg = new StreamsConfig ();
+      }
       else
-      { cfg = new StreamsConfig (cfgFileName); }
-      HashMap<String, ActivityFeeder> feederMap = cfg.getFeeders ();
+      {
+        cfg = new StreamsConfig (cfgFileName);
+      }
+      Map<String, ActivityFeeder> feederMap = cfg.getFeeders ();
       if (feederMap == null || feederMap.size () == 0)
-      { throw new IllegalStateException ("No Activity Feeders found in configuration"); }
+      {
+        throw new IllegalStateException ("No Activity Feeders found in configuration");
+      }
       for (Map.Entry<String, ActivityFeeder> f : feederMap.entrySet ())
       {
         String feederName = f.getKey ();
@@ -62,7 +69,7 @@ public final class SampleIntegration
     }
     catch (Throwable t)
     {
-      logger.error (t.getMessage (), t);
+      LOGGER.log (OpLevel.ERROR, t.getMessage (), t);
     }
   }
 
@@ -81,7 +88,7 @@ public final class SampleIntegration
     }
     catch (Throwable t)
     {
-      logger.error (t.getMessage (), t);
+      LOGGER.log (OpLevel.ERROR, t.getMessage (), t);
     }
   }
 }

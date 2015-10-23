@@ -24,7 +24,7 @@ package com.jkool.tnt4j.streams.utils;
  *
  * @version $Revision: 35 $
  */
-public class Constants
+public final class Constants
 {
   public static final String LINE_SEPARATOR = System.getProperty ("line.separator");
   public static final String NASTEL_16x16_ICON_FILE = "NastelIcon-16x16.png";

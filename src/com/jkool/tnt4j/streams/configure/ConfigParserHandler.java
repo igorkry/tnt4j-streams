@@ -19,11 +19,7 @@
 
 package com.jkool.tnt4j.streams.configure;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.*;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
@@ -32,6 +28,8 @@ import com.jkool.tnt4j.streams.fields.ActivityFieldType;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.types.GatewayProtocolTypes;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -44,6 +42,8 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class ConfigParserHandler extends DefaultHandler
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ConfigParserHandler.class);
+
   /**
    * Constant for default location delimiter in configuration definition.
    */
@@ -87,7 +87,7 @@ public class ConfigParserHandler extends DefaultHandler
   private static final String REQUIRED_VALUE = "required";
 
   private ActivityFeeder currFeeder = null;
-  private Collection<Entry<String, String>> currProperties = null;
+  private Collection<Map.Entry<String, String>> currProperties = null;
   private ActivityParser currParser = null;
   private ActivityField currField = null;
   private ActivityFieldLocator currLocator = null;
@@ -96,8 +96,8 @@ public class ConfigParserHandler extends DefaultHandler
   private boolean currFieldHasLocElmt = false;
   private boolean currFieldHasMapElmt = false;
 
-  private HashMap<String, ActivityParser> parsers = null;
-  private HashMap<String, ActivityFeeder> feeders = null;
+  private Map<String, ActivityParser> parsers = null;
+  private Map<String, ActivityFeeder> feeders = null;
 
   private Locator currParseLocation = null;
 
@@ -113,7 +113,7 @@ public class ConfigParserHandler extends DefaultHandler
    *
    * @return set of feeders found
    */
-  public HashMap<String, ActivityFeeder> getFeeders ()
+  public Map<String, ActivityFeeder> getFeeders ()
   {
     return feeders;
   }
@@ -123,7 +123,7 @@ public class ConfigParserHandler extends DefaultHandler
    *
    * @return set of parsers found
    */
-  public HashMap<String, ActivityParser> getParsers ()
+  public Map<String, ActivityParser> getParsers ()
   {
     return parsers;
   }
@@ -163,8 +163,10 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (qName.equals (CONFIG_ROOT_ELMT) || qName.equals (CONFIG_ROOT_ELMT_OLD))
     {
-      if (feeders != null && feeders.size () > 0)
-      { throw new SAXParseException ("Cannot have multiple " + qName + " elements", currParseLocation); }
+      if (feeders != null && !feeders.isEmpty ())
+      {
+        throw new SAXParseException ("Cannot have multiple " + qName + " elements", currParseLocation);
+      }
     }
     else if (qName.equals (PROPERTY_ELMT))
     {
@@ -210,7 +212,9 @@ public class ConfigParserHandler extends DefaultHandler
   private void processParser (Attributes attrs) throws SAXException
   {
     if (currParser != null)
-    { throw new SAXParseException ("Malformed configuration: Detected nested " + PARSER_ELMT + " definition", currParseLocation); }
+    {
+      throw new SAXParseException ("Malformed configuration: Detected nested " + PARSER_ELMT + " definition", currParseLocation);
+    }
     String name = null;
     String className = null;
     for (int i = 0; i < attrs.getLength (); i++)
@@ -218,16 +222,26 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
-      { name = attValue; }
+      {
+        name = attValue;
+      }
       else if (attName.equals (CLASS_ATTR))
-      { className = attValue; }
+      {
+        className = attValue;
+      }
     }
     if (StringUtils.isEmpty (name))
-    { throw new SAXParseException ("Missing " + PARSER_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + PARSER_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+    }
     if (StringUtils.isEmpty (className))
-    { throw new SAXParseException ("Missing " + PARSER_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + PARSER_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation);
+    }
     if (parsers.containsKey (name))
-    { throw new SAXParseException ("Duplicate parser definition '" + name + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Duplicate parser definition '" + name + "'", currParseLocation);
+    }
     try
     {
       ClassLoader cl = getClass ().getClassLoader ();
@@ -254,7 +268,9 @@ public class ConfigParserHandler extends DefaultHandler
       throw new SAXException ("Failed to load " + PARSER_ELMT + " " + CLASS_ATTR + " '" + className + "'" + getLocationInfo (), iae);
     }
     if (currParser != null)
-    { parsers.put (name, currParser); }
+    {
+      parsers.put (name, currParser);
+    }
   }
 
   /**
@@ -272,7 +288,7 @@ public class ConfigParserHandler extends DefaultHandler
     }
     if (currParser == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + FIELD_ELMT + "expected to have " +
+      throw new SAXParseException ("Malformed configuration: " + FIELD_ELMT + " expected to have " +
                                    PARSER_ELMT + " as parent", currParseLocation);
     }
     currFieldHasLocValAttr = false;
@@ -289,43 +305,73 @@ public class ConfigParserHandler extends DefaultHandler
     String timeZone = null;
     String value = null;
     int radix = 10;
-    String reqval = "";
+    String reqVal = "";
     for (int i = 0; i < attrs.getLength (); i++)
     {
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
-      { field = ActivityFieldType.valueOf (attValue); }
+      {
+        field = ActivityFieldType.valueOf (attValue);
+      }
       else if (attName.equals (DATA_TYPE_ATTR))
-      { dataType = ActivityFieldDataType.valueOf (attValue); }
+      {
+        dataType = ActivityFieldDataType.valueOf (attValue);
+      }
       else if (attName.equals (LOC_TYPE_ATTR))
-      { locatorType = attValue; }
+      {
+        locatorType = attValue;
+      }
       else if (attName.equals (LOCATOR_ATTR))
-      { locator = attValue; }
+      {
+        locator = attValue;
+      }
       else if (attName.equals (SEPARATOR_ATTR))
-      { separator = attValue; }
+      {
+        separator = attValue;
+      }
       else if (attName.equals (RADIX_ATTR))
-      { radix = Integer.parseInt (attValue); }
+      {
+        radix = Integer.parseInt (attValue);
+      }
       else if (attName.equals (UNITS_ATTR))
-      { units = attValue; }
+      {
+        units = attValue;
+      }
       else if (attName.equals (FORMAT_ATTR))
-      { format = attValue; }
+      {
+        format = attValue;
+      }
       else if (attName.equals (LOCALE_ATTR))
-      { locale = attValue; }
+      {
+        locale = attValue;
+      }
       else if (attName.equals (TIMEZONE_ATTR))
-      { timeZone = attValue; }
+      {
+        timeZone = attValue;
+      }
       else if (attName.equals (VALUE_ATTR))
-      { value = attValue; }
+      {
+        value = attValue;
+      }
       else if (attName.equals (REQUIRED_VALUE))
-      { reqval = attValue; }
+      {
+        reqVal = attValue;
+      }
     }
-    if (locator != null && locator.length () == 0)
-    { locator = null; }
-    if (value != null && value.length () == 0)
-    { value = null; }
+    if (locator != null && locator.isEmpty ())
+    {
+      locator = null;
+    }
+    if (value != null && value.isEmpty ())
+    {
+      value = null;
+    }
     // make sure required fields are present
     if (field == null)
-    { throw new SAXParseException ("Missing " + FIELD_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + FIELD_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+    }
     ActivityField af = new ActivityField (field);
     ActivityFieldLocator afl;
     if (value != null)
@@ -333,51 +379,73 @@ public class ConfigParserHandler extends DefaultHandler
       currFieldHasLocValAttr = true;
       afl = new ActivityFieldLocator (value);
       afl.setRadix (radix);
-      afl.setRequired (reqval);
+      afl.setRequired (reqVal);
       if (dataType != null)
-      { afl.setDataType (dataType); }
+      {
+        afl.setDataType (dataType);
+      }
       if (units != null)
-      { afl.setUnits (units); }
+      {
+        afl.setUnits (units);
+      }
       if (format != null)
-      { afl.setFormat (format, locale); }
+      {
+        afl.setFormat (format, locale);
+      }
       if (timeZone != null)
-      { afl.setTimeZone (timeZone); }
+      {
+        afl.setTimeZone (timeZone);
+      }
       af.addLocator (afl);
     }
     else if (locator != null)
     {
       currFieldHasLocValAttr = true;
       String[] locators = locator.split (LOC_DELIM);
-      for (int l = 0; l < locators.length; l++)
+      for (String loc : locators)
       {
-        if (StringUtils.isEmpty (locators[l]))
+        if (StringUtils.isEmpty (loc))
         {
           af.addLocator (null);
         }
         else
         {
-          afl = new ActivityFieldLocator (locatorType, locators[l]);
+          afl = new ActivityFieldLocator (locatorType, loc);
           afl.setRadix (radix);
-          afl.setRequired (reqval);
+          afl.setRequired (reqVal);
           if (dataType != null)
-          { afl.setDataType (dataType); }
+          {
+            afl.setDataType (dataType);
+          }
           if (units != null)
-          { afl.setUnits (units); }
+          {
+            afl.setUnits (units);
+          }
           if (format != null)
-          { afl.setFormat (format, locale); }
+          {
+            afl.setFormat (format, locale);
+          }
           if (timeZone != null)
-          { afl.setTimeZone (timeZone); }
+          {
+            afl.setTimeZone (timeZone);
+          }
           af.addLocator (afl);
         }
       }
     }
     if (format != null)
-    { af.setFormat (format); }
+    {
+      af.setFormat (format);
+    }
     if (locale != null)
-    { af.setLocale (locale); }
+    {
+      af.setLocale (locale);
+    }
     if (separator != null)
-    { af.setSeparator (separator); }
-    af.setRequired (reqval);
+    {
+      af.setSeparator (separator);
+    }
+    af.setRequired (reqVal);
     currField = af;
   }
 
@@ -396,7 +464,7 @@ public class ConfigParserHandler extends DefaultHandler
     }
     if (currField == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + FIELD_LOC_ELMT + "expected to have " +
+      throw new SAXParseException ("Malformed configuration: " + FIELD_LOC_ELMT + " expected to have " +
                                    FIELD_ELMT + " as parent", currParseLocation);
     }
     if (currFieldHasLocValAttr)
@@ -418,36 +486,60 @@ public class ConfigParserHandler extends DefaultHandler
     String timeZone = null;
     String value = null;
     int radix = 10;
-    String reqval = "";   /* string to allow override */
+    String reqVal = "";   /* string to allow override */
     for (int i = 0; i < attrs.getLength (); i++)
     {
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (DATA_TYPE_ATTR))
-      { dataType = ActivityFieldDataType.valueOf (attValue); }
+      {
+        dataType = ActivityFieldDataType.valueOf (attValue);
+      }
       else if (attName.equals (LOC_TYPE_ATTR))
-      { locatorType = attValue; }
+      {
+        locatorType = attValue;
+      }
       else if (attName.equals (LOCATOR_ATTR))
-      { locator = attValue; }
+      {
+        locator = attValue;
+      }
       else if (attName.equals (RADIX_ATTR))
-      { radix = Integer.parseInt (attValue); }
+      {
+        radix = Integer.parseInt (attValue);
+      }
       else if (attName.equals (UNITS_ATTR))
-      { units = attValue; }
+      {
+        units = attValue;
+      }
       else if (attName.equals (FORMAT_ATTR))
-      { format = attValue; }
+      {
+        format = attValue;
+      }
       else if (attName.equals (LOCALE_ATTR))
-      { locale = attValue; }
+      {
+        locale = attValue;
+      }
       else if (attName.equals (TIMEZONE_ATTR))
-      { timeZone = attValue; }
+      {
+        timeZone = attValue;
+      }
       else if (attName.equals (VALUE_ATTR))
-      { value = attValue; }
+      {
+        value = attValue;
+      }
       else if (attName.equals (REQUIRED_VALUE))
-      { reqval = attValue; }
+      {
+        reqVal = attValue;
+      }
     }
-    if (locator != null && locator.length () == 0)
-    { locator = null; }
-    if (value != null && value.length () == 0)
-    { value = null; }
+    if (locator != null && locator.isEmpty ())
+    {
+      locator = null;
+    }
+    if (value != null && value.isEmpty ())
+    {
+      value = null;
+    }
     // make sure common required fields are present
     if (locator == null && value == null)
     {
@@ -460,7 +552,7 @@ public class ConfigParserHandler extends DefaultHandler
                                    currParseLocation);
     }
     // make sure any fields that are required based on other fields are specified
-    if (ActivityFieldDataType.DateTime.equals (dataType))
+    if (ActivityFieldDataType.DateTime == dataType)
     {
       if (format == null)
       {
@@ -471,28 +563,32 @@ public class ConfigParserHandler extends DefaultHandler
       //
       //      }
     }
-    else if (ActivityFieldDataType.Timestamp.equals (dataType))
+    else if (ActivityFieldDataType.Timestamp == dataType)
     {
       if (units == null)
       {
         throw new SAXParseException ("Missing " + FIELD_LOC_ELMT + " attribute '" + UNITS_ATTR + "' for " + dataType, currParseLocation);
       }
     }
-    ActivityFieldLocator afl;
-    if (value != null)
-    { afl = new ActivityFieldLocator (value); }
-    else
-    { afl = new ActivityFieldLocator (locatorType, locator); }
+    ActivityFieldLocator afl = value != null ? new ActivityFieldLocator (value) : new ActivityFieldLocator (locatorType, locator);
     afl.setRadix (radix);
-    afl.setRequired (reqval);
+    afl.setRequired (reqVal);
     if (format != null)
-    { afl.setFormat (format, locale); }
+    {
+      afl.setFormat (format, locale);
+    }
     if (dataType != null)
-    { afl.setDataType (dataType); }
+    {
+      afl.setDataType (dataType);
+    }
     if (units != null)
-    { afl.setUnits (units); }
+    {
+      afl.setUnits (units);
+    }
     if (timeZone != null)
-    { afl.setTimeZone (timeZone); }
+    {
+      afl.setTimeZone (timeZone);
+    }
     currLocator = afl;
     currField.addLocator (afl);
     currFieldHasLocElmt = true;
@@ -509,8 +605,8 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (currField == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + FIELD_MAP_ELMT + "expected to have " +
-                                   FIELD_ELMT + "or " + FIELD_LOC_ELMT + " as parent", currParseLocation);
+      throw new SAXParseException ("Malformed configuration: " + FIELD_MAP_ELMT + " expected to have " +
+                                   FIELD_ELMT + " or " + FIELD_LOC_ELMT + " as parent", currParseLocation);
     }
     if (currFieldHasLocElmt && currLocator == null)
     {
@@ -524,14 +620,22 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (SOURCE_ATTR))
-      { source = attValue; }
+      {
+        source = attValue;
+      }
       else if (attName.equals (TARGET_ATTR))
-      { target = attValue; }
+      {
+        target = attValue;
+      }
     }
     if (source == null)
-    { throw new SAXParseException ("Missing " + FIELD_MAP_ELMT + " attribute '" + SOURCE_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + FIELD_MAP_ELMT + " attribute '" + SOURCE_ATTR + "'", currParseLocation);
+    }
     if (target == null)
-    { throw new SAXParseException ("Missing " + FIELD_MAP_ELMT + " attribute '" + TARGET_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + FIELD_MAP_ELMT + " attribute '" + TARGET_ATTR + "'", currParseLocation);
+    }
     if (currLocator != null)
     {
       currLocator.addValueMap (source, target);
@@ -539,11 +643,13 @@ public class ConfigParserHandler extends DefaultHandler
     else
     {
       currFieldHasMapElmt = true;
-      ArrayList<ActivityFieldLocator> locators = currField.getLocators ();
+      List<ActivityFieldLocator> locators = currField.getLocators ();
       if (locators != null)
       {
         for (ActivityFieldLocator loc : locators)
-        { loc.addValueMap (source, target); }
+        {
+          loc.addValueMap (source, target);
+        }
       }
     }
   }
@@ -558,7 +664,9 @@ public class ConfigParserHandler extends DefaultHandler
   private void processFeeder (Attributes attrs) throws SAXException
   {
     if (currFeeder != null)
-    { throw new SAXParseException ("Malformed configuration: Detected nested " + FEEDER_ELMT + " definitions", currParseLocation); }
+    {
+      throw new SAXParseException ("Malformed configuration: Detected nested " + FEEDER_ELMT + " definitions", currParseLocation);
+    }
     String name = null;
     String className = null;
     for (int i = 0; i < attrs.getLength (); i++)
@@ -566,16 +674,26 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
-      { name = attValue; }
+      {
+        name = attValue;
+      }
       else if (attName.equals (CLASS_ATTR))
-      { className = attValue; }
+      {
+        className = attValue;
+      }
     }
     if (StringUtils.isEmpty (name))
-    { throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+    }
     if (StringUtils.isEmpty (className))
-    { throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + FEEDER_ELMT + " attribute '" + CLASS_ATTR + "'", currParseLocation);
+    }
     if (feeders.containsKey (name))
-    { throw new SAXParseException ("Duplicate " + FEEDER_ELMT + " '" + name + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Duplicate " + FEEDER_ELMT + " '" + name + "'", currParseLocation);
+    }
     try
     {
       ClassLoader cl = getClass ().getClassLoader ();
@@ -614,7 +732,7 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (currFeeder == null && currParser == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + PROPERTY_ELMT + "expected to have " + FEEDER_ELMT +
+      throw new SAXParseException ("Malformed configuration: " + PROPERTY_ELMT + " expected to have " + FEEDER_ELMT +
                                    " or " + PARSER_ELMT + " as parent", currParseLocation);
     }
     String name = null;
@@ -624,16 +742,26 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
-      { name = attValue; }
+      {
+        name = attValue;
+      }
       else if (attName.equals (VALUE_ATTR))
-      { value = attValue; }
+      {
+        value = attValue;
+      }
     }
     if (StringUtils.isEmpty (name))
-    { throw new SAXParseException ("Missing " + PROPERTY_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + PROPERTY_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+    }
     if (value == null)
-    { throw new SAXParseException ("Missing " + PROPERTY_ELMT + " attribute '" + VALUE_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + PROPERTY_ELMT + " attribute '" + VALUE_ATTR + "'", currParseLocation);
+    }
     if (currProperties == null)
-    { currProperties = new ArrayList<Entry<String, String>> (); }
+    {
+      currProperties = new ArrayList<Map.Entry<String, String>> ();
+    }
     currProperties.add (new AbstractMap.SimpleEntry<String, String> (name, value));
   }
 
@@ -648,7 +776,7 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (currFeeder == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + TACONN_ELMT + "expected to have " +
+      throw new SAXParseException ("Malformed configuration: " + TACONN_ELMT + " expected to have " +
                                    FEEDER_ELMT + " as parent", currParseLocation);
     }
     GatewayProtocolTypes protocol = null;
@@ -665,45 +793,77 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (PROTOCOL_ATTR))
-      { protocol = GatewayProtocolTypes.valueOf (attValue); }
+      {
+        protocol = GatewayProtocolTypes.valueOf (attValue);
+      }
       else if (attName.equals (HOST_ATTR))
-      { host = attValue; }
+      {
+        host = attValue;
+      }
       else if (attName.equals (PORT_ATTR))
-      { port = Integer.parseInt (attValue); }
+      {
+        port = Integer.parseInt (attValue);
+      }
       else if (attName.equals (FILE_ATTR))
-      { file = attValue; }
+      {
+        file = attValue;
+      }
       else if (attName.equals (ACCESS_TOKEN_ATTR))
-      { token = attValue; }
+      {
+        token = attValue;
+      }
       else if (attName.equals (PROXY_HOST_ATTR))
-      { proxyHost = attValue; }
+      {
+        proxyHost = attValue;
+      }
       else if (attName.equals (PROXY_PORT_ATTR))
-      { proxyPort = Integer.parseInt (attValue); }
+      {
+        proxyPort = Integer.parseInt (attValue);
+      }
       else if (attName.equals (KEYSTORE_ATTR))
-      { keystore = attValue; }
+      {
+        keystore = attValue;
+      }
       else if (attName.equals (KEYSTORE_PWD_ATTR))
-      { keystorePwd = attValue; }
+      {
+        keystorePwd = attValue;
+      }
     }
     if (protocol == null)
-    { throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + PROTOCOL_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + PROTOCOL_ATTR + "'", currParseLocation);
+    }
     if (protocol == GatewayProtocolTypes.FILE)
     {
       if (StringUtils.isEmpty (file))
-      { throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + FILE_ATTR + "'", currParseLocation); }
+      {
+        throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + FILE_ATTR + "'", currParseLocation);
+      }
     }
     else
     {
       if (StringUtils.isEmpty (host))
-      { throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + HOST_ATTR + "'", currParseLocation); }
+      {
+        throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + HOST_ATTR + "'", currParseLocation);
+      }
     }
     currFeeder.setTaConnType (protocol);
     if (!StringUtils.isEmpty (host))
-    { currFeeder.setTaHost (host); }
+    {
+      currFeeder.setTaHost (host);
+    }
     if (port >= 0)
-    { currFeeder.setTaPort (port); }
+    {
+      currFeeder.setTaPort (port);
+    }
     if (!StringUtils.isEmpty (file))
-    { currFeeder.setTaFileName (file); }
+    {
+      currFeeder.setTaFileName (file);
+    }
     if (!StringUtils.isEmpty (token))
-    { currFeeder.setTaAccessToken (token); }
+    {
+      currFeeder.setTaAccessToken (token);
+    }
     if (!StringUtils.isEmpty (proxyHost))
     {
       currFeeder.setTaProxyHost (proxyHost);
@@ -727,7 +887,7 @@ public class ConfigParserHandler extends DefaultHandler
   {
     if (currFeeder == null)
     {
-      throw new SAXParseException ("Malformed configuration: " + PARSER_REF_ELMT + "expected to have " +
+      throw new SAXParseException ("Malformed configuration: " + PARSER_REF_ELMT + " expected to have " +
                                    FEEDER_ELMT + " as parent", currParseLocation);
     }
     String parserName = null;
@@ -736,13 +896,19 @@ public class ConfigParserHandler extends DefaultHandler
       String attName = attrs.getQName (i);
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
-      { parserName = attValue; }
+      {
+        parserName = attValue;
+      }
     }
     if (StringUtils.isEmpty (parserName))
-    { throw new SAXParseException ("Missing " + PARSER_REF_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Missing " + PARSER_REF_ELMT + " attribute '" + NAME_ATTR + "'", currParseLocation);
+    }
     ActivityParser parser = parsers.get (parserName);
     if (parser == null)
-    { throw new SAXParseException ("Undefined " + PARSER_REF_ELMT + " reference '" + parserName + "'", currParseLocation); }
+    {
+      throw new SAXParseException ("Undefined " + PARSER_REF_ELMT + " reference '" + parserName + "'", currParseLocation);
+    }
     currFeeder.addParser (parser);
   }
 
@@ -757,21 +923,25 @@ public class ConfigParserHandler extends DefaultHandler
       if (qName.equals (FEEDER_ELMT))
       {
         if (currProperties != null)
-        { currFeeder.setProperties (currProperties); }
+        {
+          currFeeder.setProperties (currProperties);
+        }
         currFeeder = null;
         currProperties = null;
       }
       else if (qName.equals (PARSER_ELMT))
       {
         if (currProperties != null)
-        { currParser.setProperties (currProperties); }
+        {
+          currParser.setProperties (currProperties);
+        }
         currParser = null;
         currProperties = null;
       }
       else if (qName.equals (FIELD_ELMT))
       {
-        ArrayList<ActivityFieldLocator> locators = currField.getLocators ();
-        if (locators == null || locators.size () == 0)
+        List<ActivityFieldLocator> locators = currField.getLocators ();
+        if (locators == null || locators.isEmpty ())
         {
           throw new SAXException ("Element '" + FIELD_ELMT + "' must have '" + LOCATOR_ATTR + "' or '" + VALUE_ATTR +
                                   "' attributes defined or one or more '" + FIELD_LOC_ELMT + "' child elements" + getLocationInfo ());
@@ -787,10 +957,12 @@ public class ConfigParserHandler extends DefaultHandler
         currLocator = null;
       }
     }
+    catch (SAXException exc)
+    {
+      throw exc;
+    }
     catch (Throwable t)
     {
-      if (t instanceof SAXException)
-      { throw (SAXException) t; }
       SAXException se = new SAXException (t.getMessage () + getLocationInfo ());
       se.initCause (t);
       throw se;
@@ -799,7 +971,7 @@ public class ConfigParserHandler extends DefaultHandler
 
   /**
    * Gets a string representing the current line in the file being parsed.
-   * Used for error mesages.
+   * Used for error messages.
    *
    * @return string representing current line number being parsed
    */
@@ -807,7 +979,9 @@ public class ConfigParserHandler extends DefaultHandler
   {
     String locInfo = "";
     if (currParseLocation != null)
-    { locInfo = ", at line " + currParseLocation.getLineNumber (); }
+    {
+      locInfo = ", at line " + currParseLocation.getLineNumber ();
+    }
     return locInfo;
   }
 }

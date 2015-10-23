@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.nastel.jkool.tnt4j.core.UsecTimestamp;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -36,25 +38,27 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Timestamp extends UsecTimestamp
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (Timestamp.class);
+
   private static final long serialVersionUID = 584224868408250622L;
 
   public Timestamp ()
   {
   }
 
-  public Timestamp (long msecs)
+  public Timestamp (long mSecs)
   {
-    super (msecs);
+    super (mSecs);
   }
 
-  public Timestamp (long msecs, int usecs)
+  public Timestamp (long mSecs, long uSecs)
   {
-    super (msecs, usecs);
+    super (mSecs, uSecs);
   }
 
-  public Timestamp (java.sql.Timestamp timestamp, int usecs)
+  public Timestamp (java.sql.Timestamp timestamp, long uSecs)
   {
-    super (timestamp, usecs);
+    super (timestamp, uSecs);
   }
 
   public Timestamp (Timestamp other)
@@ -77,8 +81,7 @@ public class Timestamp extends UsecTimestamp
    *                     time zone specification and timeStampStr does not represent a string in local time zone.
    * @param locale       locale for date format to use.
    *
-   * @throws NullPointerException     if timeStampStr is {@code null}
-   * @throws IllegalArgumentException if timeStampStr is not in the correct format
+   * @throws IllegalArgumentException if timeStampStr is {@code null} or timeStampStr is not in the correct format
    * @throws ParseException           if failed to parse string based on specified format
    * @see java.util.TimeZone
    * @since Revision: 10
@@ -86,8 +89,10 @@ public class Timestamp extends UsecTimestamp
   public Timestamp (String timeStampStr, String formatStr, String timeZoneId, String locale) throws ParseException
   {
     if (timeStampStr == null)
-    { throw new NullPointerException ("timeStampStr must be non-null"); }
-    int usecs = 0;
+    {
+      throw new IllegalArgumentException ("timeStampStr must be non-null");
+    }
+    long uSecs = 0L;
     SimpleDateFormat dateFormat;
     if (StringUtils.isEmpty (formatStr))
     {
@@ -102,23 +107,29 @@ public class Timestamp extends UsecTimestamp
         int endFmtPos = formatStr.lastIndexOf ('S');
         int fmtFracSecLen = endFmtPos - fmtPos + 1;
         if (fmtFracSecLen > 6)
-        { throw new ParseException ("Date format containing more than 6 significant digits for fractional seconds is not supported", 0); }
+        {
+          throw new ParseException ("Date format containing more than 6 significant digits for fractional seconds is not supported", 0);
+        }
         if (fmtFracSecLen > 3)
         {
           // format specification represents more than milliseconds, assume microseconds
-          int usecEndPos = StringUtils.lastIndexOfAny (timeStampStr, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-          if (usecEndPos > 2)
+          int uSecEndPos = StringUtils.lastIndexOfAny (timeStampStr, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+          if (uSecEndPos > 2)
           {
-            int usecPos = timeStampStr.lastIndexOf ('.', usecEndPos) + 1;
-            String usecStr = String.format ("%s", timeStampStr.substring (usecPos, usecEndPos + 1));
-            if (usecStr.length () < fmtFracSecLen)
-            { usecStr = StringUtils.rightPad (usecStr, fmtFracSecLen, '0'); }
-            else if (usecStr.length () > fmtFracSecLen)
-            { usecStr = usecStr.substring (0, fmtFracSecLen); }
-            usecs = Integer.parseInt (usecStr);
+            int uSecPos = timeStampStr.lastIndexOf ('.', uSecEndPos) + 1;
+            String uSecStr = String.format ("%s", timeStampStr.substring (uSecPos, uSecEndPos + 1));
+            if (uSecStr.length () < fmtFracSecLen)
+            {
+              uSecStr = StringUtils.rightPad (uSecStr, fmtFracSecLen, '0');
+            }
+            else if (uSecStr.length () > fmtFracSecLen)
+            {
+              uSecStr = uSecStr.substring (0, fmtFracSecLen);
+            }
+            uSecs = Long.parseLong (uSecStr);
             // trim off fractional part < microseconds from both timestamp and format strings
             StringBuilder sb = new StringBuilder (timeStampStr);
-            sb.delete (usecPos - 1, usecEndPos + 1);
+            sb.delete (uSecPos - 1, uSecEndPos + 1);
             timeStampStr = sb.toString ();
             sb.setLength (0);
             sb.append (formatStr);
@@ -127,21 +138,24 @@ public class Timestamp extends UsecTimestamp
           }
         }
       }
-      if (StringUtils.isEmpty (locale))
-      {
-        dateFormat = new SimpleDateFormat (formatStr);
-      }
-      else
-      {
-        dateFormat = new SimpleDateFormat (formatStr, Locale.forLanguageTag (locale));
-      }
+      dateFormat = StringUtils.isEmpty (locale) ? new SimpleDateFormat (formatStr)
+                                                : new SimpleDateFormat (formatStr, Locale.forLanguageTag (locale));
     }
     if (!StringUtils.isEmpty (timeZoneId))
     {
       dateFormat.setTimeZone (TimeZone.getTimeZone (timeZoneId));
     }
     Date date = dateFormat.parse (timeStampStr);
-    setTimestampValues (date.getTime (), 0, 0);
-    add (0, usecs);
+    setTimestampValues (date.getTime (), 0L, 0L);
+    add (0L, uSecs);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Timestamp clone () throws CloneNotSupportedException
+  {
+    return (Timestamp) super.clone ();
   }
 }

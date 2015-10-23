@@ -21,10 +21,7 @@ package com.jkool.tnt4j.streams.inputs;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Map.Entry;
+import java.util.*;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -34,8 +31,9 @@ import com.jkool.tnt4j.streams.utils.StreamsThread;
 import com.nastel.jkool.tnt4j.TrackingLogger;
 import com.nastel.jkool.tnt4j.config.DefaultConfigFactory;
 import com.nastel.jkool.tnt4j.config.TrackerConfig;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
-import org.apache.log4j.Logger;
 
 /**
  * <p>Base class that all activity feeders must extend.  It provides some base functionality
@@ -44,84 +42,85 @@ import org.apache.log4j.Logger;
  * <ul>
  * <li>DateTime - default date/time to associate with activities</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 8 $
  */
 public abstract class ActivityFeeder implements Runnable
 {
-  private Logger logger = Logger.getLogger (ActivityFeeder.class);
+  private final EventSink logger;
 
   /**
    * Feeder thread running this feeder.
    */
-  protected FeederThread ownerThread;
+  protected FeederThread ownerThread = null;
 
   /**
    * List of parsers being used by feeder.
    */
-  protected LinkedList<ActivityParser> parsers = new LinkedList<ActivityParser> ();
+  protected final List<ActivityParser> parsers = new LinkedList<ActivityParser> ();
 
   /**
    * Type of protocol used to deliver processed activity data to destination resource.
    */
-  protected GatewayProtocolTypes taConnType;
+  protected GatewayProtocolTypes taConnType = null;
 
   /**
-   * For communication-based protocols, host name or IP address of TransactionWorks Analyzer.
+   * For communication-based protocols, host name or IP address of server. May be used by JESL.
    */
-  protected String taHost;   //TODO: review if still needed for jKool
+  protected String taHost = null;   //TODO: review if still needed for jKool
 
   /**
-   * For communication-based protocols, port TransactionWorks Analyzer is accepting connections on.
+   * For communication-based protocols, port server is accepting connections on. May be used by JESL.
    */
   protected int taPort = -1;   //TODO: review if still needed for jKool
 
   /**
-   * For communication-based protocols, access token to use when TransactionWorks Analyzer
-   * requires authenticated connections.
+   * For communication-based protocols, access token to use when server
+   * requires authenticated connections. May be used by JESL.
    */
-  protected String taAccessToken;   //TODO: review if still needed for jKool
+  protected String taAccessToken = null;   //TODO: review if still needed for jKool
 
   /**
    * For {@code FILE} protocol, name of file to write processed activity data.
    */
-  protected String taFileName;
+  protected String taFileName = null;
 
   /**
-   * For communication-based protocols, host name or IP address of proxy to use to connect to TransactionWorks Analyzer.
+   * For communication-based protocols, host name or IP address of proxy to use to connect to server. May be used by JESL.
    */
-  protected String taProxyHost;   //TODO: review if still needed for jKool
+  protected String taProxyHost = null;   //TODO: review if still needed for jKool
 
   /**
-   * For communication-based protocols, port for proxy to use to connect to TransactionWorks Analyzer.
+   * For communication-based protocols, port for proxy to use to connect to server. May be used by JESL.
    */
   protected int taProxyPort = 0;     //TODO: review if still needed for jKool
 
   /**
-   * For secure connections to TransactionWorks Analyzer, path to keystore containing Analyzer's SSL certificate
+   * For secure connections to server, path to keystore containing server SSL certificate. May be used by JESL.
    */
-  protected String taKeystore;   //TODO: review if still needed for jKool
+  protected String taKeystore = null;   //TODO: review if still needed for jKool
 
   /**
-   * For secure connections to TransactionWorks Analyzer, password for keystore containing Analyzer's SSL certificate
+   * For secure connections to server, password for keystore containing server SSL certificate. May be used by JESL.
    */
-  protected String taKeystorePwd;     //TODO: review if still needed for jKool
+  protected String taKeystorePwd = null;     //TODO: review if still needed for jKool
 
   /**
    * Used to deliver processed activity data to destination.
    */
-  protected Tracker tracker;
+  protected Tracker tracker = null;
 
   /**
    * Delay between retries to submit data package to jKool Cloud Service if some transmission failure occurs, in milliseconds.
    */
-  protected int conn_retry_interval = 15000;
+  protected static final long CONN_RETRY_INTERVAL = 15000L;
 
   /**
    * Initializes ActivityFeeder.
+   *
+   * @param logger debug logger used by activity feeder
    */
-  protected ActivityFeeder (Logger logger)
+  protected ActivityFeeder (EventSink logger)
   {
     this.logger = logger;
   }
@@ -157,9 +156,7 @@ public abstract class ActivityFeeder implements Runnable
    *
    * @throws Throwable indicates error with properties
    */
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
-  {
-  }
+  public abstract void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable;
 
   /**
    * Get value of specified property.  If subclasses override {@link #setProperties(Collection)},
@@ -175,7 +172,9 @@ public abstract class ActivityFeeder implements Runnable
   public Object getProperty (String name)
   {
     if (StreamsConfig.PROP_DATETIME.equals (name))
-    { return getDate (); }
+    {
+      return getDate ();
+    }
     return null;
   }
 
@@ -249,7 +248,9 @@ public abstract class ActivityFeeder implements Runnable
         halt (); // no more data items to process
       }
       else
-      { ai = applyParsers (data); }
+      {
+        ai = applyParsers (data);
+      }
     }
     catch (ParseException e)
     {
@@ -276,14 +277,18 @@ public abstract class ActivityFeeder implements Runnable
   protected ActivityInfo applyParsers (Object data) throws IllegalStateException, ParseException
   {
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     for (ActivityParser parser : parsers)
     {
       if (parser.isDataClassSupported (data))
       {
         ActivityInfo ai = parser.parse (this, data);
         if (ai != null)
-        { return ai; }
+        {
+          return ai;
+        }
       }
     }
     return null;
@@ -431,17 +436,17 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Gets the path to the keystore containing Transaction Analyzer's SSL certificate.
+   * Gets the path to the keystore containing server connection SSL certificate. May be used by JESL.
    *
    * @return path to SSL certificate keystore
    */
-  public String getTaKeystore ()   //TODO: review if still needed for jKool
+  public String getTaKeystore ()
   {
     return taKeystore;
   }
 
   /**
-   * Sets the path to the keystore containing Transaction Analyzer's SSL certificate.
+   * Sets the path to the keystore containing server connection SSL certificate. May be used by JESL.
    *
    * @param taKeystore path to SSL certificate keystore
    */
@@ -451,7 +456,7 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Gets the password being used for the keystore containing Transaction Analyzer's SSL certificate.
+   * Gets the password being used for the keystore containing server connection SSL certificate. May be used by JESL.
    *
    * @return password for SSL certificate keystore
    */
@@ -461,7 +466,7 @@ public abstract class ActivityFeeder implements Runnable
   }
 
   /**
-   * Sets the password to use for the keystore containing Transaction Analyzer's SSL certificate.
+   * Sets the password to use for the keystore containing server connection SSL certificate. May be used by JESL.
    *
    * @param taKeystorePwd password for SSL certificate keystore
    */
@@ -524,7 +529,13 @@ public abstract class ActivityFeeder implements Runnable
   {
     if (tracker != null)
     {
-      try {tracker.close ();} catch (IOException e) {}
+      try
+      {
+        tracker.close ();
+      }
+      catch (IOException e)
+      {
+      }
       tracker = null;
     }
   }
@@ -535,9 +546,11 @@ public abstract class ActivityFeeder implements Runnable
   @Override
   public void run ()
   {
-    logger.info ("Starting ...");
+    logger.log (OpLevel.INFO, "Starting ...");
     if (ownerThread == null)
-    { throw new IllegalStateException ("Owner thread has not been set"); }
+    {
+      throw new IllegalStateException ("Owner thread has not been set");
+    }
     try
     {
       initialize ();
@@ -553,11 +566,13 @@ public abstract class ActivityFeeder implements Runnable
             }
             catch (IOException ioe)
             {
-              logger.error ("Failed to connect to " + tracker, ioe);
+              logger.log (OpLevel.ERROR, "Failed to connect to {0}", tracker, ioe);
               tracker.close ();
-              logger.info ("Will retry in " + conn_retry_interval / 1000 + " seconds");
+              logger.log (OpLevel.INFO, "Will retry in {0} seconds", CONN_RETRY_INTERVAL / 1000L);
               if (!isHalted ())
-              { StreamsThread.sleep (conn_retry_interval); }
+              {
+                StreamsThread.sleep (CONN_RETRY_INTERVAL);
+              }
             }
           }
           ActivityInfo ai = getNextActivity ();
@@ -565,36 +580,38 @@ public abstract class ActivityFeeder implements Runnable
           {
             if (isHalted ())
             {
-              logger.info ("Data stream ended ...");
+              logger.log (OpLevel.INFO, "Data stream ended ...");
             }
             else
             {
-              logger.info ("No Parser accepted Message !..");
+              logger.log (OpLevel.INFO, "No Parser accepted Message !..");
             }
             halt ();
           }
           else
-          { ai.recordActivity (tracker); }
+          {
+            ai.recordActivity (tracker);
+          }
         }
         catch (IllegalStateException ise)
         {
-          logger.error ("Failed to record activity at position " + getActivityPosition () + ": " + ise.getMessage (), ise);
+          logger.log (OpLevel.ERROR, "Failed to record activity at position {0}: {1}", getActivityPosition (), ise.getMessage (), ise);
           halt ();
         }
         catch (Exception e)
         {
-          logger.error ("Failed to record activity at position " + getActivityPosition () + ": " + e.getMessage (), e);
+          logger.log (OpLevel.ERROR, "Failed to record activity at position {0}: {1}", getActivityPosition (), e.getMessage (), e);
         }
       }
     }
     catch (Throwable t)
     {
-      logger.error ("Failed to record activity: " + t.getMessage (), t);
+      logger.log (OpLevel.ERROR, "Failed to record activity: {0}", t.getMessage (), t);
     }
     finally
     {
       cleanup ();
-      logger.info ("Thread " + Thread.currentThread ().getName () + " ended");
+      logger.log (OpLevel.INFO, "Thread {0} ended", Thread.currentThread ().getName ());
     }
   }
 
@@ -603,7 +620,7 @@ public abstract class ActivityFeeder implements Runnable
    *
    * @return debug logger
    */
-  public Logger getDbgLogger ()
+  public EventSink getDbgLogger ()
   {
     return logger;
   }

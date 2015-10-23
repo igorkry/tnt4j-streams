@@ -1,10 +1,27 @@
-/**
+/*
+ * Copyright (c) 2015 jKool, LLC. All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * jKool, LLC. ("Confidential Information").  You shall not disclose
+ * such Confidential Information and shall use it only in accordance with
+ * the terms of the license agreement you entered into with jKool, LLC.
+ *
+ * JKOOL MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
+ * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE, OR NON-INFRINGEMENT. JKOOL SHALL NOT BE LIABLE FOR ANY DAMAGES
+ * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
+ * THIS SOFTWARE OR ITS DERIVATIVES.
+ *
+ * CopyrightVersion 1.0
  *
  */
 
 package com.jkool.tnt4j.streams.utils;
 
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Base class for Streams threads.
@@ -14,28 +31,27 @@ import org.apache.log4j.Logger;
  */
 public class StreamsThread extends Thread
 {
-  private static final Logger prvLogger = Logger.getLogger (StreamsThread.class);
+  private static final EventSink PRV_LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamsThread.class);
 
-  protected Logger logger = null;
+  protected EventSink logger = null;
   protected boolean stopRunning = false;
 
   /**
    * Creates new Streams thread.
    *
-   * @see java.lang.Thread()
+   * @see java.lang.Thread#Thread() ()
    */
   public StreamsThread ()
   {
-    super ();
     setDefaultName ();
   }
 
   /**
    * Creates new Streams thread.
    *
-   * @param target object whose <code>run</code> method is called
+   * @param target object whose {@code run} method is called
    *
-   * @see java.lang.Thread(java.lang.Runnable)
+   * @see java.lang.Thread#Thread(Runnable)
    */
   public StreamsThread (Runnable target)
   {
@@ -46,9 +62,10 @@ public class StreamsThread extends Thread
   /**
    * Creates new Streams thread.
    *
-   * @param target object whose <code>run</code> method is called
+   * @param target object whose {@code run} method is called
+   * @param name   name of thread
    *
-   * @see java.lang.Thread(java.lang.Runnable, java.lang.String)
+   * @see java.lang.Thread#Thread(Runnable, String)
    */
   public StreamsThread (Runnable target, String name)
   {
@@ -61,7 +78,7 @@ public class StreamsThread extends Thread
    *
    * @param name name of thread
    *
-   * @see java.lang.Thread(java.lang.String)
+   * @see java.lang.Thread#Thread(String)
    */
   public StreamsThread (String name)
   {
@@ -73,9 +90,9 @@ public class StreamsThread extends Thread
    * Creates new Streams thread.
    *
    * @param threadGrp thread group to add new thread to
-   * @param target    object whose <code>run</code> method is called
+   * @param target    object whose {@code run} method is called
    *
-   * @see java.lang.Thread(java.lang.ThreadGroup, java.lang.Runnable)
+   * @see java.lang.Thread#Thread(ThreadGroup, Runnable)
    */
   public StreamsThread (ThreadGroup threadGrp, Runnable target)
   {
@@ -87,10 +104,10 @@ public class StreamsThread extends Thread
    * Creates new Streams thread.
    *
    * @param threadGrp thread group to add new thread to
-   * @param target    object whose <code>run</code> method is called
+   * @param target    object whose {@code run} method is called
    * @param name      name of thread
    *
-   * @see java.lang.Thread(java.lang.ThreadGroup, java.lang.Runnable, java.lang.String)
+   * @see java.lang.Thread#Thread(ThreadGroup, Runnable, String)
    */
   public StreamsThread (ThreadGroup threadGrp, Runnable target, String name)
   {
@@ -104,7 +121,7 @@ public class StreamsThread extends Thread
    * @param threadGrp thread group to add new thread to
    * @param name      name of thread
    *
-   * @see java.lang.Thread(java.lang.ThreadGroup, java.lang.String)
+   * @see java.lang.Thread#Thread(ThreadGroup, String)
    */
   public StreamsThread (ThreadGroup threadGrp, String name)
   {
@@ -125,7 +142,7 @@ public class StreamsThread extends Thread
   /**
    * Indicates whether the thread was signaled to stop running.
    *
-   * @return <code>true</code> if thread signaled to stop, <code>false</code> if not
+   * @return {@code true} if thread signaled to stop, {@code false} if not
    */
   public boolean isStopRunning ()
   {
@@ -137,9 +154,9 @@ public class StreamsThread extends Thread
    */
   public void halt ()
   {
-    if (logger != null && logger.isDebugEnabled ())
+    if (logger != null)
     {
-      logger.debug ("Signaled to terminate");
+      logger.log (OpLevel.DEBUG, "Signaled to terminate");
     }
     stopRunning = true;
     interrupt ();
@@ -147,9 +164,9 @@ public class StreamsThread extends Thread
 
   /**
    * Causes the currently executing thread to sleep (temporarily cease execution)
-   * for the specified number of milliseconds.  This method differs from
+   * for the specified number of milliseconds. This method differs from
    * {@link java.lang.Thread#sleep(long)} (which it uses) in that it does not
-   * throw any exceptions.  If the sleep is interrupted, then this method will
+   * throw any exceptions. If the sleep is interrupted, then this method will
    * just return.
    *
    * @param millis the length of time to sleep in milliseconds
@@ -165,10 +182,7 @@ public class StreamsThread extends Thread
     }
     catch (InterruptedException e)
     {
-      if (prvLogger.isDebugEnabled ())
-      {
-        prvLogger.debug ("Sleep interrupted after " + (System.currentTimeMillis () - startTime) + " msec (initial=" + millis + ")");
-      }
+      PRV_LOGGER.log (OpLevel.DEBUG, "Sleep interrupted after {0} msec. (initial={1})", (System.currentTimeMillis () - startTime), millis);
     }
   }
 
@@ -186,16 +200,16 @@ public class StreamsThread extends Thread
    */
   public void sleepFully (long millis)
   {
-    long startTime = 0;
+    long startTime = 0L;
     long remainMillis = millis;
     int interruptCount = 0;
-    while (remainMillis > 0)
+    while (remainMillis > 0L)
     {
       try
       {
         startTime = System.currentTimeMillis ();
         Thread.sleep (remainMillis);
-        remainMillis = 0;    // not interrupted, stop sleeping
+        remainMillis = 0L;    // not interrupted, stop sleeping
       }
       catch (InterruptedException e)
       {
@@ -208,12 +222,12 @@ public class StreamsThread extends Thread
         long sleepMillis = System.currentTimeMillis () - startTime;
         remainMillis -= sleepMillis;
         interruptCount++;
-        if (logger.isDebugEnabled ())
+        if (logger != null)
         {
-          logger.debug ("Sleep interrupted (count=" + interruptCount + "), after " + sleepMillis + " msec (initial=" + millis + ")");
-          if (remainMillis > 0)
+          logger.log (OpLevel.DEBUG, "Sleep interrupted (count={0}), after {1} msec. (initial={2})", interruptCount, sleepMillis, millis);
+          if (remainMillis > 0L)
           {
-            logger.debug ("   Going back to sleep for " + remainMillis + " msec");
+            logger.log (OpLevel.DEBUG, "   Going back to sleep for {0} msec.", remainMillis);
           }
         }
       }
@@ -236,11 +250,10 @@ public class StreamsThread extends Thread
     {
       join (millis);
     }
-    catch (InterruptedException e) {}
-    if (prvLogger.isDebugEnabled ())
+    catch (InterruptedException e)
     {
-      prvLogger.debug ("Completed waiting for thread to die in " + (System.currentTimeMillis () - startTime) + " msec");
     }
+    PRV_LOGGER.log (OpLevel.DEBUG, "Completed waiting for thread to die in {0} msec.", (System.currentTimeMillis () - startTime));
   }
 
   /**
@@ -248,16 +261,17 @@ public class StreamsThread extends Thread
    *
    * @return debug logger
    */
-  public Logger getDbgLogger ()
+  public EventSink getDbgLogger ()
   {
     return logger;
   }
 
   /**
    * Sets debug logger for thread.
-   * param logger debug logger
+   *
+   * @param logger debug logger
    */
-  public void setDbgLogger (Logger logger)
+  public void setDbgLogger (EventSink logger)
   {
     this.logger = logger;
   }

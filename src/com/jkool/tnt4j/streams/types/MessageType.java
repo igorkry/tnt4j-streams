@@ -56,21 +56,33 @@ public enum MessageType
   public static MessageType valueOf (int value)
   {
     if (value == UNKNOWN.value ())
-    { return UNKNOWN; }
+    {
+      return UNKNOWN;
+    }
     if (value == REQUEST.value ())
-    { return REQUEST; }
+    {
+      return REQUEST;
+    }
     if (value == REPLY.value ())
-    { return REPLY; }
+    {
+      return REPLY;
+    }
     if (value == REPORT.value ())
-    { return REPORT; }
+    {
+      return REPORT;
+    }
     if (value == DATAGRAM.value ())
-    { return DATAGRAM; }
+    {
+      return DATAGRAM;
+    }
     if (value == ACKNOWLEDGEMENT.value ())
-    { return ACKNOWLEDGEMENT; }
+    {
+      return ACKNOWLEDGEMENT;
+    }
     throw new IllegalArgumentException ("value '" + value + "' is not valid for enumeration MessageType");
   }
 
-  private int enumValue;
+  private final int enumValue;
 
   /**
    * Converts the specified object to a member of the enumeration.
@@ -79,18 +91,23 @@ public enum MessageType
    *
    * @return enumeration member
    *
-   * @throws NullPointerException     if value is <code>null</code>
-   * @throws IllegalArgumentException if object cannot be matched to a
+   * @throws IllegalArgumentException if value is {@code null} or object cannot be matched to a
    *                                  member of the enumeration
    */
   public static MessageType valueOf (Object value)
   {
     if (value == null)
-    { throw new NullPointerException ("object must be non-null"); }
+    {
+      throw new IllegalArgumentException ("object must be non-null");
+    }
     if (value instanceof Number)
-    { return valueOf (((Number) value).intValue ()); }
-    else if (value instanceof String)
-    { return valueOf (value.toString ()); }
+    {
+      return valueOf (((Number) value).intValue ());
+    }
+    if (value instanceof String)
+    {
+      return valueOf (value.toString ());
+    }
     throw new IllegalArgumentException ("Cannot convert object of type '" + value.getClass ().getName () + "' enum MessageType");
   }
 }

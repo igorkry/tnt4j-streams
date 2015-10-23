@@ -17,11 +17,10 @@
  *
  */
 /**
- * Provides the API (classes and interfaces) defining data entities (fields)
- * which can be parsed from data stream by the jKool LLC TNT4J-Streams.
+ * Contains the data types enumerations used by the jKool LLC TNT4J-Streams API.
  *
  * @author akausinis
  * @version 1.0
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.types;

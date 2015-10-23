@@ -16,3 +16,4 @@ hs_err_pid*
 /orders.log
 /config/tw-direct-feed-probe.xml
 /tnt4j-streams.iml
+/config/log4j__.xml__

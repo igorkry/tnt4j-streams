@@ -156,7 +156,7 @@ public enum ActivityFieldType
    */
   Location (false);
 
-  private boolean enumValue;
+  private final boolean enumValue;
 
   /**
    * Initializes properties of each enumeration member.

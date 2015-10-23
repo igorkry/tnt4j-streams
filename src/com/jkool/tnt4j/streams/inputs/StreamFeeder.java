@@ -23,11 +23,13 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>Implements a stream activity feeder, where activity data is read
@@ -41,14 +43,13 @@ import org.apache.log4j.Logger;
  * <li>FileName</li>
  * <li>Port</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 4 $
  * @see ActivityParser#isDataClassSupported(Object)
  */
 public class StreamFeeder extends ActivityFeeder
 {
-  private static Logger logger = Logger.getLogger (StreamFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamFeeder.class);
 
   private String fileName = null;
   private Integer socketPort = null;
@@ -77,7 +78,7 @@ public class StreamFeeder extends ActivityFeeder
    */
   public StreamFeeder ()
   {
-    super (logger);
+    super (LOGGER);
   }
 
   /**
@@ -88,8 +89,8 @@ public class StreamFeeder extends ActivityFeeder
    */
   public StreamFeeder (InputStream stream)
   {
-    super (logger);
-    setStream (stream);
+    super (LOGGER);
+    this.rawStream = stream;
   }
 
   /**
@@ -100,8 +101,8 @@ public class StreamFeeder extends ActivityFeeder
    */
   public StreamFeeder (Reader reader)
   {
-    super (logger);
-    setReader (reader);
+    super (LOGGER);
+    this.rawReader = reader;
   }
 
   /**
@@ -131,9 +132,13 @@ public class StreamFeeder extends ActivityFeeder
   public Object getProperty (String name)
   {
     if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
-    { return fileName; }
+    {
+      return fileName;
+    }
     if (StreamsConfig.PROP_PORT.equalsIgnoreCase (name))
-    { return socketPort; }
+    {
+      return socketPort;
+    }
     return super.getProperty (name);
   }
 
@@ -141,25 +146,30 @@ public class StreamFeeder extends ActivityFeeder
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props) throws IllegalStateException
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
       if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
       {
         if (socketPort != null)
-        { throw new IllegalStateException ("Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT); }
+        {
+          throw new IllegalStateException ("Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT);
+        }
         fileName = value;
       }
       else if (StreamsConfig.PROP_PORT.equalsIgnoreCase (name))
       {
         if (fileName != null)
-        { throw new IllegalStateException ("Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT); }
+        {
+          throw new IllegalStateException ("Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT);
+        }
         socketPort = Integer.valueOf (value);
       }
     }
@@ -180,7 +190,7 @@ public class StreamFeeder extends ActivityFeeder
       }
       else if (socketPort != null)
       {
-        svrSocket = new ServerSocket (socketPort.intValue ());
+        svrSocket = new ServerSocket (socketPort);
       }
       else
       {
@@ -200,23 +210,26 @@ public class StreamFeeder extends ActivityFeeder
     {
       if (svrSocket != null)
       {
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Waiting for socket connection on port: " + socketPort); }
+        LOGGER.log (OpLevel.DEBUG, "Waiting for socket connection on port: {0}", socketPort);
         socket = svrSocket.accept ();
         rawStream = socket.getInputStream ();
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Accepted connection, reading data from socket: " + socket); }
+        LOGGER.log (OpLevel.DEBUG, "Accepted connection, reading data from socket: {0}", socket);
         // only accept one connection, close down server socket
-        try {svrSocket.close ();}catch (Exception e) {}
+        try
+        {
+          svrSocket.close ();
+        }
+        catch (Exception e)
+        {
+        }
         svrSocket = null;
       }
     }
     if (rawStream == null && rawReader == null)
-    { throw new IOException ("raw stream or reader is not set"); }
-    if (rawReader != null)
-    { dataReader = new FeedReader (rawReader); }
-    else
-    { dataReader = new FeedReader (rawStream); }
+    {
+      throw new IOException ("raw stream or reader is not set");
+    }
+    dataReader = rawReader != null ? new FeedReader (rawReader) : new FeedReader (rawStream);
   }
 
   /**
@@ -231,11 +244,14 @@ public class StreamFeeder extends ActivityFeeder
   public Object getNextItem () throws Throwable
   {
     if (dataReader == null)
-    { startDataStream (); }
+    {
+      startDataStream ();
+    }
     if (dataReader.isClosed () || dataReader.hasError ())
-    { return null; }
-    if (logger.isTraceEnabled ())
-    { logger.trace ("stream is still open"); }
+    {
+      return null;
+    }
+    LOGGER.log (OpLevel.TRACE, "Stream is still open");
     return dataReader;
   }
 
@@ -247,21 +263,45 @@ public class StreamFeeder extends ActivityFeeder
   {
     if (socket != null)
     {
-      try {socket.close ();}catch (Exception e) {}
+      try
+      {
+        socket.close ();
+      }
+      catch (Exception e)
+      {
+      }
       socket = null;
     }
     if (svrSocket != null)
     {
-      try {svrSocket.close ();}catch (Exception e) {}
+      try
+      {
+        svrSocket.close ();
+      }
+      catch (Exception e)
+      {
+      }
       svrSocket = null;
     }
     if (fileName != null)
     {
-      try {rawStream.close ();}catch (Exception e) {}
+      try
+      {
+        rawStream.close ();
+      }
+      catch (Exception e)
+      {
+      }
     }
     if (dataReader != null)
     {
-      try {dataReader.close ();}catch (Exception e) {}
+      try
+      {
+        dataReader.close ();
+      }
+      catch (Exception e)
+      {
+      }
     }
     rawStream = null;
     rawReader = null;
@@ -278,7 +318,7 @@ public class StreamFeeder extends ActivityFeeder
    * @see BufferedReader
    * @see InputStreamReader
    */
-  protected class FeedReader extends BufferedReader
+  private static class FeedReader extends BufferedReader
   {
     private boolean closed = false;
     private boolean error = false;
@@ -345,10 +385,13 @@ public class StreamFeeder extends ActivityFeeder
       {
         return super.readLine ();
       }
+      catch (EOFException exc)
+      {
+        throw exc;
+      }
       catch (IOException ioe)
       {
-        if (!(ioe instanceof EOFException))
-        { error = true; }
+        error = true;
         throw ioe;
       }
     }

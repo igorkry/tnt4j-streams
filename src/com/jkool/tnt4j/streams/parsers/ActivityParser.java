@@ -21,16 +21,18 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.io.*;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.List;
+import java.util.Map;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Base class that all activity parsers must extend.  It provides some base functionality
@@ -40,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class ActivityParser
 {
-  private static Logger logger = Logger.getLogger (ActivityParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityParser.class);
 
   /**
    * Initializes ActivityParser.
@@ -53,8 +55,7 @@ public abstract class ActivityParser
    * Defines the mapping of activity fields to the location(s) in the raw data
    * from which to extract their values.
    */
-  protected HashMap<ActivityField, ArrayList<ActivityFieldLocator>> fieldMap =
-      new HashMap<ActivityField, ArrayList<ActivityFieldLocator>> ();
+  protected final Map<ActivityField, List<ActivityFieldLocator>> fieldMap = new HashMap<ActivityField, List<ActivityFieldLocator>> ();
 
   /**
    * Set properties for the parser.
@@ -69,9 +70,7 @@ public abstract class ActivityParser
    *
    * @throws Throwable indicates error with properties
    */
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
-  {
-  }
+  public abstract void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable;
 
   /**
    * Add an activity field definition to the set of fields supported by this parser.
@@ -80,8 +79,7 @@ public abstract class ActivityParser
    */
   public void addField (ActivityField field)
   {
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Adding field " + field.toDebugString ()); }
+    LOGGER.log (OpLevel.DEBUG, "Adding field {0}", field.toDebugString ());
     fieldMap.put (field, field.getLocators ());
   }
 
@@ -125,12 +123,15 @@ public abstract class ActivityParser
    */
   protected String getNextString (Object data)
   {
-    String str = null;
-    BufferedReader rdr = null;
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     if (data instanceof String)
-    { return (String) data; }
+    {
+      return (String) data;
+    }
+    BufferedReader rdr;
     if (data instanceof BufferedReader)
     {
       rdr = (BufferedReader) data;
@@ -147,18 +148,18 @@ public abstract class ActivityParser
     {
       throw new UnsupportedOperationException ("data in the format of a " + data.getClass ().getName () + " is not supported");
     }
+    String str = null;
     try
     {
       str = rdr.readLine ();
     }
     catch (EOFException eof)
     {
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Reached end of data stream", eof); }
+      LOGGER.log (OpLevel.DEBUG, "Reached end of data stream", eof);
     }
     catch (IOException ioe)
     {
-      logger.warn ("Error reading from data stream", ioe);
+      LOGGER.log (OpLevel.WARNING, "Error reading from data stream", ioe);
     }
     return str;
   }

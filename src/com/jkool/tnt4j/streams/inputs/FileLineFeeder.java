@@ -24,11 +24,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import org.apache.log4j.Logger;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>Implements a file activity feeder, where each line of the file is
@@ -38,26 +40,25 @@ import org.apache.log4j.Logger;
  * <ul>
  * <li>FileName</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 3 $
  * @see ActivityParser#isDataClassSupported(Object)
  */
 public class FileLineFeeder extends ActivityFeeder
 {
-  private static final Logger logger = Logger.getLogger (FileLineFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (FileLineFeeder.class);
 
-  private String fileName;
-  private File activityFile;
-  private LineNumberReader lineReader;
-  private int lineNumber;
+  private String fileName = null;
+  private File activityFile = null;
+  private LineNumberReader lineReader = null;
+  private int lineNumber = 0;
 
   /**
    * Constructs an FileLineFeeder.
    */
   public FileLineFeeder ()
   {
-    super (logger);
+    super (LOGGER);
   }
 
   /**
@@ -67,7 +68,9 @@ public class FileLineFeeder extends ActivityFeeder
   public Object getProperty (String name)
   {
     if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
-    { return fileName; }
+    {
+      return fileName;
+    }
     return super.getProperty (name);
   }
 
@@ -75,17 +78,20 @@ public class FileLineFeeder extends ActivityFeeder
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props)
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
       if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase (name))
-      { fileName = value; }
+      {
+        fileName = value;
+      }
     }
   }
 
@@ -97,9 +103,10 @@ public class FileLineFeeder extends ActivityFeeder
   {
     super.initialize ();
     if (fileName == null)
-    { throw new IllegalStateException ("FileLineFeeder: File name not defined"); }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Opening file: " + fileName); }
+    {
+      throw new IllegalStateException ("FileLineFeeder: File name not defined");
+    }
+    LOGGER.log (OpLevel.DEBUG, "Opening file: {0}", fileName);
     activityFile = new File (fileName);
     lineReader = new LineNumberReader (new FileReader (activityFile));
   }
@@ -112,7 +119,9 @@ public class FileLineFeeder extends ActivityFeeder
   public Object getNextItem () throws Throwable
   {
     if (lineReader == null)
-    { throw new IllegalStateException ("FileLineFeeder: File is not opened for reading"); }
+    {
+      throw new IllegalStateException ("FileLineFeeder: File is not opened for reading");
+    }
     String line = lineReader.readLine ();
     lineNumber = lineReader.getLineNumber ();
     return line;
@@ -136,7 +145,13 @@ public class FileLineFeeder extends ActivityFeeder
   {
     if (lineReader != null)
     {
-      try {lineReader.close ();} catch (IOException e) {}
+      try
+      {
+        lineReader.close ();
+      }
+      catch (IOException e)
+      {
+      }
       lineReader = null;
       activityFile = null;
     }

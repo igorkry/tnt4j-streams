@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.jkool.tnt4j.streams.fields.ActivityFieldUnitsType;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -44,6 +46,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TimestampFormatter
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (TimestampFormatter.class);
+
   private String pattern = null;
   private String timeZone = null;
   private ActivityFieldUnitsType units = null;
@@ -72,7 +76,7 @@ public class TimestampFormatter
   public TimestampFormatter (String pattern, String timeZone, String locale)
   {
     setPattern (pattern, locale);
-    setTimeZone (timeZone);
+    this.timeZone = timeZone;
   }
 
   /**
@@ -97,11 +101,10 @@ public class TimestampFormatter
     this.pattern = pattern;
     this.units = null;
     this.locale = locale;
-    formatter = (
-        StringUtils.isEmpty (pattern) ? new SimpleDateFormat () : StringUtils.isEmpty (locale) ? new SimpleDateFormat (pattern)
-                                                                                               : new SimpleDateFormat (pattern,
-                                                                                                                       Locale.forLanguageTag (
-                                                                                                                           locale)));
+    formatter = StringUtils.isEmpty (pattern) ? new SimpleDateFormat () : StringUtils.isEmpty (locale) ? new SimpleDateFormat (pattern)
+                                                                                                       : new SimpleDateFormat (pattern,
+                                                                                                                               Locale.forLanguageTag (
+                                                                                                                                   locale));
   }
 
   /**
@@ -163,17 +166,27 @@ public class TimestampFormatter
   public Timestamp parse (Object value) throws ParseException
   {
     if (value instanceof Timestamp)
-    { return (Timestamp) value; }
+    {
+      return (Timestamp) value;
+    }
     if (value instanceof Date)
-    { return new Timestamp (((Date) value).getTime ()); }
+    {
+      return new Timestamp (((Date) value).getTime ());
+    }
     if (value instanceof Calendar)
-    { return new Timestamp (((Calendar) value).getTimeInMillis ()); }
+    {
+      return new Timestamp (((Calendar) value).getTimeInMillis ());
+    }
     if (value instanceof String || value instanceof Number)
     {
       if (units != null)
-      { return parse (units, value); }
+      {
+        return parse (units, value);
+      }
       else if (pattern != null)
-      { return parse (pattern, value, timeZone, locale); }
+      {
+        return parse (pattern, value, timeZone, locale);
+      }
     }
     throw new ParseException ("Unsupported date/time pattern: " +
                               ", dataType=" + (value == null ? "null" : value.getClass ().getName ()) +
@@ -207,7 +220,7 @@ public class TimestampFormatter
    */
   public static Timestamp parse (ActivityFieldUnitsType units, Object value) throws ParseException
   {
-    Timestamp ts = null;
+    Timestamp ts;
     try
     {
       long time;
@@ -221,23 +234,19 @@ public class TimestampFormatter
         time = ((Calendar) value).getTimeInMillis ();
         units = ActivityFieldUnitsType.Milliseconds;
       }
-      else if (value instanceof Number)
-      {
-        time = ((Number) value).longValue ();
-      }
       else
       {
-        time = Long.parseLong (value.toString ());
+        time = value instanceof Number ? ((Number) value).longValue () : Long.parseLong (value.toString ());
       }
       switch (units)
       {
         case Microseconds:
-          long msecs = time / 1000;
-          int usecs = (int) (time - msecs * 1000);
-          ts = new Timestamp (msecs, usecs);
+          long mSecs = time / 1000L;
+          long uSecs = time - mSecs * 1000L;
+          ts = new Timestamp (mSecs, uSecs);
           break;
         case Seconds:
-          ts = new Timestamp (time * 1000);
+          ts = new Timestamp (time * 1000L);
           break;
         default:
           ts = new Timestamp (time);

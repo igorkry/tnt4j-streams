@@ -22,19 +22,17 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * <p>Implements an activity data parser that assumes each activity data item is a string of fields
@@ -44,13 +42,12 @@ import org.apache.log4j.Logger;
  * <ul>
  * <li>Pattern</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 5 $
  */
 public class ActivityRegExParser extends ActivityParser
 {
-  private static final Logger logger = Logger.getLogger (ActivityRegExParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityRegExParser.class);
 
   /**
    * Contains the regular expression pattern that each data item is assumed to match
@@ -62,15 +59,13 @@ public class ActivityRegExParser extends ActivityParser
    * Defines the mapping of activity fields to the regular expression group location(s)
    * in the raw data from which to extract its value.
    */
-  protected HashMap<ActivityField, ArrayList<ActivityFieldLocator>> groupMap =
-      new HashMap<ActivityField, ArrayList<ActivityFieldLocator>> ();
+  protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<ActivityField, List<ActivityFieldLocator>> ();
 
   /**
    * Defines the mapping of activity fields to the regular expression match sequence(s)
    * in the raw data from which to extract its value.
    */
-  protected HashMap<ActivityField, ArrayList<ActivityFieldLocator>> matchMap =
-      new HashMap<ActivityField, ArrayList<ActivityFieldLocator>> ();
+  protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>> ();
 
   /**
    * Constructs an ActivityRegExParser.
@@ -83,12 +78,13 @@ public class ActivityRegExParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
@@ -97,14 +93,10 @@ public class ActivityRegExParser extends ActivityParser
         if (!StringUtils.isEmpty (value))
         {
           pattern = Pattern.compile (value);
-          if (logger.isDebugEnabled ())
-          { logger.debug ("Setting " + name + " to '" + value + "'"); }
+          LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
         }
       }
-      else if (logger.isTraceEnabled ())
-      {
-        logger.trace ("Ignoring property " + name);
-      }
+      LOGGER.log (OpLevel.TRACE, "Ignoring property {0}", name);
     }
   }
 
@@ -114,34 +106,49 @@ public class ActivityRegExParser extends ActivityParser
   @Override
   public void addField (ActivityField field)
   {
-    ArrayList<ActivityFieldLocator> locations = field.getLocators ();
+    List<ActivityFieldLocator> locations = field.getLocators ();
     if (locations == null)
-    { return; }
-    ArrayList<ActivityFieldLocator> matchLocs = new ArrayList<ActivityFieldLocator> ();
-    ArrayList<ActivityFieldLocator> groupLocs = new ArrayList<ActivityFieldLocator> ();
+    {
+      return;
+    }
+    List<ActivityFieldLocator> matchLocs = new ArrayList<ActivityFieldLocator> ();
+    List<ActivityFieldLocator> groupLocs = new ArrayList<ActivityFieldLocator> ();
     for (ActivityFieldLocator locator : locations)
     {
       ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
-      try {locType = ActivityFieldLocatorType.valueOf (locator.getType ());} catch (Exception e) {}
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Adding field " + field.toDebugString ()); }
+      try
+      {
+        locType = ActivityFieldLocatorType.valueOf (locator.getType ());
+      }
+      catch (Exception e)
+      {
+      }
+      LOGGER.log (OpLevel.DEBUG, "Adding field {0}", field.toDebugString ());
       if (locType == ActivityFieldLocatorType.REMatchNum)
       {
         if (groupMap.containsKey (field))
-        { throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'"); }
+        {
+          throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'");
+        }
         matchLocs.add (locator);
       }
       else
       {
         if (matchMap.containsKey (field))
-        { throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'"); }
+        {
+          throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'");
+        }
         groupLocs.add (locator);
       }
     }
-    if (matchLocs.size () > 0)
-    { matchMap.put (field, matchLocs); }
-    if (groupLocs.size () > 0)
-    { groupMap.put (field, groupLocs); }
+    if (!matchLocs.isEmpty ())
+    {
+      matchMap.put (field, matchLocs);
+    }
+    if (!groupLocs.isEmpty ())
+    {
+      groupMap.put (field, groupLocs);
+    }
   }
 
   /**
@@ -157,10 +164,9 @@ public class ActivityRegExParser extends ActivityParser
   @Override
   public boolean isDataClassSupported (Object data)
   {
-    return (
-        String.class.isInstance (data) ||
-        Reader.class.isInstance (data) ||
-        InputStream.class.isInstance (data));
+    return String.class.isInstance (data) ||
+           Reader.class.isInstance (data) ||
+           InputStream.class.isInstance (data);
   }
 
   /**
@@ -170,63 +176,64 @@ public class ActivityRegExParser extends ActivityParser
   public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
   {
     if (pattern == null || StringUtils.isEmpty (pattern.pattern ()))
-    { throw new IllegalStateException ("ActivityRegExParser: regular expression pattern not specified or empty"); }
+    {
+      throw new IllegalStateException ("ActivityRegExParser: regular expression pattern not specified or empty");
+    }
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     String dataStr = getNextString (data);
     if (StringUtils.isEmpty (dataStr))
-    { return null; }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Parsing: " + dataStr); }
-    Matcher m = pattern.matcher (dataStr);
-    if (m == null || !m.matches ())
     {
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Input does not match pattern"); }
+      return null;
+    }
+    LOGGER.log (OpLevel.DEBUG, "Parsing: {0}", dataStr);
+    Matcher matcher = pattern.matcher (dataStr);
+    if (matcher == null || !matcher.matches ())
+    {
+      LOGGER.log (OpLevel.DEBUG, "Input does not match pattern");
       return null;
     }
     ActivityInfo ai = new ActivityInfo ();
-    ActivityField field = null;
-    Object value = null;
     // save entire activity string as message data
-    field = new ActivityField (ActivityFieldType.ActivityData);
+    ActivityField field = new ActivityField (ActivityFieldType.ActivityData);
     applyFieldValue (ai, field, dataStr);
     // apply fields for parser
     try
     {
-      if (matchMap.size () > 0)
+      if (!matchMap.isEmpty ())
       {
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Applying RE Match mappings, count = " + matchMap.size ()); }
+        LOGGER.log (OpLevel.DEBUG, "Applying RE Match mappings, count = {0}", matchMap.size ());
         ArrayList<String> matches = new ArrayList<String> ();
         matches.add ("");    // dummy entry to index array with match locations
-        while (m.find ())
+        while (matcher.find ())
         {
-          String matchStr = m.group ().trim ();
+          String matchStr = matcher.group ().trim ();
           matches.add (matchStr);
-          if (logger.isTraceEnabled ())
-          { logger.trace ("match " + matches.size () + " = " + matchStr); }
+          LOGGER.log (OpLevel.TRACE, "match {0} = {1}", matches.size (), matchStr);
         }
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Found " + matches.size () + " matches"); }
-        for (Map.Entry<ActivityField, ArrayList<ActivityFieldLocator>> fieldMap : matchMap.entrySet ())
+        LOGGER.log (OpLevel.DEBUG, "Found {0} matches", matches.size ());
+        Object value;
+        for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet ())
         {
-          field = fieldMap.getKey ();
-          ArrayList<ActivityFieldLocator> locations = fieldMap.getValue ();
+          field = fieldMapEntry.getKey ();
+          List<ActivityFieldLocator> locations = fieldMapEntry.getValue ();
           value = null;
           if (locations != null)
           {
-            if (logger.isTraceEnabled ())
-            { logger.trace ("Setting field " + field + " from match locations"); }
+            LOGGER.log (OpLevel.TRACE, "Setting field {0} from match locations", field);
             if (locations.size () == 1)
             {
-              value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REMatchNum, m, matches);
+              value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REMatchNum, matcher, matches);
             }
             else
             {
               Object[] values = new Object[locations.size ()];
-              for (int l = 0; l < locations.size (); l++)
-              { values[l] = getLocatorValue (feeder, locations.get (l), ActivityFieldLocatorType.REMatchNum, m, matches); }
+              for (int li = 0; li < locations.size (); li++)
+              {
+                values[li] = getLocatorValue (feeder, locations.get (li), ActivityFieldLocatorType.REMatchNum, matcher, matches);
+              }
               value = values;
             }
           }
@@ -242,24 +249,26 @@ public class ActivityRegExParser extends ActivityParser
     }
     try
     {
-      for (Map.Entry<ActivityField, ArrayList<ActivityFieldLocator>> fieldMap : groupMap.entrySet ())
+      Object value;
+      for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet ())
       {
-        field = fieldMap.getKey ();
-        ArrayList<ActivityFieldLocator> locations = fieldMap.getValue ();
+        field = fieldMapEntry.getKey ();
+        List<ActivityFieldLocator> locations = fieldMapEntry.getValue ();
         value = null;
         if (locations != null)
         {
-          if (logger.isTraceEnabled ())
-          { logger.trace ("Setting field " + field + " from group locations"); }
+          LOGGER.log (OpLevel.TRACE, "Setting field {0} from group locations", field);
           if (locations.size () == 1)
           {
-            value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REGroupNum, m, null);
+            value = getLocatorValue (feeder, locations.get (0), ActivityFieldLocatorType.REGroupNum, matcher, null);
           }
           else
           {
             Object[] values = new Object[locations.size ()];
-            for (int l = 0; l < locations.size (); l++)
-            { values[l] = getLocatorValue (feeder, locations.get (l), ActivityFieldLocatorType.REGroupNum, m, null); }
+            for (int li = 0; li < locations.size (); li++)
+            {
+              values[li] = getLocatorValue (feeder, locations.get (li), ActivityFieldLocatorType.REGroupNum, matcher, null);
+            }
             value = values;
           }
         }
@@ -275,8 +284,8 @@ public class ActivityRegExParser extends ActivityParser
     return ai;
   }
 
-  private Object getLocatorValue (
-      ActivityFeeder feeder, ActivityFieldLocator locator, ActivityFieldLocatorType locType, Matcher m, ArrayList<String> matches)
+  private static Object getLocatorValue (
+      ActivityFeeder feeder, ActivityFieldLocator locator, ActivityFieldLocatorType locType, Matcher matcher, List<String> matches)
       throws ParseException
   {
     Object val = null;
@@ -295,12 +304,16 @@ public class ActivityRegExParser extends ActivityParser
           if (locType == ActivityFieldLocatorType.REMatchNum)
           {
             if (loc <= matches.size ())
-            { val = matches.get (loc); }
+            {
+              val = matches.get (loc);
+            }
           }
           else
           {
-            if (loc <= m.groupCount ())
-            { val = m.group (loc); }
+            if (loc <= matcher.groupCount ())
+            {
+              val = matcher.group (loc);
+            }
           }
         }
       }

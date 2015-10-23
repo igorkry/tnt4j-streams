@@ -29,7 +29,7 @@ public enum ResourceManagerType
   UNKNOWN, APP_SERVER, DATABASE_SERVER, STANDALONE_SERVER, MESSAGING_SERVER,
   CICS_REGION;
 
-  private static ResourceManagerType[] enumList = ResourceManagerType.values ();
+  private static final ResourceManagerType[] ENUM_LIST = ResourceManagerType.values ();
 
   /**
    * Converts the specified value to a member of the enumeration.
@@ -43,9 +43,11 @@ public enum ResourceManagerType
    */
   public static ResourceManagerType valueOf (int value)
   {
-    if (value < 0 || value >= enumList.length)
-    { throw new IllegalArgumentException ("value '" + value + "' is not valid for enumeration ResourceManagerType"); }
-    return enumList[value];
+    if (value < 0 || value >= ENUM_LIST.length)
+    {
+      throw new IllegalArgumentException ("value '" + value + "' is not valid for enumeration ResourceManagerType");
+    }
+    return ENUM_LIST[value];
   }
 
   /**
@@ -55,18 +57,23 @@ public enum ResourceManagerType
    *
    * @return enumeration member
    *
-   * @throws NullPointerException     if value is <code>null</code>
-   * @throws IllegalArgumentException if object cannot be matched to a
+   * @throws IllegalArgumentException if value is {@code null} or object cannot be matched to a
    *                                  member of the enumeration
    */
   public static ResourceManagerType valueOf (Object value)
   {
     if (value == null)
-    { throw new NullPointerException ("object must be non-null"); }
+    {
+      throw new IllegalArgumentException ("object must be non-null");
+    }
     if (value instanceof Number)
-    { return valueOf (((Number) value).intValue ()); }
-    else if (value instanceof String)
-    { return valueOf (value.toString ()); }
+    {
+      return valueOf (((Number) value).intValue ());
+    }
+    if (value instanceof String)
+    {
+      return valueOf (value.toString ());
+    }
     throw new IllegalArgumentException ("Cannot convert object of type '" + value.getClass ().getName () + "' enum ResourceManagerType");
   }
 }

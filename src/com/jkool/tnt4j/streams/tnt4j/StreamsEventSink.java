@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015 jKool, LLC. All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * jKool, LLC. ("Confidential Information").  You shall not disclose
+ * such Confidential Information and shall use it only in accordance with
+ * the terms of the license agreement you entered into with jKool, LLC.
+ *
+ * JKOOL MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
+ * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE, OR NON-INFRINGEMENT. JKOOL SHALL NOT BE LIABLE FOR ANY DAMAGES
+ * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
+ * THIS SOFTWARE OR ITS DERIVATIVES.
+ *
+ * CopyrightVersion 1.0
+ *
+ */
+
 package com.jkool.tnt4j.streams.tnt4j;
 
 import java.io.IOException;
@@ -8,21 +27,15 @@ import com.nastel.jkool.tnt4j.core.KeyValueStats;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.core.Snapshot;
 import com.nastel.jkool.tnt4j.format.EventFormatter;
-import com.nastel.jkool.tnt4j.sink.AbstractEventSink;
-import com.nastel.jkool.tnt4j.sink.EventSink;
-import com.nastel.jkool.tnt4j.sink.FileSink;
-import com.nastel.jkool.tnt4j.sink.Sink;
+import com.nastel.jkool.tnt4j.sink.*;
 import com.nastel.jkool.tnt4j.source.Source;
 import com.nastel.jkool.tnt4j.tracker.TrackingActivity;
 import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 
-/**
- * @author akausinis
- * @version 1.0
- * @created 2015-10-08 11:11
- */
 public class StreamsEventSink extends AbstractEventSink
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamsEventSink.class);
+
   private Sink outSink;
 
   public StreamsEventSink (String name, String url, String gwAccessToken, EventFormatter formatter)
@@ -81,6 +94,7 @@ public class StreamsEventSink extends AbstractEventSink
   protected void _log (
       long ttl, Source src, OpLevel sev, String msg, Object... args) throws Exception
   {
+    writeFormattedMsg (getEventFormatter ().format (ttl, src, sev, msg, args));
   }
 
   /**
@@ -116,7 +130,7 @@ public class StreamsEventSink extends AbstractEventSink
   @Override
   public boolean isOpen ()
   {
-    return (outSink != null && outSink.isOpen ());
+    return outSink != null && outSink.isOpen ();
   }
 
   /**
@@ -158,7 +172,7 @@ public class StreamsEventSink extends AbstractEventSink
   {
     if (outSink instanceof EventSink)
     {
-      ((EventSink) outSink).getStats (stats);
+      ((KeyValueStats) outSink).getStats (stats);
     }
     return super.getStats (stats);
   }
@@ -172,7 +186,7 @@ public class StreamsEventSink extends AbstractEventSink
     super.resetStats ();
     if (outSink instanceof EventSink)
     {
-      ((EventSink) outSink).resetStats ();
+      ((KeyValueStats) outSink).resetStats ();
     }
   }
 }

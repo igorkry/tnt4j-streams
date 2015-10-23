@@ -22,21 +22,22 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
-import org.apache.log4j.Logger;
 
 /**
  * <p>Implements an activity data parser that assumes each activity data item
@@ -51,13 +52,12 @@ import org.apache.log4j.Logger;
  * <li>Pattern</li>
  * <li>StripQuotes</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 5 $
  */
 public class ActivityNameValueParser extends ActivityParser
 {
-  private static final Logger logger = Logger.getLogger (ActivityNameValueParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityNameValueParser.class);
 
   /**
    * Contains the field separator (set by {@code FieldDelim} property) - Default: ","
@@ -93,49 +93,40 @@ public class ActivityNameValueParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
       if (StreamsConfig.PROP_FLD_DELIM.equals (name))
       {
-        if (!StringUtils.isEmpty (value))
-        { fieldDelim = StrMatcher.charSetMatcher (value); }
-        else
-        { fieldDelim = null; }
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Setting " + name + " to '" + fieldDelim + "'"); }
+        fieldDelim = StringUtils.isEmpty (value) ? null : StrMatcher.charSetMatcher (value);
+        LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, fieldDelim);
       }
       else if (StreamsConfig.PROP_VAL_DELIM.equals (name))
       {
         valueDelim = value;
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Setting " + name + " to '" + value + "'"); }
+        LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
       }
       else if (StreamsConfig.PROP_PATTERN.equals (name))
       {
         if (!StringUtils.isEmpty (value))
         {
           pattern = Pattern.compile (value);
-          if (logger.isDebugEnabled ())
-          { logger.debug ("Setting " + name + " to '" + value + "'"); }
+          LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
         }
       }
       else if (StreamsConfig.PROP_STRIP_QUOTES.equals (name))
       {
         stripQuotes = Boolean.parseBoolean (value);
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Setting " + name + " to '" + value + "'"); }
+        LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
       }
-      else if (logger.isTraceEnabled ())
-      {
-        logger.trace ("Ignoring property " + name);
-      }
+      LOGGER.log (OpLevel.TRACE, "Ignoring property {0}", name);
     }
   }
 
@@ -152,10 +143,9 @@ public class ActivityNameValueParser extends ActivityParser
   @Override
   public boolean isDataClassSupported (Object data)
   {
-    return (
-        String.class.isInstance (data) ||
-        Reader.class.isInstance (data) ||
-        InputStream.class.isInstance (data));
+    return String.class.isInstance (data) ||
+           Reader.class.isInstance (data) ||
+           InputStream.class.isInstance (data);
   }
 
   /**
@@ -165,67 +155,69 @@ public class ActivityNameValueParser extends ActivityParser
   public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
   {
     if (fieldDelim == null)
-    { throw new IllegalStateException ("ActivityNameValueParser: field delimiter not specified"); }
+    {
+      throw new IllegalStateException ("ActivityNameValueParser: field delimiter not specified");
+    }
     if (valueDelim == null)
-    { throw new IllegalStateException ("ActivityNameValueParser: value delimiter not specified"); }
+    {
+      throw new IllegalStateException ("ActivityNameValueParser: value delimiter not specified");
+    }
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     String dataStr = getNextString (data);
     if (StringUtils.isEmpty (dataStr))
-    { return null; }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Parsing: " + dataStr); }
+    {
+      return null;
+    }
+    LOGGER.log (OpLevel.DEBUG, "Parsing: {0}", dataStr);
     if (pattern != null)
     {
-      Matcher m = pattern.matcher (dataStr);
-      if (m == null || !m.matches ())
+      Matcher matcher = pattern.matcher (dataStr);
+      if (matcher == null || !matcher.matches ())
       {
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Input does not match pattern"); }
+        LOGGER.log (OpLevel.DEBUG, "Input does not match pattern");
         return null;
       }
     }
-    StrTokenizer tk;
-    if (stripQuotes)
-    { tk = new StrTokenizer (dataStr, fieldDelim, StrMatcher.doubleQuoteMatcher ()); }
-    else
-    { tk = new StrTokenizer (dataStr, fieldDelim); }
+    StrTokenizer tk =
+        stripQuotes ? new StrTokenizer (dataStr, fieldDelim, StrMatcher.doubleQuoteMatcher ()) : new StrTokenizer (dataStr, fieldDelim);
     tk.setIgnoreEmptyTokens (false);
     String[] fields = tk.getTokenArray ();
     if (fields == null || fields.length == 0)
     {
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Did not find any fields in input string"); }
+      LOGGER.log (OpLevel.DEBUG, "Did not find any fields in input string");
       return null;
     }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Split input into " + fields.length + " fields"); }
-    HashMap<String, String> nameValues = new HashMap<String, String> (fields.length);
-    for (int f = 0; f < fields.length; f++)
+    LOGGER.log (OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+    Map<String, String> nameValues = new HashMap<String, String> (fields.length);
+    for (String field : fields)
     {
-      if (fields[f] != null)
+      if (field != null)
       {
-        String[] nv = fields[f].split (valueDelim);
+        String[] nv = field.split (valueDelim);
         if (nv != null)
-        { nameValues.put (nv[0], (nv.length > 1 ? nv[1].trim () : "")); }
-        if (logger.isTraceEnabled ())
-        { logger.trace ("Found Name/Value: " + fields[f]); }
+        {
+          nameValues.put (nv[0], nv.length > 1 ? nv[1].trim () : "");
+        }
+        LOGGER.log (OpLevel.TRACE, "Found Name/Value: {0}", field);
       }
     }
     ActivityInfo ai = new ActivityInfo ();
     ActivityField field = null;
-    Object value = null;
     try
     {
       // save entire activity string as message data
       field = new ActivityField (ActivityFieldType.ActivityData);
       applyFieldValue (ai, field, dataStr);
       // apply fields for parser
-      for (Map.Entry<ActivityField, ArrayList<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
+      Object value;
+      for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
       {
         value = null;
         field = fieldEntry.getKey ();
-        ArrayList<ActivityFieldLocator> locations = fieldEntry.getValue ();
+        List<ActivityFieldLocator> locations = fieldEntry.getValue ();
         if (locations != null)
         {
           if (locations.size () == 1)
@@ -235,8 +227,10 @@ public class ActivityNameValueParser extends ActivityParser
           else
           {
             Object[] values = new Object[locations.size ()];
-            for (int l = 0; l < locations.size (); l++)
-            { values[l] = getLocatorValue (feeder, locations.get (l), nameValues); }
+            for (int li = 0; li < locations.size (); li++)
+            {
+              values[li] = getLocatorValue (feeder, locations.get (li), nameValues);
+            }
             value = values;
           }
         }
@@ -252,7 +246,7 @@ public class ActivityNameValueParser extends ActivityParser
     return ai;
   }
 
-  private Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, HashMap<String, String> nameValues)
+  private static Object getLocatorValue (ActivityFeeder feeder, ActivityFieldLocator locator, Map<String, String> nameValues)
       throws ParseException
   {
     Object val = null;
@@ -261,10 +255,7 @@ public class ActivityNameValueParser extends ActivityParser
       String locStr = locator.getLocator ();
       if (!StringUtils.isEmpty (locStr))
       {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp)
-        { val = feeder.getProperty (locStr); }
-        else
-        { val = nameValues.get (locStr); }
+        val = locator.getBuiltInType () == ActivityFieldLocatorType.FeederProp ? feeder.getProperty (locStr) : nameValues.get (locStr);
       }
       val = locator.formatValue (val);
     }

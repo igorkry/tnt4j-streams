@@ -20,13 +20,15 @@
 package com.jkool.tnt4j.streams.configure;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -37,6 +39,7 @@ import org.xml.sax.SAXException;
  */
 public class StreamsConfig
 {
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamsConfig.class);
   /**
    * Constant for name of built-in {@value} property.
    */
@@ -135,10 +138,10 @@ public class StreamsConfig
 
   private static final String DFLT_CONFIG_FILE_PATH = "config" + File.separator + DFLT_CFG_FILE_NAME;
 
-  private SAXParserFactory parserFactory = SAXParserFactory.newInstance ();
+  private final SAXParserFactory parserFactory = SAXParserFactory.newInstance ();
 
-  private HashMap<String, ActivityParser> parsers = null;
-  private HashMap<String, ActivityFeeder> feeders = null;
+  private Map<String, ActivityParser> parsers = null;
+  private Map<String, ActivityFeeder> feeders = null;
 
   /**
    * Creates a new TNT4J-Streams Configuration loader, using the default
@@ -146,19 +149,28 @@ public class StreamsConfig
    * in the classpath.
    *
    * @throws SAXException                 if there was an error parsing the file
-   * @throws FileNotFoundException        if the file cannot be located
    * @throws ParserConfigurationException if there is an inconsistency in the configuration
    * @throws IOException                  if there is an error reading the file
    */
-  public StreamsConfig () throws SAXException, FileNotFoundException, ParserConfigurationException, IOException
+  public StreamsConfig () throws SAXException, ParserConfigurationException, IOException
   {
     InputStream config = null;
-    try {config = new FileInputStream (DFLT_CONFIG_FILE_PATH);} catch (FileNotFoundException e) {}
+    try
+    {
+      config = new FileInputStream (DFLT_CONFIG_FILE_PATH);
+    }
+    catch (FileNotFoundException e)
+    {
+    }
     // if could not locate file on file system, try classpath
     if (config == null)
-    { config = Thread.currentThread ().getContextClassLoader ().getResourceAsStream (DFLT_CONFIG_FILE_PATH); }
+    {
+      config = Thread.currentThread ().getContextClassLoader ().getResourceAsStream (DFLT_CONFIG_FILE_PATH);
+    }
     if (config == null)
-    { throw new FileNotFoundException ("Could not find configuration file '" + DFLT_CONFIG_FILE_PATH + "'"); }
+    {
+      throw new FileNotFoundException ("Could not find configuration file '" + DFLT_CONFIG_FILE_PATH + "'");
+    }
     load (new InputStreamReader (config));
   }
 
@@ -168,11 +180,10 @@ public class StreamsConfig
    * @param configFileName name of configuration file
    *
    * @throws SAXException                 if there was an error parsing the file
-   * @throws FileNotFoundException        if the file cannot be located
    * @throws ParserConfigurationException if there is an inconsistency in the configuration
    * @throws IOException                  if there is an error reading the file
    */
-  public StreamsConfig (String configFileName) throws SAXException, FileNotFoundException, ParserConfigurationException, IOException
+  public StreamsConfig (String configFileName) throws SAXException, ParserConfigurationException, IOException
   {
     load (new FileReader (configFileName));
   }
@@ -183,11 +194,10 @@ public class StreamsConfig
    * @param configFile configuration file
    *
    * @throws SAXException                 if there was an error parsing the file
-   * @throws FileNotFoundException        if the file cannot be located
    * @throws ParserConfigurationException if there is an inconsistency in the configuration
    * @throws IOException                  if there is an error reading the file
    */
-  public StreamsConfig (File configFile) throws SAXException, FileNotFoundException, ParserConfigurationException, IOException
+  public StreamsConfig (File configFile) throws SAXException, ParserConfigurationException, IOException
   {
     load (new FileReader (configFile));
   }
@@ -233,7 +243,7 @@ public class StreamsConfig
    */
   public ActivityFeeder getFeeder (String feederName)
   {
-    return (feeders == null ? null : feeders.get (feederName));
+    return feeders == null ? null : feeders.get (feederName);
   }
 
   /**
@@ -241,7 +251,7 @@ public class StreamsConfig
    *
    * @return set of feeders found
    */
-  public HashMap<String, ActivityFeeder> getFeeders ()
+  public Map<String, ActivityFeeder> getFeeders ()
   {
     return feeders;
   }
@@ -251,7 +261,7 @@ public class StreamsConfig
    *
    * @return set of parsers found
    */
-  public HashMap<String, ActivityParser> getParsers ()
+  public Map<String, ActivityParser> getParsers ()
   {
     return parsers;
   }
@@ -265,6 +275,6 @@ public class StreamsConfig
    */
   public ActivityParser getParser (String parserName)
   {
-    return (parsers == null ? null : parsers.get (parserName));
+    return parsers == null ? null : parsers.get (parserName);
   }
 }

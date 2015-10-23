@@ -21,13 +21,16 @@ package com.jkool.tnt4j.streams.fields;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.jkool.tnt4j.streams.utils.NumericFormatter;
 import com.jkool.tnt4j.streams.utils.Timestamp;
 import com.jkool.tnt4j.streams.utils.TimestampFormatter;
 import com.jkool.tnt4j.streams.utils.Utils;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining
@@ -38,27 +41,27 @@ import org.apache.log4j.Logger;
  */
 public class ActivityFieldLocator
 {
-  private static final Logger logger = Logger.getLogger (ActivityFieldLocator.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityFieldLocator.class);
 
-  private String type;
-  private String locator;
+  private String type = null;
+  private String locator = null;
   private ActivityFieldDataType dataType = ActivityFieldDataType.String;
   private int radix = 10;
-  private String units;
-  private String format;
-  private String locale;
-  private String timeZone;
-  private Object cfgValue;
+  private String units = null;
+  private String format = null;
+  private String locale = null;
+  private String timeZone = null;
+  private Object cfgValue = null;
   private String requiredVal = "";
 
-  private ActivityFieldLocatorType builtInType;
-  private ActivityFieldFormatType builtInFormat;
-  private ActivityFieldUnitsType builtInUnits;
-  private HashMap<Object, Object> map;
-  private Object mapCatchAll;
+  private ActivityFieldLocatorType builtInType = null;
+  private ActivityFieldFormatType builtInFormat = null;
+  private ActivityFieldUnitsType builtInUnits = null;
+  private Map<Object, Object> map = null;
+  private Object mapCatchAll = null;
 
-  private NumericFormatter numberParser;
-  private TimestampFormatter timeParser;
+  private NumericFormatter numberParser = null;
+  private TimestampFormatter timeParser = null;
 
   /**
    * Constructs a new activity field locator for either a built-in type or a custom type.
@@ -74,7 +77,13 @@ public class ActivityFieldLocator
   {
     this.type = type;
     this.locator = locator;
-    try {builtInType = ActivityFieldLocatorType.valueOf (this.type);} catch (Exception e) {}
+    try
+    {
+      builtInType = ActivityFieldLocatorType.valueOf (this.type);
+    }
+    catch (Exception e)
+    {
+    }
     if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.FeederProp)
     {
       int loc = Integer.valueOf (locator);
@@ -233,7 +242,13 @@ public class ActivityFieldLocator
   {
     this.units = units;
     builtInUnits = null;
-    try {builtInUnits = ActivityFieldUnitsType.valueOf (this.format);} catch (Exception e) {}
+    try
+    {
+      builtInUnits = ActivityFieldUnitsType.valueOf (this.format);
+    }
+    catch (Exception e)
+    {
+    }
   }
 
   /**
@@ -287,7 +302,13 @@ public class ActivityFieldLocator
     this.format = format;
     this.locale = locale;
     builtInFormat = null;
-    try {builtInFormat = ActivityFieldFormatType.valueOf (this.format);} catch (Exception e) {}
+    try
+    {
+      builtInFormat = ActivityFieldFormatType.valueOf (this.format);
+    }
+    catch (Exception e)
+    {
+    }
   }
 
   /**
@@ -311,7 +332,9 @@ public class ActivityFieldLocator
   }
 
   /**
-   * Gets the required option flag to indicator if locator is optional
+   * Gets the required option flag indicating whether locator is required or optional.
+   *
+   * @return flag indicating whether locator is required or optional
    */
   public String getRequired ()
   {
@@ -343,7 +366,9 @@ public class ActivityFieldLocator
     else
     {
       if (map == null)
-      { map = new HashMap<Object, Object> (); }
+      {
+        map = new HashMap<Object, Object> ();
+      }
       map.put (source, target);
     }
   }
@@ -358,7 +383,9 @@ public class ActivityFieldLocator
   protected Object getMappedValue (Object source)
   {
     if (map == null && mapCatchAll == null)
-    { return source; }
+    {
+      return source;
+    }
     Object target = null;
     if (source == null)
     {
@@ -366,18 +393,18 @@ public class ActivityFieldLocator
     }
     else
     {
-      String srcString = (source instanceof Number ? String.valueOf (((Number) source).longValue ()) : source.toString ());
+      String srcString = source instanceof Number ? String.valueOf (((Number) source).longValue ()) : source.toString ();
       if (map != null)
-      { target = map.get (srcString); }
+      {
+        target = map.get (srcString);
+      }
       if (target == null)
       {
-        if (logger.isTraceEnabled ())
-        { logger.trace ("Applying default mapping for locator type '" + type + "'"); }
-        target = (mapCatchAll != null ? mapCatchAll : source);
+        LOGGER.log (OpLevel.TRACE, "Applying default mapping for locator type '{0}'", type);
+        target = mapCatchAll != null ? mapCatchAll : source;
       }
     }
-    if (logger.isTraceEnabled ())
-    { logger.trace ("Mapped value '" + source + "' to '" + target + "' for locator type '" + type + "'"); }
+    LOGGER.log (OpLevel.TRACE, "Mapped value '{0}' to '{1}' for locator type '{2}'", source, target, type);
     return target;
   }
 
@@ -393,9 +420,13 @@ public class ActivityFieldLocator
   public Object formatValue (Object value) throws ParseException
   {
     if (cfgValue != null)
-    { return cfgValue; }
+    {
+      return cfgValue;
+    }
     if (value == null)
-    { return null; }
+    {
+      return null;
+    }
     switch (dataType)
     {
       case String:
@@ -404,11 +435,13 @@ public class ActivityFieldLocator
         return getMappedValue (formatNumericValue (value));
       case Binary:
         if (builtInFormat == ActivityFieldFormatType.base64Binary)
-        { value = Utils.base64Decode (value.toString ().getBytes ()); }
-        else if (builtInFormat == ActivityFieldFormatType.hexBinary)
-        { value = Utils.decodeHex (value.toString ()); }
+        {
+          value = Utils.base64Decode (value.toString ().getBytes ());
+        }
         else
-        { value = value.toString (); }
+        {
+          value = builtInFormat == ActivityFieldFormatType.hexBinary ? Utils.decodeHex (value.toString ()) : value.toString ();
+        }
         break;
       case DateTime:
       case Timestamp:
@@ -434,7 +467,9 @@ public class ActivityFieldLocator
   protected Number formatNumericValue (Object value) throws ParseException
   {
     if (numberParser == null)
-    { numberParser = new NumericFormatter (format); }
+    {
+      numberParser = new NumericFormatter (format);
+    }
     return numberParser.parse (value, 1.0);
   }
 
@@ -452,21 +487,28 @@ public class ActivityFieldLocator
   protected Timestamp formatDateValue (Object value) throws ParseException
   {
     if (value instanceof Timestamp)
-    { return (Timestamp) value; }
+    {
+      return (Timestamp) value;
+    }
     if (timeParser == null)
     {
-      ActivityFieldDataType dataType = this.dataType;
-      if (dataType == null)
-      { dataType = ActivityFieldDataType.DateTime; }
-      ActivityFieldUnitsType units = ActivityFieldUnitsType.Milliseconds;
+      ActivityFieldDataType fDataType = this.dataType == null ? ActivityFieldDataType.DateTime : this.dataType;
+      ActivityFieldUnitsType fUnits = ActivityFieldUnitsType.Milliseconds;
       if (this.units != null)
       {
-        try {units = ActivityFieldUnitsType.valueOf (this.units.toString ());} catch (Exception e) {}
+        try
+        {
+          fUnits = ActivityFieldUnitsType.valueOf (this.units);
+        }
+        catch (Exception e)
+        {
+        }
       }
-      if (dataType == ActivityFieldDataType.Timestamp || dataType == ActivityFieldDataType.Number)
-      { timeParser = new TimestampFormatter (units); }
-      else
-      { timeParser = new TimestampFormatter (format, timeZone, locale); }
+      timeParser =
+          fDataType == ActivityFieldDataType.Timestamp || fDataType == ActivityFieldDataType.Number ? new TimestampFormatter (fUnits)
+                                                                                                    : new TimestampFormatter (format,
+                                                                                                                              timeZone,
+                                                                                                                              locale);
     }
     return timeParser.parse (value);
   }
@@ -488,11 +530,7 @@ public class ActivityFieldLocator
    */
   public String toDebugString ()
   {
-    StringBuilder sb = new StringBuilder ();
-    sb.append ("{type='").append (type).append ("' ").append ("locator='").append (locator).append ("' ").append ("dataType='").append (
-        dataType).append ("' ").append ("format='").append (format).append ("' ").append ("locale='").append (locale).append ("' ").append (
-        "units='").append (units).append ("' ").append ("cfgValue='").append (cfgValue).append ("' ").append ("required='").append (
-        requiredVal).append ("'}");
-    return sb.toString ();
+    return "{type='" + type + "' " + "locator='" + locator + "' " + "dataType='" + dataType + "' " + "format='" + format + "' " + "locale='"
+           + locale + "' " + "units='" + units + "' " + "cfgValue='" + cfgValue + "' " + "required='" + requiredVal + "'}";
   }
 }

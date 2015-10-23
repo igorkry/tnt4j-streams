@@ -22,7 +22,6 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.*;
 import java.text.ParseException;
 import java.util.*;
-import java.util.Map.Entry;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -33,9 +32,11 @@ import javax.xml.xpath.*;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.ActivityFeeder;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -51,24 +52,23 @@ import org.w3c.dom.NodeList;
  * <p>This parser supports the following properties:
  * <ul>
  * <li>Namespace</li>
+ * </ul>
  *
  * @version $Revision: 7 $
  */
 public class ActivityXmlParser extends ActivityParser
 {
-  private static final Logger logger = Logger.getLogger (ActivityXmlParser.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityXmlParser.class);
 
   /**
    * Contains the field separator (set by {@code SignatureDelim} property) - Default: ","
    */
   protected NamespaceMap namespaces = null;
 
-  private DocumentBuilderFactory domFactory;
-  private XPathFactory xPathFactory;
-  private XPath xPath;
-  private DocumentBuilder builder;
-  private StringBuilder xmlBuffer;
-  protected Boolean requireAll = false;
+  private final XPath xPath;
+  private final DocumentBuilder builder;
+  private final StringBuilder xmlBuffer;
+  protected boolean requireAll = false;
 
   /**
    * Creates a new activity XML string parser.
@@ -77,10 +77,10 @@ public class ActivityXmlParser extends ActivityParser
    */
   public ActivityXmlParser () throws ParserConfigurationException
   {
-    domFactory = DocumentBuilderFactory.newInstance ();
+    DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance ();
     domFactory.setNamespaceAware (true);
     builder = domFactory.newDocumentBuilder ();
-    xPathFactory = XPathFactory.newInstance ();
+    XPathFactory xPathFactory = XPathFactory.newInstance ();
     xPath = xPathFactory.newXPath ();
     xmlBuffer = new StringBuilder (1024);
   }
@@ -89,12 +89,13 @@ public class ActivityXmlParser extends ActivityParser
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
@@ -109,26 +110,23 @@ public class ActivityXmlParser extends ActivityParser
           }
           String[] nsFields = value.split ("=");
           namespaces.addPrefixUriMapping (nsFields[0], nsFields[1]);
-          if (logger.isDebugEnabled ())
-          { logger.debug ("Adding " + name + " mapping " + value); }
+          LOGGER.log (OpLevel.DEBUG, "Adding {0} mapping {1}", name, value);
         }
       }
       else if (StreamsConfig.PROP_REQUIRE_ALL.equalsIgnoreCase (name))
       {
         if (!StringUtils.isEmpty (value))
         {
-          requireAll = Boolean.valueOf (value);
-          if (logger.isDebugEnabled ())
-          { logger.debug ("Setting " + name + " to '" + value + "'"); }
+          requireAll = Boolean.parseBoolean (value);
+          LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
         }
       }
-      else if (logger.isTraceEnabled ())
-      {
-        logger.trace ("Ignoring property " + name);
-      }
+      LOGGER.log (OpLevel.TRACE, "Ignoring property {0}", name);
     }
     if (namespaces != null)
-    { xPath.setNamespaceContext (namespaces); }
+    {
+      xPath.setNamespaceContext (namespaces);
+    }
   }
 
   /**
@@ -145,11 +143,10 @@ public class ActivityXmlParser extends ActivityParser
   @Override
   public boolean isDataClassSupported (Object data)
   {
-    return (
-        String.class.isInstance (data) ||
-        Reader.class.isInstance (data) ||
-        InputStream.class.isInstance (data) ||
-        Document.class.isInstance (data));
+    return String.class.isInstance (data) ||
+           Reader.class.isInstance (data) ||
+           InputStream.class.isInstance (data) ||
+           Document.class.isInstance (data);
   }
 
   /**
@@ -159,15 +156,15 @@ public class ActivityXmlParser extends ActivityParser
   public ActivityInfo parse (ActivityFeeder feeder, Object data) throws IllegalStateException, ParseException
   {
     if (data == null)
-    { return null; }
-    if (logger.isDebugEnabled ())
-    { logger.debug ("Parsing: " + data); }
+    {
+      return null;
+    }
+    LOGGER.log (OpLevel.DEBUG, "Parsing: {0}", data);
     ActivityInfo ai = new ActivityInfo ();
     ActivityField field = null;
-    Object value = null;
     try
     {
-      Document xmlDoc = null;
+      Document xmlDoc;
       if (data instanceof Document)
       {
         xmlDoc = (Document) data;
@@ -176,18 +173,21 @@ public class ActivityXmlParser extends ActivityParser
       {
         String xmlString = getNextXmlString (data);
         if (StringUtils.isEmpty (xmlString))
-        { return null; }
+        {
+          return null;
+        }
         xmlDoc = builder.parse (IOUtils.toInputStream (xmlString));
       }
       String[] savedFormats = null;
       String[] savedUnits = null;
       String[] savedLocales = null;
       // apply fields for parser
-      for (Map.Entry<ActivityField, ArrayList<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
+      Object value;
+      for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())
       {
         value = null;
         field = fieldEntry.getKey ();
-        ArrayList<ActivityFieldLocator> locations = fieldEntry.getValue ();
+        List<ActivityFieldLocator> locations = fieldEntry.getValue ();
         if (locations != null)
         {
           // need to save format and units specification from config in case individual entry in activity data overrides it
@@ -202,27 +202,25 @@ public class ActivityXmlParser extends ActivityParser
             savedFormats[0] = loc.getFormat ();
             savedUnits[0] = loc.getUnits ();
             value = getLocatorValue (feeder, loc, xmlDoc);
-            if (value == null && (requireAll && !loc.getRequired ().equalsIgnoreCase ("false")))
+            if (value == null && requireAll && !"false".equalsIgnoreCase (loc.getRequired ()))
             {
-              if (logger.isTraceEnabled ())
-              { logger.trace ("Required locator not found: " + field); }
-              return (null);
+              LOGGER.log (OpLevel.TRACE, "Required locator not found: {0}", field);
+              return null;
             }
           }
           else
           {
             Object[] values = new Object[locations.size ()];
-            for (int l = 0; l < locations.size (); l++)
+            for (int li = 0; li < locations.size (); li++)
             {
-              ActivityFieldLocator loc = locations.get (l);
-              savedFormats[l] = loc.getFormat ();
-              savedUnits[l] = loc.getUnits ();
-              values[l] = getLocatorValue (feeder, loc, xmlDoc);
-              if (values[l] == null && (requireAll && !loc.getRequired ().equalsIgnoreCase ("false")))
+              ActivityFieldLocator loc = locations.get (li);
+              savedFormats[li] = loc.getFormat ();
+              savedUnits[li] = loc.getUnits ();
+              values[li] = getLocatorValue (feeder, loc, xmlDoc);
+              if (values[li] == null && requireAll && !"false".equalsIgnoreCase (loc.getRequired ()))
               {
-                if (logger.isTraceEnabled ())
-                { logger.trace ("Required locator not found: " + field); }
-                return (null);
+                LOGGER.log (OpLevel.TRACE, "Required locator not found: {0}", field);
+                return null;
               }
             }
             value = values;
@@ -231,11 +229,11 @@ public class ActivityXmlParser extends ActivityParser
         applyFieldValue (ai, field, value);
         if (locations != null && savedFormats != null)
         {
-          for (int l = 0; l < locations.size (); l++)
+          for (int li = 0; li < locations.size (); li++)
           {
-            ActivityFieldLocator loc = locations.get (l);
-            loc.setFormat (savedFormats[l], null);
-            loc.setUnits (savedUnits[l]);
+            ActivityFieldLocator loc = locations.get (li);
+            loc.setFormat (savedFormats[li], null);
+            loc.setUnits (savedUnits[li]);
           }
         }
       }
@@ -271,7 +269,7 @@ public class ActivityXmlParser extends ActivityParser
           {
             // Get list of attributes and their values for current element
             NodeList attrs = (NodeList) xPath.evaluate (locStr + "/@*", xmlDoc, XPathConstants.NODESET);
-            int length = (attrs == null ? 0 : attrs.getLength ());
+            int length = attrs == null ? 0 : attrs.getLength ();
             if (length > 0)
             {
               String format = null;
@@ -325,12 +323,15 @@ public class ActivityXmlParser extends ActivityParser
    */
   protected String getNextXmlString (Object data)
   {
-    String xmlString = null;
-    BufferedReader rdr = null;
     if (data == null)
-    { return null; }
+    {
+      return null;
+    }
     if (data instanceof String)
-    { return (String) data; }
+    {
+      return (String) data;
+    }
+    BufferedReader rdr;
     if (data instanceof BufferedReader)
     {
       rdr = (BufferedReader) data;
@@ -347,9 +348,10 @@ public class ActivityXmlParser extends ActivityParser
     {
       throw new IllegalArgumentException ("data in the format of a " + data.getClass ().getName () + " is not supported");
     }
+    String xmlString = null;
     try
     {
-      for (String line; xmlString == null && ((line = rdr.readLine ()) != null); )
+      for (String line; xmlString == null && (line = rdr.readLine ()) != null; )
       {
         if (line.startsWith ("<?xml"))
         {
@@ -364,12 +366,11 @@ public class ActivityXmlParser extends ActivityParser
     }
     catch (EOFException eof)
     {
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Reached end of xml data stream", eof); }
+      LOGGER.log (OpLevel.DEBUG, "Reached end of xml data stream", eof);
     }
     catch (IOException ioe)
     {
-      logger.warn ("Error reading from xml data stream", ioe);
+      LOGGER.log (OpLevel.WARNING, "Error reading from xml data stream", ioe);
     }
     if (xmlString == null && xmlBuffer.length () > 0)
     {
@@ -379,9 +380,13 @@ public class ActivityXmlParser extends ActivityParser
     return xmlString;
   }
 
-  public class NamespaceMap implements NamespaceContext
+  private static class NamespaceMap implements NamespaceContext
   {
-    protected HashMap<String, String> map = new HashMap<String, String> ();
+    protected final Map<String, String> map = new HashMap<String, String> ();
+
+    private NamespaceMap ()
+    {
+    }
 
     public void addPrefixUriMapping (String prefix, String uri)
     {
@@ -396,7 +401,9 @@ public class ActivityXmlParser extends ActivityParser
     {
       String uri = map.get (prefix);
       if (uri == null)
-      { uri = XMLConstants.XML_NS_URI; }
+      {
+        uri = XMLConstants.XML_NS_URI;
+      }
       return uri;
     }
 
@@ -406,10 +413,12 @@ public class ActivityXmlParser extends ActivityParser
     @Override
     public String getPrefix (String namespaceURI)
     {
-      for (Entry<String, String> entry : map.entrySet ())
+      for (Map.Entry<String, String> entry : map.entrySet ())
       {
         if (entry.getValue ().equals (namespaceURI))
-        { return entry.getKey (); }
+        {
+          return entry.getKey ();
+        }
       }
       return XMLConstants.DEFAULT_NS_PREFIX;
     }
@@ -417,9 +426,8 @@ public class ActivityXmlParser extends ActivityParser
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings ("rawtypes")
     @Override
-    public Iterator getPrefixes (String namespaceURI)
+    public Iterator<String> getPrefixes (String namespaceURI)
     {
       return map.keySet ().iterator ();
     }

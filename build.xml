@@ -17,7 +17,7 @@
     <property name="config" value="config"/>
     <property name="samples" value="samples"/>
     <property name="scripts" value="bin"/>
-    <property name="classes" value="classes"/>
+    <property name="classes" value="${project-build}/classes"/>
     <property name="doc" value="${project-build}/doc"/>
     <property name="jar" value="${project-build}/tnt4j-streams.jar"/>
 
@@ -41,9 +41,9 @@
             </classpath>
         </javac>
 
-        <copy todir="${classes}">
+        <!--copy todir="${classes}">
             <fileset dir="${src}" includes="log4j.properties"/>
-        </copy>
+        </copy-->
     </target>
 
     <target name="clean" description="clean up">

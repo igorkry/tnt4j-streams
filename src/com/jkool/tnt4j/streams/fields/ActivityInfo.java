@@ -21,7 +21,8 @@ package com.jkool.tnt4j.streams.fields;
 
 import java.net.InetAddress;
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,10 +32,11 @@ import com.jkool.tnt4j.streams.types.ResourceType;
 import com.jkool.tnt4j.streams.types.TransportType;
 import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.*;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * This class represents an activity (e.g. event or snapshot) to record with jKool Cloud Service.
@@ -44,41 +46,41 @@ import org.apache.log4j.Logger;
 public class ActivityInfo
 {
   public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>";
-  private static final String SNAPSHOT_CATEGORY = "TNTJ4-Streams"; //TODO: category name
+  private static final String SNAPSHOT_CATEGORY = "TNT4J-Streams"; //TODO: category name
 
-  private static final Logger logger = Logger.getLogger (ActivityInfo.class);
-  private static ConcurrentHashMap<String, String> hostCache = new ConcurrentHashMap<String, String> ();
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityInfo.class);
+  private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String> ();
 
-  private long retryIntvl = 15000;
+  private static final long RETRY_INTVL = 15000L;
 
-  private String serverName;      //??
-  private String serverIp;                     //??
+  private String serverName = null;      //??
+  private String serverIp = null;                     //??
   private String osInfo = " ";    // so probe API does not fill in local information        //??
-  private String applName;      //??
-  private String userName;
+  private String applName = null;      //??
+  private String userName = null;
 
-  private String resourceMgr;
-  private ResourceManagerType resourceMgrType;   //??   op.resource
-  private String resource;            //??              op.resource
-  private ResourceType resourceType;    //??                       op.resource
+  private String resourceMgr = null;
+  private ResourceManagerType resourceMgrType = null;   //??   op.resource
+  private String resource = null;            //??              op.resource
+  private ResourceType resourceType = null;    //??                       op.resource
 
-  private String actionName;
-  private OpType actionType;
-  private Timestamp startTime;
-  private Timestamp endTime;
-  private long elapsedTime = -1;
-  private OpCompCode statusCode;
-  private int reasonCode;
-  private String errorMsg;
+  private String actionName = null;
+  private OpType actionType = null;
+  private Timestamp startTime = null;
+  private Timestamp endTime = null;
+  private long elapsedTime = -1L;
+  private OpCompCode statusCode = null;
+  private int reasonCode = 0;
+  private String errorMsg = null;
   private int severity = -1;
-  private String location;
-  private String correlator;
+  private String location = null;
+  private String correlator = null;
 
-  private String msgSignature;
-  private TransportType msgTransport;
-  private String msgTag;
-  private Object msgData;
-  private String msgValue;
+  private String msgSignature = null;
+  private TransportType msgTransport = null;
+  private String msgTag = null;
+  private Object msgData = null;
+  private String msgValue = null;
 
   /**
    * Constructs an ActivityInfo object.
@@ -89,7 +91,7 @@ public class ActivityInfo
 
   /**
    * Applies the given value(s) for the specified field to the appropriate internal data
-   * field for reporting field to the analyzer.
+   * field for reporting field to the jKool Cloud Service.
    *
    * @param field field to apply
    * @param value value to apply for this field, which could be an array of objects
@@ -100,10 +102,8 @@ public class ActivityInfo
    */
   public void applyField (ActivityField field, Object value) throws ParseException
   {
-    if (logger.isTraceEnabled ())
-    { logger.trace ("Applying field " + field + "from: " + value); }
-    ArrayList<ActivityFieldLocator> locators = field.getLocators ();
-    Object fieldValue = null;
+    LOGGER.log (OpLevel.TRACE, "Applying field {0} from: {1}", field, value);
+    List<ActivityFieldLocator> locators = field.getLocators ();
     if (value instanceof Object[])
     {
       Object[] values = (Object[]) value;
@@ -112,13 +112,18 @@ public class ActivityInfo
         value = values[0];
       }
     }
+    Object fieldValue;
     if (value instanceof Object[])
     {
       Object[] values = (Object[]) value;
       if (field.isEnumeration ())
-      { throw new ParseException ("Field " + field + ", multiple locators are not supported for enumeration-based fields", 0); }
+      {
+        throw new ParseException ("Field " + field + ", multiple locators are not supported for enumeration-based fields", 0);
+      }
       if (locators.size () != values.length)
-      { throw new ParseException ("Failed parsing field: " + field + ", number of values does not match number of locators", 0); }
+      {
+        throw new ParseException ("Failed parsing field: " + field + ", number of values does not match number of locators", 0);
+      }
       StringBuilder sb = new StringBuilder ();
       for (int v = 0; v < values.length; v++)
       {
@@ -126,13 +131,19 @@ public class ActivityInfo
         String format = locator.getFormat ();
         Object fmtValue = formatValue (field, locator, values[v]);
         if (v > 0)
-        { sb.append (field.getSeparator ()); }
+        {
+          sb.append (field.getSeparator ());
+        }
         if (fmtValue != null)
         {
           if (fmtValue instanceof Timestamp && !StringUtils.isEmpty (format))
-          { sb.append (((Timestamp) fmtValue).toString (format)); }
+          {
+            sb.append (((UsecTimestamp) fmtValue).toString (format));
+          }
           else
-          { sb.append (getStringValue (fmtValue)); }
+          {
+            sb.append (getStringValue (fmtValue));
+          }
         }
       }
       fieldValue = sb.toString ();
@@ -140,22 +151,20 @@ public class ActivityInfo
     else
     {
       if (locators == null)
-      { fieldValue = value; }
-      else if (locators.size () > 1 && !(value instanceof Object[]))
       {
-        fieldValue = value;    // field consists of multiple raw fields, but already been processed
+        fieldValue = value;
       }
       else
-      { fieldValue = formatValue (field, locators.get (0), value); }
+      {
+        fieldValue = locators.size () > 1 ? value : formatValue (field, locators.get (0), value);
+      }
     }
     if (fieldValue == null)
     {
-      if (logger.isTraceEnabled ())
-      { logger.trace ("field " + field + " resolves to null value, not applying field"); }
+      LOGGER.log (OpLevel.TRACE, "Field {0} resolves to null value, not applying field", field);
       return;
     }
-    if (logger.isTraceEnabled ())
-    { logger.trace ("Applying field " + field + ", value = " + fieldValue); }
+    LOGGER.log (OpLevel.TRACE, "Applying field {0}, value = {1}", field, fieldValue);
     setFieldValue (field, fieldValue);
   }
 
@@ -168,22 +177,19 @@ public class ActivityInfo
    * @param value   raw value of field
    *
    * @return formatted value of field in required internal data type
-   *
-   * @throws ParseException if an error parsing the specified value based on the field
-   *                        definition (e.g. does not match defined format, etc.)
    */
-  protected Object formatValue (ActivityField field, ActivityFieldLocator locator, Object value) throws ParseException
+  protected Object formatValue (ActivityField field, ActivityFieldLocator locator, Object value)
   {
     if (value == null)
-    { return null; }
+    {
+      return null;
+    }
     if (field.isEnumeration ())
     {
       if (value instanceof String)
       {
-        if (StringUtils.containsOnly (value.toString (), "0123456789"))
-        { value = Integer.parseInt (value.toString ()); }
-        else
-        { value = ((String) value).toUpperCase ().trim (); }
+        String strValue = (String) value;
+        value = StringUtils.containsOnly (strValue, "0123456789") ? Integer.valueOf (strValue) : strValue.toUpperCase ().trim ();
       }
     }
     switch (field.getFieldType ())
@@ -194,10 +200,14 @@ public class ActivityInfo
           // Elapsed time needs to be converted to usec
           ActivityFieldUnitsType units = ActivityFieldUnitsType.valueOf (locator.getUnits ());
           if (!(value instanceof Number))
-          { value = Long.parseLong (value.toString ()); }
+          {
+            value = Long.valueOf (String.valueOf (value));
+          }
           value = TimestampFormatter.convert ((Number) value, units, ActivityFieldUnitsType.Microseconds);
         }
-        catch (Exception e) {}
+        catch (Exception e)
+        {
+        }
         break;
       case Resource:
 //        if (value instanceof Resource)
@@ -206,11 +216,15 @@ public class ActivityInfo
         break;
       case ServerIp:
         if (value instanceof InetAddress)
-        { value = ((InetAddress) value).getHostAddress (); }
+        {
+          value = ((InetAddress) value).getHostAddress ();
+        }
         break;
       case ServerName:
         if (value instanceof InetAddress)
-        { value = ((InetAddress) value).getHostName (); }
+        {
+          value = ((InetAddress) value).getHostName ();
+        }
         break;
       default:
         break;
@@ -247,16 +261,11 @@ public class ActivityInfo
         correlator = getStringValue (fieldValue);
         break;
       case ElapsedTime:
-        if (fieldValue instanceof Number)
-        { elapsedTime = ((Number) fieldValue).longValue (); }
-        else
-        { elapsedTime = Long.parseLong (getStringValue (fieldValue)); }
+        elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue () : Long.parseLong (getStringValue (fieldValue));
         break;
       case EndTime:
-        if (fieldValue instanceof Timestamp)
-        { endTime = (Timestamp) fieldValue; }
-        else
-        { endTime = TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ()); }
+        endTime = fieldValue instanceof Timestamp ? (Timestamp) fieldValue
+                                                  : TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ());
         break;
       case ErrorMsg:
         errorMsg = getStringValue (fieldValue);
@@ -265,10 +274,7 @@ public class ActivityInfo
         location = getStringValue (fieldValue);
         break;
       case ReasonCode:
-        if (fieldValue instanceof Number)
-        { reasonCode = ((Number) fieldValue).intValue (); }
-        else
-        { reasonCode = Integer.parseInt (getStringValue (fieldValue)); }
+        reasonCode = fieldValue instanceof Number ? ((Number) fieldValue).intValue () : Integer.parseInt (getStringValue (fieldValue));
         break;
       case ResMgrType:
         resourceMgrType = ResourceManagerType.valueOf (fieldValue);
@@ -312,10 +318,8 @@ public class ActivityInfo
         msgSignature = getStringValue (fieldValue);
         break;
       case StartTime:
-        if (fieldValue instanceof Timestamp)
-        { startTime = (Timestamp) fieldValue; }
-        else
-        { startTime = TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ()); }
+        startTime = fieldValue instanceof Timestamp ? (Timestamp) fieldValue
+                                                    : TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ());
         break;
       case StatusCode:
         statusCode = OpCompCode.valueOf (fieldValue);
@@ -335,24 +339,23 @@ public class ActivityInfo
       default:
         throw new IllegalArgumentException ("Unrecognized Activity field: " + field);
     }
-    if (logger.isTraceEnabled ())
-    { logger.trace ("Set field " + field + " to '" + fieldValue + "'"); }
+    LOGGER.log (OpLevel.TRACE, "Set field {0} to '{1}'", field, fieldValue);
   }
 
   /**
    * Creates the appropriate data message to send to jKool Cloud Service and
-   * records the activity with the analyzer using the specified communications definition.
+   * records the activity using the specified tracker.
    *
    * @param tracker communication gateway to use to record activity
    *
    * @throws Throwable indicates an error building data message or sending data
-   *                   to analyzer
+   *                   to jKool Cloud Service
    */
   public void recordActivity (Tracker tracker) throws Throwable
   {
     if (tracker == null)
     {
-      logger.warn ("Activity destination not specified, activity not being recorded");
+      LOGGER.log (OpLevel.WARNING, "Activity destination not specified, activity not being recorded");
       return;
     }
     resolveServer ();
@@ -373,7 +376,7 @@ public class ActivityInfo
       }
       else
       {
-        event.setEncoding (com.nastel.jkool.tnt4j.core.Message.ENCODING_NONE);
+        event.setEncoding (Message.ENCODING_NONE);
         String strData = String.valueOf (msgData);
         event.setMessage (strData, (Object[]) null);
         event.setSize (strData.length ());
@@ -450,7 +453,9 @@ public class ActivityInfo
 //    activity.tnt (event);
     StreamsThread thread = null;
     if (Thread.currentThread () instanceof StreamsThread)
-    { thread = (StreamsThread) Thread.currentThread (); }
+    {
+      thread = (StreamsThread) Thread.currentThread ();
+    }
     boolean retryAttempt = false;
     do
     {
@@ -462,18 +467,22 @@ public class ActivityInfo
 //          activity.stop ();
 //          tracker.tnt (activity);
           if (retryAttempt)
-          { logger.info ("Activity recording retry successful"); }
+          {
+            LOGGER.log (OpLevel.INFO, "Activity recording retry successful");
+          }
           return;
         }
         catch (Throwable ioe)
         {
-          logger.error ("Failed recording activity", ioe);
+          LOGGER.log (OpLevel.ERROR, "Failed recording activity", ioe);
           tracker.close ();
           if (thread == null)
-          { throw ioe; }
+          {
+            throw ioe;
+          }
           retryAttempt = true;
-          logger.info ("Will retry recording in " + retryIntvl / 1000 + " seconds");
-          StreamsThread.sleep (retryIntvl);
+          LOGGER.log (OpLevel.INFO, "Will retry recording in {0} seconds", RETRY_INTVL / 1000L);
+          StreamsThread.sleep (RETRY_INTVL);
         }
       }
     }
@@ -503,19 +512,19 @@ public class ActivityInfo
       {
         try
         {
-          serverName = hostCache.get (serverIp);
+          serverName = HOST_CACHE.get (serverIp);
           if (StringUtils.isEmpty (serverName))
           {
             serverName = Utils.resolveAddressToHostName (serverIp);
             if (StringUtils.isEmpty (serverName))
             {
               // Add entry so we don't repeatedly attempt to look up unresolvable IP Address
-              hostCache.put (serverIp, "");
+              HOST_CACHE.put (serverIp, "");
             }
             else
             {
-              hostCache.put (serverIp, serverName);
-              hostCache.put (serverName, serverIp);
+              HOST_CACHE.put (serverIp, serverName);
+              HOST_CACHE.put (serverName, serverIp);
             }
           }
         }
@@ -527,19 +536,19 @@ public class ActivityInfo
     }
     else if (StringUtils.isEmpty (serverIp))
     {
-      serverIp = hostCache.get (serverName);
+      serverIp = HOST_CACHE.get (serverName);
       if (StringUtils.isEmpty (serverIp))
       {
         serverIp = Utils.resolveHostNameToAddress (serverName);
         if (StringUtils.isEmpty (serverIp))
         {
           // Add entry so we don't repeatedly attempt to look up unresolvable host name
-          hostCache.put (serverName, "");
+          HOST_CACHE.put (serverName, "");
         }
         else
         {
-          hostCache.put (serverIp, serverName);
-          hostCache.put (serverName, serverIp);
+          HOST_CACHE.put (serverIp, serverName);
+          HOST_CACHE.put (serverName, serverIp);
         }
       }
     }
@@ -555,14 +564,16 @@ public class ActivityInfo
    */
   private void determineTimes ()
   {
-    if (elapsedTime < 0)
-    { elapsedTime = 0; }
+    if (elapsedTime < 0L)
+    {
+      elapsedTime = 0L;
+    }
     if (endTime == null)
     {
       if (startTime != null)
       {
         endTime = new Timestamp (startTime);
-        endTime.add (0, elapsedTime);
+        endTime.add (0L, elapsedTime);
       }
       else
       {
@@ -572,7 +583,7 @@ public class ActivityInfo
     if (startTime == null)
     {
       startTime = new Timestamp (endTime);
-      startTime.subtract (0, elapsedTime);
+      startTime.subtract (0L, elapsedTime);
     }
   }
 
@@ -583,18 +594,13 @@ public class ActivityInfo
    *
    * @return string representation of value
    */
-  private String getStringValue (Object value)
+  private static String getStringValue (Object value)
   {
-    if (value instanceof String)
-    { return ((String) value); }
     if (value instanceof byte[])
-    { return (new String ((byte[]) value)); }
-    return value.toString ();
-  }
-
-  public long getRetryIntvl ()
-  {
-    return retryIntvl;
+    {
+      return new String ((byte[]) value);
+    }
+    return String.valueOf (value);
   }
 
   public String getServerName ()

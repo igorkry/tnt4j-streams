@@ -21,7 +21,7 @@ package com.jkool.tnt4j.streams.inputs;
 
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import com.ibm.mq.*;
 import com.ibm.mq.constants.CMQC;
@@ -29,8 +29,10 @@ import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.MQHeaderIterator;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.utils.StreamsThread;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * <p>Implements a WebSphere MQ activity feeder, where activity data is read from the
@@ -50,25 +52,24 @@ import org.apache.log4j.Logger;
  * <li>Channel</li>
  * <li>StripHeaders</li>
  * </ul>
- * </p>
  *
  * @version $Revision: 10 $
  */
 public class WmqFeeder extends ActivityFeeder
 {
-  private static Logger logger = Logger.getLogger (WmqFeeder.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (WmqFeeder.class);
 
   /**
    * Limit on number of consecutive read failures.  When limit is reached, we're
    * going to assume that there is an issue with the queue manager, or some other
    * unrecoverable condition, and therefore close and reopen the connection.
    */
-  protected int max_consecutive_failures = 5;
+  protected static final int MAX_CONSECUTIVE_FAILURES = 5;
 
   /**
    * Delay between queue manager connection retries, in milliseconds.
    */
-  protected int qmgr_conn_retry_interval = 15000;
+  protected static final long QMGR_CONN_RETRY_INTERVAL = 15000L;
 
   /**
    * Represents Queue Manager connected to
@@ -88,7 +89,7 @@ public class WmqFeeder extends ActivityFeeder
   /**
    * Current count of number of successive get failures.
    *
-   * @see #max_consecutive_failures
+   * @see #MAX_CONSECUTIVE_FAILURES
    */
   protected int curFailCount = 0;
 
@@ -108,40 +109,59 @@ public class WmqFeeder extends ActivityFeeder
    */
   public WmqFeeder ()
   {
-    super (logger);
+    super (LOGGER);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void setProperties (Collection<Entry<String, String>> props) throws Throwable
+  public void setProperties (Collection<Map.Entry<String, String>> props)
   {
     if (props == null)
-    { return; }
-    super.setProperties (props);
-    for (Entry<String, String> prop : props)
+    {
+      return;
+    }
+    for (Map.Entry<String, String> prop : props)
     {
       String name = prop.getKey ();
       String value = prop.getValue ();
       if (StreamsConfig.PROP_QMGR_NAME.equalsIgnoreCase (name))
-      { qmgrName = value; }
+      {
+        qmgrName = value;
+      }
       else if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase (name))
-      { queueName = value; }
+      {
+        queueName = value;
+      }
       else if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase (name))
-      { topicName = value; }
+      {
+        topicName = value;
+      }
       else if (StreamsConfig.PROP_SUB_NAME.equalsIgnoreCase (name))
-      { subName = value; }
+      {
+        subName = value;
+      }
       else if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase (name))
-      { topicString = value; }
+      {
+        topicString = value;
+      }
       else if (StreamsConfig.PROP_HOST.equalsIgnoreCase (name))
-      { qmgrHostName = value; }
+      {
+        qmgrHostName = value;
+      }
       else if (StreamsConfig.PROP_PORT.equalsIgnoreCase (name))
-      { qmgrPort = Integer.valueOf (value); }
+      {
+        qmgrPort = Integer.valueOf (value);
+      }
       else if (StreamsConfig.PROP_CHANNEL_NAME.equalsIgnoreCase (name))
-      { qmgrChannelName = value; }
+      {
+        qmgrChannelName = value;
+      }
       else if (StreamsConfig.PROP_STRIP_HEADERS.equalsIgnoreCase (name))
-      { stripHeaders = Boolean.parseBoolean (value); }
+      {
+        stripHeaders = Boolean.parseBoolean (value);
+      }
     }
   }
 
@@ -152,23 +172,41 @@ public class WmqFeeder extends ActivityFeeder
   public Object getProperty (String name)
   {
     if (StreamsConfig.PROP_QMGR_NAME.equalsIgnoreCase (name))
-    { return qmgrName; }
+    {
+      return qmgrName;
+    }
     if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase (name))
-    { return queueName; }
+    {
+      return queueName;
+    }
     if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase (name))
-    { return topicName; }
+    {
+      return topicName;
+    }
     if (StreamsConfig.PROP_SUB_NAME.equalsIgnoreCase (name))
-    { return subName; }
+    {
+      return subName;
+    }
     if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase (name))
-    { return topicString; }
+    {
+      return topicString;
+    }
     if (StreamsConfig.PROP_HOST.equalsIgnoreCase (name))
-    { return qmgrHostName; }
+    {
+      return qmgrHostName;
+    }
     if (StreamsConfig.PROP_PORT.equalsIgnoreCase (name))
-    { return qmgrPort; }
+    {
+      return qmgrPort;
+    }
     if (StreamsConfig.PROP_CHANNEL_NAME.equalsIgnoreCase (name))
-    { return qmgrChannelName; }
+    {
+      return qmgrChannelName;
+    }
     if (StreamsConfig.PROP_STRIP_HEADERS.equalsIgnoreCase (name))
-    { return stripHeaders; }
+    {
+      return stripHeaders;
+    }
     return super.getProperty (name);
   }
 
@@ -198,7 +236,9 @@ public class WmqFeeder extends ActivityFeeder
   protected boolean isConnectedToQmgr (MQException mqe)
   {
     if (qmgr == null || !qmgr.isConnected ())
-    { return false; }
+    {
+      return false;
+    }
     if (mqe != null && mqe.getCompCode () == MQConstants.MQCC_FAILED)
     {
       switch (mqe.getReason ())
@@ -237,9 +277,13 @@ public class WmqFeeder extends ActivityFeeder
       props.put (CMQC.CHANNEL_PROPERTY, qmgrChannelName);
     }
     if (StringUtils.isEmpty (qmgrName))
-    { logger.info ("Connecting to default queue manager, props=" + props); }
+    {
+      LOGGER.log (OpLevel.INFO, "Connecting to default queue manager, props={0}", props);
+    }
     else
-    { logger.info ("Connecting to queue manager '" + qmgrName + "', props=" + props); }
+    {
+      LOGGER.log (OpLevel.INFO, "Connecting to queue manager '{0}', props={1}", qmgrName, props);
+    }
     qmgr = new MQQueueManager (qmgrName, props);
     int openOptions;
     if (!StringUtils.isEmpty (topicString) || !StringUtils.isEmpty (topicName) || !StringUtils.isEmpty (subName))
@@ -248,26 +292,24 @@ public class WmqFeeder extends ActivityFeeder
                     (StringUtils.isEmpty (subName) ? CMQC.MQSO_MANAGED : CMQC.MQSO_RESUME);
       if (!StringUtils.isEmpty (subName))
       {
-        logger.info (
-            "Subscribing to topic string '" + topicString + "' using topic object '" + topicName + "' and subscription object '" + subName
-            + "', options=0x" + String.format ("%08X", openOptions));
+        LOGGER.log (OpLevel.INFO, "Subscribing to topic string '{0}' using topic object '{1}' and subscription object '{2}', options=0x{3}",
+                    topicString, topicName, subName, String.format ("%08X", openOptions));
         dest = qmgr.accessTopic (topicString, topicName, openOptions, null, subName);
       }
       else
       {
-        logger.info (
-            "Subscribing to topic string '" + topicString + "' using topic object '" + topicName + "', options=0x" + String.format ("%08X",
-                                                                                                                                    openOptions));
+        LOGGER.log (OpLevel.INFO, "Subscribing to topic string '{0}' using topic object '{1}', options=0x{2}", topicString, topicName,
+                    String.format ("%08X", openOptions));
         dest = qmgr.accessTopic (topicString, topicName, CMQC.MQTOPIC_OPEN_AS_SUBSCRIPTION, openOptions);
       }
     }
     else
     {
       openOptions = CMQC.MQOO_FAIL_IF_QUIESCING | CMQC.MQOO_INPUT_AS_Q_DEF | CMQC.MQOO_SAVE_ALL_CONTEXT;
-      logger.info ("Opening queue '" + queueName + "', options=0x" + String.format ("%08X", openOptions));
+      LOGGER.log (OpLevel.INFO, "Opening queue '{0}', options=0x{1}", qmgrName, String.format ("%08X", openOptions));
       dest = qmgr.accessQueue (queueName, openOptions);
     }
-    logger.info ("Reading from " + dest.getName ().trim () + ", GMO=0x" + String.format ("%08X", gmo.options));
+    LOGGER.log (OpLevel.INFO, "Reading from {0}, GMO=0x{1}", dest.getName ().trim (), String.format ("%08X", gmo.options));
     curFailCount = 0;
   }
 
@@ -289,33 +331,31 @@ public class WmqFeeder extends ActivityFeeder
         {
           // connection to qmgr was successful, so we were not able to open/subscribe
           // to required queue/topic, so exit
-          logger.error ("Failed opening object: " + formatMqException (mqe));
+          LOGGER.log (OpLevel.ERROR, "Failed opening object: {0}", formatMqException (mqe));
           return null;
         }
-        logger.error ("Failed to connect to queue manager: " + formatMqException (mqe));
-        logger.info ("Will retry in " + qmgr_conn_retry_interval / 1000 + " seconds");
+        LOGGER.log (OpLevel.ERROR, "Failed to connect to queue manager: {0}", formatMqException (mqe));
+        LOGGER.log (OpLevel.INFO, "Will retry in {0} seconds", QMGR_CONN_RETRY_INTERVAL / 1000L);
         if (!isHalted ())
-        { StreamsThread.sleep (qmgr_conn_retry_interval); }
+        {
+          StreamsThread.sleep (QMGR_CONN_RETRY_INTERVAL);
+        }
       }
     }
     try
     {
       MQMessage mqMsg = new MQMessage ();
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Waiting for message on " + dest.getName ().trim ()); }
+      LOGGER.log (OpLevel.DEBUG, "Waiting for message on {0}", dest.getName ().trim ());
       dest.get (mqMsg, gmo);
-      if (logger.isDebugEnabled ())
-      { logger.debug ("Read msg from " + dest.getName ().trim () + ", total payload length=" + mqMsg.getMessageLength ()); }
+      LOGGER.log (OpLevel.DEBUG, "Read msg from {0}, total payload length={1}", dest.getName ().trim (), mqMsg.getMessageLength ());
       if (stripHeaders)
       {
         MQHeaderIterator hdrIt = new MQHeaderIterator (mqMsg);
         hdrIt.skipHeaders ();
-        if (logger.isDebugEnabled ())
-        { logger.debug ("Stripped WMQ headers"); }
+        LOGGER.log (OpLevel.DEBUG, "Stripped WMQ headers");
       }
       String msgData = mqMsg.readStringOfByteLength (mqMsg.getDataLength ());
-      if (logger.isTraceEnabled ())
-      { logger.trace ("Message Data (length=" + msgData.length () + "): " + msgData); }
+      LOGGER.log (OpLevel.TRACE, "Message Data (length={0}): {1}", msgData.length (), msgData);
       qmgr.commit ();
       curFailCount = 0;
       return msgData;
@@ -323,10 +363,11 @@ public class WmqFeeder extends ActivityFeeder
     catch (MQException mqe)
     {
       curFailCount++;
-      logger.error ("Failed reading message from " + dest.getName ().trim () + ": " + formatMqException (mqe));
-      if (curFailCount >= max_consecutive_failures)
+      LOGGER.log (OpLevel.ERROR, "Failed reading message from {0}: {1}", dest.getName ().trim (), formatMqException (mqe));
+      if (curFailCount >= MAX_CONSECUTIVE_FAILURES)
       {
-        logger.error ("Reached limit of " + max_consecutive_failures + " message read failures - closing queue manager connection");
+        LOGGER.log (OpLevel.ERROR, "Reached limit of {0} message read failures - closing queue manager connection",
+                    MAX_CONSECUTIVE_FAILURES);
         closeQmgrConnection ();
         curFailCount = 0;
       }
@@ -349,9 +390,11 @@ public class WmqFeeder extends ActivityFeeder
       {
         try
         {
-          logger.debug ("Error closing " + dest.getClass ().getName () + " " + dest.getName () + ": " + formatMqException (mqe));
+          LOGGER.log (OpLevel.DEBUG, "Error closing {0} {1}: {2}", dest.getClass ().getName (), dest.getName (), formatMqException (mqe));
         }
-        catch (MQException e) {}
+        catch (MQException e)
+        {
+        }
       }
       dest = null;
     }
@@ -363,7 +406,13 @@ public class WmqFeeder extends ActivityFeeder
       }
       catch (MQException mqe)
       {
-        try {logger.debug ("Error closing qmgr" + qmgr.getName () + ": " + formatMqException (mqe));} catch (MQException e) {}
+        try
+        {
+          LOGGER.log (OpLevel.DEBUG, "Error closing qmgr {0}: {1}", qmgr.getName (), formatMqException (mqe));
+        }
+        catch (MQException e)
+        {
+        }
       }
       qmgr = null;
     }
@@ -390,6 +439,6 @@ public class WmqFeeder extends ActivityFeeder
    */
   protected String formatMqException (MQException mqe)
   {
-    return mqe.toString () + " (" + MQConstants.lookupReasonCode (mqe.getReason ()) + ")";
+    return mqe + " (" + MQConstants.lookupReasonCode (mqe.getReason ()) + ")";
   }
 }
