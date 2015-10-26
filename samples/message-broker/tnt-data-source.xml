@@ -174,7 +174,6 @@
     </parser>
 
     <stream name="EventStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
-        <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="QueueManager" value="QMGR"/>
         <property name="Queue" value="EVENT.QUEUE"/>
         <parser-ref name="EventParser"/>

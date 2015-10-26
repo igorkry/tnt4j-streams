@@ -27,7 +27,6 @@ import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldType;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import com.jkool.tnt4j.streams.types.GatewayProtocolTypes;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +52,6 @@ public class ConfigParserHandler extends DefaultHandler
   private static final String CONFIG_ROOT_ELMT = "tnt-data-source";
   private static final String PARSER_ELMT = "parser";
   private static final String STREAM_ELMT = "stream";
-  private static final String TACONN_ELMT = "ta-conn";
   private static final String PROPERTY_ELMT = "property";
   private static final String FIELD_ELMT = "field";
   private static final String FIELD_MAP_ELMT = "field-map";
@@ -74,15 +72,6 @@ public class ConfigParserHandler extends DefaultHandler
   private static final String TIMEZONE_ATTR = "timezone";
   private static final String SOURCE_ATTR = "source";
   private static final String TARGET_ATTR = "target";
-  private static final String PROTOCOL_ATTR = "protocol";
-  private static final String FILE_ATTR = "file";
-  private static final String HOST_ATTR = "host";
-  private static final String PORT_ATTR = "port";
-  private static final String ACCESS_TOKEN_ATTR = "access-token";
-  private static final String PROXY_HOST_ATTR = "proxy-host";
-  private static final String PROXY_PORT_ATTR = "proxy-port";
-  private static final String KEYSTORE_ATTR = "keystore";
-  private static final String KEYSTORE_PWD_ATTR = "keystore-pwd";
 
   private static final String REQUIRED_VALUE = "required";
 
@@ -187,10 +176,6 @@ public class ConfigParserHandler extends DefaultHandler
     else if (qName.equals (PARSER_REF_ELMT))
     {
       processParserRef (attributes);
-    }
-    else if (qName.equals (TACONN_ELMT))
-    {
-      processTaConnection (attributes);
     }
     else if (qName.equals (PARSER_ELMT))
     {
@@ -763,117 +748,6 @@ public class ConfigParserHandler extends DefaultHandler
       currProperties = new ArrayList<Map.Entry<String, String>> ();
     }
     currProperties.add (new AbstractMap.SimpleEntry<String, String> (name, value));
-  }
-
-  /**
-   * Processes a ta-conn element.
-   *
-   * @param attrs List of element attributes
-   *
-   * @throws SAXException if error parsing element
-   */
-  private void processTaConnection (Attributes attrs) throws SAXException
-  {
-    if (currStream == null)
-    {
-      throw new SAXParseException ("Malformed configuration: " + TACONN_ELMT + " expected to have " +
-                                   STREAM_ELMT + " as parent", currParseLocation);
-    }
-    GatewayProtocolTypes protocol = null;
-    String host = null;
-    int port = -1;
-    String file = null;
-    String token = null;
-    String proxyHost = null;
-    int proxyPort = 0;
-    String keystore = null;
-    String keystorePwd = null;
-    for (int i = 0; i < attrs.getLength (); i++)
-    {
-      String attName = attrs.getQName (i);
-      String attValue = attrs.getValue (i);
-      if (attName.equals (PROTOCOL_ATTR))
-      {
-        protocol = GatewayProtocolTypes.valueOf (attValue);
-      }
-      else if (attName.equals (HOST_ATTR))
-      {
-        host = attValue;
-      }
-      else if (attName.equals (PORT_ATTR))
-      {
-        port = Integer.parseInt (attValue);
-      }
-      else if (attName.equals (FILE_ATTR))
-      {
-        file = attValue;
-      }
-      else if (attName.equals (ACCESS_TOKEN_ATTR))
-      {
-        token = attValue;
-      }
-      else if (attName.equals (PROXY_HOST_ATTR))
-      {
-        proxyHost = attValue;
-      }
-      else if (attName.equals (PROXY_PORT_ATTR))
-      {
-        proxyPort = Integer.parseInt (attValue);
-      }
-      else if (attName.equals (KEYSTORE_ATTR))
-      {
-        keystore = attValue;
-      }
-      else if (attName.equals (KEYSTORE_PWD_ATTR))
-      {
-        keystorePwd = attValue;
-      }
-    }
-    if (protocol == null)
-    {
-      throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + PROTOCOL_ATTR + "'", currParseLocation);
-    }
-    if (protocol == GatewayProtocolTypes.FILE)
-    {
-      if (StringUtils.isEmpty (file))
-      {
-        throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + FILE_ATTR + "'", currParseLocation);
-      }
-    }
-    else
-    {
-      if (StringUtils.isEmpty (host))
-      {
-        throw new SAXParseException ("Missing " + TACONN_ELMT + " attribute '" + HOST_ATTR + "'", currParseLocation);
-      }
-    }
-    currStream.setTaConnType (protocol);
-    if (!StringUtils.isEmpty (host))
-    {
-      currStream.setTaHost (host);
-    }
-    if (port >= 0)
-    {
-      currStream.setTaPort (port);
-    }
-    if (!StringUtils.isEmpty (file))
-    {
-      currStream.setTaFileName (file);
-    }
-    if (!StringUtils.isEmpty (token))
-    {
-      currStream.setTaAccessToken (token);
-    }
-    if (!StringUtils.isEmpty (proxyHost))
-    {
-      currStream.setTaProxyHost (proxyHost);
-      currStream.setTaProxyPort (proxyPort);
-    }
-    if (!StringUtils.isEmpty (keystore))
-    {
-      currStream.setTaKeystore (keystore);
-      currStream.setTaKeystorePwd (keystorePwd);
-    }
   }
 
   /**

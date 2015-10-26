@@ -28,7 +28,6 @@
     </parser>
 
     <stream name="ExampleFileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
-        <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="FileName" value="orders.log"/>
         <parser-ref name="ExampleTokenParser"/>
     </stream>

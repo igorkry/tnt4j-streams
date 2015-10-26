@@ -78,7 +78,6 @@
     </parser>
 
     <stream name="MessageStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
-        <ta-conn protocol="TCP" host="localhost" port="6400"/>
         <property name="Port" value="6450"/>
         <parser-ref name="WmqMsgOpXmlParser"/>
     </stream>
