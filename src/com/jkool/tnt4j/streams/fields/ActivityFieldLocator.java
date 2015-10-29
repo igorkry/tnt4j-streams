@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jkool.tnt4j.streams.utils.NumericFormatter;
-import com.jkool.tnt4j.streams.utils.Timestamp;
+import com.jkool.tnt4j.streams.utils.StreamTimestamp;
 import com.jkool.tnt4j.streams.utils.TimestampFormatter;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -484,11 +484,11 @@ public class ActivityFieldLocator
    * @throws ParseException if an error parsing the specified value based on the field
    *                        definition (e.g. does not match defined format, etc.)
    */
-  protected Timestamp formatDateValue (Object value) throws ParseException
+  protected StreamTimestamp formatDateValue (Object value) throws ParseException
   {
-    if (value instanceof Timestamp)
+    if (value instanceof StreamTimestamp)
     {
-      return (Timestamp) value;
+      return (StreamTimestamp) value;
     }
     if (timeParser == null)
     {

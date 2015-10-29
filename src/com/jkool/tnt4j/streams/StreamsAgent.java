@@ -30,7 +30,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * Main class for jKool LLC TNT4J-Streams application.
+ * Main class for jKool LLC TNT4J-Streams standalone application.
  *
  * @version $Revision: 4 $
  */
@@ -44,6 +44,8 @@ public final class StreamsAgent
   }
 
   /**
+   * Main entry point for running as a standalone application.
+   *
    * @param args command-line arguments. Supported arguments:
    *             <table summary="TNT4J-Streams agent command line arguments">
    *             <tr><td>&nbsp;&nbsp;</td>
@@ -84,6 +86,11 @@ public final class StreamsAgent
     }
   }
 
+  /**
+   * Process and interprets command-line arguments.
+   *
+   * @param args command-line arguments.
+   */
   private static void processArgs (String... args)
   {
     for (String arg : args)
@@ -116,6 +123,9 @@ public final class StreamsAgent
     }
   }
 
+  /**
+   * Prints short standalone application usage manual.
+   */
   private static void printUsage ()
   {
     System.out.println ("\nValid arguments:\n");

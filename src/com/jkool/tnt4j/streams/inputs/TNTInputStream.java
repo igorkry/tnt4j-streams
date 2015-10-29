@@ -32,6 +32,7 @@ import com.nastel.jkool.tnt4j.config.DefaultConfigFactory;
 import com.nastel.jkool.tnt4j.config.TrackerConfig;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.nastel.jkool.tnt4j.source.Source;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 
 /**
@@ -61,7 +62,10 @@ public abstract class TNTInputStream implements Runnable
   /**
    * Used to deliver processed activity data to destination.
    */
-  protected Tracker tracker = null;
+  protected Map<String, Tracker> trackersMap = new HashMap<String, Tracker> ();
+
+  private TrackerConfig streamConfig;
+  private Source defaultSource;
 
   /**
    * Delay between retries to submit data package to jKool Cloud Service if some transmission failure occurs, in milliseconds.
@@ -145,8 +149,11 @@ public abstract class TNTInputStream implements Runnable
    */
   protected void initialize () throws Throwable
   {
-    TrackerConfig simConfig = DefaultConfigFactory.getInstance ().getConfig ("com.jkool.tnt4j.streams");
-    tracker = TrackingLogger.getInstance (simConfig.build ());
+    streamConfig = DefaultConfigFactory.getInstance ().getConfig ("com.jkool.tnt4j.streams");
+    Tracker tracker = TrackingLogger.getInstance (streamConfig.build ());
+    defaultSource = streamConfig.getSource ();
+    trackersMap.put (defaultSource.getFQName (), tracker);
+    logger.log (OpLevel.DEBUG, "Build default tracker for source {0}", defaultSource.getFQName ());
   }
 
   /**
@@ -288,16 +295,24 @@ public abstract class TNTInputStream implements Runnable
    */
   protected void cleanup ()
   {
-    if (tracker != null)
+    if (!trackersMap.isEmpty ())
     {
-      try
+      for (Map.Entry<String, Tracker> te : trackersMap.entrySet ())
       {
-        tracker.close ();
+        Tracker tracker = te.getValue ();
+        if (tracker != null)
+        {
+          try
+          {
+            tracker.close ();
+          }
+          catch (IOException e)
+          {
+          }
+        }
       }
-      catch (IOException e)
-      {
-      }
-      tracker = null;
+
+      trackersMap.clear ();
     }
   }
 
@@ -319,23 +334,6 @@ public abstract class TNTInputStream implements Runnable
       {
         try
         {
-          while (!isHalted () && !tracker.isOpen ())
-          {
-            try
-            {
-              tracker.open ();
-            }
-            catch (IOException ioe)
-            {
-              logger.log (OpLevel.ERROR, "Failed to connect to {0}", tracker, ioe);
-              tracker.close ();
-              logger.log (OpLevel.INFO, "Will retry in {0} seconds", CONN_RETRY_INTERVAL / 1000L);
-              if (!isHalted ())
-              {
-                StreamsThread.sleep (CONN_RETRY_INTERVAL);
-              }
-            }
-          }
           ActivityInfo ai = getNextActivity ();
           if (ai == null)
           {
@@ -351,6 +349,36 @@ public abstract class TNTInputStream implements Runnable
           }
           else
           {
+            Source aiSource = ai.getSource ();
+
+            Tracker tracker = trackersMap.get (aiSource == null ? defaultSource.getFQName () : aiSource.getFQName ());
+            if (tracker == null)
+            {
+              aiSource.setSSN (defaultSource.getSSN ());
+              streamConfig.setSource (aiSource);
+              tracker = TrackingLogger.getInstance (streamConfig.build ());
+              trackersMap.put (aiSource.getFQName (), tracker);
+              logger.log (OpLevel.DEBUG, "Build new tracked for source {0}", aiSource.getFQName ());
+            }
+
+            while (!isHalted () && !tracker.isOpen ())
+            {
+              try
+              {
+                tracker.open ();
+              }
+              catch (IOException ioe)
+              {
+                logger.log (OpLevel.ERROR, "Failed to connect to {0}", tracker, ioe);
+                tracker.close ();
+                logger.log (OpLevel.INFO, "Will retry in {0} seconds", CONN_RETRY_INTERVAL / 1000L);
+                if (!isHalted ())
+                {
+                  StreamsThread.sleep (CONN_RETRY_INTERVAL);
+                }
+              }
+            }
+
             ai.recordActivity (tracker);
           }
         }

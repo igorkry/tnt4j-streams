@@ -118,7 +118,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser
     switch (field.getFieldType ())
     {
       case Correlator:
-      case Signature:
+      case TrackingId:
         Object[] sigItems = null;
         if (value instanceof Object[])
         {

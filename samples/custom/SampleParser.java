@@ -118,7 +118,7 @@ public class SampleParser extends ActivityParser
     try
     {
       // save entire activity string as message data
-      field = new ActivityField (ActivityFieldType.ActivityData);
+      field = new ActivityField (StreamFieldType.Message);
       applyFieldValue (ai, field, dataStr);
       // apply fields for parser
       for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet ())

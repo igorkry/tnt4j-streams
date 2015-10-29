@@ -35,7 +35,7 @@ public class ActivityField
 {
   private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityField.class);
 
-  private final ActivityFieldType fieldType;
+  private final StreamFieldType fieldType;
   private List<ActivityFieldLocator> locators = null;
   private String format = null;
   private String locale = null;
@@ -49,7 +49,7 @@ public class ActivityField
    *
    * @throws IllegalArgumentException if field type is {@code null}
    */
-  public ActivityField (ActivityFieldType fieldType)
+  public ActivityField (StreamFieldType fieldType)
   {
     if (fieldType == null)
     {
@@ -66,7 +66,7 @@ public class ActivityField
    *
    * @throws NullPointerException if field type is {@code null}
    */
-  public ActivityField (ActivityFieldType fieldType, ActivityFieldDataType dataType)
+  public ActivityField (StreamFieldType fieldType, ActivityFieldDataType dataType)
   {
     this (fieldType);
     ActivityFieldLocator loc = new ActivityFieldLocator (ActivityFieldLocatorType.Index, "0");
@@ -83,7 +83,7 @@ public class ActivityField
    */
   public boolean isEnumeration ()
   {
-    return fieldType.isEnumBasedValue ();
+    return fieldType.getEnumerationClass () != null;
   }
 
   /**
@@ -91,7 +91,7 @@ public class ActivityField
    *
    * @return the activity field type
    */
-  public ActivityFieldType getFieldType ()
+  public StreamFieldType getFieldType ()
   {
     return fieldType;
   }

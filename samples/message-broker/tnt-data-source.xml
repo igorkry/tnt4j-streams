@@ -1,67 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
 
     <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace" value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
         <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
         <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
-        <!--field name="ServerOs" locator="/wmb:event/wmb:eventPointData/ServerOs" locator-type="Label"/-->
         <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
         <field name="ApplName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:messageFlow/@wmb:uniqueFlowName"
                locator-type="Label"/>
-        <field name="ResourceMgr" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:name" locator-type="Label"/>
-        <field name="ResMgrType" value="MESSAGING_SERVER"/>
-        <field name="Resource" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeLabel" locator-type="Label"/>
-        <field name="ResType" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType" locator-type="Label">
-            <field-map source="ComIbmMQInputNode" target="WMQ_QUEUE"/>
-            <field-map source="ComIbmMQOutputNode" target="WMQ_QUEUE"/>
-            <field-map source="ComIbmMQGetNode" target="WMQ_QUEUE"/>
-            <field-map source="ComIbmJMSClientInputNode" target="JMS_DESTINATION"/>
-            <field-map source="ComIbmJMSClientOutputNode" target="JMS_DESTINATION"/>
-            <field-map source="ComIbmJMSClientReplyNode" target="JMS_DESTINATION"/>
-            <field-map source="ComIbmJMSClientReceive" target="JMS_DESTINATION"/>
-            <field-map source="ComIbmJMSHeader.msgnode" target="JMS_DESTINATION"/>
-            <field-map source="ComIbmHTTPAsyncRequest" target="WEB_APP"/>
-            <field-map source="ComIbmHTTPAsyncResponse" target="WEB_APP"/>
-            <field-map source="ComIbmHTTPHeader" target="WEB_APP"/>
-            <field-map source="ComIbmWSInputNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmWSReplyNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmWSRequestNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPInputNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPReplyNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPRequestNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPAsyncRequestNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPAsyncResponseNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPWrapperNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmSOAPExtractNode" target="WEB_SERVICE"/>
-            <field-map source="SRRetrieveEntityNode" target="WEB_SERVICE"/>
-            <field-map source="SRRetrieveITServiceNode" target="WEB_SERVICE"/>
-            <field-map source="ComIbmDatabaseInputNode" target="DATABASE"/>
-            <field-map source="ComIbmDatabaseNode" target="DATABASE"/>
-            <field-map source="ComIbmDatabaseRetrieveNode" target="DATABASE"/>
-            <field-map source="ComIbmDatabaseRouteNode" target="DATABASE"/>
-            <field-map source="ComIbmFileInputNode" target="FILE"/>
-            <field-map source="ComIbmFileReadNode" target="FILE"/>
-            <field-map source="ComIbmFileOutputNode" target="FILE"/>
-            <field-map source="ComIbmFTEInputNode" target="FILE"/>
-            <field-map source="ComIbmFTEOutputNode" target="FILE"/>
-            <field-map source="ComIbmTCPIPClientInputNode" target="NETWORK"/>
-            <field-map source="ComIbmTCPIPClientOutputNode" target="NETWORK"/>
-            <field-map source="ComIbmTCPIPClientRequestNode" target="NETWORK"/>
-            <field-map source="ComIbmTCPIPServerInputNode" target="NETWORK"/>
-            <field-map source="ComIbmTCPIPServerOutputNode" target="NETWORK"/>
-            <field-map source="ComIbmTCPIPServerRequestNode" target="NETWORK"/>
-            <field-map source="ComIbmCORBARequestNode" target="CORBA_OBJECT"/>
-            <field-map source="" target="UNKNOWN"/>
-        </field>
-        <field name="ActivityData" locator="/wmb:event/wmb:bitstreamData/wmb:bitstream" locator-type="Label" datatype="Binary"
-               format="base64Binary"/>
-        <field name="ActivityName" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+        <field name="ResourceName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeLabel"
                locator-type="Label"/>
-        <field name="ActivityType" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType" locator-type="Label">
+        <field name="Message" locator="/wmb:event/wmb:bitstreamData/wmb:bitstream" locator-type="Label" datatype="Binary"
+               format="base64Binary"/>
+        <field name="EventName" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+               locator-type="Label"/>
+        <field name="EventType" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType" locator-type="Label">
             <field-map source="ComIbmMQInputNode" target="RECEIVE"/>
             <field-map source="ComIbmMQOutputNode" target="SEND"/>
             <field-map source="ComIbmMQGetNode" target="RECEIVE"/>
@@ -103,56 +59,15 @@
             <field-map source="ComIbmCORBARequestNode" target="RECEIVE"/>
             <field-map source="" target="CALL"/>
         </field>
-        <field name="Transport" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType" locator-type="Label">
-            <field-map source="ComIbmMQInputNode" target="WMQ"/>
-            <field-map source="ComIbmMQOutputNode" target="WMQ"/>
-            <field-map source="ComIbmMQGetNode" target="WMQ"/>
-            <field-map source="ComIbmJMSClientInputNode" target="JMS"/>
-            <field-map source="ComIbmJMSClientOutputNode" target="JMS"/>
-            <field-map source="ComIbmJMSClientReplyNode" target="JMS"/>
-            <field-map source="ComIbmJMSClientReceive" target="JMS"/>
-            <field-map source="ComIbmJMSHeader.msgnode" target="JMS"/>
-            <field-map source="ComIbmHTTPAsyncRequest" target="HTTP"/>
-            <field-map source="ComIbmHTTPAsyncResponse" target="HTTP"/>
-            <field-map source="ComIbmHTTPHeader" target="HTTP"/>
-            <field-map source="ComIbmWSInputNode" target="HTTP"/>
-            <field-map source="ComIbmWSReplyNode" target="HTTP"/>
-            <field-map source="ComIbmWSRequestNode" target="HTTP"/>
-            <field-map source="ComIbmSOAPInputNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPReplyNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPRequestNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPAsyncRequestNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPAsyncResponseNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPWrapperNode" target="SOAP"/>
-            <field-map source="ComIbmSOAPExtractNode" target="SOAP"/>
-            <field-map source="SRRetrieveEntityNode" target="SOAP"/>
-            <field-map source="SRRetrieveITServiceNode" target="SOAP"/>
-            <field-map source="ComIbmDatabaseInputNode" target="UNKNOWN"/>
-            <field-map source="ComIbmDatabaseNode" target="UNKNOWN"/>
-            <field-map source="ComIbmDatabaseRetrieveNode" target="UNKNOWN"/>
-            <field-map source="ComIbmDatabaseRouteNode" target="UNKNOWN"/>
-            <field-map source="ComIbmFileInputNode" target="FILE"/>
-            <field-map source="ComIbmFileReadNode" target="FILE"/>
-            <field-map source="ComIbmFileOutputNode" target="FILE"/>
-            <field-map source="ComIbmFTEInputNode" target="FILE"/>
-            <field-map source="ComIbmFTEOutputNode" target="FILE"/>
-            <field-map source="ComIbmTCPIPClientInputNode" target="TCP"/>
-            <field-map source="ComIbmTCPIPClientOutputNode" target="TCP"/>
-            <field-map source="ComIbmTCPIPClientRequestNode" target="TCP"/>
-            <field-map source="ComIbmTCPIPServerInputNode" target="TCP"/>
-            <field-map source="ComIbmTCPIPServerOutputNode" target="TCP"/>
-            <field-map source="ComIbmTCPIPServerRequestNode" target="TCP"/>
-            <field-map source="ComIbmCORBARequestNode" target="UNKNOWN"/>
-            <field-map source="" target="UNKNOWN"/>
-        </field>
+
         <field name="Correlator" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventCorrelation/@wmb:localTransactionId"
                locator-type="Label"/>
         <field name="ElapsedTime" value="0" datatype="Number"/>
         <field name="EndTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime" locator-type="Label"
-               datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timestamp="GMT"/>
+               datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timezone="GMT"/>
         <!--field name="ReasonCode" locator="/wmb:event/wmb:eventPointData/ReasonCode" locator-type="Label" datatype="Number"/-->
         <!-- *** Use following signature definition for WMQ messages ***
-        <field name="Signature" separator="#!#">
+        <field name="TrackingId" separator="#!#">
           <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgType']/@wmb:value" locator-type="Label" datatype="Number"/>
           <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Format']/@wmb:value" locator-type="Label"/>
           <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgId']/@wmb:value" locator-type="Label" datatype="Binary" format="hexBinary"/>
@@ -164,7 +79,7 @@
         </field>
         -->
         <!--field name="StartTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime" locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timestamp="GMT"/-->
-        <field name="StatusCode" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+        <field name="CompCode" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
                locator-type="Label">
             <field-map source="FlowRollback" target="ERROR"/>
             <field-map source="" target="SUCCESS"/>

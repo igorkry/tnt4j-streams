@@ -189,7 +189,7 @@ public class ActivityTokenParser extends ActivityParser
     try
     {
       // save entire activity string as message data
-      field = new ActivityField (ActivityFieldType.ActivityData);
+      field = new ActivityField (StreamFieldType.Message);
       applyFieldValue (ai, field, dataStr);
       // apply fields for parser
       Object value;

@@ -26,14 +26,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.jkool.tnt4j.streams.types.LuwType;
-import com.jkool.tnt4j.streams.types.ResourceManagerType;
-import com.jkool.tnt4j.streams.types.ResourceType;
-import com.jkool.tnt4j.streams.types.TransportType;
 import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.*;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.nastel.jkool.tnt4j.source.DefaultSourceFactory;
+import com.nastel.jkool.tnt4j.source.Source;
+import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -55,32 +54,36 @@ public class ActivityInfo
 
   private String serverName = null;      //??
   private String serverIp = null;                     //??
-  private String osInfo = " ";    // so streams API does not fill in local information        //??
   private String applName = null;      //??
   private String userName = null;
 
-  private String resourceMgr = null;
-  private ResourceManagerType resourceMgrType = null;   //??   op.resource
-  private String resource = null;            //??              op.resource
-  private ResourceType resourceType = null;    //??                       op.resource
+  private String resourceName = null;            //??              op.resourceName
 
-  private String actionName = null;
-  private OpType actionType = null;
-  private Timestamp startTime = null;
-  private Timestamp endTime = null;
+  private String eventName = null;
+  private OpType eventType = null;
+  private StreamTimestamp startTime = null;
+  private StreamTimestamp endTime = null;
   private long elapsedTime = -1L;
-  private OpCompCode statusCode = null;
+  private OpCompCode compCode = null;
   private int reasonCode = 0;
-  private String errorMsg = null;
-  private int severity = -1;
+  private String exception = null;
+  private OpLevel severity = null;
   private String location = null;
   private String correlator = null;
 
-  private String msgSignature = null;
-  private TransportType msgTransport = null;
+  private String trackingId = null;
   private String msgTag = null;
   private Object msgData = null;
   private String msgValue = null;
+  private String msgCharSet = null;
+  private String msgEncoding = null;
+  private Integer msgLength = null;
+  private String msgMimeType = null;
+
+  private Integer processId = 0;
+  private Integer threadId = 0;
+
+  private String snapshotCategory = null;
 
   /**
    * Constructs an ActivityInfo object.
@@ -136,7 +139,7 @@ public class ActivityInfo
         }
         if (fmtValue != null)
         {
-          if (fmtValue instanceof Timestamp && !StringUtils.isEmpty (format))
+          if (fmtValue instanceof StreamTimestamp && !StringUtils.isEmpty (format))
           {
             sb.append (((UsecTimestamp) fmtValue).toString (format));
           }
@@ -209,10 +212,8 @@ public class ActivityInfo
         {
         }
         break;
-      case Resource:
-//        if (value instanceof Resource)
-//        { value = ((Resource) value).getName (); }
-        value = String.valueOf (value);
+      case ResourceName:
+        value = getStringValue (value);
         break;
       case ServerIp:
         if (value instanceof InetAddress)
@@ -245,14 +246,14 @@ public class ActivityInfo
   {
     switch (field.getFieldType ())
     {
-      case ActivityData:
+      case Message:
         msgData = fieldValue;
         break;
-      case ActivityName:
-        actionName = getStringValue (fieldValue);
+      case EventName:
+        eventName = getStringValue (fieldValue);
         break;
-      case ActivityType:
-        actionType = Utils.mapOpType (fieldValue);
+      case EventType:
+        eventType = Utils.mapOpType (fieldValue);
         break;
       case ApplName:
         applName = getStringValue (fieldValue);
@@ -264,29 +265,21 @@ public class ActivityInfo
         elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue () : Long.parseLong (getStringValue (fieldValue));
         break;
       case EndTime:
-        endTime = fieldValue instanceof Timestamp ? (Timestamp) fieldValue
-                                                  : TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ());
+        endTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+                                                        : TimestampFormatter.parse (field.getFormat (), fieldValue, null,
+                                                                                    field.getLocale ());
         break;
-      case ErrorMsg:
-        errorMsg = getStringValue (fieldValue);
+      case Exception:
+        exception = getStringValue (fieldValue);
         break;
       case Location:
         location = getStringValue (fieldValue);
         break;
       case ReasonCode:
-        reasonCode = fieldValue instanceof Number ? ((Number) fieldValue).intValue () : Integer.parseInt (getStringValue (fieldValue));
+        reasonCode = getIntValue (fieldValue);
         break;
-      case ResMgrType:
-        resourceMgrType = ResourceManagerType.valueOf (fieldValue);
-        break;
-      case Resource:
-        resource = getStringValue (fieldValue);
-        break;
-      case ResourceMgr:
-        resourceMgr = getStringValue (fieldValue);
-        break;
-      case ResType:
-        resourceType = ResourceType.valueOf (fieldValue);
+      case ResourceName:
+        resourceName = getStringValue (fieldValue);
         break;
       case ServerIp:
         serverIp = getStringValue (fieldValue);
@@ -294,41 +287,36 @@ public class ActivityInfo
       case ServerName:
         serverName = getStringValue (fieldValue);
         break;
-      case ServerOs:
-        osInfo = getStringValue (fieldValue);
-        break;
       case Severity:
         if (fieldValue instanceof Number)
         {
-          severity = ((Number) fieldValue).intValue ();
+          severity = OpLevel.valueOf (((Number) fieldValue).intValue ());
         }
         else
         {
-          try
-          {
-            severity = OpLevel.valueOf (fieldValue).ordinal ();
-          }
-          catch (Exception e)
-          {
-            severity = Integer.parseInt (getStringValue (fieldValue));
-          }
+          severity = OpLevel.valueOf (fieldValue);
         }
         break;
-      case Signature:
-        msgSignature = getStringValue (fieldValue);
+      case TrackingId:
+        trackingId = getStringValue (fieldValue);
         break;
       case StartTime:
-        startTime = fieldValue instanceof Timestamp ? (Timestamp) fieldValue
-                                                    : TimestampFormatter.parse (field.getFormat (), fieldValue, null, field.getLocale ());
+        startTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+                                                          : TimestampFormatter.parse (field.getFormat (), fieldValue, null,
+                                                                                      field.getLocale ());
         break;
-      case StatusCode:
-        statusCode = OpCompCode.valueOf (fieldValue);
+      case CompCode:
+        if (fieldValue instanceof Number)
+        {
+          compCode = OpCompCode.valueOf (((Number) fieldValue).intValue ());
+        }
+        else
+        {
+          compCode = OpCompCode.valueOf (fieldValue);
+        }
         break;
       case Tag:
         msgTag = getStringValue (fieldValue);
-        break;
-      case Transport:
-        msgTransport = TransportType.valueOf (fieldValue);
         break;
       case UserName:
         userName = getStringValue (fieldValue);
@@ -336,10 +324,77 @@ public class ActivityInfo
       case Value:
         msgValue = getStringValue (fieldValue);
         break;
+      case MsgCharSet:
+        msgCharSet = getStringValue (fieldValue);
+        break;
+      case MsgEncoding:
+        msgEncoding = getStringValue (fieldValue);
+        break;
+      case MsgLength:
+        msgLength = getIntValue (fieldValue);
+        break;
+      case MsgMimeType:
+        msgMimeType = getStringValue (fieldValue);
+        break;
+      case ProcessID:
+        processId = getIntValue (fieldValue);
+        break;
+      case ThreadID:
+        threadId = getIntValue (fieldValue);
+        break;
+      case Category:
+        snapshotCategory = getStringValue (fieldValue);
+        break;
       default:
         throw new IllegalArgumentException ("Unrecognized Activity field: " + field);
     }
     LOGGER.log (OpLevel.TRACE, "Set field {0} to '{1}'", field, fieldValue);
+  }
+
+  /**
+   * Makes fully qualified name of activity source. Name is made from stream parsed data attributes.
+   *
+   * @return fully qualified name of this activity source, or {@code null} if no source defining attributes where parsed from stream.
+   */
+  public Source getSource ()
+  {
+
+    StringBuilder fqnB = new StringBuilder ();
+    if (StringUtils.isNotEmpty (serverName))
+    {
+      if (fqnB.length () > 0)
+      {
+        fqnB.append ("#");
+      }
+      fqnB.append (SourceType.SERVER).append ("=").append (serverName);
+    }
+    if (StringUtils.isNotEmpty (serverIp))
+    {
+      if (fqnB.length () > 0)
+      {
+        fqnB.append ("#");
+      }
+      fqnB.append (SourceType.NETADDR).append ("=").append (serverIp);
+    }
+    if (StringUtils.isNotEmpty (applName))
+    {
+      if (fqnB.length () > 0)
+      {
+        fqnB.append ("#");
+      }
+      fqnB.append (SourceType.APPL).append ("=").append (applName);
+    }
+//    if (StringUtils.isNotEmpty (userName))
+//    {
+//      if (fqnB.length () > 0)
+//      {
+//        fqnB.append ("#");
+//      }
+//      fqnB.append (SourceType.USER).append ("=").append (userName);
+//    }
+    String fqn = fqnB.toString ();
+
+    return StringUtils.isEmpty (fqn) ? null : DefaultSourceFactory.getInstance ().newFromFQN (fqn);
   }
 
   /**
@@ -360,11 +415,10 @@ public class ActivityInfo
     }
     resolveServer ();
     determineTimes ();
-    String signature = StringUtils.isEmpty (msgSignature) ? UUID.randomUUID ().toString () : msgSignature;
-    String correl = StringUtils.isEmpty (correlator) ? signature : correlator;
-    TrackingEvent event =
-        tracker.newEvent (severity < 0 ? OpLevel.INFO : OpLevel.valueOf (severity), actionName, correl, "", (Object[]) null);
-    event.setTrackingId (signature);
+    String trackId = StringUtils.isEmpty (trackingId) ? UUID.randomUUID ().toString () : trackingId;
+    String correl = StringUtils.isEmpty (correlator) ? trackId : correlator;
+    TrackingEvent event = tracker.newEvent (severity == null ? OpLevel.INFO : severity, eventName, correl, "", (Object[]) null);
+    event.setTrackingId (trackId);
     event.setTag (msgTag);
     if (msgData != null)
     {
@@ -372,61 +426,73 @@ public class ActivityInfo
       {
         byte[] binData = (byte[]) msgData;
         event.setMessage (binData, (Object[]) null);
-        event.setSize (binData.length);
+        event.setSize (msgLength == null ? binData.length : msgLength);
       }
       else
       {
-        event.setEncoding (Message.ENCODING_NONE);
         String strData = String.valueOf (msgData);
         event.setMessage (strData, (Object[]) null);
-        event.setSize (strData.length ());
+        event.setSize (msgLength == null ? strData.length () : msgLength);
       }
     }
-    event.getOperation ().setCompCode (statusCode == null ? OpCompCode.SUCCESS : statusCode);
+    if (StringUtils.isNotEmpty (msgMimeType))
+    {
+      event.setMimeType (msgMimeType);
+    }
+    if (StringUtils.isNotEmpty (msgEncoding))
+    {
+      event.setEncoding (msgEncoding);
+    }
+    if (StringUtils.isNotEmpty (msgCharSet))
+    {
+      event.setCharset (msgCharSet);
+    }
+
+    event.getOperation ().setCompCode (compCode == null ? OpCompCode.SUCCESS : compCode);
     event.getOperation ().setReasonCode (reasonCode);
-    event.getOperation ().setType (actionType);
-    event.getOperation ().setException (errorMsg);
+    event.getOperation ().setType (eventType);
+    event.getOperation ().setException (exception);
     event.getOperation ().setLocation (location);
-    event.getOperation ().setResource (StringUtils.isEmpty (resourceMgr) ? UNSPECIFIED_LABEL : resourceMgr);
+    event.getOperation ().setResource (StringUtils.isEmpty (resourceName) ? UNSPECIFIED_LABEL : resourceName);
     event.getOperation ().setUser (userName);
-    event.getOperation ().setTID (Thread.currentThread ().getId ());
-    event.getOperation ().setSeverity (severity < 0 ? OpLevel.INFO : OpLevel.valueOf (severity));
+    event.getOperation ().setTID (threadId == null ? Thread.currentThread ().getId () : threadId);
+    event.getOperation ().setPID (processId == null ? Utils.getVMPID () : processId);
+    event.getOperation ().setSeverity (severity == null ? OpLevel.INFO : severity);
+    if (StringUtils.isNotEmpty (msgValue))
+    {
+      event.getOperation ().addProperty (new Property ("MsgValue", msgValue));
+    }
     event.start (startTime);
     event.stop (endTime, elapsedTime);
-    Snapshot snapshot = tracker.newSnapshot (SNAPSHOT_CATEGORY, event.getOperation ().getName ());
+    Snapshot snapshot = tracker.newSnapshot (StringUtils.isEmpty (snapshotCategory) ? SNAPSHOT_CATEGORY : snapshotCategory,
+                                             event.getOperation ().getName ());
     //snapshot.setParentId (event);
     snapshot.add (Constants.XML_APPL_NAME_LABEL, applName);
     snapshot.add (Constants.XML_SERVER_NAME_LABEL, serverName);
     snapshot.add (Constants.XML_SERVER_IP_LABEL, serverIp);
     snapshot.add (Constants.XML_SERVER_CPU_COUNT_LABEL, 1);
-    snapshot.add (Constants.XML_SERVER_OS_LABEL, osInfo);
     snapshot.add (Constants.XML_APPL_USER_LABEL, userName);
-    snapshot.add (Constants.XML_RESMGR_NAME_LABEL, StringUtils.isEmpty (resourceMgr) ? UNSPECIFIED_LABEL : resourceMgr);
-    snapshot.add (Constants.XML_RESMGR_TYPE_LABEL, resourceMgrType == null ? ResourceManagerType.UNKNOWN : resourceMgrType);
     snapshot.add (Constants.XML_RESMGR_SERVER_LABEL, serverName);
     snapshot.add (Constants.XML_LUW_SIGNATURE_LABEL, UUID.randomUUID ().toString ());
-    snapshot.add (Constants.XML_LUW_TID_LABEL, Thread.currentThread ().getId ());
+    snapshot.add (Constants.XML_LUW_TID_LABEL, threadId == null ? Thread.currentThread ().getId () : threadId);
+    snapshot.add (Constants.XML_LUW_PID_LABEL, processId == null ? Utils.getVMPID () : processId);
     snapshot.add (Constants.XML_LUW_START_TIME_SEC_LABEL, startTime);
     snapshot.add (Constants.XML_LUW_END_TIME_SEC_LABEL, endTime);
-    snapshot.add (Constants.XML_LUW_STATUS_LABEL, statusCode == OpCompCode.ERROR ? ActivityStatus.EXCEPTION : ActivityStatus.END);
-    snapshot.add (Constants.XML_LUW_TYPE_LABEL,
-                  actionType == OpType.RECEIVE ? LuwType.CONSUMER : actionType == OpType.SEND ? LuwType.PRODUCER : null);
-    snapshot.add (Constants.XML_OP_FUNC_LABEL, actionName);
-    snapshot.add (Constants.XML_OP_TYPE_LABEL, actionType == null ? OpType.OTHER : actionType);
+    snapshot.add (Constants.XML_LUW_STATUS_LABEL, compCode == OpCompCode.ERROR ? ActivityStatus.EXCEPTION : ActivityStatus.END);
+    snapshot.add (Constants.XML_OP_FUNC_LABEL, eventName);
+    snapshot.add (Constants.XML_OP_TYPE_LABEL, eventType == null ? OpType.OTHER : eventType);
     snapshot.add (Constants.XML_OP_USER_NAME_LABEL, userName);
-    snapshot.add (Constants.XML_OP_CC_LABEL, statusCode == null ? OpCompCode.SUCCESS : statusCode);
+    snapshot.add (Constants.XML_OP_CC_LABEL, compCode == null ? OpCompCode.SUCCESS : compCode);
     snapshot.add (Constants.XML_OP_RC_LABEL, reasonCode);
-    snapshot.add (Constants.XML_OP_EXCEPTION_LABEL, errorMsg);
+    snapshot.add (Constants.XML_OP_EXCEPTION_LABEL, exception);
     snapshot.add (Constants.XML_OP_START_TIME_SEC_LABEL, startTime);
     snapshot.add (Constants.XML_OP_END_TIME_SEC_LABEL, endTime);
     snapshot.add (Constants.XML_OP_ELAPSED_TIME_LABEL, elapsedTime);
-    snapshot.add (Constants.XML_OP_SEVERITY_LABEL, severity < 0 ? OpLevel.INFO : OpLevel.valueOf (severity));
+    snapshot.add (Constants.XML_OP_SEVERITY_LABEL, severity == null ? OpLevel.INFO : severity);
     snapshot.add (Constants.XML_OP_LOCATION_LABEL, location);
     snapshot.add (Constants.XML_OP_CORRELATOR_LABEL, correlator);
-    snapshot.add (Constants.XML_OP_RES_NAME_LABEL, StringUtils.isEmpty (resource) ? UNSPECIFIED_LABEL : resource);
-    snapshot.add (Constants.XML_OP_RES_TYPE_LABEL, resourceType == null ? ResourceType.UNKNOWN : resourceType);
-    snapshot.add (Constants.XML_MSG_SIGNATURE_LABEL, signature);
-    snapshot.add (Constants.XML_MSG_TRANSPORT_LABEL, msgTransport == null ? TransportType.UNKNOWN : msgTransport);
+    snapshot.add (Constants.XML_OP_RES_NAME_LABEL, StringUtils.isEmpty (resourceName) ? UNSPECIFIED_LABEL : resourceName);
+    snapshot.add (Constants.XML_MSG_SIGNATURE_LABEL, trackId);
     snapshot.add (Constants.XML_MSG_TAG_LABEL, msgTag);
     snapshot.add (Constants.XML_MSG_CORRELATOR_LABEL, correlator);
     snapshot.add (Constants.XML_MSG_VALUE_LABEL, msgValue);
@@ -436,21 +502,16 @@ public class ActivityInfo
       {
         byte[] binData = (byte[]) msgData;
         snapshot.add (Constants.XML_NAS_MSG_BINDATA_LABEL, binData);
-        snapshot.add (Constants.XML_MSG_SIZE_LABEL, binData.length);
+        snapshot.add (Constants.XML_MSG_SIZE_LABEL, msgLength == null ? binData.length : msgLength);
       }
       else
       {
         String strData = String.valueOf (msgData);
         snapshot.add (Constants.XML_NAS_MSG_STRDATA_LABEL, strData);
-        snapshot.add (Constants.XML_MSG_SIZE_LABEL, strData.length ());
+        snapshot.add (Constants.XML_MSG_SIZE_LABEL, msgLength == null ? strData.length () : msgLength);
       }
     }
     event.getOperation ().addSnapshot (snapshot);
-//    TrackingActivity activity = tracker.newActivity (severity < 0 ? OpLevel.INFO : OpLevel.valueOf (severity), actionName, signature);
-//    activity.start ();
-//    //activity.setCorrelator (correlator);
-//    activity.setUser (userName);
-//    activity.tnt (event);
     StreamsThread thread = null;
     if (Thread.currentThread () instanceof StreamsThread)
     {
@@ -459,13 +520,11 @@ public class ActivityInfo
     boolean retryAttempt = false;
     do
     {
-      if (event != null)    //if (activity != null)
+      if (event != null)
       {
         try
         {
           tracker.tnt (event);
-//          activity.stop ();
-//          tracker.tnt (activity);
           if (retryAttempt)
           {
             LOGGER.log (OpLevel.INFO, "Activity recording retry successful");
@@ -498,7 +557,6 @@ public class ActivityInfo
     {
       serverName = Utils.getLocalHostName ();
       serverIp = Utils.getLocalHostAddress ();
-      osInfo = null;    // streams API will then fill in local information
     }
     else if (StringUtils.isEmpty (serverName))
     {
@@ -506,7 +564,6 @@ public class ActivityInfo
       {
         serverName = Utils.getLocalHostName ();
         serverIp = Utils.getLocalHostAddress ();
-        osInfo = null;    // streams API will then fill in local information
       }
       else
       {
@@ -572,17 +629,17 @@ public class ActivityInfo
     {
       if (startTime != null)
       {
-        endTime = new Timestamp (startTime);
+        endTime = new StreamTimestamp (startTime);
         endTime.add (0L, elapsedTime);
       }
       else
       {
-        endTime = new Timestamp ();
+        endTime = new StreamTimestamp ();
       }
     }
     if (startTime == null)
     {
-      startTime = new Timestamp (endTime);
+      startTime = new StreamTimestamp (endTime);
       startTime.subtract (0L, elapsedTime);
     }
   }
@@ -603,6 +660,11 @@ public class ActivityInfo
     return String.valueOf (value);
   }
 
+  private static Integer getIntValue (Object value)
+  {
+    return value instanceof Number ? ((Number) value).intValue () : Integer.parseInt (getStringValue (value));
+  }
+
   public String getServerName ()
   {
     return serverName;
@@ -611,11 +673,6 @@ public class ActivityInfo
   public String getServerIp ()
   {
     return serverIp;
-  }
-
-  public String getOsInfo ()
-  {
-    return osInfo;
   }
 
   public String getApplName ()
@@ -628,42 +685,27 @@ public class ActivityInfo
     return userName;
   }
 
-  public String getResourceMgr ()
+  public String getResourceName ()
   {
-    return resourceMgr;
+    return resourceName;
   }
 
-  public ResourceManagerType getResourceMgrType ()
+  public String getEventName ()
   {
-    return resourceMgrType;
+    return eventName;
   }
 
-  public String getResource ()
+  public OpType getEventType ()
   {
-    return resource;
+    return eventType;
   }
 
-  public ResourceType getResourceType ()
-  {
-    return resourceType;
-  }
-
-  public String getActionName ()
-  {
-    return actionName;
-  }
-
-  public OpType getActionType ()
-  {
-    return actionType;
-  }
-
-  public Timestamp getStartTime ()
+  public StreamTimestamp getStartTime ()
   {
     return startTime;
   }
 
-  public Timestamp getEndTime ()
+  public StreamTimestamp getEndTime ()
   {
     return endTime;
   }
@@ -673,9 +715,9 @@ public class ActivityInfo
     return elapsedTime;
   }
 
-  public OpCompCode getStatusCode ()
+  public OpCompCode getCompCode ()
   {
-    return statusCode;
+    return compCode;
   }
 
   public int getReasonCode ()
@@ -683,12 +725,12 @@ public class ActivityInfo
     return reasonCode;
   }
 
-  public String getErrorMsg ()
+  public String getException ()
   {
-    return errorMsg;
+    return exception;
   }
 
-  public int getSeverity ()
+  public OpLevel getSeverity ()
   {
     return severity;
   }
@@ -698,14 +740,9 @@ public class ActivityInfo
     return location;
   }
 
-  public String getMsgSignature ()
+  public String getTrackingId ()
   {
-    return msgSignature;
-  }
-
-  public TransportType getMsgTransport ()
-  {
-    return msgTransport;
+    return trackingId;
   }
 
   public String getMsgTag ()
@@ -726,5 +763,40 @@ public class ActivityInfo
   public String getMsgValue ()
   {
     return msgValue;
+  }
+
+  public String getMsgCharSet ()
+  {
+    return msgCharSet;
+  }
+
+  public String getMsgEncoding ()
+  {
+    return msgEncoding;
+  }
+
+  public int getMsgLength ()
+  {
+    return msgLength;
+  }
+
+  public String getMsgMimeType ()
+  {
+    return msgMimeType;
+  }
+
+  public Integer getProcessId ()
+  {
+    return processId;
+  }
+
+  public Integer getThreadId ()
+  {
+    return threadId;
+  }
+
+  public String getSnapshotCategory ()
+  {
+    return snapshotCategory;
   }
 }

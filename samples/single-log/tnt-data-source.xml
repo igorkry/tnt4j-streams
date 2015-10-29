@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
 
     <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
@@ -10,8 +10,8 @@
         <field name="ApplName" value="orders"/>
         <field name="Correlator" locator="3"/>
         <field name="UserName" locator="4"/>
-        <field name="ActivityName" locator="5"/>
-        <field name="ActivityType" locator="5">
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
             <field-map source="Order Placed" target="START"/>
             <field-map source="Order Received" target="RECEIVE"/>
             <field-map source="Order Processing" target="OPEN"/>

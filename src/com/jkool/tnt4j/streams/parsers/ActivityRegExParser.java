@@ -197,7 +197,7 @@ public class ActivityRegExParser extends ActivityParser
     }
     ActivityInfo ai = new ActivityInfo ();
     // save entire activity string as message data
-    ActivityField field = new ActivityField (ActivityFieldType.ActivityData);
+    ActivityField field = new ActivityField (StreamFieldType.Message);
     applyFieldValue (ai, field, dataStr);
     // apply fields for parser
     try

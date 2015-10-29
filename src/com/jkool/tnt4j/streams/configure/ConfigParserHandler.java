@@ -24,7 +24,7 @@ import java.util.*;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkool.tnt4j.streams.fields.ActivityFieldType;
+import com.jkool.tnt4j.streams.fields.StreamFieldType;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -279,7 +279,7 @@ public class ConfigParserHandler extends DefaultHandler
     currFieldHasLocValAttr = false;
     currFieldHasLocElmt = false;
     currFieldHasMapElmt = false;
-    ActivityFieldType field = null;
+    StreamFieldType field = null;
     ActivityFieldDataType dataType = null;
     String locatorType = null;
     String locator = null;
@@ -297,7 +297,7 @@ public class ConfigParserHandler extends DefaultHandler
       String attValue = attrs.getValue (i);
       if (attName.equals (NAME_ATTR))
       {
-        field = ActivityFieldType.valueOf (attValue);
+        field = StreamFieldType.valueOf (attValue);
       }
       else if (attName.equals (DATA_TYPE_ATTR))
       {

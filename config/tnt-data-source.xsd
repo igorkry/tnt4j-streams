@@ -184,6 +184,234 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- TNT Stream Field Types -->
+    <xs:simpleType name="StreamFieldType">
+        <xs:annotation>
+            <xs:documentation>
+                Set of supported TNT Stream event components.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ApplName">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of application associated with the activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ServerName">
+                <xs:annotation>
+                    <xs:documentation>
+                        Host name of server where activity occurred.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ServerIp">
+                <xs:annotation>
+                    <xs:documentation>
+                        IP Address of server where activity occurred.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="EventName">
+                <xs:annotation>
+                    <xs:documentation>
+                        String identifying activity/operation/event/method.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="EventType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Type of activity - Value must match values in OpType enumeration.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="StartTime">
+                <xs:annotation>
+                    <xs:documentation>
+                        Start time of the activity as either a date/time or a timestamp.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="EndTime">
+                <xs:annotation>
+                    <xs:documentation>
+                        End time of the activity as either a date/time or a timestamp.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ElapsedTime">
+                <xs:annotation>
+                    <xs:documentation>
+                        Elapsed time of the activity in the specified units - default: Microseconds.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ProcessID">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier of process where activity event has occurred.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ThreadID">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier of thread where activity event has occurred.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="CompCode">
+                <xs:annotation>
+                    <xs:documentation>
+                        Indicates completion status of the activity - Value must match values in OpCompCode enumeration.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ReasonCode">
+                <xs:annotation>
+                    <xs:documentation>
+                        Numeric reason/error code associated with the activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Exception">
+                <xs:annotation>
+                    <xs:documentation>
+                        Error/exception message associated with the activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Severity">
+                <xs:annotation>
+                    <xs:documentation>
+                        Indicates severity of the activity - Value can either be a label in OperationSeverity enumeration or a numeric
+                        value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Location">
+                <xs:annotation>
+                    <xs:documentation>
+                        String defining location activity occurred at - e.g. GPS location, source file line, etc.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Correlator">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier used to correlate/relate activity entries to group them into logical entities.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Tag">
+                <xs:annotation>
+                    <xs:documentation>
+                        User-defined label to associate with the activity, generally for locating activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="UserName">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of user associated with the activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ResourceName">
+                <xs:annotation>
+                    <xs:documentation>
+                        Name of resource associated with the activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Message">
+                <xs:annotation>
+                    <xs:documentation>
+                        Data to associate with the activity event.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="TrackingId">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier used to uniquely identify the data associated with this activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="MsgLength">
+                <xs:annotation>
+                    <xs:documentation>
+                        Length of activity event message data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="MsgMimeType">
+                <xs:annotation>
+                    <xs:documentation>
+                        MIME type of activity event message data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="MsgEncoding">
+                <xs:annotation>
+                    <xs:documentation>
+                        Encoding of activity event message data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="MsgCharSet">
+                <xs:annotation>
+                    <xs:documentation>
+                        CharSet of activity event message data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Value">
+                <xs:annotation>
+                    <xs:documentation>
+                        User-defined value associated with the activity (e.g. monetary value).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Category">
+                <xs:annotation>
+                    <xs:documentation>
+                        Activity event category name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Activity Field Types -->
     <xs:simpleType name="ActivityField">
         <xs:annotation>
@@ -197,14 +425,6 @@
                 <xs:annotation>
                     <xs:documentation>
                         Data to associate with the activity.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
-            <xs:enumeration value="ActivityName">
-                <xs:annotation>
-                    <xs:documentation>
-                        String identifying activity/operation/event/method.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -397,7 +617,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <!-- Activity Parser Field Value Locator Types -->
+    <!-- Stream Parser Field Value Locator Types -->
     <xs:simpleType name="FieldLocator">
         <xs:annotation>
             <xs:documentation>
@@ -798,10 +1018,10 @@
                                         </xs:element>
                                     </xs:choice>
 
-                                    <xs:attribute name="name" use="required" type="ActivityField">
+                                    <xs:attribute name="name" use="required" type="StreamFieldType">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Name of activity field from defined list of fields.
+                                                Name of TNT Stream field from defined list of fields.
                                             </xs:documentation>
                                         </xs:annotation>
                                     </xs:attribute>

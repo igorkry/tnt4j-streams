@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
 
     <parser name="WmqMsgOpXmlParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
-        <field name="ActivityData" locator="/messaging_operation/MsgData" locator-type="Label" datatype="String" format="string"/>
-        <field name="ActivityName" locator="/messaging_operation/OperationName" locator-type="Label"/>
-        <field name="ActivityType" locator="/messaging_operation/OperationName" locator-type="Label">
+        <field name="Message" locator="/messaging_operation/MsgData" locator-type="Label" datatype="String" format="string"/>
+        <field name="EventName" locator="/messaging_operation/OperationName" locator-type="Label"/>
+        <field name="EventType" locator="/messaging_operation/OperationName" locator-type="Label">
             <field-map source="MQGET" target="RECEIVE"/>
             <field-map source="MQPUT" target="SEND"/>
             <field-map source="MQPUT1" target="SEND"/>
@@ -31,33 +31,11 @@
         <field name="Correlator" locator="/messaging_operation/Correlator" locator-type="Label"/>
         <field name="ElapsedTime" locator="/messaging_operation/ElapsedTime" locator-type="Label" datatype="Number"/>
         <field name="EndTime" locator="/messaging_operation/EndTime" locator-type="Label" datatype="DateTime"/>
-        <field name="Resource" locator="/messaging_operation/ObjectName" locator-type="Label"/>
-        <field name="ResMgrType" value="MESSAGING_SERVER"/>
-        <field name="ResourceMgr" locator="/messaging_operation/ResMgr" locator-type="Label"/>
-        <field name="ResType" locator="/messaging_operation/ObjectType" locator-type="Label">
-            <field-map source="1" target="WMQ_QUEUE"/>
-            <field-map source="5" target="WMQ_QMGR"/>
-            <field-map source="6" target="WMQ_CHANNEL"/>
-            <field-map source="8" target="WMQ_TOPIC"/>
-            <field-map source="1002" target="WMQ_QUEUE"/>
-            <field-map source="1003" target="WMQ_QUEUE"/>
-            <field-map source="1004" target="WMQ_QUEUE"/>
-            <field-map source="1005" target="WMQ_QUEUE"/>
-            <field-map source="1007" target="WMQ_CHANNEL"/>
-            <field-map source="1008" target="WMQ_CHANNEL"/>
-            <field-map source="1009" target="WMQ_CHANNEL"/>
-            <field-map source="1010" target="WMQ_CHANNEL"/>
-            <field-map source="1011" target="WMQ_CHANNEL"/>
-            <field-map source="1012" target="WMQ_CHANNEL"/>
-            <field-map source="1013" target="WMQ_CHANNEL"/>
-            <field-map source="1014" target="WMQ_CHANNEL"/>
-            <field-map source="1015" target="WMQ_CHANNEL"/>
-        </field>
+        <field name="ResourceName" locator="/messaging_operation/ObjectName" locator-type="Label"/>
         <field name="ReasonCode" locator="/messaging_operation/ReasonCode" locator-type="Label" datatype="Number"/>
         <field name="ServerIp" locator="/messaging_operation/ServerIp" locator-type="Label"/>
         <field name="ServerName" locator="/messaging_operation/ServerName" locator-type="Label"/>
-        <field name="ServerOs" locator="/messaging_operation/ServerOs" locator-type="Label"/>
-        <field name="Signature" separator="#!#">
+        <field name="TrackingId" separator="#!#">
             <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/>
             <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/>
             <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary" format="hexBinary"/>
@@ -68,7 +46,7 @@
             <field-locator locator="/messaging_operation/MsgPutTime" locator-type="Label"/>
         </field>
         <field name="StartTime" locator="/messaging_operation/StartTime" locator-type="Label" datatype="DateTime"/>
-        <field name="StatusCode" locator="/messaging_operation/CompCode" locator-type="Label">
+        <field name="CompCode" locator="/messaging_operation/CompCode" locator-type="Label">
             <field-map source="0" target="SUCCESS"/>
             <field-map source="1" target="WARNING"/>
             <field-map source="2" target="ERROR"/>

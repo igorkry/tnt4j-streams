@@ -31,37 +31,38 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p>Represents a timestamp that has microsecond accuracy.</p>
+ * <p>Represents a timestamp that has microsecond accuracy. When constructing timestamp values from string it uses (@code Locale} to parse
+ * it.</p>
  *
  * @version $Revision: 3 $
  * @see com.nastel.jkool.tnt4j.core.UsecTimestamp
  */
-public class Timestamp extends UsecTimestamp
+public class StreamTimestamp extends UsecTimestamp
 {
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (Timestamp.class);
+  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamTimestamp.class);
 
   private static final long serialVersionUID = 584224868408250622L;
 
-  public Timestamp ()
+  public StreamTimestamp ()
   {
   }
 
-  public Timestamp (long mSecs)
+  public StreamTimestamp (long mSecs)
   {
     super (mSecs);
   }
 
-  public Timestamp (long mSecs, long uSecs)
+  public StreamTimestamp (long mSecs, long uSecs)
   {
     super (mSecs, uSecs);
   }
 
-  public Timestamp (java.sql.Timestamp timestamp, long uSecs)
+  public StreamTimestamp (java.sql.Timestamp timestamp, long uSecs)
   {
     super (timestamp, uSecs);
   }
 
-  public Timestamp (Timestamp other)
+  public StreamTimestamp (StreamTimestamp other)
   {
     super (other);
   }
@@ -86,7 +87,7 @@ public class Timestamp extends UsecTimestamp
    * @see java.util.TimeZone
    * @since Revision: 10
    */
-  public Timestamp (String timeStampStr, String formatStr, String timeZoneId, String locale) throws ParseException
+  public StreamTimestamp (String timeStampStr, String formatStr, String timeZoneId, String locale) throws ParseException
   {
     if (timeStampStr == null)
     {
@@ -154,8 +155,8 @@ public class Timestamp extends UsecTimestamp
    * {@inheritDoc}
    */
   @Override
-  public Timestamp clone () throws CloneNotSupportedException
+  public StreamTimestamp clone () throws CloneNotSupportedException
   {
-    return (Timestamp) super.clone ();
+    return (StreamTimestamp) super.clone ();
   }
 }

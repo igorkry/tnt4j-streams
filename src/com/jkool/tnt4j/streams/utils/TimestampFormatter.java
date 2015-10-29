@@ -42,7 +42,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @version $Revision: 6 $
  * @see SimpleDateFormat
- * @see Timestamp
+ * @see StreamTimestamp
  */
 public class TimestampFormatter
 {
@@ -163,19 +163,19 @@ public class TimestampFormatter
    * @throws ParseException if an error parsing the specified value based
    *                        timestamp pattern supported by this parser;
    */
-  public Timestamp parse (Object value) throws ParseException
+  public StreamTimestamp parse (Object value) throws ParseException
   {
-    if (value instanceof Timestamp)
+    if (value instanceof StreamTimestamp)
     {
-      return (Timestamp) value;
+      return (StreamTimestamp) value;
     }
     if (value instanceof Date)
     {
-      return new Timestamp (((Date) value).getTime ());
+      return new StreamTimestamp (((Date) value).getTime ());
     }
     if (value instanceof Calendar)
     {
-      return new Timestamp (((Calendar) value).getTimeInMillis ());
+      return new StreamTimestamp (((Calendar) value).getTimeInMillis ());
     }
     if (value instanceof String || value instanceof Number)
     {
@@ -218,9 +218,9 @@ public class TimestampFormatter
    *
    * @throws ParseException if an error parsing the specified value
    */
-  public static Timestamp parse (ActivityFieldUnitsType units, Object value) throws ParseException
+  public static StreamTimestamp parse (ActivityFieldUnitsType units, Object value) throws ParseException
   {
-    Timestamp ts;
+    StreamTimestamp ts;
     try
     {
       long time;
@@ -243,13 +243,13 @@ public class TimestampFormatter
         case Microseconds:
           long mSecs = time / 1000L;
           long uSecs = time - mSecs * 1000L;
-          ts = new Timestamp (mSecs, uSecs);
+          ts = new StreamTimestamp (mSecs, uSecs);
           break;
         case Seconds:
-          ts = new Timestamp (time * 1000L);
+          ts = new StreamTimestamp (time * 1000L);
           break;
         default:
-          ts = new Timestamp (time);
+          ts = new StreamTimestamp (time);
           break;
       }
     }
@@ -277,10 +277,10 @@ public class TimestampFormatter
    * @throws ParseException if an error parsing the specified value based on pattern
    * @see java.util.TimeZone
    */
-  public static Timestamp parse (String pattern, Object value, String timeZoneId, String locale) throws ParseException
+  public static StreamTimestamp parse (String pattern, Object value, String timeZoneId, String locale) throws ParseException
   {
     String dateStr = value.toString ();
-    return new Timestamp (dateStr, pattern, timeZoneId, locale);
+    return new StreamTimestamp (dateStr, pattern, timeZoneId, locale);
   }
 
   /**

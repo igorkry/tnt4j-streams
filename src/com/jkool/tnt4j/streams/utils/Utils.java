@@ -26,8 +26,6 @@ import com.nastel.jkool.tnt4j.core.OpType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * General utility methods.
@@ -286,33 +284,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
         return OpType.BROWSE;
       default:
         return OpType.OTHER;
-    }
-  }
-
-  public static String getConnectUrl (String protocol, String... urlArgs) throws IllegalArgumentException
-  {
-    if (StringUtils.isEmpty (protocol))
-    {
-      throw new IllegalArgumentException ("Protocol for URL can't be empty");
-    }
-    if (ArrayUtils.isEmpty (urlArgs))
-    {
-      throw new IllegalArgumentException ("URL arguments can't be empty");
-    }
-    try
-    {
-      if (protocol.equalsIgnoreCase ("file"))
-      {
-        return protocol.toLowerCase () + "://" + urlArgs[0];
-      }
-      else
-      {
-        return protocol.toLowerCase () + "://" + urlArgs[0] + ":" + urlArgs[1];
-      }
-    }
-    catch (ArrayIndexOutOfBoundsException exc)
-    {
-      throw new IllegalArgumentException ("Could not build URL string. Some arguments are missing:", exc);
     }
   }
 }
