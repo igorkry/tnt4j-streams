@@ -384,14 +384,14 @@ public class ActivityInfo
       }
       fqnB.append (SourceType.APPL).append ("=").append (applName);
     }
-//    if (StringUtils.isNotEmpty (userName))
-//    {
-//      if (fqnB.length () > 0)
-//      {
-//        fqnB.append ("#");
-//      }
-//      fqnB.append (SourceType.USER).append ("=").append (userName);
-//    }
+    if (StringUtils.isNotEmpty (userName))
+    {
+      if (fqnB.length () > 0)
+      {
+        fqnB.append ("#");
+      }
+      fqnB.append (SourceType.USER).append ("=").append (userName);
+    }
     String fqn = fqnB.toString ();
 
     return StringUtils.isEmpty (fqn) ? null : DefaultSourceFactory.getInstance ().newFromFQN (fqn);
