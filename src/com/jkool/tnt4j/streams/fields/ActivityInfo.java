@@ -45,7 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ActivityInfo
 {
   public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>";
-  private static final String SNAPSHOT_CATEGORY = "TNT4J-Streams"; //TODO: category name
+  private static final String SNAPSHOT_CATEGORY = "TNT4J-Streams-event-snapshot";
 
   private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityInfo.class);
   private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String> ();

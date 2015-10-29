@@ -17,3 +17,5 @@ hs_err_pid*
 /config/tnt-data-source.xml
 /tnt4j-streams.iml
 /config/log4j__.xml__
+/access.log
+/samples/apache-access-log/regexp.txt
