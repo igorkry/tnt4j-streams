@@ -514,7 +514,9 @@ public class ActivityFieldLocator
   }
 
   /**
-   * {@inheritDoc}
+   * Returns string representing field locator by type and locator key.
+   *
+   * @return a string representing field locator.
    */
   @Override
   public String toString ()

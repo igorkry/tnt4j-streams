@@ -26,7 +26,35 @@ package com.jkool.tnt4j.streams.types;
  */
 public enum MessageType
 {
-  UNKNOWN (0), REQUEST (1), REPLY (2), REPORT (4), DATAGRAM (8), ACKNOWLEDGEMENT (12);
+  /**
+   * Unknown message type.
+   */
+  UNKNOWN (0),
+
+  /**
+   * Request message type.
+   */
+  REQUEST (1),
+
+  /**
+   * Reply message type.
+   */
+  REPLY (2),
+
+  /**
+   * Report message type.
+   */
+  REPORT (4),
+
+  /**
+   * Datagram message type.
+   */
+  DATAGRAM (8),
+
+  /**
+   * Acknowledgement message type.
+   */
+  ACKNOWLEDGEMENT (12);
 
   MessageType (int enumValue)
   {

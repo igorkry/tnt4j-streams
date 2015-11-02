@@ -188,6 +188,13 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
     return new String (base64Encode (_msgDigest.digest ()));
   }
 
+  /**
+   * Maps OpType enumeration literal from string or numeric value.
+   *
+   * @param opType object to be mapped to OpType enumeration literal
+   *
+   * @return OpType mapping or {@code null} if mapping not found.
+   */
   public static OpType mapOpType (Object opType)
   {
     if (opType == null)

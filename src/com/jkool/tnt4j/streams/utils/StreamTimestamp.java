@@ -31,7 +31,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p>Represents a timestamp that has microsecond accuracy. When constructing timestamp values from string it uses (@code Locale} to parse
+ * <p>Represents a timestamp that has microsecond accuracy. When constructing timestamp values from string it uses {@code Locale} to parse
  * it.</p>
  *
  * @version $Revision: 3 $
@@ -43,32 +43,71 @@ public class StreamTimestamp extends UsecTimestamp
 
   private static final long serialVersionUID = 584224868408250622L;
 
+  /**
+   * Creates Stream Timestamp based on current time with microsecond precision/accuracy
+   *
+   * @see com.nastel.jkool.tnt4j.utils.Utils#currentTimeUsec
+   */
   public StreamTimestamp ()
   {
   }
 
+  /**
+   * Creates Stream Timestamp based on specified microsecond timestamp.
+   *
+   * @param usecTime timestamp, in microsecond
+   *
+   * @throws IllegalArgumentException if usecTime is negative
+   */
   public StreamTimestamp (long mSecs)
   {
     super (mSecs);
   }
 
+  /**
+   * Creates Stream Timestamp based on specified millisecond timestamp
+   * and fractional microsecond.
+   *
+   * @param msecs timestamp, in milliseconds
+   * @param usecs fraction microseconds
+   *
+   * @throws IllegalArgumentException if any arguments are negative,
+   *                                  or if usecs is greater than 999
+   */
   public StreamTimestamp (long mSecs, long uSecs)
   {
     super (mSecs, uSecs);
   }
 
+  /**
+   * Creates Stream Timestamp based on specified Timestamp, providing time in
+   * seconds resolution, and fractional microsecond.
+   *
+   * @param timestamp database timestamp, seconds resolution
+   * @param usecs     fraction microseconds
+   *
+   * @throws NullPointerException     if timestamp is <code>null</code>
+   * @throws IllegalArgumentException if usecs is greater than 999999
+   */
   public StreamTimestamp (java.sql.Timestamp timestamp, long uSecs)
   {
     super (timestamp, uSecs);
   }
 
+  /**
+   * Creates Stream Timestamp based on specified Stream Timestamp.
+   *
+   * @param other timestamp to copy
+   *
+   * @throws NullPointerException if timestamp is <code>null</code>
+   */
   public StreamTimestamp (StreamTimestamp other)
   {
     super (other);
   }
 
   /**
-   * <p>Creates UsecTimestamp from string representation of timestamp in the
+   * <p>Creates Stream Timestamp from string representation of timestamp in the
    * specified format.</p>
    * <p>This is based on {@link SimpleDateFormat}, but extends its support to
    * recognize microsecond fractional seconds.  If number of fractional second
@@ -152,7 +191,16 @@ public class StreamTimestamp extends UsecTimestamp
   }
 
   /**
-   * {@inheritDoc}
+   * Makes copy of Stream timestamp object.
+   *
+   * @return a clone of this instance.
+   *
+   * @throws CloneNotSupportedException if the object's class does not
+   *                                    support the {@code Cloneable} interface. Subclasses
+   *                                    that override the {@code clone} method can also
+   *                                    throw this exception to indicate that an instance cannot
+   *                                    be cloned.
+   * @see Object#clone()
    */
   @Override
   public StreamTimestamp clone () throws CloneNotSupportedException

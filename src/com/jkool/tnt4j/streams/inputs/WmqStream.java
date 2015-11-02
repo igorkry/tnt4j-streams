@@ -233,6 +233,13 @@ public class WmqStream extends TNTInputStream
     gmo.options |= CMQC.MQGMO_SYNCPOINT | CMQC.MQGMO_WAIT;
   }
 
+  /**
+   * Checks if connection to queue manager is opened.
+   *
+   * @param mqe MQ exception object
+   *
+   * @return flag identifying if connected to queue manager
+   */
   protected boolean isConnectedToQmgr (MQException mqe)
   {
     if (qmgr == null || !qmgr.isConnected ())

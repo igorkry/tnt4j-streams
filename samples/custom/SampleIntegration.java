@@ -39,6 +39,8 @@ public final class SampleIntegration
 
   /**
    * Configure streams and parsers, and run each stream in its own thread.
+   *
+   * @param cfgFileName configuration file name
    */
   public static void loadConfigAndRun (String cfgFileName)
   {
@@ -76,6 +78,8 @@ public final class SampleIntegration
   /**
    * The following can be used if using the default configuration file
    * with a single stream.
+   *
+   * @param cfgFileName configuration file name
    */
   public static void simpleConfigAndRun (String cfgFileName)
   {

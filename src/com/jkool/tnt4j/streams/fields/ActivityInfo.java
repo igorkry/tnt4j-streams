@@ -44,6 +44,9 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ActivityInfo
 {
+  /**
+   * The constant to indicate undefined value.
+   */
   public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>";
   private static final String SNAPSHOT_CATEGORY = "TNT4J-Streams-event-snapshot";
 
@@ -665,136 +668,271 @@ public class ActivityInfo
     return value instanceof Number ? ((Number) value).intValue () : Integer.parseInt (getStringValue (value));
   }
 
+  /**
+   * Gets server name.
+   *
+   * @return the server name
+   */
   public String getServerName ()
   {
     return serverName;
   }
 
+  /**
+   * Gets server ip.
+   *
+   * @return the server ip
+   */
   public String getServerIp ()
   {
     return serverIp;
   }
 
+  /**
+   * Gets application name.
+   *
+   * @return the application name
+   */
   public String getApplName ()
   {
     return applName;
   }
 
+  /**
+   * Gets user name.
+   *
+   * @return the user name
+   */
   public String getUserName ()
   {
     return userName;
   }
 
+  /**
+   * Gets resource name.
+   *
+   * @return the resource name
+   */
   public String getResourceName ()
   {
     return resourceName;
   }
 
+  /**
+   * Gets event name.
+   *
+   * @return the event name
+   */
   public String getEventName ()
   {
     return eventName;
   }
 
+  /**
+   * Gets event type.
+   *
+   * @return the event type
+   */
   public OpType getEventType ()
   {
     return eventType;
   }
 
+  /**
+   * Gets start time.
+   *
+   * @return the start time
+   */
   public StreamTimestamp getStartTime ()
   {
     return startTime;
   }
 
+  /**
+   * Gets end time.
+   *
+   * @return the end time
+   */
   public StreamTimestamp getEndTime ()
   {
     return endTime;
   }
 
+  /**
+   * Gets elapsed time.
+   *
+   * @return the elapsed time
+   */
   public long getElapsedTime ()
   {
     return elapsedTime;
   }
 
+  /**
+   * Gets activity completion code.
+   *
+   * @return the activity completion code
+   */
   public OpCompCode getCompCode ()
   {
     return compCode;
   }
 
+  /**
+   * Gets reason code.
+   *
+   * @return the reason code
+   */
   public int getReasonCode ()
   {
     return reasonCode;
   }
 
+  /**
+   * Gets exception/error message.
+   *
+   * @return the exception/error message
+   */
   public String getException ()
   {
     return exception;
   }
 
+  /**
+   * Gets severity.
+   *
+   * @return the severity
+   */
   public OpLevel getSeverity ()
   {
     return severity;
   }
 
+  /**
+   * Gets location.
+   *
+   * @return the location
+   */
   public String getLocation ()
   {
     return location;
   }
 
+  /**
+   * Gets tracking identifier.
+   *
+   * @return the tracking identifier
+   */
   public String getTrackingId ()
   {
     return trackingId;
   }
 
+  /**
+   * Gets message tag.
+   *
+   * @return the message tag
+   */
   public String getMsgTag ()
   {
     return msgTag;
   }
 
+  /**
+   * Gets activity correlator.
+   *
+   * @return the activity correlator
+   */
   public String getCorrelator ()
   {
     return correlator;
   }
 
+  /**
+   * Gets activity message data.
+   *
+   * @return the activity message data
+   */
   public Object getMsgData ()
   {
     return msgData;
   }
 
+  /**
+   * Gets activity message value.
+   *
+   * @return the activity message value
+   */
   public String getMsgValue ()
   {
     return msgValue;
   }
 
+  /**
+   * Gets message char set.
+   *
+   * @return the message char set
+   */
   public String getMsgCharSet ()
   {
     return msgCharSet;
   }
 
+  /**
+   * Gets message encoding.
+   *
+   * @return the message encoding
+   */
   public String getMsgEncoding ()
   {
     return msgEncoding;
   }
 
+  /**
+   * Gets message length.
+   *
+   * @return the message length
+   */
   public int getMsgLength ()
   {
     return msgLength;
   }
 
+  /**
+   * Gets message MIME type.
+   *
+   * @return the message MIME type
+   */
   public String getMsgMimeType ()
   {
     return msgMimeType;
   }
 
+  /**
+   * Gets process identifier.
+   *
+   * @return the process identifier
+   */
   public Integer getProcessId ()
   {
     return processId;
   }
 
+  /**
+   * Gets thread identifier.
+   *
+   * @return the thread identifier
+   */
   public Integer getThreadId ()
   {
     return threadId;
   }
 
+  /**
+   * Gets activity snapshot category.
+   *
+   * @return the activity snapshot category
+   */
   public String getSnapshotCategory ()
   {
     return snapshotCategory;

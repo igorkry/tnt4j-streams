@@ -68,6 +68,10 @@ public class ActivityXmlParser extends ActivityParser
   private final XPath xPath;
   private final DocumentBuilder builder;
   private final StringBuilder xmlBuffer;
+
+  /**
+   * Property indicating that all attributes are required by default .
+   */
   protected boolean requireAll = false;
 
   /**
@@ -382,12 +386,18 @@ public class ActivityXmlParser extends ActivityParser
 
   private static class NamespaceMap implements NamespaceContext
   {
-    protected final Map<String, String> map = new HashMap<String, String> ();
+    private final Map<String, String> map = new HashMap<String, String> ();
 
     private NamespaceMap ()
     {
     }
 
+    /**
+     * Adds mapping of prefix to namespace URI.
+     *
+     * @param prefix prefix to put into mapping
+     * @param uri    uri to put into mapping
+     */
     public void addPrefixUriMapping (String prefix, String uri)
     {
       map.put (prefix, uri);

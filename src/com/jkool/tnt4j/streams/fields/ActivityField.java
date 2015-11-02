@@ -211,7 +211,14 @@ public class ActivityField
   }
 
   /**
-   * {@inheritDoc}
+   * Indicates whether some other object is "equal to" this field.
+   *
+   * @param obj the reference object with which to compare.
+   *
+   * @return {@code true} if this field is the same as the obj
+   * argument; {@code false} otherwise.
+   *
+   * @see Object#equals(Object)
    */
   @Override
   public boolean equals (Object obj)
@@ -229,7 +236,11 @@ public class ActivityField
   }
 
   /**
-   * {@inheritDoc}
+   * Returns hash code for this filed object.
+   *
+   * @return a hash code value for this field.
+   *
+   * @see Object#hashCode()
    */
   @Override
   public int hashCode ()
@@ -238,7 +249,9 @@ public class ActivityField
   }
 
   /**
-   * {@inheritDoc}
+   * Returns string representing activity field by field type.
+   *
+   * @return a string representing field.
    */
   @Override
   public String toString ()

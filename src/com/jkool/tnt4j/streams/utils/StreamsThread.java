@@ -33,13 +33,20 @@ public class StreamsThread extends Thread
 {
   private static final EventSink PRV_LOGGER = DefaultEventSinkFactory.defaultEventSink (StreamsThread.class);
 
+  /**
+   * Event sink used to log stream activities run on this thread.
+   */
   protected EventSink logger = null;
+
+  /**
+   * Flag indicating that tread should stop running.
+   */
   protected boolean stopRunning = false;
 
   /**
    * Creates new Streams thread.
    *
-   * @see java.lang.Thread#Thread() ()
+   * @see java.lang.Thread#Thread()
    */
   public StreamsThread ()
   {

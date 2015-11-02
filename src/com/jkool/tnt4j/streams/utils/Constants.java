@@ -23,23 +23,11 @@ package com.jkool.tnt4j.streams.utils;
  * Global Constants
  *
  * @version $Revision: 35 $
+ * @Deprecated those used to fill in event snapshot
  */
+@Deprecated
 public final class Constants
 {
-  public static final String LINE_SEPARATOR = System.getProperty ("line.separator");
-  public static final String NASTEL_16x16_ICON_FILE = "NastelIcon-16x16.png";
-
-  // Explorer Global Settings record id
-  public static final String TWEX_SYSTEM_DEFAULTS_ID = "TWEAppSystemDefault";
-
-  public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>";
-  //////////////////////////////////////////////////////////////////////////////////////
-  //
-  // Streams activity data XML definitions
-
-  // XML schema version
-  public static final int XML_MSG_VERSION = 2;
-
   // XML elements
   public static final String XML_NAS_JANUS_LABEL = "nas_tw";
   public static final String XML_NAS_SERVER_LABEL = "nas_svr";
@@ -147,17 +135,6 @@ public final class Constants
   public static final String XML_PROPERTY_VALUE_LABEL = "pr_val";
   public static final String XML_PROPERTY_TIME_SEC_LABEL = "pr_tm_s";
   public static final String XML_PROPERTY_TIME_USEC_LABEL = "pr_tm_u";
-  //////////////////////////////////////////////////////////////////////////////////////
-  //
-  // Streams statistics XML definitions
-
-  // XML schema version
-  public static final int XML_STAT_MSG_VERSION = 1;
-
-  // XML elements
-  public static final String XML_NAS_STAT_ROOT_LABEL = "tw_stats";
-  public static final String XML_NAS_STAT_LABEL = "stat";
-  public static final String XML_NAS_STAT_GRP_LABEL = "st_grp";
 
   // element attributes
   public static final String XML_NAS_STAT_VERSION_LABEL = "ver";
@@ -165,10 +142,4 @@ public final class Constants
   public static final String XML_NAS_STAT_HOST_LABEL = "host";
   public static final String XML_NAS_STAT_NAME_LABEL = "name";
   public static final String XML_NAS_STAT_VALUE_LABEL = "value";
-
-  //////////////////////////////////////////////////////////////////////////////////////
-  //
-  // Streams statistics grouping types
-  public static final String PRB_STATS_GROUP_HOST_TYPE = "Host/Type";
-  public static final String PRB_STATS_GROUP_TYPE_HOST = "Type/Host";
 }

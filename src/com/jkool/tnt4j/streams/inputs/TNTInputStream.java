@@ -317,7 +317,9 @@ public abstract class TNTInputStream implements Runnable
   }
 
   /**
-   * {@inheritDoc}
+   * Starts input stream processing. Implementing {@code Runnable} interface makes it possible to process each stream in separate thread.
+   *
+   * @see Runnable#run()
    */
   @Override
   public void run ()
