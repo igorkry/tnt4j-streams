@@ -24,20 +24,19 @@ package com.jkool.tnt4j.streams.fields;
  *
  * @version $Revision: 1 $
  */
-public enum ActivityFieldFormatType
-{
-  /**
-   * Field value is base64-encoded.
-   */
-  base64Binary,
+public enum ActivityFieldFormatType {
+	/**
+	 * Field value is base64-encoded.
+	 */
+	base64Binary,
 
-  /**
-   * Field value is represented as a string of hexadecimal codes.
-   */
-  hexBinary,
+	/**
+	 * Field value is represented as a string of hexadecimal codes.
+	 */
+	hexBinary,
 
-  /**
-   * Field value is a character string.
-   */
-  string
+	/**
+	 * Field value is a character string.
+	 */
+	string
 }

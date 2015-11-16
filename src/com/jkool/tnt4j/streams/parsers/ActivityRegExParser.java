@@ -26,299 +26,251 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
-import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p>Implements an activity data parser that assumes each activity data item is a string of fields
- * as defined by the specified regular expression, with the value for each field being retrieved
- * from either of the 1-based group position, or match position.</p>
- * <p>This parser supports the following properties:
+ * <p>
+ * Implements an activity data parser that assumes each activity data item is a
+ * string of fields as defined by the specified regular expression, with the
+ * value for each field being retrieved from either of the 1-based group
+ * position, or match position.
+ * </p>
+ * <p>
+ * This parser supports the following properties:
  * <ul>
  * <li>Pattern</li>
  * </ul>
  *
  * @version $Revision: 5 $
  */
-public class ActivityRegExParser extends ActivityParser
-{
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityRegExParser.class);
+public class ActivityRegExParser extends ActivityParser {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
 
-  /**
-   * Contains the regular expression pattern that each data item is assumed to match
-   * (set by {@code Pattern} property).
-   */
-  protected Pattern pattern = null;
+	/**
+	 * Contains the regular expression pattern that each data item is assumed to
+	 * match (set by {@code Pattern} property).
+	 */
+	protected Pattern pattern = null;
 
-  /**
-   * Defines the mapping of activity fields to the regular expression group location(s)
-   * in the raw data from which to extract its value.
-   */
-  protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<ActivityField, List<ActivityFieldLocator>> ();
+	/**
+	 * Defines the mapping of activity fields to the regular expression group
+	 * location(s) in the raw data from which to extract its value.
+	 */
+	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
-  /**
-   * Defines the mapping of activity fields to the regular expression match sequence(s)
-   * in the raw data from which to extract its value.
-   */
-  protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>> ();
+	/**
+	 * Defines the mapping of activity fields to the regular expression match
+	 * sequence(s) in the raw data from which to extract its value.
+	 */
+	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
-  /**
-   * Constructs an ActivityRegExParser.
-   */
-  public ActivityRegExParser ()
-  {
-  }
+	/**
+	 * Constructs an ActivityRegExParser.
+	 */
+	public ActivityRegExParser() {
+	}
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setProperties (Collection<Map.Entry<String, String>> props) throws Throwable
-  {
-    if (props == null)
-    {
-      return;
-    }
-    for (Map.Entry<String, String> prop : props)
-    {
-      String name = prop.getKey ();
-      String value = prop.getValue ();
-      if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase (name))
-      {
-        if (!StringUtils.isEmpty (value))
-        {
-          pattern = Pattern.compile (value);
-          LOGGER.log (OpLevel.DEBUG, "Setting {0} to '{1}'", name, value);
-        }
-      }
-      LOGGER.log (OpLevel.TRACE, "Ignoring property {0}", name);
-    }
-  }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+		if (props == null) {
+			return;
+		}
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+			if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase(name)) {
+				if (!StringUtils.isEmpty(value)) {
+					pattern = Pattern.compile(value);
+					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+				}
+			}
+			LOGGER.log(OpLevel.TRACE, "Ignoring property {0}", name);
+		}
+	}
 
-  /* (non-Javadoc)
-   * @see com.jkool.tnt4j.streams.parsers.ActivityParser#addField(com.jkool.tnt4j.streams.fields.ActivityField)
-   */
-  @Override
-  public void addField (ActivityField field)
-  {
-    List<ActivityFieldLocator> locations = field.getLocators ();
-    if (locations == null)
-    {
-      return;
-    }
-    List<ActivityFieldLocator> matchLocs = new ArrayList<ActivityFieldLocator> ();
-    List<ActivityFieldLocator> groupLocs = new ArrayList<ActivityFieldLocator> ();
-    for (ActivityFieldLocator locator : locations)
-    {
-      ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
-      try
-      {
-        locType = ActivityFieldLocatorType.valueOf (locator.getType ());
-      }
-      catch (Exception e)
-      {
-      }
-      LOGGER.log (OpLevel.DEBUG, "Adding field {0}", field.toDebugString ());
-      if (locType == ActivityFieldLocatorType.REMatchNum)
-      {
-        if (groupMap.containsKey (field))
-        {
-          throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'");
-        }
-        matchLocs.add (locator);
-      }
-      else
-      {
-        if (matchMap.containsKey (field))
-        {
-          throw new IllegalArgumentException ("Conflicting mapping for '" + field + "'");
-        }
-        groupLocs.add (locator);
-      }
-    }
-    if (!matchLocs.isEmpty ())
-    {
-      matchMap.put (field, matchLocs);
-    }
-    if (!groupLocs.isEmpty ())
-    {
-      groupMap.put (field, groupLocs);
-    }
-  }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addField(ActivityField field) {
+		List<ActivityFieldLocator> locations = field.getLocators();
+		if (locations == null) {
+			return;
+		}
+		List<ActivityFieldLocator> matchLocs = new ArrayList<ActivityFieldLocator>();
+		List<ActivityFieldLocator> groupLocs = new ArrayList<ActivityFieldLocator>();
+		for (ActivityFieldLocator locator : locations) {
+			ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
+			try {
+				locType = ActivityFieldLocatorType.valueOf(locator.getType());
+			} catch (Exception e) {
+			}
+			LOGGER.log(OpLevel.DEBUG, "Adding field {0}", field.toDebugString());
+			if (locType == ActivityFieldLocatorType.REMatchNum) {
+				if (groupMap.containsKey(field)) {
+					throw new IllegalArgumentException("Conflicting mapping for '" + field + "'");
+				}
+				matchLocs.add(locator);
+			} else {
+				if (matchMap.containsKey(field)) {
+					throw new IllegalArgumentException("Conflicting mapping for '" + field + "'");
+				}
+				groupLocs.add(locator);
+			}
+		}
+		if (!matchLocs.isEmpty()) {
+			matchMap.put(field, matchLocs);
+		}
+		if (!groupLocs.isEmpty()) {
+			groupMap.put(field, groupLocs);
+		}
+	}
 
-  /**
-   * {@inheritDoc}
-   * <p> This parser supports the following class types
-   * (and all classes extending/implementing any of these):</p>
-   * <ul>
-   * <li>{@code java.lang.String}</li>
-   * <li>{@code java.io.Reader}</li>
-   * <li>{@code java.io.InputStream}</li>
-   * </ul>
-   */
-  @Override
-  public boolean isDataClassSupported (Object data)
-  {
-    return String.class.isInstance (data) ||
-           Reader.class.isInstance (data) ||
-           InputStream.class.isInstance (data);
-  }
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes
+	 * extending/implementing any of these):
+	 * </p>
+	 * <ul>
+	 * <li>{@code java.lang.String}</li>
+	 * <li>{@code java.io.Reader}</li>
+	 * <li>{@code java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return String.class.isInstance(data) || Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+	}
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public ActivityInfo parse (TNTInputStream stream, Object data) throws IllegalStateException, ParseException
-  {
-    if (pattern == null || StringUtils.isEmpty (pattern.pattern ()))
-    {
-      throw new IllegalStateException ("ActivityRegExParser: regular expression pattern not specified or empty");
-    }
-    if (data == null)
-    {
-      return null;
-    }
-    String dataStr = getNextString (data);
-    if (StringUtils.isEmpty (dataStr))
-    {
-      return null;
-    }
-    LOGGER.log (OpLevel.DEBUG, "Parsing: {0}", dataStr);
-    Matcher matcher = pattern.matcher (dataStr);
-    if (matcher == null || !matcher.matches ())
-    {
-      LOGGER.log (OpLevel.DEBUG, "Input does not match pattern");
-      return null;
-    }
-    ActivityInfo ai = new ActivityInfo ();
-    // save entire activity string as message data
-    ActivityField field = new ActivityField (StreamFieldType.Message);
-    applyFieldValue (ai, field, dataStr);
-    // apply fields for parser
-    try
-    {
-      if (!matchMap.isEmpty ())
-      {
-        LOGGER.log (OpLevel.DEBUG, "Applying RE Match mappings, count = {0}", matchMap.size ());
-        ArrayList<String> matches = new ArrayList<String> ();
-        matches.add ("");    // dummy entry to index array with match locations
-        while (matcher.find ())
-        {
-          String matchStr = matcher.group ().trim ();
-          matches.add (matchStr);
-          LOGGER.log (OpLevel.TRACE, "match {0} = {1}", matches.size (), matchStr);
-        }
-        LOGGER.log (OpLevel.DEBUG, "Found {0} matches", matches.size ());
-        Object value;
-        for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet ())
-        {
-          field = fieldMapEntry.getKey ();
-          List<ActivityFieldLocator> locations = fieldMapEntry.getValue ();
-          value = null;
-          if (locations != null)
-          {
-            LOGGER.log (OpLevel.TRACE, "Setting field {0} from match locations", field);
-            if (locations.size () == 1)
-            {
-              value = getLocatorValue (stream, locations.get (0), ActivityFieldLocatorType.REMatchNum, matcher, matches);
-            }
-            else
-            {
-              Object[] values = new Object[locations.size ()];
-              for (int li = 0; li < locations.size (); li++)
-              {
-                values[li] = getLocatorValue (stream, locations.get (li), ActivityFieldLocatorType.REMatchNum, matcher, matches);
-              }
-              value = values;
-            }
-          }
-          applyFieldValue (ai, field, value);
-        }
-      }
-    }
-    catch (Exception e)
-    {
-      ParseException pe = new ParseException ("Failed parsing RE Match data for field " + field, 0);
-      pe.initCause (e);
-      throw pe;
-    }
-    try
-    {
-      Object value;
-      for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet ())
-      {
-        field = fieldMapEntry.getKey ();
-        List<ActivityFieldLocator> locations = fieldMapEntry.getValue ();
-        value = null;
-        if (locations != null)
-        {
-          LOGGER.log (OpLevel.TRACE, "Setting field {0} from group locations", field);
-          if (locations.size () == 1)
-          {
-            value = getLocatorValue (stream, locations.get (0), ActivityFieldLocatorType.REGroupNum, matcher, null);
-          }
-          else
-          {
-            Object[] values = new Object[locations.size ()];
-            for (int li = 0; li < locations.size (); li++)
-            {
-              values[li] = getLocatorValue (stream, locations.get (li), ActivityFieldLocatorType.REGroupNum, matcher, null);
-            }
-            value = values;
-          }
-        }
-        applyFieldValue (ai, field, value);
-      }
-    }
-    catch (Exception e)
-    {
-      ParseException pe = new ParseException ("Failed parsing RE Group data for field " + field, 0);
-      pe.initCause (e);
-      throw pe;
-    }
-    return ai;
-  }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
+		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {
+			throw new IllegalStateException("ActivityRegExParser: regular expression pattern not specified or empty");
+		}
+		if (data == null) {
+			return null;
+		}
+		String dataStr = getNextString(data);
+		if (StringUtils.isEmpty(dataStr)) {
+			return null;
+		}
+		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		Matcher matcher = pattern.matcher(dataStr);
+		if (matcher == null || !matcher.matches()) {
+			LOGGER.log(OpLevel.DEBUG, "Input does not match pattern defined in parser \"{0}\"", getName());
+			return null;
+		}
+		ActivityInfo ai = new ActivityInfo();
+		// save entire activity string as message data
+		ActivityField field = new ActivityField(StreamFieldType.Message);
+		applyFieldValue(ai, field, dataStr);
+		// apply fields for parser
+		try {
+			if (!matchMap.isEmpty()) {
+				LOGGER.log(OpLevel.DEBUG, "Applying RE Match mappings, count = {0}", matchMap.size());
+				ArrayList<String> matches = new ArrayList<String>();
+				matches.add(""); // dummy entry to index array with match
+									// locations
+				while (matcher.find()) {
+					String matchStr = matcher.group().trim();
+					matches.add(matchStr);
+					LOGGER.log(OpLevel.TRACE, "match {0} = {1}", matches.size(), matchStr);
+				}
+				LOGGER.log(OpLevel.DEBUG, "Found {0} matches", matches.size());
+				Object value;
+				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
+					field = fieldMapEntry.getKey();
+					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
+					value = null;
+					if (locations != null) {
+						LOGGER.log(OpLevel.TRACE, "Setting field {0} from match locations", field);
+						if (locations.size() == 1) {
+							value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REMatchNum,
+									matcher, matches);
+						} else {
+							Object[] values = new Object[locations.size()];
+							for (int li = 0; li < locations.size(); li++) {
+								values[li] = getLocatorValue(stream, locations.get(li),
+										ActivityFieldLocatorType.REMatchNum, matcher, matches);
+							}
+							value = values;
+						}
+					}
+					applyFieldValue(ai, field, value);
+				}
+			}
+		} catch (Exception e) {
+			ParseException pe = new ParseException("Failed parsing RE Match data for field " + field, 0);
+			pe.initCause(e);
+			throw pe;
+		}
+		try {
+			Object value;
+			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
+				field = fieldMapEntry.getKey();
+				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
+				value = null;
+				if (locations != null) {
+					LOGGER.log(OpLevel.TRACE, "Setting field {0} from group locations", field);
+					if (locations.size() == 1) {
+						value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REGroupNum, matcher,
+								null);
+					} else {
+						Object[] values = new Object[locations.size()];
+						for (int li = 0; li < locations.size(); li++) {
+							values[li] = getLocatorValue(stream, locations.get(li), ActivityFieldLocatorType.REGroupNum,
+									matcher, null);
+						}
+						value = values;
+					}
+				}
+				applyFieldValue(ai, field, value);
+			}
+		} catch (Exception e) {
+			ParseException pe = new ParseException("Failed parsing RE Group data for field " + field, 0);
+			pe.initCause(e);
+			throw pe;
+		}
+		return ai;
+	}
 
-  private static Object getLocatorValue (
-      TNTInputStream stream, ActivityFieldLocator locator, ActivityFieldLocatorType locType, Matcher matcher, List<String> matches)
-      throws ParseException
-  {
-    Object val = null;
-    if (locator != null)
-    {
-      String locStr = locator.getLocator ();
-      if (!StringUtils.isEmpty (locStr))
-      {
-        if (locator.getBuiltInType () == ActivityFieldLocatorType.StreamProp)
-        {
-          val = stream.getProperty (locStr);
-        }
-        else
-        {
-          int loc = Integer.parseInt (locStr);
-          if (locType == ActivityFieldLocatorType.REMatchNum)
-          {
-            if (loc <= matches.size ())
-            {
-              val = matches.get (loc);
-            }
-          }
-          else
-          {
-            if (loc <= matcher.groupCount ())
-            {
-              val = matcher.group (loc);
-            }
-          }
-        }
-      }
-      val = locator.formatValue (val);
-    }
-    return val;
-  }
+	private static Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator,
+			ActivityFieldLocatorType locType, Matcher matcher, List<String> matches) throws ParseException {
+		Object val = null;
+		if (locator != null) {
+			String locStr = locator.getLocator();
+			if (!StringUtils.isEmpty(locStr)) {
+				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
+					val = stream.getProperty(locStr);
+				} else {
+					int loc = Integer.parseInt(locStr);
+					if (locType == ActivityFieldLocatorType.REMatchNum) {
+						if (loc <= matches.size()) {
+							val = matches.get(loc);
+						}
+					} else {
+						if (loc <= matcher.groupCount()) {
+							val = matcher.group(loc);
+						}
+					}
+				}
+			}
+			val = locator.formatValue(val);
+		}
+		return val;
+	}
 }

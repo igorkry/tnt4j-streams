@@ -18,11 +18,11 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for extending and
- * customizing the behavior of the jKool LLC TNT4J-Streams.
+ * Contains the API (classes and interfaces) for the custom jKool LLC
+ * TNT4J-Streams parsers targeting standard activities data formats.
  *
  * @author akausinis
  * @version 1.0
  */
 
-package com.jkool.tnt4j.streams;
+package com.jkool.tnt4j.streams.custom.parsers;

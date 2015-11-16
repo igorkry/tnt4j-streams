@@ -16,11 +16,48 @@
  * CopyrightVersion 1.0
  *
  */
-/**
- * Contains the data types enumerations used by the jKool LLC TNT4J-Streams API.
- *
- * @author akausinis
- * @version 1.0
- */
 
-package com.jkool.tnt4j.streams.types;
+package com.jkool.tnt4j.streams.fields;
+
+/**
+ * Defines supported builtin activity event properties.
+ *
+ * @version $Revision: 1 $
+ */
+public enum ActivityEventProperties {
+
+	/**
+	 * Event property for activity server name.
+	 */
+	EVENT_PROP_SERVER_NAME("sv_name"),
+
+	/**
+	 * Event property for activity server IP.
+	 */
+	EVENT_PROP_SERVER_IP("sv_ip"),
+
+	/**
+	 * Event property for activity application name.
+	 */
+	EVENT_PROP_APPL_NAME("ap_name"),
+
+	/**
+	 * Event property for activity custom user defined value.
+	 */
+	EVENT_PROP_MSG_VALUE("MsgValue");
+
+	private String key;
+
+	ActivityEventProperties(String key) {
+		this.key = key;
+	}
+
+	/**
+	 * Returns property key value string.
+	 *
+	 * @return key string
+	 */
+	public String getKey() {
+		return key;
+	}
+}

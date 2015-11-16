@@ -19,278 +19,364 @@
 
 package com.jkool.tnt4j.streams.utils;
 
+import java.io.*;
 import java.security.MessageDigest;
 
-import com.jkool.tnt4j.streams.types.MessageType;
-import com.nastel.jkool.tnt4j.core.OpType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+
+import com.jkool.tnt4j.streams.parsers.MessageType;
+import com.nastel.jkool.tnt4j.core.OpType;
 
 /**
  * General utility methods.
  *
  * @version $Revision: 16 $
  */
-public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils
-{
+public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
-  private Utils ()
-  {
-  }
+	private Utils() {
+	}
 
-  /**
-   * Base64 encodes the specified sequence of bytes.
-   *
-   * @param src byte sequence to encode
-   *
-   * @return encoded byte sequence
-   */
-  public static byte[] base64Encode (byte[] src)
-  {
-    return Base64.encodeBase64 (src);
-  }
+	/**
+	 * Base64 encodes the specified sequence of bytes.
+	 *
+	 * @param src
+	 *            byte sequence to encode
+	 *
+	 * @return encoded byte sequence
+	 */
+	public static byte[] base64Encode(byte[] src) {
+		return Base64.encodeBase64(src);
+	}
 
-  /**
-   * Base64 decodes the specified sequence of bytes.
-   *
-   * @param src byte sequence to decode
-   *
-   * @return decoded byte sequence
-   */
-  public static byte[] base64Decode (byte[] src)
-  {
-    return Base64.decodeBase64 (src);
-  }
+	/**
+	 * Base64 decodes the specified sequence of bytes.
+	 *
+	 * @param src
+	 *            byte sequence to decode
+	 *
+	 * @return decoded byte sequence
+	 */
+	public static byte[] base64Decode(byte[] src) {
+		return Base64.decodeBase64(src);
+	}
 
-  /**
-   * Converts an array of bytes into an array of characters representing the hexadecimal values.
-   *
-   * @param src byte sequence to encode
-   *
-   * @return encoded character sequence
-   */
-  public static char[] encodeHex (byte[] src)
-  {
-    return Hex.encodeHex (src);
-  }
+	/**
+	 * Converts an array of bytes into an array of characters representing the
+	 * hexadecimal values.
+	 *
+	 * @param src
+	 *            byte sequence to encode
+	 *
+	 * @return encoded character sequence
+	 */
+	public static char[] encodeHex(byte[] src) {
+		return Hex.encodeHex(src);
+	}
 
-  /**
-   * Converts a string representing hexadecimal values into an array of bytes.
-   *
-   * @param str String to convert
-   *
-   * @return decoded byte sequence
-   */
-  public static byte[] decodeHex (String str)
-  {
-    byte[] ba = null;
-    try
-    {
-      ba = Hex.decodeHex (str.toCharArray ());
-    }
-    catch (DecoderException e)
-    {
-    }
-    return ba;
-  }
+	/**
+	 * Converts a string representing hexadecimal values into an array of bytes.
+	 *
+	 * @param str
+	 *            String to convert
+	 *
+	 * @return decoded byte sequence
+	 */
+	public static byte[] decodeHex(String str) {
+		byte[] ba = null;
+		try {
+			ba = Hex.decodeHex(str.toCharArray());
+		} catch (DecoderException e) {
+		}
+		return ba;
+	}
 
-  private static final MessageDigest MSG_DIGEST = getMD5Digester ();
+	private static final MessageDigest MSG_DIGEST = getMD5Digester();
 
-  /**
-   * <p>Generates a new unique message signature.  This signature is expected to be
-   * used for creating a new message instance, and is intended to uniquely
-   * identify the message regardless of which application is processing it.</p>
-   * <p>It is up to the individual stream to determine which of these attributes is
-   * available/required to uniquely identify a message.  In order to identify a message
-   * within two different transports, the streams for each transport must provide the
-   * same values.</p>
-   *
-   * @param msgType     message type
-   * @param msgFormat   message format
-   * @param msgId       message identifier
-   * @param userId      user that originated the message
-   * @param putApplType type of application that originated the message
-   * @param putApplName name of application that originated the message
-   * @param putDate     date (GMT) the message was originated
-   * @param putTime     time (GMT) the message was originated
-   *
-   * @return unique message signature
-   */
-  public static String computeSignature (
-      MessageType msgType, String msgFormat, byte[] msgId, String userId, String putApplType, String putApplName, String putDate,
-      String putTime)
-  {
-    synchronized (MSG_DIGEST)
-    {
-      return computeSignature (MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate, putTime);
-    }
-  }
+	/**
+	 * <p>
+	 * Generates a new unique message signature. This signature is expected to
+	 * be used for creating a new message instance, and is intended to uniquely
+	 * identify the message regardless of which application is processing it.
+	 * </p>
+	 * <p>
+	 * It is up to the individual stream to determine which of these attributes
+	 * is available/required to uniquely identify a message. In order to
+	 * identify a message within two different transports, the streams for each
+	 * transport must provide the same values.
+	 * </p>
+	 *
+	 * @param msgType
+	 *            message type
+	 * @param msgFormat
+	 *            message format
+	 * @param msgId
+	 *            message identifier
+	 * @param userId
+	 *            user that originated the message
+	 * @param putApplType
+	 *            type of application that originated the message
+	 * @param putApplName
+	 *            name of application that originated the message
+	 * @param putDate
+	 *            date (GMT) the message was originated
+	 * @param putTime
+	 *            time (GMT) the message was originated
+	 *
+	 * @return unique message signature
+	 */
+	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
+			String putApplType, String putApplName, String putDate, String putTime) {
+		synchronized (MSG_DIGEST) {
+			return computeSignature(MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate,
+					putTime);
+		}
+	}
 
-  /**
-   * <p>Generates a new unique message signature.  This signature is expected to be
-   * used for creating a new message instance, and is intended to uniquely
-   * identify the message regardless of which application is processing it.</p>
-   * <p>It is up to the individual stream to determine which of these attributes is
-   * available/required to uniquely identify a message.  In order to identify a message
-   * within two different transports, the streams for each transport must provide the
-   * same values.</p>
-   *
-   * @param _msgDigest  message type
-   * @param msgType     message type
-   * @param msgFormat   message format
-   * @param msgId       message identifier
-   * @param userId      user that originated the message
-   * @param putApplType type of application that originated the message
-   * @param putApplName name of application that originated the message
-   * @param putDate     date (GMT) the message was originated
-   * @param putTime     time (GMT) the message was originated
-   *
-   * @return unique message signature
-   */
-  public static String computeSignature (
-      MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId, String userId, String putApplType, String putApplName,
-      String putDate, String putTime)
-  {
-    _msgDigest.reset ();
-    if (msgType != null)
-    {
-      _msgDigest.update (String.valueOf (msgType.value ()).getBytes ());
-    }
-    if (msgFormat != null)
-    {
-      _msgDigest.update (msgFormat.trim ().getBytes ());
-    }
-    if (msgId != null)
-    {
-      _msgDigest.update (msgId);
-    }
-    if (userId != null)
-    {
-      _msgDigest.update (userId.trim ().toLowerCase ().getBytes ());
-    }
-    if (putApplType != null)
-    {
-      _msgDigest.update (putApplType.trim ().getBytes ());
-    }
-    if (putApplName != null)
-    {
-      _msgDigest.update (putApplName.trim ().getBytes ());
-    }
-    if (putDate != null)
-    {
-      _msgDigest.update (putDate.trim ().getBytes ());
-    }
-    if (putTime != null)
-    {
-      _msgDigest.update (putTime.trim ().getBytes ());
-    }
-    return new String (base64Encode (_msgDigest.digest ()));
-  }
+	/**
+	 * <p>
+	 * Generates a new unique message signature. This signature is expected to
+	 * be used for creating a new message instance, and is intended to uniquely
+	 * identify the message regardless of which application is processing it.
+	 * </p>
+	 * <p>
+	 * It is up to the individual stream to determine which of these attributes
+	 * is available/required to uniquely identify a message. In order to
+	 * identify a message within two different transports, the streams for each
+	 * transport must provide the same values.
+	 * </p>
+	 *
+	 * @param _msgDigest
+	 *            message type
+	 * @param msgType
+	 *            message type
+	 * @param msgFormat
+	 *            message format
+	 * @param msgId
+	 *            message identifier
+	 * @param userId
+	 *            user that originated the message
+	 * @param putApplType
+	 *            type of application that originated the message
+	 * @param putApplName
+	 *            name of application that originated the message
+	 * @param putDate
+	 *            date (GMT) the message was originated
+	 * @param putTime
+	 *            time (GMT) the message was originated
+	 *
+	 * @return unique message signature
+	 */
+	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
+			String userId, String putApplType, String putApplName, String putDate, String putTime) {
+		_msgDigest.reset();
+		if (msgType != null) {
+			_msgDigest.update(String.valueOf(msgType.value()).getBytes());
+		}
+		if (msgFormat != null) {
+			_msgDigest.update(msgFormat.trim().getBytes());
+		}
+		if (msgId != null) {
+			_msgDigest.update(msgId);
+		}
+		if (userId != null) {
+			_msgDigest.update(userId.trim().toLowerCase().getBytes());
+		}
+		if (putApplType != null) {
+			_msgDigest.update(putApplType.trim().getBytes());
+		}
+		if (putApplName != null) {
+			_msgDigest.update(putApplName.trim().getBytes());
+		}
+		if (putDate != null) {
+			_msgDigest.update(putDate.trim().getBytes());
+		}
+		if (putTime != null) {
+			_msgDigest.update(putTime.trim().getBytes());
+		}
+		return new String(base64Encode(_msgDigest.digest()));
+	}
 
-  /**
-   * Maps OpType enumeration literal from string or numeric value.
-   *
-   * @param opType object to be mapped to OpType enumeration literal
-   *
-   * @return OpType mapping or {@code null} if mapping not found.
-   */
-  public static OpType mapOpType (Object opType)
-  {
-    if (opType == null)
-    {
-      return null;
-    }
-    if (opType instanceof Number)
-    {
-      return mapOpType (((Number) opType).intValue ());
-    }
-    return mapOpType (opType.toString ());
-  }
+	/**
+	 * Maps OpType enumeration literal from string or numeric value.
+	 *
+	 * @param opType
+	 *            object to be mapped to OpType enumeration literal
+	 *
+	 * @return OpType mapping or {@code null} if mapping not found.
+	 */
+	public static OpType mapOpType(Object opType) {
+		if (opType == null) {
+			return null;
+		}
+		if (opType instanceof Number) {
+			return mapOpType(((Number) opType).intValue());
+		}
+		return mapOpType(opType.toString());
+	}
 
-  private static OpType mapOpType (String opType)
-  {
-    if (opType.equalsIgnoreCase ("OTHER"))
-    {
-      return OpType.OTHER;
-    }
-    if (opType.equalsIgnoreCase ("START"))
-    {
-      return OpType.START;
-    }
-    if (opType.equalsIgnoreCase ("OPEN"))
-    {
-      return OpType.OPEN;
-    }
-    if (opType.equalsIgnoreCase ("SEND"))
-    {
-      return OpType.SEND;
-    }
-    if (opType.equalsIgnoreCase ("RECEIVE"))
-    {
-      return OpType.RECEIVE;
-    }
-    if (opType.equalsIgnoreCase ("CLOSE"))
-    {
-      return OpType.CLOSE;
-    }
-    if (opType.equalsIgnoreCase ("END"))
-    {
-      return OpType.STOP;
-    }
-    if (opType.equalsIgnoreCase ("INQUIRE"))
-    {
-      return OpType.INQUIRE;
-    }
-    if (opType.equalsIgnoreCase ("SET"))
-    {
-      return OpType.SET;
-    }
-    if (opType.equalsIgnoreCase ("CALL"))
-    {
-      return OpType.CALL;
-    }
-    if (opType.equalsIgnoreCase ("URL"))
-    {
-      return OpType.OTHER;
-    }
-    if (opType.equalsIgnoreCase ("BROWSE"))
-    {
-      return OpType.BROWSE;
-    }
-    return OpType.OTHER;
-  }
+	private static OpType mapOpType(String opType) {
+		if (opType.equalsIgnoreCase("OTHER")) {
+			return OpType.OTHER;
+		}
+		if (opType.equalsIgnoreCase("START")) {
+			return OpType.START;
+		}
+		if (opType.equalsIgnoreCase("OPEN")) {
+			return OpType.OPEN;
+		}
+		if (opType.equalsIgnoreCase("SEND")) {
+			return OpType.SEND;
+		}
+		if (opType.equalsIgnoreCase("RECEIVE")) {
+			return OpType.RECEIVE;
+		}
+		if (opType.equalsIgnoreCase("CLOSE")) {
+			return OpType.CLOSE;
+		}
+		if (opType.equalsIgnoreCase("END")) {
+			return OpType.STOP;
+		}
+		if (opType.equalsIgnoreCase("INQUIRE")) {
+			return OpType.INQUIRE;
+		}
+		if (opType.equalsIgnoreCase("SET")) {
+			return OpType.SET;
+		}
+		if (opType.equalsIgnoreCase("CALL")) {
+			return OpType.CALL;
+		}
+		if (opType.equalsIgnoreCase("URL")) {
+			return OpType.OTHER;
+		}
+		if (opType.equalsIgnoreCase("BROWSE")) {
+			return OpType.BROWSE;
+		}
+		return OpType.OTHER;
+	}
 
-  private static OpType mapOpType (int opType)
-  {
-    switch (opType)
-    {
-      case 0:
-        return OpType.OTHER;
-      case 1:
-        return OpType.START;
-      case 2:
-        return OpType.OPEN;
-      case 3:
-        return OpType.SEND;
-      case 4:
-        return OpType.RECEIVE;
-      case 5:
-        return OpType.CLOSE;
-      case 6:
-        return OpType.STOP;
-      case 7:
-        return OpType.INQUIRE;
-      case 8:
-        return OpType.SET;
-      case 9:
-        return OpType.CALL;
-      case 10://URL
-        return OpType.OTHER;
-      case 11:
-        return OpType.BROWSE;
-      default:
-        return OpType.OTHER;
-    }
-  }
+	private static OpType mapOpType(int opType) {
+		switch (opType) {
+		case 0:
+			return OpType.OTHER;
+		case 1:
+			return OpType.START;
+		case 2:
+			return OpType.OPEN;
+		case 3:
+			return OpType.SEND;
+		case 4:
+			return OpType.RECEIVE;
+		case 5:
+			return OpType.CLOSE;
+		case 6:
+			return OpType.STOP;
+		case 7:
+			return OpType.INQUIRE;
+		case 8:
+			return OpType.SET;
+		case 9:
+			return OpType.CALL;
+		case 10:// URL
+			return OpType.OTHER;
+		case 11:
+			return OpType.BROWSE;
+		default:
+			return OpType.OTHER;
+		}
+	}
+
+	/**
+	 * Checks if properties defined file name contains wildcard characters and
+	 * directory scanning for matching files is required.
+	 *
+	 * @param fileName
+	 *            file name to check if it contains wildcard characters
+	 *
+	 * @return {@code true} if file name con
+	 *
+	 */
+	public static boolean isWildcardFileName(String fileName) {
+		if (StringUtils.isNotEmpty(fileName)) {
+			return fileName.contains("*") || fileName.contains("?");
+		}
+		return false;
+	}
+
+	/**
+	 * Counts text lines available in file.
+	 * 
+	 * @param filename
+	 *            file name to count lines
+	 *
+	 * @return number of lines currently available in file
+	 */
+	public static int countLines(String fileName) {
+		int count = 0;
+		InputStream is = null;
+
+		try {
+			is = new BufferedInputStream(new FileInputStream(fileName));
+			byte[] c = new byte[1024];
+			int readChars = 0;
+			boolean endsWithoutNewLine = false;
+			while ((readChars = is.read(c)) != -1) {
+				for (int i = 0; i < readChars; ++i) {
+					if (c[i] == '\n')
+						++count;
+				}
+				endsWithoutNewLine = (c[readChars - 1] != '\n');
+			}
+			if (endsWithoutNewLine) {
+				++count;
+			}
+		} catch (IOException exc) {
+
+		} finally {
+			close(is);
+		}
+
+		return count;
+	}
+
+	/**
+	 * Returns first readable file from {@code files} array which has last
+	 * modification timestamp newer than {@code lastModif}. If {@code lastModif}
+	 * is {@code null}, then newest readable file is returned.
+	 * 
+	 * @param files
+	 *            last modification timestamp ordered files array
+	 * @param lastModif
+	 *            last modification time to compare. If {@code null} - then
+	 *            newest file is returned
+	 *
+	 * @return first file from array which has modification time later than
+	 *         {@code lastModif}, or {@code null} if {@code files} is empty or
+	 *         does not contain readable file with last modification time later
+	 *         than {@code lastModif}
+	 */
+	public static File getFirstNewer(File[] files, Long lastModif) {
+		File last = null;
+
+		if (ArrayUtils.isNotEmpty(files)) {
+			for (File f : files) {
+				if (lastModif == null && f.canRead()) {
+					last = f;
+					break;
+				} else {
+					if (f.lastModified() > lastModif && f.canRead()) {
+						last = f;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+
+		return last;
+	}
 }

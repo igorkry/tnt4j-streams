@@ -24,20 +24,19 @@ package com.jkool.tnt4j.streams.fields;
  *
  * @version $Revision: 1 $
  */
-public enum ActivityFieldUnitsType
-{
-  /**
-   * Indicates activity field value is in seconds.
-   */
-  Seconds,
+public enum ActivityFieldUnitsType {
+	/**
+	 * Indicates activity field value is in seconds.
+	 */
+	Seconds,
 
-  /**
-   * Indicates activity field value is in milliseconds.
-   */
-  Milliseconds,
+	/**
+	 * Indicates activity field value is in milliseconds.
+	 */
+	Milliseconds,
 
-  /**
-   * Indicates activity field value is in microseconds.
-   */
-  Microseconds
+	/**
+	 * Indicates activity field value is in microseconds.
+	 */
+	Microseconds
 }

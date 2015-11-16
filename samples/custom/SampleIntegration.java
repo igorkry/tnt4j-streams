@@ -21,6 +21,8 @@ package com.jkool.tnt4j.streams.samples.custom;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.StreamThread;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
@@ -33,66 +35,51 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 2 $
  */
-public final class SampleIntegration
-{
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (SampleIntegration.class);
+public final class SampleIntegration {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleIntegration.class);
 
-  /**
-   * Configure streams and parsers, and run each stream in its own thread.
-   *
-   * @param cfgFileName configuration file name
-   */
-  public static void loadConfigAndRun (String cfgFileName)
-  {
-    ThreadGroup streamThreads = new ThreadGroup ("Streams");
-    try
-    {
-      StreamsConfig cfg;
-      if (cfgFileName == null || cfgFileName.length () == 0)
-      {
-        cfg = new StreamsConfig ();
-      }
-      else
-      {
-        cfg = new StreamsConfig (cfgFileName);
-      }
-      Map<String, TNTInputStream> streamsMap = cfg.getStreams ();
-      if (streamsMap == null || streamsMap.size () == 0)
-      {
-        throw new IllegalStateException ("No Activity Streams found in configuration");
-      }
-      for (Map.Entry<String, TNTInputStream> f : streamsMap.entrySet ())
-      {
-        String streamName = f.getKey ();
-        TNTInputStream stream = f.getValue ();
-        StreamThread ft = new StreamThread (streamThreads, stream, streamName);
-        ft.start ();
-      }
-    }
-    catch (Throwable t)
-    {
-      LOGGER.log (OpLevel.ERROR, t.getMessage (), t);
-    }
-  }
+	/**
+	 * Configure streams and parsers, and run each stream in its own thread.
+	 *
+	 * @param cfgFileName
+	 *            configuration file name
+	 */
+	public static void loadConfigAndRun(String cfgFileName) {
+		try {
+			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
+			Map<String, TNTInputStream> streamsMap = cfg.getStreams();
+			if (streamsMap == null || streamsMap.isEmpty()) {
+				throw new IllegalStateException("No Activity Streams found in configuration");
+			}
 
-  /**
-   * The following can be used if using the default configuration file
-   * with a single stream.
-   *
-   * @param cfgFileName configuration file name
-   */
-  public static void simpleConfigAndRun (String cfgFileName)
-  {
-    try
-    {
-      StreamsConfig cfg = new StreamsConfig ();
-      TNTInputStream stream = cfg.getStream ("StreamName");
-      StreamThread ft = new StreamThread (stream);
-      ft.start ();
-    }
-    catch (Throwable t)
-    {
-      LOGGER.log (OpLevel.ERROR, t.getMessage (), t);
-    }
-  }
+			ThreadGroup streamThreads = new ThreadGroup("Streams");
+			StreamThread ft;
+			for (Map.Entry<String, TNTInputStream> streamEntry : streamsMap.entrySet()) {
+				String streamName = streamEntry.getKey();
+				TNTInputStream stream = streamEntry.getValue();
+				ft = new StreamThread(streamThreads, stream, streamName);
+				ft.start();
+			}
+		} catch (Throwable t) {
+			LOGGER.log(OpLevel.ERROR, t.getMessage(), t);
+		}
+	}
+
+	/**
+	 * The following can be used if using the default configuration file with a
+	 * single stream.
+	 *
+	 * @param cfgFileName
+	 *            configuration file name
+	 */
+	public static void simpleConfigAndRun(String cfgFileName) {
+		try {
+			StreamsConfig cfg = new StreamsConfig();
+			TNTInputStream stream = cfg.getStream("StreamName");
+			StreamThread ft = new StreamThread(stream);
+			ft.start();
+		} catch (Throwable t) {
+			LOGGER.log(OpLevel.ERROR, t.getMessage(), t);
+		}
+	}
 }

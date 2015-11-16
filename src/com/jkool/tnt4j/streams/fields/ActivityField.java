@@ -31,243 +31,249 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 2 $
  */
-public class ActivityField
-{
-  private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink (ActivityField.class);
+public class ActivityField {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
-  private final StreamFieldType fieldType;
-  private List<ActivityFieldLocator> locators = null;
-  private String format = null;
-  private String locale = null;
-  private String separator = "";
-  private String reqValue = ""; /* string to allow no value */
+	private final StreamFieldType fieldType;
+	private List<ActivityFieldLocator> locators = null;
+	private String format = null;
+	private String locale = null;
+	private String separator = "";
+	private String reqValue = ""; /* string to allow no value */
 
-  /**
-   * Creates a new activity field entry.
-   *
-   * @param fieldType type of activity field
-   *
-   * @throws IllegalArgumentException if field type is {@code null}
-   */
-  public ActivityField (StreamFieldType fieldType)
-  {
-    if (fieldType == null)
-    {
-      throw new IllegalArgumentException ("Activity field type cannot be null");
-    }
-    this.fieldType = fieldType;
-  }
+	/**
+	 * Creates a new activity field entry.
+	 *
+	 * @param fieldType
+	 *            type of activity field
+	 *
+	 * @throws IllegalArgumentException
+	 *             if field type is {@code null}
+	 */
+	public ActivityField(StreamFieldType fieldType) {
+		if (fieldType == null) {
+			throw new IllegalArgumentException("Activity field type cannot be null");
+		}
+		this.fieldType = fieldType;
+	}
 
-  /**
-   * Creates a new activity field entry.
-   *
-   * @param fieldType type of activity field
-   * @param dataType  type of field data type
-   *
-   * @throws NullPointerException if field type is {@code null}
-   */
-  public ActivityField (StreamFieldType fieldType, ActivityFieldDataType dataType)
-  {
-    this (fieldType);
-    ActivityFieldLocator loc = new ActivityFieldLocator (ActivityFieldLocatorType.Index, "0");
-    locators = new ArrayList<ActivityFieldLocator> (1);
-    locators.add (loc);
-  }
+	/**
+	 * Creates a new activity field entry.
+	 *
+	 * @param fieldType
+	 *            type of activity field
+	 * @param dataType
+	 *            type of field data type
+	 *
+	 * @throws NullPointerException
+	 *             if field type is {@code null}
+	 */
+	public ActivityField(StreamFieldType fieldType, ActivityFieldDataType dataType) {
+		this(fieldType);
+		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0");
+		locators = new ArrayList<ActivityFieldLocator>(1);
+		locators.add(loc);
+	}
 
-  /**
-   * Indicates if the raw data value for this activity field must be converted to
-   * a member or some enumeration type.
-   *
-   * @return {@code true} if value must be converted to an enumeration member,
-   * {@code false} otherwise
-   */
-  public boolean isEnumeration ()
-  {
-    return fieldType.getEnumerationClass () != null;
-  }
+	/**
+	 * Indicates if the raw data value for this activity field must be converted
+	 * to a member or some enumeration type.
+	 *
+	 * @return {@code true} if value must be converted to an enumeration member,
+	 *         {@code false} otherwise
+	 */
+	public boolean isEnumeration() {
+		return fieldType.getEnumerationClass() != null;
+	}
 
-  /**
-   * Gets the type of this activity field.
-   *
-   * @return the activity field type
-   */
-  public StreamFieldType getFieldType ()
-  {
-    return fieldType;
-  }
+	/**
+	 * Gets the type of this activity field.
+	 *
+	 * @return the activity field type
+	 */
+	public StreamFieldType getFieldType() {
+		return fieldType;
+	}
 
-  /**
-   * Gets activity field locators list.
-   *
-   * @return the locators list
-   */
-  public List<ActivityFieldLocator> getLocators ()
-  {
-    return locators;
-  }
+	/**
+	 * Gets activity field locators list.
+	 *
+	 * @return the locators list
+	 */
+	public List<ActivityFieldLocator> getLocators() {
+		return locators;
+	}
 
-  /**
-   * Adds activity field locator.
-   *
-   * @param locator the locator to add
-   */
-  public void addLocator (ActivityFieldLocator locator)
-  {
-    if (locators == null)
-    {
-      locators = new ArrayList<ActivityFieldLocator> ();
-    }
-    locators.add (locator);
-  }
+	/**
+	 * Adds activity field locator.
+	 *
+	 * @param locator
+	 *            the locator to add
+	 */
+	public void addLocator(ActivityFieldLocator locator) {
+		if (locators == null) {
+			locators = new ArrayList<ActivityFieldLocator>();
+		}
+		locators.add(locator);
+	}
 
-  /**
-   * Gets the string to insert between values when concatenating multiple
-   * raw activity values into the converted value for this field.
-   *
-   * @return the string being used to separate raw values
-   */
-  public String getSeparator ()
-  {
-    return separator;
-  }
+	/**
+	 * Gets the string to insert between values when concatenating multiple raw
+	 * activity values into the converted value for this field.
+	 *
+	 * @return the string being used to separate raw values
+	 */
+	public String getSeparator() {
+		return separator;
+	}
 
-  /**
-   * Sets the string to insert between values when concatenating multiple
-   * raw activity values into the converted value for this field.
-   *
-   * @param locatorSep the string to use to separate raw values
-   */
-  public void setSeparator (String locatorSep)
-  {
-    this.separator = locatorSep;
-  }
+	/**
+	 * Sets the string to insert between values when concatenating multiple raw
+	 * activity values into the converted value for this field.
+	 *
+	 * @param locatorSep
+	 *            the string to use to separate raw values
+	 */
+	public void setSeparator(String locatorSep) {
+		this.separator = locatorSep;
+	}
 
-  /**
-   * <p>Gets the format string defining how to interpret the raw data field value.</p>
-   * <p>Note: This is not applicable for all fields and will be ignored by those fields
-   * to which it does not apply.</p>
-   *
-   * @return the format string for interpreting raw data value
-   */
-  public String getFormat ()
-  {
-    return format;
-  }
+	/**
+	 * <p>
+	 * Gets the format string defining how to interpret the raw data field
+	 * value.
+	 * </p>
+	 * <p>
+	 * Note: This is not applicable for all fields and will be ignored by those
+	 * fields to which it does not apply.
+	 * </p>
+	 *
+	 * @return the format string for interpreting raw data value
+	 */
+	public String getFormat() {
+		return format;
+	}
 
-  /**
-   * <p>Sets the format string defining how to interpret the raw data field value.</p>
-   * <p>Note: This is not applicable for all fields and will be ignored by those fields
-   * to which it does not apply.</p>
-   *
-   * @param format the format string for interpreting raw data value
-   */
-  public void setFormat (String format)
-  {
-    this.format = format;
-  }
+	/**
+	 * <p>
+	 * Sets the format string defining how to interpret the raw data field
+	 * value.
+	 * </p>
+	 * <p>
+	 * Note: This is not applicable for all fields and will be ignored by those
+	 * fields to which it does not apply.
+	 * </p>
+	 *
+	 * @param format
+	 *            the format string for interpreting raw data value
+	 */
+	public void setFormat(String format) {
+		this.format = format;
+	}
 
-  /**
-   * <p>Gets the locale representation string used by formatter.</p>
-   * <p>Note: This is not applicable for all fields and will be ignored by those fields
-   * to which it does not apply.</p>
-   *
-   * @return the locale representation string used by formatter
-   */
-  public String getLocale ()
-  {
-    return locale;
-  }
+	/**
+	 * <p>
+	 * Gets the locale representation string used by formatter.
+	 * </p>
+	 * <p>
+	 * Note: This is not applicable for all fields and will be ignored by those
+	 * fields to which it does not apply.
+	 * </p>
+	 *
+	 * @return the locale representation string used by formatter
+	 */
+	public String getLocale() {
+		return locale;
+	}
 
-  /**
-   * <p>Sets the locale representation string used by formatter.</p>
-   * <p>Note: This is not applicable for all fields and will be ignored by those fields
-   * to which it does not apply.</p>
-   *
-   * @param locale the locale representation string used by formatter
-   */
-  public void setLocale (String locale)
-  {
-    this.locale = locale;
-  }
+	/**
+	 * <p>
+	 * Sets the locale representation string used by formatter.
+	 * </p>
+	 * <p>
+	 * Note: This is not applicable for all fields and will be ignored by those
+	 * fields to which it does not apply.
+	 * </p>
+	 *
+	 * @param locale
+	 *            the locale representation string used by formatter
+	 */
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
 
-  /**
-   * Gets the required flag indicating whether field is required or optional.
-   *
-   * @return flag indicating whether field is required or optional
-   */
-  public String getRequired ()
-  {
-    return reqValue;
-  }
+	/**
+	 * Gets the required flag indicating whether field is required or optional.
+	 *
+	 * @return flag indicating whether field is required or optional
+	 */
+	public String getRequired() {
+		return reqValue;
+	}
 
-  /**
-   * Sets the required flag  indicates where field is required or optional.
-   *
-   * @param reqValue true/false string to use to separate raw values
-   */
-  public void setRequired (String reqValue)
-  {
-    this.reqValue = reqValue;
-  }
+	/**
+	 * Sets the required flag indicates where field is required or optional.
+	 *
+	 * @param reqValue
+	 *            true/false string to use to separate raw values
+	 */
+	public void setRequired(String reqValue) {
+		this.reqValue = reqValue;
+	}
 
-  /**
-   * Indicates whether some other object is "equal to" this field.
-   *
-   * @param obj the reference object with which to compare.
-   *
-   * @return {@code true} if this field is the same as the obj
-   * argument; {@code false} otherwise.
-   *
-   * @see Object#equals(Object)
-   */
-  @Override
-  public boolean equals (Object obj)
-  {
-    if (obj == null)
-    {
-      return false;
-    }
-    if (!(obj instanceof ActivityField))
-    {
-      return false;
-    }
-    ActivityField other = (ActivityField) obj;
-    return this.fieldType == other.fieldType;
-  }
+	/**
+	 * Indicates whether some other object is "equal to" this field.
+	 *
+	 * @param obj
+	 *            the reference object with which to compare.
+	 *
+	 * @return {@code true} if this field is the same as the obj argument;
+	 *         {@code false} otherwise.
+	 *
+	 * @see Object#equals(Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ActivityField)) {
+			return false;
+		}
+		ActivityField other = (ActivityField) obj;
+		return this.fieldType == other.fieldType;
+	}
 
-  /**
-   * Returns hash code for this filed object.
-   *
-   * @return a hash code value for this field.
-   *
-   * @see Object#hashCode()
-   */
-  @Override
-  public int hashCode ()
-  {
-    return fieldType.ordinal ();
-  }
+	/**
+	 * Returns hash code for this filed object.
+	 *
+	 * @return a hash code value for this field.
+	 *
+	 * @see Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return fieldType.ordinal();
+	}
 
-  /**
-   * Returns string representing activity field by field type.
-   *
-   * @return a string representing field.
-   */
-  @Override
-  public String toString ()
-  {
-    return fieldType.toString ();
-  }
+	/**
+	 * Returns string representing activity field by field type.
+	 *
+	 * @return a string representing field.
+	 */
+	@Override
+	public String toString() {
+		return fieldType.toString();
+	}
 
-  /**
-   * Gets a string representation of this object for use in debugging, which
-   * includes the value of each data member.
-   *
-   * @return debugging string representation
-   */
-  public String toDebugString ()
-  {
-    return "{fieldType='" + fieldType + "' " + "format='" + format + "' " + "locale='" + locale + "' " + "separator='" + separator + "' "
-           + "required='" + reqValue + "'}";
-  }
+	/**
+	 * Gets a string representation of this object for use in debugging, which
+	 * includes the value of each data member.
+	 *
+	 * @return debugging string representation
+	 */
+	public String toDebugString() {
+		return "{fieldType='" + fieldType + "' " + "format='" + format + "' " + "locale='" + locale + "' "
+				+ "separator='" + separator + "' " + "required='" + reqValue + "'}";
+	}
 }
