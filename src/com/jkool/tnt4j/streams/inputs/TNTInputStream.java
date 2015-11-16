@@ -52,7 +52,7 @@ import com.nastel.jkool.tnt4j.uuid.DefaultUUIDFactory;
  * @version $Revision: 8 $
  */
 public abstract class TNTInputStream implements Runnable {
-	private final EventSink logger; // TODO: review (debug, TA)
+	private final EventSink logger;
 
 	/**
 	 * StreamThread running this stream.
@@ -384,14 +384,5 @@ public abstract class TNTInputStream implements Runnable {
 			cleanup();
 			logger.log(OpLevel.INFO, "Thread {0} ended", Thread.currentThread().getName());
 		}
-	}
-
-	/**
-	 * Get the debug logger being used for this class instance.
-	 *
-	 * @return debug logger
-	 */
-	public EventSink getDbgLogger() {
-		return logger;
 	}
 }

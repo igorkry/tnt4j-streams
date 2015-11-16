@@ -30,12 +30,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see java.lang.Thread
  */
 public class StreamsThread extends Thread {
-	private static final EventSink PRV_LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsThread.class);
-
-	/**
-	 * Event sink used to log stream activities run on this thread.
-	 */
-	protected EventSink logger = null;
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsThread.class);
 
 	/**
 	 * Flag indicating that tread should stop running.
@@ -165,9 +160,7 @@ public class StreamsThread extends Thread {
 	 * Stops this thread.
 	 */
 	public void halt() {
-		if (logger != null) {
-			logger.log(OpLevel.DEBUG, "Signaled to terminate");
-		}
+		LOGGER.log(OpLevel.DEBUG, "Signaled to terminate");
 		stopRunning = true;
 		interrupt();
 	}
@@ -189,7 +182,7 @@ public class StreamsThread extends Thread {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
-			PRV_LOGGER.log(OpLevel.DEBUG, "Sleep interrupted after {0} msec. (initial={1})",
+			LOGGER.log(OpLevel.DEBUG, "Sleep interrupted after {0} msec. (initial={1})",
 					(System.currentTimeMillis() - startTime), millis);
 		}
 	}
@@ -227,12 +220,10 @@ public class StreamsThread extends Thread {
 				long sleepMillis = System.currentTimeMillis() - startTime;
 				remainMillis -= sleepMillis;
 				interruptCount++;
-				if (logger != null) {
-					logger.log(OpLevel.DEBUG, "Sleep interrupted (count={0}), after {1} msec. (initial={2})",
-							interruptCount, sleepMillis, millis);
-					if (remainMillis > 0L) {
-						logger.log(OpLevel.DEBUG, "   Going back to sleep for {0} msec.", remainMillis);
-					}
+				LOGGER.log(OpLevel.DEBUG, "Sleep interrupted (count={0}), after {1} msec. (initial={2})",
+						interruptCount, sleepMillis, millis);
+				if (remainMillis > 0L) {
+					LOGGER.log(OpLevel.DEBUG, "   Going back to sleep for {0} msec.", remainMillis);
 				}
 			}
 		}
@@ -254,26 +245,7 @@ public class StreamsThread extends Thread {
 			join(millis);
 		} catch (InterruptedException e) {
 		}
-		PRV_LOGGER.log(OpLevel.DEBUG, "Completed waiting for thread to die in {0} msec.",
+		LOGGER.log(OpLevel.DEBUG, "Completed waiting for thread to die in {0} msec.",
 				(System.currentTimeMillis() - startTime));
-	}
-
-	/**
-	 * Gets debug logger for thread.
-	 *
-	 * @return debug logger
-	 */
-	public EventSink getDbgLogger() {
-		return logger;
-	}
-
-	/**
-	 * Sets debug logger for thread.
-	 *
-	 * @param logger
-	 *            debug logger
-	 */
-	public void setDbgLogger(EventSink logger) {
-		this.logger = logger;
 	}
 }

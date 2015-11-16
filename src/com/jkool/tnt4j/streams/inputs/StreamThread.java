@@ -31,6 +31,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  */
 public class StreamThread extends StreamsThread {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamThread.class);
+
 	/**
 	 * TNTInputStream being executed by this thread.
 	 */
@@ -48,7 +49,6 @@ public class StreamThread extends StreamsThread {
 		super(target);
 		this.target = target;
 		target.setOwnerThread(this);
-		setDbgLogger(target.getDbgLogger());
 	}
 
 	/**
@@ -65,7 +65,6 @@ public class StreamThread extends StreamsThread {
 		super(target, name);
 		this.target = target;
 		target.setOwnerThread(this);
-		setDbgLogger(target.getDbgLogger());
 	}
 
 	/**
@@ -84,7 +83,6 @@ public class StreamThread extends StreamsThread {
 		super(group, target, name);
 		this.target = target;
 		target.setOwnerThread(this);
-		setDbgLogger(target.getDbgLogger());
 	}
 
 	/**
@@ -101,7 +99,6 @@ public class StreamThread extends StreamsThread {
 		super(group, target);
 		this.target = target;
 		target.setOwnerThread(this);
-		setDbgLogger(target.getDbgLogger());
 	}
 
 	/**
