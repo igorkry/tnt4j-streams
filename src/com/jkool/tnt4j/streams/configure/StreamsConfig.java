@@ -31,6 +31,7 @@ import org.xml.sax.SAXException;
 
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -44,109 +45,109 @@ public class StreamsConfig {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_DATETIME = "DateTime";
+	public static final String PROP_DATETIME = "DateTime"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_PATTERN = "Pattern";
+	public static final String PROP_PATTERN = "Pattern"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_FLD_DELIM = "FieldDelim";
+	public static final String PROP_FLD_DELIM = "FieldDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_VAL_DELIM = "ValueDelim";
+	public static final String PROP_VAL_DELIM = "ValueDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_STRIP_QUOTES = "StripQuotes";
+	public static final String PROP_STRIP_QUOTES = "StripQuotes"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_FILENAME = "FileName";
+	public static final String PROP_FILENAME = "FileName"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_HOST = "Host";
+	public static final String PROP_HOST = "Host"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_PORT = "Port";
+	public static final String PROP_PORT = "Port"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_SIG_DELIM = "SignatureDelim";
+	public static final String PROP_SIG_DELIM = "SignatureDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_REQUIRE_ALL = "RequireDefault";
+	public static final String PROP_REQUIRE_ALL = "RequireDefault"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_QMGR_NAME = "QueueManager";
+	public static final String PROP_QMGR_NAME = "QueueManager"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_QUEUE_NAME = "Queue";
+	public static final String PROP_QUEUE_NAME = "Queue"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_TOPIC_NAME = "Topic";
+	public static final String PROP_TOPIC_NAME = "Topic"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_SUB_NAME = "Subscription";
+	public static final String PROP_SUB_NAME = "Subscription"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_TOPIC_STRING = "TopicString";
+	public static final String PROP_TOPIC_STRING = "TopicString"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_CHANNEL_NAME = "Channel";
+	public static final String PROP_CHANNEL_NAME = "Channel"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_STRIP_HEADERS = "StripHeaders";
+	public static final String PROP_STRIP_HEADERS = "StripHeaders"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_NAMESPACE = "Namespace";
+	public static final String PROP_NAMESPACE = "Namespace"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_START_FROM_LATEST = "StartFromLatest";
+	public static final String PROP_START_FROM_LATEST = "StartFromLatest"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_FILE_READ_DELAY = "FileReadDelay";
+	public static final String PROP_FILE_READ_DELAY = "FileReadDelay"; // NON-NLS
 
 	/**
 	 * Name of default configuration file name ({@value})
 	 */
-	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml";
+	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml"; // NON-NLS
 
-	private static final String DFLT_CONFIG_FILE_PATH = "config" + File.separator + DFLT_CFG_FILE_NAME;
+	private static final String DFLT_CONFIG_FILE_PATH = "config" + File.separator + DFLT_CFG_FILE_NAME; // NON-NLS
 
 	private final SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 
@@ -176,7 +177,8 @@ public class StreamsConfig {
 			config = Thread.currentThread().getContextClassLoader().getResourceAsStream(DFLT_CONFIG_FILE_PATH);
 		}
 		if (config == null) {
-			throw new FileNotFoundException("Could not find configuration file '" + DFLT_CONFIG_FILE_PATH + "'");
+			throw new FileNotFoundException(
+					StreamsResources.getStringFormatted("StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH));
 		}
 		load(new InputStreamReader(config));
 	}

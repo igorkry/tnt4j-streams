@@ -36,6 +36,7 @@ import org.apache.commons.lang3.text.StrTokenizer;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -64,7 +65,7 @@ public class ActivityTokenParser extends ActivityParser {
 	 * Contains the field separator (set by {@code FieldDelim} property) -
 	 * Default: ","
 	 */
-	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(",");
+	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(","); // NON-NLS
 
 	/**
 	 * Indicates whether surrounding double quotes should be stripped from
@@ -100,15 +101,15 @@ public class ActivityTokenParser extends ActivityParser {
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, fieldDelim);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, fieldDelim);
 			} else if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			} else if (StreamsConfig.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
-				LOGGER.log(OpLevel.TRACE, "Setting {0} to \"{1}\"", name, value);
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.setting"), name, value);
 			}
 		}
 	}
@@ -150,7 +151,7 @@ public class ActivityTokenParser extends ActivityParser {
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
-			throw new IllegalStateException("ActivityTokenParser: field delimiter not specified or empty");
+			throw new IllegalStateException(StreamsResources.getString("ActivityTokenParser.no.field.delimiter"));
 		}
 		if (data == null) {
 			return null;
@@ -160,11 +161,11 @@ public class ActivityTokenParser extends ActivityParser {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.parsing"), dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				LOGGER.log(OpLevel.DEBUG, "Input does not match pattern defined in parser {0}", getName());
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.input.not.match"), getName());
 				return null;
 			}
 		}
@@ -173,15 +174,15 @@ public class ActivityTokenParser extends ActivityParser {
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG, "Did not find any fields in input string");
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.split"), fields.length);
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		try {
 			// save entire activity string as message data
-			field = new ActivityField(StreamFieldType.Message);
+			field = new ActivityField(StreamFieldType.Message.name());
 			applyFieldValue(ai, field, dataStr);
 			// apply fields for parser
 			Object value;
@@ -208,7 +209,8 @@ public class ActivityTokenParser extends ActivityParser {
 				applyFieldValue(ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing data for field " + field, 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}

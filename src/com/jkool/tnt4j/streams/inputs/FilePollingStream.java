@@ -36,6 +36,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -129,9 +130,9 @@ public class FilePollingStream extends TNTInputStream {
 	public void initialize() throws Throwable {
 		super.initialize();
 		if (fileName == null) {
-			throw new IllegalStateException("FilePollingStream: File name not defined");
+			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
 		}
-		LOGGER.log(OpLevel.DEBUG, "Initializing stream using file name: {0}", fileName);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
 
 		changedLinesBuffer = new ArrayBlockingQueue<String>(CHANGES_BUFFER_SIZE, true);
 
@@ -151,7 +152,8 @@ public class FilePollingStream extends TNTInputStream {
 	@Override
 	public Object getNextItem() throws Throwable {
 		if (changedLinesBuffer == null) {
-			throw new IllegalStateException("FilePollingStream: queue of changed lines is not initialized!..");
+			throw new IllegalStateException(
+					StreamsResources.getString("FilePollingStream.changes.buffer.uninitialized"));
 		}
 
 		String line = changedLinesBuffer.take();
@@ -219,7 +221,7 @@ public class FilePollingStream extends TNTInputStream {
 		 * Constructs an LogWatcher.
 		 */
 		LogWatcher() {
-			super("FilePollingStream.LogWatcher");
+			super("FilePollingStream.LogWatcher"); // NON-NLS
 
 			setDaemon(true);
 		}
@@ -279,18 +281,18 @@ public class FilePollingStream extends TNTInputStream {
 		}
 
 		private void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, "Reading changes of log file: {0}", polledFileName);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.reading.changes"), polledFileName);
 			readingLatestLogFile = true;
 
 			File currLogFile = new File(polledFileName);
 
 			if (!currLogFile.canRead()) {
-				LOGGER.log(OpLevel.WARNING, "Can't access log file! trying to swap to later log.");
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.cant.access"));
 
 				currLogFile = getNextAvailableLogFile();
 
 				if (currLogFile == null) {
-					LOGGER.log(OpLevel.ERROR, "Next log file not found! Interrupting polling...");
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.next.not.found"));
 
 					interrupted = true;
 					return;
@@ -298,7 +300,7 @@ public class FilePollingStream extends TNTInputStream {
 			} else {
 				long flm = currLogFile.lastModified();
 				if (flm > lastModifTime) {
-					LOGGER.log(OpLevel.DEBUG, "File updated {0} sec. ago. Time since last file reading {1} sec.",
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.file.updated"),
 							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
 							TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
 
@@ -309,7 +311,7 @@ public class FilePollingStream extends TNTInputStream {
 					if (nextLog != null) {
 						currLogFile = nextLog;
 					} else {
-						LOGGER.log(OpLevel.DEBUG, "No changes available. Waiting until next invoke...");
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.no.changes"));
 
 						return;
 					}
@@ -321,14 +323,14 @@ public class FilePollingStream extends TNTInputStream {
 			try {
 				lnr = rollToCurrentLine(currLogFile);
 			} catch (IOException exc) {
-				LOGGER.log(OpLevel.ERROR, "Error while rolling to marked log line: ", exc);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.error.rolling"), exc);
 			}
 
 			if (lnr != null) {
 				try {
 					readNewLogLines(lnr);
 				} catch (IOException exc) {
-					LOGGER.log(OpLevel.ERROR, "Error reading new log file entries: ", exc);
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.error.reading"), exc);
 				} finally {
 					Utils.close(lnr);
 				}
@@ -346,7 +348,8 @@ public class FilePollingStream extends TNTInputStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, "Changing to next available log file: {0}", polledFileName);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.next"),
+							polledFileName);
 				}
 
 				return nextFile;
@@ -369,7 +372,7 @@ public class FilePollingStream extends TNTInputStream {
 			try {
 				return new LineNumberReader(new FileReader(logFile));
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, "Couldn't initialize reader for log file! Interrupting polling...");
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.reader.error"));
 
 				interrupted = true;
 				return null;
@@ -382,7 +385,7 @@ public class FilePollingStream extends TNTInputStream {
 
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
-					LOGGER.log(OpLevel.DEBUG, "Looks like log file got smaller...");
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.log.shorter"));
 
 					skipFail = true;
 					break;
@@ -398,7 +401,8 @@ public class FilePollingStream extends TNTInputStream {
 					return rollToCurrentLine(prevLogFile);
 				} else {
 					if (lnr.markSupported()) {
-						LOGGER.log(OpLevel.INFO, "Resetting log file reader to 0 position...");
+						LOGGER.log(OpLevel.INFO,
+								StreamsResources.getStringFormatted("FilePollingStream.resetting.reader", 0));
 
 						lnr.reset();
 					}
@@ -419,7 +423,8 @@ public class FilePollingStream extends TNTInputStream {
 					lastModifTime = prevFile.lastModified();
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, "Changing to previous found log file: {0}", polledFileName);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.previous"),
+							polledFileName);
 				}
 
 				return prevFile;
@@ -441,7 +446,7 @@ public class FilePollingStream extends TNTInputStream {
 				boolean added = changedLinesBuffer.offer(line);
 
 				if (!added) {
-					LOGGER.log(OpLevel.WARNING, "Changes buffer size limit is reached and Log entry is skipped: {0}",
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.changes.buffer.limit"),
 							line);
 				}
 			}

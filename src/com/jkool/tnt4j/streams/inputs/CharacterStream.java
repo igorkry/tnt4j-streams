@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -158,14 +159,14 @@ public class CharacterStream extends TNTInputStream {
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
 				if (socketPort != null) {
-					throw new IllegalStateException(
-							"Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT);
+					throw new IllegalStateException(StreamsResources.getStringFormatted(
+							"CharacterStream.cannot.set.both", StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
 				}
 				fileName = value;
 			} else if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(fileName)) {
-					throw new IllegalStateException(
-							"Cannot set both " + StreamsConfig.PROP_FILENAME + " and " + StreamsConfig.PROP_PORT);
+					throw new IllegalStateException(StreamsResources.getStringFormatted(
+							"CharacterStream.cannot.set.both", StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
 				}
 				socketPort = Integer.valueOf(value);
 			}
@@ -184,7 +185,7 @@ public class CharacterStream extends TNTInputStream {
 			} else if (socketPort != null) {
 				svrSocket = new ServerSocket(socketPort);
 			} else {
-				throw new IllegalStateException("CharacterStream: Input stream source type not specified");
+				throw new IllegalStateException(StreamsResources.getString("CharacterStream.no.stream.source"));
 			}
 		}
 	}
@@ -198,17 +199,18 @@ public class CharacterStream extends TNTInputStream {
 	protected void startDataStream() throws IOException {
 		if (rawStream == null && rawReader == null) {
 			if (svrSocket != null) {
-				LOGGER.log(OpLevel.DEBUG, "Waiting for socket connection on port: {0}", socketPort);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("CharacterStream.waiting.for.connection"),
+						socketPort);
 				socket = svrSocket.accept();
 				rawStream = socket.getInputStream();
-				LOGGER.log(OpLevel.DEBUG, "Accepted connection, reading data from socket: {0}", socket);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("CharacterStream.accepted.connection"), socket);
 				// only accept one connection, close down server socket
 				Utils.close(svrSocket);
 				svrSocket = null;
 			}
 		}
 		if (rawStream == null && rawReader == null) {
-			throw new IOException("raw stream or reader is not set");
+			throw new IOException(StreamsResources.getString("CharacterStream.no.stream.reader"));
 		}
 		dataReader = rawReader != null ? new FeedReader(rawReader) : new FeedReader(rawStream);
 	}
@@ -232,7 +234,7 @@ public class CharacterStream extends TNTInputStream {
 		if (dataReader.isClosed() || dataReader.hasError()) {
 			return null;
 		}
-		LOGGER.log(OpLevel.TRACE, "Stream is still open");
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("CharacterStream.stream.still.open"));
 		return dataReader;
 	}
 

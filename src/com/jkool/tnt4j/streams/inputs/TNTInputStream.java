@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.StreamsThread;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.TrackingLogger;
@@ -161,14 +162,15 @@ public abstract class TNTInputStream implements Runnable {
 	 *             continue.
 	 */
 	protected void initialize() throws Throwable {
-		streamConfig = DefaultConfigFactory.getInstance().getConfig("com.jkool.tnt4j.streams");
+		streamConfig = DefaultConfigFactory.getInstance().getConfig("com.jkool.tnt4j.streams"); // NON-NLS
 		if (streamConfig.getUUIDFactory() == null) {
 			streamConfig.setUUIDFactory(DefaultUUIDFactory.getInstance());
 		}
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
 		trackersMap.put(defaultSource.getFQName(), tracker);
-		logger.log(OpLevel.DEBUG, "Build default tracker for source {0}", defaultSource.getFQName());
+		logger.log(OpLevel.DEBUG, StreamsResources.getString("TNTInputStream.default.tracker"),
+				defaultSource.getFQName());
 	}
 
 	/**
@@ -227,7 +229,8 @@ public abstract class TNTInputStream implements Runnable {
 			}
 		} catch (ParseException e) {
 			int position = getActivityPosition();
-			ParseException pe = new ParseException("Failed to process activity data at position " + position, position);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("TNTInputStream.failed.to.process", position), position);
 			pe.initCause(e);
 			throw pe;
 		}
@@ -322,9 +325,9 @@ public abstract class TNTInputStream implements Runnable {
 	 */
 	@Override
 	public void run() {
-		logger.log(OpLevel.INFO, "Starting ...");
+		logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.starting"));
 		if (ownerThread == null) {
-			throw new IllegalStateException("Owner thread has not been set");
+			throw new IllegalStateException(StreamsResources.getString("TNTInputStream.no.owner.thread"));
 		}
 		try {
 			initialize();
@@ -333,9 +336,9 @@ public abstract class TNTInputStream implements Runnable {
 					ActivityInfo ai = getNextActivity();
 					if (ai == null) {
 						if (isHalted()) {
-							logger.log(OpLevel.INFO, "Data stream ended ...");
+							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
 						} else {
-							logger.log(OpLevel.INFO, "No Parser accepted Message !..");
+							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.no.parser"));
 						}
 						halt();
 					} else {
@@ -349,16 +352,20 @@ public abstract class TNTInputStream implements Runnable {
 								streamConfig.setSource(aiSource);
 								tracker = TrackingLogger.getInstance(streamConfig.build());
 								trackersMap.put(aiSource.getFQName(), tracker);
-								logger.log(OpLevel.DEBUG, "Build new tracked for source {0}", aiSource.getFQName());
+								logger.log(OpLevel.DEBUG,
+										StreamsResources.getString("TNTInputStream.build.new.tracker"),
+										aiSource.getFQName());
 							}
 
 							while (!isHalted() && !tracker.isOpen()) {
 								try {
 									tracker.open();
 								} catch (IOException ioe) {
-									logger.log(OpLevel.ERROR, "Failed to connect to {0}", tracker, ioe);
+									logger.log(OpLevel.ERROR,
+											StreamsResources.getString("TNTInputStream.failed.to.connect"), tracker,
+											ioe);
 									Utils.close(tracker);
-									logger.log(OpLevel.INFO, "Will retry in {0} seconds",
+									logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.will.retry"),
 											TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL));
 									if (!isHalted()) {
 										StreamsThread.sleep(CONN_RETRY_INTERVAL);
@@ -370,19 +377,21 @@ public abstract class TNTInputStream implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger.log(OpLevel.ERROR, "Failed to record activity at position {0}: {1}", getActivityPosition(),
-							ise.getMessage(), ise);
+					logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity.at"),
+							getActivityPosition(), ise.getMessage(), ise);
 					halt();
 				} catch (Exception e) {
-					logger.log(OpLevel.ERROR, "Failed to record activity at position {0}: {1}", getActivityPosition(),
-							e.getMessage(), e);
+					logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity.at"),
+							getActivityPosition(), e.getMessage(), e);
 				}
 			}
 		} catch (Throwable t) {
-			logger.log(OpLevel.ERROR, "Failed to record activity: {0}", t.getMessage(), t);
+			logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity"),
+					t.getMessage(), t);
 		} finally {
 			cleanup();
-			logger.log(OpLevel.INFO, "Thread {0} ended", Thread.currentThread().getName());
+			logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.thread.ended"),
+					Thread.currentThread().getName());
 		}
 	}
 }

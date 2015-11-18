@@ -19,6 +19,8 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+
 /**
  * Provides list of valid Message Types.
  *
@@ -99,7 +101,7 @@ public enum MessageType {
 		if (value == ACKNOWLEDGEMENT.value()) {
 			return ACKNOWLEDGEMENT;
 		}
-		throw new IllegalArgumentException("value '" + value + "' is not valid for enumeration MessageType");
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.num.value", value));
 	}
 
 	private final int enumValue;
@@ -118,7 +120,7 @@ public enum MessageType {
 	 */
 	public static MessageType valueOf(Object value) {
 		if (value == null) {
-			throw new IllegalArgumentException("object must be non-null");
+			throw new IllegalArgumentException(StreamsResources.getString("MessageType.null.object"));
 		}
 		if (value instanceof Number) {
 			return valueOf(((Number) value).intValue());
@@ -127,6 +129,6 @@ public enum MessageType {
 			return valueOf(value.toString());
 		}
 		throw new IllegalArgumentException(
-				"Cannot convert object of type '" + value.getClass().getName() + "' enum MessageType");
+				StreamsResources.getStringFormatted("MessageType.illegal.obj.value", value.getClass().getName()));
 	}
 }

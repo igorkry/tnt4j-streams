@@ -19,7 +19,10 @@
 
 package com.jkool.tnt4j.streams.fields;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.jkool.tnt4j.streams.utils.StreamTimestamp;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpCompCode;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.core.OpType;
@@ -172,12 +175,7 @@ public enum StreamFieldType {
 	/**
 	 * Activity event category name.
 	 */
-	Category(String.class),
-
-	/**
-	 * User-defined value associated with the activity (e.g. monetary value).
-	 */
-	Value(String.class);
+	Category(String.class);
 
 	private Class dataType;
 
@@ -215,7 +213,8 @@ public enum StreamFieldType {
 			return OpCompCode.class;
 
 		default:
-			throw new UnsupportedOperationException(this + " does not have a defined enumeration set");
+			throw new UnsupportedOperationException(
+					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
 
@@ -250,7 +249,8 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(enumLabel).ordinal();
 
 		default:
-			throw new UnsupportedOperationException(this + " does not have a defined enumeration set");
+			throw new UnsupportedOperationException(
+					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
 
@@ -283,7 +283,8 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(enumLabel.toUpperCase());
 
 		default:
-			throw new UnsupportedOperationException(this + " does not have a defined enumeration set");
+			throw new UnsupportedOperationException(
+					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
 
@@ -314,7 +315,8 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(value).toString();
 
 		default:
-			throw new UnsupportedOperationException(this + " does not have a defined enumeration set");
+			throw new UnsupportedOperationException(
+					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
 
@@ -345,7 +347,8 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(value);
 
 		default:
-			throw new UnsupportedOperationException(this + " does not have a defined enumeration set");
+			throw new UnsupportedOperationException(
+					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
 
@@ -365,9 +368,26 @@ public enum StreamFieldType {
 	public static StreamFieldType getType(int ordinal) {
 		StreamFieldType[] enums = StreamFieldType.values();
 		if (ordinal < 0 || ordinal >= enums.length) {
-			throw new IndexOutOfBoundsException(
-					"Invalid StreamFieldType ordinal value '" + ordinal + "' (range: 0-" + (enums.length - 1) + ")");
+			throw new IndexOutOfBoundsException(StreamsResources.getStringFormatted("StreamFieldType.invalid.ordinal",
+					ordinal, (enums.length - 1)));
 		}
 		return enums[ordinal];
+	}
+
+	public static StreamFieldType valueOfIgnoreCase(String name) throws IllegalArgumentException {
+		if (StringUtils.isEmpty(name)) {
+			throw new IllegalArgumentException(StreamsResources.getString("StreamFieldType.name.empty"));
+		}
+
+		StreamFieldType[] enumConstants = StreamFieldType.values();
+
+		for (StreamFieldType ec : enumConstants) {
+			if (ec.name().equalsIgnoreCase(name)) {
+				return ec;
+			}
+		}
+
+		throw new IllegalArgumentException(
+				StreamsResources.getStringFormatted("StreamFieldType.no.enum.constant", name));
 	}
 }

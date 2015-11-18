@@ -41,9 +41,9 @@
             </classpath>
         </javac>
 
-        <!--copy todir="${classes}">
-            <fileset dir="${src}" includes="log4j.properties"/>
-        </copy-->
+        <copy todir="${classes}">
+            <fileset dir="${src}" includes="resources/*.properties"/>
+        </copy>
     </target>
 
     <target name="clean" description="clean up">

@@ -186,9 +186,8 @@ public class TimestampFormatter {
 				return parse(pattern, value, timeZone, locale);
 			}
 		}
-		throw new ParseException("Unsupported date/time pattern: " + ", dataType="
-				+ (value == null ? "null" : value.getClass().getName()) + ", units=" + units + ", pattern=" + pattern
-				+ ", locale=" + locale, 0);
+		throw new ParseException(StreamsResources.getStringFormatted("TimestampFormatter.unsupported.pattern",
+				(value == null ? "null" : value.getClass().getName()), units, pattern, locale), 0);
 	}
 
 	/**
@@ -246,7 +245,8 @@ public class TimestampFormatter {
 			}
 		} catch (NumberFormatException nfe) {
 			ParseException pe = new ParseException(
-					"Failed to parse date/time value '" + value + "': " + nfe.getMessage(), 0);
+					StreamsResources.getStringFormatted("TimestampFormatter.failed.parsing", value, nfe.getMessage()),
+					0);
 			pe.initCause(nfe);
 			throw pe;
 		}

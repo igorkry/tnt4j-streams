@@ -43,6 +43,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class StreamTimestamp extends UsecTimestamp {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamTimestamp.class);
 
+	private static final String[] digits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
 	private static final long serialVersionUID = 584224868408250622L;
 
 	/**
@@ -162,7 +164,7 @@ public class StreamTimestamp extends UsecTimestamp {
 	public StreamTimestamp(String timeStampStr, String formatStr, String timeZoneId, String locale)
 			throws ParseException {
 		if (timeStampStr == null) {
-			throw new IllegalArgumentException("timeStampStr must be non-null");
+			throw new IllegalArgumentException(StreamsResources.getString("StreamTimestamp.null.timestamp.srt"));
 		}
 		long uSecs = 0L;
 		SimpleDateFormat dateFormat;
@@ -177,17 +179,15 @@ public class StreamTimestamp extends UsecTimestamp {
 				int fmtFracSecLen = endFmtPos - fmtPos + 1;
 				if (fmtFracSecLen > 6) {
 					throw new ParseException(
-							"Date format containing more than 6 significant digits for fractional seconds is not supported",
-							0);
+							StreamsResources.getString("StreamTimestamp.fraction.length.not.supported"), 0);
 				}
 				if (fmtFracSecLen > 3) {
 					// format specification represents more than milliseconds,
 					// assume microseconds
-					int uSecEndPos = StringUtils.lastIndexOfAny(timeStampStr, "0", "1", "2", "3", "4", "5", "6", "7",
-							"8", "9");
+					int uSecEndPos = StringUtils.lastIndexOfAny(timeStampStr, digits);
 					if (uSecEndPos > 2) {
 						int uSecPos = timeStampStr.lastIndexOf('.', uSecEndPos) + 1;
-						String uSecStr = String.format("%s", timeStampStr.substring(uSecPos, uSecEndPos + 1));
+						String uSecStr = String.format("%s", timeStampStr.substring(uSecPos, uSecEndPos + 1)); // NON-NLS
 						if (uSecStr.length() < fmtFracSecLen) {
 							uSecStr = StringUtils.rightPad(uSecStr, fmtFracSecLen, '0');
 						} else if (uSecStr.length() > fmtFracSecLen) {

@@ -30,6 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.fields.StreamFieldType;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -61,7 +63,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * Contains the field separator (set by {@code SignatureDelim} property) -
 	 * Default: ","
 	 */
-	protected String sigDelim = ",";
+	protected String sigDelim = ","; // NON-NLS
 
 	/**
 	 * Constructs a MessageActivityXmlParser.
@@ -121,73 +123,75 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 */
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		switch (field.getFieldType()) {
-		case Correlator:
-		case TrackingId:
-			Object[] sigItems = null;
-			if (value instanceof Object[]) {
-				sigItems = (Object[]) value;
-			} else if (value instanceof String) {
-				String sigStr = (String) value;
-				if (sigStr.contains(sigDelim)) {
-					sigItems = sigStr.split(sigDelim);
-				}
-			}
-			if (sigItems != null) {
-				MessageType msgType = null;
-				String msgFormat = null;
-				byte[] msgId = null;
-				String msgUser = null;
-				String msgApplType = null;
-				String msgApplName = null;
-				String msgPutDate = null;
-				String msgPutTime = null;
-				for (int i = 0; i < sigItems.length; i++) {
-					Object item = sigItems[i];
-					if (item == null) {
-						continue;
-					}
-					switch (i) {
-					case 0:
-						msgType = item instanceof Number ? MessageType.valueOf(((Number) item).intValue())
-								: MessageType.valueOf(Integer.parseInt(item.toString()));
-						break;
-					case 1:
-						msgFormat = item.toString();
-						break;
-					case 2:
-						msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-						break;
-					case 3:
-						msgUser = item.toString();
-						break;
-					case 4:
-						msgApplType = item.toString();
-						break;
-					case 5:
-						msgApplName = item.toString();
-						break;
-					case 6:
-						msgPutDate = item.toString();
-						break;
-					case 7:
-						msgPutTime = item.toString();
-						break;
-					default:
-						break;
+		StreamFieldType fieldType = field.getFieldType();
+		if (fieldType != null) {
+			switch (fieldType) {
+			case Correlator:
+			case TrackingId:
+				Object[] sigItems = null;
+				if (value instanceof Object[]) {
+					sigItems = (Object[]) value;
+				} else if (value instanceof String) {
+					String sigStr = (String) value;
+					if (sigStr.contains(sigDelim)) {
+						sigItems = sigStr.split(sigDelim);
 					}
 				}
-				value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate,
-						msgPutTime);
-				LOGGER.log(OpLevel.TRACE,
-						"Message Signature ({0}):  msgType={1}  msgFormat={2}  msgId={3} [{4}]  userId={5}  putApplType={6}  putApplName={7}  putDate={8}  putTime={9}",
-						value, msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),
-						msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
-						msgPutTime);
+				if (sigItems != null) {
+					MessageType msgType = null;
+					String msgFormat = null;
+					byte[] msgId = null;
+					String msgUser = null;
+					String msgApplType = null;
+					String msgApplName = null;
+					String msgPutDate = null;
+					String msgPutTime = null;
+					for (int i = 0; i < sigItems.length; i++) {
+						Object item = sigItems[i];
+						if (item == null) {
+							continue;
+						}
+						switch (i) {
+						case 0:
+							msgType = item instanceof Number ? MessageType.valueOf(((Number) item).intValue())
+									: MessageType.valueOf(Integer.parseInt(item.toString()));
+							break;
+						case 1:
+							msgFormat = item.toString();
+							break;
+						case 2:
+							msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+							break;
+						case 3:
+							msgUser = item.toString();
+							break;
+						case 4:
+							msgApplType = item.toString();
+							break;
+						case 5:
+							msgApplName = item.toString();
+							break;
+						case 6:
+							msgPutDate = item.toString();
+							break;
+						case 7:
+							msgPutTime = item.toString();
+							break;
+						default:
+							break;
+						}
+					}
+					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
+							msgPutDate, msgPutTime);
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getString("MessageActivityXmlParser.msg.signature"),
+							value, msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),
+							msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
+							msgPutTime);
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
 		}
 		super.applyFieldValue(ai, field, value);
 	}

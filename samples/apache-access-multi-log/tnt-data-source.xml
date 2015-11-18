@@ -64,7 +64,7 @@
             <field-map source="511" target="ERROR"/>
         </field>
         <field name="ReasonCode" locator="10"/>
-        <field name="Value" locator="11"/>
+        <field name="MsgValue" locator="11"/>
         <field name="ElapsedTime" locator="13" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
         <filter name="LogEntriesFilter">
@@ -134,7 +134,7 @@
             <field-map source="511" target="ERROR"/>
         </field>
         <field name="ReasonCode" locator="10"/>
-        <field name="Value" locator="11"/>
+        <field name="MsgValue" locator="11"/>
     </parser>
 
     <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">

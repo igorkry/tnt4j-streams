@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.parsers.ActivityRegExParser;
 import com.jkool.tnt4j.streams.utils.StreamTimestamp;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -58,28 +59,28 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	protected static final String PROP_APACHE_LOG_PATTERN = "LogPattern";
+	protected static final String PROP_APACHE_LOG_PATTERN = "LogPattern"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	protected static final String PROP_CONF_REGEX_MAPPING = "ConfRegexMapping";
+	protected static final String PROP_CONF_REGEX_MAPPING = "ConfRegexMapping"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	protected static final String PROP_LOG_BEGIN_TIME = "LogBeginTime";
+	protected static final String PROP_LOG_BEGIN_TIME = "LogBeginTime"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	protected static final String PROP_LOG_END_TIME = "LogEndTime";
+	protected static final String PROP_LOG_END_TIME = "LogEndTime"; // NON-NLS
 
-	private static final String APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX = "%\\S*(%|\\w)";
+	private static final String APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX = "%\\S*(%|\\w)"; // NON-NLS
 
-	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)";
-	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})";
-	private static final String REQUEST_LOG_TOKEN_REGEX = "((\\S+) (\\S+) (\\S+))";
+	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
+	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
+	private static final String REQUEST_LOG_TOKEN_REGEX = "((\\S+) (\\S+) (\\S+))"; // NON-NLS
 
 	private static final DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss z");
 
@@ -109,38 +110,39 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * Fills default Apache access log configuration to RegEx mappings.
 	 */
 	private void fillDefaultConfigRegexMappings() {
-		configRegexMappings.put("%%", "%");
-		configRegexMappings.put("%a", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%A", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%B", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%b", "(\\d+|-)");
-		configRegexMappings.put("%*C", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*D", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*e", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%f", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%h", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%H", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*i", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%k", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%l", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%m", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*n", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*o", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*p", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*P", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%q", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*r", REQUEST_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%R", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*s", STATUS_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*t", "\\[([\\w:/]+\\s[+\\-]\\d{4})\\]");
-		configRegexMappings.put("%*T", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*u", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%*U", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%v", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%V", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%X", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%I", DEFAULT_LOG_TOKEN_REGEX);
-		configRegexMappings.put("%O", DEFAULT_LOG_TOKEN_REGEX);
+		configRegexMappings.put("%%", "%"); // NON-NLS NON-NLS
+		configRegexMappings.put("%a", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%A", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%B", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%b", "(\\d+|-)"); // NON-NLS NON-NLS
+		configRegexMappings.put("%*C", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*D", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*e", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%f", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%h", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%H", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*i", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%k", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%l", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%m", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*n", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*o", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*p", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*P", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%q", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*r", REQUEST_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%R", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*s", STATUS_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*t", "\\[([\\w:/]+\\s[+\\-]\\d{4})\\]"); // NON-NLS
+																			// NON-NLS
+		configRegexMappings.put("%*T", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*u", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*U", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%v", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%V", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%X", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%I", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%O", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 	}
 
 	/**
@@ -158,7 +160,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					apacheLogPattern = value;
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
@@ -168,9 +170,9 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 						String regex = value.substring(idx + 1);
 
 						String oldRegex = userRegexMappings.put(confKey, regex);
-						LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 						LOGGER.log(OpLevel.DEBUG,
-								"Setting Apache access log parsing RegEx mapping {0} from \"{1}\" to \"{2}\"", confKey,
+								StreamsResources.getString("ApacheAccessLogParser.setting.regex.mapping"), confKey,
 								oldRegex, regex);
 					}
 				}
@@ -178,25 +180,25 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 				if (!StringUtils.isEmpty(value)) {
 					Date d = df.parse(value);
 					logBeginTime = new StreamTimestamp(d);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			} else if (PROP_LOG_END_TIME.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					Date d = df.parse(value);
 					logEndTime = new StreamTimestamp(d);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, "Ignoring property {0}", name);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
 		}
 
 		if (pattern == null && StringUtils.isNotEmpty(apacheLogPattern)) {
 			String regex = makeRegexPattern(apacheLogPattern);
 			if (regex != null) {
 				pattern = Pattern.compile(regex);
-				LOGGER.log(OpLevel.DEBUG, "Made Apache access log parsing RegEx \"{0}\"", regex);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ApacheAccessLogParser.regex.made"), regex);
 			} else {
-				LOGGER.log(OpLevel.TRACE, "Could not make Apache access log parsing RegEx for \"{0}\"",
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ApacheAccessLogParser.could.not.make.regex"),
 						apacheLogPattern);
 			}
 		}
@@ -226,7 +228,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 		// return StringUtils.isEmpty (logRegex) ? null : "(?m)^" +
 		// logRegex.trim ();
-		return StringUtils.isEmpty(logRegex) ? null : "^" + logRegex.trim();
+		return StringUtils.isEmpty(logRegex) ? null : "^" + logRegex.trim(); // NON-NLS
 	}
 
 	/**
@@ -289,9 +291,9 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * @return default RegEx string for configuration token
 	 */
 	private static String mapConfigTokenRegexDefault(String configToken) {
-		if (isMatchingPattern(configToken, "%*s")) {
+		if (isMatchingPattern(configToken, "%*s")) { // NON-NLS
 			return STATUS_LOG_TOKEN_REGEX;
-		} else if (isMatchingPattern(configToken, "%*r")) {
+		} else if (isMatchingPattern(configToken, "%*r")) { // NON-NLS
 			return REQUEST_LOG_TOKEN_REGEX;
 		}
 
@@ -310,7 +312,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 *         pattern
 	 */
 	private static boolean isMatchingPattern(String configToken, String pattern) {
-		String p = pattern.replace("*", "\\S*");
+		String p = pattern.replace("*", "\\S*"); // NON-NLS
 
 		return configToken.matches(p);
 	}

@@ -25,10 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.utils.NumericFormatter;
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
-import com.jkool.tnt4j.streams.utils.TimestampFormatter;
-import com.jkool.tnt4j.streams.utils.Utils;
+import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -89,7 +86,8 @@ public class ActivityFieldLocator {
 		if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.StreamProp) {
 			int loc = Integer.valueOf(locator);
 			if (loc <= 0) {
-				throw new IllegalArgumentException("Numeric locator must be > 0");
+				throw new IllegalArgumentException(
+						StreamsResources.getString("ActivityFieldLocator.numeric.locator.positive"));
 			}
 		}
 	}
@@ -435,11 +433,12 @@ public class ActivityFieldLocator {
 				target = map.get(srcString);
 			}
 			if (target == null) {
-				LOGGER.log(OpLevel.TRACE, "Applying default mapping for locator type \"{0}\"", type);
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityFieldLocator.mapped.default"), type);
 				target = mapCatchAll != null ? mapCatchAll : source;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE, "Mapped value \"{0}\" to \"{1}\" for locator type \"{2}\"", source, target, type);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityFieldLocator.mapped.result"), source, target,
+				type);
 		return target;
 	}
 
@@ -557,7 +556,7 @@ public class ActivityFieldLocator {
 	 */
 	@Override
 	public String toString() {
-		return type + "::" + locator;
+		return String.format("%s::%s", type, locator); // NON-NLS
 	}
 
 	/**
@@ -567,8 +566,18 @@ public class ActivityFieldLocator {
 	 * @return debugging string representation
 	 */
 	public String toDebugString() {
-		return "{type='" + type + "' " + "locator='" + locator + "' " + "dataType='" + dataType + "' " + "format='"
-				+ format + "' " + "locale='" + locale + "' " + "units='" + units + "' " + "cfgValue='" + cfgValue + "' "
-				+ "required='" + requiredVal + "'}";
+		final StringBuilder sb = new StringBuilder("ActivityFieldLocator{"); // NON-NLS
+		sb.append("type='").append(type).append('\''); // NON-NLS
+		sb.append(", locator='").append(locator).append('\''); // NON-NLS
+		sb.append(", dataType=").append(dataType); // NON-NLS
+		sb.append(", radix=").append(radix); // NON-NLS
+		sb.append(", units='").append(units).append('\''); // NON-NLS
+		sb.append(", format='").append(format).append('\''); // NON-NLS
+		sb.append(", locale='").append(locale).append('\''); // NON-NLS
+		sb.append(", timeZone='").append(timeZone).append('\''); // NON-NLS
+		sb.append(", cfgValue=").append(cfgValue); // NON-NLS
+		sb.append(", requiredVal='").append(requiredVal).append('\''); // NON-NLS
+		sb.append('}');
+		return sb.toString();
 	}
 }

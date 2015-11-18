@@ -21,15 +21,13 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.io.*;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -93,7 +91,7 @@ public abstract class ActivityParser {
 	 *            activity field to add
 	 */
 	public void addField(ActivityField field) {
-		LOGGER.log(OpLevel.DEBUG, "Adding field {0}", field.toDebugString());
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.adding.field"), field.toDebugString());
 		fieldMap.put(field, field.getLocators());
 	}
 
@@ -157,15 +155,15 @@ public abstract class ActivityParser {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		} else {
 			throw new UnsupportedOperationException(
-					"data in the format of a " + data.getClass().getName() + " is not supported");
+					StreamsResources.getStringFormatted("ActivityParser.data.unsupported", data.getClass().getName()));
 		}
 		String str = null;
 		try {
 			str = rdr.readLine();
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG, "Reached end of data stream", eof);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.data.end"), eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, "Error reading from data stream", ioe);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityParser.error.reading"), ioe);
 		}
 
 		return str;

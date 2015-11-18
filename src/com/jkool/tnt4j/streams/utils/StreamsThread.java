@@ -144,7 +144,7 @@ public class StreamsThread extends Thread {
 	 * </p>
 	 */
 	protected void setDefaultName() {
-		setName(getId() + ":" + getName().replaceFirst("com.jkool.tnt4j.streams.", ""));
+		setName(String.format("%s:%s", getId(), getName().replaceFirst("com.jkool.tnt4j.streams.", ""))); // NON-NLS
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class StreamsThread extends Thread {
 	 * Stops this thread.
 	 */
 	public void halt() {
-		LOGGER.log(OpLevel.DEBUG, "Signaled to terminate");
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.halt"));
 		stopRunning = true;
 		interrupt();
 	}
@@ -182,7 +182,7 @@ public class StreamsThread extends Thread {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
-			LOGGER.log(OpLevel.DEBUG, "Sleep interrupted after {0} msec. (initial={1})",
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.sleep.interrupted"),
 					(System.currentTimeMillis() - startTime), millis);
 		}
 	}
@@ -220,10 +220,11 @@ public class StreamsThread extends Thread {
 				long sleepMillis = System.currentTimeMillis() - startTime;
 				remainMillis -= sleepMillis;
 				interruptCount++;
-				LOGGER.log(OpLevel.DEBUG, "Sleep interrupted (count={0}), after {1} msec. (initial={2})",
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.sleepFully.interrupted"),
 						interruptCount, sleepMillis, millis);
 				if (remainMillis > 0L) {
-					LOGGER.log(OpLevel.DEBUG, "   Going back to sleep for {0} msec.", remainMillis);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.sleepFully.remaining"),
+							remainMillis);
 				}
 			}
 		}
@@ -245,7 +246,7 @@ public class StreamsThread extends Thread {
 			join(millis);
 		} catch (InterruptedException e) {
 		}
-		LOGGER.log(OpLevel.DEBUG, "Completed waiting for thread to die in {0} msec.",
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.waitfor"),
 				(System.currentTimeMillis() - startTime));
 	}
 }

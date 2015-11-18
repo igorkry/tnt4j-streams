@@ -39,6 +39,7 @@ import org.w3c.dom.NodeList;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -114,17 +115,18 @@ public class ActivityXmlParser extends ActivityParser {
 						namespaces = new NamespaceMap();
 						namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 					}
-					String[] nsFields = value.split("=");
+					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
-					LOGGER.log(OpLevel.DEBUG, "Adding {0} mapping {1}", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityXmlParser.adding.mapping"), name,
+							value);
 				}
 			} else if (StreamsConfig.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, "Ignoring property {0}", name);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
 		}
 		if (namespaces != null) {
 			xPath.setNamespaceContext(namespaces);
@@ -158,7 +160,7 @@ public class ActivityXmlParser extends ActivityParser {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", data);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.parsing"), data);
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		try {
@@ -193,8 +195,9 @@ public class ActivityXmlParser extends ActivityParser {
 						savedFormats[0] = loc.getFormat();
 						savedUnits[0] = loc.getUnits();
 						value = getLocatorValue(stream, loc, xmlDoc);
-						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) {
-							LOGGER.log(OpLevel.TRACE, "Required locator not found: {0}", field);
+						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
+							LOGGER.log(OpLevel.TRACE,
+									StreamsResources.getString("ActivityXmlParser.required.locator.not.found"), field);
 							return null;
 						}
 					} else {
@@ -204,8 +207,10 @@ public class ActivityXmlParser extends ActivityParser {
 							savedFormats[li] = loc.getFormat();
 							savedUnits[li] = loc.getUnits();
 							values[li] = getLocatorValue(stream, loc, xmlDoc);
-							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) {
-								LOGGER.log(OpLevel.TRACE, "Required locator not found: {0}", field);
+							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
+								LOGGER.log(OpLevel.TRACE,
+										StreamsResources.getString("ActivityXmlParser.required.locator.not.found"),
+										field);
 								return null;
 							}
 						}
@@ -222,7 +227,8 @@ public class ActivityXmlParser extends ActivityParser {
 				}
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing data for field " + field, 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
@@ -244,7 +250,7 @@ public class ActivityXmlParser extends ActivityParser {
 					if (!StringUtils.isEmpty(strVal)) {
 						// Get list of attributes and their values for current
 						// element
-						NodeList attrs = (NodeList) xPath.evaluate(locStr + "/@*", xmlDoc, XPathConstants.NODESET);
+						NodeList attrs = (NodeList) xPath.evaluate(locStr + "/@*", xmlDoc, XPathConstants.NODESET); // NON-NLS
 						int length = attrs == null ? 0 : attrs.getLength();
 						if (length > 0) {
 							String format = null;
@@ -254,14 +260,14 @@ public class ActivityXmlParser extends ActivityParser {
 								Attr attr = (Attr) attrs.item(i);
 								String attrName = attr.getName();
 								String attrValue = attr.getValue();
-								if ("datatype".equals(attrName)) {
+								if ("datatype".equals(attrName)) { // NON-NLS
 									locator.setDataType(ActivityFieldDataType.valueOf(attrValue));
-								} else if ("format".equals(attrName)) {
+								} else if ("format".equals(attrName)) { // NON-NLS
 									format = attrValue;
 									formatAttrSet = true;
-								} else if ("locale".equals(attrName)) {
+								} else if ("locale".equals(attrName)) { // NON-NLS
 									locale = attrValue;
-								} else if ("units".equals(attrName)) {
+								} else if ("units".equals(attrName)) { // NON-NLS
 									locator.setUnits(attrValue);
 								}
 							}
@@ -306,12 +312,12 @@ public class ActivityXmlParser extends ActivityParser {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		} else {
 			throw new IllegalArgumentException(
-					"data in the format of a " + data.getClass().getName() + " is not supported");
+					StreamsResources.getStringFormatted("ActivityParser.data.unsupported", data.getClass().getName()));
 		}
 		String xmlString = null;
 		try {
 			for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
-				if (line.startsWith("<?xml")) {
+				if (line.startsWith("<?xml")) { // NON-NLS
 					if (xmlBuffer.length() > 0) {
 						xmlString = xmlBuffer.toString();
 						xmlBuffer.setLength(0);
@@ -320,9 +326,9 @@ public class ActivityXmlParser extends ActivityParser {
 				xmlBuffer.append(line);
 			}
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG, "Reached end of xml data stream", eof);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityXmlParser.data.end"), eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, "Error reading from xml data stream", ioe);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityXmlParser.error.reading"), ioe);
 		}
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();

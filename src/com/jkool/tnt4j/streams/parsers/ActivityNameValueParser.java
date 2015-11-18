@@ -37,6 +37,7 @@ import org.apache.commons.lang3.text.StrTokenizer;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -67,13 +68,13 @@ public class ActivityNameValueParser extends ActivityParser {
 	 * Contains the field separator (set by {@code FieldDelim} property) -
 	 * Default: ","
 	 */
-	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(",");
+	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(","); // NON-NLS
 
 	/**
 	 * Contains the name/value separator (set by {@code ValueDelim} property) -
 	 * Default: "="
 	 */
-	protected String valueDelim = "=";
+	protected String valueDelim = "="; // NON-NLS
 
 	/**
 	 * Contains the pattern used to determine which types of activity data
@@ -109,20 +110,20 @@ public class ActivityNameValueParser extends ActivityParser {
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_FLD_DELIM.equals(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, fieldDelim);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, fieldDelim);
 			} else if (StreamsConfig.PROP_VAL_DELIM.equals(name)) {
 				valueDelim = value;
-				LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 			} else if (StreamsConfig.PROP_PATTERN.equals(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			} else if (StreamsConfig.PROP_STRIP_QUOTES.equals(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
-				LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 			}
-			LOGGER.log(OpLevel.TRACE, "Ignoring property {0}", name);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -149,10 +150,10 @@ public class ActivityNameValueParser extends ActivityParser {
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
-			throw new IllegalStateException("ActivityNameValueParser: field delimiter not specified");
+			throw new IllegalStateException(StreamsResources.getString("ActivityNameValueParser.no.field.delimiter"));
 		}
 		if (valueDelim == null) {
-			throw new IllegalStateException("ActivityNameValueParser: value delimiter not specified");
+			throw new IllegalStateException(StreamsResources.getString("ActivityNameValueParser.no.value.delimiter"));
 		}
 		if (data == null) {
 			return null;
@@ -161,11 +162,11 @@ public class ActivityNameValueParser extends ActivityParser {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.parsing"), dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				LOGGER.log(OpLevel.DEBUG, "Input does not match pattern defined in parser {0}", getName());
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.input.not.match"), getName());
 				return null;
 			}
 		}
@@ -174,10 +175,10 @@ public class ActivityNameValueParser extends ActivityParser {
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG, "Did not find any fields in input string");
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.split"), fields.length);
 		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
@@ -185,14 +186,14 @@ public class ActivityNameValueParser extends ActivityParser {
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}
-				LOGGER.log(OpLevel.TRACE, "Found Name/Value: {0}", field);
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityNameValueParser.found"), field);
 			}
 		}
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		try {
 			// save entire activity string as message data
-			field = new ActivityField(StreamFieldType.Message);
+			field = new ActivityField(StreamFieldType.Message.name());
 			applyFieldValue(ai, field, dataStr);
 			// apply fields for parser
 			Object value;
@@ -214,7 +215,8 @@ public class ActivityNameValueParser extends ActivityParser {
 				applyFieldValue(ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing data for field " + field, 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}

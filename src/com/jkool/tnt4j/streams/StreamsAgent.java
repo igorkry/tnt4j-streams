@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.StreamThread;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -62,7 +63,7 @@ public final class StreamsAgent {
 	 *            </table>
 	 */
 	public static void main(String... args) {
-		LOGGER.log(OpLevel.INFO, "jKool TNT4J Streams session starting as standalone application...");
+		LOGGER.log(OpLevel.INFO, StreamsResources.getString("StreamsAgent.start.main"));
 		processArgs(args);
 		loadConfigAndRun(cfgFileName);
 	}
@@ -74,7 +75,7 @@ public final class StreamsAgent {
 	 *            stream configuration file name
 	 */
 	public static void runFromAPI(String cfgFileName) {
-		LOGGER.log(OpLevel.INFO, "jKool TNT4J Streams session starting as API integration...");
+		LOGGER.log(OpLevel.INFO, StreamsResources.getString("StreamsAgent.start.api"));
 		loadConfigAndRun(cfgFileName);
 	}
 
@@ -89,14 +90,15 @@ public final class StreamsAgent {
 			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
 			Map<String, TNTInputStream> streamsMap = cfg.getStreams();
 			if (streamsMap == null || streamsMap.isEmpty()) {
-				throw new IllegalStateException("No Activity Streams found in configuration");
+				throw new IllegalStateException(StreamsResources.getString("StreamsAgent.no.activity.streams"));
 			}
-			ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads");
+			ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
 			StreamThread ft;
 			for (Map.Entry<String, TNTInputStream> streamEntry : streamsMap.entrySet()) {
 				String streamName = streamEntry.getKey();
 				TNTInputStream stream = streamEntry.getValue();
-				ft = new StreamThread(streamThreads, stream, stream.getClass().getSimpleName() + ":" + streamName);
+				ft = new StreamThread(streamThreads, stream,
+						String.format("%s:%s", stream.getClass().getSimpleName(), streamName)); // NON-NLS
 				ft.start();
 			}
 		} catch (Throwable t) {
@@ -115,18 +117,18 @@ public final class StreamsAgent {
 			if (StringUtils.isEmpty(arg)) {
 				continue;
 			}
-			if (arg.startsWith("-f:")) {
+			if (arg.startsWith("-f:")) { // NON-NLS
 				cfgFileName = arg.substring(3);
 				if (StringUtils.isEmpty(cfgFileName)) {
-					System.out.println("Missing <cfg_file_name> for '-f' argument");
+					System.out.println(StreamsResources.getString("StreamsAgent.missing.cfg"));
 					printUsage();
 					System.exit(1);
 				}
-			} else if ("-h".equals(arg) || "-?".equals(arg)) {
+			} else if ("-h".equals(arg) || "-?".equals(arg)) { // NON-NLS
 				printUsage();
 				System.exit(1);
 			} else {
-				System.out.println("Invalid argument: " + arg);
+				System.out.println(StreamsResources.getStringFormatted("StreamsAgent.invalid.argument", arg));
 				printUsage();
 				System.exit(1);
 			}
@@ -137,10 +139,6 @@ public final class StreamsAgent {
 	 * Prints short standalone application usage manual.
 	 */
 	private static void printUsage() {
-		System.out.println("\nValid arguments:\n");
-		System.out.println("    [-f:<cfg_file_name>] [-h|-?]");
-		System.out.println("where:");
-		System.out.println("    -f      -  Load TNT4J Streams data source configuration from <cfg_file_name>");
-		System.out.println("    -h, -?  -  Print usage");
+		System.out.println(StreamsResources.getString("StreamsAgent.help"));
 	}
 }

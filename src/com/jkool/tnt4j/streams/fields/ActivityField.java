@@ -22,6 +22,9 @@ package com.jkool.tnt4j.streams.fields;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -34,7 +37,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class ActivityField {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
-	private final StreamFieldType fieldType;
+	private final String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String format = null;
 	private String locale = null;
@@ -44,32 +47,32 @@ public class ActivityField {
 	/**
 	 * Creates a new activity field entry.
 	 *
-	 * @param fieldType
-	 *            type of activity field
+	 * @param fieldTypeName
+	 *            name of activity field type
 	 *
 	 * @throws IllegalArgumentException
-	 *             if field type is {@code null}
+	 *             if field name is {@code null} or empty
 	 */
-	public ActivityField(StreamFieldType fieldType) {
-		if (fieldType == null) {
-			throw new IllegalArgumentException("Activity field type cannot be null");
+	public ActivityField(String fieldTypeName) {
+		if (StringUtils.isEmpty(fieldTypeName)) {
+			throw new IllegalArgumentException(StreamsResources.getString("ActivityField.field.type.name.empty"));
 		}
-		this.fieldType = fieldType;
+		this.fieldTypeName = fieldTypeName;
 	}
 
 	/**
 	 * Creates a new activity field entry.
 	 *
-	 * @param fieldType
-	 *            type of activity field
+	 * @param fieldTypeName
+	 *            name of activity field type
 	 * @param dataType
 	 *            type of field data type
 	 *
 	 * @throws NullPointerException
 	 *             if field type is {@code null}
 	 */
-	public ActivityField(StreamFieldType fieldType, ActivityFieldDataType dataType) {
-		this(fieldType);
+	public ActivityField(String fieldTypeName, ActivityFieldDataType dataType) {
+		this(fieldTypeName);
 		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0");
 		locators = new ArrayList<ActivityFieldLocator>(1);
 		locators.add(loc);
@@ -83,7 +86,9 @@ public class ActivityField {
 	 *         {@code false} otherwise
 	 */
 	public boolean isEnumeration() {
-		return fieldType.getEnumerationClass() != null;
+		StreamFieldType sft = getFieldType();
+
+		return sft == null ? false : sft.getEnumerationClass() != null;
 	}
 
 	/**
@@ -92,7 +97,22 @@ public class ActivityField {
 	 * @return the activity field type
 	 */
 	public StreamFieldType getFieldType() {
-		return fieldType;
+		try {
+			StreamFieldType sft = StreamFieldType.valueOfIgnoreCase(fieldTypeName);
+			return sft;
+		} catch (IllegalArgumentException exc) {
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the type name of this activity field.
+	 *
+	 * @return the activity field type name
+	 */
+	public String getFieldTypeName() {
+		return fieldTypeName;
 	}
 
 	/**
@@ -233,15 +253,15 @@ public class ActivityField {
 	 * @see Object#equals(Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
 			return false;
-		}
-		if (!(obj instanceof ActivityField)) {
-			return false;
-		}
-		ActivityField other = (ActivityField) obj;
-		return this.fieldType == other.fieldType;
+
+		ActivityField that = (ActivityField) o;
+
+		return fieldTypeName.equals(that.fieldTypeName);
 	}
 
 	/**
@@ -253,7 +273,7 @@ public class ActivityField {
 	 */
 	@Override
 	public int hashCode() {
-		return fieldType.ordinal();
+		return fieldTypeName.hashCode();
 	}
 
 	/**
@@ -263,7 +283,7 @@ public class ActivityField {
 	 */
 	@Override
 	public String toString() {
-		return fieldType.toString();
+		return fieldTypeName;
 	}
 
 	/**
@@ -273,7 +293,13 @@ public class ActivityField {
 	 * @return debugging string representation
 	 */
 	public String toDebugString() {
-		return "{fieldType='" + fieldType + "' " + "format='" + format + "' " + "locale='" + locale + "' "
-				+ "separator='" + separator + "' " + "required='" + reqValue + "'}";
+		final StringBuilder sb = new StringBuilder("ActivityField{"); // NON-NLS
+		sb.append("fieldTypeName=").append(fieldTypeName); // NON-NLS
+		sb.append(", format='").append(format).append('\''); // NON-NLS
+		sb.append(", locale='").append(locale).append('\''); // NON-NLS
+		sb.append(", separator='").append(separator).append('\''); // NON-NLS
+		sb.append(", reqValue='").append(reqValue).append('\''); // NON-NLS
+		sb.append('}');
+		return sb.toString();
 	}
 }

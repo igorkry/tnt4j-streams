@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -91,10 +92,10 @@ public class ActivityRegExParser extends ActivityParser {
 			if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, "Ignoring property {0}", name);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -115,15 +116,17 @@ public class ActivityRegExParser extends ActivityParser {
 				locType = ActivityFieldLocatorType.valueOf(locator.getType());
 			} catch (Exception e) {
 			}
-			LOGGER.log(OpLevel.DEBUG, "Adding field {0}", field.toDebugString());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.adding.field"), field.toDebugString());
 			if (locType == ActivityFieldLocatorType.REMatchNum) {
 				if (groupMap.containsKey(field)) {
-					throw new IllegalArgumentException("Conflicting mapping for '" + field + "'");
+					throw new IllegalArgumentException(
+							StreamsResources.getStringFormatted("ActivityRegExParser.conflicting.mapping", field));
 				}
 				matchLocs.add(locator);
 			} else {
 				if (matchMap.containsKey(field)) {
-					throw new IllegalArgumentException("Conflicting mapping for '" + field + "'");
+					throw new IllegalArgumentException(
+							StreamsResources.getStringFormatted("ActivityRegExParser.conflicting.mapping", field));
 				}
 				groupLocs.add(locator);
 			}
@@ -159,7 +162,7 @@ public class ActivityRegExParser extends ActivityParser {
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {
-			throw new IllegalStateException("ActivityRegExParser: regular expression pattern not specified or empty");
+			throw new IllegalStateException(StreamsResources.getString("ActivityRegExParser.no.regex.pattern"));
 		}
 		if (data == null) {
 			return null;
@@ -168,36 +171,40 @@ public class ActivityRegExParser extends ActivityParser {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.parsing"), dataStr);
 		Matcher matcher = pattern.matcher(dataStr);
 		if (matcher == null || !matcher.matches()) {
-			LOGGER.log(OpLevel.DEBUG, "Input does not match pattern defined in parser \"{0}\"", getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.input.not.match"), getName());
 			return null;
 		}
 		ActivityInfo ai = new ActivityInfo();
 		// save entire activity string as message data
-		ActivityField field = new ActivityField(StreamFieldType.Message);
+		ActivityField field = new ActivityField(StreamFieldType.Message.name());
 		applyFieldValue(ai, field, dataStr);
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
-				LOGGER.log(OpLevel.DEBUG, "Applying RE Match mappings, count = {0}", matchMap.size());
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityRegExParser.applying.regex"),
+						matchMap.size());
 				ArrayList<String> matches = new ArrayList<String>();
 				matches.add(""); // dummy entry to index array with match
 									// locations
 				while (matcher.find()) {
 					String matchStr = matcher.group().trim();
 					matches.add(matchStr);
-					LOGGER.log(OpLevel.TRACE, "match {0} = {1}", matches.size(), matchStr);
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityRegExParser.match"), matches.size(),
+							matchStr);
 				}
-				LOGGER.log(OpLevel.DEBUG, "Found {0} matches", matches.size());
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityRegExParser.found.matches"),
+						matches.size());
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 					value = null;
 					if (locations != null) {
-						LOGGER.log(OpLevel.TRACE, "Setting field {0} from match locations", field);
+						LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityRegExParser.setting.field"),
+								field);
 						if (locations.size() == 1) {
 							value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REMatchNum,
 									matcher, matches);
@@ -214,7 +221,8 @@ public class ActivityRegExParser extends ActivityParser {
 				}
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing RE Match data for field " + field, 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityRegExParser.failed.parsing.regex", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
@@ -225,7 +233,8 @@ public class ActivityRegExParser extends ActivityParser {
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 				value = null;
 				if (locations != null) {
-					LOGGER.log(OpLevel.TRACE, "Setting field {0} from group locations", field);
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityRegExParser.setting.group.field"),
+							field);
 					if (locations.size() == 1) {
 						value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REGroupNum, matcher,
 								null);
@@ -241,7 +250,8 @@ public class ActivityRegExParser extends ActivityParser {
 				applyFieldValue(ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing RE Group data for field " + field, 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityRegExParser.failed.parsing.regex.group", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}

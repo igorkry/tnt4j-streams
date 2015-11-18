@@ -31,6 +31,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -108,9 +109,9 @@ public class FileLineStream extends TNTInputStream {
 	public void initialize() throws Throwable {
 		super.initialize();
 		if (fileName == null) {
-			throw new IllegalStateException("FileLineStream: File name not defined");
+			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
 		}
-		LOGGER.log(OpLevel.DEBUG, "Initializing stream using file name: {0}", fileName);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
 		if (Utils.isWildcardFileName(fileName)) {
 			activityFiles = searchFiles(fileName);
 		} else {
@@ -172,7 +173,7 @@ public class FileLineStream extends TNTInputStream {
 	@Override
 	public Object getNextItem() throws Throwable {
 		if (lineReader == null) {
-			throw new IllegalStateException("FileLineStream: File is not opened for reading");
+			throw new IllegalStateException(StreamsResources.getString("FileLineStream.file.not.opened"));
 		}
 
 		String line = lineReader.readLine();
@@ -201,7 +202,8 @@ public class FileLineStream extends TNTInputStream {
 			File activityFile = activityFiles[fileNumber];
 			lineReader = new LineNumberReader(new FileReader(activityFile));
 			lineNumber = 0;
-			LOGGER.log(OpLevel.DEBUG, "Opening file: {0}", activityFile.getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.opening.file"),
+					activityFile.getName());
 
 			return true;
 		}

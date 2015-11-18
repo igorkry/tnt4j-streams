@@ -29,22 +29,17 @@ public enum ActivityEventProperties {
 	/**
 	 * Event property for activity server name.
 	 */
-	EVENT_PROP_SERVER_NAME("sv_name"),
+	EVENT_PROP_SERVER_NAME("sv_name"), // NON-NLS
 
 	/**
 	 * Event property for activity server IP.
 	 */
-	EVENT_PROP_SERVER_IP("sv_ip"),
+	EVENT_PROP_SERVER_IP("sv_ip"), // NON-NLS
 
 	/**
 	 * Event property for activity application name.
 	 */
-	EVENT_PROP_APPL_NAME("ap_name"),
-
-	/**
-	 * Event property for activity custom user defined value.
-	 */
-	EVENT_PROP_MSG_VALUE("MsgValue");
+	EVENT_PROP_APPL_NAME("ap_name"); // NON-NLS
 
 	private String key;
 

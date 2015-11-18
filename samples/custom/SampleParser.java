@@ -19,6 +19,7 @@
 
 package com.jkool.tnt4j.streams.samples.custom;
 
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +64,7 @@ public class SampleParser extends ActivityParser {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			LOGGER.log(OpLevel.DEBUG, "Setting {0} to \"{1}\"", name, value);
+			LOGGER.log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
 			if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = value;
 			}
@@ -113,7 +114,7 @@ public class SampleParser extends ActivityParser {
 		Object value = null;
 		try {
 			// save entire activity string as message data
-			field = new ActivityField(StreamFieldType.Message);
+			field = new ActivityField(StreamFieldType.Message.name());
 			applyFieldValue(ai, field, dataStr);
 			// apply fields for parser
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
@@ -139,7 +140,7 @@ public class SampleParser extends ActivityParser {
 				applyFieldValue(ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException("Failed parsing data for field " + field, 0);
+			ParseException pe = new ParseException(MessageFormat.format("Failed parsing data for field {0}", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}

@@ -202,10 +202,10 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Maps OpType enumeration literal from string or numeric value.
+	 * Maps OpType enumeration constant from string or numeric value.
 	 *
 	 * @param opType
-	 *            object to be mapped to OpType enumeration literal
+	 *            object to be mapped to OpType enumeration constant
 	 *
 	 * @return OpType mapping or {@code null} if mapping not found.
 	 */
@@ -220,40 +220,40 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	private static OpType mapOpType(String opType) {
-		if (opType.equalsIgnoreCase("OTHER")) {
+		if (opType.equalsIgnoreCase("OTHER")) { // NON-NLS
 			return OpType.OTHER;
 		}
-		if (opType.equalsIgnoreCase("START")) {
+		if (opType.equalsIgnoreCase("START")) { // NON-NLS
 			return OpType.START;
 		}
-		if (opType.equalsIgnoreCase("OPEN")) {
+		if (opType.equalsIgnoreCase("OPEN")) { // NON-NLS
 			return OpType.OPEN;
 		}
-		if (opType.equalsIgnoreCase("SEND")) {
+		if (opType.equalsIgnoreCase("SEND")) { // NON-NLS
 			return OpType.SEND;
 		}
-		if (opType.equalsIgnoreCase("RECEIVE")) {
+		if (opType.equalsIgnoreCase("RECEIVE")) { // NON-NLS
 			return OpType.RECEIVE;
 		}
-		if (opType.equalsIgnoreCase("CLOSE")) {
+		if (opType.equalsIgnoreCase("CLOSE")) { // NON-NLS
 			return OpType.CLOSE;
 		}
-		if (opType.equalsIgnoreCase("END")) {
+		if (opType.equalsIgnoreCase("END")) { // NON-NLS
 			return OpType.STOP;
 		}
-		if (opType.equalsIgnoreCase("INQUIRE")) {
+		if (opType.equalsIgnoreCase("INQUIRE")) { // NON-NLS
 			return OpType.INQUIRE;
 		}
-		if (opType.equalsIgnoreCase("SET")) {
+		if (opType.equalsIgnoreCase("SET")) { // NON-NLS
 			return OpType.SET;
 		}
-		if (opType.equalsIgnoreCase("CALL")) {
+		if (opType.equalsIgnoreCase("CALL")) { // NON-NLS
 			return OpType.CALL;
 		}
-		if (opType.equalsIgnoreCase("URL")) {
+		if (opType.equalsIgnoreCase("URL")) { // NON-NLS
 			return OpType.OTHER;
 		}
-		if (opType.equalsIgnoreCase("BROWSE")) {
+		if (opType.equalsIgnoreCase("BROWSE")) { // NON-NLS
 			return OpType.BROWSE;
 		}
 		return OpType.OTHER;
@@ -302,7 +302,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 */
 	public static boolean isWildcardFileName(String fileName) {
 		if (StringUtils.isNotEmpty(fileName)) {
-			return fileName.contains("*") || fileName.contains("?");
+			return fileName.contains("*") || fileName.contains("?"); // NON-NLS
 		}
 		return false;
 	}

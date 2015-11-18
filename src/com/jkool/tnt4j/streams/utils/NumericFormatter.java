@@ -206,7 +206,8 @@ public class NumericFormatter {
 			Number numValue = null;
 			if (formatter == null && value instanceof String) {
 				String strValue = (String) value;
-				if (strValue.startsWith("0x") || strValue.startsWith("0X")) {
+				if (strValue.startsWith("0x") || strValue.startsWith("0X")) { // NON-NLS
+																				// NON-NLS
 					numValue = Long.parseLong(strValue.substring(2), 16);
 				}
 			}

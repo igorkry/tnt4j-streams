@@ -21,6 +21,7 @@ package com.jkool.tnt4j.streams.fields;
 
 import java.net.InetAddress;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,10 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
-import com.jkool.tnt4j.streams.utils.StreamsThread;
-import com.jkool.tnt4j.streams.utils.TimestampFormatter;
-import com.jkool.tnt4j.streams.utils.Utils;
+import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.*;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -53,7 +51,7 @@ public class ActivityInfo {
 	/**
 	 * The constant to indicate undefined value.
 	 */
-	public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>";
+	public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
 
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
@@ -80,7 +78,6 @@ public class ActivityInfo {
 	private String trackingId = null;
 	private String msgTag = null;
 	private Object msgData = null;
-	private String msgValue = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
 	private Integer msgLength = null;
@@ -94,6 +91,8 @@ public class ActivityInfo {
 	private boolean filtered = false;
 
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
+
+	private Map<String, Object> activityProperties;
 
 	/**
 	 * Constructs an ActivityInfo object.
@@ -117,7 +116,7 @@ public class ActivityInfo {
 	 *             definition (e.g. does not match defined format, etc.)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
-		LOGGER.log(OpLevel.TRACE, "Applying field {0} from: {1}", field, value);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.applying.field"), field, value);
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
@@ -129,12 +128,11 @@ public class ActivityInfo {
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
 			if (field.isEnumeration()) {
-				throw new ParseException(
-						"Field " + field + ", multiple locators are not supported for enumeration-based fields", 0);
+				throw new ParseException(StreamsResources.getStringFormatted("ActivityInfo.multiple.locators", field),
+						0);
 			}
 			if (locators.size() != values.length) {
-				throw new ParseException(
-						"Failed parsing field: " + field + ", number of values does not match number of locators", 0);
+				throw new ParseException(StreamsResources.getStringFormatted("ActivityInfo.failed.parsing", field), 0);
 			}
 			StringBuilder sb = new StringBuilder();
 			for (int v = 0; v < values.length; v++) {
@@ -161,10 +159,10 @@ public class ActivityInfo {
 			}
 		}
 		if (fieldValue == null) {
-			LOGGER.log(OpLevel.TRACE, "Field {0} resolves to null value, not applying field", field);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.field.null"), field);
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE, "Applying field {0}, value = {1}", field, fieldValue);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.applying.field.value"), field, fieldValue);
 		setFieldValue(field, fieldValue);
 	}
 
@@ -188,37 +186,40 @@ public class ActivityInfo {
 		if (field.isEnumeration()) {
 			if (value instanceof String) {
 				String strValue = (String) value;
-				value = StringUtils.containsOnly(strValue, "0123456789") ? Integer.valueOf(strValue)
+				value = StringUtils.containsOnly(strValue, "0123456789") ? Integer.valueOf(strValue) // NON-NLS
 						: strValue.toUpperCase().trim();
 			}
 		}
-		switch (field.getFieldType()) {
-		case ElapsedTime:
-			try {
-				// Elapsed time needs to be converted to usec
-				ActivityFieldUnitsType units = ActivityFieldUnitsType.valueOf(locator.getUnits());
-				if (!(value instanceof Number)) {
-					value = Long.valueOf(String.valueOf(value));
+		StreamFieldType fieldType = field.getFieldType();
+		if (fieldType != null) {
+			switch (fieldType) {
+			case ElapsedTime:
+				try {
+					// Elapsed time needs to be converted to usec
+					ActivityFieldUnitsType units = ActivityFieldUnitsType.valueOf(locator.getUnits());
+					if (!(value instanceof Number)) {
+						value = Long.valueOf(String.valueOf(value));
+					}
+					value = TimestampFormatter.convert((Number) value, units, ActivityFieldUnitsType.Microseconds);
+				} catch (Exception e) {
 				}
-				value = TimestampFormatter.convert((Number) value, units, ActivityFieldUnitsType.Microseconds);
-			} catch (Exception e) {
+				break;
+			case ResourceName:
+				value = getStringValue(value);
+				break;
+			case ServerIp:
+				if (value instanceof InetAddress) {
+					value = ((InetAddress) value).getHostAddress();
+				}
+				break;
+			case ServerName:
+				if (value instanceof InetAddress) {
+					value = ((InetAddress) value).getHostName();
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		case ResourceName:
-			value = getStringValue(value);
-			break;
-		case ServerIp:
-			if (value instanceof InetAddress) {
-				value = ((InetAddress) value).getHostAddress();
-			}
-			break;
-		case ServerName:
-			if (value instanceof InetAddress) {
-				value = ((InetAddress) value).getHostName();
-			}
-			break;
-		default:
-			break;
 		}
 		return value;
 	}
@@ -236,103 +237,114 @@ public class ActivityInfo {
 	 *             if there are any errors with conversion to internal format
 	 */
 	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
-		switch (field.getFieldType()) {
-		case Message:
-			msgData = fieldValue;
-			break;
-		case EventName:
-			eventName = getStringValue(fieldValue);
-			break;
-		case EventType:
-			eventType = Utils.mapOpType(fieldValue);
-			break;
-		case ApplName:
-			applName = getStringValue(fieldValue);
-			break;
-		case Correlator:
-			correlator = getStringValue(fieldValue);
-			break;
-		case ElapsedTime:
-			elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue()
-					: Long.parseLong(getStringValue(fieldValue));
-			break;
-		case EndTime:
-			endTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
-					: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
-			break;
-		case Exception:
-			exception = getStringValue(fieldValue);
-			break;
-		case Location:
-			location = getStringValue(fieldValue);
-			break;
-		case ReasonCode:
-			reasonCode = getIntValue(fieldValue);
-			break;
-		case ResourceName:
-			resourceName = getStringValue(fieldValue);
-			break;
-		case ServerIp:
-			serverIp = getStringValue(fieldValue);
-			break;
-		case ServerName:
-			serverName = getStringValue(fieldValue);
-			break;
-		case Severity:
-			if (fieldValue instanceof Number) {
-				severity = OpLevel.valueOf(((Number) fieldValue).intValue());
-			} else {
-				severity = OpLevel.valueOf(fieldValue);
+		StreamFieldType fieldType = field.getFieldType();
+		if (fieldType != null) {
+			switch (fieldType) {
+			case Message:
+				msgData = fieldValue;
+				break;
+			case EventName:
+				eventName = getStringValue(fieldValue);
+				break;
+			case EventType:
+				eventType = Utils.mapOpType(fieldValue);
+				break;
+			case ApplName:
+				applName = getStringValue(fieldValue);
+				break;
+			case Correlator:
+				correlator = getStringValue(fieldValue);
+				break;
+			case ElapsedTime:
+				elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue()
+						: Long.parseLong(getStringValue(fieldValue));
+				break;
+			case EndTime:
+				endTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
+				break;
+			case Exception:
+				exception = getStringValue(fieldValue);
+				break;
+			case Location:
+				location = getStringValue(fieldValue);
+				break;
+			case ReasonCode:
+				reasonCode = getIntValue(fieldValue);
+				break;
+			case ResourceName:
+				resourceName = getStringValue(fieldValue);
+				break;
+			case ServerIp:
+				serverIp = getStringValue(fieldValue);
+				break;
+			case ServerName:
+				serverName = getStringValue(fieldValue);
+				break;
+			case Severity:
+				if (fieldValue instanceof Number) {
+					severity = OpLevel.valueOf(((Number) fieldValue).intValue());
+				} else {
+					severity = OpLevel.valueOf(fieldValue);
+				}
+				break;
+			case TrackingId:
+				trackingId = getStringValue(fieldValue);
+				break;
+			case StartTime:
+				startTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
+				break;
+			case CompCode:
+				if (fieldValue instanceof Number) {
+					compCode = OpCompCode.valueOf(((Number) fieldValue).intValue());
+				} else {
+					compCode = OpCompCode.valueOf(fieldValue);
+				}
+				break;
+			case Tag:
+				msgTag = getStringValue(fieldValue);
+				break;
+			case UserName:
+				userName = getStringValue(fieldValue);
+				break;
+			case MsgCharSet:
+				msgCharSet = getStringValue(fieldValue);
+				break;
+			case MsgEncoding:
+				msgEncoding = getStringValue(fieldValue);
+				break;
+			case MsgLength:
+				msgLength = getIntValue(fieldValue);
+				break;
+			case MsgMimeType:
+				msgMimeType = getStringValue(fieldValue);
+				break;
+			case ProcessID:
+				processId = getIntValue(fieldValue);
+				break;
+			case ThreadID:
+				threadId = getIntValue(fieldValue);
+				break;
+			case Category:
+				snapshotCategory = getStringValue(fieldValue);
+				break;
+			default:
+				throw new IllegalArgumentException(
+						StreamsResources.getStringFormatted("ActivityInfo.unrecognized.activity", field));
 			}
-			break;
-		case TrackingId:
-			trackingId = getStringValue(fieldValue);
-			break;
-		case StartTime:
-			startTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
-					: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
-			break;
-		case CompCode:
-			if (fieldValue instanceof Number) {
-				compCode = OpCompCode.valueOf(((Number) fieldValue).intValue());
-			} else {
-				compCode = OpCompCode.valueOf(fieldValue);
-			}
-			break;
-		case Tag:
-			msgTag = getStringValue(fieldValue);
-			break;
-		case UserName:
-			userName = getStringValue(fieldValue);
-			break;
-		case Value:
-			msgValue = getStringValue(fieldValue);
-			break;
-		case MsgCharSet:
-			msgCharSet = getStringValue(fieldValue);
-			break;
-		case MsgEncoding:
-			msgEncoding = getStringValue(fieldValue);
-			break;
-		case MsgLength:
-			msgLength = getIntValue(fieldValue);
-			break;
-		case MsgMimeType:
-			msgMimeType = getStringValue(fieldValue);
-			break;
-		case ProcessID:
-			processId = getIntValue(fieldValue);
-			break;
-		case ThreadID:
-			threadId = getIntValue(fieldValue);
-			break;
-		case Category:
-			snapshotCategory = getStringValue(fieldValue);
-			break;
-		default:
-			throw new IllegalArgumentException("Unrecognized Activity field: " + field);
+		} else {
+			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		}
-		LOGGER.log(OpLevel.TRACE, "Set field {0} to \"{1}\"", field, fieldValue);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.set.field"), field, fieldValue);
+	}
+
+	private void addActivityProperty(String propName, Object propValue) {
+		if (activityProperties == null) {
+			activityProperties = new HashMap<String, Object>();
+		}
+
+		activityProperties.put(propName, propValue);
 	}
 
 	/**
@@ -358,10 +370,10 @@ public class ActivityInfo {
 	private static void addSourceValue(StringBuilder sb, SourceType type, String value) {
 		if (StringUtils.isNotEmpty(value)) {
 			if (sb.length() > 0) {
-				sb.append("#");
+				sb.append("#"); // NON-NLS
 			}
 			if (!value.isEmpty()) {
-				sb.append(type).append("=").append(value);
+				sb.append(type).append("=").append(value); // NON-NLS
 			}
 		}
 	}
@@ -382,7 +394,7 @@ public class ActivityInfo {
 	 */
 	public void recordActivity(Tracker tracker, long retryPeriod) throws Throwable {
 		if (tracker == null) {
-			LOGGER.log(OpLevel.WARNING, "Activity destination not specified, activity not being recorded");
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityInfo.tracker.null"));
 			return;
 		}
 
@@ -428,13 +440,18 @@ public class ActivityInfo {
 		event.getOperation().setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		event.getOperation().setPID(processId == null ? Utils.getVMPID() : processId);
 		event.getOperation().setSeverity(severity == null ? OpLevel.INFO : severity);
-		addEventProperty(event, ActivityEventProperties.EVENT_PROP_MSG_VALUE.getKey(), msgValue);
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
 
 		addEventProperty(event, ActivityEventProperties.EVENT_PROP_APPL_NAME.getKey(), applName);
 		addEventProperty(event, ActivityEventProperties.EVENT_PROP_SERVER_NAME.getKey(), serverName);
 		addEventProperty(event, ActivityEventProperties.EVENT_PROP_SERVER_IP.getKey(), serverIp);
+
+		if (activityProperties != null) {
+			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
+				addEventProperty(event, ape.getKey(), ape.getValue());
+			}
+		}
 
 		StreamsThread thread = null;
 		if (Thread.currentThread() instanceof StreamsThread) {
@@ -446,17 +463,17 @@ public class ActivityInfo {
 				try {
 					tracker.tnt(event);
 					if (retryAttempt) {
-						LOGGER.log(OpLevel.INFO, "Activity recording retry successful");
+						LOGGER.log(OpLevel.INFO, StreamsResources.getString("ActivityInfo.retry.successful"));
 					}
 					return;
 				} catch (Throwable ioe) {
-					LOGGER.log(OpLevel.ERROR, "Failed recording activity", ioe);
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityInfo.recording.failed"), ioe);
 					Utils.close(tracker);
 					if (thread == null) {
 						throw ioe;
 					}
 					retryAttempt = true;
-					LOGGER.log(OpLevel.INFO, "Will retry recording in {0} seconds",
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString("ActivityInfo.will.retry"),
 							TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
 					StreamsThread.sleep(retryPeriod);
 				}
@@ -464,8 +481,8 @@ public class ActivityInfo {
 		} while (thread != null && !thread.isStopRunning());
 	}
 
-	private static void addEventProperty(TrackingEvent event, String key, String value) {
-		if (event != null && StringUtils.isNotEmpty(value)) {
+	private static void addEventProperty(TrackingEvent event, String key, Object value) {
+		if (event != null && value != null) {
 			event.getOperation().addProperty(new Property(key, value));
 		}
 	}
@@ -730,15 +747,6 @@ public class ActivityInfo {
 	 */
 	public Object getMsgData() {
 		return msgData;
-	}
-
-	/**
-	 * Gets activity message value.
-	 *
-	 * @return the activity message value
-	 */
-	public String getMsgValue() {
-		return msgValue;
 	}
 
 	/**

@@ -62,7 +62,7 @@
             <field-map source="511" target="ERROR"/>
         </field>
         <field name="ReasonCode" locator="10"/>
-        <field name="Value" locator="11"/>
+        <field name="MsgValue" locator="11"/>
         <field name="ElapsedTime" locator="12" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>

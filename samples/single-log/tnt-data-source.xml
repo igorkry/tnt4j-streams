@@ -18,7 +18,7 @@
             <field-map source="Order Processed" target="SEND"/>
             <field-map source="Order Shipped" target="END"/>
         </field>
-        <field name="Value" locator="8"/>
+        <field name="MsgValue" locator="8"/>
     </parser>
 
     <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
