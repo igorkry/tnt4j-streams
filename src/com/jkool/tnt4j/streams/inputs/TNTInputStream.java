@@ -63,7 +63,7 @@ public abstract class TNTInputStream implements Runnable {
 	/**
 	 * List of parsers being used by stream.
 	 */
-	protected final List<ActivityParser> parsers = new LinkedList<ActivityParser>();
+	protected final Collection<ActivityParser> parsers = new LinkedList<ActivityParser>();
 
 	/**
 	 * Used to deliver processed activity data to destination.

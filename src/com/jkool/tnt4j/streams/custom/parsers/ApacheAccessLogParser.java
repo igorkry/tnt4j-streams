@@ -19,16 +19,15 @@
 
 package com.jkool.tnt4j.streams.custom.parsers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.parsers.ActivityRegExParser;
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -66,28 +65,16 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 */
 	protected static final String PROP_CONF_REGEX_MAPPING = "ConfRegexMapping"; // NON-NLS
 
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	protected static final String PROP_LOG_BEGIN_TIME = "LogBeginTime"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	protected static final String PROP_LOG_END_TIME = "LogEndTime"; // NON-NLS
-
 	private static final String APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX = "%\\S*(%|\\w)"; // NON-NLS
 
 	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
 	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
 	private static final String REQUEST_LOG_TOKEN_REGEX = "((\\S+) (\\S+) (\\S+))"; // NON-NLS
 
-	private static final DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss z");
-
 	/**
 	 * Apache access log configuration pattern string.
 	 */
-	protected String apacheLogPattern;
+	protected String apacheLogPattern = null;
 
 	/**
 	 * Defines mapping between Apache access log configuration pattern token
@@ -95,9 +82,6 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 */
 	protected final Map<String, String> configRegexMappings = new HashMap<String, String>();
 	protected final Map<String, String> userRegexMappings = new HashMap<String, String>();
-
-	protected StreamTimestamp logBeginTime = null;
-	protected StreamTimestamp logEndTime = null;
 
 	/**
 	 * Constructs an ApacheAccessLogParser.
@@ -176,18 +160,6 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 								oldRegex, regex);
 					}
 				}
-			} else if (PROP_LOG_BEGIN_TIME.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
-					Date d = df.parse(value);
-					logBeginTime = new StreamTimestamp(d);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
-				}
-			} else if (PROP_LOG_END_TIME.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
-					Date d = df.parse(value);
-					logEndTime = new StreamTimestamp(d);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
-				}
 			}
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
 		}
@@ -218,17 +190,17 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	private String makeRegexPattern(String apacheLogPattern) {
 		Pattern pattern = Pattern.compile(APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX);
 		Matcher matcher = pattern.matcher(apacheLogPattern);
-		String logRegex = "";
+		StringBuilder logRegexBuff = new StringBuilder();
 		int pos = 0;
 		while (matcher.find()) {
-			logRegex += apacheLogPattern.substring(pos, matcher.start());
-			logRegex += mapConfigTokenToRegex(matcher.group());
+			logRegexBuff.append(apacheLogPattern.substring(pos, matcher.start()));
+			logRegexBuff.append(mapConfigTokenToRegex(matcher.group()));
 			pos = matcher.end();
 		}
 
-		// return StringUtils.isEmpty (logRegex) ? null : "(?m)^" +
-		// logRegex.trim ();
-		return StringUtils.isEmpty(logRegex) ? null : "^" + logRegex.trim(); // NON-NLS
+		String logRegex = logRegexBuff.toString().trim();
+		// return logRegex.isEmpty() ? null : "(?m)^" + logRegex;
+		return logRegex.isEmpty() ? null : "^" + logRegex; // NON-NLS
 	}
 
 	/**
@@ -270,11 +242,11 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	}
 
 	private static String findRegexMapping(String configToken, Map<String, String> regexMappings) {
-		Set<String> keys = regexMappings.keySet();
-
-		for (String key : keys) {
-			if (isMatchingPattern(configToken, key)) {
-				return regexMappings.get(key);
+		if (regexMappings != null) {
+			for (Map.Entry<String, String> e : regexMappings.entrySet()) {
+				if (isMatchingPattern(configToken, e.getKey())) {
+					return e.getValue();
+				}
 			}
 		}
 

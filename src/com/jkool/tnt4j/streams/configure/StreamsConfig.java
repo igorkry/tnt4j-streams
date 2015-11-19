@@ -32,6 +32,7 @@ import org.xml.sax.SAXException;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -256,6 +257,8 @@ public class StreamsConfig {
 		parser.parse(new InputSource(config), hndlr);
 		streams = hndlr.getStreams();
 		parsers = hndlr.getParsers();
+
+		Utils.close(config);
 	}
 
 	/**

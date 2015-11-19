@@ -246,7 +246,7 @@ public class StreamsThread extends Thread {
 			join(millis);
 		} catch (InterruptedException e) {
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.waitfor"),
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("StreamsThread.wait.for"),
 				(System.currentTimeMillis() - startTime));
 	}
 }

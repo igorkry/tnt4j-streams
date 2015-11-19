@@ -196,7 +196,7 @@ public class ActivityTokenParser extends ActivityParser {
 						// the value of this location
 						value = getLocatorValue(stream, locations.get(0), fields);
 					} else {
-						// field value is based on contatenation of several raw
+						// field value is based on concatenation of several raw
 						// data locations,
 						// build array to hold data from each location
 						Object[] values = new Object[locations.size()];
