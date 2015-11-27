@@ -53,8 +53,6 @@ public class ActivityInfo {
 	 */
 	public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
 
-	private static final String TAG_DELIM = ","; // NON-NLS
-
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
@@ -305,10 +303,7 @@ public class ActivityInfo {
 				}
 				break;
 			case Tag:
-				String fValue = getStringValue(fieldValue);
-				if (StringUtils.isNotEmpty(fValue)) {
-					msgTags = fValue.split(TAG_DELIM);
-				}
+				msgTags = Utils.getTags(fieldValue);
 				break;
 			case UserName:
 				userName = getStringValue(fieldValue);

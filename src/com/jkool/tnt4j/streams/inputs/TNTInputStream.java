@@ -424,7 +424,9 @@ public abstract class TNTInputStream implements Runnable {
 			while (!isHalted()) {
 				try {
 					ActivityInfo ai = getNextActivity();
-					if (ai == null) {
+					if (ai == null) { // TODO: better distinguishing between
+										// data stream end and unparseable
+										// activity data.
 						if (isHalted()) {
 							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
 						} else {

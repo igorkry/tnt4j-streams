@@ -213,7 +213,7 @@ public class ActivityTokenParser extends ActivityParser {
 					val = stream.getProperty(locStr);
 				} else {
 					int loc = Integer.parseInt(locStr);
-					if (loc <= fields.length) {
+					if (loc >= 0 && loc <= fields.length) {
 						val = fields[loc - 1].trim();
 					}
 				}

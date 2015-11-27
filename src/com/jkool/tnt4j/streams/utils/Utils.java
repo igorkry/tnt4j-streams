@@ -43,10 +43,7 @@ import com.nastel.jkool.tnt4j.core.OpType;
  */
 public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
-	/**
-	 * Predefined JSON data map key to store initial JSON string.
-	 */
-	public static final String JSON_DATA_KEY = "<<TNT4J_JSON_DATA>>"; // NON-NLS
+	private static final String TAG_DELIM = ","; // NON-NLS
 
 	private Utils() {
 	}
@@ -400,27 +397,44 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @return data map parsed from JSON data object
 	 *
 	 * @throws JsonSyntaxException
+	 *             if there was a problem reading from the Reader
+	 * @throws JsonIOException
 	 *             if json is not a valid representation for an object of type
-	 *             classOfT
 	 *
 	 * @see Gson#fromJson(String, Class)
+	 * @see Gson#fromJson(Reader, Class)
 	 */
-	public static Map<String, ?> fromJsonToMap(Object jsonData) throws IOException {
-		Map<String, Object> map = new LinkedTreeMap<String, Object>();
-		String jsonLine = getStringLine(jsonData);
+	public static Map<String, ?> fromJsonToMap(Object jsonData) {
+		Map<String, ?> map = new LinkedTreeMap<String, Object>();
+		Gson gson = new Gson();
 
-		if (StringUtils.isNotEmpty(jsonLine)) {
-			Gson gson = new Gson();
-
-			map = (Map<String, Object>) gson.fromJson(jsonLine, map.getClass());
-			map.put(JSON_DATA_KEY, jsonLine);
+		if (jsonData instanceof String) {
+			map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
+		} else if (jsonData instanceof Reader) {
+			map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
+		} else if (jsonData instanceof InputStream) {
+			map = (Map<String, ?>) gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
+					map.getClass());
 		}
 
 		return map;
-
 	}
 
-	private static String getStringLine(Object data) throws IOException {
+	/**
+	 * Returns string line read from data source. Data source object can be
+	 * {@code String}, {@code Reader} or {@code InputStream}.
+	 *
+	 * @param data
+	 *            data source object to read string line
+	 *
+	 * @return string line read from data source
+	 *
+	 * @throws IOException
+	 *             If an I/O error occurs while reading line
+	 *
+	 * @see BufferedReader#readLine()
+	 */
+	public static String getStringLine(Object data) throws IOException {
 		if (data == null) {
 			return null;
 		}
@@ -454,7 +468,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 */
 	public static String[] getTags(Object tagsData) {
 		if (tagsData instanceof String) {
-			return ((String) tagsData).split(","); // NON-NLS
+			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
 		} else if (tagsData instanceof Collection) {

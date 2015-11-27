@@ -96,13 +96,13 @@ public class ApacheFlumeStream extends CharacterStream {
 			if (data == null) {
 				halt(); // no more data items to process
 			} else {
-				Map<String, ?> jsonMap = Utils.fromJsonToMap(data);
+				String jsonLine = Utils.getStringLine(data);
+				Map<String, ?> jsonMap = Utils.fromJsonToMap(jsonLine);
 
 				if (jsonMap != null && !jsonMap.isEmpty()) {
 					Object msgData = jsonMap.get(MESSAGE_KEY);
 
 					if (msgData == null) {
-						String jsonLine = String.valueOf(jsonMap.get(Utils.JSON_DATA_KEY));
 						LOGGER.log(OpLevel.DEBUG,
 								StreamsResources.getStringFormatted("CustomStream.no.activity.data", jsonLine));
 					} else {
@@ -111,7 +111,6 @@ public class ApacheFlumeStream extends CharacterStream {
 
 					if (ai != null) {
 						jsonMap.remove(MESSAGE_KEY);
-						jsonMap.remove(Utils.JSON_DATA_KEY);
 
 						for (Map.Entry<String, ?> jme : jsonMap.entrySet()) {
 							ai.addActivityProperty(jme.getKey(), jme.getValue());
