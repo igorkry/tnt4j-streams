@@ -125,10 +125,13 @@ public class WmqStream extends TNTInputStream {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();

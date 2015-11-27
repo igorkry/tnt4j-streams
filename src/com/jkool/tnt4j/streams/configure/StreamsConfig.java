@@ -144,6 +144,11 @@ public class StreamsConfig {
 	public static final String PROP_FILE_READ_DELAY = "FileReadDelay"; // NON-NLS
 
 	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_HALT_ON_PARSER = "HaltIfNoParser"; // NON-NLS
+
+	/**
 	 * Name of default configuration file name ({@value})
 	 */
 	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml"; // NON-NLS

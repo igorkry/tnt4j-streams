@@ -75,6 +75,8 @@ public abstract class TNTInputStream implements Runnable {
 	private TrackerConfig streamConfig;
 	private Source defaultSource;
 
+	private boolean haltIfNoParser = true;
+
 	/**
 	 * Delay between retries to submit data package to jKool Cloud Service if
 	 * some transmission failure occurs, in milliseconds.
@@ -124,7 +126,19 @@ public abstract class TNTInputStream implements Runnable {
 	 * @throws Throwable
 	 *             indicates error with properties
 	 */
-	public abstract void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable;
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+		if (props == null) {
+			return;
+		}
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+			if (StreamsConfig.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
+				haltIfNoParser = Boolean.parseBoolean(value);
+			}
+		}
+	}
 
 	/**
 	 * Get value of specified property. If subclasses override
@@ -145,6 +159,10 @@ public abstract class TNTInputStream implements Runnable {
 		if (StreamsConfig.PROP_DATETIME.equals(name)) {
 			return getDate();
 		}
+		if (StreamsConfig.PROP_HALT_ON_PARSER.equals(name)) {
+			return haltIfNoParser;
+		}
+
 		return null;
 	}
 
@@ -411,8 +429,10 @@ public abstract class TNTInputStream implements Runnable {
 							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
 						} else {
 							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.no.parser"));
+							if (haltIfNoParser) {
+								halt();
+							}
 						}
-						halt();
 					} else {
 						if (!ai.isFiltered()) {
 							Source aiSource = ai.getSource();

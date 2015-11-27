@@ -66,6 +66,7 @@
     </parser>
 
     <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.custom.inputs.ApacheFlumeStream">
+        <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
         <parser-ref name="AccessLogParserCommon"/>
     </stream>
