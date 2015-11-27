@@ -1,7 +1,7 @@
 # tnt4j-streams
 TNT4J Streams allows data streaming, parsing from various data sources into TNT4J event sinks
 
-# Intalation of tnt-4j flume plugin
+# Installation of tnt-4j flume plugin
 
 1. Copy tnt-4j-streams-*-all.jar to [flume_path]/lib directory
 2. Copy tnt-4j sample config files to [flume_path]/config/:
@@ -26,10 +26,10 @@ TNT4J Streams allows data streaming, parsing from various data sources into TNT4
 Q: 	My log is not parsed correctly?
 A: 	Default sample is for on common apache log format.
 	In order to change ir you may need to change <parser> or its <properties>
-	Look in documentation for more exmaples.
+	Look in documentation for more examples.
 	
-Q: 	Can I stream to different mashine?
-	Yes. Change host and/or port where TNT4J-streams is working. 
+Q: 	Can I stream to different machine?
+	Yes. Change host and/or port where TNT4J-Streams is running.
 			
 		
 	
