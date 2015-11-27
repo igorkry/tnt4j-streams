@@ -84,6 +84,14 @@ public class CharacterStream extends TNTInputStream {
 	 * Construct empty CharacterStream. Requires configuration settings to set
 	 * input stream source.
 	 */
+	protected CharacterStream(EventSink logger) {
+		super(logger);
+	}
+
+	/**
+	 * Construct empty CharacterStream. Requires configuration settings to set
+	 * input stream source.
+	 */
 	public CharacterStream() {
 		super(LOGGER);
 	}

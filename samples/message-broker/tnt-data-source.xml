@@ -59,7 +59,6 @@
             <field-map source="ComIbmCORBARequestNode" target="RECEIVE"/>
             <field-map source="" target="CALL"/>
         </field>
-
         <field name="Correlator" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventCorrelation/@wmb:localTransactionId"
                locator-type="Label"/>
         <field name="ElapsedTime" value="0" datatype="Number"/>

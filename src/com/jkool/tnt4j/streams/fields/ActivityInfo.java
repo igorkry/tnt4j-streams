@@ -53,6 +53,8 @@ public class ActivityInfo {
 	 */
 	public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
 
+	private static final String TAG_DELIM = ","; // NON-NLS
+
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
@@ -76,7 +78,7 @@ public class ActivityInfo {
 	private String correlator = null;
 
 	private String trackingId = null;
-	private String msgTag = null;
+	private String[] msgTags = null;
 	private Object msgData = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
@@ -303,7 +305,10 @@ public class ActivityInfo {
 				}
 				break;
 			case Tag:
-				msgTag = getStringValue(fieldValue);
+				String fValue = getStringValue(fieldValue);
+				if (StringUtils.isNotEmpty(fValue)) {
+					msgTags = fValue.split(TAG_DELIM);
+				}
 				break;
 			case UserName:
 				userName = getStringValue(fieldValue);
@@ -339,12 +344,44 @@ public class ActivityInfo {
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.set.field"), field, fieldValue);
 	}
 
-	private void addActivityProperty(String propName, Object propValue) {
+	/**
+	 * Adds activity item property to item properties map. Properties from map
+	 * are transferred as tracking event properties when {@code recordActivity}
+	 * is invoked.
+	 *
+	 * @param propName
+	 *            activity item property key
+	 * @param propValue
+	 *            activity item property value
+	 *
+	 * @see Map#put(Object, Object)
+	 * @see #recordActivity(Tracker, long)
+	 */
+	public Object addActivityProperty(String propName, Object propValue) {
 		if (activityProperties == null) {
 			activityProperties = new HashMap<String, Object>();
 		}
 
-		activityProperties.put(propName, propValue);
+		return activityProperties.put(propName, propValue);
+	}
+
+	/**
+	 * Appends activity item tags array with provided tag strings array
+	 * contents.
+	 * 
+	 * @param tags
+	 *            tag strings array
+	 */
+	public void addTags(String[] tags) {
+		if (tags.length > 0) {
+			int currLength = msgTags == null ? 0 : msgTags.length;
+			String[] newTags = new String[currLength + tags.length];
+			if (currLength > 0) {
+				System.arraycopy(msgTags, 0, newTags, 0, currLength);
+			}
+			System.arraycopy(tags, 0, newTags, currLength, tags.length);
+			msgTags = newTags;
+		}
 	}
 
 	/**
@@ -408,7 +445,7 @@ public class ActivityInfo {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, correl, "",
 				(Object[]) null);
 		event.setTrackingId(trackId);
-		event.setTag(msgTag);
+		event.setTag(msgTags);
 		if (msgData != null) {
 			if (msgData instanceof byte[]) {
 				byte[] binData = (byte[]) msgData;
@@ -723,12 +760,12 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets message tag.
+	 * Gets message tag strings array.
 	 *
-	 * @return the message tag
+	 * @return the message tag strings array
 	 */
-	public String getMsgTag() {
-		return msgTag;
+	public String[] getMsgTags() {
+		return msgTags;
 	}
 
 	/**

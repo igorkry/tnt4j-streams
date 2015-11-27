@@ -21,6 +21,8 @@ package com.jkool.tnt4j.streams.utils;
 
 import java.io.*;
 import java.security.MessageDigest;
+import java.util.Collection;
+import java.util.Map;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -28,6 +30,9 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 import com.jkool.tnt4j.streams.parsers.MessageType;
 import com.nastel.jkool.tnt4j.core.OpType;
 
@@ -37,6 +42,11 @@ import com.nastel.jkool.tnt4j.core.OpType;
  * @version $Revision: 16 $
  */
 public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
+
+	/**
+	 * Predefined JSON data map key to store initial JSON string.
+	 */
+	public static final String JSON_DATA_KEY = "<<TNT4J_JSON_DATA>>"; // NON-NLS
 
 	private Utils() {
 	}
@@ -378,5 +388,104 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		}
 
 		return last;
+	}
+
+	/**
+	 * Deserializes JSON data object ({@code String}, {@code Reader},
+	 * {@code InputStream}) into map structured data.
+	 *
+	 * @param jsonData
+	 *            JSON format data object
+	 *
+	 * @return data map parsed from JSON data object
+	 *
+	 * @throws JsonSyntaxException
+	 *             if json is not a valid representation for an object of type
+	 *             classOfT
+	 *
+	 * @see Gson#fromJson(String, Class)
+	 */
+	public static Map<String, ?> fromJsonToMap(Object jsonData) throws IOException {
+		Map<String, Object> map = new LinkedTreeMap<String, Object>();
+		String jsonLine = getStringLine(jsonData);
+
+		if (StringUtils.isNotEmpty(jsonLine)) {
+			Gson gson = new Gson();
+
+			map = (Map<String, Object>) gson.fromJson(jsonLine, map.getClass());
+			map.put(JSON_DATA_KEY, jsonLine);
+		}
+
+		return map;
+
+	}
+
+	private static String getStringLine(Object data) throws IOException {
+		if (data == null) {
+			return null;
+		}
+		if (data instanceof String) {
+			return (String) data;
+		}
+
+		BufferedReader rdr = null;
+		if (data instanceof BufferedReader) {
+			rdr = (BufferedReader) data;
+		} else if (data instanceof Reader) {
+			rdr = new BufferedReader((Reader) data);
+		} else if (data instanceof InputStream) {
+			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
+		}
+
+		String str = rdr == null ? null : rdr.readLine();
+
+		return str;
+	}
+
+	/**
+	 * Returns tag strings array retrieved from provided data object. Data
+	 * object an be string (tags delimiter ','), strings collection or strings
+	 * array.
+	 * 
+	 * @param tagsData
+	 *            tags data object
+	 *
+	 * @return tag strings array, or {@code null} if arrays can't be made
+	 */
+	public static String[] getTags(Object tagsData) {
+		if (tagsData instanceof String) {
+			return ((String) tagsData).split(","); // NON-NLS
+		} else if (tagsData instanceof String[]) {
+			return (String[]) tagsData;
+		} else if (tagsData instanceof Collection) {
+			Collection<?> tagsList = (Collection<?>) tagsData;
+			if (!tagsList.isEmpty()) {
+				String[] tags = new String[tagsList.size()];
+				tags = tagsList.toArray(tags);
+
+				return tags;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Cleans raw activity data. If activity data is string, removes 'new line'
+	 * symbols from it. Returns same object otherwise.
+	 *
+	 * @param activityData
+	 *            raw activity data
+	 *
+	 * @return raw activity data without 'new line' symbols.
+	 */
+	public static Object cleanActivityData(Object activityData) {
+		if (activityData instanceof String) {
+			String ads = (String) activityData;
+
+			return ads.replaceAll("(\\r\\n|\\r|\\n)", "");
+		}
+
+		return activityData;
 	}
 }

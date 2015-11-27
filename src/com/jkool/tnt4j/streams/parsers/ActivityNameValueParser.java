@@ -68,7 +68,7 @@ public class ActivityNameValueParser extends ActivityParser {
 	 * Contains the field separator (set by {@code FieldDelim} property) -
 	 * Default: ","
 	 */
-	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(","); // NON-NLS
+	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
 	 * Contains the name/value separator (set by {@code ValueDelim} property) -

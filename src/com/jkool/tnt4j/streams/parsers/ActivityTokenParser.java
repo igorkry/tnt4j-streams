@@ -65,7 +65,7 @@ public class ActivityTokenParser extends ActivityParser {
 	 * Contains the field separator (set by {@code FieldDelim} property) -
 	 * Default: ","
 	 */
-	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(","); // NON-NLS
+	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
 	 * Indicates whether surrounding double quotes should be stripped from
@@ -132,21 +132,7 @@ public class ActivityTokenParser extends ActivityParser {
 	}
 
 	/**
-	 * Parses the specified raw activity data item, converting each field in raw
-	 * data to its corresponding value for passing to jKool Cloud Service.
-	 *
-	 * @param stream
-	 *            parent stream
-	 * @param data
-	 *            raw activity data to parse
-	 *
-	 * @return converted activity info, or {@code null} if raw data string does
-	 *         not match format for this parser
-	 *
-	 * @throws IllegalStateException
-	 *             if parser has not been properly initialized
-	 * @throws ParseException
-	 *             if an error parsing raw data string
+	 * {@inheritDoc}
 	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {

@@ -34,8 +34,6 @@ import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
-//import com.jkool.tnt4j.streams.filters.StreamFilter;
-
 /**
  * Implements the SAX DefaultHandler for parsing jKool LLC TNT4J-Streams
  * configuration.
@@ -65,21 +63,22 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String STEP_ELMT = "step"; // NON-NLS
 
 	private static final String NAME_ATTR = "name"; // NON-NLS
-	private static final String CLASS_ATTR = "class";
+	private static final String CLASS_ATTR = "class"; // NON-NLS
 	private static final String VALUE_ATTR = "value"; // NON-NLS
 	private static final String LOC_TYPE_ATTR = "locator-type"; // NON-NLS
 	private static final String LOCATOR_ATTR = "locator"; // NON-NLS
 	private static final String SEPARATOR_ATTR = "separator"; // NON-NLS
-	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
+	public static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
-	private static final String UNITS_ATTR = "units"; // NON-NLS
-	private static final String FORMAT_ATTR = "format"; // NON-NLS
-	private static final String LOCALE_ATTR = "locale"; // NON-NLS
+	public static final String UNITS_ATTR = "units"; // NON-NLS
+	public static final String FORMAT_ATTR = "format"; // NON-NLS
+	public static final String LOCALE_ATTR = "locale"; // NON-NLS
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
 	private static final String SOURCE_ATTR = "source";
 	private static final String TARGET_ATTR = "target"; // NON-NLS
 	private static final String FIELD_REF_ATTR = "field-ref"; // NON-NLS
 	private static final String COMPARATOR_ATTR = "comparator"; // NON-NLS
+	private static final String TAGS_ATTR = "tags"; // NON-NLS
 
 	private static final String REQUIRED_VALUE = "required"; // NON-NLS
 
@@ -200,6 +199,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		String name = null;
 		String className = null;
+		String tags = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -207,6 +207,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				name = attValue;
 			} else if (CLASS_ATTR.equals(attName)) {
 				className = attValue;
+			} else if (TAGS_ATTR.equals(attName)) {
+				tags = attValue;
 			}
 		}
 		if (StringUtils.isEmpty(name)) {
@@ -244,6 +246,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		if (currParser != null) {
 			currParser.setName(name);
+			currParser.setTags(tags);
 			parsers.put(name, currParser);
 		}
 	}

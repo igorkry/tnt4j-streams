@@ -45,7 +45,7 @@ public class SampleParser extends ActivityParser {
 	/**
 	 * Defines field separator.
 	 */
-	protected String fieldDelim = ",";
+	protected String fieldDelim = DEFAULT_DELIM;
 
 	/**
 	 * Sets custom properties for this parser

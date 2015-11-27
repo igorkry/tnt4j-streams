@@ -2,7 +2,8 @@
 -->
 <project name="StreamsBuildProps">
     <!-- Installation package directories -->
-    <property name="project-build" value="${basedir}/../build/tnt4j-streams"/>
+    <property name="project-pkg-name" value="tnt4j-streams"/>
+    <property name="project-build" value="${basedir}/../build/${project-pkg-name}"/>
 
     <!-- Default compilation settings -->
     <property name="target" value="1.6"/>

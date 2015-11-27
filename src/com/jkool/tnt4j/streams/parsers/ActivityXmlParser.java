@@ -36,6 +36,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import com.jkool.tnt4j.streams.configure.ConfigParserHandler;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
@@ -69,8 +70,7 @@ public class ActivityXmlParser extends ActivityParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code SignatureDelim} property) -
-	 * Default: ","
+	 * Contains the XML namespace mappings.
 	 */
 	protected NamespaceMap namespaces = null;
 
@@ -189,11 +189,13 @@ public class ActivityXmlParser extends ActivityParser {
 					if (savedFormats == null || savedFormats.length < locations.size()) {
 						savedFormats = new String[locations.size()];
 						savedUnits = new String[locations.size()];
+						savedLocales = new String[locations.size()];
 					}
 					if (locations.size() == 1) {
 						ActivityFieldLocator loc = locations.get(0);
 						savedFormats[0] = loc.getFormat();
 						savedUnits[0] = loc.getUnits();
+						savedLocales[0] = loc.getLocale();
 						value = getLocatorValue(stream, loc, xmlDoc);
 						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
 							LOGGER.log(OpLevel.TRACE,
@@ -206,6 +208,7 @@ public class ActivityXmlParser extends ActivityParser {
 							ActivityFieldLocator loc = locations.get(li);
 							savedFormats[li] = loc.getFormat();
 							savedUnits[li] = loc.getUnits();
+							savedLocales[li] = loc.getLocale();
 							values[li] = getLocatorValue(stream, loc, xmlDoc);
 							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
 								LOGGER.log(OpLevel.TRACE,
@@ -221,7 +224,7 @@ public class ActivityXmlParser extends ActivityParser {
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
-						loc.setFormat(savedFormats[li], null);
+						loc.setFormat(savedFormats[li], savedLocales[li]);
 						loc.setUnits(savedUnits[li]);
 					}
 				}
@@ -260,14 +263,14 @@ public class ActivityXmlParser extends ActivityParser {
 								Attr attr = (Attr) attrs.item(i);
 								String attrName = attr.getName();
 								String attrValue = attr.getValue();
-								if ("datatype".equals(attrName)) { // NON-NLS
+								if (ConfigParserHandler.DATA_TYPE_ATTR.equals(attrName)) {
 									locator.setDataType(ActivityFieldDataType.valueOf(attrValue));
-								} else if ("format".equals(attrName)) { // NON-NLS
+								} else if (ConfigParserHandler.FORMAT_ATTR.equals(attrName)) {
 									format = attrValue;
 									formatAttrSet = true;
-								} else if ("locale".equals(attrName)) { // NON-NLS
+								} else if (ConfigParserHandler.LOCALE_ATTR.equals(attrName)) {
 									locale = attrValue;
-								} else if ("units".equals(attrName)) { // NON-NLS
+								} else if (ConfigParserHandler.UNITS_ATTR.equals(attrName)) {
 									locator.setUnits(attrValue);
 								}
 							}
@@ -295,6 +298,9 @@ public class ActivityXmlParser extends ActivityParser {
 	 *
 	 * @return XML document string, or {@code null} if end of input source has
 	 *         been reached
+	 *
+	 * @throws IllegalArgumentException
+	 *             if the class of input source supplied is not supported.
 	 */
 	protected String getNextXmlString(Object data) {
 		if (data == null) {

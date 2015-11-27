@@ -129,7 +129,7 @@ public enum StreamFieldType {
 	 * User-defined label to associate with the activity, generally for locating
 	 * activity.
 	 */
-	Tag(String.class),
+	Tag(String[].class),
 
 	/**
 	 * Name of user associated with the activity.
@@ -198,6 +198,9 @@ public enum StreamFieldType {
 	 *
 	 * @return enumeration class for field, or {@code null} if this field is not
 	 *         an enumeration
+	 *
+	 * @throws IllegalArgumentException
+	 *             if ordinal is not a valid enumeration value
 	 */
 	public Class<? extends Enum<?>> getEnumerationClass() {
 		if (dataType != Enum.class) {
@@ -213,7 +216,7 @@ public enum StreamFieldType {
 			return OpCompCode.class;
 
 		default:
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
@@ -228,8 +231,6 @@ public enum StreamFieldType {
 	 * @return ordinal value for enumeration with specified name, or {@code -1}
 	 *         if this field is not an enumeration
 	 *
-	 * @throws UnsupportedOperationException
-	 *             if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if enumLabel is not a valid enumeration label
 	 */
@@ -249,7 +250,7 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(enumLabel).ordinal();
 
 		default:
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
@@ -283,7 +284,7 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(enumLabel.toUpperCase());
 
 		default:
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
@@ -315,7 +316,7 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(value).toString();
 
 		default:
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
@@ -347,7 +348,7 @@ public enum StreamFieldType {
 			return OpCompCode.valueOf(value);
 
 		default:
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("StreamFieldType.not.defined", this));
 		}
 	}
@@ -369,7 +370,7 @@ public enum StreamFieldType {
 		StreamFieldType[] enums = StreamFieldType.values();
 		if (ordinal < 0 || ordinal >= enums.length) {
 			throw new IndexOutOfBoundsException(StreamsResources.getStringFormatted("StreamFieldType.invalid.ordinal",
-					ordinal, (enums.length - 1)));
+					ordinal, (enums.length - 1), StreamFieldType.class.getSimpleName()));
 		}
 		return enums[ordinal];
 	}
@@ -387,7 +388,7 @@ public enum StreamFieldType {
 			}
 		}
 
-		throw new IllegalArgumentException(
-				StreamsResources.getStringFormatted("StreamFieldType.no.enum.constant", name));
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted("StreamFieldType.no.enum.constant", name,
+				StreamFieldType.class.getSimpleName()));
 	}
 }

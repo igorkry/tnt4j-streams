@@ -204,6 +204,16 @@ public class FilePollingStream extends TNTInputStream {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void cleanup() {
+		changedLinesBuffer.clear();
+
+		super.cleanup();
+	}
+
+	/**
 	 * Log changes watcher thread. It reads changes from defined log files using
 	 * last modification timestamp of log file.
 	 */

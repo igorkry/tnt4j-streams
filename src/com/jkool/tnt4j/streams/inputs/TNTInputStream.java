@@ -24,6 +24,8 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
@@ -61,9 +63,9 @@ public abstract class TNTInputStream implements Runnable {
 	protected StreamThread ownerThread = null;
 
 	/**
-	 * List of parsers being used by stream.
+	 * Map of parsers being used by stream.
 	 */
-	protected final Collection<ActivityParser> parsers = new LinkedList<ActivityParser>();
+	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<String, List<ActivityParser>>();
 
 	/**
 	 * Used to deliver processed activity data to destination.
@@ -181,7 +183,26 @@ public abstract class TNTInputStream implements Runnable {
 	 *            parser to add
 	 */
 	public void addParser(ActivityParser parser) {
-		parsers.add(parser);
+		String[] tags = parser.getTags();
+
+		if (ArrayUtils.isNotEmpty(tags)) {
+			for (String tag : tags) {
+				addTaggedParser(tag, parser);
+			}
+		} else {
+			addTaggedParser(parser.getName(), parser);
+		}
+	}
+
+	private void addTaggedParser(String tag, ActivityParser parser) {
+		List<ActivityParser> tpl = parsersMap.get(tag);
+
+		if (tpl == null) {
+			tpl = new ArrayList<ActivityParser>();
+			parsersMap.put(tag, tpl);
+		}
+
+		tpl.add(parser);
 	}
 
 	/**
@@ -254,9 +275,34 @@ public abstract class TNTInputStream implements Runnable {
 	 *             if any parser encounters an error parsing the activity data
 	 */
 	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
+		return applyParsers(null, data);
+	}
+
+	/**
+	 * Applies all defined parsers for this stream that support the format that
+	 * the raw activity data is in the order added until one successfully
+	 * matches the specified activity data item.
+	 *
+	 * @param tags
+	 *            array of tag strings to map activity data with parsers. Can be
+	 *            {@code null}.
+	 * @param data
+	 *            activity data item to process
+	 *
+	 * @return processed activity data item, or {@code null} if activity data
+	 *         item does not match rules for any parsers
+	 *
+	 * @throws IllegalStateException
+	 *             if parser fails to run
+	 * @throws ParseException
+	 *             if any parser encounters an error parsing the activity data
+	 */
+	protected ActivityInfo applyParsers(String[] tags, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
 		}
+
+		Set<ActivityParser> parsers = getParsersFor(tags);
 		for (ActivityParser parser : parsers) {
 			if (parser.isDataClassSupported(data)) {
 				ActivityInfo ai = parser.parse(this, data);
@@ -266,6 +312,32 @@ public abstract class TNTInputStream implements Runnable {
 			}
 		}
 		return null;
+	}
+
+	private Set<ActivityParser> getParsersFor(String[] tags) {
+		Set<ActivityParser> parsersSet = new LinkedHashSet<ActivityParser>();
+
+		if (ArrayUtils.isNotEmpty(tags)) {
+			for (String tag : tags) {
+				List<ActivityParser> tpl = parsersMap.get(tag);
+
+				if (tpl != null) {
+					parsersSet.addAll(tpl);
+				}
+			}
+		}
+
+		if (parsersSet.isEmpty()) {
+			Collection<List<ActivityParser>> allParsers = parsersMap.values();
+
+			for (List<ActivityParser> tpl : allParsers) {
+				if (tpl != null) {
+					parsersSet.addAll(tpl);
+				}
+			}
+		}
+
+		return parsersSet;
 	}
 
 	/**

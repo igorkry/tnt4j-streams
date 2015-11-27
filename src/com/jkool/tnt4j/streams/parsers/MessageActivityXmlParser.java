@@ -63,7 +63,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * Contains the field separator (set by {@code SignatureDelim} property) -
 	 * Default: ","
 	 */
-	protected String sigDelim = ","; // NON-NLS
+	protected String sigDelim = DEFAULT_DELIM;
 
 	/**
 	 * Constructs a MessageActivityXmlParser.

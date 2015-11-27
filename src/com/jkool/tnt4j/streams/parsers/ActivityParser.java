@@ -42,15 +42,16 @@ public abstract class ActivityParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityParser.class);
 
 	/**
+	 * Constant for default delimiter symbol used by parsers.
+	 */
+	protected static final String DEFAULT_DELIM = ","; // NON-NLS
+
+	/**
 	 * Name of activity parser
 	 */
 	private String name;
 
-	// /** //NEXT_FEATURE:
-	// * List of filters being used by stream.
-	// */
-	// protected final List<StreamFilter> filters = new
-	// LinkedList<StreamFilter>();
+	private String[] tags;
 
 	/**
 	 * Initializes ActivityParser.
@@ -136,7 +137,7 @@ public abstract class ActivityParser {
 	 *
 	 * @return string, or {@code null} if end of input source has been reached
 	 *
-	 * @throws UnsupportedOperationException
+	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */
 	protected String getNextString(Object data) {
@@ -154,7 +155,7 @@ public abstract class ActivityParser {
 		} else if (data instanceof InputStream) {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		} else {
-			throw new UnsupportedOperationException(
+			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted("ActivityParser.data.unsupported", data.getClass().getName()));
 		}
 		String str = null;
@@ -205,37 +206,22 @@ public abstract class ActivityParser {
 		this.name = name;
 	}
 
-	// /** //NEXT_FEATURE:
-	// * Adds the specified filter to the list of filters being used by this
-	// * stream.
-	// *
-	// * @param filter
-	// * filter to add
-	// */
-	// public void addFilter(StreamFilter filter) {
-	// filters.add(filter);
-	// }
-	//
-	// /**
-	// * Applies all defined filters on specified activity item. If activity
-	// item
-	// * matches any of filter criteria - such item is skipped from sending it
-	// to
-	// * jKool Cloud Service.
-	// *
-	// * @param activityInfo
-	// * activity item data to check against defined filters
-	// *
-	// * @return {@code true} if activity data was filtered by any of defined
-	// * filters, {@code false} otherwise
-	// */
-	// protected boolean filterActivity(ActivityInfo activityInfo) {
-	// boolean filtered = false;
-	// Iterator<StreamFilter> filtersIterator = filters.iterator();
-	// while (!filtered && filtersIterator.hasNext()) {
-	// StreamFilter filter = filtersIterator.next();
-	// filtered = filter.doFilterActivity(activityInfo);
-	// }
-	// return filtered;
-	// }
+	/**
+	 * Returns tag strings array of activity parser
+	 * 
+	 * @return tags strings array
+	 */
+	public String[] getTags() {
+		return tags;
+	}
+
+	/**
+	 * Sets activity parser tags string. Tags are separated using ",".
+	 * 
+	 * @param tags
+	 *            tags string
+	 */
+	public void setTags(String tags) {
+		this.tags = Utils.getTags(tags);
+	}
 }

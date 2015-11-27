@@ -1,4 +1,4 @@
-<project name="TNT4J-Streams" default="tnt4j-streams" basedir=".">
+<project name="TNT4J-Streams" default="tnt4j-streams-api" basedir=".">
 
     <echo message="Processing ${ant.project.name}${line.separator}" level="info"/>
 
@@ -14,12 +14,15 @@
     <property name="docpkg" value="com.jkool.tnt4j.streams.*"/>
     <property name="src" value="src"/>
     <property name="lib" value="lib"/>
+    <property name="lib_build" value="lib_build"/>
     <property name="config" value="config"/>
     <property name="samples" value="samples"/>
     <property name="scripts" value="bin"/>
     <property name="classes" value="${project-build}/classes"/>
     <property name="doc" value="${project-build}/doc"/>
-    <property name="jar" value="${project-build}/tnt4j-streams.jar"/>
+    <property name="jar_name" value="${project-pkg-name}.jar"/>
+    <property name="jar" value="${project-build}/${jar_name}"/>
+    <property name="pkg" value="${project-build}/${project-pkg-name}"/>
 
     <target name="init">
         <tstamp/>
@@ -38,6 +41,7 @@
             <src path="${src}"/>
             <classpath>
                 <fileset dir="${lib}"/>
+                <fileset dir="${lib_build}"/>
             </classpath>
         </javac>
 
@@ -52,7 +56,7 @@
         <echo message="Clean of ${ant.project.name} Complete${line.separator}" level="info"/>
     </target>
 
-    <target name="tnt4j-streams" depends="init,compile" description="build TNT4J Streams">
+    <target name="tnt4j-streams-api" depends="init,compile" description="build TNT4J Streams">
 
         <path id="runtime-classpath">
             <fileset dir="${project-build}/lib">
@@ -104,7 +108,7 @@
         <echo message="Build of ${ant.project.name} Complete${line.separator}" level="info"/>
     </target>
 
-    <target name="doc" depends="compile" description="build javadoc">
+    <target name="doc" depends="tnt4j-streams-api" description="build javadoc">
         <delete dir="${doc}"/>
         <javadoc destdir="${doc}"
                  sourcepath="${src}"
@@ -134,7 +138,24 @@
         <!--delete file="${src}/overview.html" quiet="true"/-->
     </target>
 
-    <target name="all" depends="tnt4j-streams, doc" description="generate the distribution"/>
+    <target name="tnt4j-streams-pkg" depends="doc" description="build package for distribution">
+        <echo message="Deleting old archives" level="info"/>
+        <delete dir="${project-build}" includes="*-all.jar,*-all.zip"/>
+
+        <echo message="Creating ${pkg}-${version}-all.jar" level="info"/>
+        <zip destfile="${pkg}-${version}-all.jar">
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+            <zipgroupfileset dir="${project-build}" includes="${jar_name}"/>
+        </zip>
+        <echo message="Creating ${pkg}-final-all.jar" level="info"/>
+        <zip destfile="${pkg}-final-all.jar">
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+            <zipgroupfileset dir="${project-build}" includes="${jar_name}"/>
+        </zip>
+    </target>
+
+    <target name="tnt4j-streams" depends="tnt4j-streams-api" description="build executables"/>
+    <target name="all" depends="tnt4j-streams-pkg" description="generate the distribution"/>
     <target name="rebuild" depends="clean,all" description="clean and build"/>
 
 </project>

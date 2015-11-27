@@ -19,7 +19,7 @@
 
 /**
  * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * streams.
+ * input streams.
  *
  * @author akausinis
  * @version 1.0

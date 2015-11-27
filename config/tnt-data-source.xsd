@@ -1020,6 +1020,15 @@
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attributeGroup>
+
+                        <xs:attribute name="tags" use="optional" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Tags list (separated using ',') for a parser. Tags are used to map incoming
+                                    parseable data package with parser instance dedicated to parse it.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
                     </xs:complexType>
                 </xs:element>
 

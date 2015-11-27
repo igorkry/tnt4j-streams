@@ -101,7 +101,8 @@ public enum MessageType {
 		if (value == ACKNOWLEDGEMENT.value()) {
 			return ACKNOWLEDGEMENT;
 		}
-		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.num.value", value));
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.num.value", value,
+				MessageType.class.getSimpleName()));
 	}
 
 	private final int enumValue;
@@ -128,7 +129,7 @@ public enum MessageType {
 		if (value instanceof String) {
 			return valueOf(value.toString());
 		}
-		throw new IllegalArgumentException(
-				StreamsResources.getStringFormatted("MessageType.illegal.obj.value", value.getClass().getName()));
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.obj.value",
+				value.getClass().getName(), MessageType.class.getSimpleName()));
 	}
 }
