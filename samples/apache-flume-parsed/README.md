@@ -13,7 +13,7 @@ TNT4J Streams allows data streaming, parsing from various data sources into TNT4
 	a. my-flume.properties 
 		change "agent.sources.seqGenSrc.spoolDir  = <LOGS DIR>" to yours log directory
 		or sink in your favor.
-	b.  change tnt-data-source.xml config according your log format
+	b. change source interceptor configuration according to your log format
 	c. 	tnt4.properties
 		change "event.sink.factory.Token: ##############################" to yours JKoolCloud token
 
