@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
@@ -161,10 +162,33 @@ public class ActivityJsonParser extends ActivityParser {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
 				} else {
-					val = jsonMap.get(locStr);
+					String[] path = getNodePath(locStr);
+					val = getNode(path, jsonMap, 0);
 				}
 			}
 			val = locator.formatValue(val);
+		}
+
+		return val;
+	}
+
+	private static String[] getNodePath(String locStr) {
+		if (StringUtils.isNotEmpty(locStr)) {
+			return locStr.split("\\.");
+		}
+
+		return null;
+	}
+
+	private static Object getNode(String[] path, Map<String, ?> map, int i) {
+		if (ArrayUtils.isEmpty(path) || map == null) {
+			return null;
+		}
+
+		Object val = map.get(path[i]);
+
+		if (i < path.length - 1 && val instanceof Map) {
+			val = getNode(path, (Map<String, ?>) val, ++i);
 		}
 
 		return val;

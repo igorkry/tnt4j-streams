@@ -21,12 +21,11 @@ package com.jkool.tnt4j.streams.fields;
 
 import java.net.InetAddress;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.utils.*;
@@ -76,7 +75,7 @@ public class ActivityInfo {
 	private String correlator = null;
 
 	private String trackingId = null;
-	private String[] msgTags = null;
+	private Collection<String> msgTags = null;
 	private Object msgData = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
@@ -303,7 +302,7 @@ public class ActivityInfo {
 				}
 				break;
 			case Tag:
-				msgTags = Utils.getTags(fieldValue);
+				addTags(Utils.getTags(fieldValue));
 				break;
 			case UserName:
 				userName = getStringValue(fieldValue);
@@ -361,21 +360,19 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Appends activity item tags array with provided tag strings array
+	 * Appends activity item tags collection with provided tag strings array
 	 * contents.
 	 * 
 	 * @param tags
 	 *            tag strings array
 	 */
 	public void addTags(String[] tags) {
-		if (tags.length > 0) {
-			int currLength = msgTags == null ? 0 : msgTags.length;
-			String[] newTags = new String[currLength + tags.length];
-			if (currLength > 0) {
-				System.arraycopy(msgTags, 0, newTags, 0, currLength);
+		if (ArrayUtils.isNotEmpty(tags)) {
+			if (msgTags == null) {
+				msgTags = new ArrayList<String>();
 			}
-			System.arraycopy(tags, 0, newTags, currLength, tags.length);
-			msgTags = newTags;
+
+			Collections.addAll(msgTags, tags);
 		}
 	}
 
@@ -440,7 +437,9 @@ public class ActivityInfo {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, correl, "",
 				(Object[]) null);
 		event.setTrackingId(trackId);
-		event.setTag(msgTags);
+		if (msgTags != null) {
+			event.setTag(msgTags);
+		}
 		if (msgData != null) {
 			if (msgData instanceof byte[]) {
 				byte[] binData = (byte[]) msgData;
@@ -755,11 +754,11 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets message tag strings array.
+	 * Gets message tag strings collection.
 	 *
-	 * @return the message tag strings array
+	 * @return the message tag strings collection
 	 */
-	public String[] getMsgTags() {
+	public Collection<String> getMsgTags() {
 		return msgTags;
 	}
 

@@ -1,0 +1,16 @@
+{
+  "sinkName": "TNT4JStreams",
+  "chanelName": "memoryChannel",
+  "headers": {
+    "method": "POST",
+    "auth": "-",
+    "param": "/gvm_java/gvm/services/OperatorWebService",
+    "ident": "-",
+    "response": "200",
+    "bytes": "364",
+    "clientip": "127.0.0.1",
+    "httpversion": "HTTP/1.1",
+    "logtime": "27/Nov/2015:14:31:40 +0200"
+  },
+  "body": "127.0.0.1 - - [27/Nov/2015:14:31:40 +0200] \"POST /gvm_java/gvm/services/OperatorWebService HTTP/1.1\" 200 364\r"
+}

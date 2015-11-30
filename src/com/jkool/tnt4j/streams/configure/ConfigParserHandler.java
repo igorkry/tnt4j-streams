@@ -28,6 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -87,7 +88,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private ActivityParser currParser = null;
 	private ActivityField currField = null;
 	private ActivityFieldLocator currLocator = null;
-	// private StreamFilter currFilter = null;
+	private StreamFilter currFilter = null;
 
 	private boolean currFieldHasLocValAttr = false;
 	private boolean currFieldHasLocElmt = false;
@@ -140,7 +141,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		currParser = null;
 		currField = null;
 		currLocator = null;
-		// currFilter = null;
+		currFilter = null;
 		currFieldHasLocValAttr = false;
 		currFieldHasLocElmt = false;
 		currFieldHasMapElmt = false;
@@ -763,8 +764,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (FIELD_LOC_ELMT.equals(qName)) {
 				currLocator = null;
 			} else if (FILTER_ELMT.equals(qName)) {
-				// currParser.addFilter(currFilter);
-				// currFilter = null;
+				currParser.addFilter(currFilter);
+				currFilter = null;
 			}
 		} catch (SAXException exc) {
 			throw exc;
