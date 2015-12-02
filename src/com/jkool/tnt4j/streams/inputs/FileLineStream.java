@@ -23,23 +23,18 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
-import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>
- * Implements a file activity stream, where each line of the file is assumed to
+ * Implements a files activity stream, where each line of the file is assumed to
  * represent a single activity or event which should be recorded. Files to
  * stream are defined using "FileName" property in stream configuration.
  * </p>
@@ -53,19 +48,15 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * characters '*' and '?'</li>
  * </ul>
  *
- * @version $Revision: 3 $
+ * @version $Revision: 4 $
+ *
  * @see ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
-public class FileLineStream extends TNTInputStream {
+public class FileLineStream extends AbstractFileLineStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileLineStream.class);
 
-	private String fileName = null;
 	private File[] activityFiles = null;
-	private LineNumberReader lineReader = null;
-
-	private int fileNumber = -1;
-	private int lineNumber = 0;
 
 	/**
 	 * Constructs an FileLineStream.
@@ -78,50 +69,12 @@ public class FileLineStream extends TNTInputStream {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
-			return fileName;
-		}
-		return super.getProperty(name);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
-		if (props == null) {
-			return;
-		}
-
-		super.setProperties(props);
-
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
-				fileName = value;
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void initialize() throws Throwable {
-		super.initialize();
-		if (fileName == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
-		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
+	protected void loadFiles() {
 		if (Utils.isWildcardFileName(fileName)) {
 			activityFiles = searchFiles(fileName);
 		} else {
 			activityFiles = new File[] { new File(fileName) };
 		}
-
-		hasNextFile();
 	}
 
 	/**
@@ -135,8 +88,7 @@ public class FileLineStream extends TNTInputStream {
 	 * @param namePattern
 	 *            name pattern to find files
 	 *
-	 * @return files with name matching name pattern ordered by file create
-	 *         timestamp in descending order.
+	 * @return array of found files.
 	 *
 	 * @see WildcardFileFilter#WildcardFileFilter(String)
 	 * @see File#listFiles(FilenameFilter)
@@ -168,73 +120,22 @@ public class FileLineStream extends TNTInputStream {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the file.
-	 * </p>
 	 */
-	@Override
-	public Object getNextItem() throws Throwable {
-		if (lineReader == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.file.not.opened"));
-		}
-
-		String line = lineReader.readLine();
-		lineNumber = lineReader.getLineNumber();
-
-		if (line == null && hasNextFile()) {
-			line = (String) getNextItem();
-		}
-
-		return line;
-	}
-
-	/**
-	 * Returns {@code true} if the stream configuration defined activity files
-	 * array has more files.
-	 *
-	 * @return {@code true} if there is more activity files available
-	 *
-	 * @throws IOException
-	 *
-	 * @see FileReader#FileReader(File)
-	 */
-	private boolean hasNextFile() throws IOException {
-		fileNumber++;
-		if (activityFiles != null && fileNumber < activityFiles.length) {
-			File activityFile = activityFiles[fileNumber];
-			lineReader = new LineNumberReader(new FileReader(activityFile));
-			lineNumber = 0;
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.opening.file"),
-					activityFile.getName());
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This method returns line number of the file last read.
-	 * </p>
-	 */
-	@Override
-	public int getActivityPosition() {
-		return lineNumber;
+	protected boolean isFileAvailable(int fileNumber) {
+		return activityFiles != null && fileNumber < activityFiles.length;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
-	protected void cleanup() {
-		Utils.close(lineReader);
+	protected Reader getFileReader(int fileNumber) throws IOException {
+		return new FileReader(activityFiles[fileNumber]);
+	}
 
-		lineReader = null;
-		activityFiles = null;
-
-		super.cleanup();
+	/**
+	 * {@inheritDoc}
+	 */
+	protected String getFileName(int fileNumber) {
+		return activityFiles[fileNumber].getName();
 	}
 }

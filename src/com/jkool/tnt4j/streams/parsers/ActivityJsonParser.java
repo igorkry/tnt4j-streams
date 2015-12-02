@@ -174,7 +174,7 @@ public class ActivityJsonParser extends ActivityParser {
 
 	private static String[] getNodePath(String locStr) {
 		if (StringUtils.isNotEmpty(locStr)) {
-			return locStr.split("\\.");
+			return locStr.split("\\."); // NON-NLS
 		}
 
 		return null;

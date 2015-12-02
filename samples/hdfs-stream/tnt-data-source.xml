@@ -4,7 +4,7 @@
         xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
-        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%h=(\S+)"/>
         <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
@@ -63,24 +63,11 @@
         </field>
         <field name="ReasonCode" locator="10"/>
         <field name="MsgValue" locator="11"/>
-        <field name="ElapsedTime" locator="12" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>
 
-    <stream name="SampleFilePolingStream" class="com.jkool.tnt4j.streams.inputs.FilePollingStream">
-        <property name="FileName"
-                  value="<PATH TO DIR WHERE TOMCAT ACCESS LOG FILES ARE WRITTEN>/logs/localhost_access_log.*.txt"/>
-        <property name="FileReadDelay" value="30"/>
-        <property name="StartFromLatest" value="true"/>
+    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
+        <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
         <parser-ref name="AccessLogParserCommon"/>
     </stream>
-
-    <!-- sample then file is located in HDFS file system -->
-    <!--stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFilePollingStream">
-        <property name="FileName"
-                  value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
-        <property name="FileReadDelay" value="30"/>
-        <property name="StartFromLatest" value="true"/>
-        <parser-ref name="AccessLogParserCommon"/>
-    </stream-->
 </tnt-data-source>

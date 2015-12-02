@@ -39,7 +39,6 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.source.Source;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
-import com.nastel.jkool.tnt4j.uuid.DefaultUUIDFactory;
 
 /**
  * <p>
@@ -55,7 +54,10 @@ import com.nastel.jkool.tnt4j.uuid.DefaultUUIDFactory;
  * @version $Revision: 8 $
  */
 public abstract class TNTInputStream implements Runnable {
-	private final EventSink logger;
+	/**
+	 * Stream logger.
+	 */
+	protected final EventSink logger;
 
 	/**
 	 * StreamThread running this stream.
@@ -183,9 +185,6 @@ public abstract class TNTInputStream implements Runnable {
 	 */
 	protected void initialize() throws Throwable {
 		streamConfig = DefaultConfigFactory.getInstance().getConfig("com.jkool.tnt4j.streams"); // NON-NLS
-		if (streamConfig.getUUIDFactory() == null) {
-			streamConfig.setUUIDFactory(DefaultUUIDFactory.getInstance());
-		}
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
 		trackersMap.put(defaultSource.getFQName(), tracker);

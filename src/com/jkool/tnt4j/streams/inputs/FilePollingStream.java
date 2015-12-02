@@ -23,18 +23,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -44,10 +38,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>
- * Implements a file activity stream, where each line of the file is assumed to
- * represent a single activity or event which should be recorded. Stream reads
- * changes form defined log files every "FileReadDelay" property defined seconds
- * (default is 15sec.).
+ * Implements a log files poling activity stream, where each line of the file is
+ * assumed to represent a single activity or event which should be recorded.
+ * Stream reads changes form defined log files every "FileReadDelay" property
+ * defined seconds (default is 15sec.).
  * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
@@ -62,21 +56,12 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>FileReadDelay - delay is seconds between log file reading iterations</li>
  * </ul>
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  * @see ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
-public class FilePollingStream extends TNTInputStream {
+public class FilePollingStream extends AbstractFilePollingStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FilePollingStream.class);
-
-	private static final long DEFAULT_DELAY_PERIOD = TimeUnit.SECONDS.toMillis(15);
-	private static final int CHANGES_BUFFER_SIZE = 1024 * 10;
-
-	private String fileName = null;
-	private boolean startFromLatestActivity = true;
-	private long logWatcherDelay = DEFAULT_DELAY_PERIOD;
-
-	private BlockingQueue<String> changedLinesBuffer;
 
 	/**
 	 * Constructs an FilePollingStream.
@@ -89,79 +74,8 @@ public class FilePollingStream extends TNTInputStream {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
-			return fileName;
-		}
-		if (StreamsConfig.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
-			return startFromLatestActivity;
-		}
-		if (StreamsConfig.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
-			return logWatcherDelay;
-		}
-		return super.getProperty(name);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
-		if (props == null) {
-			return;
-		}
-
-		super.setProperties(props);
-
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
-				fileName = value;
-			} else if (StreamsConfig.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
-				startFromLatestActivity = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
-				logWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void initialize() throws Throwable {
-		super.initialize();
-		if (fileName == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
-		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
-
-		changedLinesBuffer = new ArrayBlockingQueue<String>(CHANGES_BUFFER_SIZE, true);
-
-		LogWatcher lw = new LogWatcher();
-		lw.initialize();
-		lw.start();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the polled file. Method blocks and waits for lines available in changed
-	 * lines buffer. Changed lines buffer is filled by LogWatcher thread.
-	 * </p>
-	 */
-	@Override
-	public Object getNextItem() throws Throwable {
-		if (changedLinesBuffer == null) {
-			throw new IllegalStateException(
-					StreamsResources.getString("FilePollingStream.changes.buffer.uninitialized"));
-		}
-
-		String line = changedLinesBuffer.take();
-
-		return line;
+	protected LogWatcher createLogWatcher() {
+		return new FileLogWatcher();
 	}
 
 	/**
@@ -175,8 +89,7 @@ public class FilePollingStream extends TNTInputStream {
 	 * @param namePattern
 	 *            name pattern to find files
 	 *
-	 * @return files with name matching name pattern ordered by file last
-	 *         modification timestamp in descending order.
+	 * @return array of found files.
 	 *
 	 * @see WildcardFileFilter#WildcardFileFilter(String)
 	 * @see File#listFiles(FilenameFilter)
@@ -207,36 +120,18 @@ public class FilePollingStream extends TNTInputStream {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Log files changes watcher thread. It reads changes from defined log files
+	 * using last modification timestamp of log file.
 	 */
-	@Override
-	protected void cleanup() {
-		changedLinesBuffer.clear();
+	private class FileLogWatcher extends LogWatcher {
 
-		super.cleanup();
-	}
-
-	/**
-	 * Log changes watcher thread. It reads changes from defined log files using
-	 * last modification timestamp of log file.
-	 */
-	private class LogWatcher extends Thread {
-
-		private String polledFileName = null;
-		private int lineNumber = -1;
-		private long lastModifTime = -1;
-
-		private boolean readingLatestLogFile = true;
-
-		private boolean interrupted = false;
+		private File pollingFile = null;
 
 		/**
-		 * Constructs an LogWatcher.
+		 * Constructs an FileLogWatcher.
 		 */
-		LogWatcher() {
+		FileLogWatcher() {
 			super("FilePollingStream.LogWatcher"); // NON-NLS
-
-			setDaemon(true);
 		}
 
 		/**
@@ -245,25 +140,25 @@ public class FilePollingStream extends TNTInputStream {
 		 * latest logged activity, then count of lines in log file is calculated
 		 * to mark latest activity position.
 		 *
-		 * @throws Throwable
-		 *             indicates that stream is not configured properly and lof
-		 *             files monitoring can't initialize and continue.
+		 * @throws Exception
+		 *             when file is not found or can't determine number of lines
+		 *             in file.
 		 */
-		void initialize() throws Throwable {
+		@Override
+		protected void initialize() throws Exception {
 			if (Utils.isWildcardFileName(fileName)) {
 				File[] activityFiles = searchFiles(fileName);
 
-				polledFileName = ArrayUtils.isEmpty(activityFiles) ? null : activityFiles[0].getAbsolutePath();
+				pollingFile = ArrayUtils.isEmpty(activityFiles) ? null : activityFiles[0];
 			} else {
-				polledFileName = fileName;
+				pollingFile = new File(fileName);
 			}
 
-			if (startFromLatestActivity && StringUtils.isNotEmpty(polledFileName)) {
-				File activityFile = new File(polledFileName);
-				lastModifTime = activityFile.lastModified();
+			if (startFromLatestActivity && pollingFile != null) {
+				lastModifTime = pollingFile.lastModified();
 				LineNumberReader lineReader = null;
 				try {
-					lineReader = new LineNumberReader(new FileReader(activityFile));
+					lineReader = new LineNumberReader(new FileReader(pollingFile));
 					lineReader.skip(Long.MAX_VALUE);
 					// NOTE: Add 1 because line index starts at 0
 					lineNumber = lineReader.getLineNumber() + 1;
@@ -272,46 +167,56 @@ public class FilePollingStream extends TNTInputStream {
 				}
 
 				// NOTE: this one should be "faster"
-				// lineNumber = Utils.countLines(polledFileName);
+				// lineNumber = Utils.countLines(pollingFile);
 			}
 		}
 
-		public void run() {
-			while (!isStopping()) {
-				readLogChanges();
-
-				if (readingLatestLogFile && !isStopping()) {
-					try {
-						Thread.sleep(logWatcherDelay);
-					} catch (InterruptedException exc) {
-					}
-				}
-			}
-		}
-
-		private boolean isStopping() {
-			return interrupted || isHalted();
-		}
-
-		private void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.reading.changes"), polledFileName);
+		/**
+		 * Reads log file changes since last read iteration (or from stream
+		 * initialization if it is first monitor invocation).
+		 * <p>
+		 * Monitor checks if it can read polled file. If not then tries to swap
+		 * to next available log file. If swap can't be done (no newer readable
+		 * file) then file monitoring is interrupted.
+		 * </p>
+		 * <p>
+		 * If polled file is readable, then monitor checks modification
+		 * timestamp. If it is newer than sored in {@code lastModifTime} file
+		 * gets opened for reading. If not, monitor tries to swap to next
+		 * available log file. If swap can'e be done (no newer readable file)
+		 * then file reading is skipped until next monitor invocation.
+		 * </p>
+		 * <p>
+		 * When file gets opened for reading reader is rolled to log file marked
+		 * by {@code lineNumber} attribute. If turns out that file got smaller
+		 * in lines count, then monitor tries to swap to previous log file. If
+		 * no previous readable log file is available, then reader is reset to
+		 * first file line.
+		 * </p>
+		 * <p>
+		 * Reader reads all file lines until end of file and puts them to
+		 * changed lines buffer.
+		 * </p>
+		 */
+		@Override
+		protected void readLogChanges() {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.reading.changes"),
+					pollingFile.getAbsolutePath());
 			readingLatestLogFile = true;
 
-			File currLogFile = new File(polledFileName);
-
-			if (!currLogFile.canRead()) {
+			if (!pollingFile.canRead()) {
 				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.cant.access"));
 
-				currLogFile = getNextAvailableLogFile();
+				boolean swapped = swapToNextAvailableLogFile();
 
-				if (currLogFile == null) {
+				if (!swapped) {
 					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.next.not.found"));
 
 					interrupted = true;
 					return;
 				}
 			} else {
-				long flm = currLogFile.lastModified();
+				long flm = pollingFile.lastModified();
 				if (flm > lastModifTime) {
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.file.updated"),
 							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
@@ -319,11 +224,9 @@ public class FilePollingStream extends TNTInputStream {
 
 					lastModifTime = flm;
 				} else {
-					File nextLog = getNextAvailableLogFile();
+					boolean swapped = swapToNextAvailableLogFile();
 
-					if (nextLog != null) {
-						currLogFile = nextLog;
-					} else {
+					if (!swapped) {
 						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.no.changes"));
 
 						return;
@@ -334,7 +237,7 @@ public class FilePollingStream extends TNTInputStream {
 			LineNumberReader lnr = null;
 
 			try {
-				lnr = rollToCurrentLine(currLogFile);
+				lnr = rollToCurrentLine();
 			} catch (IOException exc) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.error.rolling"), exc);
 			}
@@ -350,46 +253,18 @@ public class FilePollingStream extends TNTInputStream {
 			}
 		}
 
-		private File getNextAvailableLogFile() {
-			if (Utils.isWildcardFileName(fileName)) {
-				File[] foundFiles = searchFiles(fileName);
-				File nextFile = Utils.getFirstNewer(foundFiles, lastModifTime);
-
-				if (nextFile != null) {
-					polledFileName = nextFile.getAbsolutePath();
-					lastModifTime = nextFile.lastModified();
-					lineNumber = 0;
-					readingLatestLogFile = nextFile.equals(foundFiles[0]);
-
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.next"),
-							polledFileName);
-				}
-
-				return nextFile;
-			}
-
-			return null;
-		}
-
-		private LineNumberReader rollToCurrentLine(File logFile) throws IOException {
-			LineNumberReader lnr = openLogReader(logFile);
-
-			if (lnr == null) {
-				return null;
-			}
-
-			return skipOldLines(lnr);
-		}
-
-		private LineNumberReader openLogReader(File logFile) {
+		private LineNumberReader rollToCurrentLine() throws IOException {
+			LineNumberReader lnr;
 			try {
-				return new LineNumberReader(new FileReader(logFile));
+				lnr = new LineNumberReader(new FileReader(pollingFile));
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.reader.error"));
 
 				interrupted = true;
 				return null;
 			}
+
+			return skipOldLines(lnr);
 		}
 
 		private LineNumberReader skipOldLines(LineNumberReader lnr) throws IOException {
@@ -406,12 +281,12 @@ public class FilePollingStream extends TNTInputStream {
 			}
 
 			if (skipFail) {
-				File prevLogFile = getPrevLogFile();
+				boolean swapped = swapToPrevLogFile();
 
-				if (prevLogFile != null) {
+				if (swapped) {
 					Utils.close(lnr);
 
-					return rollToCurrentLine(prevLogFile);
+					return rollToCurrentLine();
 				} else {
 					if (lnr.markSupported()) {
 						LOGGER.log(OpLevel.INFO,
@@ -420,49 +295,50 @@ public class FilePollingStream extends TNTInputStream {
 						lnr.reset();
 					}
 				}
-
 			}
 
 			return lnr;
 		}
 
-		private File getPrevLogFile() {
+		private boolean swapToPrevLogFile() {
 			if (Utils.isWildcardFileName(fileName)) {
 				File[] foundFiles = searchFiles(fileName);
 				File prevFile = foundFiles == null || foundFiles.length < 2 ? null : foundFiles[1];
 
 				if (prevFile != null) {
-					polledFileName = prevFile.getAbsolutePath();
+					pollingFile = prevFile;
 					lastModifTime = prevFile.lastModified();
 					readingLatestLogFile = false;
 
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.previous"),
-							polledFileName);
+							prevFile.getAbsolutePath());
 				}
 
-				return prevFile;
+				return prevFile != null;
 			}
 
-			return null;
+			return false;
 		}
 
-		private void readNewLogLines(LineNumberReader lnr) throws IOException {
-			String line;
-			while ((line = lnr.readLine()) != null) {
-				addChangedLineToBuffer(line);
-				lineNumber = lnr.getLineNumber();
-			}
-		}
+		private boolean swapToNextAvailableLogFile() {
+			if (Utils.isWildcardFileName(fileName)) {
+				File[] foundFiles = searchFiles(fileName);
+				File nextFile = Utils.getFirstNewer(foundFiles, lastModifTime);
 
-		private void addChangedLineToBuffer(String line) {
-			if (StringUtils.isNotEmpty(line)) {
-				boolean added = changedLinesBuffer.offer(line);
+				if (nextFile != null) {
+					pollingFile = nextFile;
+					lastModifTime = nextFile.lastModified();
+					lineNumber = 0;
+					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-				if (!added) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.changes.buffer.limit"),
-							line);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.next"),
+							nextFile.getAbsolutePath());
 				}
+
+				return nextFile != null;
 			}
+
+			return false;
 		}
 	}
 }

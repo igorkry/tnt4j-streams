@@ -317,17 +317,17 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	/**
 	 * Counts text lines available in file.
 	 * 
-	 * @param filename
-	 *            file name to count lines
+	 * @param file
+	 *            file to count lines
 	 *
 	 * @return number of lines currently available in file
 	 */
-	public static int countLines(String fileName) {
+	public static int countLines(File file) {
 		int count = 0;
 		InputStream is = null;
 
 		try {
-			is = new BufferedInputStream(new FileInputStream(fileName));
+			is = new BufferedInputStream(new FileInputStream(file));
 			byte[] c = new byte[1024];
 			int readChars = 0;
 			boolean endsWithoutNewLine = false;
@@ -371,14 +371,16 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 		if (ArrayUtils.isNotEmpty(files)) {
 			for (File f : files) {
-				if (lastModif == null && f.canRead()) {
-					last = f;
-					break;
-				} else {
-					if (f.lastModified() > lastModif && f.canRead()) {
+				if (f.canRead()) {
+					if (lastModif == null) {
 						last = f;
-					} else {
 						break;
+					} else {
+						if (f.lastModified() > lastModif) {
+							last = f;
+						} else {
+							break;
+						}
 					}
 				}
 			}
@@ -497,7 +499,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		if (activityData instanceof String) {
 			String ads = (String) activityData;
 
-			return ads.replaceAll("(\\r\\n|\\r|\\n)", "");
+			return ads.replaceAll("(\\r\\n|\\r|\\n)", ""); // NON-NLS
 		}
 
 		return activityData;
