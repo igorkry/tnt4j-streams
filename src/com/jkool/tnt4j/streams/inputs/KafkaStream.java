@@ -29,6 +29,8 @@ import kafka.consumer.Whitelist;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -128,6 +130,7 @@ public class KafkaStream extends TNTInputStream {
 		super.initialize();
 
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.ready.to.receive.messages"));
 	}
 
 	/**
@@ -141,16 +144,27 @@ public class KafkaStream extends TNTInputStream {
 	public Object getNextItem() throws Throwable {
 		while (!closed.get()) {
 			if (messageBuffer == null || !messageBuffer.hasNext()) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.empty.messages.buffer"));
 				final List<kafka.consumer.KafkaStream<byte[], byte[]>> streams = consumer
 						.createMessageStreamsByFilter(new Whitelist(topicName));
-				messageBuffer = streams.get(0).iterator();
+				if (CollectionUtils.isNotEmpty(streams)) {
+					kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(0);
+					messageBuffer = stream.iterator();
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getStringFormatted("KafkaStream.retrieved.new.messages", stream.size()));
+				} else {
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.retrieved.no.new.messages"));
+				}
 			}
 
 			if (messageBuffer != null && messageBuffer.hasNext()) {
 				MessageAndMetadata<byte[], byte[]> msg = messageBuffer.next();
+				String msgData = new String(msg.message(), Charset.forName("UTF-8"));
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
 
 				// TODO: pass byte[] to parser
-				return Utils.cleanActivityData(new String(msg.message(), Charset.forName("UTF-8")));
+				return Utils.cleanActivityData(msgData);
 			}
 		}
 		LOGGER.log(OpLevel.ERROR, StreamsResources.getString("KafkaStream.failed.consumer"));

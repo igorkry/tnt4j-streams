@@ -210,11 +210,12 @@ public class CharacterStream extends TNTInputStream {
 	protected void startDataStream() throws IOException {
 		if (rawStream == null && rawReader == null) {
 			if (svrSocket != null) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("CharacterStream.waiting.for.connection"),
-						socketPort);
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getStringFormatted("CharacterStream.waiting.for.connection", socketPort));
 				socket = svrSocket.accept();
 				rawStream = socket.getInputStream();
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("CharacterStream.accepted.connection"), socket);
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getStringFormatted("CharacterStream.accepted.connection", socket));
 				// only accept one connection, close down server socket
 				Utils.close(svrSocket);
 				svrSocket = null;

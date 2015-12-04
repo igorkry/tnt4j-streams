@@ -107,7 +107,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream {
 		if (fileName == null) {
 			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FileLineStream.initializing.stream", fileName));
 
 		loadFiles();
 
@@ -183,8 +183,8 @@ public abstract class AbstractFileLineStream extends TNTInputStream {
 
 			lineReader = new LineNumberReader(getFileReader(fileNumber));
 			lineNumber = 0;
-			logger.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.opening.file"),
-					getFileName(fileNumber));
+			logger.log(OpLevel.DEBUG,
+					StreamsResources.getStringFormatted("FileLineStream.opening.file", getFileName(fileNumber)));
 
 			return true;
 		}

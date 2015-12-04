@@ -200,8 +200,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 		 */
 		@Override
 		protected void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.reading.changes"),
-					pollingFile.getAbsolutePath());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FilePollingStream.reading.changes",
+					pollingFile.getAbsolutePath()));
 			readingLatestLogFile = true;
 
 			if (!pollingFile.canRead()) {
@@ -218,9 +218,10 @@ public class FilePollingStream extends AbstractFilePollingStream {
 			} else {
 				long flm = pollingFile.lastModified();
 				if (flm > lastModifTime) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.file.updated"),
-							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-							TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getStringFormatted("FilePollingStream.file.updated",
+									TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
+									TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime)));
 
 					lastModifTime = flm;
 				} else {
@@ -310,8 +311,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lastModifTime = prevFile.lastModified();
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.previous"),
-							prevFile.getAbsolutePath());
+					LOGGER.log(OpLevel.INFO, StreamsResources
+							.getStringFormatted("FilePollingStream.changing.to.previous", prevFile.getAbsolutePath()));
 				}
 
 				return prevFile != null;
@@ -331,8 +332,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.next"),
-							nextFile.getAbsolutePath());
+					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted("FilePollingStream.changing.to.next",
+							nextFile.getAbsolutePath()));
 				}
 
 				return nextFile != null;

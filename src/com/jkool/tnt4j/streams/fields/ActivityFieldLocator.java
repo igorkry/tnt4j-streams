@@ -433,12 +433,13 @@ public class ActivityFieldLocator {
 				target = map.get(srcString);
 			}
 			if (target == null) {
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityFieldLocator.mapped.default"), type);
+				LOGGER.log(OpLevel.TRACE,
+						StreamsResources.getStringFormatted("ActivityFieldLocator.mapped.default", type));
 				target = mapCatchAll != null ? mapCatchAll : source;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityFieldLocator.mapped.result"), source, target,
-				type);
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getStringFormatted("ActivityFieldLocator.mapped.result", source, target, type));
 		return target;
 	}
 

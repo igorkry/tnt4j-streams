@@ -115,7 +115,7 @@ public class ActivityInfo {
 	 *             definition (e.g. does not match defined format, etc.)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.applying.field"), field, value);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.applying.field", field, value));
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
@@ -158,10 +158,11 @@ public class ActivityInfo {
 			}
 		}
 		if (fieldValue == null) {
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.field.null"), field);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.field.null", field));
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.applying.field.value"), field, fieldValue);
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getStringFormatted("ActivityInfo.applying.field.value", field, fieldValue));
 		setFieldValue(field, fieldValue);
 	}
 
@@ -335,7 +336,7 @@ public class ActivityInfo {
 		} else {
 			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityInfo.set.field"), field, fieldValue);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.set.field", field, fieldValue));
 	}
 
 	/**
@@ -504,8 +505,8 @@ public class ActivityInfo {
 						throw ioe;
 					}
 					retryAttempt = true;
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("ActivityInfo.will.retry"),
-							TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted("ActivityInfo.will.retry",
+							TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
 					StreamsThread.sleep(retryPeriod);
 				}
 			}

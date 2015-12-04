@@ -104,7 +104,7 @@ public class ActivityJsonParser extends ActivityParser {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.parsing"), data);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;

@@ -135,7 +135,7 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 		if (fileName == null) {
 			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getString("FileLineStream.initializing.stream"), fileName);
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FileLineStream.initializing.stream", fileName));
 
 		changedLinesBuffer = new ArrayBlockingQueue<String>(CHANGES_BUFFER_SIZE, true);
 
@@ -288,8 +288,8 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 				boolean added = changedLinesBuffer.offer(line);
 
 				if (!added) {
-					logger.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.changes.buffer.limit"),
-							line);
+					logger.log(OpLevel.WARNING,
+							StreamsResources.getStringFormatted("FilePollingStream.changes.buffer.limit", line));
 				}
 			}
 		}

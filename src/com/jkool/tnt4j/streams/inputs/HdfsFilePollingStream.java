@@ -216,8 +216,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 */
 		@Override
 		protected void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.reading.changes"),
-					pollingFile.toString());
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getStringFormatted("FilePollingStream.reading.changes", pollingFile.toString()));
 			readingLatestLogFile = true;
 
 			FileSystem fs = null;
@@ -240,9 +240,10 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 				} else {
 					long flm = fStatus.getModificationTime();
 					if (flm > lastModifTime) {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.file.updated"),
-								TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-								TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
+						LOGGER.log(OpLevel.DEBUG,
+								StreamsResources.getStringFormatted("FilePollingStream.file.updated",
+										TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
+										TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime)));
 
 						lastModifTime = flm;
 					} else {
@@ -341,8 +342,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					lastModifTime = getModificationTime(prevFile, fs);
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.previous"),
-							prevFile.toUri());
+					LOGGER.log(OpLevel.INFO, StreamsResources
+							.getStringFormatted("FilePollingStream.changing.to.previous", prevFile.toUri()));
 				}
 
 				return prevFile != null;
@@ -364,8 +365,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString("FilePollingStream.changing.to.next"),
-							nextFile.toUri());
+					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted("FilePollingStream.changing.to.next",
+							nextFile.toUri()));
 				}
 
 				return nextFile != null;

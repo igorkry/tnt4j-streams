@@ -21,10 +21,7 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.io.*;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
@@ -96,7 +93,8 @@ public abstract class ActivityParser {
 	 *            activity field to add
 	 */
 	public void addField(ActivityField field) {
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.adding.field"), field.toDebugString());
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getStringFormatted("ActivityParser.adding.field", field.toDebugString()));
 		fieldMap.put(field, field.getLocators());
 	}
 

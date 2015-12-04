@@ -191,8 +191,8 @@ public abstract class TNTInputStream implements Runnable {
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
 		trackersMap.put(defaultSource.getFQName(), tracker);
-		logger.log(OpLevel.DEBUG, StreamsResources.getString("TNTInputStream.default.tracker"),
-				defaultSource.getFQName());
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getStringFormatted("TNTInputStream.default.tracker", defaultSource.getFQName()));
 	}
 
 	/**
@@ -448,21 +448,20 @@ public abstract class TNTInputStream implements Runnable {
 								streamConfig.setSource(aiSource);
 								tracker = TrackingLogger.getInstance(streamConfig.build());
 								trackersMap.put(aiSource.getFQName(), tracker);
-								logger.log(OpLevel.DEBUG,
-										StreamsResources.getString("TNTInputStream.build.new.tracker"),
-										aiSource.getFQName());
+								logger.log(OpLevel.DEBUG, StreamsResources
+										.getStringFormatted("TNTInputStream.build.new.tracker", aiSource.getFQName()));
 							}
 
 							while (!isHalted() && !tracker.isOpen()) {
 								try {
 									tracker.open();
 								} catch (IOException ioe) {
-									logger.log(OpLevel.ERROR,
-											StreamsResources.getString("TNTInputStream.failed.to.connect"), tracker,
-											ioe);
+									logger.log(OpLevel.ERROR, StreamsResources
+											.getStringFormatted("TNTInputStream.failed.to.connect", tracker), ioe);
 									Utils.close(tracker);
-									logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.will.retry"),
-											TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL));
+									logger.log(OpLevel.INFO,
+											StreamsResources.getStringFormatted("TNTInputStream.will.retry",
+													TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
 									if (!isHalted()) {
 										StreamsThread.sleep(CONN_RETRY_INTERVAL);
 									}
@@ -473,21 +472,21 @@ public abstract class TNTInputStream implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity.at"),
-							getActivityPosition(), ise.getMessage(), ise);
+					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
+							"TNTInputStream.failed.record.activity.at", getActivityPosition(), ise.getMessage()), ise);
 					halt();
 				} catch (Exception e) {
-					logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity.at"),
-							getActivityPosition(), e.getMessage(), e);
+					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
+							"TNTInputStream.failed.record.activity.at", getActivityPosition(), e.getMessage()), e);
 				}
 			}
 		} catch (Throwable t) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString("TNTInputStream.failed.record.activity"),
-					t.getMessage(), t);
+			logger.log(OpLevel.ERROR,
+					StreamsResources.getStringFormatted("TNTInputStream.failed.record.activity", t.getMessage()), t);
 		} finally {
 			cleanup();
-			logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.thread.ended"),
-					Thread.currentThread().getName());
+			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted("TNTInputStream.thread.ended",
+					Thread.currentThread().getName()));
 		}
 	}
 }

@@ -144,7 +144,8 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					apacheLogPattern = value;
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getStringFormatted("ActivityParser.setting", name, value));
 				}
 			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
@@ -154,24 +155,25 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 						String regex = value.substring(idx + 1);
 
 						String oldRegex = userRegexMappings.put(confKey, regex);
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.setting"), name, value);
 						LOGGER.log(OpLevel.DEBUG,
-								StreamsResources.getString("ApacheAccessLogParser.setting.regex.mapping"), confKey,
-								oldRegex, regex);
+								StreamsResources.getStringFormatted("ActivityParser.setting", name, value));
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(
+								"ApacheAccessLogParser.setting.regex.mapping", confKey, oldRegex, regex));
 					}
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ActivityParser.ignoring"), name);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityParser.ignoring", name));
 		}
 
 		if (pattern == null && StringUtils.isNotEmpty(apacheLogPattern)) {
 			String regex = makeRegexPattern(apacheLogPattern);
 			if (regex != null) {
 				pattern = Pattern.compile(regex);
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ApacheAccessLogParser.regex.made"), regex);
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getStringFormatted("ApacheAccessLogParser.regex.made", regex));
 			} else {
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getString("ApacheAccessLogParser.could.not.make.regex"),
-						apacheLogPattern);
+				LOGGER.log(OpLevel.TRACE, StreamsResources
+						.getStringFormatted("ApacheAccessLogParser.could.not.make.regex", apacheLogPattern));
 			}
 		}
 	}
