@@ -49,6 +49,9 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * All activity streams should support the following properties:
  * <ul>
  * <li>DateTime - default date/time to associate with activities</li>
+ * <li>HaltIfNoParser - if set to true, stream will halt if none of the parsers
+ * can parse activity event RAW data. If set to false - puts log entry and
+ * continues.</li>
  * </ul>
  *
  * @version $Revision: 8 $

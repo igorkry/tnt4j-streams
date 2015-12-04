@@ -145,7 +145,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 * Constructs an HdfsLogWatcher.
 		 */
 		HdfsLogWatcher() {
-			super("FilePollingStream.LogWatcher"); // NON-NLS
+			super("HdfsFilePollingStream.HdfsLogWatcher"); // NON-NLS
 		}
 
 		/**
