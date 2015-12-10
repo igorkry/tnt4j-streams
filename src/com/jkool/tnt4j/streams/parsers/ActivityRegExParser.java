@@ -76,6 +76,7 @@ public class ActivityRegExParser extends ActivityParser {
 	 * Constructs an ActivityRegExParser.
 	 */
 	public ActivityRegExParser() {
+		super(LOGGER);
 	}
 
 	/**
@@ -149,13 +150,15 @@ public class ActivityRegExParser extends ActivityParser {
 	 * </p>
 	 * <ul>
 	 * <li>{@code java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
 	 * <li>{@code java.io.Reader}</li>
 	 * <li>{@code java.io.InputStream}</li>
 	 * </ul>
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
+				|| InputStream.class.isInstance(data);
 	}
 
 	/**
@@ -182,7 +185,7 @@ public class ActivityRegExParser extends ActivityParser {
 		ActivityInfo ai = new ActivityInfo();
 		// save entire activity string as message data
 		ActivityField field = new ActivityField(StreamFieldType.Message.name());
-		applyFieldValue(ai, field, dataStr);
+		applyFieldValue(stream, ai, field, dataStr);
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
@@ -219,7 +222,7 @@ public class ActivityRegExParser extends ActivityParser {
 							value = values;
 						}
 					}
-					applyFieldValue(ai, field, value);
+					applyFieldValue(stream, ai, field, value);
 				}
 			}
 		} catch (Exception e) {
@@ -249,7 +252,7 @@ public class ActivityRegExParser extends ActivityParser {
 						value = values;
 					}
 				}
-				applyFieldValue(ai, field, value);
+				applyFieldValue(stream, ai, field, value);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(

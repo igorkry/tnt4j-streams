@@ -19,7 +19,6 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,7 +31,6 @@ import kafka.message.MessageAndMetadata;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -59,10 +57,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 1 $
  *
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see ConsumerConfig
  */
-public class KafkaStream extends TNTInputStream {
+public class KafkaStream extends TNTInputStream<String> {
 
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
 
@@ -141,7 +139,7 @@ public class KafkaStream extends TNTInputStream {
 	 * </p>
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public String getNextItem() throws Throwable {
 		while (!closed.get()) {
 			if (messageBuffer == null || !messageBuffer.hasNext()) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.empty.messages.buffer"));
@@ -159,7 +157,7 @@ public class KafkaStream extends TNTInputStream {
 
 			if (messageBuffer != null && messageBuffer.hasNext()) {
 				MessageAndMetadata<byte[], byte[]> msg = messageBuffer.next();
-				String msgData = new String(msg.message(), Charset.forName("UTF-8"));
+				String msgData = Utils.getString(msg.message());
 
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
 

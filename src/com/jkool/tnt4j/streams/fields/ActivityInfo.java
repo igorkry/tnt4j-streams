@@ -82,8 +82,8 @@ public class ActivityInfo {
 	private Integer msgLength = null;
 	private String msgMimeType = null;
 
-	private Integer processId = 0;
-	private Integer threadId = 0;
+	private Integer processId = null;
+	private Integer threadId = null;
 
 	private String snapshotCategory = null;
 
@@ -198,7 +198,7 @@ public class ActivityInfo {
 					// Elapsed time needs to be converted to usec
 					ActivityFieldUnitsType units = ActivityFieldUnitsType.valueOf(locator.getUnits());
 					if (!(value instanceof Number)) {
-						value = Long.valueOf(String.valueOf(value));
+						value = Long.valueOf(getStringValue(value));
 					}
 					value = TimestampFormatter.convert((Number) value, units, ActivityFieldUnitsType.Microseconds);
 				} catch (Exception e) {
@@ -363,7 +363,7 @@ public class ActivityInfo {
 	/**
 	 * Appends activity item tags collection with provided tag strings array
 	 * contents.
-	 * 
+	 *
 	 * @param tags
 	 *            tag strings array
 	 */
@@ -564,7 +564,7 @@ public class ActivityInfo {
 		}
 		if (StringUtils.isEmpty(serverIp)) {
 			serverIp = " "; // prevents streams API from resolving it to the
-							// local IP address
+			// local IP address
 		}
 	}
 
@@ -601,13 +601,120 @@ public class ActivityInfo {
 	 */
 	private static String getStringValue(Object value) {
 		if (value instanceof byte[]) {
-			return new String((byte[]) value);
+			return Utils.getString((byte[]) value);
 		}
 		return String.valueOf(value);
 	}
 
 	private static Integer getIntValue(Object value) {
 		return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(getStringValue(value));
+	}
+
+	/**
+	 * Merges activity info data fields values. Values of fields are changed
+	 * only if they currently hold default (initial) value.
+	 *
+	 * @param otherAi
+	 *            activity info object to merge into this one
+	 */
+	public void merge(ActivityInfo otherAi) {
+		if (StringUtils.isEmpty(serverName)) {
+			serverName = otherAi.serverName;
+		}
+		if (StringUtils.isEmpty(serverIp)) {
+			serverIp = otherAi.serverIp;
+		}
+		if (StringUtils.isEmpty(applName)) {
+			applName = otherAi.applName;
+		}
+		if (StringUtils.isEmpty(userName)) {
+			userName = otherAi.userName;
+		}
+
+		if (StringUtils.isEmpty(resourceName)) {
+			resourceName = otherAi.resourceName;
+		}
+
+		if (StringUtils.isEmpty(eventName)) {
+			eventName = otherAi.eventName;
+		}
+		if (eventType == null) {
+			eventType = otherAi.eventType;
+		}
+		if (startTime == null) {
+			startTime = otherAi.startTime;
+		}
+		if (endTime == null) {
+			endTime = otherAi.endTime;
+		}
+		if (elapsedTime == -1L) {
+			elapsedTime = otherAi.elapsedTime;
+		}
+		if (compCode == null) {
+			compCode = otherAi.compCode;
+		}
+		if (reasonCode == 0) {
+			reasonCode = otherAi.reasonCode;
+		}
+		if (StringUtils.isEmpty(exception)) {
+			exception = otherAi.exception;
+		}
+		if (severity == null) {
+			severity = otherAi.severity;
+		}
+		if (StringUtils.isEmpty(location)) {
+			location = otherAi.location;
+		}
+		if (StringUtils.isEmpty(correlator)) {
+			correlator = otherAi.correlator;
+		}
+
+		if (StringUtils.isEmpty(trackingId)) {
+			trackingId = otherAi.trackingId;
+		}
+		if (otherAi.msgTags != null) {
+			if (msgTags == null) {
+				msgTags = new ArrayList<String>();
+			}
+
+			msgTags.addAll(otherAi.msgTags);
+		}
+		if (msgData == null) {
+			msgData = otherAi.msgData;
+		}
+		if (StringUtils.isEmpty(msgCharSet)) {
+			msgCharSet = otherAi.msgCharSet;
+		}
+		if (StringUtils.isEmpty(msgEncoding)) {
+			msgEncoding = otherAi.msgEncoding;
+		}
+		if (msgLength == null) {
+			msgLength = otherAi.msgLength;
+		}
+		if (StringUtils.isEmpty(msgMimeType)) {
+			msgMimeType = otherAi.msgMimeType;
+		}
+
+		if (processId == null) {
+			processId = otherAi.processId;
+		}
+		if (threadId == null) {
+			threadId = otherAi.threadId;
+		}
+
+		if (StringUtils.isEmpty(snapshotCategory)) {
+			snapshotCategory = otherAi.snapshotCategory;
+		}
+
+		filtered |= otherAi.filtered;
+
+		if (otherAi.activityProperties != null) {
+			if (activityProperties == null) {
+				activityProperties = new HashMap<String, Object>();
+			}
+
+			activityProperties.putAll(otherAi.activityProperties);
+		}
 	}
 
 	/**
@@ -846,7 +953,7 @@ public class ActivityInfo {
 
 	/**
 	 * Returns activity filtering flag value.
-	 * 
+	 *
 	 * @return activity filtering flag value
 	 */
 	public boolean isFiltered() {
@@ -855,7 +962,7 @@ public class ActivityInfo {
 
 	/**
 	 * Sets activity filtering flag value.
-	 * 
+	 *
 	 * @param filtered
 	 *            {@code true} if activity is filtered out, {@code false}
 	 *            otherwise

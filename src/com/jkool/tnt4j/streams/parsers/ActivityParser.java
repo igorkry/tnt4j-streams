@@ -23,15 +23,19 @@ import java.io.*;
 import java.text.ParseException;
 import java.util.*;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
+
+//import com.jkool.tnt4j.streams.filters.StreamFilter;
 
 /**
  * Base class that all activity parsers must extend. It provides some base
@@ -40,7 +44,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 2 $
  */
 public abstract class ActivityParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityParser.class);
+	/**
+	 * Parser logger.
+	 */
+	protected final EventSink logger;
 
 	/**
 	 * Constant for default delimiter symbol used by parsers.
@@ -55,9 +62,18 @@ public abstract class ActivityParser {
 	private String[] tags;
 
 	/**
-	 * Initializes ActivityParser.
+	 * List of filters being used by stream.
 	 */
-	protected ActivityParser() {
+	protected final Collection<StreamFilter> filters = new LinkedList<StreamFilter>();
+
+	/**
+	 * Initializes ActivityParser.
+	 *
+	 * @param logger
+	 *            logger used by activity parser
+	 */
+	protected ActivityParser(EventSink logger) {
+		this.logger = logger;
 	}
 
 	/**
@@ -93,7 +109,7 @@ public abstract class ActivityParser {
 	 *            activity field to add
 	 */
 	public void addField(ActivityField field) {
-		LOGGER.log(OpLevel.DEBUG,
+		logger.log(OpLevel.DEBUG,
 				StreamsResources.getStringFormatted("ActivityParser.adding.field", field.toDebugString()));
 		fieldMap.put(field, field.getLocators());
 	}
@@ -148,6 +164,8 @@ public abstract class ActivityParser {
 		}
 		if (data instanceof String) {
 			return (String) data;
+		} else if (data instanceof byte[]) {
+			return Utils.getString((byte[]) data);
 		}
 		BufferedReader rdr;
 		if (data instanceof BufferedReader) {
@@ -164,9 +182,9 @@ public abstract class ActivityParser {
 		try {
 			str = rdr.readLine();
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.data.end"), eof);
+			logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.data.end"), eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityParser.error.reading"), ioe);
+			logger.log(OpLevel.WARNING, StreamsResources.getString("ActivityParser.error.reading"), ioe);
 		}
 
 		return str;
@@ -190,6 +208,35 @@ public abstract class ActivityParser {
 	}
 
 	/**
+	 * TODO
+	 * 
+	 * @param stream
+	 * @param ai
+	 * @param field
+	 * @param value
+	 * @throws IllegalStateException
+	 * @throws ParseException
+	 */
+	protected void applyFieldValue(TNTInputStream stream, ActivityInfo ai, ActivityField field, Object value)
+			throws IllegalStateException, ParseException {
+		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
+			value = Utils.cleanActivityData(value);
+			for (ActivityParser stackedParser : field.getStackedParsers()) {
+				if (stackedParser.isDataClassSupported(value)) {
+					ActivityInfo sai = stackedParser.parse(stream, value);
+
+					if (sai != null) {
+						ai.merge(sai);
+						break;
+					}
+				}
+			}
+		} else {
+			applyFieldValue(ai, field, value);
+		}
+	}
+
+	/**
 	 * Returns name of activity parser
 	 *
 	 * @return name string of activity parser
@@ -206,6 +253,38 @@ public abstract class ActivityParser {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * Adds the specified filter to the list of filters being used by this
+	 * stream.
+	 *
+	 * @param filter
+	 *            filter to add
+	 */
+	public void addFilter(StreamFilter filter) {
+		filters.add(filter);
+	}
+
+	/**
+	 * Applies all defined filters on specified activity item. If activity item
+	 * matches any of filter criteria - such item is skipped from sending it to
+	 * jKool Cloud Service.
+	 *
+	 * @param activityInfo
+	 *            activity item data to check against defined filters
+	 *
+	 * @return {@code true} if activity data was filtered by any of defined
+	 *         filters, {@code false} otherwise
+	 */
+	protected boolean filterActivity(ActivityInfo activityInfo) {
+		boolean filtered = false;
+		Iterator<StreamFilter> filtersIterator = filters.iterator();
+		while (!filtered && filtersIterator.hasNext()) {
+			StreamFilter filter = filtersIterator.next();
+			filtered = filter.doFilterActivity(activityInfo);
+		}
+		return filtered;
 	}
 
 	/**

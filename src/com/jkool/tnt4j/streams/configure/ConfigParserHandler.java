@@ -40,7 +40,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * configuration.
  *
  * @version $Revision: 7 $
- * @see StreamsConfig
+ * @see com.jkool.tnt4j.streams.configure.StreamsConfig
  */
 public class ConfigParserHandler extends DefaultHandler {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
@@ -670,9 +670,11 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error parsing element
 	 */
 	private void processParserRef(Attributes attrs) throws SAXException {
-		if (currStream == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(
-					"ConfigParserHandler.malformed.configuration2", PARSER_REF_ELMT, STREAM_ELMT), currParseLocation);
+		if (currField == null && currStream == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted("ConfigParserHandler.malformed.configuration3", PARSER_REF_ELMT,
+							FIELD_ELMT, STREAM_ELMT),
+					currParseLocation);
 		}
 		String parserName = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
@@ -691,7 +693,12 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted("ConfigParserHandler.undefined.reference",
 					PARSER_REF_ELMT, parserName), currParseLocation);
 		}
-		currStream.addParser(parser);
+
+		if (currField != null) {
+			currField.addStackedParser(parser);
+		} else {
+			currStream.addParser(parser);
+		}
 	}
 
 	/**

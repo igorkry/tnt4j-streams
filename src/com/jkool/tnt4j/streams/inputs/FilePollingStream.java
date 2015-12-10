@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.ArrayUtils;
 
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -57,7 +56,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 2 $
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
 public class FilePollingStream extends AbstractFilePollingStream {

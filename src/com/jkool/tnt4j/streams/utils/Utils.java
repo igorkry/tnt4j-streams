@@ -20,6 +20,8 @@
 package com.jkool.tnt4j.streams.utils;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Map;
@@ -410,7 +412,10 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		Map<String, ?> map = new LinkedTreeMap<String, Object>();
 		Gson gson = new Gson();
 
-		if (jsonData instanceof String) {
+		if (jsonData instanceof byte[]) {
+			String str = getString((byte[]) jsonData);
+			map = (Map<String, ?>) gson.fromJson(str, map.getClass());
+		} else if (jsonData instanceof String) {
 			map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
 		} else if (jsonData instanceof Reader) {
 			map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
@@ -442,6 +447,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		}
 		if (data instanceof String) {
 			return (String) data;
+		} else if (data instanceof byte[]) {
+			return getString((byte[]) data);
 		}
 
 		BufferedReader rdr = null;
@@ -495,13 +502,25 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @return raw activity data without 'new line' symbols.
 	 */
-	public static Object cleanActivityData(Object activityData) {
+	public static <T> T cleanActivityData(T activityData) {
 		if (activityData instanceof String) {
 			String ads = (String) activityData;
 
-			return ads.replaceAll("(\\r\\n|\\r|\\n)", ""); // NON-NLS
+			return (T) ads.replaceAll("(\\r\\n|\\r|\\n)", ""); // NON-NLS
 		}
 
 		return activityData;
+	}
+
+	public static String getString(byte[] strBytes) {
+		try {
+			return new String(strBytes, Charset.forName("UTF-8"));
+		} catch (UnsupportedCharsetException uce) {
+			try {
+				return new String(strBytes, "UTF-8");
+			} catch (UnsupportedEncodingException uee) {
+				return new String(strBytes);
+			}
+		}
 	}
 }

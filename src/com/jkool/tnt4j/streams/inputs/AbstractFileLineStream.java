@@ -49,7 +49,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public abstract class AbstractFileLineStream extends TNTInputStream {
+public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 	/**
 	 * Stream attribute defining file name.
@@ -122,7 +122,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream {
 	 * </p>
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public String getNextItem() throws Throwable {
 		if (lineReader == null) {
 			throw new IllegalStateException(StreamsResources.getString("FileLineStream.file.not.opened"));
 		}
@@ -131,7 +131,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream {
 		lineNumber = lineReader.getLineNumber();
 
 		if (line == null && hasNextFile()) {
-			line = (String) getNextItem();
+			line = getNextItem();
 		}
 
 		return line;

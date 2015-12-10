@@ -20,10 +20,12 @@
 package com.jkool.tnt4j.streams.fields;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -43,6 +45,7 @@ public class ActivityField {
 	private String locale = null;
 	private String separator = "";
 	private String reqValue = ""; /* string to allow no value */
+	private Collection<ActivityParser> stackedParsers;
 
 	/**
 	 * Creates a new activity field entry.
@@ -287,6 +290,29 @@ public class ActivityField {
 	}
 
 	/**
+	 * Adds activity field stacked parser.
+	 *
+	 * @param parser
+	 *            the stacked parser to add
+	 */
+	public void addStackedParser(ActivityParser parser) {
+		if (stackedParsers == null) {
+			stackedParsers = new ArrayList<ActivityParser>();
+		}
+
+		stackedParsers.add(parser);
+	}
+
+	/**
+	 * Gets activity field stacked parsers collection.
+	 *
+	 * @return stacked parsers collection
+	 */
+	public Collection<ActivityParser> getStackedParsers() {
+		return stackedParsers;
+	}
+
+	/**
 	 * Gets a string representation of this object for use in debugging, which
 	 * includes the value of each data member.
 	 *
@@ -299,6 +325,7 @@ public class ActivityField {
 		sb.append(", locale='").append(locale).append('\''); // NON-NLS
 		sb.append(", separator='").append(separator).append('\''); // NON-NLS
 		sb.append(", reqValue='").append(reqValue).append('\''); // NON-NLS
+		sb.append(", stackedParsers='").append(stackedParsers).append('\''); // NON-NLS
 		sb.append('}');
 		return sb.toString();
 	}

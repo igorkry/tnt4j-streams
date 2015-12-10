@@ -34,7 +34,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -58,7 +57,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 1 $
  *
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see FilenameUtils#wildcardMatch(String, String, IOCase)
  */
 public class HdfsFileLineStream extends AbstractFileLineStream {

@@ -27,7 +27,6 @@ import java.util.Comparator;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -50,7 +49,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 4 $
  *
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
 public class FileLineStream extends AbstractFileLineStream {

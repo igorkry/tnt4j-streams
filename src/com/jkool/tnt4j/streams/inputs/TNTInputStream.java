@@ -56,7 +56,7 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  *
  * @version $Revision: 8 $
  */
-public abstract class TNTInputStream implements Runnable {
+public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Stream logger.
 	 */
@@ -92,7 +92,7 @@ public abstract class TNTInputStream implements Runnable {
 	 * Initializes TNTInputStream.
 	 *
 	 * @param logger
-	 *            debug logger used by activity stream
+	 *            logger used by activity stream
 	 */
 	protected TNTInputStream(EventSink logger) {
 		this.logger = logger;
@@ -246,7 +246,7 @@ public abstract class TNTInputStream implements Runnable {
 	 * @throws Throwable
 	 *             if any errors occurred getting next item
 	 */
-	public abstract Object getNextItem() throws Throwable;
+	public abstract T getNextItem() throws Throwable;
 
 	/**
 	 * Gets the next processed activity.
@@ -261,7 +261,7 @@ public abstract class TNTInputStream implements Runnable {
 	 */
 	protected ActivityInfo getNextActivity() throws Throwable {
 		ActivityInfo ai = null;
-		Object data = getNextItem();
+		T data = getNextItem();
 		try {
 			if (data == null) {
 				halt(); // no more data items to process

@@ -35,7 +35,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * Sample custom stream.
  */
-public class SampleStream extends TNTInputStream {
+public class SampleStream extends TNTInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleStream.class);
 
 	private String fileName;
@@ -113,7 +113,7 @@ public class SampleStream extends TNTInputStream {
 	 * @returns string containing next line in file.
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public String getNextItem() throws Throwable {
 		if (lineReader == null) {
 			throw new IllegalStateException("SampleStream: File is not opened for reading");
 		}

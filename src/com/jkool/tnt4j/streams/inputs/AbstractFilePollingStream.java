@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -56,9 +55,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 1 $
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public abstract class AbstractFilePollingStream extends TNTInputStream {
+public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 	private static final long DEFAULT_DELAY_PERIOD = TimeUnit.SECONDS.toMillis(15);
 	private static final int CHANGES_BUFFER_SIZE = 1024 * 10;
 
@@ -76,6 +75,7 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 
 	private long logWatcherDelay = DEFAULT_DELAY_PERIOD;
 
+	private LogWatcher logWatcher;
 	private BlockingQueue<String> changedLinesBuffer;
 
 	/**
@@ -139,9 +139,9 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 
 		changedLinesBuffer = new ArrayBlockingQueue<String>(CHANGES_BUFFER_SIZE, true);
 
-		LogWatcher lw = createLogWatcher();
-		lw.initialize();
-		lw.start();
+		logWatcher = createLogWatcher();
+		logWatcher.initialize();
+		logWatcher.start();
 	}
 
 	/**
@@ -153,7 +153,7 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 	 * </p>
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public String getNextItem() throws Throwable {
 		if (changedLinesBuffer == null) {
 			throw new IllegalStateException(
 					StreamsResources.getString("FilePollingStream.changes.buffer.uninitialized"));
@@ -169,6 +169,7 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 	 */
 	@Override
 	protected void cleanup() {
+		logWatcher.halt();
 		changedLinesBuffer.clear();
 
 		super.cleanup();
@@ -250,6 +251,15 @@ public abstract class AbstractFilePollingStream extends TNTInputStream {
 
 		private boolean isStopping() {
 			return interrupted || isHalted();
+		}
+
+		/**
+		 * Stops this thread.
+		 */
+		void halt() {
+			interrupted = true;
+			interrupt();
+			// join();
 		}
 
 		/**

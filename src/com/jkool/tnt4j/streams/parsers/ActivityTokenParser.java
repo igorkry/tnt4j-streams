@@ -86,6 +86,7 @@ public class ActivityTokenParser extends ActivityParser {
 	 * Constructs an ActivityTokenParser.
 	 */
 	public ActivityTokenParser() {
+		super(LOGGER);
 	}
 
 	/**
@@ -124,13 +125,15 @@ public class ActivityTokenParser extends ActivityParser {
 	 * </p>
 	 * <ul>
 	 * <li>{@code java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
 	 * <li>{@code java.io.Reader}</li>
 	 * <li>{@code java.io.InputStream}</li>
 	 * </ul>
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
+				|| InputStream.class.isInstance(data);
 	}
 
 	/**
@@ -172,7 +175,7 @@ public class ActivityTokenParser extends ActivityParser {
 		try {
 			// save entire activity string as message data
 			field = new ActivityField(StreamFieldType.Message.name());
-			applyFieldValue(ai, field, dataStr);
+			applyFieldValue(stream, ai, field, dataStr);
 			// apply fields for parser
 			Object value;
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
@@ -195,7 +198,7 @@ public class ActivityTokenParser extends ActivityParser {
 						value = values;
 					}
 				}
-				applyFieldValue(ai, field, value);
+				applyFieldValue(stream, ai, field, value);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(

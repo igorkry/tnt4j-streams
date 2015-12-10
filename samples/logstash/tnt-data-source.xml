@@ -66,10 +66,19 @@
         <field name="MsgValue" locator="11"/>
     </parser>
 
-    <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.custom.inputs.LogstashStream">
+    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="MsgBody" locator="message" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+        <field name="path" locator="path" locator-type="Label"/>
+        <field name="Tag" locator="tags" locator-type="Label"/>
+        <field name="host" locator="host" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
-        <!--<property name="FileName" value="messages.json"/>-->
-        <property name="Port" value="9595"/>
-        <parser-ref name="AccessLogParserCommon"/>
+        <property name="FileName" value="messages.json"/>
+        <!--<property name="Port" value="9595"/>-->
+        <parser-ref name="JSONEnvelopeParser"/>
     </stream>
 </tnt-data-source>

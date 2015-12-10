@@ -65,9 +65,18 @@
         <field name="MsgValue" locator="11"/>
     </parser>
 
-    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.custom.inputs.ApacheFlumeStream">
+    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="MsgBody" locator="body" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+        <field name="sinkName" locator="sinkName" locator-type="Label"/>
+        <field name="chanelName" locator="chanelName" locator-type="Label"/>
+        <field name="headers" locator="headers" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
-        <parser-ref name="AccessLogParserCommon"/>
+        <parser-ref name="JSONEnvelopeParser"/>
     </stream>
 </tnt-data-source>

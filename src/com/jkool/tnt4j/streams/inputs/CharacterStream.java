@@ -28,7 +28,6 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -54,9 +53,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 4 $
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public class CharacterStream extends TNTInputStream {
+public class CharacterStream extends TNTInputStream<BufferedReader> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CharacterStream.class);
 
 	private String fileName = null;
@@ -239,7 +238,7 @@ public class CharacterStream extends TNTInputStream {
 	 * </p>
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public BufferedReader getNextItem() throws Throwable {
 		if (dataReader == null) {
 			startDataStream();
 		}

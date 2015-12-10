@@ -64,7 +64,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 10 $
  */
-public class WmqStream extends TNTInputStream {
+public class WmqStream extends TNTInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);
 
 	/**
@@ -294,7 +294,7 @@ public class WmqStream extends TNTInputStream {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Object getNextItem() throws Throwable {
+	public String getNextItem() throws Throwable {
 		while (!isHalted() && !isConnectedToQmgr(null)) {
 			try {
 				connectToQmgr();

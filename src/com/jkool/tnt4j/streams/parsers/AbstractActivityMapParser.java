@@ -17,53 +17,41 @@
  *
  */
 
-package com.jkool.tnt4j.streams.samples.custom;
+package com.jkool.tnt4j.streams.parsers;
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.fields.*;
+import com.jkool.tnt4j.streams.fields.ActivityField;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
-import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * Sample custom parser.
+ * TODO
  */
-public class SampleParser extends ActivityParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleParser.class);
+public abstract class AbstractActivityMapParser extends ActivityParser {
 
 	/**
-	 * Defines field separator.
+	 * Constructs an AbstractActivityMapParser.
 	 */
-	protected String fieldDelim = DEFAULT_DELIM;
-
-	/**
-	 * Constructs an SampleParser.
-	 */
-	public SampleParser() {
-		super(LOGGER);
+	protected AbstractActivityMapParser(EventSink logger) {
+		super(logger);
 	}
 
 	/**
-	 * Sets custom properties for this parser
-	 *
-	 * @param props
-	 *            properties to set
-	 *
-	 * @throws Throwable
-	 *             indicates error with properties
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
@@ -73,10 +61,8 @@ public class SampleParser extends ActivityParser {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			LOGGER.log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
-			if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
-				fieldDelim = value;
-			}
+
+			// TODO:
 		}
 	}
 
@@ -104,32 +90,26 @@ public class SampleParser extends ActivityParser {
 	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
-		if (fieldDelim == null) {
-			throw new IllegalStateException("SampleParser: field delimiter not specified or empty");
-		}
 		if (data == null) {
 			return null;
 		}
-		// Get next string to parse
-		String dataStr = getNextString(data);
-		if (StringUtils.isEmpty(dataStr)) {
-			return null;
-		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
-		String[] fields = dataStr.split(fieldDelim);
-		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG, "Did not find any fields in input string");
-			return null;
-		}
-		LOGGER.log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
+
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
-		Object value = null;
 		try {
-			// save entire activity string as message data
-			field = new ActivityField(StreamFieldType.Message.name());
-			applyFieldValue(stream, ai, field, dataStr);
+			Map<String, ?> dataMap = getDataMap(data);
+			if (dataMap == null || dataMap.isEmpty()) {
+				logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
+				return null;
+			}
+
+			// // save entire activity string as message data
+			// field = new ActivityField(StreamFieldType.Message.name());
+			// applyFieldValue(ai, field, dataStr); //TODO
+
 			// apply fields for parser
+			Object value;
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
 				value = null;
 				field = fieldEntry.getKey();
@@ -138,14 +118,14 @@ public class SampleParser extends ActivityParser {
 					if (locations.size() == 1) {
 						// field value is based on single raw data location, get
 						// the value of this location
-						value = getLocatorValue(stream, locations.get(0), fields);
+						value = getLocatorValue(stream, locations.get(0), dataMap);
 					} else {
-						// field value is based on contatenation of several raw
-						// data locations,
-						// build array to hold data from each location
+						// field value is based on concatenation of several raw
+						// data locations, build array to hold data from each
+						// location
 						Object[] values = new Object[locations.size()];
-						for (int l = 0; l < locations.size(); l++) {
-							values[l] = getLocatorValue(stream, locations.get(l), fields);
+						for (int li = 0; li < locations.size(); li++) {
+							values[li] = getLocatorValue(stream, locations.get(li), dataMap);
 						}
 						value = values;
 					}
@@ -153,30 +133,72 @@ public class SampleParser extends ActivityParser {
 				applyFieldValue(stream, ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException(MessageFormat.format("Failed parsing data for field {0}", field), 0);
+			ParseException pe = new ParseException(
+					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
+
 		return ai;
 	}
 
-	private Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, String[] fields)
+	/**
+	 * TODO
+	 * 
+	 * @param data
+	 * @return
+	 */
+	protected abstract Map<String, ?> getDataMap(Object data);
+
+	/**
+	 * TODO
+	 * 
+	 * @param stream
+	 * @param locator
+	 * @param dataMap
+	 *
+	 * @return
+	 *
+	 * @throws ParseException
+	 */
+	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Map<String, ?> dataMap)
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {
 			String locStr = locator.getLocator();
-			if (locStr != null && locStr.length() > 0) {
+			if (!StringUtils.isEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
 				} else {
-					int loc = Integer.parseInt(locStr);
-					if (loc <= fields.length) {
-						val = fields[loc - 1].trim();
-					}
+					String[] path = getNodePath(locStr);
+					val = getNode(path, dataMap, 0);
 				}
 			}
 			val = locator.formatValue(val);
 		}
+
+		return val;
+	}
+
+	private static String[] getNodePath(String locStr) {
+		if (StringUtils.isNotEmpty(locStr)) {
+			return locStr.split("\\."); // NON-NLS
+		}
+
+		return null;
+	}
+
+	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
+		if (ArrayUtils.isEmpty(path) || dataMap == null) {
+			return null;
+		}
+
+		Object val = dataMap.get(path[i]);
+
+		if (i < path.length - 1 && val instanceof Map) {
+			val = getNode(path, (Map<String, ?>) val, ++i);
+		}
+
 		return val;
 	}
 }

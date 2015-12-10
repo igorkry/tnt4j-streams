@@ -90,6 +90,8 @@ public class ActivityXmlParser extends ActivityParser {
 	 *             if any errors configuring the parser
 	 */
 	public ActivityXmlParser() throws ParserConfigurationException {
+		super(LOGGER);
+
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(true);
 		builder = domFactory.newDocumentBuilder();
@@ -142,6 +144,7 @@ public class ActivityXmlParser extends ActivityParser {
 	 * </p>
 	 * <ul>
 	 * <li>{@code java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
 	 * <li>{@code java.io.Reader}</li>
 	 * <li>{@code java.io.InputStream}</li>
 	 * <li>{@code org.w3c.dom.Document}</li>
@@ -149,8 +152,8 @@ public class ActivityXmlParser extends ActivityParser {
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || Reader.class.isInstance(data) || InputStream.class.isInstance(data)
-				|| Document.class.isInstance(data);
+		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
+				|| InputStream.class.isInstance(data) || Document.class.isInstance(data);
 	}
 
 	/**
@@ -220,7 +223,7 @@ public class ActivityXmlParser extends ActivityParser {
 						value = values;
 					}
 				}
-				applyFieldValue(ai, field, value);
+				applyFieldValue(stream, ai, field, value);
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
@@ -308,6 +311,8 @@ public class ActivityXmlParser extends ActivityParser {
 		}
 		if (data instanceof String) {
 			return (String) data;
+		} else if (data instanceof byte[]) {
+			return Utils.getString((byte[]) data);
 		}
 		BufferedReader rdr;
 		if (data instanceof BufferedReader) {
