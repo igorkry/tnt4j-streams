@@ -39,7 +39,13 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * TODO
+ * <p>
+ * Implements an activity data parser that assumes each activity data item is an
+ * Map data structure, where each field is represented by a key/value pair and
+ * the name is used to map each field onto its corresponding activity field.
+ * </p>
+ *
+ * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends ActivityParser {
 
@@ -104,7 +110,7 @@ public abstract class AbstractActivityMapParser extends ActivityParser {
 				return null;
 			}
 
-			// // save entire activity string as message data
+			// save entire activity string as message data
 			// field = new ActivityField(StreamFieldType.Message.name());
 			// applyFieldValue(ai, field, dataStr); //TODO
 
@@ -143,23 +149,34 @@ public abstract class AbstractActivityMapParser extends ActivityParser {
 	}
 
 	/**
-	 * TODO
+	 * Makes map data package containing data of specified activity object.
 	 * 
 	 * @param data
-	 * @return
+	 *            activity object data
+	 *
+	 * @return activity object data map
 	 */
 	protected abstract Map<String, ?> getDataMap(Object data);
 
 	/**
-	 * TODO
+	 * Gets field value from raw data location and formats it according locator
+	 * definition.
 	 * 
 	 * @param stream
+	 *            parent stream
 	 * @param locator
+	 *            activity field locator
 	 * @param dataMap
+	 *            activity object data map
 	 *
-	 * @return
+	 * @return value formatted based on locator definition or {@code null} if
+	 *         locator is not defined
 	 *
 	 * @throws ParseException
+	 *             if error applying locator format properties to specified
+	 *             value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Map<String, ?> dataMap)
 			throws ParseException {

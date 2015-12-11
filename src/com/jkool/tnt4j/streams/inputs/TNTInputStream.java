@@ -50,7 +50,7 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * <ul>
  * <li>DateTime - default date/time to associate with activities</li>
  * <li>HaltIfNoParser - if set to true, stream will halt if none of the parsers
- * can parse activity event RAW data. If set to false - puts log entry and
+ * can parse activity object RAW data. If set to false - puts log entry and
  * continues.</li>
  * </ul>
  *

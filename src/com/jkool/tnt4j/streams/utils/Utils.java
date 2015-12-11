@@ -512,6 +512,20 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		return activityData;
 	}
 
+	/**
+	 * Makes a new {@code String} by decoding the specified array of bytes using
+	 * the UTF-8 charset. If {@code String} can't be constructed using UTF-8
+	 * charset, then the platform's default charset is used.
+	 *
+	 * @param strBytes
+	 *            The bytes to be decoded into characters
+	 *
+	 * @return string constructed from specified byte array. s
+	 *
+	 * @see String#String(byte[], Charset)
+	 * @see String#String(byte[], String)
+	 * @see String#String(byte[])
+	 */
 	public static String getString(byte[] strBytes) {
 		try {
 			return new String(strBytes, Charset.forName("UTF-8"));

@@ -32,7 +32,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * the name is used to map each field onto its corresponding activity field.
  * </p>
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 // TODO: now works when one activity item is one JSON data package. No activity
 // arrays parsing supported.
@@ -47,14 +47,12 @@ public class ActivityJsonParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
-	 * Makes map object containing activity event data parsed from JSON.
+	 * Makes map object containing activity object data parsed from JSON.
 	 * 
 	 * @param data
-	 *            activity event data object
+	 *            activity object data object
 	 * 
-	 * @return activity event data map
+	 * @return activity object data map
 	 */
 	@Override
 	protected Map<String, ?> getDataMap(Object data) {

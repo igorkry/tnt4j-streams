@@ -208,14 +208,26 @@ public abstract class ActivityParser {
 	}
 
 	/**
-	 * TODO
-	 * 
+	 * Sets the value for the field in the specified activity. If field has
+	 * stacked parser defined, then field value is parsed into separate activity
+	 * using stacked parser. If field can be parsed by stacked parser, produced
+	 * activity is merged into specified (parent) activity.
+	 *
 	 * @param stream
+	 *            parent stream
 	 * @param ai
+	 *            activity object whose field is to be set
 	 * @param field
+	 *            field to apply value to
 	 * @param value
+	 *            value to apply for this field
+	 *
 	 * @throws IllegalStateException
+	 *             if parser has not been properly initialized
 	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 *
+	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream stream, ActivityInfo ai, ActivityField field, Object value)
 			throws IllegalStateException, ParseException {
