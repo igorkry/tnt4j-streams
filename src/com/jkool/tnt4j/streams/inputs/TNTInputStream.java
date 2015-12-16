@@ -240,10 +240,41 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
+	/**
+	 * Creates default thread pool executor service for a given number of
+	 * threads. Using this executor service tasks queue size is unbound. Thus
+	 * memory use may be high to store all producer thread created tasks.
+	 *
+	 * @param threadsQty
+	 *            the number of threads in the pool
+	 *
+	 * @return the newly created thread pool
+	 *
+	 * @see Executors#newFixedThreadPool(int)
+	 */
 	private static ExecutorService getDefaultExecutorService(int threadsQty) {
 		return Executors.newFixedThreadPool(threadsQty, new StreamExecutorThreadFactory("StreamExecutorThread-"));
 	}
 
+	/**
+	 * Creates thread pool executor service for a given number of threads with
+	 * bounded tasks queue - queue size is 2x{@code threadsQty}. When queue size
+	 * is reached, new tasks are offered to queue using defined offer timeout.
+	 * If task can't be put into queue over this time, task is skipped with
+	 * making warning log entry. Thus memory use does not grow drastically if
+	 * consumers can't keep up the pace of producers filling in the queue,
+	 * making producers synchronize with consumers.
+	 * 
+	 * @param threadsQty
+	 *            the number of threads in the pool
+	 * @param offerTimeout
+	 *            how long to wait before giving up on offering task to queue
+	 *
+	 * @return the newly created thread pool
+	 *
+	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
+	 *      BlockingQueue, ThreadFactory)
+	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingDeque<Runnable>(threadsQty * 2),
