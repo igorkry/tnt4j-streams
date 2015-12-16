@@ -22,7 +22,7 @@ package com.jkool.tnt4j.streams.inputs;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -57,6 +57,11 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * @version $Revision: 8 $
  */
 public abstract class TNTInputStream<T> implements Runnable {
+
+	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
+	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
+	private static final int DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT = 20;
+
 	/**
 	 * Stream logger.
 	 */
@@ -75,7 +80,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Used to deliver processed activity data to destination.
 	 */
-	protected Map<String, Tracker> trackersMap = new HashMap<String, Tracker>();
+	protected final Map<String, Tracker> trackersMap = new HashMap<String, Tracker>();
 
 	private TrackerConfig streamConfig;
 	private Source defaultSource;
@@ -87,6 +92,15 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * some transmission failure occurs, in milliseconds.
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
+
+	private boolean useExecutorService = false;
+	private ExecutorService streamExecutorService = null;
+
+	// executor service related properties
+	private boolean boundedExecutorModel = false;
+	private int executorThreadsQty = DEFAULT_EXECUTOR_THREADS_QTY;
+	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
+	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
 
 	/**
 	 * Initializes TNTInputStream.
@@ -141,6 +155,16 @@ public abstract class TNTInputStream<T> implements Runnable {
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
 				haltIfNoParser = Boolean.parseBoolean(value);
+			} else if (StreamsConfig.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
+				useExecutorService = Boolean.parseBoolean(value);
+			} else if (StreamsConfig.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
+				executorThreadsQty = Integer.parseInt(value);
+			} else if (StreamsConfig.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+				executorRejectedTaskOfferTimeout = Integer.parseInt(value);
+			} else if (StreamsConfig.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
+				executorsTerminationTimeout = Integer.parseInt(value);
+			} else if (StreamsConfig.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
+				boundedExecutorModel = Boolean.parseBoolean(value);
 			}
 		}
 	}
@@ -166,6 +190,21 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 		if (StreamsConfig.PROP_HALT_ON_PARSER.equals(name)) {
 			return haltIfNoParser;
+		}
+		if (StreamsConfig.PROP_USE_EXECUTOR_SERVICE.equals(name)) {
+			return useExecutorService;
+		}
+		if (StreamsConfig.PROP_EXECUTOR_THREADS_QTY.equals(name)) {
+			return executorThreadsQty;
+		}
+		if (StreamsConfig.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equals(name)) {
+			return executorRejectedTaskOfferTimeout;
+		}
+		if (StreamsConfig.PROP_EXECUTORS_TERMINATION_TIMEOUT.equals(name)) {
+			return executorsTerminationTimeout;
+		}
+		if (StreamsConfig.PROP_EXECUTORS_BOUNDED.equals(name)) {
+			return boundedExecutorModel;
 		}
 
 		return null;
@@ -193,6 +232,39 @@ public abstract class TNTInputStream<T> implements Runnable {
 		trackersMap.put(defaultSource.getFQName(), tracker);
 		logger.log(OpLevel.DEBUG,
 				StreamsResources.getStringFormatted("TNTInputStream.default.tracker", defaultSource.getFQName()));
+
+		if (useExecutorService) {
+			streamExecutorService = boundedExecutorModel
+					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
+					: getDefaultExecutorService(executorThreadsQty);
+		}
+	}
+
+	private static ExecutorService getDefaultExecutorService(int threadsQty) {
+		return Executors.newFixedThreadPool(threadsQty, new StreamExecutorThreadFactory("StreamExecutorThread-"));
+	}
+
+	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
+		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingDeque<Runnable>(threadsQty * 2),
+				new StreamExecutorThreadFactory("StreamExecutorThread-"));
+
+		tpe.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+			@Override
+			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+				try {
+					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
+					if (!added) {
+						logger.log(OpLevel.WARNING,
+								StreamsResources.getStringFormatted("TNTInputStream.tasks.buffer.limit", offerTimeout));
+					}
+				} catch (InterruptedException exc) {
+					halt();
+				}
+			}
+		});
+
+		return tpe;
 	}
 
 	/**
@@ -238,10 +310,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * Get the next activity data item to be processed. All subclasses must
+	 * Get the next raw activity data item to be processed. All subclasses must
 	 * implement this.
 	 *
-	 * @return next activity data item, or {@code null} if there is no next item
+	 * @return next raw activity data item, or {@code null} if there is no next
+	 *         item
 	 *
 	 * @throws Throwable
 	 *             if any errors occurred getting next item
@@ -249,31 +322,32 @@ public abstract class TNTInputStream<T> implements Runnable {
 	public abstract T getNextItem() throws Throwable;
 
 	/**
-	 * Gets the next processed activity.
+	 * Makes activity information {@code ActivityInfo} object from raw activity
+	 * data item.
 	 * <p>
-	 * Default implementation simply calls {@link #getNextItem()} to get next
-	 * activity data item and calls {@link #applyParsers(Object)} to process it.
+	 * Default implementation simply calls {@link #applyParsers(Object)} to
+	 * process raw activity data item.
 	 *
-	 * @return next activity item
+	 * @param data
+	 *            raw activity data item.
+	 *
+	 * @return activity information object
 	 *
 	 * @throws Throwable
-	 *             if error getting next activity data item or processing it
+	 *             if error occurs while parsing raw activity data item
 	 */
-	protected ActivityInfo getNextActivity() throws Throwable {
+	protected ActivityInfo makeActivityInfo(T data) throws Throwable {
 		ActivityInfo ai = null;
-		T data = getNextItem();
-		try {
-			if (data == null) {
-				halt(); // no more data items to process
-			} else {
+		if (data != null) {
+			try {
 				ai = applyParsers(data);
+			} catch (ParseException exc) {
+				int position = getActivityPosition();
+				ParseException pe = new ParseException(
+						StreamsResources.getStringFormatted("TNTInputStream.failed.to.process", position), position);
+				pe.initCause(exc);
+				throw pe;
 			}
-		} catch (ParseException e) {
-			int position = getActivityPosition();
-			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("TNTInputStream.failed.to.process", position), position);
-			pe.initCause(e);
-			throw pe;
 		}
 		return ai;
 	}
@@ -409,6 +483,37 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
+	private synchronized void shutdownExecutors() {
+		if (streamExecutorService == null || streamExecutorService.isShutdown()) {
+			return;
+		}
+
+		streamExecutorService.shutdown();
+		try {
+			streamExecutorService.awaitTermination(executorsTerminationTimeout, TimeUnit.SECONDS);
+		} catch (InterruptedException exc) {
+			halt();
+		} finally {
+			streamExecutorService.shutdownNow();
+		}
+	}
+
+	private Tracker getTracker(Source aiSource) {
+		synchronized (trackersMap) {
+			Tracker tracker = trackersMap.get(aiSource == null ? defaultSource.getFQName() : aiSource.getFQName());
+			if (tracker == null) {
+				aiSource.setSSN(defaultSource.getSSN());
+				streamConfig.setSource(aiSource);
+				tracker = TrackingLogger.getInstance(streamConfig.build());
+				trackersMap.put(aiSource.getFQName(), tracker);
+				logger.log(OpLevel.DEBUG,
+						StreamsResources.getStringFormatted("TNTInputStream.build.new.tracker", aiSource.getFQName()));
+			}
+
+			return tracker;
+		}
+	}
+
 	/**
 	 * Starts input stream processing. Implementing {@code Runnable} interface
 	 * makes it possible to process each stream in separate thread.
@@ -425,59 +530,25 @@ public abstract class TNTInputStream<T> implements Runnable {
 			initialize();
 			while (!isHalted()) {
 				try {
-					ActivityInfo ai = getNextActivity();
-					if (ai == null) { // TODO: better distinguishing between
-										// data stream end and unparseable
-										// activity data.
-						if (isHalted()) {
-							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
-						} else {
-							logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.no.parser"));
-							if (haltIfNoParser) {
-								halt();
-							}
-						}
+					T item = getNextItem();
+					if (item == null) {
+						logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
+						shutdownExecutors();
+						halt(); // no more data items to process
 					} else {
-						if (!ai.isFiltered()) {
-							Source aiSource = ai.getSource();
-
-							Tracker tracker = trackersMap
-									.get(aiSource == null ? defaultSource.getFQName() : aiSource.getFQName());
-							if (tracker == null) {
-								aiSource.setSSN(defaultSource.getSSN());
-								streamConfig.setSource(aiSource);
-								tracker = TrackingLogger.getInstance(streamConfig.build());
-								trackersMap.put(aiSource.getFQName(), tracker);
-								logger.log(OpLevel.DEBUG, StreamsResources
-										.getStringFormatted("TNTInputStream.build.new.tracker", aiSource.getFQName()));
-							}
-
-							while (!isHalted() && !tracker.isOpen()) {
-								try {
-									tracker.open();
-								} catch (IOException ioe) {
-									logger.log(OpLevel.ERROR, StreamsResources
-											.getStringFormatted("TNTInputStream.failed.to.connect", tracker), ioe);
-									Utils.close(tracker);
-									logger.log(OpLevel.INFO,
-											StreamsResources.getStringFormatted("TNTInputStream.will.retry",
-													TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
-									if (!isHalted()) {
-										StreamsThread.sleep(CONN_RETRY_INTERVAL);
-									}
-								}
-							}
-
-							ai.recordActivity(tracker, CONN_RETRY_INTERVAL);
+						if (streamExecutorService == null) {
+							processActivityItem(item);
+						} else {
+							streamExecutorService.submit(new ActivityItemProcessingTask(item));
 						}
 					}
 				} catch (IllegalStateException ise) {
 					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
 							"TNTInputStream.failed.record.activity.at", getActivityPosition(), ise.getMessage()), ise);
 					halt();
-				} catch (Exception e) {
+				} catch (Exception exc) {
 					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
-							"TNTInputStream.failed.record.activity.at", getActivityPosition(), e.getMessage()), e);
+							"TNTInputStream.failed.record.activity.at", getActivityPosition(), exc.getMessage()), exc);
 				}
 			}
 		} catch (Throwable t) {
@@ -489,4 +560,71 @@ public abstract class TNTInputStream<T> implements Runnable {
 					Thread.currentThread().getName()));
 		}
 	}
+
+	private void processActivityItem(T item) throws Throwable {
+		ActivityInfo ai = makeActivityInfo(item);
+		if (ai == null) {
+			logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.no.parser"));
+			if (haltIfNoParser) {
+				halt();
+			}
+		} else {
+			if (!ai.isFiltered()) {
+				Tracker tracker = getTracker(ai.getSource());
+
+				while (!isHalted() && !tracker.isOpen()) {
+					try {
+						tracker.open();
+					} catch (IOException ioe) {
+						logger.log(OpLevel.ERROR,
+								StreamsResources.getStringFormatted("TNTInputStream.failed.to.connect", tracker), ioe);
+						Utils.close(tracker);
+						logger.log(OpLevel.INFO, StreamsResources.getStringFormatted("TNTInputStream.will.retry",
+								TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
+						if (!isHalted()) {
+							StreamsThread.sleep(CONN_RETRY_INTERVAL);
+						}
+					}
+				}
+
+				ai.recordActivity(tracker, CONN_RETRY_INTERVAL);
+			}
+		}
+	}
+
+	private class ActivityItemProcessingTask implements Runnable {
+		private T item;
+
+		ActivityItemProcessingTask(T activityItem) {
+			this.item = activityItem;
+		}
+
+		public void run() {
+			try {
+				processActivityItem(item);
+			} catch (Throwable t) { // TODO: better handling
+				logger.log(OpLevel.ERROR,
+						StreamsResources.getStringFormatted("TNTInputStream.failed.record.activity", t.getMessage()),
+						t);
+			}
+		}
+	}
+
+	private static class StreamExecutorThreadFactory implements ThreadFactory {
+		private int count = 0;
+		private String prefix;
+
+		StreamExecutorThreadFactory(String pfix) {
+			prefix = pfix;
+		}
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread task = new Thread(r, prefix + count++);
+			task.setDaemon(true);
+
+			return task;
+		}
+	}
+
 }

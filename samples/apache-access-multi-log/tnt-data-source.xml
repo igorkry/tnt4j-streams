@@ -67,12 +67,12 @@
         <field name="MsgValue" locator="11"/>
         <field name="ElapsedTime" locator="13" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
-        <filter name="LogEntriesFilter">
+        <!--filter name="LogEntriesFilter">
             <rule name="Start time filter" field-ref="StartTime">
                 <step comparator=">=" value="01/11/2015 16:00:00 +0200"/>
                 <step comparator="<=" value="02/11/2015 23:59:59 +0200"/>
             </rule>
-        </filter>
+        </filter-->
     </parser>
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
@@ -139,6 +139,13 @@
 
     <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="*_access_log.2015-*.txt"/>
+
+        <property name="UseExecutors" value="true"/>
+        <property name="ExecutorThreadsQuantity" value="5"/>
+        <property name="ExecutorsTerminationTimeout" value="20"/>
+        <property name="ExecutorsBoundedModel" value="false"/>
+        <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
+
         <parser-ref name="AccessLogParserExt"/>
         <parser-ref name="AccessLogParserCommon"/>
     </stream>

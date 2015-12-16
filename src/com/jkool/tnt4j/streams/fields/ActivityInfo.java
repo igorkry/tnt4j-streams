@@ -41,8 +41,8 @@ import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
 
 /**
- * This class represents an activity (e.g. event or snapshot) to record with
- * jKool Cloud Service.
+ * This class represents an activity (e.g. event or snapshot) to record to jKool
+ * Cloud Service.
  *
  * @version $Revision: 11 $
  */

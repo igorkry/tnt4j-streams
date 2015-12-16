@@ -151,6 +151,31 @@ public class StreamsConfig {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
+	public static final String PROP_USE_EXECUTOR_SERVICE = "UseExecutors"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_EXECUTOR_THREADS_QTY = "ExecutorThreadsQuantity"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT = "ExecutorRejectedTaskOfferTimeout"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_EXECUTORS_TERMINATION_TIMEOUT = "ExecutorsTerminationTimeout"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_EXECUTORS_BOUNDED = "ExecutorsBoundedModel"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
 	public static final String PROP_KEYSTORE = "Keystore"; // NON-NLS
 
 	/**
