@@ -44,7 +44,7 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityMapParser.class);
 
 	/**
-	 * Constructs an ActivityMapParser.
+	 * Constructs a new ActivityMapParser.
 	 */
 	public ActivityMapParser() {
 		super(LOGGER);

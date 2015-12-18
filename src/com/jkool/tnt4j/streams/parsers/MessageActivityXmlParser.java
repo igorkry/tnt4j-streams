@@ -66,7 +66,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	protected String sigDelim = DEFAULT_DELIM;
 
 	/**
-	 * Constructs a MessageActivityXmlParser.
+	 * Constructs a new MessageActivityXmlParser.
 	 *
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser

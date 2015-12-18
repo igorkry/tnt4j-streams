@@ -38,6 +38,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </p>
  *
  * @version $Revision: 3 $
+ *
  * @see com.nastel.jkool.tnt4j.core.UsecTimestamp
  */
 public class StreamTimestamp extends UsecTimestamp {

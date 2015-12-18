@@ -66,7 +66,12 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * only if ExecutorsBoundedModel is set to {@code true})</li>
  * </ul>
  *
+ * @param <T>
+ *            the type of handled RAW activity data
+ *
  * @version $Revision: 8 $
+ *
+ * @see java.util.concurrent.ExecutorService
  */
 public abstract class TNTInputStream<T> implements Runnable {
 
@@ -115,7 +120,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
 
 	/**
-	 * Initializes TNTInputStream.
+	 * Constructs a new TNTInputStream.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -645,6 +650,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private class ActivityItemProcessingTask implements Runnable {
 		private T item;
 
+		/**
+		 * Constructs a new ActivityItemProcessingTask.
+		 *
+		 * @param activityItem
+		 *            raw activity data item to process asynchronously
+		 */
 		ActivityItemProcessingTask(T activityItem) {
 			this.item = activityItem;
 		}
@@ -664,6 +675,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 		private int count = 0;
 		private String prefix;
 
+		/**
+		 * Constructs a new StreamExecutorThreadFactory.
+		 *
+		 * @param pfix
+		 *            thread name prefix
+		 */
 		StreamExecutorThreadFactory(String pfix) {
 			prefix = pfix;
 		}

@@ -25,6 +25,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -46,6 +47,7 @@ import com.nastel.jkool.tnt4j.core.OpType;
 public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 	private static final String TAG_DELIM = ","; // NON-NLS
+	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)");
 
 	private Utils() {
 	}
@@ -307,7 +309,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            file name to check if it contains wildcard characters
 	 *
 	 * @return {@code true} if file name con
-	 *
 	 */
 	public static boolean isWildcardFileName(String fileName) {
 		if (StringUtils.isNotEmpty(fileName)) {
@@ -318,7 +319,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 	/**
 	 * Counts text lines available in file.
-	 * 
+	 *
 	 * @param file
 	 *            file to count lines
 	 *
@@ -356,7 +357,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * Returns first readable file from {@code files} array which has last
 	 * modification timestamp newer than {@code lastModif}. If {@code lastModif}
 	 * is {@code null}, then newest readable file is returned.
-	 * 
+	 *
 	 * @param files
 	 *            last modification timestamp ordered files array
 	 * @param lastModif
@@ -469,7 +470,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * Returns tag strings array retrieved from provided data object. Data
 	 * object an be string (tags delimiter ','), strings collection or strings
 	 * array.
-	 * 
+	 *
 	 * @param tagsData
 	 *            tags data object
 	 *
@@ -502,11 +503,12 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @return raw activity data without 'new line' symbols.
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T cleanActivityData(T activityData) {
 		if (activityData instanceof String) {
 			String ads = (String) activityData;
 
-			return (T) ads.replaceAll("(\\r\\n|\\r|\\n)", ""); // NON-NLS
+			return (T) LINE_ENDINGS_PATTERN.matcher(ads).replaceAll(""); // NON-NLS
 		}
 
 		return activityData;

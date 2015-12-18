@@ -64,6 +64,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 1 $
+ *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
@@ -71,7 +72,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(HdfsFilePollingStream.class);
 
 	/**
-	 * Constructs an HdfsFilePollingStream.
+	 * Constructs a new HdfsFilePollingStream.
 	 */
 	public HdfsFilePollingStream() {
 		super(LOGGER);
@@ -141,7 +142,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		private Path pollingFile = null;
 
 		/**
-		 * Constructs an HdfsLogWatcher.
+		 * Constructs a new HdfsLogWatcher.
 		 */
 		HdfsLogWatcher() {
 			super("HdfsFilePollingStream.HdfsLogWatcher"); // NON-NLS

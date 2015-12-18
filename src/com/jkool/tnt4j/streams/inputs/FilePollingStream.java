@@ -56,6 +56,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 2 $
+ *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
@@ -63,7 +64,7 @@ public class FilePollingStream extends AbstractFilePollingStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FilePollingStream.class);
 
 	/**
-	 * Constructs an FilePollingStream.
+	 * Constructs a new FilePollingStream.
 	 */
 	public FilePollingStream() {
 		super(LOGGER);
@@ -127,7 +128,7 @@ public class FilePollingStream extends AbstractFilePollingStream {
 		private File pollingFile = null;
 
 		/**
-		 * Constructs an FileLogWatcher.
+		 * Constructs a new FileLogWatcher.
 		 */
 		FileLogWatcher() {
 			super("FilePollingStream.LogWatcher"); // NON-NLS

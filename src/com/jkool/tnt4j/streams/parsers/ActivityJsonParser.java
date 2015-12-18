@@ -40,7 +40,7 @@ public class ActivityJsonParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
 
 	/**
-	 * Constructs an ActivityJsonParser.
+	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
 		super(LOGGER);

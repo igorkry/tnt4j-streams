@@ -77,14 +77,18 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	protected String apacheLogPattern = null;
 
 	/**
-	 * Defines mapping between Apache access log configuration pattern token
-	 * strings and RegEx strings used to parse log entries.
+	 * Pre configured mappings between Apache access log configuration pattern
+	 * token strings and RegEx strings used to parse log entries.
 	 */
 	protected final Map<String, String> configRegexMappings = new HashMap<String, String>();
+	/**
+	 * User defined mappings between Apache access log configuration pattern
+	 * token strings and RegEx strings used to parse log entries.
+	 */
 	protected final Map<String, String> userRegexMappings = new HashMap<String, String>();
 
 	/**
-	 * Constructs an ApacheAccessLogParser.
+	 * Constructs a new ApacheAccessLogParser.
 	 */
 	public ApacheAccessLogParser() {
 		fillDefaultConfigRegexMappings();

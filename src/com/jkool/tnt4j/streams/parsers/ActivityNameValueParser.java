@@ -93,7 +93,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	protected boolean stripQuotes = true;
 
 	/**
-	 * Constructs an ActivityNameValueParser.
+	 * Constructs a new ActivityNameValueParser.
 	 */
 	public ActivityNameValueParser() {
 		super(LOGGER);

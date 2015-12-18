@@ -54,7 +54,7 @@ public abstract class ActivityParser {
 	private String[] tags;
 
 	/**
-	 * Constructs an ActivityParser.
+	 * Constructs a new ActivityParser.
 	 *
 	 * @param logger
 	 *            logger used by activity parser
@@ -240,7 +240,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Sets name for activity parser
-	 * 
+	 *
 	 * @param name
 	 *            name string value
 	 */
@@ -250,7 +250,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Returns tag strings array of activity parser
-	 * 
+	 *
 	 * @return tags strings array
 	 */
 	public String[] getTags() {
@@ -259,7 +259,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Sets activity parser tags string. Tags are separated using ",".
-	 * 
+	 *
 	 * @param tags
 	 *            tags string
 	 */

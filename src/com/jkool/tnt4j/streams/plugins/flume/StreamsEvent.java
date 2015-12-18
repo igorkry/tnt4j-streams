@@ -36,14 +36,14 @@ public class StreamsEvent extends JSONEvent {
 	private String chanelName;
 
 	/**
-	 * Constructs an StreamsEvent.
+	 * Constructs a new StreamsEvent.
 	 */
 	public StreamsEvent() {
 		super();
 	}
 
 	/**
-	 * Constructs an StreamEvent based on Apache Flume output event data.
+	 * Constructs a new StreamEvent based on Apache Flume output event data.
 	 * Additionally sets event channel and sink names.
 	 *
 	 * @param event
@@ -60,7 +60,7 @@ public class StreamsEvent extends JSONEvent {
 	}
 
 	/**
-	 * Constructs an StreamEvent based on Apache Flume output event data.
+	 * Constructs a new StreamEvent based on Apache Flume output event data.
 	 *
 	 * @param event
 	 *            event to wrap

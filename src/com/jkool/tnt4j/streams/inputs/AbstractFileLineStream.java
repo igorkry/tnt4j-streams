@@ -63,7 +63,10 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	private int lineNumber = 0;
 
 	/**
-	 * Constructs an AbstractFileLineStream.
+	 * Constructs a new AbstractFileLineStream.
+	 *
+	 * @param logger
+	 *            logger used by activity stream
 	 */
 	protected AbstractFileLineStream(EventSink logger) {
 		super(logger);

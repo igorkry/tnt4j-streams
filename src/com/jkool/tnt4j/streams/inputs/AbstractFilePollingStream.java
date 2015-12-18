@@ -53,6 +53,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 1 $
+ *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public abstract class AbstractFilePollingStream extends AbstractBufferedStream<String> {
@@ -75,7 +76,10 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	private LogWatcher logWatcher;
 
 	/**
-	 * Constructs an AbstractFilePollingStream.
+	 * Constructs a new AbstractFilePollingStream.
+	 * 
+	 * @param logger
+	 *            logger used by activity stream
 	 */
 	protected AbstractFilePollingStream(EventSink logger) {
 		super(logger);
@@ -150,7 +154,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	}
 
 	/**
-	 * Constructs new log watcher instance.
+	 * Constructs a new log watcher instance specific for this stream.
 	 *
 	 * @return log watcher instance
 	 */
@@ -187,7 +191,10 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		protected boolean readingLatestLogFile = true;
 
 		/**
-		 * Constructs an LogWatcher.
+		 * Constructs a new LogWatcher.
+		 * 
+		 * @param name
+		 *            the name of log watcher thread
 		 */
 		LogWatcher(String name) {
 			super(name);

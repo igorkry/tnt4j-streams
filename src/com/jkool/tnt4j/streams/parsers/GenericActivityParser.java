@@ -37,6 +37,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Generic class for common activity parsers. It provides some generic
  * functionality witch is common to most activity parsers.
  *
+ * @param <T>
+ *            the type of handled activity data
  * @version $Revision: 1 $
  */
 public abstract class GenericActivityParser<T> extends ActivityParser {

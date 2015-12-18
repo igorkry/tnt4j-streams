@@ -46,6 +46,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * {@link SimpleDateFormat}.
  *
  * @version $Revision: 6 $
+ *
  * @see SimpleDateFormat
  * @see StreamTimestamp
  */

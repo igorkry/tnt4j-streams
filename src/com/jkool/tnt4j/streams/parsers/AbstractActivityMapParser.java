@@ -49,7 +49,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
 
 	/**
-	 * Constructs an AbstractActivityMapParser.
+	 * Constructs a new AbstractActivityMapParser.
+	 * 
+	 * @param logger
+	 *            logger used by activity parser
 	 */
 	protected AbstractActivityMapParser(EventSink logger) {
 		super(logger);
@@ -111,7 +114,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	/**
 	 * Makes map data package containing data of specified activity object.
-	 * 
+	 *
 	 * @param data
 	 *            activity object data
 	 *
@@ -166,6 +169,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
 		if (ArrayUtils.isEmpty(path) || dataMap == null) {
 			return null;

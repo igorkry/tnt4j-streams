@@ -73,7 +73,7 @@ public class ActivityRegExParser extends ActivityParser {
 	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
 	/**
-	 * Constructs an ActivityRegExParser.
+	 * Constructs a new ActivityRegExParser.
 	 */
 	public ActivityRegExParser() {
 		super(LOGGER);

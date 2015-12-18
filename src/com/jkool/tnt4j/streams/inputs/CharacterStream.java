@@ -53,6 +53,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  *
  * @version $Revision: 4 $
+ *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class CharacterStream extends TNTInputStream<BufferedReader> {
@@ -82,6 +83,9 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	/**
 	 * Construct empty CharacterStream. Requires configuration settings to set
 	 * input stream source.
+	 * 
+	 * @param logger
+	 *            logger used by activity stream
 	 */
 	protected CharacterStream(EventSink logger) {
 		super(logger);
@@ -96,8 +100,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Constructs CharacterStream to obtain activity data from the specified
-	 * InputStream.
+	 * Constructs a new CharacterStream to obtain activity data from the
+	 * specified InputStream.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -108,8 +112,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Constructs CharacterStream to obtain activity data from the specified
-	 * Reader.
+	 * Constructs a new CharacterStream to obtain activity data from the
+	 * specified Reader.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -282,6 +286,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * closed.
 	 *
 	 * @version $Revision: 4 $
+	 *
 	 * @see BufferedReader
 	 * @see InputStreamReader
 	 */
@@ -290,7 +295,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		private boolean error = false;
 
 		/**
-		 * Constructs a FeedReader, buffering the specified Reader, using an
+		 * Constructs a new FeedReader, buffering the specified Reader, using an
 		 * internal buffer with the given size.
 		 *
 		 * @param in
@@ -305,7 +310,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 
 		/**
-		 * Constructs a FeedReader, buffering the specified Reader.
+		 * Constructs a new FeedReader, buffering the specified Reader.
 		 *
 		 * @param in
 		 *            Reader to buffer
@@ -317,8 +322,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 
 		/**
-		 * Constructs a FeedReader, buffering the specified InputStream, using
-		 * an internal buffer with the given size.
+		 * Constructs a new FeedReader, buffering the specified InputStream,
+		 * using an internal buffer with the given size.
 		 *
 		 * @param in
 		 *            InputStream to buffer
@@ -332,7 +337,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 
 		/**
-		 * Constructs a FeedReader, buffering the specified InputStream.
+		 * Constructs a new FeedReader, buffering the specified InputStream.
 		 *
 		 * @param in
 		 *            InputStream to buffer

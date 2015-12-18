@@ -40,6 +40,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * configuration.
  *
  * @version $Revision: 7 $
+ *
  * @see com.jkool.tnt4j.streams.configure.StreamsConfig
  */
 public class ConfigParserHandler extends DefaultHandler {
@@ -69,10 +70,22 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String LOC_TYPE_ATTR = "locator-type"; // NON-NLS
 	private static final String LOCATOR_ATTR = "locator"; // NON-NLS
 	private static final String SEPARATOR_ATTR = "separator"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'data type'.
+	 */
 	public static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'units'.
+	 */
 	public static final String UNITS_ATTR = "units"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'format'.
+	 */
 	public static final String FORMAT_ATTR = "format"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'locale'.
+	 */
 	public static final String LOCALE_ATTR = "locale"; // NON-NLS
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
 	private static final String SOURCE_ATTR = "source";
@@ -100,7 +113,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private Locator currParseLocation = null;
 
 	/**
-	 * Constructs a ConfigurationParserHandler.
+	 * Constructs a new ConfigurationParserHandler.
 	 */
 	public ConfigParserHandler() {
 	}

@@ -34,6 +34,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * processed by consumer thread(s).
  * </p>
  *
+ * @param <T>
+ *            the type of handled RAW activity data
+ *
  * @version $Revision: 1 $
  *
  * @see java.util.concurrent.ArrayBlockingQueue
@@ -43,10 +46,14 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	private static final int INPUT_BUFFER_SIZE = 1024 * 10;
 	private static final int INPUT_BUFFER_OFFER_TIMEOUT = 15; // NOTE: sec.
 
+	/**
+	 * RAW activity data items buffer queue. Items in this queue are processed
+	 * asynchronously by consumer thread(s).
+	 */
 	protected BlockingQueue<T> inputBuffer;
 
 	/**
-	 * Initializes AbstractBufferedStream.
+	 * Constructs a new AbstractBufferedStream.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -149,7 +156,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 		private boolean inputEnd = false;
 
 		/**
-		 * Initializes InputProcessor.
+		 * Constructs a new InputProcessor.
 		 *
 		 * @param name
 		 *            the name of the new thread

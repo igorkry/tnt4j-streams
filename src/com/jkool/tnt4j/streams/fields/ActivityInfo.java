@@ -95,7 +95,7 @@ public class ActivityInfo {
 	private Map<String, Object> activityProperties;
 
 	/**
-	 * Constructs an ActivityInfo object.
+	 * Constructs a new ActivityInfo object.
 	 */
 	public ActivityInfo() {
 
@@ -349,6 +349,9 @@ public class ActivityInfo {
 	 *            activity item property key
 	 * @param propValue
 	 *            activity item property value
+	 *
+	 * @return previous property value replaced by {@code propValue} or
+	 *         {@code null} if there was no such activity property set
 	 *
 	 * @see Map#put(Object, Object)
 	 * @see #recordActivity(Tracker, long)

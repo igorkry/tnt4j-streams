@@ -34,6 +34,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * numeric values as strings.
  *
  * @version $Revision: 4 $
+ *
  * @see DecimalFormat
  */
 public class NumericFormatter {

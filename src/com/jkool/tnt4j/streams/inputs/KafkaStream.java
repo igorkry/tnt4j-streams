@@ -61,8 +61,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This activity stream supports the following properties:
  * <ul>
  * <li>Topic - regex of topic name to listen. (Required)</li>
- * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id
- * </li>
+ * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id.
+ * See {@link kafka.consumer.ConsumerConfig} for more details on Kafka consumer
+ * properties.</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -84,7 +85,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	private int partition = 0;
 
 	/**
-	 * Constructs an KafkaStream.
+	 * Constructs a new KafkaStream.
 	 */
 	public KafkaStream() {
 		super(LOGGER);

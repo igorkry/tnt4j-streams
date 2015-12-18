@@ -67,7 +67,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 	private FileSystem fs = null;
 
 	/**
-	 * Constructs an FileLineStream.
+	 * Constructs a new FileLineStream.
 	 */
 	public HdfsFileLineStream() {
 		super(LOGGER);

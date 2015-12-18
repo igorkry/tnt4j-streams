@@ -84,7 +84,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	protected Pattern pattern = null;
 
 	/**
-	 * Constructs an ActivityTokenParser.
+	 * Constructs a new ActivityTokenParser.
 	 */
 	public ActivityTokenParser() {
 		super(LOGGER);

@@ -218,6 +218,9 @@ public class StreamsConfig {
 	 */
 	public static final String PROP_USE_SSL = "UseSSL"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
 	public static final String PROP_READ_LINES = "ReadLines"; // NON-NLS
 
 	/**

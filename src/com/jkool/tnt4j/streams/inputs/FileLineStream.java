@@ -58,7 +58,7 @@ public class FileLineStream extends AbstractFileLineStream {
 	private File[] activityFiles = null;
 
 	/**
-	 * Constructs an FileLineStream.
+	 * Constructs a new FileLineStream.
 	 */
 	public FileLineStream() {
 		super(LOGGER);
