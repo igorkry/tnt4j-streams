@@ -36,7 +36,7 @@ import com.nastel.jkool.tnt4j.core.OpType;
  * name.
  * </p>
  *
- * @version $Revision: $
+ * @version $Revision: 1 $
  */
 public enum StreamFieldType {
 	/**
@@ -375,6 +375,18 @@ public enum StreamFieldType {
 		return enums[ordinal];
 	}
 
+	/**
+	 * Gets the field enumeration object based on enumeration object name value
+	 * ignoring case.
+	 *
+	 * @param name
+	 *            name of field type
+	 *
+	 * @return field type enumeration object
+	 *
+	 * @throws IllegalArgumentException
+	 *             if name is not a valid enumeration object name
+	 */
 	public static StreamFieldType valueOfIgnoreCase(String name) throws IllegalArgumentException {
 		if (StringUtils.isEmpty(name)) {
 			throw new IllegalArgumentException(StreamsResources.getString("StreamFieldType.name.empty"));
