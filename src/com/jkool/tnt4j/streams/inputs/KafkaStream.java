@@ -29,8 +29,10 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -45,30 +47,38 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * configuration.
  * </p>
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@code Map} data. On
+ * message reception message data is packed into {@code Map} filling these
+ * entries:
+ * <ul>
+ * <li>ActivityTopic - topic name message with activity data was received.</li>
+ * <li>ActivityData - raw activity data as {@code byte[]} retrieved from
+ * message.</li>
+ * <li>ActivityTransport - activity transport definition: 'Kafka'.</li>
+ * </ul>
  * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>Topic - topic name to listen.</li>
+ * <li>Topic - regex of topic name to listen. (Required)</li>
  * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id
  * </li>
  * </ul>
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
- * @see ConsumerConfig
+ * @see com.jkool.tnt4j.streams.parsers.ActivityMapParser
+ * @see kafka.consumer.ConsumerConfig
  */
-public class KafkaStream extends TNTInputStream<String> {
-
+public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
 
 	private final AtomicBoolean closed = new AtomicBoolean(false);
 
 	private ConsumerConnector consumer;
 	private ConsumerConfig kafkaProperties;
-	private String topicName;
+	private String topicNameRegex;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
 	private int partition = 0;
@@ -95,7 +105,7 @@ public class KafkaStream extends TNTInputStream<String> {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				topicName = value;
+				topicNameRegex = value;
 			} else {
 				properties.put(name, value);
 			}
@@ -109,7 +119,7 @@ public class KafkaStream extends TNTInputStream<String> {
 	@Override
 	public Object getProperty(String name) {
 		if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-			return topicName;
+			return topicNameRegex;
 		}
 
 		Object prop = super.getProperty(name);
@@ -126,6 +136,10 @@ public class KafkaStream extends TNTInputStream<String> {
 	@Override
 	protected void initialize() throws Throwable {
 		super.initialize();
+		if (StringUtils.isEmpty(topicNameRegex)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
+					StreamsConfig.PROP_TOPIC_NAME));
+		}
 
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.ready.to.receive.messages"));
@@ -139,12 +153,12 @@ public class KafkaStream extends TNTInputStream<String> {
 	 * </p>
 	 */
 	@Override
-	public String getNextItem() throws Throwable {
+	public Map<String, ?> getNextItem() throws Throwable {
 		while (!closed.get()) {
 			if (messageBuffer == null || !messageBuffer.hasNext()) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.empty.messages.buffer"));
 				final List<kafka.consumer.KafkaStream<byte[], byte[]>> streams = consumer
-						.createMessageStreamsByFilter(new Whitelist(topicName));
+						.createMessageStreamsByFilter(new Whitelist(topicNameRegex));
 				if (CollectionUtils.isNotEmpty(streams)) {
 					kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(0);
 					messageBuffer = stream.iterator();
@@ -157,12 +171,17 @@ public class KafkaStream extends TNTInputStream<String> {
 
 			if (messageBuffer != null && messageBuffer.hasNext()) {
 				MessageAndMetadata<byte[], byte[]> msg = messageBuffer.next();
-				String msgData = Utils.getString(msg.message());
+				byte[] msgPayload = msg.message();
+				String msgData = Utils.getString(msgPayload);
 
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
 
-				// TODO: pass byte[] to parser
-				return Utils.cleanActivityData(msgData);
+				Map<String, Object> msgDataMap = new HashMap<String, Object>();
+				msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
+				msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
+				msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_KAFKA);
+
+				return msgDataMap;
 			}
 		}
 		LOGGER.log(OpLevel.ERROR, StreamsResources.getString("KafkaStream.failed.consumer"));
@@ -176,6 +195,8 @@ public class KafkaStream extends TNTInputStream<String> {
 	protected void cleanup() {
 		closed.set(true);
 		consumer.shutdown();
+
+		super.cleanup();
 	}
 
 	/**

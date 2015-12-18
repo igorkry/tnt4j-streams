@@ -282,8 +282,8 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * @param pattern
 	 *            pattern string to match configuration token
 	 *
-	 * @return true if Apache access log configuration token matches defined
-	 *         pattern
+	 * @return {@code true} if Apache access log configuration token matches
+	 *         defined pattern
 	 */
 	private static boolean isMatchingPattern(String configToken, String pattern) {
 		String p = pattern.replace("*", "\\S*"); // NON-NLS

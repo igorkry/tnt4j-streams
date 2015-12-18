@@ -184,7 +184,8 @@
                 <xs:element name="MsgPutApplType" type="xs:nonNegativeInteger" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Type of application that put the message (MQAT_ value from MQMD.PutApplType for WMQ message).
+                            Type of application that put the message (MQAT_ value from MQMD.PutApplType for WMQ
+                            message).
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -256,7 +257,8 @@
                 <xs:element name="ResMgr" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Name of resource manager owning object associated with the activity (queue manager name for WMQ operation).
+                            Name of resource manager owning object associated with the activity (queue manager name for
+                            WMQ operation).
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -280,7 +282,8 @@
                 <xs:element name="ServerOs" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            String identifying information (e.g. type, version) about operating system on server where activity occurred.
+                            String identifying information (e.g. type, version) about operating system on server where
+                            activity occurred.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>

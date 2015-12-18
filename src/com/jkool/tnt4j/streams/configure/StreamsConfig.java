@@ -184,6 +184,43 @@ public class StreamsConfig {
 	public static final String PROP_KEYSTORE_PASS = "KeystorePass"; // NON-NLS
 
 	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_KEY_PASS = "KeyPass"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_JNDI_FACTORY = "JNDIFactory"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_JMS_FACTORY = "JMSFactory"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_SERVER_URI = "ServerURI"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_USERNAME = "UserName"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_PASSWORD = "Password"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_USE_SSL = "UseSSL"; // NON-NLS
+
+	public static final String PROP_READ_LINES = "ReadLines"; // NON-NLS
+
+	/**
 	 * Name of default configuration file name ({@value})
 	 */
 	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml"; // NON-NLS

@@ -5,7 +5,8 @@
 
     <parser name="WmqMsgOpXmlParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
-        <field name="Message" locator="/messaging_operation/MsgData" locator-type="Label" datatype="String" format="string"/>
+        <field name="Message" locator="/messaging_operation/MsgData" locator-type="Label" datatype="String"
+               format="string"/>
         <field name="EventName" locator="/messaging_operation/OperationName" locator-type="Label"/>
         <field name="EventType" locator="/messaging_operation/OperationName" locator-type="Label">
             <field-map source="MQGET" target="RECEIVE"/>
@@ -38,7 +39,8 @@
         <field name="TrackingId" separator="#!#">
             <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/>
             <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/>
-            <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary" format="hexBinary"/>
+            <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary"
+                           format="hexBinary"/>
             <field-locator locator="/messaging_operation/MsgUser" locator-type="Label"/>
             <field-locator locator="/messaging_operation/MsgPutApplType" locator-type="Label"/>
             <field-locator locator="/messaging_operation/MsgPutApplName" locator-type="Label"/>

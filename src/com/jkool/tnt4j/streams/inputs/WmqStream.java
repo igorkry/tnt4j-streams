@@ -387,6 +387,7 @@ public class WmqStream extends TNTInputStream<String> {
 	@Override
 	protected void cleanup() {
 		closeQmgrConnection();
+
 		super.cleanup();
 	}
 

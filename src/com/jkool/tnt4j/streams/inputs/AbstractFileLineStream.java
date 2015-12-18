@@ -23,6 +23,8 @@ import java.io.*;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -42,7 +44,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This activity stream supports the following properties:
  * <ul>
  * <li>FileName - concrete file name or file name pattern defined using
- * characters '*' and '?'</li>
+ * characters '*' and '?'. (Required)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -104,8 +106,9 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	@Override
 	public void initialize() throws Throwable {
 		super.initialize();
-		if (fileName == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
+		if (StringUtils.isEmpty(fileName)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
+					StreamsConfig.PROP_FILENAME));
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FileLineStream.initializing.stream", fileName));
 
@@ -161,7 +164,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 	/**
 	 * Load file descriptors matching {@code fileName} into collection.
-	 * 
+	 *
 	 * @throws Exception
 	 *             if any errors occurred while loading file descriptors
 	 */
@@ -199,9 +202,10 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * @param fileNumber
 	 *            file number in file descriptors collection
 	 *
-	 * @return true if file descriptors collection contains element with index
-	 *         equal to fileNumber, false - if file descriptors collection is
-	 *         {@code null} or fileNumber is out if collection bounds
+	 * @return {@code true} if file descriptors collection contains element with
+	 *         index equal to fileNumber, {@code false} - if file descriptors
+	 *         collection is {@code null} or fileNumber is out if collection
+	 *         bounds
 	 */
 	protected abstract boolean isFileAvailable(int fileNumber);
 
@@ -221,7 +225,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 	/**
 	 * Returns name of file identified by file number in files collection.
-	 * 
+	 *
 	 * @param fileNumber
 	 *            file number in file descriptors collection
 	 *

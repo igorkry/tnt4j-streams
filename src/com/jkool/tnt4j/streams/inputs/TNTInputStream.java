@@ -48,10 +48,22 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * <p>
  * All activity streams should support the following properties:
  * <ul>
- * <li>DateTime - default date/time to associate with activities</li>
- * <li>HaltIfNoParser - if set to true, stream will halt if none of the parsers
- * can parse activity object RAW data. If set to false - puts log entry and
- * continues.</li>
+ * <li>DateTime - default date/time to associate with activities. (Optional)
+ * </li>
+ * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the
+ * parsers can parse activity object RAW data. If set to {@code false} - puts
+ * log entry and continues. (Optional)</li>
+ * <li>UseExecutors - identifies whether stream should use executor service to
+ * process activities data items asynchronously or not. (Optional)</li>
+ * <li>ExecutorThreadsQuantity - defines executor service thread pool size.
+ * (Optional)</li>
+ * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a
+ * executor service to terminate. (Optional)</li>
+ * <li>ExecutorsBoundedModel - identifies whether executor service should use
+ * bounded tasks queue model. (Optional)</li>
+ * <li>ExecutorsTerminationTimeout -time to wait (in seconds) for a task to be
+ * inserted into bounded queue if max. queue size is reached. (Optional, actual
+ * only if ExecutorsBoundedModel is set to {@code true})</li>
  * </ul>
  *
  * @version $Revision: 8 $
@@ -238,7 +250,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		}
+
+		// t1 = System.currentTimeMillis();
 	}
+
+	// long t1;
 
 	/**
 	 * Creates default thread pool executor service for a given number of
@@ -512,6 +528,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 			trackersMap.clear();
 		}
+
+		// System.out.println("====================>>>>>>>>>>>>>> ELAPSED TIME:
+		// " + (System.currentTimeMillis() - t1));
 	}
 
 	private synchronized void shutdownExecutors() {

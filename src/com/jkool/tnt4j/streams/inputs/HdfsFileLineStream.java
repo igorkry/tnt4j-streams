@@ -52,7 +52,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This activity stream supports the following properties:
  * <ul>
  * <li>FileName - URI of concrete file name or file name pattern defined using
- * characters '*' and '?'</li>
+ * characters '*' and '?'. (Required)</li>
  * </ul>
  *
  * @version $Revision: 1 $

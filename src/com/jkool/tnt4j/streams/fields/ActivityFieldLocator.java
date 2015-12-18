@@ -384,7 +384,7 @@ public class ActivityFieldLocator {
 	 * Sets the required option flag to indicator if locator is optional
 	 *
 	 * @param requiredVal
-	 *            true/false string
+	 *            {@code true}/{@code false} string
 	 */
 	public void setRequired(String requiredVal) {
 		this.requiredVal = requiredVal;

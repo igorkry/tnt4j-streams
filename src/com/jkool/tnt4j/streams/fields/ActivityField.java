@@ -238,7 +238,8 @@ public class ActivityField {
 	 * Sets the required flag indicates where field is required or optional.
 	 *
 	 * @param reqValue
-	 *            true/false string to use to separate raw values
+	 *            {@code true}/{@code false} string to use to separate raw
+	 *            values
 	 */
 	public void setRequired(String reqValue) {
 		this.reqValue = reqValue;

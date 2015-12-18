@@ -257,7 +257,7 @@
                 </xs:annotation>
             </xs:enumeration>
 
-            <xs:enumeration value="ProcessID">
+            <xs:enumeration value="ProcessId">
                 <xs:annotation>
                     <xs:documentation>
                         Identifier of process where activity event has occurred.
@@ -265,7 +265,7 @@
                 </xs:annotation>
             </xs:enumeration>
 
-            <xs:enumeration value="ThreadID">
+            <xs:enumeration value="ThreadId">
                 <xs:annotation>
                     <xs:documentation>
                         Identifier of thread where activity event has occurred.

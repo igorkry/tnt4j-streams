@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
@@ -47,19 +45,18 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This activity stream supports the following properties:
  * <ul>
  * <li>FileName - concrete file name or file name pattern defined using
- * characters '*' and '?'</li>
- * <li>StartFromLatest - flag {@code true/false} indicating that streaming
- * should be performed from latest log entry. If {@code false} - then latest log
- * file is streamed from beginning</li>
+ * characters '*' and '?'. (Required)</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
+ * streaming should be performed from latest log entry. If {@code false} - then
+ * latest log file is streamed from beginning</li>
  * <li>FileReadDelay - delay is seconds between log file reading iterations</li>
  * </ul>
  *
  * @version $Revision: 1 $
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
+public abstract class AbstractFilePollingStream extends AbstractBufferedStream<String> {
 	private static final long DEFAULT_DELAY_PERIOD = TimeUnit.SECONDS.toMillis(15);
-	private static final int CHANGES_BUFFER_SIZE = 1024 * 10;
 
 	/**
 	 * Stream attribute defining file name.
@@ -68,15 +65,14 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 
 	/**
 	 * Stream attribute defining if streaming should be performed from log
-	 * position found on stream initialization. If false - then streaming is
-	 * performed from beginning of the file.
+	 * position found on stream initialization. If {@code false} - then
+	 * streaming is performed from beginning of the file.
 	 */
 	protected boolean startFromLatestActivity = true;
 
 	private long logWatcherDelay = DEFAULT_DELAY_PERIOD;
 
 	private LogWatcher logWatcher;
-	private BlockingQueue<String> changedLinesBuffer;
 
 	/**
 	 * Constructs an AbstractFilePollingStream.
@@ -132,12 +128,11 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 	@Override
 	public void initialize() throws Throwable {
 		super.initialize();
-		if (fileName == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.undefined.filename"));
+		if (StringUtils.isEmpty(fileName)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
+					StreamsConfig.PROP_FILENAME));
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FileLineStream.initializing.stream", fileName));
-
-		changedLinesBuffer = new ArrayBlockingQueue<String>(CHANGES_BUFFER_SIZE, true);
 
 		logWatcher = createLogWatcher();
 		logWatcher.initialize();
@@ -146,31 +141,10 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the polled file. Method blocks and waits for lines available in changed
-	 * lines buffer. Changed lines buffer is filled by LogWatcher thread.
-	 * </p>
-	 */
-	@Override
-	public String getNextItem() throws Throwable {
-		if (changedLinesBuffer == null) {
-			throw new IllegalStateException(
-					StreamsResources.getString("FilePollingStream.changes.buffer.uninitialized"));
-		}
-
-		String line = changedLinesBuffer.take();
-
-		return line;
-	}
-
-	/**
-	 * {@inheritDoc}
 	 */
 	@Override
 	protected void cleanup() {
-		logWatcher.halt();
-		changedLinesBuffer.clear();
+		logWatcher.shutdown();
 
 		super.cleanup();
 	}
@@ -183,9 +157,17 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 	protected abstract LogWatcher createLogWatcher();
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected boolean isInputEnded() {
+		return logWatcher.isInputEnded();
+	}
+
+	/**
 	 * Base class containing common log watcher features.
 	 */
-	protected abstract class LogWatcher extends Thread {
+	protected abstract class LogWatcher extends InputProcessor {
 
 		/**
 		 * Log monitor attribute storing line number marker of polled log file.
@@ -199,23 +181,16 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 
 		/**
 		 * Log monitor attribute identifying that last (or latest) log file is
-		 * polled. If false, then no delay is performed between log file changes
-		 * reading.
+		 * polled. If {@code false}, then no delay is performed between log file
+		 * changes reading.
 		 */
 		protected boolean readingLatestLogFile = true;
-
-		/**
-		 * Log monitor attribute identifying that monitoring is interrupted.
-		 */
-		protected boolean interrupted = false;
 
 		/**
 		 * Constructs an LogWatcher.
 		 */
 		LogWatcher(String name) {
 			super(name);
-
-			setDaemon(true);
 		}
 
 		/**
@@ -249,19 +224,6 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 			}
 		}
 
-		private boolean isStopping() {
-			return interrupted || isHalted();
-		}
-
-		/**
-		 * Stops this thread.
-		 */
-		void halt() {
-			interrupted = true;
-			interrupt();
-			// join();
-		}
-
 		/**
 		 * Performs log changes reading.
 		 */
@@ -279,30 +241,9 @@ public abstract class AbstractFilePollingStream extends TNTInputStream<String> {
 		protected void readNewLogLines(LineNumberReader lnr) throws IOException {
 			String line;
 			while ((line = lnr.readLine()) != null) {
-				addChangedLineToBuffer(line);
+				addInputToBuffer(line);
 				lineNumber = lnr.getLineNumber();
 			}
 		}
-
-		/**
-		 * Adds log line to changes buffer. Line may not be added if buffer size
-		 * limit is exceeded.
-		 *
-		 * @param line
-		 *            log line to add to changes buffer
-		 *
-		 * @see BlockingQueue#offer(Object)
-		 */
-		private void addChangedLineToBuffer(String line) {
-			if (StringUtils.isNotEmpty(line)) {
-				boolean added = changedLinesBuffer.offer(line);
-
-				if (!added) {
-					logger.log(OpLevel.WARNING,
-							StreamsResources.getStringFormatted("FilePollingStream.changes.buffer.limit", line));
-				}
-			}
-		}
 	}
-
 }

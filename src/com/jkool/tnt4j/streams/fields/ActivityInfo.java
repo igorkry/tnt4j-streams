@@ -47,20 +47,21 @@ import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
  * @version $Revision: 11 $
  */
 public class ActivityInfo {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
+
 	/**
 	 * The constant to indicate undefined value.
 	 */
-	public static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
+	protected static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
 
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
-	private String serverName = null; // ??
-	private String serverIp = null; // ??
-	private String applName = null; // ??
+	private String serverName = null;
+	private String serverIp = null;
+	private String applName = null;
 	private String userName = null;
 
-	private String resourceName = null; // ?? op.resourceName
+	private String resourceName = null;
 
 	private String eventName = null;
 	private OpType eventType = null;
@@ -75,8 +76,8 @@ public class ActivityInfo {
 	private String correlator = null;
 
 	private String trackingId = null;
-	private Collection<String> msgTags = null;
-	private Object msgData = null;
+	private Collection<String> tag = null;
+	private Object message = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
 	private Integer msgLength = null;
@@ -85,7 +86,7 @@ public class ActivityInfo {
 	private Integer processId = null;
 	private Integer threadId = null;
 
-	private String snapshotCategory = null;
+	private String category = null;
 
 	private boolean filtered = false;
 
@@ -241,7 +242,7 @@ public class ActivityInfo {
 		if (fieldType != null) {
 			switch (fieldType) {
 			case Message:
-				msgData = fieldValue;
+				message = fieldValue;
 				break;
 			case EventName:
 				eventName = getStringValue(fieldValue);
@@ -303,7 +304,7 @@ public class ActivityInfo {
 				}
 				break;
 			case Tag:
-				addTags(Utils.getTags(fieldValue));
+				addTag(Utils.getTags(fieldValue));
 				break;
 			case UserName:
 				userName = getStringValue(fieldValue);
@@ -320,14 +321,14 @@ public class ActivityInfo {
 			case MsgMimeType:
 				msgMimeType = getStringValue(fieldValue);
 				break;
-			case ProcessID:
+			case ProcessId:
 				processId = getIntValue(fieldValue);
 				break;
-			case ThreadID:
+			case ThreadId:
 				threadId = getIntValue(fieldValue);
 				break;
 			case Category:
-				snapshotCategory = getStringValue(fieldValue);
+				category = getStringValue(fieldValue);
 				break;
 			default:
 				throw new IllegalArgumentException(
@@ -361,19 +362,19 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Appends activity item tags collection with provided tag strings array
+	 * Appends activity item tag collection with provided tag strings array
 	 * contents.
 	 *
 	 * @param tags
 	 *            tag strings array
 	 */
-	public void addTags(String[] tags) {
+	public void addTag(String[] tags) {
 		if (ArrayUtils.isNotEmpty(tags)) {
-			if (msgTags == null) {
-				msgTags = new ArrayList<String>();
+			if (this.tag == null) {
+				this.tag = new ArrayList<String>();
 			}
 
-			Collections.addAll(msgTags, tags);
+			Collections.addAll(this.tag, tags);
 		}
 	}
 
@@ -438,16 +439,16 @@ public class ActivityInfo {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, correl, "",
 				(Object[]) null);
 		event.setTrackingId(trackId);
-		if (msgTags != null) {
-			event.setTag(msgTags);
+		if (tag != null) {
+			event.setTag(tag);
 		}
-		if (msgData != null) {
-			if (msgData instanceof byte[]) {
-				byte[] binData = (byte[]) msgData;
+		if (message != null) {
+			if (message instanceof byte[]) {
+				byte[] binData = (byte[]) message;
 				event.setMessage(binData, (Object[]) null);
 				event.setSize(msgLength == null ? binData.length : msgLength);
 			} else {
-				String strData = String.valueOf(msgData);
+				String strData = String.valueOf(message);
 				event.setMessage(strData, (Object[]) null);
 				event.setSize(msgLength == null ? strData.length() : msgLength);
 			}
@@ -672,15 +673,15 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(trackingId)) {
 			trackingId = otherAi.trackingId;
 		}
-		if (otherAi.msgTags != null) {
-			if (msgTags == null) {
-				msgTags = new ArrayList<String>();
+		if (otherAi.tag != null) {
+			if (tag == null) {
+				tag = new ArrayList<String>();
 			}
 
-			msgTags.addAll(otherAi.msgTags);
+			tag.addAll(otherAi.tag);
 		}
-		if (msgData == null) {
-			msgData = otherAi.msgData;
+		if (message == null) {
+			message = otherAi.message;
 		}
 		if (StringUtils.isEmpty(msgCharSet)) {
 			msgCharSet = otherAi.msgCharSet;
@@ -702,8 +703,8 @@ public class ActivityInfo {
 			threadId = otherAi.threadId;
 		}
 
-		if (StringUtils.isEmpty(snapshotCategory)) {
-			snapshotCategory = otherAi.snapshotCategory;
+		if (StringUtils.isEmpty(category)) {
+			category = otherAi.category;
 		}
 
 		filtered |= otherAi.filtered;
@@ -862,12 +863,12 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets message tag strings collection.
+	 * Gets activity tag strings collection.
 	 *
-	 * @return the message tag strings collection
+	 * @return the activity tag strings collection
 	 */
-	public Collection<String> getMsgTags() {
-		return msgTags;
+	public Collection<String> getTag() {
+		return tag;
 	}
 
 	/**
@@ -884,8 +885,8 @@ public class ActivityInfo {
 	 *
 	 * @return the activity message data
 	 */
-	public Object getMsgData() {
-		return msgData;
+	public Object getMessage() {
+		return message;
 	}
 
 	/**
@@ -943,12 +944,12 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets activity snapshot category.
+	 * Gets activity category (i.e. snapshot category).
 	 *
-	 * @return the activity snapshot category
+	 * @return the activity category
 	 */
-	public String getSnapshotCategory() {
-		return snapshotCategory;
+	public String getCategory() {
+		return category;
 	}
 
 	/**

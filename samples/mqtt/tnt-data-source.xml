@@ -65,7 +65,7 @@
         <field name="MsgValue" locator="11"/>
     </parser>
 
-    <parser name="KafkaMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
@@ -73,11 +73,16 @@
         </field>
     </parser>
 
-    <stream name="SampleKafkaStream" class="com.jkool.tnt4j.streams.inputs.KafkaStream">
+    <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
         <property name="HaltIfNoParser" value="false"/>
+        <property name="ServerURI" value="tcp://localhost:1883"/>
         <property name="Topic" value="TNT4JStreams"/>
-        <property name="zookeeper.connect" value="127.0.0.1:2181"/>
-        <property name="group.id" value="TNT4JStreams"/>
-        <parser-ref name="KafkaMessageParser"/>
+        <!--<property name="UserName" value="someUser"/>-->
+        <!--<property name="Password" value="somePassword"/>-->
+        <!--<property name="UseSSL" value="true"/>-->
+        <!--<property name="Keystore" value="path_to_keystore_file"/>-->
+        <!--<property name="KeystorePass" value="somePassword"/>-->
+
+        <parser-ref name="MqttMessageParser"/>
     </stream>
 </tnt-data-source>

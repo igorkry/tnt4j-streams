@@ -57,9 +57,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <ul>
  * <li>FileName - concrete file name or file name pattern defined using
  * characters '*' and '?'</li>
- * <li>StartFromLatest - flag {@code true/false} indicating that streaming
- * should be performed from latest log entry. If {@code false} - then latest log
- * file is streamed from beginning</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
+ * streaming should be performed from latest log entry. If {@code false} - then
+ * latest log file is streamed from beginning</li>
  * <li>FileReadDelay - delay is seconds between log file reading iterations</li>
  * </ul>
  *
@@ -233,7 +233,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					if (!swapped) {
 						LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.next.not.found"));
 
-						interrupted = true;
+						halt();
 						return;
 					}
 				} else {
@@ -288,7 +288,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.reader.error"));
 
-				interrupted = true;
+				halt();
 				return null;
 			}
 

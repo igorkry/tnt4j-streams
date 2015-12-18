@@ -66,7 +66,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 7 $
  */
-public class ActivityXmlParser extends ActivityParser {
+public class ActivityXmlParser extends GenericActivityParser<Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
 
 	/**
@@ -165,10 +165,9 @@ public class ActivityXmlParser extends ActivityParser {
 			return null;
 		}
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
-		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
+
+		Document xmlDoc = null;
 		try {
-			Document xmlDoc;
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
 			} else {
@@ -178,6 +177,27 @@ public class ActivityXmlParser extends ActivityParser {
 				}
 				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString));
 			}
+		} catch (Exception e) {
+			ParseException pe = new ParseException(
+					StreamsResources.getString("ActivityXmlParser.xmlDocument.parse.error"), 0);
+			pe.initCause(e);
+
+			throw pe;
+		}
+
+		return parsePreparedItem(stream, null, xmlDoc);
+	}
+
+	@Override
+	protected ActivityInfo parsePreparedItem(TNTInputStream stream, String dataStr, Document xmlDoc)
+			throws ParseException {
+		if (xmlDoc == null) {
+			return null;
+		}
+
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField field = null;
+		try {
 			String[] savedFormats = null;
 			String[] savedUnits = null;
 			String[] savedLocales = null;
@@ -241,8 +261,29 @@ public class ActivityXmlParser extends ActivityParser {
 		return ai;
 	}
 
-	private Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Document xmlDoc)
-			throws XPathExpressionException, ParseException {
+	/**
+	 * Gets field value from raw data location and formats it according locator
+	 * definition.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param locator
+	 *            activity field locator
+	 * @param xmlDoc
+	 *            activity object XML DOM document
+	 *
+	 * @return value formatted based on locator definition or {@code null} if
+	 *         locator is not defined
+	 *
+	 * @throws ParseException
+	 *             if error applying locator format properties to specified
+	 *             value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
+	@Override
+	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Document xmlDoc)
+			throws ParseException {
 		Object val = null;
 		if (locator != null) {
 			String locStr = locator.getLocator();
@@ -251,43 +292,52 @@ public class ActivityXmlParser extends ActivityParser {
 					val = stream.getProperty(locStr);
 				} else {
 					// get value for locator (element)
-					XPathExpression expr = xPath.compile(locStr);
-					String strVal = (String) expr.evaluate(xmlDoc, XPathConstants.STRING);
-					if (!StringUtils.isEmpty(strVal)) {
-						// Get list of attributes and their values for current
-						// element
-						NodeList attrs = (NodeList) xPath.evaluate(locStr + "/@*", xmlDoc, XPathConstants.NODESET); // NON-NLS
-						int length = attrs == null ? 0 : attrs.getLength();
-						if (length > 0) {
-							String format = null;
-							String locale = null;
-							boolean formatAttrSet = false;
-							for (int i = 0; i < length; i++) {
-								Attr attr = (Attr) attrs.item(i);
-								String attrName = attr.getName();
-								String attrValue = attr.getValue();
-								if (ConfigParserHandler.DATA_TYPE_ATTR.equals(attrName)) {
-									locator.setDataType(ActivityFieldDataType.valueOf(attrValue));
-								} else if (ConfigParserHandler.FORMAT_ATTR.equals(attrName)) {
-									format = attrValue;
-									formatAttrSet = true;
-								} else if (ConfigParserHandler.LOCALE_ATTR.equals(attrName)) {
-									locale = attrValue;
-								} else if (ConfigParserHandler.UNITS_ATTR.equals(attrName)) {
-									locator.setUnits(attrValue);
+					try {
+						XPathExpression expr = xPath.compile(locStr);
+						String strVal = (String) expr.evaluate(xmlDoc, XPathConstants.STRING);
+						if (!StringUtils.isEmpty(strVal)) {
+							// Get list of attributes and their values for
+							// current element
+							NodeList attrs = (NodeList) xPath.evaluate(locStr + "/@*", xmlDoc, XPathConstants.NODESET); // NON-NLS
+							int length = attrs == null ? 0 : attrs.getLength();
+							if (length > 0) {
+								String format = null;
+								String locale = null;
+								boolean formatAttrSet = false;
+								for (int i = 0; i < length; i++) {
+									Attr attr = (Attr) attrs.item(i);
+									String attrName = attr.getName();
+									String attrValue = attr.getValue();
+									if (ConfigParserHandler.DATA_TYPE_ATTR.equals(attrName)) {
+										locator.setDataType(ActivityFieldDataType.valueOf(attrValue));
+									} else if (ConfigParserHandler.FORMAT_ATTR.equals(attrName)) {
+										format = attrValue;
+										formatAttrSet = true;
+									} else if (ConfigParserHandler.LOCALE_ATTR.equals(attrName)) {
+										locale = attrValue;
+									} else if (ConfigParserHandler.UNITS_ATTR.equals(attrName)) {
+										locator.setUnits(attrValue);
+									}
+								}
+								if (formatAttrSet) {
+									locator.setFormat(format, locale);
 								}
 							}
-							if (formatAttrSet) {
-								locator.setFormat(format, locale);
-							}
+							val = strVal.trim();
 						}
-						val = strVal.trim();
+					} catch (XPathExpressionException exc) {
+						ParseException pe = new ParseException(
+								StreamsResources.getString("ActivityXMLParser.xPath.exception"), 0);
+						pe.initCause(exc);
+
+						throw pe;
 					}
 				}
 			}
 			val = locator.formatValue(val);
 		}
 		return val;
+
 	}
 
 	/**

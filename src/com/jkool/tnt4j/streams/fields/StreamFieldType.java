@@ -84,12 +84,12 @@ public enum StreamFieldType {
 	/**
 	 * Identifier of process where activity event has occurred.
 	 */
-	ProcessID(Integer.class),
+	ProcessId(Integer.class),
 
 	/**
 	 * Identifier of thread where activity event has occurred.
 	 */
-	ThreadID(Integer.class),
+	ThreadId(Integer.class),
 
 	/**
 	 * Indicates completion status of the activity - Value must match values in

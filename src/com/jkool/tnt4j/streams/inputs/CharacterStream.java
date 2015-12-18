@@ -189,6 +189,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	@Override
 	protected void initialize() throws Throwable {
 		super.initialize();
+
+		if (StringUtils.isEmpty(fileName) && socketPort == null) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(
+					"TNTInputStream.property.undefined.one.of", StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
+		}
+
 		if (rawStream == null && rawReader == null) {
 			if (fileName != null) {
 				rawStream = new FileInputStream(fileName);
@@ -322,7 +328,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 * @see BufferedReader#BufferedReader(Reader, int)
 		 */
 		public FeedReader(InputStream in, int size) {
-			super(new InputStreamReader(in), size);
+			this(new InputStreamReader(in), size);
 		}
 
 		/**
@@ -334,7 +340,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 * @see BufferedReader#BufferedReader(Reader)
 		 */
 		public FeedReader(InputStream in) {
-			super(new InputStreamReader(in));
+			this(new InputStreamReader(in));
 		}
 
 		/**

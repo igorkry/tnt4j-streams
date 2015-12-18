@@ -23,13 +23,11 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -40,14 +38,15 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * Map data structure, where each field is represented by a key/value pair and
- * the name is used to map each field onto its corresponding activity field.
+ * Base class for abstract activity data parser that assumes each activity data
+ * item can be transformed into an {@code Map} data structure, where each field
+ * is represented by a key/value pair and the name is used to map each field
+ * onto its corresponding activity field.
  * </p>
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractActivityMapParser extends ActivityParser {
+public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
 
 	/**
 	 * Constructs an AbstractActivityMapParser.
@@ -101,51 +100,13 @@ public abstract class AbstractActivityMapParser extends ActivityParser {
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
 
-		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
-		try {
-			Map<String, ?> dataMap = getDataMap(data);
-			if (dataMap == null || dataMap.isEmpty()) {
-				logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
-				return null;
-			}
-
-			// save entire activity string as message data
-			// field = new ActivityField(StreamFieldType.Message.name());
-			// applyFieldValue(ai, field, dataStr); //TODO
-
-			// apply fields for parser
-			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
-				value = null;
-				field = fieldEntry.getKey();
-				List<ActivityFieldLocator> locations = fieldEntry.getValue();
-				if (locations != null) {
-					if (locations.size() == 1) {
-						// field value is based on single raw data location, get
-						// the value of this location
-						value = getLocatorValue(stream, locations.get(0), dataMap);
-					} else {
-						// field value is based on concatenation of several raw
-						// data locations, build array to hold data from each
-						// location
-						Object[] values = new Object[locations.size()];
-						for (int li = 0; li < locations.size(); li++) {
-							values[li] = getLocatorValue(stream, locations.get(li), dataMap);
-						}
-						value = values;
-					}
-				}
-				applyFieldValue(stream, ai, field, value);
-			}
-		} catch (Exception e) {
-			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
-			pe.initCause(e);
-			throw pe;
+		Map<String, ?> dataMap = getDataMap(data);
+		if (dataMap == null || dataMap.isEmpty()) {
+			logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
+			return null;
 		}
 
-		return ai;
+		return parsePreparedItem(stream, null, dataMap); // TODO: dataStr
 	}
 
 	/**

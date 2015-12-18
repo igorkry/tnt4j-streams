@@ -24,7 +24,6 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +34,9 @@ import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.fields.*;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -61,7 +62,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 5 $
  */
-public class ActivityNameValueParser extends ActivityParser {
+public class ActivityNameValueParser extends GenericActivityParser<Map<String, String>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityNameValueParser.class);
 
 	/**
@@ -195,41 +196,32 @@ public class ActivityNameValueParser extends ActivityParser {
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityNameValueParser.found", field));
 			}
 		}
-		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
-		try {
-			// save entire activity string as message data
-			field = new ActivityField(StreamFieldType.Message.name());
-			applyFieldValue(stream, ai, field, dataStr);
-			// apply fields for parser
-			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
-				value = null;
-				field = fieldEntry.getKey();
-				List<ActivityFieldLocator> locations = fieldEntry.getValue();
-				if (locations != null) {
-					if (locations.size() == 1) {
-						value = getLocatorValue(stream, locations.get(0), nameValues);
-					} else {
-						Object[] values = new Object[locations.size()];
-						for (int li = 0; li < locations.size(); li++) {
-							values[li] = getLocatorValue(stream, locations.get(li), nameValues);
-						}
-						value = values;
-					}
-				}
-				applyFieldValue(stream, ai, field, value);
-			}
-		} catch (Exception e) {
-			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
-			pe.initCause(e);
-			throw pe;
-		}
-		return ai;
+
+		return parsePreparedItem(stream, dataStr, nameValues);
 	}
 
-	private static Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator,
+	/**
+	 * Gets field value from raw data location and formats it according locator
+	 * definition.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param locator
+	 *            activity field locator
+	 * @param nameValues
+	 *            activity object name/value pairs map
+	 *
+	 * @return value formatted based on locator definition or {@code null} if
+	 *         locator is not defined
+	 *
+	 * @throws ParseException
+	 *             if error applying locator format properties to specified
+	 *             value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
+	@Override
+	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator,
 			Map<String, String> nameValues) throws ParseException {
 		Object val = null;
 		if (locator != null) {

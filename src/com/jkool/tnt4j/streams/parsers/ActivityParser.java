@@ -21,21 +21,18 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.io.*;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
-import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
-
-//import com.jkool.tnt4j.streams.filters.StreamFilter;
 
 /**
  * Base class that all activity parsers must extend. It provides some base
@@ -50,11 +47,6 @@ public abstract class ActivityParser {
 	protected final EventSink logger;
 
 	/**
-	 * Constant for default delimiter symbol used by parsers.
-	 */
-	protected static final String DEFAULT_DELIM = ","; // NON-NLS
-
-	/**
 	 * Name of activity parser
 	 */
 	private String name;
@@ -62,12 +54,7 @@ public abstract class ActivityParser {
 	private String[] tags;
 
 	/**
-	 * List of filters being used by stream.
-	 */
-	protected final Collection<StreamFilter> filters = new LinkedList<StreamFilter>();
-
-	/**
-	 * Initializes ActivityParser.
+	 * Constructs an ActivityParser.
 	 *
 	 * @param logger
 	 *            logger used by activity parser
@@ -75,12 +62,6 @@ public abstract class ActivityParser {
 	protected ActivityParser(EventSink logger) {
 		this.logger = logger;
 	}
-
-	/**
-	 * Defines the mapping of activity fields to the location(s) in the raw data
-	 * from which to extract their values.
-	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> fieldMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
 	/**
 	 * Set properties for the parser.
@@ -108,11 +89,7 @@ public abstract class ActivityParser {
 	 * @param field
 	 *            activity field to add
 	 */
-	public void addField(ActivityField field) {
-		logger.log(OpLevel.DEBUG,
-				StreamsResources.getStringFormatted("ActivityParser.adding.field", field.toDebugString()));
-		fieldMap.put(field, field.getLocators());
-	}
+	public abstract void addField(ActivityField field);
 
 	/**
 	 * Parse the specified raw activity data, converting each field in raw data
@@ -123,14 +100,17 @@ public abstract class ActivityParser {
 	 * @param data
 	 *            raw activity data to parse
 	 *
-	 * @return converted activity info, or {@code null} if raw data string does
-	 *         not match format for this parser
+	 * @return converted activity info, or {@code null} if raw activity data
+	 *         does not match format for this parser
 	 *
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing raw data string
+	 * 
 	 * @see #isDataClassSupported(Object)
+	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String,
+	 *      Object)
 	 */
 	public abstract ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException;
 
@@ -234,6 +214,7 @@ public abstract class ActivityParser {
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
 			for (ActivityParser stackedParser : field.getStackedParsers()) {
+				// TODO: tags
 				if (stackedParser.isDataClassSupported(value)) {
 					ActivityInfo sai = stackedParser.parse(stream, value);
 
@@ -265,38 +246,6 @@ public abstract class ActivityParser {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Adds the specified filter to the list of filters being used by this
-	 * stream.
-	 *
-	 * @param filter
-	 *            filter to add
-	 */
-	public void addFilter(StreamFilter filter) {
-		filters.add(filter);
-	}
-
-	/**
-	 * Applies all defined filters on specified activity item. If activity item
-	 * matches any of filter criteria - such item is skipped from sending it to
-	 * jKool Cloud Service.
-	 *
-	 * @param activityInfo
-	 *            activity item data to check against defined filters
-	 *
-	 * @return {@code true} if activity data was filtered by any of defined
-	 *         filters, {@code false} otherwise
-	 */
-	protected boolean filterActivity(ActivityInfo activityInfo) {
-		boolean filtered = false;
-		Iterator<StreamFilter> filtersIterator = filters.iterator();
-		while (!filtered && filtersIterator.hasNext()) {
-			StreamFilter filter = filtersIterator.next();
-			filtered = filter.doFilterActivity(activityInfo);
-		}
-		return filtered;
 	}
 
 	/**

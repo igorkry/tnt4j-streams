@@ -138,7 +138,7 @@ public class TimestampFormatter {
 	/**
 	 * Gets the time zone ID that date/time strings are assumed to be in.
 	 *
-	 * @return time zone for date/time strings ({@code null} indicates deriving
+	 * @return time zone for date/time strings {@code null} indicates deriving
 	 *         from format string or default is being used if no time zone
 	 *         specification in string)
 	 */
