@@ -19,6 +19,8 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +64,25 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected GenericActivityParser(EventSink logger) {
 		super(logger);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes
+	 * extending/implementing any of these):
+	 * </p>
+	 * <ul>
+	 * <li>{@code java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
+	 * <li>{@code java.io.Reader}</li>
+	 * <li>{@code java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
+				|| InputStream.class.isInstance(data);
 	}
 
 	/**

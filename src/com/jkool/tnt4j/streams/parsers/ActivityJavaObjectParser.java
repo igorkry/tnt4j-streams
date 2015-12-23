@@ -19,6 +19,7 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
@@ -32,28 +33,21 @@ import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * <p>
- * Base class for abstract activity data parser that assumes each activity data
- * item can be transformed into an {@code Map} data structure, where each field
- * is represented by a key/value pair and the name is used to map each field
- * onto its corresponding activity field.
- * </p>
- *
- * @version $Revision: 1 $
+ * TODO
  */
-public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
+public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJavaObjectParser.class);
 
 	/**
-	 * Constructs a new AbstractActivityMapParser.
-	 * 
-	 * @param logger
-	 *            logger used by activity parser
+	 * Constructs a new ActivityJavaObjectParser.
+	 *
 	 */
-	protected AbstractActivityMapParser(EventSink logger) {
-		super(logger);
+	protected ActivityJavaObjectParser() {
+		super(LOGGER);
 	}
 
 	/**
@@ -74,6 +68,21 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes
+	 * extending/implementing any of these):
+	 * </p>
+	 * <ul>
+	 * <li>{@code java.lang.Object}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return Object.class.isInstance(data);
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
@@ -82,35 +91,19 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
 
-		Map<String, ?> dataMap = getDataMap(data);
-		if (dataMap == null || dataMap.isEmpty()) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
-			return null;
-		}
-
-		return parsePreparedItem(stream, null, dataMap); // TODO: dataStr
+		return parsePreparedItem(stream, null, data); // TODO: dataStr
 	}
-
-	/**
-	 * Makes map data package containing data of specified activity object.
-	 *
-	 * @param data
-	 *            activity object data
-	 *
-	 * @return activity object data map
-	 */
-	protected abstract Map<String, ?> getDataMap(Object data);
 
 	/**
 	 * Gets field value from raw data location and formats it according locator
 	 * definition.
-	 * 
+	 *
 	 * @param stream
 	 *            parent stream
 	 * @param locator
 	 *            activity field locator
-	 * @param dataMap
-	 *            activity object data map
+	 * @param dataObj
+	 *            activity data carrier object
 	 *
 	 * @return value formatted based on locator definition or {@code null} if
 	 *         locator is not defined
@@ -121,7 +114,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
-	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Map<String, ?> dataMap)
+	@Override
+	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Object dataObj)
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {
@@ -131,7 +125,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 					val = stream.getProperty(locStr);
 				} else {
 					String[] path = getNodePath(locStr);
-					val = getNode(path, dataMap, 0);
+					val = getFieldValue(path, dataObj, 0);
 				}
 			}
 			val = locator.formatValue(val);
@@ -149,17 +143,23 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
-		if (ArrayUtils.isEmpty(path) || dataMap == null) {
+	private static Object getFieldValue(String[] path, Object dataObj, int i) {
+		if (ArrayUtils.isEmpty(path) || dataObj == null) {
 			return null;
 		}
 
-		Object val = dataMap.get(path[i]);
+		try {
+			Field f = dataObj.getClass().getDeclaredField(path[i]);
+			Object obj = f.get(dataObj);
 
-		if (i < path.length - 1 && val instanceof Map) {
-			val = getNode(path, (Map<String, ?>) val, ++i);
+			if (i < path.length - 1 && !f.getType().isPrimitive()) {
+				obj = getFieldValue(path, obj, ++i);
+			}
+
+			return obj;
+		} catch (Throwable exc) {
+			LOGGER.log(OpLevel.WARNING, "TODO", exc);
+			return null;
 		}
-
-		return val;
 	}
 }

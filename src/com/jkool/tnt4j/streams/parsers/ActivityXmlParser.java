@@ -138,26 +138,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
-	 * </p>
-	 * <ul>
-	 * <li>{@code java.lang.String}</li>
-	 * <li>{@code byte[]}</li>
-	 * <li>{@code java.io.Reader}</li>
-	 * <li>{@code java.io.InputStream}</li>
-	 * <li>{@code org.w3c.dom.Document}</li>
-	 * </ul>
-	 */
-	@Override
-	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
-				|| InputStream.class.isInstance(data) || Document.class.isInstance(data);
-	}
-
-	/**
-	 * {@inheritDoc}
 	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {

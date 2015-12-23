@@ -22,12 +22,15 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.*;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -52,6 +55,11 @@ public abstract class ActivityParser {
 	private String name;
 
 	private String[] tags;
+
+	/**
+	 * List of filters being used by stream.
+	 */
+	protected final Collection<StreamFilter> filters = new LinkedList<StreamFilter>();
 
 	/**
 	 * Constructs a new ActivityParser.
@@ -246,6 +254,38 @@ public abstract class ActivityParser {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * Adds the specified filter to the list of filters being used by this
+	 * stream.
+	 *
+	 * @param filter
+	 *            filter to add
+	 */
+	public void addFilter(StreamFilter filter) {
+		filters.add(filter);
+	}
+
+	/**
+	 * Applies all defined filters on specified activity item. If activity item
+	 * matches any of filter criteria - such item is skipped from sending it to
+	 * jKool Cloud Service.
+	 *
+	 * @param activityInfo
+	 *            activity item data to check against defined filters
+	 *
+	 * @return {@code true} if activity data was filtered by any of defined
+	 *         filters, {@code false} otherwise
+	 */
+	protected boolean filterActivity(ActivityInfo activityInfo) {
+		boolean filtered = false;
+		Iterator<StreamFilter> filtersIterator = filters.iterator();
+		while (!filtered && filtersIterator.hasNext()) {
+			StreamFilter filter = filtersIterator.next();
+			filtered = filter.doFilterActivity(activityInfo);
+		}
+		return filtered;
 	}
 
 	/**

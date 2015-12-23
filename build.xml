@@ -1,4 +1,4 @@
-<project name="TNT4J-Streams" default="tnt4j-streams-api" basedir=".">
+<project name="TNT4J-Streams" default="tnt4j-streams" basedir=".">
 
     <echo message="Processing ${ant.project.name}${line.separator}" level="info"/>
 
@@ -21,7 +21,21 @@
     <property name="classes" value="${project-build}/classes"/>
     <property name="doc" value="${project-build}/doc"/>
     <property name="jar_name" value="${project-pkg-name}.jar"/>
+    <property name="jar_name_core" value="${project-pkg-name}-core.jar"/>
+    <property name="jar_name_hdfs" value="${project-pkg-name}-hdfs.jar"/>
+    <property name="jar_name_wmq" value="${project-pkg-name}-wmq.jar"/>
+    <property name="jar_name_kafka" value="${project-pkg-name}-kafka.jar"/>
+    <property name="jar_name_http" value="${project-pkg-name}-http.jar"/>
+    <property name="jar_name_mqtt" value="${project-pkg-name}-mqtt.jar"/>
+    <property name="jar_name_jms" value="${project-pkg-name}-jms.jar"/>
     <property name="jar" value="${project-build}/${jar_name}"/>
+    <property name="jar_core" value="${project-build}/${jar_name_core}"/>
+    <property name="jar_hdfs" value="${project-build}/${jar_name_hdfs}"/>
+    <property name="jar_wmq" value="${project-build}/${jar_name_wmq}"/>
+    <property name="jar_kafka" value="${project-build}/${jar_name_kafka}"/>
+    <property name="jar_http" value="${project-build}/${jar_name_http}"/>
+    <property name="jar_mqtt" value="${project-build}/${jar_name_mqtt}"/>
+    <property name="jar_jms" value="${project-build}/${jar_name_jms}"/>
     <property name="pkg" value="${project-build}/${project-pkg-name}"/>
 
     <target name="init">
@@ -56,12 +70,16 @@
         <echo message="Clean of ${ant.project.name} Complete${line.separator}" level="info"/>
     </target>
 
-    <target name="tnt4j-streams-api" depends="init,compile" description="build TNT4J Streams">
+    <target name="tnt4j-streams-all-api" depends="init,compile" description="build TNT4J Streams">
 
         <path id="runtime-classpath">
             <fileset dir="${project-build}/lib">
                 <include name="*.jar"/>
                 <include name="tnt4j-log4j12\*.jar"/>
+                <include name="hadoop\*.jar"/>
+                <include name="ibm.mq\*.jar"/>
+                <include name="kafka\*.jar"/>
+                <include name="paho\*.jar"/>
             </fileset>
         </path>
 
@@ -105,10 +123,186 @@
             </fileset>
         </copy>
 
-        <echo message="Build of ${ant.project.name} Complete${line.separator}" level="info"/>
+        <echo message="Build of ${ant.project.name} complete${line.separator}" level="info"/>
     </target>
 
-    <target name="doc" depends="tnt4j-streams-api" description="build javadoc">
+    <target name="tnt4j-streams-core-api" depends="init,compile" description="build TNT4J Streams core API">
+
+        <path id="runtime-classpath-core">
+            <fileset dir="${project-build}/lib">
+                <include name="*.jar"/>
+                <include name="tnt4j-log4j12\*.jar"/>
+            </fileset>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-core" jarfile="${jar_core}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-core"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_core}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-core}"/>
+                <attribute name="Main-Class" value="com.jkool.tnt4j.streams.StreamsAgent"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFileLineStream.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFilePollingStream.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/WmqStream.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/KafkaStream.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/MqttStream.class"/>
+            </fileset>
+        </jar>
+        <echo message="Copying ${ant.project.name} configuration" level="info"/>
+        <copy todir="${project-build}/config">
+            <fileset dir="${config}">
+                <include name="**/*.properties"/>
+                <include name="**/*.xsd"/>
+            </fileset>
+        </copy>
+        <echo message="Copying ${ant.project.name} README and LICENSE info" level="info"/>
+        <copy todir="${project-build}">
+            <fileset dir="${root}">
+                <include name="README.md"/>
+                <include name="LICENSE"/>
+            </fileset>
+        </copy>
+        <echo message="Copying ${ant.project.name} samples" level="info"/>
+        <copy todir="${project-build}/samples">
+            <fileset dir="${samples}">
+                <include name="**/*.*"/>
+            </fileset>
+        </copy>
+        <echo message="Copying ${ant.project.name} Shell Scripts" level="info"/>
+        <copy todir="${project-build}/bin">
+            <fileset dir="${scripts}">
+                <include name="**/*.*"/>
+            </fileset>
+        </copy>
+
+        <echo message="Build of ${ant.project.name} core API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="tnt4j-streams-hdfs-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams HDFS API">
+
+        <path id="runtime-classpath-hdfs">
+            <fileset dir="${project-build}/lib">
+                <include name="hadoop\*.jar"/>
+            </fileset>
+            <file name="${jar_core}"/>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-hdfs" jarfile="${jar_hdfs}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-hdfs"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_hdfs}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-hdfs}"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <include name="com/jkool/tnt4j/streams/inputs/HdfsFileLineStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/HdfsFilePollingStream.class"/>
+                <!--<include name="resources/*.properties"/>-->
+            </fileset>
+        </jar>
+
+        <echo message="Build of ${ant.project.name} HDFS API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="tnt4j-streams-wmq-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams WMQ API">
+
+        <path id="runtime-classpath-wmq">
+            <fileset dir="${project-build}/lib">
+                <include name="ibm.mq\*.jar"/>
+            </fileset>
+            <file name="${jar_core}"/>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-wmq" jarfile="${jar_wmq}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-wmq"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_wmq}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-wmq}"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <include name="com/jkool/tnt4j/streams/inputs/WmqStream.class"/>
+                <!--<include name="resources/*.properties"/>-->
+            </fileset>
+        </jar>
+
+        <echo message="Build of ${ant.project.name} WMQ API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="tnt4j-streams-kafka-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams Kafka API">
+
+        <path id="runtime-classpath-kafka">
+            <fileset dir="${project-build}/lib">
+                <include name="kafka\*.jar"/>
+            </fileset>
+            <file name="${jar_core}"/>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-kafka" jarfile="${jar_kafka}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-kafka"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_kafka}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-kafka}"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <include name="com/jkool/tnt4j/streams/inputs/KafkaStream.class"/>
+                <!--<include name="resources/*.properties"/>-->
+            </fileset>
+        </jar>
+
+        <echo message="Build of ${ant.project.name} Kafka API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="tnt4j-streams-mqtt-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams MQTT API">
+
+        <path id="runtime-classpath-mqtt">
+            <fileset dir="${project-build}/lib">
+                <include name="paho\*.jar"/>
+            </fileset>
+            <file name="${jar_core}"/>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-mqtt" jarfile="${jar_mqtt}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-mqtt"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_mqtt}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-mqtt}"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <include name="com/jkool/tnt4j/streams/inputs/MqttStream.class"/>
+                <!--<include name="resources/*.properties"/>-->
+            </fileset>
+        </jar>
+
+        <echo message="Build of ${ant.project.name} MQTT API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="doc" depends="tnt4j-streams" description="build javadoc">
         <delete dir="${doc}"/>
         <javadoc destdir="${doc}"
                  sourcepath="${src}"
@@ -144,17 +338,21 @@
 
         <echo message="Creating ${pkg}-${version}-all.jar" level="info"/>
         <zip destfile="${pkg}-${version}-all.jar">
-            <zipgroupfileset dir="lib" includes="*.jar"/>
-            <zipgroupfileset dir="${project-build}" includes="${jar_name}"/>
+            <zipgroupfileset dir="${lib}" includes="*.jar, hadoop/*.jar, ibm.mq/*.jar, kafka/*.jar, paho/*.jar"/>
+            <zipgroupfileset dir="${project-build}"
+                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}"/>
         </zip>
         <echo message="Creating ${pkg}-final-all.jar" level="info"/>
         <zip destfile="${pkg}-final-all.jar">
-            <zipgroupfileset dir="lib" includes="*.jar"/>
-            <zipgroupfileset dir="${project-build}" includes="${jar_name}"/>
+            <zipgroupfileset dir="${lib}" includes="*.jar, hadoop/*.jar, ibm.mq/*.jar, kafka/*.jar, paho/*.jar"/>
+            <zipgroupfileset dir="${project-build}"
+                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}"/>
         </zip>
     </target>
 
-    <target name="tnt4j-streams" depends="tnt4j-streams-api" description="build executables"/>
+    <target name="tnt4j-streams"
+            depends="tnt4j-streams-core-api, tnt4j-streams-hdfs-api, tnt4j-streams-wmq-api, tnt4j-streams-kafka-api, tnt4j-streams-mqtt-api"
+            description="build executables"/>
     <target name="all" depends="tnt4j-streams-pkg" description="generate the distribution"/>
     <target name="rebuild" depends="clean,all" description="clean and build"/>
 
