@@ -1,20 +1,17 @@
 /*
- * Copyright (c) 2015 jKool, LLC. All Rights Reserved.
+ * Copyright 2014-2016 JKOOL, LLC.
  *
- * This software is the confidential and proprietary information of
- * jKool, LLC. ("Confidential Information").  You shall not disclose
- * such Confidential Information and shall use it only in accordance with
- * the terms of the license agreement you entered into with jKool, LLC.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * JKOOL MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
- * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE, OR NON-INFRINGEMENT. JKOOL SHALL NOT BE LIABLE FOR ANY DAMAGES
- * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
- * THIS SOFTWARE OR ITS DERIVATIVES.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * CopyrightVersion 1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.jkool.tnt4j.streams.configure;
@@ -28,7 +25,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -101,7 +97,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	private ActivityParser currParser = null;
 	private ActivityField currField = null;
 	private ActivityFieldLocator currLocator = null;
-	private StreamFilter currFilter = null;
 
 	private boolean currFieldHasLocValAttr = false;
 	private boolean currFieldHasLocElmt = false;
@@ -154,7 +149,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		currParser = null;
 		currField = null;
 		currLocator = null;
-		currFilter = null;
 		currFieldHasLocValAttr = false;
 		currFieldHasLocElmt = false;
 		currFieldHasMapElmt = false;
@@ -783,9 +777,6 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFieldHasMapElmt = false;
 			} else if (FIELD_LOC_ELMT.equals(qName)) {
 				currLocator = null;
-			} else if (FILTER_ELMT.equals(qName)) {
-				currParser.addFilter(currFilter);
-				currFilter = null;
 			}
 		} catch (SAXException exc) {
 			throw exc;

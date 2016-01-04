@@ -1,20 +1,17 @@
 /*
- * Copyright (c) 2015 jKool, LLC. All Rights Reserved.
+ * Copyright 2014-2016 JKOOL, LLC.
  *
- * This software is the confidential and proprietary information of
- * jKool, LLC. ("Confidential Information").  You shall not disclose
- * such Confidential Information and shall use it only in accordance with
- * the terms of the license agreement you entered into with jKool, LLC.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * JKOOL MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
- * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE, OR NON-INFRINGEMENT. JKOOL SHALL NOT BE LIABLE FOR ANY DAMAGES
- * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
- * THIS SOFTWARE OR ITS DERIVATIVES.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * CopyrightVersion 1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.jkool.tnt4j.streams.parsers;
@@ -22,15 +19,12 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.*;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.filters.StreamFilter;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -55,11 +49,6 @@ public abstract class ActivityParser {
 	private String name;
 
 	private String[] tags;
-
-	/**
-	 * List of filters being used by stream.
-	 */
-	protected final Collection<StreamFilter> filters = new LinkedList<StreamFilter>();
 
 	/**
 	 * Constructs a new ActivityParser.
@@ -254,38 +243,6 @@ public abstract class ActivityParser {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Adds the specified filter to the list of filters being used by this
-	 * stream.
-	 *
-	 * @param filter
-	 *            filter to add
-	 */
-	public void addFilter(StreamFilter filter) {
-		filters.add(filter);
-	}
-
-	/**
-	 * Applies all defined filters on specified activity item. If activity item
-	 * matches any of filter criteria - such item is skipped from sending it to
-	 * jKool Cloud Service.
-	 *
-	 * @param activityInfo
-	 *            activity item data to check against defined filters
-	 *
-	 * @return {@code true} if activity data was filtered by any of defined
-	 *         filters, {@code false} otherwise
-	 */
-	protected boolean filterActivity(ActivityInfo activityInfo) {
-		boolean filtered = false;
-		Iterator<StreamFilter> filtersIterator = filters.iterator();
-		while (!filtered && filtersIterator.hasNext()) {
-			StreamFilter filter = filtersIterator.next();
-			filtered = filter.doFilterActivity(activityInfo);
-		}
-		return filtered;
 	}
 
 	/**

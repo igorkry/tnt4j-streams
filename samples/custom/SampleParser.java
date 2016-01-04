@@ -1,26 +1,21 @@
 /*
- * Copyright (c) 2015 jKool, LLC. All Rights Reserved.
+ * Copyright 2014-2016 JKOOL, LLC.
  *
- * This software is the confidential and proprietary information of
- * jKool, LLC. ("Confidential Information").  You shall not disclose
- * such Confidential Information and shall use it only in accordance with
- * the terms of the license agreement you entered into with jKool, LLC.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * JKOOL MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
- * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
- * PURPOSE, OR NON-INFRINGEMENT. JKOOL SHALL NOT BE LIABLE FOR ANY DAMAGES
- * SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
- * THIS SOFTWARE OR ITS DERIVATIVES.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * CopyrightVersion 1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.jkool.tnt4j.streams.samples.custom;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
@@ -78,25 +73,6 @@ public class SampleParser extends GenericActivityParser<String[]> {
 				fieldDelim = value;
 			}
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
-	 * </p>
-	 * <ul>
-	 * <li>{@code java.lang.String}</li>
-	 * <li>{@code byte[]}</li>
-	 * <li>{@code java.io.Reader}</li>
-	 * <li>{@code java.io.InputStream}</li>
-	 * </ul>
-	 */
-	@Override
-	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
-				|| InputStream.class.isInstance(data);
 	}
 
 	/**
