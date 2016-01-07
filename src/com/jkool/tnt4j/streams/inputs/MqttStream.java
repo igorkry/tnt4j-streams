@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -79,7 +80,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MqttStream.class);
 
-	private static final String SSL_PROTOCOL = "SSL";
+	private static final String SSL_PROTOCOL = "SSL"; // NON-NLS
 	private static final String KEYSTORE_TYPE = KeyStore.getDefaultType();
 
 	// Stream properties
@@ -181,7 +182,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		mqttDataReceiver = new MqttDataReceiver();
 		mqttDataReceiver.initialize();
 
-		LOGGER.log(OpLevel.DEBUG, "TNT4J-Streams Mqtt stream ready to receive messages");
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("MqttStream.stream.ready"));
 
 		mqttDataReceiver.start();
 	}
@@ -194,7 +195,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		try {
 			mqttDataReceiver.close();
 		} catch (MqttException exc) {
-			LOGGER.log(OpLevel.WARNING, "Error while closing Mqtt data receiver", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.closing.receiver"), exc);
 		}
 
 		super.cleanup();
@@ -272,18 +273,18 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			LOGGER.log(OpLevel.ERROR, "Mqtt connection lost", cause);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("MqttStream.connection.lost"), cause);
 
 			try {
 				closeConncetion();
 			} catch (MqttException exc) {
-				LOGGER.log(OpLevel.WARNING, "Error while closing Mqtt data receiver", exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.closing.receiver"), exc);
 			}
 
 			try {
 				initialize();
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, "Error while reconnecting Mqtt data receiver", exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.reconnecting.receiver"), exc);
 			}
 		}
 
@@ -298,11 +299,16 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
 
 			Map<String, Object> msgDataMap = new HashMap<String, Object>();
-			msgDataMap.put(StreamsConstants.TOPIC_KEY, topic);
-			msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, message.getPayload());
-			msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_MQTT);
 
-			addInputToBuffer(msgDataMap);
+			if (ArrayUtils.isNotEmpty(message.getPayload())) {
+				msgDataMap.put(StreamsConstants.TOPIC_KEY, topic);
+				msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, message.getPayload());
+				msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_MQTT);
+			}
+
+			if (!msgDataMap.isEmpty()) {
+				addInputToBuffer(msgDataMap);
+			}
 		}
 
 		@Override

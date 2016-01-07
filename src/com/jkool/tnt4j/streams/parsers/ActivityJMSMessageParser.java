@@ -16,48 +16,55 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
-import java.lang.IllegalStateException;
-import java.text.ParseException;
-import java.util.Collection;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.*;
 
-import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+
+import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * TODO
+ * <p>
+ * Implements default activity data parser that assumes each activity data item
+ * is an JMS message data structure. Message payload data is put into map entry
+ * using key defined in {@code StreamsConstants.ACTIVITY_DATA_KEY}. This parser
+ * supports JMS messages of those types:
+ * <ul>
+ * <li>TextMessage - activity data is message text</li>
+ * <li>BytesMessage - activity data is string made from message bytes</li>
+ * <li>MapMessage - activity data is message map entries</li>
+ * <li>StreamMessage - activity data is string made from message bytes</li>
+ * <li>ObjectMessage - activity data is message serializable object</li>
+ * </ul>
+ * </p>
+ * </p>
+ * Custom messages parsing not implemented and puts just log entry.
+ * </p>
+ *
+ * @version $Revision: 1 $
  */
-public class ActivityJMSMessageParser extends GenericActivityParser<Message> {
+public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJMSMessageParser.class);
 
+	private static final int BYTE_BUFFER_LENGTH = 1024;
+
 	/**
-	 * Constructs a new JMSMessageParser.
+	 * Constructs a new ActivityJMSMessageParser.
 	 */
 	public ActivityJMSMessageParser() {
 		super(LOGGER);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
-		if (props == null) {
-			return;
-		}
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-
-			// TODO:
-		}
 	}
 
 	/**
@@ -76,125 +83,174 @@ public class ActivityJMSMessageParser extends GenericActivityParser<Message> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Makes map object containing activity object data collected from JMS
+	 * message payload data.
+	 *
+	 * @param data
+	 *            activity object data object - JMS message
+	 *
+	 * @return activity object data map
 	 */
 	@Override
-	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
+	protected Map<String, ?> getDataMap(Object data) {
 		if (data == null) {
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
-
 		Message message = (Message) data;
+		Map<String, Object> dataMap = new HashMap<String, Object>();
 
-		ActivityInfo ai = new ActivityInfo();
-
-		if (message instanceof TextMessage) {
-			ai = parseTextMessage((TextMessage) message);
-		} else if (message instanceof BytesMessage) {
-			ai = parseBytesMessage((BytesMessage) message);
-		} else if (message instanceof MapMessage) {
-			ai = parseMapMessage((MapMessage) message);
-		} else if (message instanceof StreamMessage) {
-			ai = parseStreamMessage((StreamMessage) message);
-		} else if (message instanceof ObjectMessage) {
-			ai = parseObjectMessage((ObjectMessage) message);
-		} else {
-			ai = parseCustomMessage(message);
+		try {
+			if (message instanceof TextMessage) {
+				parseTextMessage((TextMessage) message, dataMap);
+			} else if (message instanceof BytesMessage) {
+				parseBytesMessage((BytesMessage) message, dataMap);
+			} else if (message instanceof MapMessage) {
+				parseMapMessage((MapMessage) message, dataMap);
+			} else if (message instanceof StreamMessage) {
+				parseStreamMessage((StreamMessage) message, dataMap);
+			} else if (message instanceof ObjectMessage) {
+				parseObjectMessage((ObjectMessage) message, dataMap);
+			} else {
+				parseCustomMessage(message, dataMap);
+			}
+		} catch (JMSException exc) {
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityJMSMessageParser.payload.data.error"), exc);
 		}
 
-		return ai;
+		if (!dataMap.isEmpty()) {
+			dataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_JMS);
+		}
+
+		return dataMap;
 	}
 
 	/**
-	 * Parse text message activity info.
+	 * Parse JMS {@code TextMessage} activity info into activity data map.
 	 *
 	 * @param textMessage
-	 *            the text message
-	 * @return the activity info
+	 *            JMS text message
+	 * @param dataMap
+	 *            activity data map collected from JMS {@code TextMessage}
+	 *
+	 * @throws JMSException
+	 *             if JMS exception occurs while getting text from message.
 	 */
-	protected ActivityInfo parseTextMessage(TextMessage textMessage) {
-		return null; // TODO
+	protected void parseTextMessage(TextMessage textMessage, Map<String, Object> dataMap) throws JMSException {
+		String text = textMessage.getText();
+		if (StringUtils.isNotEmpty(text)) {
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, text);
+		}
 	}
 
 	/**
-	 * Parse bytes message activity info.
+	 * Parse JMS {@code BytesMessage} activity info into activity data map.
 	 *
 	 * @param bytesMessage
-	 *            the bytes message
-	 * @return the activity info
+	 *            JMS bytes message
+	 * @param dataMap
+	 *            activity data map collected from JMS {@code BytesMessage}
+	 *
+	 * @throws JMSException
+	 *             if JMS exception occurs while reading bytes from message.
 	 */
-	protected ActivityInfo parseBytesMessage(BytesMessage bytesMessage) {
-		return null; // TODO
+	protected void parseBytesMessage(BytesMessage bytesMessage, Map<String, Object> dataMap) throws JMSException {
+		byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
+		bytesMessage.readBytes(bytes);
+
+		if (ArrayUtils.isNotEmpty(bytes)) {
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, Utils.getString(bytes));
+		}
 	}
 
 	/**
-	 * Parse map message activity info.
+	 * Parse JMS {@code MapMessage} activity info into activity data map.
 	 *
 	 * @param mapMessage
-	 *            the map message
-	 * @return the activity info
+	 *            JMS map message
+	 * @param dataMap
+	 *            activity data map collected from JMS {@code MapMessage}
+	 *
+	 * @throws JMSException
+	 *             if JMS exception occurs while getting map entries from
+	 *             message.
 	 */
-	protected ActivityInfo parseMapMessage(MapMessage mapMessage) {
-		return null; // TODO
+	protected void parseMapMessage(MapMessage mapMessage, Map<String, Object> dataMap) throws JMSException {
+		Enumeration<String> en = mapMessage.getMapNames();
+		while (en.hasMoreElements()) {
+			String key = en.nextElement();
+			dataMap.put(key, mapMessage.getObject(key));
+		}
 	}
 
 	/**
-	 * Parse stream message activity info.
+	 * Parse JMS {@code StreamMessage} activity info into activity data map.
 	 *
 	 * @param streamMessage
-	 *            the stream message
-	 * @return the activity info
+	 *            JMS stream message
+	 * @param dataMap
+	 *            activity data map collected from JMS {@code StreamMessage}
+	 *
+	 * @throws JMSException
+	 *             if JMS exception occurs while reading bytes from message.
 	 */
-	protected ActivityInfo parseStreamMessage(StreamMessage streamMessage) {
-		return null; // TODO
+	protected void parseStreamMessage(StreamMessage streamMessage, Map<String, Object> dataMap) throws JMSException {
+		streamMessage.reset();
+
+		byte[] buffer = new byte[BYTE_BUFFER_LENGTH];
+
+		int bytesRead = 0;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(buffer.length);
+
+		try {
+			do {
+				bytesRead = streamMessage.readBytes(buffer);
+
+				baos.write(buffer);
+			} while (bytesRead != 0);
+		} catch (IOException exc) {
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityJMSMessageParser.bytes.buffer.error"), exc);
+		}
+
+		byte[] bytes = baos.toByteArray();
+		Utils.close(baos);
+
+		if (ArrayUtils.isNotEmpty(bytes)) {
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, Utils.getString(bytes));
+		}
 	}
 
 	/**
-	 * Parse object message activity info.
+	 * Parse JMS {@code ObjectMessage} activity info into activity data map.
 	 *
 	 * @param objMessage
-	 *            the obj message
-	 * @return the activity info
+	 *            JMS object message
+	 * @param dataMap
+	 *            activity data map collected from JMS {@code ObjectMessage}
+	 *
+	 * @throws JMSException
+	 *             if JMS exception occurs while getting {@code Serializable}
+	 *             object from message.
 	 */
-	protected ActivityInfo parseObjectMessage(ObjectMessage objMessage) {
-		return null; // TODO
+	protected void parseObjectMessage(ObjectMessage objMessage, Map<String, Object> dataMap) throws JMSException {
+		Serializable serializableObj = objMessage.getObject();
+		if (serializableObj != null) {
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, serializableObj);
+		}
 	}
 
 	/**
-	 * Parse custom message activity info.
-	 *
+	 * Parse custom message activity info into activity data map.
+	 * 
 	 * @param message
-	 *            the message
-	 * @return the activity info
+	 *            custom JMS message
+	 * @param dataMap
+	 *            activity data map collected from custom JMS message
+	 *
+	 * @throws JMSException
+	 *             if any JMS exception occurs while parsing message.
 	 */
-	protected ActivityInfo parseCustomMessage(Message message) {
-		return null; // TODO
-	}
-
-	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
-	 *
-	 * @param stream
-	 *            parent stream
-	 * @param locator
-	 *            activity field locator
-	 * @param data
-	 *            activity object data
-	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
-	 */
-	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Message data)
-			throws ParseException {
-		return null; // TODO
+	protected void parseCustomMessage(Message message, Map<String, Object> dataMap) throws JMSException {
+		LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityJMSMessageParser.parsing.custom.jms.message"));
 	}
 }

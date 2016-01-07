@@ -171,7 +171,7 @@ public class NumericFormatter {
 	 * @see java.text.DecimalFormat#DecimalFormat(String)
 	 */
 	public static Number parse(String pattern, Object value, Number scale) throws ParseException {
-		return parse(new DecimalFormat(pattern), 10, value, scale);
+		return parse(Utils.isEmpty(pattern) ? null : new DecimalFormat(pattern), 10, value, scale);
 	}
 
 	/**

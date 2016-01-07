@@ -26,6 +26,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -33,13 +34,13 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * <p>
  * Implements a JMS message transported activity stream, where each JMS message
- * carries single {@code TextMessage} activity object data or line of the file
- * is assumed to represent a single activity or event which should be recorded.
- * TODO
+ * payload data carried data is assumed to represent a single activity or event
+ * which should be recorded.
  *
  * </p>
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support JMS {@code Message}
+ * data.
  * </p>
  * This activity stream supports the following properties:
  * <ul>
@@ -135,7 +136,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 		jmsDataReceiver.initialize(ic, queueName, jmsFactory);
 
-		LOGGER.log(OpLevel.DEBUG, "TNT4J-Streams JMS stream ready to receive messages");
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("JMSStream.stream.ready"));
 
 		jmsDataReceiver.start();
 	}
@@ -182,10 +183,12 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		}
 
 		/**
-		 * Message listener interface. TODO
+		 * Adds received JMS message to input buffer queue.
 		 *
 		 * @param msg
-		 *            message
+		 *            received JMS message
+		 *
+		 * @see javax.jms.MessageListener#onMessage(Message)
 		 */
 		@Override
 		public void onMessage(Message msg) {

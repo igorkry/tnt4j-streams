@@ -248,8 +248,8 @@ public class ActivityField {
 	 * @param obj
 	 *            the reference object with which to compare.
 	 *
-	 * @return {@code true} if this field is the same as the obj argument;
-	 *         {@code false} otherwise.
+	 * @return {@code true} if this field is the same as the obj argument,
+	 *         {@code false} otherwise
 	 *
 	 * @see Object#equals(Object)
 	 */

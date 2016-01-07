@@ -61,8 +61,10 @@ public final class StreamsAgent {
 	 */
 	public static void main(String... args) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getString("StreamsAgent.start.main"));
-		processArgs(args);
-		loadConfigAndRun(cfgFileName);
+		boolean argsValid = processArgs(args);
+		if (argsValid) {
+			loadConfigAndRun(cfgFileName);
+		}
 	}
 
 	/**
@@ -108,8 +110,11 @@ public final class StreamsAgent {
 	 *
 	 * @param args
 	 *            command-line arguments.
+	 * 
+	 * @return {@code true} if command-line arguments where valid to interpret,
+	 *         {@code false} - otherwise
 	 */
-	private static void processArgs(String... args) {
+	private static boolean processArgs(String... args) {
 		for (String arg : args) {
 			if (StringUtils.isEmpty(arg)) {
 				continue;
@@ -119,17 +124,19 @@ public final class StreamsAgent {
 				if (StringUtils.isEmpty(cfgFileName)) {
 					System.out.println(StreamsResources.getString("StreamsAgent.missing.cfg"));
 					printUsage();
-					System.exit(1);
+					return false;
 				}
 			} else if ("-h".equals(arg) || "-?".equals(arg)) { // NON-NLS
 				printUsage();
-				System.exit(1);
+				return false;
 			} else {
 				System.out.println(StreamsResources.getStringFormatted("StreamsAgent.invalid.argument", arg));
 				printUsage();
-				System.exit(1);
+				return false;
 			}
 		}
+
+		return true;
 	}
 
 	/**

@@ -315,7 +315,7 @@ public class TimestampFormatter {
 	public static Number convert(Number timestamp, ActivityFieldUnitsType fromUnits, ActivityFieldUnitsType toUnits)
 			throws ParseException {
 		double scale = 1.0;
-		if (fromUnits != null && toUnits != null && fromUnits != toUnits) {
+		if (fromUnits != null && toUnits != null) {
 			switch (fromUnits) {
 			case Microseconds:
 				switch (toUnits) {

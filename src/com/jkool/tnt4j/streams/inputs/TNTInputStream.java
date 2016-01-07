@@ -271,7 +271,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @see Executors#newFixedThreadPool(int)
 	 */
 	private static ExecutorService getDefaultExecutorService(int threadsQty) {
-		return Executors.newFixedThreadPool(threadsQty, new StreamExecutorThreadFactory("StreamExecutorThread-"));
+		return Executors.newFixedThreadPool(threadsQty,
+				new StreamExecutorThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
 	}
 
 	/**
@@ -296,7 +297,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingDeque<Runnable>(threadsQty * 2),
-				new StreamExecutorThreadFactory("StreamExecutorThread-"));
+				new StreamExecutorThreadFactory("StreamBoundedExecutorThread-")); // NON-NLS
 
 		tpe.setRejectedExecutionHandler(new RejectedExecutionHandler() {
 			@Override
@@ -504,7 +505,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Indicates whether this stream has stopped.
 	 *
-	 * @return {@code true} if stream has stopped processing, {@code false}
+	 * @return {@code true} if stream has stopped processing, {@code false} -
 	 *         otherwise
 	 */
 	public boolean isHalted() {

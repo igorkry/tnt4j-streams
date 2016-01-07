@@ -26,6 +26,7 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
@@ -140,7 +141,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		}
 
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.ready.to.receive.messages"));
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.stream.ready"));
 	}
 
 	/**
@@ -175,9 +176,12 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
 
 				Map<String, Object> msgDataMap = new HashMap<String, Object>();
-				msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
-				msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
-				msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_KAFKA);
+
+				if (ArrayUtils.isNotEmpty(msgPayload)) {
+					msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
+					msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
+					msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_KAFKA);
+				}
 
 				return msgDataMap;
 			}

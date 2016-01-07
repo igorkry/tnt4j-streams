@@ -120,7 +120,7 @@ public abstract class ActivityParser {
 	 *            data object whose class is to be verified
 	 *
 	 * @return {@code true} if this parser can process data in the specified
-	 *         format, {@code false} otherwise
+	 *         format, {@code false} - otherwise
 	 */
 	public abstract boolean isDataClassSupported(Object data);
 

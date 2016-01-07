@@ -61,12 +61,13 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (props == null) {
 			return;
 		}
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
 
-			// TODO:
-		}
+		// for (Map.Entry<String, String> prop : props) {
+		// String name = prop.getKey();
+		// String value = prop.getValue();
+		//
+		// // no any additional properties are required yet.
+		// }
 	}
 
 	/**

@@ -34,7 +34,14 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * TODO
+ * <p>
+ * Implements default activity data parser that assumes each activity data item
+ * is an plain java {@code Object} data structure, where each field is
+ * represented by declared class field and the field name is used to map each
+ * field onto its corresponding activity field.
+ * </p>
+ *
+ * @version $Revision: 1 $
  */
 public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJavaObjectParser.class);
@@ -55,12 +62,13 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		if (props == null) {
 			return;
 		}
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
 
-			// TODO:
-		}
+		// for (Map.Entry<String, String> prop : props) {
+		// String name = prop.getKey();
+		// String value = prop.getValue();
+		//
+		// // no any additional properties are required yet.
+		// }
 	}
 
 	/**
@@ -155,7 +163,9 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 			return obj;
 		} catch (Throwable exc) {
-			LOGGER.log(OpLevel.WARNING, "TODO", exc);
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getStringFormatted("ActivityJavaObjectParser.could.not.get.declared.field"),
+					path[i], dataObj.getClass().getSimpleName(), exc);
 			return null;
 		}
 	}

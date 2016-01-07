@@ -86,7 +86,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 	@Override
 	protected void loadFiles() throws Exception {
 		final URI fileUri = new URI(fileName);
-		fs = FileSystem.get(fileUri, new Configuration());
+		if (fs == null) {
+			fs = FileSystem.get(fileUri, new Configuration());
+		}
 		Path filePath = new Path(fileUri);
 
 		if (Utils.isWildcardFileName(fileName)) {
@@ -163,5 +165,13 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 	 */
 	protected String getFileName(int fileNumber) {
 		return activityFiles[fileNumber].getName();
+	}
+
+	/**
+	 * For testing
+	 */
+	protected void setFs(FileSystem fs)
+	{
+		this.fs = fs;
 	}
 }

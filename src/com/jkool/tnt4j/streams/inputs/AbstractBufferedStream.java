@@ -111,9 +111,12 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 * @param inputData
 	 *            input data to add to buffer
 	 *
+	 * @return {@code true} if input data is added to buffer, {@code false} -
+	 *         otherwise
+	 *
 	 * @see java.util.concurrent.BlockingQueue#offer(Object, long, TimeUnit)
 	 */
-	protected void addInputToBuffer(T inputData) {
+	protected boolean addInputToBuffer(T inputData) {
 		if (inputData != null) {
 			try {
 				boolean added = inputBuffer.offer(inputData, INPUT_BUFFER_OFFER_TIMEOUT, TimeUnit.SECONDS);
@@ -122,12 +125,16 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 					logger.log(OpLevel.WARNING, StreamsResources
 							.getStringFormatted("AbstractBufferedStream.changes.buffer.limit", inputData));
 				}
+
+				return added;
 			} catch (InterruptedException exc) {
 				logger.log(OpLevel.WARNING, StreamsResources.getString("AbstractBufferedStream.offer.interrupted"),
 						exc);
 				// halt();
 			}
 		}
+
+		return false;
 	}
 
 	/**
