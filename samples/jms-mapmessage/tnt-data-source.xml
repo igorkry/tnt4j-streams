@@ -64,7 +64,7 @@
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
-        <property name="Queue" value="queue.SampleJMSQueue"/>
+        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
         <property name="Topic" value="topic.SampleJMSTopic"/>
         <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
         <property name="JMSConnFactory" value="ConnectionFactory"/>
