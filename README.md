@@ -14,11 +14,11 @@ Stream executors related parameters:
                                            Actual only if ExecutorsBoundedModel is set to true.
 
     sample:
-        <property name="UseExecutors" value="true"/>
-        <property name="ExecutorThreadsQuantity" value="5"/>
-        <property name="ExecutorsTerminationTimeout" value="20"/>
-        <property name="ExecutorsBoundedModel" value="true"/>
-        <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
+        &lt;property name="UseExecutors" value="true"/&gt;
+        &lt;property name="ExecutorThreadsQuantity" value="5"/&gt;
+        &lt;property name="ExecutorsTerminationTimeout" value="20"/&gt;
+        &lt;property name="ExecutorsBoundedModel" value="true"/&gt;
+        &lt;property name="ExecutorRejectedTaskOfferTimeout" value="20"/&gt;
 
 How to Build TNT4J-Streams
 =========================================
@@ -88,4 +88,4 @@ Requirements
 * Mockito (http://mockito.org/)
 
 Running
-* Run JUnit test suite named StreamsAllTests
+* Run JUnit test suite named "StreamsAllTests"
