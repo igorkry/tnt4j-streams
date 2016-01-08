@@ -45,9 +45,20 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class TNT4JStreamsEventSink extends AbstractSink implements Configurable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TNT4JStreamsEventSink.class);
 
-	private static final String PROP_HOST = "hostname"; // NON-NLS
-	private static final String PROP_PORT = "port"; // NON-NLS
-	private static final String PROP_STREAM_CONFIG = "streamConfig"; // NON-NLS
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_HOST = "hostname"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_PORT = "port"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_STREAM_CONFIG = "streamConfig"; // NON-NLS
 
 	private static final String DEFAULT_HOST = "localhost"; // NON-NLS
 	private static final int DEFAULT_PORT = 9595;

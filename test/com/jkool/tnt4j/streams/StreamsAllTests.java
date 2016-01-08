@@ -23,6 +23,7 @@ import com.jkool.tnt4j.streams.configure.AllConfigureTests;
 import com.jkool.tnt4j.streams.fields.AllFieldsTests;
 import com.jkool.tnt4j.streams.inputs.AllInputsTests;
 import com.jkool.tnt4j.streams.parsers.AllParsersTests;
+import com.jkool.tnt4j.streams.plugins.flume.AllFlumeTests;
 import com.jkool.tnt4j.streams.utils.AllUtilsTests;
 
 /**
@@ -31,6 +32,6 @@ import com.jkool.tnt4j.streams.utils.AllUtilsTests;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ StreamsAgentTests.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
-		AllParsersTests.class, AllUtilsTests.class })
+		AllParsersTests.class, AllFlumeTests.class, AllUtilsTests.class })
 public class StreamsAllTests {
 }
