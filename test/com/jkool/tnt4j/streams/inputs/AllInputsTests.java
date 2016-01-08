@@ -28,7 +28,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
 		FileLineStreamTest.class, FilePollingStreamTest.class, HdfsFileLineStreamTest.class, HttpStreamTest.class,
 		StreamThreadTest.class, TNTInputStreamTest.class, WmqStreamTest.class, JMSStreamTest.class,
-		KafkaStreamTest.class })
+		KafkaStreamTest.class, MqttStreamTest.class })
 public class AllInputsTests {
 
 }
