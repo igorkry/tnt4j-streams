@@ -16,12 +16,15 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -39,6 +42,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -54,7 +58,7 @@ public class HttpStreamTest {
 		URI url = new URI("http://localhost:8080/");
 		HttpPost post = new HttpPost(url);
 
-		File file = new File("./samples/http-stream/log.txt");
+		File file = new File("./samples/http-file/log.txt");
 		EntityBuilder entityBuilder = EntityBuilder.create();
 		entityBuilder.setFile(file);
 		entityBuilder.setContentType(ContentType.TEXT_PLAIN);
@@ -82,20 +86,18 @@ public class HttpStreamTest {
 		URI url = new URI("Http://localhost:8080/");
 		HttpPost post = new HttpPost(url);
 
-		// StringEntity entity = new StringEntity(
-		// Files.toString(new File("./samples/http-stream/messages.json"),
-		// Charset.forName("UTF-8")));
+		FileReader fileReader = new FileReader(new File("./samples/http-form/form-data.json"));
+		Map<String, ?> jsonMap = Utils.fromJsonToMap(fileReader);
+		Utils.close(fileReader);
+
+		assertNotNull("Could not load form data from JSON", jsonMap);
+		assertFalse("Loaded form data is empty", jsonMap.isEmpty());
 
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("clientip", "127.0.0.1"));
-		params.add(new BasicNameValuePair("ident", "-"));
-		params.add(new BasicNameValuePair("auth", "-"));
-		params.add(new BasicNameValuePair("timestamp", "27/Nov/2015:14:19:46 +0200"));
-		params.add(new BasicNameValuePair("verb", "POST"));
-		params.add(new BasicNameValuePair("request", "/gvm_java/gvm/services/OperatorWebService"));
-		params.add(new BasicNameValuePair("httpversion", "1.1"));
-		params.add(new BasicNameValuePair("response", "200"));
-		params.add(new BasicNameValuePair("bytes", "124647"));
+
+		for (Map.Entry<String, ?> e : jsonMap.entrySet()) {
+			params.add(new BasicNameValuePair(e.getKey(), String.valueOf(e.getValue())));
+		}
 
 		HttpEntity entity = new UrlEncodedFormEntity(params);
 

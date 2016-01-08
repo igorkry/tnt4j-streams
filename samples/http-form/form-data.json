@@ -1,0 +1,11 @@
+{
+  "clientip": "127.0.0.1",
+  "ident": "-",
+  "auth": "-",
+  "timestamp": "27/Nov/2015:14:19:46 +0200",
+  "verb": "POST",
+  "request": "/gvm_java/gvm/services/OperatorWebService",
+  "httpversion": "1.1",
+  "response": "200",
+  "bytes": "124647"
+}

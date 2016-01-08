@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  */
 public class StreamsConfigTest {
 	private static final boolean DEFAULT_CONFIG = true;
-	private static final String TEST_FILE_NAME = ".\\samples\\http-stream\\tnt-data-source.xml";
+	private static final String TEST_FILE_NAME = ".\\samples\\http-file\\tnt-data-source.xml";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -58,8 +58,8 @@ public class StreamsConfigTest {
 
 	private void isStreamsAndParsersLoaded(StreamsConfig streamsConfig) {
 		if (DEFAULT_CONFIG) {
-			assertNotNull("Has no parsers", streamsConfig.getParsers());
-			assertNotNull("Has no parsers", streamsConfig.getStreams());
+			assertNotNull("Has no parsers defined", streamsConfig.getParsers());
+			assertNotNull("Has no streams defined", streamsConfig.getStreams());
 		}
 	}
 
