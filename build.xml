@@ -14,7 +14,6 @@
     <property name="docpkg" value="com.jkool.tnt4j.streams.*"/>
     <property name="src" value="src"/>
     <property name="lib" value="lib"/>
-    <property name="lib_build" value="lib_build"/>
     <property name="config" value="config"/>
     <property name="samples" value="samples"/>
     <property name="scripts" value="bin"/>
@@ -28,6 +27,7 @@
     <property name="jar_name_http" value="${project-pkg-name}-http.jar"/>
     <property name="jar_name_mqtt" value="${project-pkg-name}-mqtt.jar"/>
     <property name="jar_name_jms" value="${project-pkg-name}-jms.jar"/>
+    <property name="jar_name_flume" value="${project-pkg-name}-flume-plugin.jar"/>
     <property name="jar" value="${project-build}/${jar_name}"/>
     <property name="jar_core" value="${project-build}/${jar_name_core}"/>
     <property name="jar_hdfs" value="${project-build}/${jar_name_hdfs}"/>
@@ -36,6 +36,7 @@
     <property name="jar_http" value="${project-build}/${jar_name_http}"/>
     <property name="jar_mqtt" value="${project-build}/${jar_name_mqtt}"/>
     <property name="jar_jms" value="${project-build}/${jar_name_jms}"/>
+    <property name="jar_flume" value="${project-build}/${jar_name_flume}"/>
     <property name="pkg" value="${project-build}/${project-pkg-name}"/>
 
     <target name="init">
@@ -55,7 +56,6 @@
             <src path="${src}"/>
             <classpath>
                 <fileset dir="${lib}"/>
-                <fileset dir="${lib_build}"/>
             </classpath>
         </javac>
 
@@ -80,6 +80,7 @@
                 <include name="ibm.mq\*.jar"/>
                 <include name="kafka\*.jar"/>
                 <include name="paho\*.jar"/>
+                <include name="flume\*.jar"/>
             </fileset>
         </path>
 
@@ -148,11 +149,15 @@
                 <attribute name="Main-Class" value="com.jkool.tnt4j.streams.StreamsAgent"/>
             </manifest>
             <fileset dir="${classes}">
-                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFileLineStream.class"/>
-                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFilePollingStream.class"/>
-                <exclude name="com/jkool/tnt4j/streams/inputs/WmqStream.class"/>
-                <exclude name="com/jkool/tnt4j/streams/inputs/KafkaStream.class"/>
-                <exclude name="com/jkool/tnt4j/streams/inputs/MqttStream.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFileLineStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/HdfsFilePollingStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/WmqStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/KafkaStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/MqttStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/JMSStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/parsers/ActivityJMSMessageParser*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/inputs/HttpStream*.class"/>
+                <exclude name="com/jkool/tnt4j/streams/plugins/flume/**/*.*"/>
             </fileset>
         </jar>
         <echo message="Copying ${ant.project.name} configuration" level="info"/>
@@ -208,6 +213,7 @@
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/HdfsFileLineStream.class"/>
                 <include name="com/jkool/tnt4j/streams/inputs/HdfsFilePollingStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
@@ -237,6 +243,7 @@
             </manifest>
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/WmqStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
@@ -266,6 +273,7 @@
             </manifest>
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/KafkaStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
@@ -295,6 +303,7 @@
             </manifest>
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/MqttStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
@@ -305,9 +314,9 @@
     <target name="tnt4j-streams-jms-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams JMS API">
 
         <path id="runtime-classpath-jms">
-            <!--fileset dir="${project-build}/lib">
+            <fileset dir="${project-build}/lib">
                 <include name="jms\*.jar"/>
-            </fileset-->
+            </fileset>
             <file name="${jar_core}"/>
         </path>
 
@@ -324,7 +333,9 @@
             </manifest>
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/JMSStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <include name="com/jkool/tnt4j/streams/parsers/ActivityJMSMessageParser.class"/>
+                <include name="com/jkool/tnt4j/streams/parsers/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
@@ -335,9 +346,9 @@
     <target name="tnt4j-streams-http-api" depends="tnt4j-streams-core-api" description="build TNT4J Streams HTTP API">
 
         <path id="runtime-classpath-http">
-            <!--fileset dir="${project-build}/lib">
+            <fileset dir="${project-build}/lib">
                 <include name="http\*.jar"/>
-            </fileset-->
+            </fileset>
             <file name="${jar_core}"/>
         </path>
 
@@ -354,11 +365,42 @@
             </manifest>
             <fileset dir="${classes}">
                 <include name="com/jkool/tnt4j/streams/inputs/HttpStream.class"/>
+                <include name="com/jkool/tnt4j/streams/inputs/package-info.class"/>
                 <!--<include name="resources/*.properties"/>-->
             </fileset>
         </jar>
 
         <echo message="Build of ${ant.project.name} HTTP API complete${line.separator}" level="info"/>
+    </target>
+
+    <target name="tnt4j-streams-flume-plugin" depends="tnt4j-streams-core-api"
+            description="build TNT4J Streams Apache Flume plugin API">
+
+        <path id="runtime-classpath-flume">
+            <fileset dir="${project-build}/lib">
+                <include name="flume\*.jar"/>
+            </fileset>
+            <file name="${jar_core}"/>
+        </path>
+
+        <manifestclasspath property="jar-runtime-classpath-flume" jarfile="${jar_flume}" maxParentLevels="0">
+            <classpath refid="runtime-classpath-flume"/>
+        </manifestclasspath>
+
+        <jar jarfile="${jar_flume}" update="false">
+            <manifest>
+                <attribute name="Implementation-Vendor" value="${vendor}"/>
+                <attribute name="Implementation-Title" value="${prodname}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Class-Path" value="${jar-runtime-classpath-flume}"/>
+            </manifest>
+            <fileset dir="${classes}">
+                <include name="com/jkool/tnt4j/streams/plugins/flume/*.*"/>
+                <!--<include name="resources/*.properties"/>-->
+            </fileset>
+        </jar>
+
+        <echo message="Build of ${ant.project.name} Apache Flume plugin complete${line.separator}" level="info"/>
     </target>
 
     <target name="doc" depends="tnt4j-streams" description="build javadoc">
@@ -396,21 +438,21 @@
         <delete dir="${project-build}" includes="*-all.jar,*-all.zip"/>
 
         <echo message="Creating ${pkg}-${version}-all.jar" level="info"/>
-        <zip destfile="${pkg}-${version}-all.jar">
+        <zip destfile="${pkg}-${version}-all.jar" duplicate="preserve">
             <zipgroupfileset dir="${lib}" includes="*.jar, hadoop/*.jar, ibm.mq/*.jar, kafka/*.jar, paho/*.jar"/>
             <zipgroupfileset dir="${project-build}"
-                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}, ${jar_name_jms}, ${jar_name_http}"/>
+                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}, ${jar_name_jms}, ${jar_name_http}, ${jar_name_flume}"/>
         </zip>
         <echo message="Creating ${pkg}-final-all.jar" level="info"/>
-        <zip destfile="${pkg}-final-all.jar">
+        <zip destfile="${pkg}-final-all.jar" duplicate="preserve">
             <zipgroupfileset dir="${lib}" includes="*.jar, hadoop/*.jar, ibm.mq/*.jar, kafka/*.jar, paho/*.jar"/>
             <zipgroupfileset dir="${project-build}"
-                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}, ${jar_name_jms}, ${jar_name_http}"/>
+                             includes="${jar_name_core}, ${jar_name_hdfs}, ${jar_name_wmq}, ${jar_name_kafka}, ${jar_name_mqtt}, ${jar_name_jms}, ${jar_name_http}, ${jar_name_flume}"/>
         </zip>
     </target>
 
     <target name="tnt4j-streams"
-            depends="tnt4j-streams-core-api, tnt4j-streams-hdfs-api, tnt4j-streams-wmq-api, tnt4j-streams-kafka-api, tnt4j-streams-mqtt-api, tnt4j-streams-jms-api, tnt4j-streams-http-api"
+            depends="tnt4j-streams-core-api, tnt4j-streams-hdfs-api, tnt4j-streams-wmq-api, tnt4j-streams-kafka-api, tnt4j-streams-mqtt-api, tnt4j-streams-jms-api, tnt4j-streams-http-api, tnt4j-streams-flume-plugin"
             description="build executables"/>
     <target name="all" depends="tnt4j-streams-pkg" description="generate the distribution"/>
     <target name="rebuild" depends="clean,all" description="clean and build"/>

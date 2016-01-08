@@ -24,6 +24,6 @@ import org.junit.runners.Suite;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ActivityInfoTest.class, ActivityFieldLocatorTest.class })
+@Suite.SuiteClasses({ ActivityInfoTest.class, ActivityFieldLocatorTest.class, StreamFieldTypeTest.class })
 public class AllFieldsTests {
 }
