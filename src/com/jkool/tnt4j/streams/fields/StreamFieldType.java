@@ -239,10 +239,8 @@ public enum StreamFieldType {
 		switch (this) {
 		case Severity:
 			return OpLevel.valueOf(enumLabel).ordinal();
-
 		case EventType:
 			return OpType.valueOf(enumLabel).ordinal();
-
 		case CompCode:
 			return OpCompCode.valueOf(enumLabel).ordinal();
 
@@ -273,10 +271,8 @@ public enum StreamFieldType {
 		switch (this) {
 		case Severity:
 			return OpLevel.valueOf(enumLabel.toUpperCase());
-
 		case EventType:
 			return OpType.valueOf(enumLabel.toUpperCase());
-
 		case CompCode:
 			return OpCompCode.valueOf(enumLabel.toUpperCase());
 

@@ -14,21 +14,11 @@
  * the License.
  */
 
-package com.jkool.tnt4j.streams.inputs;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
 /**
+ * TODO
+ *
  * @author akausinis
  * @version 1.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
-		FileLineStreamTest.class, FilePollingStreamTest.class, HdfsFileLineStreamTest.class, HttpStreamTest.class,
-		StreamThreadTest.class, TNTInputStreamTest.class, WmqStreamTest.class, JMSStreamTest.class,
-		KafkaStreamTest.class })
-public class AllInputsTests {
 
-}
+package com.jkool.tnt4j.streams.filters;
