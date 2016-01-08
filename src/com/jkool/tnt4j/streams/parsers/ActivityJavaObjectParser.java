@@ -50,7 +50,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * Constructs a new ActivityJavaObjectParser.
 	 *
 	 */
-	protected ActivityJavaObjectParser() {
+	public ActivityJavaObjectParser() {
 		super(LOGGER);
 	}
 
