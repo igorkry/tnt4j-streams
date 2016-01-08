@@ -193,7 +193,7 @@ public class StreamsConfig {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_JMS_FACTORY = "JMSFactory"; // NON-NLS
+	public static final String PROP_JMS_CONN_FACTORY = "JMSConnFactory"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.

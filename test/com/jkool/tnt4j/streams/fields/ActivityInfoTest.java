@@ -132,7 +132,7 @@ public class ActivityInfoTest {
 		activityInfo.recordActivity(tracker, 50L);
 
 		verify(tracker).tnt(any(TrackingEvent.class));
-		// verify(tracker).close();
+		// Utils.close(verify(tracker));
 	}
 
 	@Test

@@ -116,7 +116,7 @@ public class UtilsTest {
 		}
 		System.out.println(tempFile.getAbsolutePath());
 		wr.flush();
-		wr.close();
+		Utils.close(wr);
 		final int lines = Utils.countLines(tempFile);
 		assertEquals(FILE_WR_LINES, lines);
 
