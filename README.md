@@ -109,6 +109,54 @@ Default location of `tnt4j.properties` file is in project `config` directory. At
 
 For more information on TNT4J and `tnt4j.properties` see (https://github.com/Nastel/TNT4J/wiki/Getting-Started).
 
+## Streams configuration
+
+Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration is
+can be found in `tnt-data-source.xsd` file located in project `config` directory.
+
+sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        <property name="FileName" value="orders.log"/>
+        <parser-ref name="TokenParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+As You can see from sample configuration there are two major configuration elements defined `parser` and `stream`.
+Because streams configuration is read using SAX parser referenced entities should be initialized before it is used.
+Note that `stream` uses `parser` reference:
+```xml
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        ...
+        <parser-ref name="TokenParser"/>
+    </stream>
+```
+That is why sequence of configuration elements is critical and can't be swapped.
+
 ### Generic stream parameters:
 
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
@@ -267,6 +315,9 @@ or
     <property name="Queue" value="EVENT.QUEUE"/>
     <property name="Host" value="wmq.sample.com"/>
 ```
+
+## Parsers configuration
+
 
 How to Build TNT4J-Streams
 =========================================
