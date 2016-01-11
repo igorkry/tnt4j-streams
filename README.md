@@ -98,7 +98,61 @@ TODO
 TODO
 
 #### Single Log file
-TODO
+
+Sample files can be found in `samples\single-log` directory.
+
+To run sample as standalone application use command:
+ * windows
+ ```
+ ..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml
+ or
+ run.bat
+ ```
+ * unix
+ ```
+ ..\..\bin\tnt4j-streams.sh -f:tnt-data-source.xml
+ ```
+`orders.log` file contains order activity event as single line.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        <property name="FileName" value="orders.log"/>
+        <parser-ref name="TokenParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `FileLineStream` referencing `TokenParser` shall be used.
+`FileStream` reads data from `orders.log` file.
+`TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
+ Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual field string mapping
+ to TNT4J event field value.
+
+
 
 Configuring TNT4J-Streams
 ======================================
@@ -111,7 +165,7 @@ For more information on TNT4J and `tnt4j.properties` see (https://github.com/Nas
 
 ## Streams configuration
 
-Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration is
+Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration
 can be found in `tnt-data-source.xsd` file located in project `config` directory.
 
 sample stream configuration:
@@ -157,7 +211,7 @@ Note that `stream` uses `parser` reference:
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
 
-### Generic stream parameters:
+#### Generic stream parameters:
 
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
@@ -167,12 +221,12 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="HaltIfNoParser" value="false"/>
 ```
 
-#### Stream executors related parameters:
+##### Stream executors related parameters:
 
  * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously or not. Default value - `false`. (Optional)
-    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)
-    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional)
-    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional)
+    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only if `UseExecutors` is set to `true`
+    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) Actual only if `UseExecutors` is set to `true`
+    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional)  Actual only if `UseExecutors` is set to `true`
         * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is reached. Default value - `20sec`. (Optional)
            Actual only if `ExecutorsBoundedModel` is set to `true`.
 
@@ -185,7 +239,7 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
 ```
 
-### File line stream parameters:
+#### File line stream parameters:
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
 
@@ -194,7 +248,7 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="FileName" value="*_access_log.2015-*.txt"/>
  ```
 
-### File polling stream parameters:
+#### File polling stream parameters:
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
  * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest log entry. If `false` - then
@@ -208,7 +262,7 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="StartFromLatest" value="true"/>
  ```
 
-### Character stream parameters:
+#### Character stream parameters:
 
  * FileName - concrete file name. (Required - just one `FileName` or `Port`)
  * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
@@ -222,7 +276,7 @@ or
     <property name="Port" value="9595"/>
 ```
 
-### Http stream parameters:
+#### Http stream parameters:
 
  * Port - port number to run Http server. Default value - `8080`. (Optional)
  * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
@@ -239,7 +293,7 @@ or
     <property name="KeyPass" value="somePassword"/>
 ```
 
-### JMS stream parameters:
+#### JMS stream parameters:
 
  * ServerURI - JMS server URL. (Required)
  * Queue - queue destination name. (Required - just one of `Queue` or `Topic`)
@@ -264,7 +318,7 @@ or
      <parser-ref name="SampleJMSParser"/>
 ```
 
-### Kafka stream parameters:
+#### Kafka stream parameters:
 
  * Topic - regex of topic name to listen. (Required)
  * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` for more details on Kafka consumer properties.
@@ -276,7 +330,7 @@ or
     <property name="group.id" value="TNT4JStreams"/>
 ```
 
-### MQTT stream parameters:
+#### MQTT stream parameters:
 
  * ServerURI - Mqtt server URI. (Required)
  * Topic - topic name to listen. (Required)
@@ -297,7 +351,7 @@ or
     <property name="KeystorePass" value="somePassword"/>
 ```
 
-### WMQ Stream parameters:
+#### WMQ Stream parameters:
 
  * QueueManager - Queue manager name. (Optional)
  * Queue - Queue name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
@@ -316,7 +370,7 @@ or
     <property name="Host" value="wmq.sample.com"/>
 ```
 
-## Parsers configuration
+### Parsers configuration
 
 
 How to Build TNT4J-Streams
