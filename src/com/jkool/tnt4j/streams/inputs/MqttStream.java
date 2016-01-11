@@ -229,7 +229,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			MqttConnectOptions options = new MqttConnectOptions();
 			if (StringUtils.isNotEmpty(userName)) {
 				options.setUserName(userName);
-				options.setPassword(password.toCharArray());
+				options.setPassword(password == null ? "".toCharArray() : password.toCharArray());
 			}
 
 			if (useSSL) {

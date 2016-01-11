@@ -45,8 +45,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName</li>
- * <li>Port</li>
+ * <li>FileName - concrete file name. (Required - just one 'FileName' or 'Port')
+ * </li>
+ * <li>Port - port number to accept character stream over TCP/IP. (Required -
+ * just one 'FileName' or 'Port')</li>
  * </ul>
  *
  * @version $Revision: 4 $

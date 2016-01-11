@@ -48,15 +48,20 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>QueueManager</li>
- * <li>Queue</li>
- * <li>Topic</li>
- * <li>Subscription</li>
- * <li>TopicString</li>
- * <li>Host</li>
- * <li>Port</li>
- * <li>Channel</li>
- * <li>StripHeaders</li>
+ * <li>QueueManager - Queue manager name. (Optional)</li>
+ * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic',
+ * 'Subscription', 'TopicString')</li>
+ * <li>Topic - Topic name. (Required - at least one of 'Queue', 'Topic',
+ * 'Subscription', 'TopicString')</li>
+ * <li>Subscription - Subscription name. (Required - at least one of 'Queue',
+ * 'Topic', 'Subscription', 'TopicString')</li>
+ * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic',
+ * 'Subscription', 'TopicString')</li>
+ * <li>Host - WMQ connection host name. (Optional)</li>
+ * <li>Port - WMQ connection port number. (Optional)</li>
+ * <li>Channel - Channel name. (Optional)</li>
+ * <li>StripHeaders - identifies whether stream should strip WMQ message
+ * headers. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 10 $

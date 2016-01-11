@@ -45,8 +45,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * characters '*' and '?'. (Required)</li>
  * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
  * streaming should be performed from latest log entry. If {@code false} - then
- * latest log file is streamed from beginning</li>
- * <li>FileReadDelay - delay is seconds between log file reading iterations</li>
+ * latest log file is streamed from beginning. (Optional)</li>
+ * <li>FileReadDelay - delay is seconds between log file reading iterations.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

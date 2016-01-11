@@ -16,10 +16,16 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
+
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
+import static org.mockito.Mockito.*;
+import java.text.ParseException;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 
 /**
  * @author akausinis
@@ -31,7 +37,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void setPropertiesTest() throws Throwable {
 		setProperty(parser, StreamsConfig.PROP_FLD_DELIM, ";");
-		setProperty(parser, StreamsConfig.PROP_PATTERN, "/S");
+		setProperty(parser, StreamsConfig.PROP_PATTERN, "\\S+");
 		setProperty(parser, StreamsConfig.PROP_STRIP_QUOTES, true);
 
 	}
@@ -41,5 +47,38 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	public void prepare() {
 		parser = new ActivityTokenParser();
 	}
+	
+	@Test
+	public void testParse() throws Throwable {
+		final TNTInputStream stream = mock(TNTInputStream.class);
+		final Object data = "TEST";
+		setPropertiesTest();
+		assertNotNull(parser.parse(stream, data ));
+	}
 
+	@Test
+	public void testParseDoensMatch() throws Throwable {
+		final TNTInputStream stream = mock(TNTInputStream.class);
+		final Object data = "TEST TTT";
+		setPropertiesTest();
+		assertNull(parser.parse(stream, data ));
+	}
+	
+	
+	@Test
+	public void testGetLocatorValueAsProperty() throws ParseException {
+		final TNTInputStream stream = mock(TNTInputStream.class);
+		final ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "TEST");
+		((ActivityTokenParser)parser).getLocatorValue(stream, locator, null);
+		verify(stream).getProperty(any(String.class));
+	}
+	
+	@Test
+	public void testGetLocatorAsIndex() throws ParseException {
+		final TNTInputStream stream = mock(TNTInputStream.class);
+		final ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "2");
+		String[] fields = {"FAIL", "GOOD"};
+		Object result = ((ActivityTokenParser)parser).getLocatorValue(stream, locator, fields );
+		assertEquals("GOOD", result);
+	}
 }

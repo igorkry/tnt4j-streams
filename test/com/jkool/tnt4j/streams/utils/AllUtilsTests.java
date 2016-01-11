@@ -25,6 +25,6 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ UtilsTest.class, NumericFormatterTest.class, TimestampFormatterTest.class,
-		StreamsThreadTest.class, StreamTimestampTest.class })
+		StreamsThreadTest.class, StreamTimestampTest.class, StreamsResourcesTest.class })
 public class AllUtilsTests {
 }

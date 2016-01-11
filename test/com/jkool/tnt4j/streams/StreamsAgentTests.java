@@ -16,9 +16,20 @@
 
 package com.jkool.tnt4j.streams;
 
-import org.junit.After;
-import org.junit.Before;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.util.Set;
+
+import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.Test;
+
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -26,23 +37,90 @@ import org.junit.Test;
  */
 public class StreamsAgentTests {
 
-	@Before
-	public void setUp() throws Exception {
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	}
+	private StringWriter console;
 
-	@After
-	public void tearDown() throws Exception {
-
+	@Test
+	public void testHelpArgument() throws Exception {
+		interceptConsole();
+		StreamsAgent.main("-h");
+		System.out.flush();
+		final String string = console.getBuffer().toString();
+		final String expected = StreamsResources.getString("StreamsAgent.help") + LINE_SEPARATOR;
+		assertTrue("Console output does not contain expected string", string.contains(expected));
+		Utils.close(console);
 	}
 
 	@Test
-	public void testMain() throws Exception {
-		StreamsAgent.main("-o");
+	public void testArgumentsFail() throws Exception {
+		interceptConsole();
+		final String argument = "-test";
+		StreamsAgent.main(argument);
+		System.out.flush();
+		final String string = console.getBuffer().toString();
+		String expected = StreamsResources.getStringFormatted("StreamsAgent.invalid.argument", argument);
+		expected += LINE_SEPARATOR;
+		expected += StreamsResources.getString("StreamsAgent.help");
+		expected += LINE_SEPARATOR;
+		assertTrue("Console output does not contain expected string", string.contains(expected));
+		Utils.close(console);
 	}
 
 	@Test
-	public void testRunFromAPI() throws Exception {
-		StreamsAgent.runFromAPI("xxxxxxxxxxxxxxx");
+	public void testFileEmptyFail() throws Exception {
+		interceptConsole();
+		final String argument = "-f:";
+		StreamsAgent.main(argument);
+		System.out.flush();
+		final String string = console.getBuffer().toString();
+		String expected = StreamsResources.getString("StreamsAgent.missing.cfg");
+		expected += LINE_SEPARATOR;
+		expected += StreamsResources.getString("StreamsAgent.help");
+		expected += LINE_SEPARATOR;
+		assertTrue("Console output does not contain expected string", string.contains(expected));
+		Utils.close(console);
+	}
+
+	@Test
+	public void testRunFromAPI() throws Throwable {
+		final String testStreamName = "TestStream";
+		final File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
+		FileWriter fw = new FileWriter(tempConfFile);
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + LINE_SEPARATOR);
+		sb.append("<tnt-data-source" + LINE_SEPARATOR
+				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + LINE_SEPARATOR
+				+ "        xsi:noNamespaceSchemaLocation=\"..\\..\\config\\tnt-data-source.xsd\">" + LINE_SEPARATOR
+				+ "   ");
+		sb.append("<stream name=\"");
+		sb.append(testStreamName);
+		sb.append("\" class=\"com.jkool.tnt4j.streams.inputs.CharacterStream\">" + LINE_SEPARATOR
+				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + LINE_SEPARATOR
+				+ "        <property name=\"Port\" value=\"9595\"/>" + LINE_SEPARATOR + "    ");
+		sb.append("</stream>" + LINE_SEPARATOR + "</tnt-data-source>");
+		fw.write(sb.toString());
+		fw.flush();
+		fw.close();
+		StreamsAgent.runFromAPI(tempConfFile.getAbsolutePath());
+		Thread.sleep(500);
+		tempConfFile.deleteOnExit();
+		final Set<Thread> threads = Thread.getAllStackTraces().keySet();
+		for (Thread thread : threads) {
+			if (thread.getName().contains(testStreamName)) {
+				return;
+			} else {
+				continue;
+			}
+		}
+		fail("No streams thread created");
+	}
+
+	private void interceptConsole() throws InterruptedException {
+		console = new StringWriter();
+		final WriterOutputStream writerOutputStream = new WriterOutputStream(console);
+		final PrintStream out = new PrintStream(writerOutputStream);
+		System.setOut(out);
+		Thread.sleep(50);
 	}
 }
