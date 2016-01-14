@@ -38,8 +38,8 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Vendor>${vendor}</Implementation-Vendor>
-                            <Implementation-Title>"${prodname}</Implementation-Title>
+                            <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
+                            <Implementation-Title>"${product.name}</Implementation-Title>
                             <Implementation-Version>"${project.version}"</Implementation-Version>
                             <Main-Class>com.jkool.tnt4j.streams.StreamsAgent</Main-Class>
                         </manifestEntries>

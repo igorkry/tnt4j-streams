@@ -18,9 +18,49 @@
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
         <java.compiler.debuglevel>source,lines,vars</java.compiler.debuglevel>
-        <vendor>JKOOL, LLC</vendor>
-        <prodname>TNT4J-Streams</prodname>
+        <product.vendor>JKOOL, LLC</product.vendor>
+        <product.name>TNT4J-Streams</product.name>
+        <product.name.hr>TNT4J Streams</product.name.hr>
+        <product.copyright.html>
+            <![CDATA[<font size="-1">Copyright &#169; 2015-2016 jKool, LLC. All Rights Reserved.</font>]]></product.copyright.html>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.6</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <doctitle>${product.name.hr}</doctitle>
+                    <windowtitle>${product.name.hr}</windowtitle>
+                    <header>Version ${project.version}</header>
+                    <bottom>${product.copyright.html}</bottom>
+                    <show>protected</show>
+                    <use>true</use>
+                    <notree>false</notree>
+                    <nonavbar>false</nonavbar>
+                    <noindex>false</noindex>
+                    <splitindex>true</splitindex>
+                    <author>true</author>
+                    <version>true</version>
+                    <nodeprecatedlist>false</nodeprecatedlist>
+                    <nodeprecatedlist>false</nodeprecatedlist>
+                </configuration>
+                <!--<executions>-->
+                <!--<execution>-->
+                <!--<id>aggregate</id>-->
+                <!--<phase>site</phase>-->
+                <!--<goals>-->
+                <!--<goal>aggregate</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
+                <!--</executions>-->
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
