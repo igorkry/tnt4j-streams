@@ -1,0 +1,22 @@
+[
+  {
+    "message": "127.0.0.1 - - [17/Nov/2015:15:05:11 +0200] \"POST /gvm_java/gvm/services/OperatorWebService HTTP/1.1\" 200 124647\r",
+    "@version": "1",
+    "@timestamp": "2015-11-17T13:05:15.157Z",
+    "host": "vezimas",
+    "path": "g:/workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/logs/localhost_access_log.2015-11-17.txt",
+    "tags": [
+      "Normal server"
+    ]
+  },
+  {
+    "message": "127.0.0.1 - - [17/Nov/2015:15:05:12 +0200] \"POST /gvm_java/gvm/services/OperatorWebService HTTP/1.1\" 200 124687\r",
+    "@version": "1",
+    "@timestamp": "2015-11-17T13:05:15.207Z",
+    "host": "vezimas",
+    "path": "g:/workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/logs/localhost_access_log.2015-11-17.txt",
+    "tags": [
+      "Normal server"
+    ]
+  }
+]

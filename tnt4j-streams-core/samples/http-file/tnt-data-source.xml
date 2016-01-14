@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="..\..\..\config\tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
+        <property name="ConfRegexMapping" value="%*i=(\S+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="10">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="10"/>
+        <field name="MsgValue" locator="11"/>
+    </parser>
+
+    <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="8080"/>
+        <!--<property name="UseSSL" value="true"/>-->
+        <!--<property name="Keystore" value="path_to_keystore_file"/>-->
+        <!--<property name="KeystorePass" value="somePassword"/>-->
+        <!--<property name="KeyPass" value="somePassword"/>-->
+        <parser-ref name="SampleHttpReqParser"/>
+    </stream>
+</tnt-data-source>

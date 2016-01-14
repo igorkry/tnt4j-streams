@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="..\..\..\config\tnt-data-source.xsd">
+
+    <parser name="WmqMsgOpXmlParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <property name="SignatureDelim" value="#!#"/>
+        <field name="Message" locator="/messaging_operation/MsgData" locator-type="Label" datatype="String"
+               format="string"/>
+        <field name="EventName" locator="/messaging_operation/OperationName" locator-type="Label"/>
+        <field name="EventType" locator="/messaging_operation/OperationName" locator-type="Label">
+            <field-map source="MQGET" target="RECEIVE"/>
+            <field-map source="MQPUT" target="SEND"/>
+            <field-map source="MQPUT1" target="SEND"/>
+            <field-map source="MQCONN" target="START"/>
+            <field-map source="MQCONNX" target="START"/>
+            <field-map source="MQBEGIN" target="START"/>
+            <field-map source="MQDISC" target="END"/>
+            <field-map source="MQCMIT" target="END"/>
+            <field-map source="MQBACK" target="END"/>
+            <field-map source="MQTERM" target="END"/>
+            <field-map source="MQOPEN" target="MOPEN"/>
+            <field-map source="MQCLOSE" target="CLOSE"/>
+            <field-map source="MQSET" target="SET"/>
+            <field-map source="MQSETMP" target="SET"/>
+            <field-map source="MQINQ" target="INQUIRE"/>
+            <field-map source="MQINQMP" target="INQUIRE"/>
+            <field-map source="MQSTAT" target="INQUIRE"/>
+            <field-map source="" target="CALL"/>
+        </field>
+        <field name="ApplName" locator="/messaging_operation/ApplName" locator-type="Label"/>
+        <field name="Correlator" locator="/messaging_operation/Correlator" locator-type="Label"/>
+        <field name="ElapsedTime" locator="/messaging_operation/ElapsedTime" locator-type="Label" datatype="Number"/>
+        <field name="EndTime" locator="/messaging_operation/EndTime" locator-type="Label" datatype="DateTime"/>
+        <field name="ResourceName" locator="/messaging_operation/ObjectName" locator-type="Label"/>
+        <field name="ReasonCode" locator="/messaging_operation/ReasonCode" locator-type="Label" datatype="Number"/>
+        <field name="ServerIp" locator="/messaging_operation/ServerIp" locator-type="Label"/>
+        <field name="ServerName" locator="/messaging_operation/ServerName" locator-type="Label"/>
+        <field name="TrackingId" separator="#!#">
+            <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/>
+            <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/>
+            <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary"
+                           format="hexBinary"/>
+            <field-locator locator="/messaging_operation/MsgUser" locator-type="Label"/>
+            <field-locator locator="/messaging_operation/MsgPutApplType" locator-type="Label"/>
+            <field-locator locator="/messaging_operation/MsgPutApplName" locator-type="Label"/>
+            <field-locator locator="/messaging_operation/MsgPutDate" locator-type="Label"/>
+            <field-locator locator="/messaging_operation/MsgPutTime" locator-type="Label"/>
+        </field>
+        <field name="StartTime" locator="/messaging_operation/StartTime" locator-type="Label" datatype="DateTime"/>
+        <field name="CompCode" locator="/messaging_operation/CompCode" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="WARNING"/>
+            <field-map source="2" target="ERROR"/>
+        </field>
+        <field name="Tag" locator="/messaging_operation/Tag" locator-type="Label"/>
+        <field name="UserName" locator="/messaging_operation/UserName" locator-type="Label"/>
+    </parser>
+
+    <stream name="MessageStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+        <property name="Port" value="6450"/>
+        <parser-ref name="WmqMsgOpXmlParser"/>
+    </stream>
+</tnt-data-source>
