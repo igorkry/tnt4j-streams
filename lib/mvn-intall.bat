@@ -17,4 +17,4 @@ call mvn install:install-file -Dfile=ibm.mq/com.ibm.mq.jmqi.jar -DgroupId=com.ib
 call mvn install:install-file -Dfile=ibm.mq/com.ibm.mq.pcf.jar -DgroupId=com.ibm -DartifactId=com.ibm.mq.pcf -Dversion=7.5 -Dpackaging=jar
 
 ; libraries required by Zorka
-call mvn install:install-file -Dfile=zorka\zico-util.jar -DgroupId=zorka -DartifactId=zico-util -Dversion=1.0.0 -Dpackaging=jar
+;call mvn install:install-file -Dfile=zorka\zico-util.jar -DgroupId=zorka -DartifactId=zico-util -Dversion=1.0.0 -Dpackaging=jar

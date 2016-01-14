@@ -71,10 +71,10 @@
             <directory>../tnt4j-streams-wmq/samples</directory>
             <outputDirectory>samples</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>../tnt4j-streams-zorka/samples</directory>
-            <outputDirectory>samples</outputDirectory>
-        </fileSet>
+        <!--<fileSet>-->
+        <!--<directory>../tnt4j-streams-zorka/samples</directory>-->
+        <!--<outputDirectory>samples</outputDirectory>-->
+        <!--</fileSet>-->
 
         <!-- module contents: binaries -->
         <fileSet>
@@ -154,16 +154,16 @@
             </excludes>
             <outputDirectory>lib</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>../tnt4j-streams-zorka/${project.build.directory}</directory>
-            <includes>
-                <include>*.jar</include>
-            </includes>
-            <excludes>
-                <exclude>*-sources.jar</exclude>
-                <exclude>*-tests.jar</exclude>
-            </excludes>
-            <outputDirectory>lib</outputDirectory>
-        </fileSet>
+        <!--<fileSet>-->
+        <!--<directory>../tnt4j-streams-zorka/${project.build.directory}</directory>-->
+        <!--<includes>-->
+        <!--<include>*.jar</include>-->
+        <!--</includes>-->
+        <!--<excludes>-->
+        <!--<exclude>*-sources.jar</exclude>-->
+        <!--<exclude>*-tests.jar</exclude>-->
+        <!--</excludes>-->
+        <!--<outputDirectory>lib</outputDirectory>-->
+        <!--</fileSet>-->
     </fileSets>
 </assembly>
