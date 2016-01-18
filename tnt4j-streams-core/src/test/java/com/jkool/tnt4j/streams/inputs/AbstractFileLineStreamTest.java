@@ -37,7 +37,7 @@ public class AbstractFileLineStreamTest {
 
 	@Test
 	public void setPropertiesTest() throws Throwable {
-		final String fileName = "c:\\Windows\\schemas\\TSWorkSpace\\tswcx.xsd";
+		final String fileName = "c:\\Windows\\schemas\\TSWorkSpace\\tswcx.xml";
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
 			{
 				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_FILENAME, fileName));

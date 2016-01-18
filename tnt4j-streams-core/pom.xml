@@ -166,13 +166,14 @@
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
+        <!-- tnt4j-log4j12 logger shall be used -->
+        <!--<dependency>-->
+        <!--<groupId>com.nastel.jkool.tnt4j</groupId>-->
+        <!--<artifactId>tnt4j-log4j12</artifactId>-->
+        <!--<version>1.0.0</version>-->
+        <!--<scope>runtime</scope>-->
+        <!--</dependency>-->
         <!-- slf4j-log4j12 logger shall be used -->
-        <dependency>
-            <groupId>com.nastel.jkool.tnt4j</groupId>
-            <artifactId>tnt4j-log4j12</artifactId>
-            <version>1.0.0</version>
-            <scope>runtime</scope>
-        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -186,13 +187,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- logback logger shall be used -->
+        <!-- tnt4j-logback logger shall be used -->
         <!--<dependency>-->
         <!--<groupId>com.nastel.jkool.tnt4j</groupId>-->
         <!--<artifactId>tnt4j-logback</artifactId>-->
         <!--<version>1.0.0</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
+        <!-- logback logger shall be used -->
         <!--<dependency>-->
         <!--<groupId>ch.qos.logback</groupId>-->
         <!--<artifactId>logback-classic</artifactId>-->

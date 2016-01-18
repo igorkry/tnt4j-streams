@@ -91,7 +91,7 @@ public class StreamsAgentTests {
 		sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + LINE_SEPARATOR);
 		sb.append("<tnt-data-source" + LINE_SEPARATOR
 				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + LINE_SEPARATOR
-				+ "        xsi:noNamespaceSchemaLocation=\"..\\..\\config\\tnt-data-source.xsd\">" + LINE_SEPARATOR
+				+ "        xsi:noNamespaceSchemaLocation=\"../../../config/tnt-data-source.xsd\">" + LINE_SEPARATOR
 				+ "   ");
 		sb.append("<stream name=\"");
 		sb.append(testStreamName);

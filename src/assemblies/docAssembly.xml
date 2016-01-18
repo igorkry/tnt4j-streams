@@ -9,7 +9,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>../${project.build.directory}/site/apidocs</directory>
+            <directory>${project.build.directory}/site/apidocs</directory>
             <outputDirectory>docs</outputDirectory>
         </fileSet>
     </fileSets>

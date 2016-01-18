@@ -32,5 +32,5 @@ import com.jkool.tnt4j.streams.utils.AllUtilsTests;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ StreamsAgentTests.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
 		AllParsersTests.class, AllUtilsTests.class })
-public class StreamsAllTests {
+public class AllStreamsCoreTests {
 }

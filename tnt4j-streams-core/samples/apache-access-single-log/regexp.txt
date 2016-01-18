@@ -1,0 +1,17 @@
+(?m)^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] "((\S+) (\S+) (\S+))" (\d{3}) (\d+|-)
+
+%(((>|<)*\S)|(\S*\{(\S+)\}(\^t)*\S))
+%\S*(%|\w)
+
+<property name="LogPattern"
+                  value="[] %h %l %u %t &quot;%r&quot; %>s ___ %b &quot;%{Referer}i&quot; &quot;%{User-agent}^ti&quot; &quot;%!200,304,302{Referer}i&quot;"/>
+
+<!--filter name="LogEntriesFilter">
+            <rule name="Start time filter" field-ref="StartTime">
+                <step comparator=">=" value="01/11/2015 16:00:00 +0200"/>
+                <step comparator="<=" value="02/11/2015 23:59:59 +0200"/>
+            </rule>
+        </filter-->
+
+<property name="FileName"
+                  value="C:/Users/akausinis/.IntelliJIdea15/system/tomcat/Tomcat_7_0_34_gvm_java_2/logs/localhost_access_log.*.txt"/>

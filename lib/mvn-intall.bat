@@ -1,5 +1,7 @@
 @echo OFF
 
+setlocal
+
 if "%M2_HOME%" == "" goto try_maven_home
 set MVN=%M2_HOME%\bin\mvn.bat
 if not exist "%MVN%" goto try_maven_home

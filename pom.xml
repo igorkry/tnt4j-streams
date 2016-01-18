@@ -23,10 +23,24 @@
         <product.name.hr>TNT4J Streams</product.name.hr>
         <product.copyright.html>
             <![CDATA[<font size="-1">Copyright &#169; 2015-2016 jKool, LLC. All Rights Reserved.</font>]]></product.copyright.html>
+        <release.deploy.dir>../build/${project.name}</release.deploy.dir>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>../build/${project.name}</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -49,6 +63,43 @@
                     <nodeprecatedlist>false</nodeprecatedlist>
                     <nodeprecatedlist>false</nodeprecatedlist>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>docs-assembly</id>
+                        <phase>verify</phase>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/assemblies/docAssembly.xml</descriptor>
+                            </descriptors>
+                            <finalName>${project.build.finalName}-docs</finalName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>deploy-assembly</id>
+                        <phase>verify</phase>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/assemblies/deployAssembly.xml</descriptor>
+                            </descriptors>
+                            <outputDirectory>${release.deploy.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
