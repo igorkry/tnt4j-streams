@@ -445,5 +445,4 @@ or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
-* in `zorka` module run JUnit test suite named `AllZorkaTests`
 
