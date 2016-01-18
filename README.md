@@ -121,7 +121,7 @@ Sample stream configuration:
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
@@ -164,7 +164,7 @@ Configuring TNT4J-Streams
 
 Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assinged for You.
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
 
 For more information on TNT4J and `tnt4j.properties` see (https://github.com/Nastel/TNT4J/wiki/Getting-Started).
 
@@ -178,7 +178,7 @@ sample stream configuration:
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="..\..\config\tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
