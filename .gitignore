@@ -13,17 +13,6 @@ hs_err_pid*
 /.svn
 /classes
 /logs
-/orders.log
-/config/tnt-data-source.xml
-/tnt4j-streams.iml
-/config/log4j__.xml__
-/access.log
-/localhost_access_log.2015-04-02.txt
-/localhost_access_log.2015-07-22.txt
-/localhost_access_log.2015-11-05.txt
-/tnt4j-streams-core/samples/apache-access-single-log/regexp.txt
-/tnt4j-streams-core/samples/apache-access-single-log/error.log
-/plugins
 /target
 /tnt4j-streams-zorka/target
 /tnt4j-streams-wmq/target
@@ -34,4 +23,3 @@ hs_err_pid*
 /tnt4j-streams-hdfs/target
 /tnt4j-streams-flume-plugin/target
 /tnt4j-streams-core/target
-/tnt4j-streams-release/target
