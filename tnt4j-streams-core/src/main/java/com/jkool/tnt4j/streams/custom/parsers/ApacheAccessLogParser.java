@@ -45,8 +45,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <ul>
  * <li>LogPattern - access log pattern. (Optional, if RegEx {@code Pattern}
  * property is defined)</li>
- * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual
- * only if {@code LogPattern} property is used)</li>
+ * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional,
+ * actual only if {@code LogPattern} property is used)</li>
  * </ul>
  *
  * @version $Revision: 1 $
