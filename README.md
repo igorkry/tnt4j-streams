@@ -378,60 +378,53 @@ How to Build TNT4J-Streams
 
 ## Requirements
 * JDK 1.6+
-* Apache ANT (http://ant.apache.org/)
+* Apache Maven 3 (https://maven.apache.org/)
 * TNT4J (https://github.com/Nastel/TNT4J)
+* JESL (https://github.com/Nastel/JESL)
 
-### TNT4J-Streams depends on the following external packages:
-#### Core:
-* Apache commons codec 1.9 (http://commons.apache.org/proper/commons-codec/)
-* Apache commons collections 3.2.1 (http://commons.apache.org/proper/commons-collections/)
-* Apache commons configuration 1.10 (http://commons.apache.org/proper/commons-configuration/)
-* Apache commons io 2.4 (http://commons.apache.org/proper/commons-io/)
-* Apache commons lang 2.6 (http://commons.apache.org/proper/commons-lang/)
-* Apache commons lang3 3.3.2 (http://commons.apache.org/proper/commons-lang/)
-* Apache commons logging 1.1.3 (http://commons.apache.org/proper/commons-logging/)
-* Apache commons net 3.3 (http://commons.apache.org/proper/commons-net/)
-* Google GSON 2.3.1 (https://github.com/google/gson)
-* Google Guava Libraries 18.0 (https://code.google.com/p/guava-libraries/)
-* SLF4J 1.7.12 (http://www.slf4j.org/)
-* Java UUID Generator (JUG) 3.1.3 (http://wiki.fasterxml.com/JugHome/)
+All other required dependencies are defined in project modules `pom.xml` files. If maven is running
+online mode it should download these defined dependencies automatically.
 
-#### Http Extension:
-* Apache HttpComponents client 4.5.1 (https://hc.apache.org/httpcomponents-client-4.5.x/)
-* Apache HttpComponents core 4.4.3 (https://hc.apache.org/httpcomponents-core-4.4.x/)
+### Manually installed dependencies
+Some of required and optional dependencies may be not available in public Maven Repository (http://mvnrepository.com/).
+In this case we would recommend to download those dependencies manually into `lib` directory and install into local
+maven repository by running `mvn install` command. See `lib\mvn-install.bat` how to do this.
 
-#### JMS Extension:
-* Javax JMS API (https://java.net/projects/jms-spec/pages/Home)
+So what to download manually:
+* TNT4J
+* JESL
+* IBM MQ 7.5 - if You wish to use WMQ module. If not just comment out that module in main `pom.xml` file.
+* TNT4J-log4j12 - if You wish to use this logger. See 'How to use TNT4J loggers' section for more details.
+* TNT4J-logback - if You wish to use this logger. See 'How to use TNT4J loggers' section for more details.
 
-#### Hdfs Extension:
-* Apache Hadoop 2.6.2 (https://hadoop.apache.org/)
-* Apache commons cli 1.3.1 (http://commons.apache.org/proper/commons-cli/)
-* Javax Servlet API (https://java.net/projects/servlet-spec/)
-* Google protocol buffers 2.6.2 (https://developers.google.com/protocol-buffers/)
+Download the above libraries and place into the `tnt4j-streams/lib directory` directory like this:
+   ```
+      lib
+       + ibm.mq (O)
+       |- com.ibm.mq.commonservices.jar
+       |- com.ibm.mq.headers.jar
+       |- com.ibm.mq.jar
+       |- com.ibm.mq.jmqi.jar
+       |-com.ibm.mq.pcf.jar
+       jkool-jesl.jar
+       tnt4j-api.jar
+       tnt4j-log4j12.jar (O)
+       tnt4j-logback.jar (O)
+   ```
 
-#### WMQ Extension:
-* IBM MQ API 7.5 ()
-* Javax connector
+(O) marked libraries are optional
 
-#### Kafka Extension:
-* Apache Kafka 2.10 (http://kafka.apache.org/)
-* Yammer Metrics 2.2.0 (http://mvnrepository.com/artifact/com.yammer.metrics/metrics-core/)
-* Scala Library 2.10.1 (http://www.scala-lang.org/)
-* ZKClient 0.7 (https://github.com/sgroschupf/zkclient)
-* Apache Zookeeper 3.3.4 (https://zookeeper.apache.org/)
+## Building
+   * to build project run maven goals `clean package`
+   * to make release assembly run maven goals `clean package javadoc:aggregate verify`
 
-#### MQTT Extension:
-* Eclipse Paho Client MQTTV3 1.0.2 (http://www.eclipse.org/paho/)
+Release assembly is built to `../build/tnt4j-streams` directory.
 
-#### Apache Flume Plugin:
-* Apache Flume 1.6.0 (https://flume.apache.org/)
-
-### To build TNT4J-Streams:
-* Download the above libraries and place into the tnt4j-streams/lib folder
-* Compile and build using ANT:
-	* ant all (run "ant rebuild" for clean builds)
-	* Check ../build/tnt4j-streams for output
-	* JavaDoc will be located under ../build/tnt4j-streams/doc
+## Running samples
+When release assembly is built samples are located in `samples` directory i.e. `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
+To run desired sample:
+   * go to sample directory
+   * run `run.bat` or `run.sh` depending on Your OS.
 
 Testing of TNT4J-Streams
 =========================================
@@ -440,5 +433,17 @@ Testing of TNT4J-Streams
 * JUnit 4 (http://junit.org/)
 * Mockito (http://mockito.org/)
 
-## Running
-* Run JUnit test suite named "StreamsAllTests"
+## Testing using maven
+Maven runs tests automatically while building project. To skip test phase add Maven parameter `-Dmaven.test.skip=true`
+or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
+
+## Running manually
+* in `core` module run JUnit test suite named `AllStreamsCoreTests`
+* in `flume-plugin` module run JUnit test suite named `AllFlumeTests`
+* in `hdfs` module run JUnit test suite named `AllHdfsStreamTests`
+* in `jms` module run JUnit test suite named `AllJMSStreamTests`
+* in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
+* in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
+* in `wmq` module run JUnit test suite named `AllWmqStreamTests`
+* in `zorka` module run JUnit test suite named `AllZorkaTests`
+
