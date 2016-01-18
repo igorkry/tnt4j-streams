@@ -60,7 +60,7 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * bounded tasks queue model. (Optional)</li>
  * <li>ExecutorsTerminationTimeout -time to wait (in seconds) for a task to be
  * inserted into bounded queue if max. queue size is reached. (Optional, actual
- * only if ExecutorsBoundedModel is set to {@code true})</li>
+ * only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
  * </ul>
  *
  * @param <T>

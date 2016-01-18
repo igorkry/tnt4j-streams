@@ -43,7 +43,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>Pattern</li>
+ * <li>Pattern - contains the regular expression pattern that each data item is
+ * assumed to match. (Required)</li>
  * </ul>
  *
  * @version $Revision: 5 $

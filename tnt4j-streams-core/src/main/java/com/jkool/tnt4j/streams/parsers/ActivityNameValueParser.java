@@ -49,10 +49,13 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>FieldDelim</li>
- * <li>ValueDelim</li>
- * <li>Pattern</li>
- * <li>StripQuotes</li>
+ * <li>FieldDelim - fields separator. (Optional)</li>
+ * <li>ValueDelim - value delimiter. (Optional)</li>
+ * <li>Pattern - pattern used to determine which types of activity data string
+ * this parser supports. When {@code null}, all strings are assumed to match the
+ * format supported by this parser. (Optional)</li>
+ * <li>StripQuotes - whether surrounding double quotes should be stripped from
+ * extracted data values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 5 $

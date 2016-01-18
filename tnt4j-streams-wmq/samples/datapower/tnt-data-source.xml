@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="DatapowerParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="DatapowerParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <field name="Message" locator="/tracking_event/MsgData" locator-type="Label" datatype="String" format="string"/>
         <field name="EventName" separator=":">

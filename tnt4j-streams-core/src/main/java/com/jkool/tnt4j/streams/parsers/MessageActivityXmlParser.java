@@ -49,7 +49,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This parser supports the following properties (in addition to those supported
  * by {@link ActivityXmlParser}):
  * <ul>
- * <li>SignatureDelim</li>
+ * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 6 $

@@ -21,8 +21,8 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
     data of single activity event. After file reading completes - stream stops.
     * using file polling - when some application uses file to write data at runtime, stream waits for file changes.
-    When file changes, changed (appended) lines are read by stream and interpreted as single line is single activity event.
-    Stream stops only when application gets terminated or some critical runtime error occurs.
+    When file changes, changed (appended) lines are read by stream and interpreted as single line is single activity
+    event. Stream stops only when application gets terminated or some critical runtime error occurs.
 
 * Has customized parser to parse Apache Access Logs.
 
@@ -110,7 +110,9 @@ To run sample as standalone application use command:
  ```
  * unix
  ```
- ..\..\bin\tnt4j-streams.sh -f:tnt-data-source.xml
+ ../../bin/tnt4j-streams -f:tnt-data-source.xml
+ or
+ run.sh
  ```
 `orders.log` file contains order activity event as single line.
 
@@ -149,9 +151,12 @@ Sample stream configuration:
 Stream configuration states that `FileLineStream` referencing `TokenParser` shall be used.
 `FileStream` reads data from `orders.log` file.
 `TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
- Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual field string mapping
- to TNT4J event field value.
+ Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+ field string mapping to TNT4J event field value.
 
+### How to use TNT4J loggers
+
+TODO
 
 
 Configuring TNT4J-Streams
@@ -223,11 +228,16 @@ That is why sequence of configuration elements is critical and can't be swapped.
 
 ##### Stream executors related parameters:
 
- * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously or not. Default value - `false`. (Optional)
-    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only if `UseExecutors` is set to `true`
-    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) Actual only if `UseExecutors` is set to `true`
-    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional)  Actual only if `UseExecutors` is set to `true`
-        * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is reached. Default value - `20sec`. (Optional)
+ * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously
+ or not. Default value - `false`. (Optional)
+    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only
+    if `UseExecutors` is set to `true`
+    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value -
+    `20sec`. (Optional) Actual only if `UseExecutors` is set to `true`
+    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value -
+    `false`. (Optional)  Actual only if `UseExecutors` is set to `true`
+        * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if
+        max. queue size is reached. Default value - `20sec`. (Optional)
            Actual only if `ExecutorsBoundedModel` is set to `true`.
 
     sample:
@@ -251,8 +261,8 @@ That is why sequence of configuration elements is critical and can't be swapped.
 #### File polling stream parameters:
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
- * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest log entry. If `false` - then
- latest log file is streamed from beginning. Default value - `true`. (Optional)
+ * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest log entry. If `false` -
+  then latest log file is streamed from beginning. Default value - `true`. (Optional)
  * FileReadDelay - delay is seconds between log file reading iterations. Default value - `15sec`. (Optional)
 
      sample:
@@ -321,7 +331,8 @@ or
 #### Kafka stream parameters:
 
  * Topic - regex of topic name to listen. (Required)
- * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` for more details on Kafka consumer properties.
+ * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` for more
+ details on Kafka consumer properties.
 
     sample:
 ```xml
@@ -372,6 +383,86 @@ or
 
 ### Parsers configuration
 
+#### Activity Name-Value parser:
+
+ * FieldDelim - fields separator. Default value - `,`. (Optional)
+ * ValueDelim - value delimiter. Default value - `=`. (Optional)
+ * Pattern - pattern used to determine which types of activity data string this parser supports. When `null`, all
+ strings are assumed to match the format supported by this parser. Default value - `null`. (Optional)
+ * StripQuotes - whether surrounding double quotes should be stripped from extracted data values. Default value -
+ `true`. (Optional)
+
+    sample:
+```xml
+    <property name="FieldDelim" value=";"/>
+    <property name="ValueDelim" value="-"/>
+    <property name="Pattern" value="(\S+)"/>
+    <property name="StripQuotes" value="false"/>
+```
+
+#### Activity RegEx parser:
+
+ * Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)
+
+    sample:
+```xml
+    <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
+```
+
+#### Activity token parser:
+
+ * FieldDelim - fields separator. Default value - `,`. (Optional)
+ * Pattern - pattern used to determine which types of activity data string this parser supports. When `null`, all
+ strings are assumed to match the format supported by this parser. Default value - `null`. (Optional)
+ * StripQuotes - whether surrounding double quotes should be stripped from extracted data values. Default value -
+ `true`. (Optional)
+
+    sample:
+```xml
+    <property name="FieldDelim" value=";"/>
+    <property name="Pattern" value="(\S+)"/>
+    <property name="StripQuotes" value="false"/>
+```
+
+#### Activity XML parser:
+
+ * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
+ * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
+
+    sample:
+```xml
+    <property name="Namespace" value="xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance"/>
+    <property name="Namespace" value="xmlns:tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
+    <property name="RequireDefault" value="true"/>
+```
+
+#### Message activity XML parser:
+
+ * SignatureDelim - signature fields delimiter. Default value - `,`. (Optional)
+
+    sample:
+```xml
+    <property name="SignatureDelim" value="#"/>
+```
+
+#### Apache access log parser:
+
+ * LogPattern - access log pattern. (Optional, if RegEx `Pattern` property is defined)
+ * ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if `LogPattern` property is used)
+
+    sample:
+ ```xml
+     <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+     <property name="ConfRegexMapping" value="%h=(\S+)"/>
+     <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+     <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
+     <property name="ConfRegexMapping" value="%*i=(\S+)"/>
+ ```
+ or
+```xml
+     <property name="Pattern"
+                  value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
+```
 
 How to Build TNT4J-Streams
 =========================================

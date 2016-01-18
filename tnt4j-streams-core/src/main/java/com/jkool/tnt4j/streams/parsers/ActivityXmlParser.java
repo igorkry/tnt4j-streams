@@ -58,7 +58,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>Namespace</li>
+ * <li>Namespace - additional XML namespace mappings. (Optional)</li>
+ * <li>RequireDefault - indicates that all attributes are required by default.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 7 $
@@ -76,7 +78,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	private final StringBuilder xmlBuffer;
 
 	/**
-	 * Property indicating that all attributes are required by default .
+	 * Property indicating that all attributes are required by default.
 	 */
 	protected boolean requireAll = false;
 

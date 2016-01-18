@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="MQFTEParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="MQFTEParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <field name="EventName" locator="/transaction/action" locator-type="Label"/>
         <field name="ApplName" separator=":">
