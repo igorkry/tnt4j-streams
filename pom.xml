@@ -36,7 +36,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>../build/${project.name}</directory>
+                            <directory>${release.deploy.dir}</directory>
                         </fileset>
                     </filesets>
                 </configuration>
