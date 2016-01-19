@@ -37,7 +37,12 @@ Running TNT4J-Streams
 
 ## TNT4J-Streams can be run:
 * As standalone application
+    * write streams configuration file. See 'Streams configuration' chapter for more details
+    * configure Your loggers
+    * use `bin\tnt4j-streams.bat` or `bin\tnt4j-streams.sh` to run standalone application
 * As API integrated into Your product
+    * Write streams configuration file. See 'Streams configuration' chapter for more details
+    * use `StreamsAgent.runFromAPI(configFileName)` in your code
 
 ## Examples:
 #### Apache Access log single file
@@ -159,7 +164,7 @@ Stream configuration states that `FileLineStream` referencing `TokenParser` shal
  field string mapping to TNT4J event field value.
 
 ### How to use TNT4J loggers
-See chapter 'Manually installed dependencies' how to install these dependencies.
+See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
 
 #### TNT4J-log4j12
 
