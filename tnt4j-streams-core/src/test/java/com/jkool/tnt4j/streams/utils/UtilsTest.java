@@ -94,10 +94,10 @@ public class UtilsTest {
 
 	@Test
 	public void testIsWildcardFileName() {
-		final String N_WILDC = "c:\\Users\\Default.migrated\\AppData\\Local\\Microsoft\\Windows\\INetCache\\";
-		final String WILDC = "c:\\Windows\\schemas\\TSWorkSpace\\*.*";
-		final String WILDC2 = "c:\\Windows\\schemas\\TSWorkSpace\\*.*";
-		final String WILDC3 = "c:\\Windows\\schemas\\TSWorkSpa?e\\*.*";
+		final String N_WILDC = "c:/Users/Default.migrated/AppData/Local/Microsoft/Windows/INetCache/";
+		final String WILDC = "c:/Windows/schemas/TSWorkSpace/*.*";
+		final String WILDC2 = "c:/Windows/schemas/TSWorkSpace/*.*";
+		final String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*";
 		final String EMPTY = "";
 
 		assertFalse(Utils.isWildcardFileName(N_WILDC));

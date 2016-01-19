@@ -108,7 +108,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		configRegexMappings.put("%f", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%h", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%H", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*i", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*i", "(.+)"); // NON-NLS
 		configRegexMappings.put("%k", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%l", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%m", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS

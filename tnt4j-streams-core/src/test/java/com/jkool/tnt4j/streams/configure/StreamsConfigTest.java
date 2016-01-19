@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  */
 public class StreamsConfigTest {
 	private static final boolean DEFAULT_CONFIG = true;
-	private static final String TEST_FILE_NAME = ".\\samples\\apache-access-multi-log\\tnt-data-source.xml";
+	private static final String TEST_FILE_NAME = "./samples/apache-access-multi-log/tnt-data-source.xml";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {

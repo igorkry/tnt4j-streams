@@ -41,10 +41,12 @@ public class ConfigParserHandlerTest {
 	@Rule
 	public ErrorCollector collector = new ErrorCollector();
 
-	List<File> excludeFile = new ArrayList<File>() {{
-		add(new File(".\\Samples\\tran-stitch\\tnt-msg-activity.xml"));
-	}};
-	
+	List<File> excludeFile = new ArrayList<File>() {
+		{
+			add(new File("./Samples/tran-stitch/tnt-msg-activity.xml"));
+		}
+	};
+
 	@Test
 	public void samplesCanParseTest() throws Throwable {
 
@@ -56,9 +58,7 @@ public class ConfigParserHandlerTest {
 		for (File subdir : samples.listFiles()) {
 			if (subdir.isDirectory()) {
 				for (File config : subdir.listFiles()) {
-					if (!config.isDirectory() 
-							&& config.getName().endsWith("xml")
-							&& !excludeFile.contains(config))
+					if (!config.isDirectory() && config.getName().endsWith("xml") && !excludeFile.contains(config))
 						sampleConfigurations.add(config);
 				}
 			}
