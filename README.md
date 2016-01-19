@@ -519,7 +519,7 @@ or
     <property name="ConfRegexMapping" value="%h=(\S+)"/>
     <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
     <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
-    <property name="ConfRegexMapping" value="%*i=(\S+)"/>
+    <property name="ConfRegexMapping" value="%*i=(.+)"/>
 ```
  or
 ```xml
