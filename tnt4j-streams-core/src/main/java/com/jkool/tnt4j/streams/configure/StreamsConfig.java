@@ -225,7 +225,7 @@ public class StreamsConfig {
 	 */
 	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml"; // NON-NLS
 
-	private static final String DFLT_CONFIG_FILE_PATH = "..\\config" + File.separator + DFLT_CFG_FILE_NAME; // NON-NLS
+	private static final String DFLT_CONFIG_FILE_PATH = "./../config" + File.separator + DFLT_CFG_FILE_NAME; // NON-NLS
 
 	private final SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 

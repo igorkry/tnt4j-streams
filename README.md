@@ -26,11 +26,11 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
 
 * Has customized parser to parse Apache Access Logs.
 
-* It can be integrated into:
+* It can be integrated with:
     * Logstash
     * Apache Flume
 
-just applying configuration and without additional codding.
+just by applying configuration and without additional codding.
 
 Running TNT4J-Streams
 ======================================
@@ -103,17 +103,21 @@ Sample files can be found in `samples\single-log` directory.
 
 To run sample as standalone application use command:
  * windows
- ```
- ..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml
- or
- run.bat
- ```
+```
+..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml
+```
+or
+```
+run.bat
+```
  * unix
- ```
- ../../bin/tnt4j-streams -f:tnt-data-source.xml
- or
- run.sh
- ```
+```
+../../bin/tnt4j-streams -f:tnt-data-source.xml
+```
+or
+```
+run.sh
+```
 `orders.log` file contains order activity event as single line.
 
 Sample stream configuration:
@@ -155,9 +159,63 @@ Stream configuration states that `FileLineStream` referencing `TokenParser` shal
  field string mapping to TNT4J event field value.
 
 ### How to use TNT4J loggers
+See chapter 'Manually installed dependencies' how to install these dependencies.
 
-TODO
+#### TNT4J-log4j12
 
+* in `config\log4j.properties` file change log appender to
+`log4j.appender.tnt4j=com.nastel.jkool.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
+`log4j.appender.tnt4j=` in this file, so please comment or remove all others if available.
+* in `pom.xml` file of `core` change dependencies - uncomment:
+```xml
+    <dependency>
+        <groupId>com.nastel.jkool.tnt4j</groupId>
+        <artifactId>tnt4j-log4j12</artifactId>
+        <version>1.0.0</version>
+        <scope>runtime</scope>
+    </dependency>
+```
+
+#### TNT4J-logback
+
+* make logback configuration file `config\logback.xml`.
+* change `bin\tnt-streams.bat` or `bin\tnt-streams.sh` file to pass logback configuration to Java:
+
+`bat` file:
+```
+set LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%..\config\logback.xml"
+java %LOGBACKOPTS% %TNT4JOPTS% ...
+```
+
+`sh` file:
+```
+LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%/../config/logback.xml"
+java $LOGBACKOPTS $TNT4JOPTS
+```
+
+* in `pom.xml` file of `core` change dependencies - uncomment:
+```xml
+    <dependency>
+        <groupId>com.nastel.jkool.tnt4j</groupId>
+        <artifactId>tnt4j-logback</artifactId>
+        <version>1.0.0</version>
+        <scope>runtime</scope>
+    </dependency>
+    <!-- logback logger shall be used -->
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.1.3</version>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>1.1.3</version>
+        <scope>runtime</scope>
+    </dependency>
+```
+and comment out log4j dependencies
 
 Configuring TNT4J-Streams
 ======================================
@@ -451,13 +509,13 @@ or
  * ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if `LogPattern` property is used)
 
     sample:
- ```xml
-     <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
-     <property name="ConfRegexMapping" value="%h=(\S+)"/>
-     <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-     <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
-     <property name="ConfRegexMapping" value="%*i=(\S+)"/>
- ```
+```xml
+    <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+    <property name="ConfRegexMapping" value="%h=(\S+)"/>
+    <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+    <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
+    <property name="ConfRegexMapping" value="%*i=(\S+)"/>
+```
  or
 ```xml
      <property name="Pattern"
@@ -489,19 +547,19 @@ So what to download manually:
 * TNT4J-logback - if You wish to use this logger. See 'How to use TNT4J loggers' section for more details.
 
 Download the above libraries and place into the `tnt4j-streams/lib directory` directory like this:
-   ```
-      lib
-       + ibm.mq (O)
-       |- com.ibm.mq.commonservices.jar
-       |- com.ibm.mq.headers.jar
-       |- com.ibm.mq.jar
-       |- com.ibm.mq.jmqi.jar
-       |-com.ibm.mq.pcf.jar
-       jkool-jesl.jar
-       tnt4j-api.jar
-       tnt4j-log4j12.jar (O)
-       tnt4j-logback.jar (O)
-   ```
+```
+    lib
+     + ibm.mq (O)
+     |- com.ibm.mq.commonservices.jar
+     |- com.ibm.mq.headers.jar
+     |- com.ibm.mq.jar
+     |- com.ibm.mq.jmqi.jar
+     |-com.ibm.mq.pcf.jar
+     jkool-jesl.jar
+     tnt4j-api.jar
+     tnt4j-log4j12.jar (O)
+     tnt4j-logback.jar (O)
+```
 
 (O) marked libraries are optional
 
@@ -536,4 +594,5 @@ or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
+* in `zorka` module run JUnit test suite named `AllZorkaTests`
 
