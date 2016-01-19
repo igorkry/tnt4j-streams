@@ -32,6 +32,18 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
 
 just by applying configuration and without additional codding.
 
+Importing TNT4J-Streams project into IDE
+======================================
+
+## Eclipse
+* Select File->Import...->Maven->Existing Maven Projects
+* Click 'Next'
+* In 'Root directory' field select path of directory where You have downloaded (checked out from git)
+TNT4J-Streams project
+* Click 'OK'
+* Dialog fills in with project modules details
+* Click 'Finish'
+
 Running TNT4J-Streams
 ======================================
 
@@ -591,7 +603,7 @@ Testing of TNT4J-Streams
 Maven runs tests automatically while building project. To skip test phase add Maven parameter `-Dmaven.test.skip=true`
 or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
 
-## Running manually
+## Running manually from IDE
 * in `core` module run JUnit test suite named `AllStreamsCoreTests`
 * in `flume-plugin` module run JUnit test suite named `AllFlumeTests`
 * in `hdfs` module run JUnit test suite named `AllHdfsStreamTests`
