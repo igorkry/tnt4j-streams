@@ -35,5 +35,10 @@ public enum ActivityFieldUnitsType {
 	/**
 	 * Indicates activity field value is in microseconds.
 	 */
-	Microseconds
+	Microseconds,
+
+	/**
+	 * Indicates activity field value is in nanoseconds.
+	 */
+	Nanoseconds
 }

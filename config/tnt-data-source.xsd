@@ -128,6 +128,7 @@
             <xs:enumeration value="Seconds"/>
             <xs:enumeration value="Milliseconds"/>
             <xs:enumeration value="Microseconds"/>
+            <xs:enumeration value="Nanoseconds"/>
         </xs:restriction>
     </xs:simpleType>
     <!-- Allow user-defined types for custom units types in addition to built-in types

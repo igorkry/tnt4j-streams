@@ -228,10 +228,16 @@ public class TimestampFormatter {
 				time = value instanceof Number ? ((Number) value).longValue() : Long.parseLong(value.toString());
 			}
 			switch (units) {
-			case Microseconds:
-				long scale = 1000L;
+			case Nanoseconds:
+				long scale = 1000000L;
 				long mSecs = time / scale;
-				long uSecs = time - mSecs * scale;
+				long uSecs = (time - mSecs * scale) / 1000L;
+				ts = new StreamTimestamp(mSecs, uSecs);
+				break;
+			case Microseconds:
+				scale = 1000L;
+				mSecs = time / scale;
+				uSecs = time - mSecs * scale;
 				ts = new StreamTimestamp(mSecs, uSecs);
 				break;
 			case Seconds:
@@ -317,8 +323,27 @@ public class TimestampFormatter {
 		double scale = 1.0;
 		if (fromUnits != null && toUnits != null) {
 			switch (fromUnits) {
+			case Nanoseconds:
+				switch (toUnits) {
+				case Nanoseconds:
+					scale = 1.0;
+					break;
+				case Microseconds:
+					scale = 0.001;
+					break;
+				case Milliseconds:
+					scale = 0.000001;
+					break;
+				case Seconds:
+					scale = 0.000000001;
+					break;
+				}
+				break;
 			case Microseconds:
 				switch (toUnits) {
+				case Nanoseconds:
+					scale = 1000.0;
+					break;
 				case Microseconds:
 					scale = 1.0;
 					break;
@@ -332,6 +357,9 @@ public class TimestampFormatter {
 				break;
 			case Milliseconds:
 				switch (toUnits) {
+				case Nanoseconds:
+					scale = 1000000.0;
+					break;
 				case Microseconds:
 					scale = 1000.0;
 					break;
@@ -345,6 +373,9 @@ public class TimestampFormatter {
 				break;
 			case Seconds:
 				switch (toUnits) {
+				case Nanoseconds:
+					scale = 1000000000.0;
+					break;
 				case Microseconds:
 					scale = 1000000.0;
 					break;

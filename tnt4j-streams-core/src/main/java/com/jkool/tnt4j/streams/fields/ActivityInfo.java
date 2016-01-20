@@ -575,8 +575,17 @@ public class ActivityInfo {
 	 */
 	private void determineTimes() {
 		if (elapsedTime < 0L) {
-			elapsedTime = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
+			long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
 					: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
+			try {
+				Number elapsedTimeMicro = TimestampFormatter.convert(elapsedTimeNano,
+						ActivityFieldUnitsType.Nanoseconds, ActivityFieldUnitsType.Microseconds);
+
+				if (elapsedTimeMicro != null) {
+					elapsedTime = elapsedTimeMicro.longValue();
+				}
+			} catch (Exception exc) {
+			}
 		}
 		if (endTime == null) {
 			if (startTime != null) {
