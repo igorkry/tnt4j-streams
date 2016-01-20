@@ -7,17 +7,19 @@ Why TNT4J-Streams
 * TNT4J-Streams can be run out of the box for a large set of data streaming without writing no additional code.
 All You need is to define Your data format mapping to TNT4J event mapping in TNT4J-Streams configuration.
 
-* It supports these major data transports:
+* It supports the following data sources:
     * File
     * Character stream over TCP/IP
-    * Hdfs
-    * Mqtt
-    * Http
+    * HDFS
+    * MQTT
+    * HTTP
     * JMS
     * Apache Kafka
+    * Apache Flume
+    * Logstash
     * WMQ
 
-* Files (also Hdfs) can be streamed:
+* Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
     data of single activity event. After file reading completes - stream stops.
     * using file polling - when some application uses file to write data at runtime, stream waits for file changes.
@@ -352,13 +354,13 @@ Sample files can be found in `samples\custom` directory.
 #### Datapower
 TODO
 
-#### Hdfs
+#### HDFS
 TODO
 
-#### Http request file
+#### HTTP request file
 TODO
 
-#### Http request form
+#### HTTP request form
 TODO
 
 #### JMS text message
