@@ -56,12 +56,286 @@ Running TNT4J-Streams
     * Write streams configuration file. See 'Streams configuration' chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in your code
 
-## Examples:
+## Samples:
+
+### Running samples
+When release assembly is built samples are located in `samples` directory i.e. `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
+To run desired sample:
+* go to sample directory
+* run `run.bat` or `run.sh` depending on Your OS
+
+#### Single Log file
+
+This sample shows how to stream activity events (orders) data from single log file.
+
+Sample files can be found in `samples\single-log` directory.
+
+`orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
+
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        <property name="FileName" value="orders.log"/>
+        <parser-ref name="TokenParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `FileLineStream` referencing `TokenParser` shall be used.
+`FileStream` reads data from `orders.log` file.
+`TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
+Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+field string mapping to TNT4J event field value.
+
+#### Multiple Log files
+
+This sample shows how to stream activity events (orders) data from multiple log files using file name matching
+wildcard pattern.
+
+Sample files can be found in `samples\multiple-logs` directory.
+
+`orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
+single order activity event.
+
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+Sample configuration and sample idea is same as 'Single Log file' with one single difference:
+```xml
+    <property name="FileName" value="orders-*.log"/>
+```
+meaning that stream should process not one single file, but file set matching `orders-*.log` wildcard pattern.
+
 #### Apache Access log single file
-TODO
+
+This sample shows how to stream Apache access log records as activity events from single log file.
+
+Sample files can be found in `samples\apache-access-single-log` directory.
+
+`access.log` is sample Apache access log file depicting some HTTP server activity.
+
+NOTE: records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <!--property name="Pattern"
+                  value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/-->
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+        <field name="ElapsedTime" locator="16" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+
+    </parser>
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+
+    </parser>
+
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="access.log"/>
+
+        <parser-ref name="AccessLogParserExt"/>
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `FileLineStream` referencing `AccessLogParserExt` and `AccessLogParserCommon` shall
+be used. Note that multiple parsers can be used to parse stream entries data, meaning that activity event data will be
+made by first parser capable to parse entry data.
+
+`FileStream` reads data from `access.log` file. `HaltIfNoParser` property states that stream should skip unparseable
+entries and don't stop if such situation occurs.
+
+`AccessLogParserCommon` parser is dedicated to parse Apache access log entries made using default logging configuration.
+
+`LogPattern` defines logger pattern used to log entries to log file. Using this property parser is capable to
+automatically build RegEx to parse log entry fields.
+
+User is also allowed to manually define RegEx for log entry line using `Pattern` property.
+
+`ConfRegexMapping` properties are used to allow user override default log pattern token-RegEx mappings and define those
+manually to improve automatically build entry line RegEx.
+
+Activity event fields mapping is performed using locator identifying RegEx pattern group index.
+
+`AccessLogParserExt` is differs from `AccessLogParserCommon` just by having one additional log token `%D` in `LogPattern`
+property.
+
+So if for example half of log file was made using log pattern defined in `AccessLogParserCommon` parser `LogPattern`
+property and the second part using log pater defined in `AccessLogParserExt` parser `LogPattern` property - stream
+should be able to handle whole log file with no problems.
+
+Note: `StartTime` fields defines format and locale to correctly parse field data string. `CompCode` uses manual
+field string mapping to TNT4J event field value.
 
 #### Apache Access log multiple files
-TODO
+
+This sample shows how to stream Apache access log records as activity events from multiple log files using file name
+matching wildcard pattern.
+
+Sample files can be found in `samples\apache-access-multi-log` directory.
+
+`localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
+
+NOTE: records in this file are from year `2015` ranging from April until November, so then getting events data
+in JKoolCloud please do not forget to just to dashboard time frame to that period!
+
+Sample configuration and sample idea is same as 'Apache Access log single file' with one single difference:
+```xml
+    <property name="FileName" value="*_access_log.2015-*.txt"/>
+```
+meaning that stream should process not one single file, but file set matching `*_access_log.2015-*.txt` wildcard
+pattern.
 
 #### Apache Flume RAW data
 TODO
@@ -70,7 +344,10 @@ TODO
 TODO
 
 #### Custom API
-TODO
+
+Sample files can be found in `samples\custom` directory.
+
+
 
 #### Datapower
 TODO
@@ -113,67 +390,6 @@ TODO
 
 #### MQTT
 TODO
-
-#### Single Log file
-
-Sample files can be found in `samples\single-log` directory.
-
-To run sample as standalone application use command:
- * windows
-```
-..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml
-```
-or
-```
-run.bat
-```
- * unix
-```
-../../bin/tnt4j-streams -f:tnt-data-source.xml
-```
-or
-```
-run.sh
-```
-`orders.log` file contains order activity event as single line.
-
-Sample stream configuration:
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<tnt-data-source
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
-
-    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
-        <property name="FieldDelim" value="|"/>
-        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
-        <field name="ServerIp" locator="2"/>
-        <field name="ApplName" value="orders"/>
-        <field name="Correlator" locator="3"/>
-        <field name="UserName" locator="4"/>
-        <field name="EventName" locator="5"/>
-        <field name="EventType" locator="5">
-            <field-map source="Order Placed" target="START"/>
-            <field-map source="Order Received" target="RECEIVE"/>
-            <field-map source="Order Processing" target="OPEN"/>
-            <field-map source="Order Processed" target="SEND"/>
-            <field-map source="Order Shipped" target="END"/>
-        </field>
-        <field name="MsgValue" locator="8"/>
-    </parser>
-
-    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
-        <property name="FileName" value="orders.log"/>
-        <parser-ref name="TokenParser"/>
-    </stream>
-</tnt-data-source>
-```
-
-Stream configuration states that `FileLineStream` referencing `TokenParser` shall be used.
-`FileStream` reads data from `orders.log` file.
-`TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
- Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
- field string mapping to TNT4J event field value.
 
 ### How to use TNT4J loggers
 See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
@@ -242,6 +458,7 @@ Default location of `tnt4j.properties` file is in project `config` directory. At
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
 
 For more information on TNT4J and `tnt4j.properties` see (https://github.com/Nastel/TNT4J/wiki/Getting-Started).
+Details on JESL related configuration can be found at (https://github.com/Nastel/JESL/blob/master/README.md).
 
 ## Streams configuration
 
@@ -530,7 +747,7 @@ or
     <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
     <property name="ConfRegexMapping" value="%h=(\S+)"/>
     <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-    <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
+    <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
     <property name="ConfRegexMapping" value="%*i=(.+)"/>
 ```
  or
@@ -587,10 +804,8 @@ Download the above libraries and place into the `tnt4j-streams/lib directory` di
 Release assembly is built to `../build/tnt4j-streams` directory.
 
 ## Running samples
-When release assembly is built samples are located in `samples` directory i.e. `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
-To run desired sample:
-   * go to sample directory
-   * run `run.bat` or `run.sh` depending on Your OS.
+
+See 'Running TNT4J-Streams' chapter section 'Samples'.
 
 Testing of TNT4J-Streams
 =========================================
