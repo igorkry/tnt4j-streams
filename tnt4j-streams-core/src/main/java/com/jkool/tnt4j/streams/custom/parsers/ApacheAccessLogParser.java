@@ -68,7 +68,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
 	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
-	private static final String REQUEST_LOG_TOKEN_REGEX = "((\\S+) (\\S+) (\\S+))"; // NON-NLS
+	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (\\S+)( (\\S+)|()))|(-))"; // NON-NLS
 
 	/**
 	 * Apache access log configuration pattern string.
@@ -201,6 +201,10 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			logRegexBuff.append(apacheLogPattern.substring(pos, matcher.start()));
 			logRegexBuff.append(mapConfigTokenToRegex(matcher.group()));
 			pos = matcher.end();
+		}
+
+		if (pos < apacheLogPattern.length()) {
+			logRegexBuff.append(apacheLogPattern.substring(pos, apacheLogPattern.length()));
 		}
 
 		String logRegex = logRegexBuff.toString().trim();

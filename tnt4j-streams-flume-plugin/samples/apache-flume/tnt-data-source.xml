@@ -7,7 +7,7 @@
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%h=(\S+)"/>
         <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+) (\S+))|-)"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
@@ -16,7 +16,7 @@
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="10">
+        <field name="CompCode" locator="13">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -61,8 +61,8 @@
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="10"/>
-        <field name="MsgValue" locator="11"/>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">

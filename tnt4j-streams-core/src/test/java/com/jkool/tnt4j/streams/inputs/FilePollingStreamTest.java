@@ -52,6 +52,7 @@ public class FilePollingStreamTest {
 		fps.initialize();
 		final LogWatcher logWatcher = fps.createLogWatcher();
 		// TODO assert smth
+		logWatcher.shutdown();
 
 		fps.cleanup();
 		files.cleanup();
