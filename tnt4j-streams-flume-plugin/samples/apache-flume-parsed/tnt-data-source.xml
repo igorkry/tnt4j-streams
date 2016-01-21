@@ -66,8 +66,8 @@
     </parser>
 
     <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value="messages.json"/>
-        <!--<property name="Port" value="9595"/>-->
+        <!--<property name="FileName" value="messages.json"/>-->
+        <property name="Port" value="9595"/>
         <parser-ref name="FlumeJSONParser"/>
     </stream>
 </tnt-data-source>

@@ -1,15 +1,16 @@
 # tnt4j-streams
 TNT4J Streams allows data streaming, parsing from various data sources into TNT4J event sinks
 
-# Installation of tnt-4j flume plugin
+# Installation of tnt4j-streams Apache Flume plugin
 
-1. Copy tnt-4j-streams-*-all.jar to [flume_path]/lib directory
-2. Copy tnt-4j sample config files to [flume_path]/config/:
+1. Copy `tnt4j-streams-core.jar` and `tnt4j-streams-flume-plugin.jar` to [flume_path]/lib directory
+2. Copy tnt4j-streams Apache Flume plugin sample config files to [flume_path]/config/:
 
-	my-flume.properties 			(located [tnt-4j-dir]/samples/apache-flume/) <br>
-	tnt4.properties  				(located [tnt-4j-dir]/config/) <br>
-	log4j.properties [overwrite] 	(located [tnt-4j-dir]/config/) <br>
-	tnt-data-source.xml 			(located [tnt-4j-dir]/samples/apache-flume/) <br>
+	* my-flume.properties 			(located [tnt4j-streams-dir]/samples/apache-flume/)
+	* tnt4.properties  				(located [tnt4j-streams-dir]/config/)
+	* log4j.properties [overwrite/merge] 	(located [tnt4j-streams-dir]/config/)
+	* tnt-data-source.xml 			(located [tnt4j-streams-dir]/samples/apache-flume/)
+
 3. Adjust properties to your needs
 
 	* change my-flume.properties:

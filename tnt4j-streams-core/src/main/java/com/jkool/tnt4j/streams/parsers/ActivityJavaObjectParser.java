@@ -40,6 +40,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * represented by declared class field and the field name is used to map each
  * field onto its corresponding activity field.
  * </p>
+ * If field is complex object, subfields can be accessed using '.' as naming
+ * hierarchy separator: i.e. 'header.author.name'.
  *
  * @version $Revision: 1 $
  */

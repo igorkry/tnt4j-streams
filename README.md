@@ -481,10 +481,214 @@ To poll HDFS file `HdfsFilePollingStream` shall be used. `FileName` is defined u
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Apache Flume RAW data
-<!--- TODO -->
+
+This sample shows how to stream activity events from redirected Apache Flume output RAW data. Apache Flume output is
+configured to send RAW output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
+to extract log entry data from JSON envelope.
+
+Sample files can be found in `samples\apache-flume` directory.
+
+How to install plugin into Apache Flume and configure, see `samples\apache-flume\README.md`
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+    </parser>
+
+    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="MsgBody" locator="body" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+        <field name="sinkName" locator="sinkName" locator-type="Label"/>
+        <field name="chanelName" locator="chanelName" locator-type="Label"/>
+        <field name="headers" locator="headers" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="JSONEnvelopeParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `CharacterStream` referencing `JSONEnvelopeParser` shall be used.
+
+`CharacterStream` starts server socket on port defined using `Port` property. `HaltIfNoParser` property indicates that
+stream should skip unparseable entries.
+
+`JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `sinkName`, `chanelName` and
+`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.  Note that activity event
+will contain all fields processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Apache Flume Parsed Data
-<!--- TODO -->
+
+This sample shows how to stream activity events from Apache Flume parsed log entry output data. Apache Flume output is
+configured to send parsed log entry data as JSON to `localhost:9595`.
+
+Sample files can be found in `samples\apache-flume-parsed` directory.
+
+How to install plugin into Apache Flume and configure, see `samples\apache-flume-parsed\README.md`
+
+`messages.json` file contains sample JSON data package like one is sent from Apache Flume using configuration of
+this sample.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="FlumeJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="Location" locator="headers.clientip" locator-type="Label"/>
+        <field name="UserName" locator="headers.auth" locator-type="Label"/>
+        <field name="StartTime" locator="headers.logtime" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+               locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="headers.method" locator-type="Label"/>
+        <field name="ResourceName" locator="headers.param" locator-type="Label"/>
+        <field name="CompCode" locator="headers.response" locator-type="Label">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="headers.response" locator-type="Label"/>
+        <field name="MsgValue" locator="headers.bytes" locator-type="Label"/>
+        <field name="Message" locator="body" locator-type="Label"/>
+        <field name="Tag" separator=",">
+            <field-locator locator="sinkName" locator-type="Label"/>
+            <field-locator locator="chanelName" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+        <!--<property name="FileName" value="messages.json"/>-->
+        <property name="Port" value="9595"/>
+        <parser-ref name="FlumeJSONParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `CharacterStream` referencing `FlumeJSONParser` shall be used.
+
+`CharacterStream` starts server socket on port defined using `Port` property.
+
+`FlumeJSONParser` transforms received JSON data package to Map entries. Note that some entries like `headers` in map
+has inner map as value. Fields of such entries can be accessed defining field name using `.` as field hierarchy
+separator.
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
 
 #### Logstash RAW data
 
@@ -495,6 +699,9 @@ to extract log entry data from JSON envelope.
 Sample files can be found in `samples\logstash` directory.
 
 How to configure Logstash see `samples\logstash\README.MD`
+
+`messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
+this sample.
 
 Sample stream configuration:
 ```xml
@@ -606,6 +813,9 @@ send parsed Apache Access log entry data as JSON to `localhost:9595`.
 Sample files can be found in `samples\logstash-parsed` directory.
 
 How to configure Logstash see `samples\logstash-parsed\README.MD`
+
+`messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
+this sample.
 
 Sample stream configuration:
 ```xml
