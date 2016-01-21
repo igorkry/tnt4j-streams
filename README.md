@@ -158,11 +158,9 @@ Sample stream configuration:
     <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
         <!--property name="Pattern"
-                  value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/-->
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+                  value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/-->
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -223,10 +221,8 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -358,10 +354,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -499,10 +491,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -713,10 +701,6 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser"
             tags="Normal server,Delayed server">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -918,10 +902,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -1122,10 +1102,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -1438,10 +1414,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -1548,10 +1520,6 @@ Sample stream configuration:
 
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
-        <property name="ConfRegexMapping" value="%h=(\S+)"/>
-        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-        <property name="ConfRegexMapping" value="%*i=(.+)"/>
 
         <field name="Location" locator="1"/>
         <field name="UserName" locator="3"/>
@@ -2140,13 +2108,13 @@ or
     <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
     <property name="ConfRegexMapping" value="%h=(\S+)"/>
     <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
-    <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
-    <property name="ConfRegexMapping" value="%*i=(.+)"/>
+    <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
+    <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 ```
  or
 ```xml
     <property name="Pattern"
-              value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
+              value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
 
 How to Build TNT4J-Streams

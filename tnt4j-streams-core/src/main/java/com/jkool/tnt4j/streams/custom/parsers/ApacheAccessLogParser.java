@@ -68,7 +68,18 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
 	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
-	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (\\S+)( (\\S+)|()))|(-))"; // NON-NLS
+	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (.*?)( (\\S+)|()))|(-))"; // NON-NLS
+
+	// static final String REGEX_TOKENS = "(?<address>\\S+) (?<user>.*?)
+	// \\[(?<when>.*?)\\] \"(?<request>.*?)\" (?<status>[\\d\\-]+)
+	// (?<length>[\\d\\-]+) \"(?<referer>.*?)\" \"(?<agent>.*?)\".*";
+	// static final Pattern PATTERN_TOKENS = Pattern.compile(REGEX_TOKENS,
+	// Pattern.CASE_INSENSITIVE);
+	//
+	// static final String REGEX_CLIENT_REQUEST =
+	// "(?<method>\\S+)\\s+?(?<uri>.*?)\\s+?(?<version>HTTP.*)";
+	// static final Pattern PATTERN_CLIENT_REQUEST =
+	// Pattern.compile(REGEX_CLIENT_REQUEST, Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Apache access log configuration pattern string.
@@ -108,7 +119,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		configRegexMappings.put("%f", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%h", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%H", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*i", "(.+)"); // NON-NLS
+		configRegexMappings.put("%*i", "(.*?)"); // NON-NLS
 		configRegexMappings.put("%k", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%l", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 		configRegexMappings.put("%m", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
@@ -172,7 +183,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			String regex = makeRegexPattern(apacheLogPattern);
 			if (regex != null) {
 				pattern = Pattern.compile(regex);
-				LOGGER.log(OpLevel.DEBUG,
+				LOGGER.log(OpLevel.INFO,
 						StreamsResources.getStringFormatted("ApacheAccessLogParser.regex.made", regex));
 			} else {
 				LOGGER.log(OpLevel.TRACE, StreamsResources
