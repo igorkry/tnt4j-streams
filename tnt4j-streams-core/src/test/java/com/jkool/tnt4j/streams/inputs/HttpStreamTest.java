@@ -78,7 +78,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpHtmlPostTest() throws Throwable {
+	public void HttpFormPostTest() throws Throwable {
 		// initializeTest();
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
