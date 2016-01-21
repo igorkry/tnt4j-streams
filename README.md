@@ -168,7 +168,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -213,9 +213,9 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
-        <field name="ElapsedTime" locator="16" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
+        <field name="ElapsedTime" locator="15" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>
 
@@ -230,7 +230,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -275,8 +275,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
 
     </parser>
 
@@ -361,7 +361,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -406,9 +406,9 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
-        <field name="ElapsedTime" locator="15" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
+        <field name="ElapsedTime" locator="14" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>
 
@@ -498,7 +498,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -543,8 +543,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
@@ -708,7 +708,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -753,8 +753,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
@@ -909,7 +909,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -954,8 +954,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
@@ -1109,7 +1109,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1154,8 +1154,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
@@ -1421,7 +1421,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1466,8 +1466,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
@@ -1527,7 +1527,7 @@ Sample stream configuration:
         <field name="EventType" value="SEND"/>
         <field name="EventName" locator="7"/>
         <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="13">
+        <field name="CompCode" locator="12">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1572,8 +1572,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="13"/>
-        <field name="MsgValue" locator="14"/>
+        <field name="ReasonCode" locator="12"/>
+        <field name="MsgValue" locator="13"/>
     </parser>
 
     <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">

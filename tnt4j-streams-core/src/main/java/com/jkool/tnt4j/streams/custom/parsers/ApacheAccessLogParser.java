@@ -68,7 +68,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
 	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
-	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (.*?)( (\\S+)|()))|(-))"; // NON-NLS
+	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (.*?)( (\\S+))?)|(-))"; // NON-NLS
 
 	// static final String REGEX_TOKENS = "(?<address>\\S+) (?<user>.*?)
 	// \\[(?<when>.*?)\\] \"(?<request>.*?)\" (?<status>[\\d\\-]+)
