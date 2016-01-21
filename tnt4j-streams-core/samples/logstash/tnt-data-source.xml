@@ -77,8 +77,8 @@
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value="messages.json"/>
-        <!--<property name="Port" value="9595"/>-->
+        <!--<property name="FileName" value="messages.json"/>-->
+        <property name="Port" value="9595"/>
         <parser-ref name="JSONEnvelopeParser"/>
     </stream>
 </tnt-data-source>
