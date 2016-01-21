@@ -32,7 +32,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * Apache Flume
 
-just by applying configuration and without additional codding.
+just by applying configuration and without additional coding.
 
 Importing TNT4J-Streams project into IDE
 ======================================
