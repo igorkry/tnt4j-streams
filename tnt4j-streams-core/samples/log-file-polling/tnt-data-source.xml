@@ -69,8 +69,8 @@
 
     <stream name="SampleFilePolingStream" class="com.jkool.tnt4j.streams.inputs.FilePollingStream">
         <property name="FileName"
-                  value="C:/Users/akausinis/.IntelliJIdea15/system/tomcat/Tomcat_7_0_34_gvm_java_2/logs/localhost_access_log.*.txt"/>
-        <property name="FileReadDelay" value="5"/>
+                  value="[PATH_TO_LOGS_REPOSITORY]/logs/localhost_access_log.*.txt"/>
+        <property name="FileReadDelay" value="20"/>
         <property name="StartFromLatest" value="true"/>
         <parser-ref name="AccessLogParserCommon"/>
     </stream>

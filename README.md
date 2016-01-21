@@ -64,6 +64,8 @@ To run desired sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
 
+For more detailed configuration explanation see chapter 'Configuring TNT4J-Streams'.
+
 #### Single Log file
 
 This sample shows how to stream activity events (orders) data from single log file.
@@ -337,59 +339,187 @@ Sample configuration and sample idea is same as 'Apache Access log single file' 
 meaning that stream should process not one single file, but file set matching `*_access_log.2015-*.txt` wildcard
 pattern.
 
+#### Log file polling
+
+This sample shows how to stream Apache access log records as activity events from file which is used for logging at
+runtime. File polling technique may be used for any text file. File rolling is also supported.
+
+Sample files can be found in `samples\log-file-polling` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+        <field name="ElapsedTime" locator="15" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+
+    </parser>
+
+    <stream name="SampleFilePolingStream" class="com.jkool.tnt4j.streams.inputs.FilePollingStream">
+        <property name="FileName"
+                  value="[PATH_TO_LOGS_REPOSITORY]/logs/localhost_access_log.*.txt"/>
+        <property name="FileReadDelay" value="20"/>
+        <property name="StartFromLatest" value="true"/>
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `FilePollingStream` referencing `AccessLogParserCommon` shall be used.
+
+`FileStream` reads data from `access.log` file. `HaltIfNoParser` property states that stream should skip unparseable
+entries and don't stop if such situation occurs.
+
+`AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
+'Apache Access log single file' section.
+
+`FileName` property defines that stream should watch for files matching `localhost_access_log.*.txt` wildcard pattern.
+ This is needed to properly handle file rolling.
+
+`FileReadDelay` property indicates that file changes are streamed every 20 seconds.
+
+`StartFromLatest` property indicates that stream should start from latest entry record in log file. Setting this
+property to `false` would stream all log entries starting from oldest file matching wildcard pattern.
+
+
 #### Apache Flume RAW data
-TODO
+<!--- TODO -->
 
 #### Apache Flume Parsed Data
-TODO
+<!--- TODO -->
 
-#### Custom API
+#### Logstash RAW data
+<!--- TODO -->
+
+#### Logstash parsed data
+<!--- TODO -->
+
+#### Hdfs
+<!--- TODO -->
+
+#### Http request file
+
+This sample shows how to stream activity events received over HTTP request as file.
+
+Sample files can be found in `samples\http-file` directory.
+
+<!--- TODO -->
+
+#### Http request form
+
+This sample shows how to stream activity events received over HTTP request as form data.
+
+Sample files can be found in `samples\http-form` directory.
+
+<!--- TODO -->
+
+#### JMS text message
+<!--- TODO -->
+
+#### JMS map message
+<!--- TODO -->
+
+#### JMS object message
+<!--- TODO -->
+
+#### Kafka
+
+This sample shows how to stream activity events received over Apache Kafka transport as messages.
+
+Sample files can be found in `samples\kafka` directory.
+
+<!--- TODO -->
+
+#### MQTT
+
+This sample shows how to stream activity events received over MQTT transport as MQTT messages.
+
+Sample files can be found in `samples\mqtt` directory.
+
+<!--- TODO -->
+
+#### WMQ Message broker
+
+This sample shows how to stream activity events received over WMQ as MQ messages.
+
+Sample files can be found in `samples\message-broker` directory.
+
+<!--- TODO -->
+
+#### Integrating TNT4J-Streams into custom API
+
+This sample shows how to integrate TNT4J-Streams into Your custom API.
 
 Sample files can be found in `samples\custom` directory.
 
+`SampleIntegration.java` shows how to make TNT4J-Streams integration into Your API. Also integration could be made using
+`StreamsAgent.runFromAPI(cfgFileName)` call.
 
+`SampleParder.java` shows how to implement custom parser.
 
-#### Datapower
-TODO
-
-#### Hdfs
-TODO
-
-#### Http request file
-TODO
-
-#### Http request form
-TODO
-
-#### JMS text message
-TODO
-
-#### JMS map message
-TODO
-
-#### JMS object message
-TODO
-
-#### Kafka
-TODO
-
-#### Log file polling
-TODO
-
-#### Logstash RAW data
-TODO
-
-#### Logstash parsed data
-TODO
-
-#### WMQ Message broker
-TODO
-
-#### WMQ MFT/FTE
-TODO
-
-#### MQTT
-TODO
+`SampleStream.java` shows how to implement custom stream.
 
 ### How to use TNT4J loggers
 See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
@@ -557,7 +687,7 @@ That is why sequence of configuration elements is critical and can't be swapped.
   then latest log file is streamed from beginning. Default value - `true`. (Optional)
  * FileReadDelay - delay is seconds between log file reading iterations. Default value - `15sec`. (Optional)
 
-     sample:
+    sample:
  ```xml
     <property name="FileName" value="C:/Tomcat_7_0_34/logs/localhost_access_log.*.txt"/>
     <property name="FileReadDelay" value="5"/>
@@ -613,11 +743,11 @@ or
 ```
 or
 ```xml
-     <property name="ServerURI" value="tcp://localhost:61616"/>
-     <property name="Queue" value="queue.SampleJMSQueue"/>
-     <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-     <property name="JMSConnFactory" value="ConnectionFactory"/>
-     <parser-ref name="SampleJMSParser"/>
+    <property name="ServerURI" value="tcp://localhost:61616"/>
+    <property name="Queue" value="queue.SampleJMSQueue"/>
+    <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+    <property name="JMSConnFactory" value="ConnectionFactory"/>
+    <parser-ref name="SampleJMSParser"/>
 ```
 
 #### Kafka stream parameters:
@@ -752,8 +882,8 @@ or
 ```
  or
 ```xml
-     <property name="Pattern"
-                  value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
+    <property name="Pattern"
+              value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (\S+) (\S+))|-)&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
 
 How to Build TNT4J-Streams
