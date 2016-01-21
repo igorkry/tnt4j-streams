@@ -690,9 +690,12 @@ event fields using map entry key labels.
 
 #### HTTP request file
 
-This sample shows how to stream activity events received over HTTP request as file.
+This sample shows how to stream activity events received over HTTP request as file. Sample also shows how to use
+stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples\http-file` directory.
+
+Over HTTP sent sample file is `log.txt` - snapshot of Apache access log depicting some HTTP server activity.
 
 How to send file data over HTTP see `samples\http-file\README.md`
 
@@ -787,21 +790,16 @@ Sample stream configuration:
 Stream configuration states that `HttpStream` referencing `SampleHttpReqParser` shall be used.
 
 `HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
-should skip unparseable entries.
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`SampleHttpReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
+`AccessLogParserCommon` to parse format. Note that activity event will contain all fields processed by all stacked
+parsers. Custom fields values can be found as activity event properties.
 
 `AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
 'Apache Access log single file' section.
 
-
-`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
-should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
-
-`SampleHttpReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
-`SampleFormDataParser` to parse format.
-
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
-
-<!--- TODO -->
 
 #### HTTP request form
 
