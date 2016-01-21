@@ -66,7 +66,8 @@ To run desired sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
 
-For more detailed configuration explanation see chapter 'Configuring TNT4J-Streams'.
+For more detailed explanation of streams and parsers configuration and usage see chapter 'Configuring TNT4J-Streams'
+and JavaDocs.
 
 #### Single Log file
 
@@ -445,6 +446,39 @@ entries and don't stop if such situation occurs.
 `StartFromLatest` property indicates that stream should start from latest entry record in log file. Setting this
 property to `false` would stream all log entries starting from oldest file matching wildcard pattern.
 
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+
+#### HDFS
+
+These samples shows how to read or poll HDFS files contents. Samples are very similar to 'Log file polling' or
+'Apache Access log single file'. Difference is that specialized stream classes are used.
+
+Sample files can be found in `samples\hdfs-file-stream` and `hdfs-log-file-polling` directories.
+
+* Simple HDFS file streaming
+
+```xml
+    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
+        <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
+        ...
+    </stream>
+```
+
+To stream HDFS file lines `HdfsFileLineStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
+
+* HDFS file polling
+
+```xml
+    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFilePollingStream">
+        <property name="FileName"
+                  value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
+        ...
+    </stream>
+```
+
+To poll HDFS file `HdfsFilePollingStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Apache Flume RAW data
 <!--- TODO -->
@@ -458,14 +492,118 @@ property to `false` would stream all log entries starting from oldest file match
 #### Logstash parsed data
 <!--- TODO -->
 
-#### HDFS
-<!--- TODO -->
-
 #### HTTP request file
 
 This sample shows how to stream activity events received over HTTP request as file.
 
 Sample files can be found in `samples\http-file` directory.
+
+How to send file data over HTTP see `samples\http-file\README.md`
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+    </parser>
+
+    <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="8080"/>
+        <!--<property name="UseSSL" value="true"/>-->
+        <!--<property name="Keystore" value="path_to_keystore_file"/>-->
+        <!--<property name="KeystorePass" value="somePassword"/>-->
+        <!--<property name="KeyPass" value="somePassword"/>-->
+        <parser-ref name="SampleHttpReqParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `SampleHttpReqParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries.
+
+`AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
+'Apache Access log single file' section.
+
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`SampleHttpReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
+`SampleFormDataParser` to parse format.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 <!--- TODO -->
 
@@ -475,32 +613,634 @@ This sample shows how to stream activity events received over HTTP request as fo
 
 Sample files can be found in `samples\http-form` directory.
 
-<!--- TODO -->
+How to send HTTP form data see `samples\http-form\README.md`
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="SampleFormDataParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Location" locator="clientip" locator-type="Label"/>
+        <field name="UserName" locator="auth" locator-type="Label"/>
+        <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+               locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="verb" locator-type="Label"/>
+        <field name="ResourceName" locator="request" locator-type="Label"/>
+        <field name="CompCode" locator="response" locator-type="Label">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="response" locator-type="Label"/>
+        <field name="MsgValue" locator="bytes" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="8080"/>
+        <!--<property name="UseSSL" value="true"/>-->
+        <!--<property name="Keystore" value="path_to_keystore_file"/>-->
+        <!--<property name="KeystorePass" value="somePassword"/>-->
+        <!--<property name="KeyPass" value="somePassword"/>-->
+        <parser-ref name="SampleFormDataParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `SampleFormDataParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received form parameters data to map and passes it to parser.
+
+`SampleFormDataParser` performs form data mapping to TNT4J activity event data using form data parameters name labels.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS text message
-<!--- TODO -->
+
+This sample shows how to stream activity events received over JMS transport as text messages. Sample also shows
+how to use stacked parsers technique to extract message payload data.
+
+Sample files can be found in `samples\jms-mapmessage` directory.
+
+NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+    </parser>
+
+    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="ServerURI" value="tcp://localhost:61616"/>
+        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+        <property name="Topic" value="topic.SampleJMSTopic"/>
+        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <parser-ref name="SampleJMSParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
+
+`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
+processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+`SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
+`AccessLogParserCommon`.
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS map message
-<!--- TODO -->
+
+This sample shows how to stream activity events received over JMS transport as map messages.
+
+Sample files can be found in `samples\jms-textmessage` directory.
+
+NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="Location" locator="clientip" locator-type="Label"/>
+        <field name="UserName" locator="auth" locator-type="Label"/>
+        <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+               locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="verb" locator-type="Label"/>
+        <field name="ResourceName" locator="request" locator-type="Label"/>
+        <field name="CompCode" locator="response" locator-type="Label">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="response" locator-type="Label"/>
+        <field name="MsgValue" locator="bytes" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="ServerURI" value="tcp://localhost:61616"/>
+        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+        <property name="Topic" value="topic.SampleJMSTopic"/>
+        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <parser-ref name="SampleJMSParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
+
+`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
+processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+`SampleJMSParser` maps activity event data from JMS map message using map entries key labels.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS object message
-<!--- TODO -->
+
+This sample shows how to stream activity events received over JMS transport as serializable object messages. Sample
+also shows how to use stacked parsers technique to extract message payload data.
+
+Sample files can be found in `samples\jms-objectmessage` directory.
+
+NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="SampleObjectParser" class="com.jkool.tnt4j.streams.parsers.ActivityJavaObjectParser">
+        <field name="Location" locator="clientip" locator-type="Label"/>
+        <field name="UserName" locator="auth" locator-type="Label"/>
+        <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+               locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="verb" locator-type="Label"/>
+        <field name="ResourceName" locator="request" locator-type="Label"/>
+        <field name="CompCode" locator="response" locator-type="Label">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="response" locator-type="Label"/>
+        <field name="MsgValue" locator="bytes" locator-type="Label"/>
+    </parser>
+
+    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="SampleObjectParser"/>
+        </field>
+    </parser>
+
+    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="ServerURI" value="tcp://localhost:61616"/>
+        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+        <property name="Topic" value="topic.SampleJMSTopic"/>
+        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <parser-ref name="SampleJMSParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
+
+`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
+processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+`SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
+`SampleObjectParser`.
+
+`SampleObjectParser` is able to map activity event fields values from serialized object declared fields using field
+names as labels.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Kafka
 
-This sample shows how to stream activity events received over Apache Kafka transport as messages.
+This sample shows how to stream activity events received over Apache Kafka transport as messages. Sample also shows
+how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples\kafka` directory.
 
-<!--- TODO -->
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+    </parser>
+
+    <parser name="KafkaMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleKafkaStream" class="com.jkool.tnt4j.streams.inputs.KafkaStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Topic" value="TNT4JStreams"/>
+        <property name="zookeeper.connect" value="127.0.0.1:2181"/>
+        <property name="group.id" value="TNT4JStreams"/>
+        <parser-ref name="KafkaMessageParser"/>
+    </stream>
+</tnt-data-source>
+
+```
+
+Stream configuration states that `KafkaStream` referencing `KafkaMessageParser` shall be used.
+
+`KafkaStream` connects to server defined using `zookeeper.connect` property, and takes messages from topic defined
+`Topic` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
+Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
+processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+`KafkaMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
+`AccessLogParserCommon`.
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### MQTT
 
-This sample shows how to stream activity events received over MQTT transport as MQTT messages.
+This sample shows how to stream activity events received over MQTT transport as MQTT messages. Sample also shows how to
+use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples\mqtt` directory.
 
-<!--- TODO -->
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%h=(\S+)"/>
+        <property name="ConfRegexMapping" value="%*s=(\d{3})"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (\S+)( (\S+)|()))|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.+)"/>
+
+        <field name="Location" locator="1"/>
+        <field name="UserName" locator="3"/>
+        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7"/>
+        <field name="ResourceName" locator="8"/>
+        <field name="CompCode" locator="13">
+            <field-map source="100" target="SUCCESS"/>
+            <field-map source="101" target="SUCCESS"/>
+            <field-map source="103" target="SUCCESS"/>
+            <field-map source="200" target="SUCCESS"/>
+            <field-map source="201" target="SUCCESS"/>
+            <field-map source="202" target="SUCCESS"/>
+            <field-map source="203" target="SUCCESS"/>
+            <field-map source="204" target="SUCCESS"/>
+            <field-map source="205" target="SUCCESS"/>
+            <field-map source="206" target="SUCCESS"/>
+            <field-map source="300" target="WARNING"/>
+            <field-map source="301" target="WARNING"/>
+            <field-map source="302" target="WARNING"/>
+            <field-map source="303" target="WARNING"/>
+            <field-map source="304" target="WARNING"/>
+            <field-map source="306" target="WARNING"/>
+            <field-map source="307" target="WARNING"/>
+            <field-map source="308" target="WARNING"/>
+            <field-map source="400" target="ERROR"/>
+            <field-map source="401" target="ERROR"/>
+            <field-map source="402" target="ERROR"/>
+            <field-map source="403" target="ERROR"/>
+            <field-map source="404" target="ERROR"/>
+            <field-map source="405" target="ERROR"/>
+            <field-map source="406" target="ERROR"/>
+            <field-map source="407" target="ERROR"/>
+            <field-map source="408" target="ERROR"/>
+            <field-map source="409" target="ERROR"/>
+            <field-map source="410" target="ERROR"/>
+            <field-map source="411" target="ERROR"/>
+            <field-map source="412" target="ERROR"/>
+            <field-map source="413" target="ERROR"/>
+            <field-map source="414" target="ERROR"/>
+            <field-map source="415" target="ERROR"/>
+            <field-map source="416" target="ERROR"/>
+            <field-map source="417" target="ERROR"/>
+            <field-map source="500" target="ERROR"/>
+            <field-map source="501" target="ERROR"/>
+            <field-map source="502" target="ERROR"/>
+            <field-map source="503" target="ERROR"/>
+            <field-map source="504" target="ERROR"/>
+            <field-map source="505" target="ERROR"/>
+            <field-map source="511" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="13"/>
+        <field name="MsgValue" locator="14"/>
+    </parser>
+
+    <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="ServerURI" value="tcp://localhost:1883"/>
+        <property name="Topic" value="TNT4JStreams"/>
+        <!--<property name="UserName" value="someUser"/>-->
+        <!--<property name="Password" value="somePassword"/>-->
+        <!--<property name="UseSSL" value="true"/>-->
+        <!--<property name="Keystore" value="path_to_keystore_file"/>-->
+        <!--<property name="KeystorePass" value="somePassword"/>-->
+
+        <parser-ref name="MqttMessageParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `MqttStream` referencing `MqttMessageParser` shall be used.
+
+`MqttStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`Topic` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
+Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
+processed by all stacked parsers. Custom fields values can be found as activity event properties.
+
+`MqttMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
+`AccessLogParserCommon`.
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### WMQ Message broker
 
@@ -508,7 +1248,124 @@ This sample shows how to stream activity events received over WMQ as MQ messages
 
 Sample files can be found in `samples\message-broker` directory.
 
-<!--- TODO -->
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <property name="SignatureDelim" value="#!#"/>
+        <property name="Namespace"
+                  value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
+        <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
+        <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
+        <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
+        <field name="ApplName"
+               locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:messageFlow/@wmb:uniqueFlowName"
+               locator-type="Label"/>
+        <field name="ResourceName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeLabel"
+               locator-type="Label"/>
+        <field name="Message" locator="/wmb:event/wmb:bitstreamData/wmb:bitstream" locator-type="Label"
+               datatype="Binary"
+               format="base64Binary"/>
+        <field name="EventName" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+               locator-type="Label"/>
+        <field name="EventType" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType"
+               locator-type="Label">
+            <field-map source="ComIbmMQInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmMQOutputNode" target="SEND"/>
+            <field-map source="ComIbmMQGetNode" target="RECEIVE"/>
+            <field-map source="ComIbmJMSClientInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmJMSClientOutputNode" target="SEND"/>
+            <field-map source="ComIbmJMSClientReplyNode" target="SEND"/>
+            <field-map source="ComIbmJMSClientReceive" target="RECEIVE"/>
+            <field-map source="ComIbmJMSHeader.msgnode" target="RECEIVE"/>
+            <field-map source="ComIbmHTTPAsyncRequest" target="RECEIVE"/>
+            <field-map source="ComIbmHTTPAsyncResponse" target="SEND"/>
+            <field-map source="ComIbmHTTPHeader" target="RECEIVE"/>
+            <field-map source="ComIbmWSInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmWSReplyNode" target="SEND"/>
+            <field-map source="ComIbmWSRequestNode" target="RECEIVE"/>
+            <field-map source="ComIbmSOAPInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmSOAPReplyNode" target="SEND"/>
+            <field-map source="ComIbmSOAPRequestNode" target="RECEIVE"/>
+            <field-map source="ComIbmSOAPAsyncRequestNode" target="RECEIVE"/>
+            <field-map source="ComIbmSOAPAsyncResponseNode" target="SEND"/>
+            <field-map source="ComIbmSOAPWrapperNode" target="CALL"/>
+            <field-map source="ComIbmSOAPExtractNode" target="CALL"/>
+            <field-map source="SRRetrieveEntityNode" target="CALL"/>
+            <field-map source="SRRetrieveITServiceNode" target="CALL"/>
+            <field-map source="ComIbmDatabaseInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmDatabaseNode" target="CALL"/>
+            <field-map source="ComIbmDatabaseRetrieveNode" target="RECEIVE"/>
+            <field-map source="ComIbmDatabaseRouteNode" target="SEND"/>
+            <field-map source="ComIbmFileInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmFileReadNode" target="CALL"/>
+            <field-map source="ComIbmFileOutputNode" target="SEND"/>
+            <field-map source="ComIbmFTEInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmFTEOutputNode" target="SEND"/>
+            <field-map source="ComIbmTCPIPClientInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmTCPIPClientOutputNode" target="SEND"/>
+            <field-map source="ComIbmTCPIPClientRequestNode" target="RECEIVE"/>
+            <field-map source="ComIbmTCPIPServerInputNode" target="RECEIVE"/>
+            <field-map source="ComIbmTCPIPServerOutputNode" target="SEND"/>
+            <field-map source="ComIbmTCPIPServerRequestNode" target="RECEIVE"/>
+            <field-map source="ComIbmCORBARequestNode" target="RECEIVE"/>
+            <field-map source="" target="CALL"/>
+        </field>
+        <field name="Correlator"
+               locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventCorrelation/@wmb:localTransactionId"
+               locator-type="Label"/>
+        <field name="ElapsedTime" value="0" datatype="Number"/>
+        <field name="EndTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime"
+               locator-type="Label"
+               datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timezone="GMT"/>
+        <!--field name="ReasonCode" locator="/wmb:event/wmb:eventPointData/ReasonCode" locator-type="Label" datatype="Number"/-->
+        <!-- *** Use following signature definition for WMQ messages ***
+        <field name="TrackingId" separator="#!#">
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgType']/@wmb:value" locator-type="Label" datatype="Number"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Format']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgId']/@wmb:value" locator-type="Label" datatype="Binary" format="hexBinary"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='UserIdentifier']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutApplType']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutApplName']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutDate']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutTime']/@wmb:value" locator-type="Label"/>
+        </field>
+        -->
+        <!--field name="StartTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime" locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timestamp="GMT"/-->
+        <field name="CompCode" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+               locator-type="Label">
+            <field-map source="FlowRollback" target="ERROR"/>
+            <field-map source="" target="SUCCESS"/>
+        </field>
+        <!--field name="Tag" locator="/wmb:event/wmb:eventPointData/Tag" locator-type="Label"/-->
+        <!--field name="UserName" locator="/wmb:event/wmb:eventPointData/UserName" locator-type="Label"/-->
+    </parser>
+
+    <stream name="EventStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
+        <property name="QueueManager" value="QMGR"/>
+        <property name="Queue" value="EVENT.QUEUE"/>
+        <parser-ref name="EventParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `WmqStream` referencing `EventParser` shall be used. Stream deserialize message to
+string and passes it to parser.
+
+`QueueManager` property defines name of queue manager.
+
+`Queue` property defines name of queue to get messages.
+
+`EventParser` is of type `MessageActivityXmlParser` meaning that it will parse messages deserialized into XML strings.
+
+`SignatureDelim` property defines that `#!#` should be used as signature delimiter.
+
+`Namespace` property adds `wmb` namespace definition mapping to mapping
+`http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event`.
 
 #### Integrating TNT4J-Streams into custom API
 
