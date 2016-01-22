@@ -17,8 +17,7 @@
 package com.jkool.tnt4j.streams.inputs;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
@@ -53,7 +52,7 @@ public class AbstractBufferedStreamTest {
 		assertNull(abs.getNextItem());
 	}
 
-	@Test(timeout = 3000)
+	@Test(timeout = 4000)
 	public void getNextItemExpectedToWaitTest() throws Throwable {
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
@@ -67,7 +66,7 @@ public class AbstractBufferedStreamTest {
 			}
 		});
 		thread.start();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		assertEquals(Thread.State.WAITING, thread.getState());
 		thread.interrupt();
 	}
@@ -99,7 +98,7 @@ public class AbstractBufferedStreamTest {
 			}
 		});
 		thread.start();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		if (overflowRecordCount >= 2) {
 			Thread.sleep(30);
 			assertEquals(Thread.State.WAITING, thread.getState());

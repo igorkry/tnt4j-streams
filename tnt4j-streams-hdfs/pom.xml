@@ -5,7 +5,7 @@
     <parent>
         <artifactId>tnt4j-streams</artifactId>
         <groupId>com.jkool.tnt4j</groupId>
-        <version>1.0.0</version>
+        <version>0.1-beta</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

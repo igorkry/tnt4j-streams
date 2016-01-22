@@ -7,7 +7,7 @@
     <groupId>com.jkool.tnt4j</groupId>
     <artifactId>tnt4j-streams</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>0.1-beta</version>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -36,7 +36,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${release.deploy.dir}</directory>
+                            <directory>${release.deploy.dir}/${project.build.finalName}</directory>
                         </fileset>
                     </filesets>
                 </configuration>
