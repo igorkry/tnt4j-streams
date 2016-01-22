@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -70,10 +71,10 @@ public class ActivityInfo {
 	private String exception = null;
 	private OpLevel severity = null;
 	private String location = null;
-	private String correlator = null;
+	private Collection<String> correlators = null;
 
 	private String trackingId = null;
-	private Collection<String> tag = null;
+	private Collection<String> tags = null;
 	private Object message = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
@@ -251,7 +252,7 @@ public class ActivityInfo {
 				applName = getStringValue(fieldValue);
 				break;
 			case Correlator:
-				correlator = getStringValue(fieldValue);
+				addCorrelator(getStringValue(fieldValue));
 				break;
 			case ElapsedTime:
 				elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue()
@@ -362,19 +363,36 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Appends activity item tag collection with provided tag strings array
+	 * Appends activity item tags collection with provided tag strings array
 	 * contents.
 	 *
 	 * @param tags
 	 *            tag strings array
 	 */
-	public void addTag(String[] tags) {
+	public void addTag(String... tags) {
 		if (ArrayUtils.isNotEmpty(tags)) {
-			if (this.tag == null) {
-				this.tag = new ArrayList<String>();
+			if (this.tags == null) {
+				this.tags = new ArrayList<String>();
 			}
 
-			Collections.addAll(this.tag, tags);
+			Collections.addAll(this.tags, tags);
+		}
+	}
+
+	/**
+	 * Appends activity item correlators collection with provided correlator
+	 * strings array contents.
+	 *
+	 * @param correlators
+	 *            correlator strings array
+	 */
+	public void addCorrelator(String... correlators) {
+		if (ArrayUtils.isNotEmpty(correlators)) {
+			if (this.correlators == null) {
+				this.correlators = new ArrayList<String>();
+			}
+
+			Collections.addAll(this.correlators, correlators);
 		}
 	}
 
@@ -434,13 +452,13 @@ public class ActivityInfo {
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String evtName = StringUtils.isEmpty(eventName) ? UNSPECIFIED_LABEL : eventName;
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
-		String correl = StringUtils.isEmpty(correlator) ? trackId : correlator;
 		String resName = StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName;
-		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, correl, "",
-				(Object[]) null);
+		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, (String) null,
+				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
-		if (tag != null) {
-			event.setTag(tag);
+		event.setCorrelator(CollectionUtils.isEmpty(correlators) ? Collections.singletonList(trackId) : correlators);
+		if (CollectionUtils.isNotEmpty(tags)) {
+			event.setTag(tags);
 		}
 		if (message != null) {
 			if (message instanceof byte[]) {
@@ -675,19 +693,23 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(location)) {
 			location = otherAi.location;
 		}
-		if (StringUtils.isEmpty(correlator)) {
-			correlator = otherAi.correlator;
+		if (otherAi.correlators != null) {
+			if (correlators == null) {
+				correlators = new ArrayList<String>();
+			}
+
+			correlators.addAll(otherAi.correlators);
 		}
 
 		if (StringUtils.isEmpty(trackingId)) {
 			trackingId = otherAi.trackingId;
 		}
-		if (otherAi.tag != null) {
-			if (tag == null) {
-				tag = new ArrayList<String>();
+		if (otherAi.tags != null) {
+			if (tags == null) {
+				tags = new ArrayList<String>();
 			}
 
-			tag.addAll(otherAi.tag);
+			tags.addAll(otherAi.tags);
 		}
 		if (message == null) {
 			message = otherAi.message;
@@ -876,17 +898,17 @@ public class ActivityInfo {
 	 *
 	 * @return the activity tag strings collection
 	 */
-	public Collection<String> getTag() {
-		return tag;
+	public Collection<String> getTags() {
+		return tags;
 	}
 
 	/**
-	 * Gets activity correlator.
+	 * Gets activity correlator strings collection.
 	 *
-	 * @return the activity correlator
+	 * @return the activity correlator string collection
 	 */
-	public String getCorrelator() {
-		return correlator;
+	public Collection<String> getCorrelators() {
+		return correlators;
 	}
 
 	/**

@@ -120,7 +120,7 @@ public enum StreamFieldType {
 	 * Identifier used to correlate/relate activity entries to group them into
 	 * logical entities.
 	 */
-	Correlator(String.class),
+	Correlator(String[].class),
 
 	/**
 	 * User-defined label to associate with the activity, generally for locating

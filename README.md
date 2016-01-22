@@ -2160,7 +2160,7 @@ Download the above libraries and place into the `tnt4j-streams/lib directory` di
 
 ## Building
    * to build project run maven goals `clean package`
-   * to make release assembly run maven goals `clean package javadoc:aggregate verify`
+   * to make release assembly run maven goals `clean package javadoc:aggregate install`
 
 Release assembly is built to `../build/tnt4j-streams` directory.
 
