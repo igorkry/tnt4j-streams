@@ -58,7 +58,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>a byte array as request payload data(i.e. log file contents)</li>
  * </ul>
  * Running this stream Http server is started on configuration defined port.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code Map} data. On
  * message reception message data is packed into {@code Map} filling these
@@ -68,7 +67,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * request.</li>
  * <li>ActivityTransport - activity transport definition: 'Http'.</li>
  * </ul>
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>

@@ -39,12 +39,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements a JMS message transported activity stream, where each JMS message
  * payload data carried data is assumed to represent a single activity or event
  * which should be recorded.
- *
- * </p>
  * <p>
  * This activity stream requires parsers that can support JMS {@code Message}
  * data.
- * </p>
+ * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>ServerURI - JMS server URL. (Required)</li>

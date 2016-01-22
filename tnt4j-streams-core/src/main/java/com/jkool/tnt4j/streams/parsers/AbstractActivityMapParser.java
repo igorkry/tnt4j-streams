@@ -37,7 +37,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * item can be transformed into an {@code Map} data structure, where each field
  * is represented by a key/value pair and the name is used to map each field
  * onto its corresponding activity field.
- * </p>
+ * <p>
  * If map entry value is inner map, entries of that map can be accessed using
  * '.' as naming hierarchy separator: i.e. 'headers.auth.name'.
  *

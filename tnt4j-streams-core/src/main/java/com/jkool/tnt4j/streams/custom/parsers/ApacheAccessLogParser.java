@@ -34,12 +34,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Implements a custom Apache access log parser based on RegEx parsing. User can
  * define RegEx string to parse log as for ordinary activity RegEx parser.
- * </p>
  * <p>
- * >But it is also possible to use Apache access log configuration pattern over
+ * But it is also possible to use Apache access log configuration pattern over
  * LogPattern parameter. Then RegEx is generated from it. Additional config
  * pattern tokens may be mapped to RegEx'es using ConfRegexMapping parameters.
- * </p>
  * <p>
  * This parser supports the following properties:
  * <ul>

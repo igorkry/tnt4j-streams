@@ -23,7 +23,6 @@ import org.apache.flume.event.JSONEvent;
  * <p>
  * Extends Apache Flume {@code JSONEvent} to add additional attributes, required
  * by TNT4J-Streams.
- * </p>
  *
  * @version $Revision: 1 $
  */

@@ -39,12 +39,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements a WebSphere MQ activity stream, where activity data is read from
  * the specified WMQ Object (queue or topic) on the given (possibly remote)
  * queue manager.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
  * It currently does not strip off any WMQ headers, assuming that the message
  * data only contains the actual input for the configured parsers.
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -384,7 +382,6 @@ public class WmqStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 * <p>
 	 * Closes open objects and disconnects from queue manager.
-	 * </p>
 	 */
 	@Override
 	protected void cleanup() {
@@ -396,10 +393,8 @@ public class WmqStream extends TNTInputStream<String> {
 	/**
 	 * <p>
 	 * Formats display string for WMQ Exceptions.
-	 * </p>
 	 * <p>
 	 * This implementation appends the {@code MQRC_} label for the reason code.
-	 * </p>
 	 *
 	 * @param mqe
 	 *            WMQ exception

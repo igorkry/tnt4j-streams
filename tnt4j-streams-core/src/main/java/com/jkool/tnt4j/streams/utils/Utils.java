@@ -31,7 +31,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.jkool.tnt4j.streams.parsers.MessageType;
 import com.nastel.jkool.tnt4j.core.OpType;
@@ -110,13 +109,11 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * Generates a new unique message signature. This signature is expected to
 	 * be used for creating a new message instance, and is intended to uniquely
 	 * identify the message regardless of which application is processing it.
-	 * </p>
 	 * <p>
 	 * It is up to the individual stream to determine which of these attributes
 	 * is available/required to uniquely identify a message. In order to
 	 * identify a message within two different transports, the streams for each
 	 * transport must provide the same values.
-	 * </p>
 	 *
 	 * @param msgType
 	 *            message type
@@ -150,13 +147,11 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * Generates a new unique message signature. This signature is expected to
 	 * be used for creating a new message instance, and is intended to uniquely
 	 * identify the message regardless of which application is processing it.
-	 * </p>
 	 * <p>
 	 * It is up to the individual stream to determine which of these attributes
 	 * is available/required to uniquely identify a message. In order to
 	 * identify a message within two different transports, the streams for each
 	 * transport must provide the same values.
-	 * </p>
 	 *
 	 * @param _msgDigest
 	 *            message type
@@ -398,9 +393,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @return data map parsed from JSON data object
 	 *
-	 * @throws JsonSyntaxException
+	 * @throws com.google.gson.JsonSyntaxException
 	 *             if there was a problem reading from the Reader
-	 * @throws JsonIOException
+	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
 	 *
 	 * @see Gson#fromJson(String, Class)
@@ -497,6 +492,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param activityData
 	 *            raw activity data
+	 * @param <T>
+	 *            type of raw activity data
 	 *
 	 * @return raw activity data without 'new line' symbols.
 	 */

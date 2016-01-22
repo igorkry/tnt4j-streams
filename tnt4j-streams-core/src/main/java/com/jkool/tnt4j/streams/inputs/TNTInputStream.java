@@ -41,7 +41,6 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * <p>
  * Base class that all activity streams must extend. It provides some base
  * functionality useful for all activity streams.
- * </p>
  * <p>
  * All activity streams should support the following properties:
  * <ul>
@@ -252,11 +251,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		}
-
-		// t1 = System.currentTimeMillis();
 	}
-
-	// long t1;
 
 	/**
 	 * Creates default thread pool executor service for a given number of
@@ -531,9 +526,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 			trackersMap.clear();
 		}
-
-		// System.out.println("====================>>>>>>>>>>>>>> ELAPSED TIME:
-		// " + (System.currentTimeMillis() - t1));
 	}
 
 	private synchronized void shutdownExecutors() {

@@ -45,7 +45,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * name/value pair and the name is used to map each field onto its corresponding
  * activity field. The field-separator and the name/value separator can both be
  * customized.
- * </p>
  * <p>
  * This parser supports the following properties:
  * <ul>

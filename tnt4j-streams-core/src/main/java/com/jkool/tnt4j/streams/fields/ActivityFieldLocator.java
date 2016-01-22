@@ -120,11 +120,9 @@ public class ActivityFieldLocator {
 	 * Gets the type of this locator that indicates how to interpret the locator
 	 * to find the value in the raw activity data. This value can be one of the
 	 * predefined types, or it can be a custom type.
-	 * </p>
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field
 	 * locator is always a specific type.
-	 * </p>
 	 *
 	 * @return the label representing the type of locator
 	 */
@@ -136,11 +134,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the enumeration value for this locator if it implements one of the
 	 * built-in locator types.
-	 * </p>
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field
 	 * locator is always a specific type.
-	 * </p>
 	 *
 	 * @return the builtInType built-in locator type, or {@code null} if this
 	 *         locator is a custom one.
@@ -153,7 +149,6 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the locator to find the value of this field in the raw activity
 	 * data. This is generally a numeric position or a string label.
-	 * </p>
 	 *
 	 * @return the locator for data value
 	 */
@@ -166,7 +161,6 @@ public class ActivityFieldLocator {
 	 * Get the radix that raw data field values are interpreted in. Only
 	 * relevant for numeric fields and will be ignored by those fields to which
 	 * it does not apply.
-	 * </p>
 	 *
 	 * @return radix for field values
 	 */
@@ -179,7 +173,6 @@ public class ActivityFieldLocator {
 	 * Set the radix used to interpret the raw data field values. Only relevant
 	 * for numeric fields and will be ignored by those fields to which it does
 	 * not apply.
-	 * </p>
 	 *
 	 * @param radix
 	 *            radix of field values
@@ -191,11 +184,9 @@ public class ActivityFieldLocator {
 	/**
 	 * <p>
 	 * Gets the data type indicating how to treat the raw data field value.
-	 * </p>
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field
 	 * value is always a specific data type.
-	 * </p>
 	 *
 	 * @return the data type for raw data field
 	 */
@@ -206,11 +197,9 @@ public class ActivityFieldLocator {
 	/**
 	 * <p>
 	 * Sets the data type indicating how to treat the raw data field value.
-	 * </p>
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field
 	 * value is always a specific data type.
-	 * </p>
 	 *
 	 * @param dataType
 	 *            the data type for raw data field
@@ -223,11 +212,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the units represented by the raw data field value. This value can be
 	 * one of the predefined units, or it can be a custom unit type.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields.
-	 * </p>
 	 *
 	 * @return the units the raw data value represents
 	 */
@@ -239,11 +226,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the enumeration value for this locator's units if it implements one
 	 * of the built-in units types.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @return the builtInUnits built-in format type, or {@code null} if this
 	 *         units specification is a custom one.
@@ -256,11 +241,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Sets the units represented by the raw data field value. This value can be
 	 * one of the predefined units, or it can be a custom unit type.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @param units
 	 *            the units the raw data value represents
@@ -278,11 +261,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the format string defining how to interpret the raw data field
 	 * value.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @return the format string for interpreting raw data value
 	 */
@@ -293,11 +274,9 @@ public class ActivityFieldLocator {
 	/**
 	 * <p>
 	 * Gets locale representation string used by formatter.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @return the locale representation string used by formatter.
 	 */
@@ -309,11 +288,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Gets the enumeration value for this locator's format if it implements one
 	 * of the built-in format types.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @return the builtInFormat built-in format type, or {@code null} if this
 	 *         format is either a format string, or a custom one.
@@ -326,11 +303,9 @@ public class ActivityFieldLocator {
 	 * <p>
 	 * Sets the format string defining how to interpret the raw data field
 	 * value.
-	 * </p>
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those
 	 * fields to which it does not apply.
-	 * </p>
 	 *
 	 * @param format
 	 *            the format string for interpreting raw data value

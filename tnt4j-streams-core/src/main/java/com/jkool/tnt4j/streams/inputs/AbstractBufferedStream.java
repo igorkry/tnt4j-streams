@@ -29,7 +29,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Base class for buffered input activity stream. RAW activity data retrieved
  * from input source is placed into blocking queue to be asynchronously
  * processed by consumer thread(s).
- * </p>
  *
  * @param <T>
  *            the type of handled RAW activity data

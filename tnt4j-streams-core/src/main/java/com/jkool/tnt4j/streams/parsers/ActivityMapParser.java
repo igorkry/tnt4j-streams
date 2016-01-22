@@ -29,11 +29,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * is an {@code Map} data structure, where each field is represented by a
  * key/value pair and the name is used to map each field onto its corresponding
  * activity field.
- * </p>
  * <p>
  * Additionally this parser makes activity data transformation from
  * {@code byte[]} to {@code String}.
- * </p>
  *
  * @version $Revision: 1 $
  */
@@ -52,7 +50,6 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	 * <p>
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
-	 * </p>
 	 * <ul>
 	 * <li>{@code java.util.Map}</li>
 	 * </ul>

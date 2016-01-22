@@ -27,7 +27,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements an activity data parser that assumes each activity data item is an
  * JSON format string, where each field is represented by a key/value pair and
  * the name is used to map each field onto its corresponding activity field.
- * </p>
  *
  * @version $Revision: 2 $
  */

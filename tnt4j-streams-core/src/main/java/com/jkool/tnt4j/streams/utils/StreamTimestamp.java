@@ -32,7 +32,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Represents a timestamp that has microsecond accuracy. When constructing
  * timestamp values from string it uses {@code Locale} to parse it.
- * </p>
  *
  * @version $Revision: 3 $
  *
@@ -132,7 +131,6 @@ public class StreamTimestamp extends UsecTimestamp {
 	 * <p>
 	 * Creates Stream Timestamp from string representation of timestamp in the
 	 * specified format.
-	 * </p>
 	 * <p>
 	 * This is based on {@link SimpleDateFormat}, but extends its support to
 	 * recognize microsecond fractional seconds. If number of fractional second

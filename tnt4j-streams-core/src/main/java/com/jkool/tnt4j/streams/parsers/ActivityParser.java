@@ -69,7 +69,6 @@ public abstract class ActivityParser {
 	 * may be valid for a subclass of the parser. If extending an existing
 	 * parser subclass, the method from the base class should be called so that
 	 * it can process any properties it requires.
-	 * </p>
 	 *
 	 * @param props
 	 *            properties to set

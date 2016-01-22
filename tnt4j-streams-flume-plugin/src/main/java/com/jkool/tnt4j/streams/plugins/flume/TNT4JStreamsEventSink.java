@@ -38,7 +38,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Extends Apache Flume {@code AbstractSink} to deliver output events to JKool
  * Cloud service.
- * </p>
  *
  * @version $Revision: 1 $
  */

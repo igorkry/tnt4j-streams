@@ -27,11 +27,9 @@ import com.nastel.jkool.tnt4j.core.OpType;
 /**
  * <p>
  * Defines the set of item fields supported by jKool Database Access API.
- * </p>
  * <p>
  * Fields should be specified using the defined label instead of the enumeration
  * name.
- * </p>
  *
  * @version $Revision: 1 $
  */

@@ -43,7 +43,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * token-separated string of fields, with the value for each field being
  * retrieved from a specific 1-based numeric token position. The field-separator
  * can be customized.
- * </p>
  * <p>
  * This parser supports the following properties:
  * <ul>

@@ -135,11 +135,9 @@ public class StreamsThread extends Thread {
 	/**
 	 * <p>
 	 * Sets default name for a Streams thread.
-	 * </p>
 	 * <p>
 	 * Prefixes current (default) thread name with thread's ID and strips off
 	 * leading "com.jkool.tnt4j.streams." from thread name.
-	 * </p>
 	 */
 	protected void setDefaultName() {
 		setName(String.format("%s:%s", getId(), getName().replaceFirst("com.jkool.tnt4j.streams.", ""))); // NON-NLS

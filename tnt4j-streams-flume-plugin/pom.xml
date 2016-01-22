@@ -93,6 +93,14 @@
             <version>1.6.0</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.jkool.tnt4j</groupId>
+            <artifactId>tnt4j-streams-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

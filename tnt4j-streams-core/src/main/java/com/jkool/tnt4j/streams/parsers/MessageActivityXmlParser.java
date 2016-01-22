@@ -39,12 +39,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This class extends the basic activity XML parser for handling data specific
  * to messaging operations. It provides additional transformations of the raw
  * activity data collected for specific fields.
- * </p>
  * <p>
  * In particular, this class will convert the signature and correlation field
  * values from a tokenized list of items into a value in the appropriate form
  * required by the jKool Cloud Service.
- * </p>
  * <p>
  * This parser supports the following properties (in addition to those supported
  * by {@link ActivityXmlParser}):
@@ -99,10 +97,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * value, which is assumed to be a string containing the inputs required for
 	 * the message signature calculation, with each input separated by the
 	 * delimiter specified in property {@code SignatureDelim}.
-	 * </p>
 	 * <p>
 	 * The signature items MUST be specified in the following order:
-	 * </p>
 	 * <ol>
 	 * <li>Message Type</li>
 	 * <li>Message Format</li>
@@ -116,7 +112,6 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * <p>
 	 * Individual items can be omitted, but must contain a place holder (except
 	 * for trailing items).
-	 * </p>
 	 */
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {

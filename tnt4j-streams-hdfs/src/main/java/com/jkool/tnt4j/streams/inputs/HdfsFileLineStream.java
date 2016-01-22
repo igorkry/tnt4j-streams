@@ -41,10 +41,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * assumed to represent a single activity or event which should be recorded.
  * Files to stream are defined using "FileName" property in stream
  * configuration.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -168,10 +166,14 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 	}
 
 	/**
-	 * For testing
+	 * For testing purposes.
+	 *
+	 * Sets file system object for stream to use.
+	 *
+	 * @param fs
+	 *            file system object
 	 */
-	protected void setFs(FileSystem fs)
-	{
+	protected void setFs(FileSystem fs) {
 		this.fs = fs;
 	}
 }

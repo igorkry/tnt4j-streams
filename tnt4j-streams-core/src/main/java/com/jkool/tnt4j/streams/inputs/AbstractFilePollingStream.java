@@ -35,10 +35,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * is assumed to represent a single activity or event which should be recorded.
  * Stream reads changes form defined log files every "FileReadDelay" property
  * defined seconds (default is 15sec.).
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
- * </p>
+ * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>FileName - concrete file name or file name pattern defined using

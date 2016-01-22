@@ -33,10 +33,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Base class for files activity stream, where each line of the file is assumed
  * to represent a single activity or event which should be recorded. Files to
  * stream are defined using "FileName" property in stream configuration.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -122,7 +120,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * <p>
 	 * This method returns a string containing the contents of the next line in
 	 * the file.
-	 * </p>
 	 */
 	@Override
 	public String getNextItem() throws Throwable {
@@ -144,7 +141,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 * <p>
 	 * This method returns line number of the file last read.
-	 * </p>
 	 */
 	@Override
 	public int getActivityPosition() {

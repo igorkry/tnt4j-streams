@@ -46,10 +46,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * file is assumed to represent a single activity or event which should be
  * recorded. Stream reads changes form defined log files every "FileReadDelay"
  * property defined seconds (default is 15sec.).
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code String} data.
- * </p>
+ * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>FileName - concrete file name or file name pattern defined using
@@ -191,25 +190,21 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 * Monitor checks if it can read polled file. If not then tries to swap
 		 * to next available log file. If swap can't be done (no newer readable
 		 * file) then file monitoring is interrupted.
-		 * </p>
 		 * <p>
 		 * If polled file is readable, then monitor checks modification
 		 * timestamp. If it is newer than sored in {@code lastModifTime} file
 		 * gets opened for reading. If not, monitor tries to swap to next
 		 * available log file. If swap can'e be done (no newer readable file)
 		 * then file reading is skipped until next monitor invocation.
-		 * </p>
 		 * <p>
 		 * When file gets opened for reading reader is rolled to log file marked
 		 * by {@code lineNumber} attribute. If turns out that file got smaller
 		 * in lines count, then monitor tries to swap to previous log file. If
 		 * no previous readable log file is available, then reader is reset to
 		 * first file line.
-		 * </p>
 		 * <p>
 		 * Reader reads all file lines until end of file and puts them to
 		 * changed lines buffer.
-		 * </p>
 		 */
 		@Override
 		protected void readLogChanges() {

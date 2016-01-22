@@ -39,7 +39,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * string of fields as defined by the specified regular expression, with the
  * value for each field being retrieved from either of the 1-based group
  * position, or match position.
- * </p>
  * <p>
  * This parser supports the following properties:
  * <ul>
@@ -145,7 +144,6 @@ public class ActivityRegExParser extends ActivityParser {
 	 * <p>
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
-	 * </p>
 	 * <ul>
 	 * <li>{@code java.lang.String}</li>
 	 * <li>{@code byte[]}</li>

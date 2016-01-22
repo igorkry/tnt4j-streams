@@ -39,7 +39,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * is an plain java {@code Object} data structure, where each field is
  * represented by declared class field and the field name is used to map each
  * field onto its corresponding activity field.
- * </p>
+ * <p>
  * If field is complex object, subfields can be accessed using '.' as naming
  * hierarchy separator: i.e. 'header.author.name'.
  *
@@ -78,7 +78,6 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * <p>
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
-	 * </p>
 	 * <ul>
 	 * <li>{@code java.lang.Object}</li>
 	 * </ul>

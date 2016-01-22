@@ -34,7 +34,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Provides methods for parsing objects into timestamps and for formatting
  * timestamps as strings.
- * </p>
  * <p>
  * This is based on {@link SimpleDateFormat}, but extends its support to
  * recognize microsecond fractional seconds. If number of fractional second

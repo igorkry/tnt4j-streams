@@ -48,10 +48,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>StreamMessage - activity data is string made from message bytes</li>
  * <li>ObjectMessage - activity data is message serializable object</li>
  * </ul>
- * </p>
- * </p>
+ * <p>
  * Custom messages parsing not implemented and puts just log entry.
- * </p>
  *
  * @version $Revision: 1 $
  */
@@ -72,7 +70,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * <p>
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
-	 * </p>
 	 * <ul>
 	 * <li>{@code javax.jms.Message}</li>
 	 * </ul>

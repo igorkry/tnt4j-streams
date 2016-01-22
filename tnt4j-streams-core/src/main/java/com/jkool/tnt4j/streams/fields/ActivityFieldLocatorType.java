@@ -19,13 +19,11 @@ package com.jkool.tnt4j.streams.fields;
 /**
  * <p>
  * Lists the build-in raw activity field locator types.
- * </p>
  * <p>
  * Note: most parsers only support a single type of locator, so in many cases
  * the locator type is ignored, with the parser assuming that the locator
  * specification is a particular type. The types of locators supported is
  * parser-specific.
- * </p>
  *
  * @version $Revision: 1 $
  */

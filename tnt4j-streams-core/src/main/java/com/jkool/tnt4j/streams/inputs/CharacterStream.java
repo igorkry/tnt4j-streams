@@ -37,11 +37,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * read from the specified InputStream-based stream or Reader-based reader. This
  * class wraps the raw {@code InputStream} or {@code Reader} with a
  * {@code BufferedReader}.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code InputStream}s
  * or {@code Reader}s as the source for activity data.
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -244,7 +242,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * classes to process the data from an input stream. The parser, or its
 	 * underlying data reader needs to handle all I/O, along with any associated
 	 * errors.
-	 * </p>
 	 */
 	@Override
 	public BufferedReader getNextItem() throws Throwable {

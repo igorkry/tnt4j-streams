@@ -48,13 +48,11 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements an activity data parser that assumes each activity data item is an
  * XML string, with the value for each field being retrieved from a particular
  * XML element or attribute.
- * </p>
  * <p>
  * This parser supports reading the activity data from several types of input
  * sources, and supports input streams containing multiple XML documents. If
  * there are multiple XML documents, each document must start with
  * {@code "<?xml ...>"}, and be separated by a new line.
- * </p>
  * <p>
  * This parser supports the following properties:
  * <ul>

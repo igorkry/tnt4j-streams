@@ -46,7 +46,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements a MQTT topics transmitted activity stream, where each message body
  * is assumed to represent a single activity or event which should be recorded.
  * Topic to listen is defined using "Topic" property in stream configuration.
- * </p>
  * <p>
  * This activity stream requires parsers that can support {@code Map} data. On
  * message reception message data is packed into {@code Map} filling these
@@ -57,7 +56,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * message.</li>
  * <li>ActivityTransport - activity transport definition: 'Mqtt'.</li>
  * </ul>
- * </p>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
