@@ -71,10 +71,10 @@ public class ActivityInfo {
 	private String exception = null;
 	private OpLevel severity = null;
 	private String location = null;
-	private Collection<String> correlators = null;
+	private Collection<String> correlator = null;
 
 	private String trackingId = null;
-	private Collection<String> tags = null;
+	private Collection<String> tag = null;
 	private Object message = null;
 	private String msgCharSet = null;
 	private String msgEncoding = null;
@@ -252,7 +252,7 @@ public class ActivityInfo {
 				applName = getStringValue(fieldValue);
 				break;
 			case Correlator:
-				addCorrelator(getStringValue(fieldValue));
+				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
 				elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue()
@@ -371,11 +371,11 @@ public class ActivityInfo {
 	 */
 	public void addTag(String... tags) {
 		if (ArrayUtils.isNotEmpty(tags)) {
-			if (this.tags == null) {
-				this.tags = new ArrayList<String>();
+			if (this.tag == null) {
+				this.tag = new ArrayList<String>();
 			}
 
-			Collections.addAll(this.tags, tags);
+			Collections.addAll(this.tag, tags);
 		}
 	}
 
@@ -388,11 +388,11 @@ public class ActivityInfo {
 	 */
 	public void addCorrelator(String... correlators) {
 		if (ArrayUtils.isNotEmpty(correlators)) {
-			if (this.correlators == null) {
-				this.correlators = new ArrayList<String>();
+			if (this.correlator == null) {
+				this.correlator = new ArrayList<String>();
 			}
 
-			Collections.addAll(this.correlators, correlators);
+			Collections.addAll(this.correlator, correlators);
 		}
 	}
 
@@ -456,9 +456,9 @@ public class ActivityInfo {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
-		event.setCorrelator(CollectionUtils.isEmpty(correlators) ? Collections.singletonList(trackId) : correlators);
-		if (CollectionUtils.isNotEmpty(tags)) {
-			event.setTag(tags);
+		event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
+		if (CollectionUtils.isNotEmpty(tag)) {
+			event.setTag(tag);
 		}
 		if (message != null) {
 			if (message instanceof byte[]) {
@@ -693,23 +693,23 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(location)) {
 			location = otherAi.location;
 		}
-		if (otherAi.correlators != null) {
-			if (correlators == null) {
-				correlators = new ArrayList<String>();
+		if (otherAi.correlator != null) {
+			if (correlator == null) {
+				correlator = new ArrayList<String>();
 			}
 
-			correlators.addAll(otherAi.correlators);
+			correlator.addAll(otherAi.correlator);
 		}
 
 		if (StringUtils.isEmpty(trackingId)) {
 			trackingId = otherAi.trackingId;
 		}
-		if (otherAi.tags != null) {
-			if (tags == null) {
-				tags = new ArrayList<String>();
+		if (otherAi.tag != null) {
+			if (tag == null) {
+				tag = new ArrayList<String>();
 			}
 
-			tags.addAll(otherAi.tags);
+			tag.addAll(otherAi.tag);
 		}
 		if (message == null) {
 			message = otherAi.message;
@@ -898,8 +898,8 @@ public class ActivityInfo {
 	 *
 	 * @return the activity tag strings collection
 	 */
-	public Collection<String> getTags() {
-		return tags;
+	public Collection<String> getTag() {
+		return tag;
 	}
 
 	/**
@@ -907,8 +907,8 @@ public class ActivityInfo {
 	 *
 	 * @return the activity correlator string collection
 	 */
-	public Collection<String> getCorrelators() {
-		return correlators;
+	public Collection<String> getCorrelator() {
+		return correlator;
 	}
 
 	/**

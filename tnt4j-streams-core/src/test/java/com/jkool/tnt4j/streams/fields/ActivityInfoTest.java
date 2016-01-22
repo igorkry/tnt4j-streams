@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Test;
@@ -62,7 +63,7 @@ public class ActivityInfoTest {
 			if (test) {
 
 				final Object result = method.invoke(activityInfo);
-				assertEquals("Value not set", value.valueExpected, result);
+				assertEquals("Value not equal", value.valueExpected, result);
 			}
 		}
 		return activityInfo;
@@ -89,16 +90,10 @@ public class ActivityInfoTest {
 			valueT.value = OpCompCode.WARNING.toString();
 			break;
 		case Tag:
-		case Message:
+		case Correlator:
 			String[] array = { "Cheese", "Pepperoni", "Black Olives" };
-			activityField.addLocator(new ActivityFieldLocator(2));
-			activityField.addLocator(new ActivityFieldLocator(3));
-			valueT.value = array;
-			activityInfo.applyField(activityField, valueT.value);
-			return null;
-		// TODO
-		// assertEquals("Value not set", activityInfo.getMsgTags(),
-		// Arrays.asList(array));
+			valueT.value = Arrays.asList(array);
+			break;
 		case ServerIp:
 			valueT.value = "127.0.0.1";
 			break;
@@ -141,27 +136,12 @@ public class ActivityInfoTest {
 		ActivityInfo activityInfo = new ActivityInfo();
 		ActivityInfo activityInfoToMerge = new ActivityInfo();
 		for (StreamFieldType field : StreamFieldType.values()) {
+			fillInField(field, activityInfo);
 
-			TestPair value1 = fillInField(field, activityInfo);
-
-			StreamFieldType nextType = null;
-
-			try {
-				nextType = StreamFieldType.getType(field.ordinal() + 1);
-			} catch (IndexOutOfBoundsException ex) {
-				nextType = StreamFieldType.getType(0);
-			}
-
-			TestPair value2 = fillInField(nextType, activityInfoToMerge);
-			activityInfo.merge(activityInfoToMerge);
+			activityInfoToMerge.merge(activityInfo);
 
 			Method method = ActivityInfo.class.getMethod("get" + field.name());
-			Method method2 = ActivityInfo.class.getMethod("get" + nextType.name());
-			if (value1 == null || value2 == null)
-				continue;
-			assertEquals("Value not set", method.invoke(activityInfo), value1.valueExpected);
-			assertEquals("Value not set", method2.invoke(activityInfo), value2.valueExpected);
-
+			assertEquals("Value not equal", method.invoke(activityInfo), method.invoke(activityInfoToMerge));
 		}
 	}
 
