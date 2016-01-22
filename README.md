@@ -1732,7 +1732,7 @@ string and passes it to parser.
 
 `Queue` property defines name of queue to get messages.
 
-`EventParser` is of type `MessageActivityXmlParser` meaning that it will parse messages deserialized into XML strings.
+`EventParser` is of type `MessageActivityXmlParser` meaning that it will parse messages de-serialized into XML strings.
 
 `SignatureDelim` property defines that `#!#` should be used as signature delimiter.
 
@@ -2163,6 +2163,10 @@ Download the above libraries and place into the `tnt4j-streams/lib directory` di
    * to make release assembly run maven goals `clean package javadoc:aggregate install`
 
 Release assembly is built to `../build/tnt4j-streams` directory.
+
+NOTE: sometimes maven fails to correctly handle dependencies. If dependency configuration looks
+fine, but maven still complains about missing dependencies try to delete local maven repository
+by hand: i.e. delete contents of `c:\Users\[username]\.m2\repository` directory.
 
 ## Running samples
 
