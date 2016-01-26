@@ -31,7 +31,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * Main class for jKool LLC TNT4J-Streams standalone application.
  *
- * @version $Revision: 4 $
+ * @version $Revision: 1 $
  */
 public final class StreamsAgent {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsAgent.class);

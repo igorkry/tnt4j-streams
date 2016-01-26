@@ -38,7 +38,7 @@ import com.nastel.jkool.tnt4j.core.OpType;
 /**
  * General utility methods.
  *
- * @version $Revision: 16 $
+ * @version $Revision: 1 $
  */
 public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 

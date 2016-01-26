@@ -41,7 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Otherwise, it's assumed to be milliseconds (as this is the behavior of
  * {@link SimpleDateFormat}.
  *
- * @version $Revision: 6 $
+ * @version $Revision: 1 $
  *
  * @see SimpleDateFormat
  * @see StreamTimestamp

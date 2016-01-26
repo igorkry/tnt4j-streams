@@ -42,7 +42,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * characters '*' and '?'</li>
  * </ul>
  *
- * @version $Revision: 4 $
+ * @version $Revision: 1 $
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)

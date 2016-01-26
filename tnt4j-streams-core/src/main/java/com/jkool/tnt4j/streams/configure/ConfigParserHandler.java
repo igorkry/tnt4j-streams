@@ -35,7 +35,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements the SAX DefaultHandler for parsing jKool LLC TNT4J-Streams
  * configuration.
  *
- * @version $Revision: 7 $
+ * @version $Revision: 1 $
  *
  * @see StreamsConfig
  */

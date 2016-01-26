@@ -31,7 +31,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Represents a specific activity field, containing the necessary information on
  * how to extract its value from the raw activity data.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
 public class ActivityField {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);

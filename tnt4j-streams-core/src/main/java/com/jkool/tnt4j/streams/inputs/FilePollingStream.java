@@ -51,7 +51,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>FileReadDelay - delay is seconds between log file reading iterations</li>
  * </ul>
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)

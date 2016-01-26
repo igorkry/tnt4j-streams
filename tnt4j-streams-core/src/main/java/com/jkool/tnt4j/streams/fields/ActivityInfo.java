@@ -42,7 +42,7 @@ import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
  * This class represents an activity (e.g. event or snapshot) to record to jKool
  * Cloud Service.
  *
- * @version $Revision: 11 $
+ * @version $Revision: 1 $
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);

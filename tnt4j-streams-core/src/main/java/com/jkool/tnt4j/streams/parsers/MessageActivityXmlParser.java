@@ -50,7 +50,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
  * </ul>
  *
- * @version $Revision: 6 $
+ * @version $Revision: 1 $
  */
 public class MessageActivityXmlParser extends ActivityXmlParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MessageActivityXmlParser.class);

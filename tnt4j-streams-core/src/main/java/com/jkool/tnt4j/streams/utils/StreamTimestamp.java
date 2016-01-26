@@ -33,7 +33,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Represents a timestamp that has microsecond accuracy. When constructing
  * timestamp values from string it uses {@code Locale} to parse it.
  *
- * @version $Revision: 3 $
+ * @version $Revision: 1 $
  *
  * @see com.nastel.jkool.tnt4j.core.UsecTimestamp
  */
@@ -155,7 +155,6 @@ public class StreamTimestamp extends UsecTimestamp {
 	 * @throws ParseException
 	 *             if failed to parse string based on specified format
 	 * @see TimeZone
-	 * @since Revision: 10
 	 */
 	public StreamTimestamp(String timeStampStr, String formatStr, String timeZoneId, String locale)
 			throws ParseException {

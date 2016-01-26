@@ -35,7 +35,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Base class that all activity parsers must extend. It provides some base
  * functionality useful for all activity parsers.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
 public abstract class ActivityParser {
 	/**

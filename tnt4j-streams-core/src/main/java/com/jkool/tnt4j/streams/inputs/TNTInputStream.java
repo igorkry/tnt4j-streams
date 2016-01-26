@@ -65,7 +65,7 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * @param <T>
  *            the type of handled RAW activity data
  *
- * @version $Revision: 8 $
+ * @version $Revision: 1 $
  *
  * @see ExecutorService
  */

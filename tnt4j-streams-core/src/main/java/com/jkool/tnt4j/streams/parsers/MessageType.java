@@ -21,7 +21,7 @@ import com.jkool.tnt4j.streams.utils.StreamsResources;
 /**
  * Provides list of valid Message Types.
  *
- * @version $Revision: 7 $
+ * @version $Revision: 1 $
  */
 public enum MessageType {
 	/**

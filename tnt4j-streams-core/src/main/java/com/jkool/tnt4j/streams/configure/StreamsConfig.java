@@ -36,7 +36,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * This class will load the specified stream configuration.
  *
- * @version $Revision: 5 $
+ * @version $Revision: 1 $
  */
 public class StreamsConfig {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsConfig.class);

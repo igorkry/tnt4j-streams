@@ -49,7 +49,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * just one 'FileName' or 'Port')</li>
  * </ul>
  *
- * @version $Revision: 4 $
+ * @version $Revision: 1 $
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
@@ -281,7 +281,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * and adding the ability to detect if the underlying object has been
 	 * closed.
 	 *
-	 * @version $Revision: 4 $
+	 * @version $Revision: 1 $
 	 *
 	 * @see BufferedReader
 	 * @see InputStreamReader

@@ -33,7 +33,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * corresponding activity item value, as well as any transformations that are
  * necessary.
  *
- * @version $Revision: 7 $
+ * @version $Revision: 1 $
  */
 public class ActivityFieldLocator {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);

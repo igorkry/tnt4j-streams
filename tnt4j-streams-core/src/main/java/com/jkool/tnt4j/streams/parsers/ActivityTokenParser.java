@@ -54,7 +54,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * extracted data values. (Optional)</li>
  * </ul>
  *
- * @version $Revision: 5 $
+ * @version $Revision: 1 $
  */
 public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityTokenParser.class);

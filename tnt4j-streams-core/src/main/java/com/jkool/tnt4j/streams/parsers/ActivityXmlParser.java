@@ -61,7 +61,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * (Optional)</li>
  * </ul>
  *
- * @version $Revision: 7 $
+ * @version $Revision: 1 $
  */
 public class ActivityXmlParser extends GenericActivityParser<Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);

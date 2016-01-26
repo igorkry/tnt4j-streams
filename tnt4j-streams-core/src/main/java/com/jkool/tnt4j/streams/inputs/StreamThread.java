@@ -23,7 +23,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * Base class for threads running an TNTInputStream.
  *
- * @version $Revision: 3 $
+ * @version $Revision: 1 $
  *
  * @see TNTInputStream
  */

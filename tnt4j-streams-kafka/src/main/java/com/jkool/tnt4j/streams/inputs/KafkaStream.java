@@ -62,7 +62,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * properties.</li>
  * </ul>
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  *
  * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see com.jkool.tnt4j.streams.parsers.ActivityMapParser

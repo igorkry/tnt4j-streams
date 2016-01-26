@@ -28,7 +28,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * JSON format string, where each field is represented by a key/value pair and
  * the name is used to map each field onto its corresponding activity field.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
 // TODO: now works when one activity item is one JSON data package. No activity
 // arrays parsing supported.

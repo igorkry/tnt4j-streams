@@ -30,7 +30,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Provides methods for parsing objects into numeric values and for formatting
  * numeric values as strings.
  *
- * @version $Revision: 4 $
+ * @version $Revision: 1 $
  *
  * @see DecimalFormat
  */

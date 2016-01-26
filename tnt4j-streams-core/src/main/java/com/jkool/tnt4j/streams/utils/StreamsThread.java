@@ -23,9 +23,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * Base class for Streams threads.
  *
- * @version $Revision: 12 $
+ * @version $Revision: 1 $
  *
- * @see Thread
+ * @see java.lang.Thread
  */
 public class StreamsThread extends Thread {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsThread.class);

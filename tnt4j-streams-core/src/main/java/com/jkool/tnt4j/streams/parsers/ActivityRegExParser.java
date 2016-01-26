@@ -46,7 +46,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * assumed to match. (Required)</li>
  * </ul>
  *
- * @version $Revision: 5 $
+ * @version $Revision: 1 $
  */
 public class ActivityRegExParser extends ActivityParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);

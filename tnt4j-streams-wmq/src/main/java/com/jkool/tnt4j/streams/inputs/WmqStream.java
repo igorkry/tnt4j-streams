@@ -62,7 +62,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * headers. (Optional)</li>
  * </ul>
  *
- * @version $Revision: 10 $
+ * @version $Revision: 1 $
  */
 public class WmqStream extends TNTInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);

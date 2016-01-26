@@ -30,7 +30,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * Sample integration of TNT4J-Streams into an application.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
 public final class SampleIntegration {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleIntegration.class);
