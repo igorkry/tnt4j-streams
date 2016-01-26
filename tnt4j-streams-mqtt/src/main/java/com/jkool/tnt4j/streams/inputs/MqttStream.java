@@ -263,7 +263,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			halt();
 		}
 
-		private void closeConncetion() throws MqttException {
+		private void closeConnection() throws MqttException {
 			client.unsubscribe(topic);
 			client.disconnect();
 			// client.close();
@@ -274,7 +274,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("MqttStream.connection.lost"), cause);
 
 			try {
-				closeConncetion();
+				closeConnection();
 			} catch (MqttException exc) {
 				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.closing.receiver"), exc);
 			}
