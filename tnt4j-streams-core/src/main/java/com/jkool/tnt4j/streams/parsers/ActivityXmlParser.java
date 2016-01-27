@@ -175,6 +175,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		try {
+			if (dataStr != null) {
+				// save entire activity string as message data
+				field = new ActivityField(StreamFieldType.Message.name());
+				applyFieldValue(stream, ai, field, dataStr);
+			}
+
 			String[] savedFormats = null;
 			String[] savedUnits = null;
 			String[] savedLocales = null;

@@ -88,7 +88,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			return null;
 		}
 
-		return parsePreparedItem(stream, null, dataMap); // TODO: dataStr
+		return parsePreparedItem(stream, dataMap.toString(), dataMap);
 	}
 
 	/**

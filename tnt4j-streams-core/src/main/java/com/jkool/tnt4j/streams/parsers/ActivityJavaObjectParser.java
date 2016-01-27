@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
@@ -97,7 +99,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
 
-		return parsePreparedItem(stream, null, data); // TODO: dataStr
+		String dataStr = data == null ? null : ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
+		return parsePreparedItem(stream, dataStr, data);
 	}
 
 	/**
