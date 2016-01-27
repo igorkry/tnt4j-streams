@@ -20,16 +20,21 @@
         </license>
     </licenses>
 
+    <organization>
+        <name>jKool, LLC</name>
+        <url>https://www.jkoolcloud.com/</url>
+    </organization>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
         <java.compiler.debuglevel>source,lines,vars</java.compiler.debuglevel>
-        <product.vendor>JKOOL, LLC</product.vendor>
+        <product.vendor>${project.organization.name}</product.vendor>
         <product.name>TNT4J-Streams</product.name>
         <product.name.hr>TNT4J Streams</product.name.hr>
         <product.copyright.html>
-            <![CDATA[<font size="-1">Copyright &#169; 2015-2016 jKool, LLC. All Rights Reserved.</font>]]></product.copyright.html>
+            <![CDATA[<font size="-1">Copyright &#169; 2015-2016 ${project.organization.name}. All Rights Reserved.</font>]]></product.copyright.html>
         <release.deploy.dir>../build/${project.name}</release.deploy.dir>
     </properties>
 

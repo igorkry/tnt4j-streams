@@ -17,3 +17,17 @@ hs_err_pid*
 /.classpath
 /.settings/
 /**/target
+
+/**/*.iml
+
+/orders.log
+/config/log4j__.xml__
+/access.log
+/messages.json
+/access.log__
+/localhost_access_log.2015-04-02.txt
+/localhost_access_log.2015-07-22.txt
+/localhost_access_log.2015-11-05.txt
+/tnt4j-streams-core/samples/apache-access-single-log/regexp.txt
+/tnt4j-streams-core/samples/apache-access-single-log/error.log
+/plugins
