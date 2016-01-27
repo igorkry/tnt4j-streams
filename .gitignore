@@ -13,13 +13,7 @@ hs_err_pid*
 /.svn
 /classes
 /logs
-/target
-/tnt4j-streams-zorka/target
-/tnt4j-streams-wmq/target
-/tnt4j-streams-mqtt/target
-/tnt4j-streams-kafka/target
-/tnt4j-streams-jms/target
-/tnt4j-streams-http/target
-/tnt4j-streams-hdfs/target
-/tnt4j-streams-flume-plugin/target
-/tnt4j-streams-core/target
+/.project
+/.classpath
+/.settings/
+/**/target
