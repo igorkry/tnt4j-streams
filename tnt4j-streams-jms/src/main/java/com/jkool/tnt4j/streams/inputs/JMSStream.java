@@ -29,6 +29,7 @@ import javax.naming.NamingException;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -95,7 +96,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		if (StreamsConfig.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 			return jndiFactory;
 		}
-		if (StreamsConfig.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
+		if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 			return jmsConnFactory;
 		}
 
@@ -120,21 +121,21 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 				serverURL = value;
 			} else if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(topicName)) {
-					throw new IllegalStateException(
-							StreamsResources.getStringFormatted("CharacterStream.cannot.set.both",
-									StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
+					throw new IllegalStateException(StreamsResources.getStringFormatted(
+							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
+							StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
 				}
 				queueName = value;
 			} else if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(queueName)) {
-					throw new IllegalStateException(
-							StreamsResources.getStringFormatted("CharacterStream.cannot.set.both",
-									StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
+					throw new IllegalStateException(StreamsResources.getStringFormatted(
+							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
+							StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
 				}
 				topicName = value;
 			} else if (StreamsConfig.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 				jndiFactory = value;
-			} else if (StreamsConfig.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
+			} else if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 				jmsConnFactory = value;
 			}
 		}
@@ -148,9 +149,9 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		super.initialize();
 
 		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(queueName)) {
-			throw new IllegalStateException(
-					StreamsResources.getStringFormatted("TNTInputStream.property.undefined.one.of",
-							StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined.one.of", StreamsConfig.PROP_QUEUE_NAME,
+					StreamsConfig.PROP_TOPIC_NAME));
 		}
 
 		jmsDataReceiver = new JMSDataReceiver();
@@ -162,7 +163,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 		jmsDataReceiver.initialize(ic, StringUtils.isEmpty(queueName) ? topicName : queueName, jmsConnFactory);
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("JMSStream.stream.ready"));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS, "JMSStream.stream.ready"));
 
 		jmsDataReceiver.start();
 	}

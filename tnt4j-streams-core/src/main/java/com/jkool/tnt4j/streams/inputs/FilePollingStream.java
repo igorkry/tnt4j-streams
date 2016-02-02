@@ -155,7 +155,7 @@ public class FilePollingStream extends AbstractFilePollingStream {
 				LineNumberReader lineReader = null;
 				try {
 					lineReader = new LineNumberReader(new FileReader(pollingFile));
-					lineReader.skip(Long.MAX_VALUE);
+					long skippedCharsCount = lineReader.skip(Long.MAX_VALUE);
 					// NOTE: Add 1 because line index starts at 0
 					lineNumber = lineReader.getLineNumber() + 1;
 				} finally {
@@ -192,17 +192,19 @@ public class FilePollingStream extends AbstractFilePollingStream {
 		 */
 		@Override
 		protected void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FilePollingStream.reading.changes",
-					pollingFile.getAbsolutePath()));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"FilePollingStream.reading.changes", pollingFile.getAbsolutePath()));
 			readingLatestLogFile = true;
 
 			if (!pollingFile.canRead()) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("FilePollingStream.cant.access"));
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"FilePollingStream.cant.access"));
 
 				boolean swapped = swapToNextAvailableLogFile();
 
 				if (!swapped) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.next.not.found"));
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.next.not.found"));
 
 					halt();
 					return;
@@ -211,7 +213,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 				long flm = pollingFile.lastModified();
 				if (flm > lastModifTime) {
 					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted("FilePollingStream.file.updated",
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"FilePollingStream.file.updated",
 									TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
 									TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime)));
 
@@ -220,7 +223,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					boolean swapped = swapToNextAvailableLogFile();
 
 					if (!swapped) {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.no.changes"));
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"FilePollingStream.no.changes"));
 
 						return;
 					}
@@ -232,14 +236,16 @@ public class FilePollingStream extends AbstractFilePollingStream {
 			try {
 				lnr = rollToCurrentLine();
 			} catch (IOException exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.error.rolling"), exc);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"FilePollingStream.error.rolling"), exc);
 			}
 
 			if (lnr != null) {
 				try {
 					readNewLogLines(lnr);
 				} catch (IOException exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.error.reading"), exc);
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.error.reading"), exc);
 				} finally {
 					Utils.close(lnr);
 				}
@@ -251,7 +257,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 			try {
 				lnr = new LineNumberReader(new FileReader(pollingFile));
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("FilePollingStream.reader.error"));
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"FilePollingStream.reader.error"));
 
 				halt();
 				return null;
@@ -266,7 +273,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("FilePollingStream.log.shorter"));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.log.shorter"));
 
 					skipFail = true;
 					break;
@@ -282,8 +290,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					return rollToCurrentLine();
 				} else {
 					if (lnr.markSupported()) {
-						LOGGER.log(OpLevel.INFO,
-								StreamsResources.getStringFormatted("FilePollingStream.resetting.reader", 0));
+						LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(
+								StreamsResources.RESOURCE_BUNDLE_CORE, "FilePollingStream.resetting.reader", 0));
 
 						lnr.reset();
 					}
@@ -303,8 +311,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lastModifTime = prevFile.lastModified();
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources
-							.getStringFormatted("FilePollingStream.changing.to.previous", prevFile.getAbsolutePath()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.previous", prevFile.getAbsolutePath()));
 				}
 
 				return prevFile != null;
@@ -324,8 +332,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted("FilePollingStream.changing.to.next",
-							nextFile.getAbsolutePath()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.next", nextFile.getAbsolutePath()));
 				}
 
 				return nextFile != null;

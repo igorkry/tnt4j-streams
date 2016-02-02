@@ -98,8 +98,8 @@ public enum MessageType {
 		if (value == ACKNOWLEDGEMENT.value()) {
 			return ACKNOWLEDGEMENT;
 		}
-		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.num.value", value,
-				MessageType.class.getSimpleName()));
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"MessageType.illegal.num.value", value, MessageType.class.getSimpleName()));
 	}
 
 	private final int enumValue;
@@ -118,7 +118,8 @@ public enum MessageType {
 	 */
 	public static MessageType valueOf(Object value) {
 		if (value == null) {
-			throw new IllegalArgumentException(StreamsResources.getString("MessageType.null.object"));
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "MessageType.null.object"));
 		}
 		if (value instanceof Number) {
 			return valueOf(((Number) value).intValue());
@@ -126,7 +127,7 @@ public enum MessageType {
 		if (value instanceof String) {
 			return valueOf(value.toString());
 		}
-		throw new IllegalArgumentException(StreamsResources.getStringFormatted("MessageType.illegal.obj.value",
-				value.getClass().getName(), MessageType.class.getSimpleName()));
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"MessageType.illegal.obj.value", value.getClass().getName(), MessageType.class.getSimpleName()));
 	}
 }

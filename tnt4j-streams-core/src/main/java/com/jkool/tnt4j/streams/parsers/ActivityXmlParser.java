@@ -116,17 +116,18 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					}
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityXmlParser.adding.mapping"),
-							name, value);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityXmlParser.adding.mapping"), name, value);
 				}
 			} else if (StreamsConfig.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
-					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted("ActivityParser.setting", name, value));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityParser.setting", name, value));
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityParser.ignoring", name));
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityParser.ignoring", name));
 		}
 		if (namespaces != null) {
 			xPath.setNamespaceContext(namespaces);
@@ -141,7 +142,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityParser.parsing", data));
 
 		Document xmlDoc = null;
 		try {
@@ -155,8 +157,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString));
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException(
-					StreamsResources.getString("ActivityXmlParser.xmlDocument.parse.error"), 0);
+			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityXmlParser.xmlDocument.parse.error"), 0);
 			pe.initCause(e);
 
 			throw pe;
@@ -205,8 +207,9 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						savedLocales[0] = loc.getLocale();
 						value = getLocatorValue(stream, loc, xmlDoc);
 						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-							LOGGER.log(OpLevel.TRACE, StreamsResources
-									.getStringFormatted("ActivityXmlParser.required.locator.not.found", field));
+							LOGGER.log(OpLevel.TRACE,
+									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+											"ActivityXmlParser.required.locator.not.found", field));
 							return null;
 						}
 					} else {
@@ -218,8 +221,9 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							savedLocales[li] = loc.getLocale();
 							values[li] = getLocatorValue(stream, loc, xmlDoc);
 							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-								LOGGER.log(OpLevel.TRACE, StreamsResources
-										.getStringFormatted("ActivityXmlParser.required.locator.not.found", field));
+								LOGGER.log(OpLevel.TRACE,
+										StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+												"ActivityXmlParser.required.locator.not.found", field));
 								return null;
 							}
 						}
@@ -236,8 +240,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				}
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
+			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
@@ -309,8 +313,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							val = strVal.trim();
 						}
 					} catch (XPathExpressionException exc) {
-						ParseException pe = new ParseException(
-								StreamsResources.getString("ActivityXMLParser.xPath.exception"), 0);
+						ParseException pe = new ParseException(StreamsResources.getString(
+								StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityXMLParser.xPath.exception"), 0);
 						pe.initCause(exc);
 
 						throw pe;
@@ -356,7 +360,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		} else {
 			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted("ActivityParser.data.unsupported", data.getClass().getName()));
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityParser.data.unsupported", data.getClass().getName()));
 		}
 		String xmlString = null;
 		try {
@@ -370,9 +375,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				xmlBuffer.append(line);
 			}
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("ActivityXmlParser.data.end"), eof);
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityXmlParser.data.end"),
+					eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityXmlParser.error.reading"), ioe);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityXmlParser.error.reading"), ioe);
 		}
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();

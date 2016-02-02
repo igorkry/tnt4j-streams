@@ -16,7 +16,6 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import static com.jkool.tnt4j.streams.inputs.InputPropertiesTestUtils.testInputPropertySetAndGet;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +26,8 @@ import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
  * @author akausinis
@@ -111,5 +112,20 @@ public class WmqStreamTest {
 		wmqStream.cleanup();
 
 		// Verify doesn't throw
+	}
+
+	@Test
+	public void testRB() {
+		String keyModule = "WmqStream.stripped.wmq";
+		String keyCore = "ActivityField.field.type.name.empty";
+
+		String rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_WMQ, keyModule);
+		assertNotEquals("Wmq resource bundle entry not found", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyModule);
+		assertEquals("Wmq resource bundle entry found in core", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyCore);
+		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_WMQ, keyCore);
+		assertEquals("Core resource bundle entry found in wmq", rbs1, keyCore);
 	}
 }

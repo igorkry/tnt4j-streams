@@ -105,10 +105,11 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	public void initialize() throws Throwable {
 		super.initialize();
 		if (StringUtils.isEmpty(fileName)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
-					StreamsConfig.PROP_FILENAME));
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamsConfig.PROP_FILENAME));
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("FileLineStream.initializing.stream", fileName));
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"FileLineStream.initializing.stream", fileName));
 
 		loadFiles();
 
@@ -124,7 +125,8 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	@Override
 	public String getNextItem() throws Throwable {
 		if (lineReader == null) {
-			throw new IllegalStateException(StreamsResources.getString("FileLineStream.file.not.opened"));
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"FileLineStream.file.not.opened"));
 		}
 
 		String line = lineReader.readLine();
@@ -182,8 +184,8 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 			lineReader = new LineNumberReader(getFileReader(fileNumber));
 			lineNumber = 0;
-			logger.log(OpLevel.DEBUG,
-					StreamsResources.getStringFormatted("FileLineStream.opening.file", getFileName(fileNumber)));
+			logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"FileLineStream.opening.file", getFileName(fileNumber)));
 
 			return true;
 		}

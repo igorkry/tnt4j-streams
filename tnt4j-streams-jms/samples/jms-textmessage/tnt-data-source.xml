@@ -66,6 +66,7 @@
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
+        <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">

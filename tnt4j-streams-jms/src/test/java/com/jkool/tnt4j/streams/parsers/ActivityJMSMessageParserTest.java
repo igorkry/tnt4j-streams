@@ -16,8 +16,7 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.util.StringTokenizer;
@@ -25,6 +24,9 @@ import java.util.StringTokenizer;
 import javax.jms.*;
 
 import org.junit.Test;
+
+import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 
 /**
  * @author akausinis
@@ -66,6 +68,21 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 		((ActivityJMSMessageParser) parser).getDataMap(messageO);
 		verify(messageO).getObject();
 
+	}
+
+	@Test
+	public void testRB() {
+		String keyModule = "JMSStream.stream.ready";
+		String keyCore = "ActivityField.field.type.name.empty";
+
+		String rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS, keyModule);
+		assertNotEquals("JMS resource bundle entry not found", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyModule);
+		assertEquals("JMS resource bundle entry found in core", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyCore);
+		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS, keyCore);
+		assertEquals("Core resource bundle entry found in jms", rbs1, keyCore);
 	}
 
 }

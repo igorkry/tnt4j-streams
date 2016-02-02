@@ -15,9 +15,6 @@ echo installing libraries required by WMQ...
 #mvn install:install-file -Dfile=ibm.mq/com.ibm.mq.jmqi.jar -DgroupId=com.ibm -DartifactId=com.ibm.mq.jmqi -Dversion=7.5 -Dpackaging=jar
 #mvn install:install-file -Dfile=ibm.mq/com.ibm.mq.pcf.jar -DgroupId=com.ibm -DartifactId=com.ibm.mq.pcf -Dversion=7.5 -Dpackaging=jar
 
-echo installing libraries required by Zorka...
-#mvn install:install-file -Dfile=zico-util.jar -DgroupId=zorka -DartifactId=zico-util -Dversion=1.0.0 -Dpackaging=jar
-
 echo DONE!
 
 read -p "Press [Enter] key to exit..."

@@ -47,7 +47,8 @@ public class StreamsAgentTests {
 		StreamsAgent.main("-h");
 		System.out.flush();
 		final String string = console.getBuffer().toString();
-		final String expected = StreamsResources.getString("StreamsAgent.help") + LINE_SEPARATOR;
+		final String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.help")
+				+ LINE_SEPARATOR;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
 	}
@@ -59,9 +60,10 @@ public class StreamsAgentTests {
 		StreamsAgent.main(argument);
 		System.out.flush();
 		final String string = console.getBuffer().toString();
-		String expected = StreamsResources.getStringFormatted("StreamsAgent.invalid.argument", argument);
+		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"StreamsAgent.invalid.argument", argument);
 		expected += LINE_SEPARATOR;
-		expected += StreamsResources.getString("StreamsAgent.help");
+		expected += StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.help");
 		expected += LINE_SEPARATOR;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
@@ -74,9 +76,9 @@ public class StreamsAgentTests {
 		StreamsAgent.main(argument);
 		System.out.flush();
 		final String string = console.getBuffer().toString();
-		String expected = StreamsResources.getString("StreamsAgent.missing.cfg");
+		String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.missing.cfg");
 		expected += LINE_SEPARATOR;
-		expected += StreamsResources.getString("StreamsAgent.help");
+		expected += StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.help");
 		expected += LINE_SEPARATOR;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);

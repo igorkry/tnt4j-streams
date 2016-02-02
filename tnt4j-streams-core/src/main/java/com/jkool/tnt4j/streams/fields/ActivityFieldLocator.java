@@ -81,10 +81,10 @@ public class ActivityFieldLocator {
 		} catch (Exception e) {
 		}
 		if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.StreamProp) {
-			int loc = Integer.valueOf(locator);
+			int loc = Integer.parseInt(locator);
 			if (loc <= 0) {
-				throw new IllegalArgumentException(
-						StreamsResources.getString("ActivityFieldLocator.numeric.locator.positive"));
+				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityFieldLocator.numeric.locator.positive"));
 			}
 		}
 	}
@@ -405,13 +405,13 @@ public class ActivityFieldLocator {
 				target = map.get(srcString);
 			}
 			if (target == null) {
-				LOGGER.log(OpLevel.TRACE,
-						StreamsResources.getStringFormatted("ActivityFieldLocator.mapped.default", type));
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityFieldLocator.mapped.default", type));
 				target = mapCatchAll != null ? mapCatchAll : source;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getStringFormatted("ActivityFieldLocator.mapped.result", source, target, type));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityFieldLocator.mapped.result", source, target, type));
 		return target;
 	}
 

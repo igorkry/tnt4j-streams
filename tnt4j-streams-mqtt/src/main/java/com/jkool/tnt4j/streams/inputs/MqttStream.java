@@ -34,6 +34,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.MqttStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -169,18 +170,19 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	protected void initialize() throws Throwable {
 		super.initialize();
 		if (StringUtils.isEmpty(serverURI)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
-					StreamsConfig.PROP_SERVER_URI));
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamsConfig.PROP_SERVER_URI));
 		}
 		if (StringUtils.isEmpty(topic)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
-					StreamsConfig.PROP_TOPIC_STRING));
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamsConfig.PROP_TOPIC_STRING));
 		}
 
 		mqttDataReceiver = new MqttDataReceiver();
 		mqttDataReceiver.initialize();
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("MqttStream.stream.ready"));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT, "MqttStream.stream.ready"));
 
 		mqttDataReceiver.start();
 	}
@@ -193,7 +195,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		try {
 			mqttDataReceiver.close();
 		} catch (MqttException exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.closing.receiver"), exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
+					"MqttStream.error.closing.receiver"), exc);
 		}
 
 		super.cleanup();
@@ -271,18 +274,22 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("MqttStream.connection.lost"), cause);
+			LOGGER.log(OpLevel.ERROR,
+					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT, "MqttStream.connection.lost"),
+					cause);
 
 			try {
 				closeConnection();
 			} catch (MqttException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.closing.receiver"), exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
+						"MqttStream.error.closing.receiver"), exc);
 			}
 
 			try {
 				initialize();
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString("MqttStream.error.reconnecting.receiver"), exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
+						"MqttStream.error.reconnecting.receiver"), exc);
 			}
 		}
 
@@ -294,14 +301,15 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			String msgData = Utils.getString(message.getPayload());
 
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
+					"MqttStream.message.received", msgData));
 
 			Map<String, Object> msgDataMap = new HashMap<String, Object>();
 
 			if (ArrayUtils.isNotEmpty(message.getPayload())) {
 				msgDataMap.put(StreamsConstants.TOPIC_KEY, topic);
 				msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, message.getPayload());
-				msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_MQTT);
+				msgDataMap.put(StreamsConstants.TRANSPORT_KEY, MqttStreamConstants.TRANSPORT_MQTT);
 			}
 
 			if (!msgDataMap.isEmpty()) {

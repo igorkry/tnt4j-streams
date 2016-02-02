@@ -30,6 +30,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -134,12 +135,13 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	protected void initialize() throws Throwable {
 		super.initialize();
 		if (StringUtils.isEmpty(topicNameRegex)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted("TNTInputStream.property.undefined",
-					StreamsConfig.PROP_TOPIC_NAME));
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamsConfig.PROP_TOPIC_NAME));
 		}
 
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.stream.ready"));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA, "KafkaStream.stream.ready"));
 	}
 
 	/**
@@ -152,16 +154,19 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	public Map<String, ?> getNextItem() throws Throwable {
 		while (!closed.get()) {
 			if (messageBuffer == null || !messageBuffer.hasNext()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.empty.messages.buffer"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
+						"KafkaStream.empty.messages.buffer"));
 				final List<kafka.consumer.KafkaStream<byte[], byte[]>> streams = consumer
 						.createMessageStreamsByFilter(new Whitelist(topicNameRegex));
 				if (CollectionUtils.isNotEmpty(streams)) {
 					kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(0);
 					messageBuffer = stream.iterator();
 					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted("KafkaStream.retrieved.new.messages", stream.size()));
+							StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
+									"KafkaStream.retrieved.new.messages", stream.size()));
 				} else {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("KafkaStream.retrieved.no.new.messages"));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
+							"KafkaStream.retrieved.no.new.messages"));
 				}
 			}
 
@@ -170,20 +175,22 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 				byte[] msgPayload = msg.message();
 				String msgData = Utils.getString(msgPayload);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("KafkaStream.next.message", msgData));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(
+						KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA, "KafkaStream.next.message", msgData));
 
 				Map<String, Object> msgDataMap = new HashMap<String, Object>();
 
 				if (ArrayUtils.isNotEmpty(msgPayload)) {
 					msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
 					msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
-					msgDataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_KAFKA);
+					msgDataMap.put(StreamsConstants.TRANSPORT_KEY, KafkaStreamConstants.TRANSPORT_KAFKA);
 				}
 
 				return msgDataMap;
 			}
 		}
-		LOGGER.log(OpLevel.ERROR, StreamsResources.getString("KafkaStream.failed.consumer"));
+		LOGGER.log(OpLevel.ERROR,
+				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA, "KafkaStream.failed.consumer"));
 		return null;
 	}
 

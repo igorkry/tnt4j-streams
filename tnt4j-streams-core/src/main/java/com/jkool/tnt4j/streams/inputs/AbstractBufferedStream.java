@@ -81,8 +81,8 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 */
 	public T getNextItem() throws Throwable {
 		if (inputBuffer == null) {
-			throw new IllegalStateException(
-					StreamsResources.getString("AbstractBufferedStream.changes.buffer.uninitialized"));
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 
 		if (inputBuffer.isEmpty() && isInputEnded()) {
@@ -121,14 +121,15 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 				boolean added = inputBuffer.offer(inputData, INPUT_BUFFER_OFFER_TIMEOUT, TimeUnit.SECONDS);
 
 				if (!added) {
-					logger.log(OpLevel.WARNING, StreamsResources
-							.getStringFormatted("AbstractBufferedStream.changes.buffer.limit", inputData));
+					logger.log(OpLevel.WARNING,
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"AbstractBufferedStream.changes.buffer.limit", inputData));
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString("AbstractBufferedStream.offer.interrupted"),
-						exc);
+				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"AbstractBufferedStream.offer.interrupted"), exc);
 				// halt();
 			}
 		}
@@ -209,8 +210,8 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 			try {
 				close();
 			} catch (Exception exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString("AbstractBufferedStream.input.close.error"),
-						exc);
+				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"AbstractBufferedStream.input.close.error"), exc);
 			}
 		}
 

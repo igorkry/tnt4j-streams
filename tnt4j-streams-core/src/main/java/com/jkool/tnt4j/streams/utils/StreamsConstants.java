@@ -38,18 +38,6 @@ public final class StreamsConstants {
 	public static final String TRANSPORT_KEY = "ActivityTransport"; // NON-NLS
 
 	/**
-	 * The constant to indicate activity transport is Apache Kafka.
-	 */
-	public static final String TRANSPORT_KAFKA = "Kafka"; // NON-NLS
-	/**
-	 * The constant to indicate activity transport is MQTT.
-	 */
-	public static final String TRANSPORT_MQTT = "Mqtt"; // NON-NLS
-	/**
-	 * The constant to indicate activity transport is JMS.
-	 */
-	public static final String TRANSPORT_JMS = "JMS"; // NON-NLS
-	/**
 	 * The constant to indicate activity transport is HTTP.
 	 */
 	public static final String TRANSPORT_HTTP = "Http"; // NON-NLS

@@ -114,7 +114,8 @@ public class ActivityInfo {
 	 *             definition (e.g. does not match defined format, etc.)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.applying.field", field, value));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityInfo.applying.field", field, value));
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
@@ -126,11 +127,12 @@ public class ActivityInfo {
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
 			if (field.isEnumeration()) {
-				throw new ParseException(StreamsResources.getStringFormatted("ActivityInfo.multiple.locators", field),
-						0);
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.multiple.locators", field), 0);
 			}
 			if (locators.size() != values.length) {
-				throw new ParseException(StreamsResources.getStringFormatted("ActivityInfo.failed.parsing", field), 0);
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.failed.parsing", field), 0);
 			}
 			StringBuilder sb = new StringBuilder();
 			for (int v = 0; v < values.length; v++) {
@@ -157,11 +159,12 @@ public class ActivityInfo {
 			}
 		}
 		if (fieldValue == null) {
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.field.null", field));
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityInfo.field.null", field));
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getStringFormatted("ActivityInfo.applying.field.value", field, fieldValue));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityInfo.applying.field.value", field, fieldValue));
 		setFieldValue(field, fieldValue);
 	}
 
@@ -329,13 +332,14 @@ public class ActivityInfo {
 				category = getStringValue(fieldValue);
 				break;
 			default:
-				throw new IllegalArgumentException(
-						StreamsResources.getStringFormatted("ActivityInfo.unrecognized.activity", field));
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.unrecognized.activity", field));
 			}
 		} else {
 			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityInfo.set.field", field, fieldValue));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityInfo.set.field", field, fieldValue));
 	}
 
 	/**
@@ -443,7 +447,8 @@ public class ActivityInfo {
 	 */
 	public void recordActivity(Tracker tracker, long retryPeriod) throws Throwable {
 		if (tracker == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityInfo.tracker.null"));
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.tracker.null"));
 			return;
 		}
 
@@ -510,24 +515,24 @@ public class ActivityInfo {
 		}
 		boolean retryAttempt = false;
 		do {
-			if (event != null) {
-				try {
-					tracker.tnt(event);
-					if (retryAttempt) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getString("ActivityInfo.retry.successful"));
-					}
-					return;
-				} catch (Throwable ioe) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityInfo.recording.failed"), ioe);
-					Utils.close(tracker);
-					if (thread == null) {
-						throw ioe;
-					}
-					retryAttempt = true;
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted("ActivityInfo.will.retry",
-							TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
-					StreamsThread.sleep(retryPeriod);
+			try {
+				tracker.tnt(event);
+				if (retryAttempt) {
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityInfo.retry.successful"));
 				}
+				return;
+			} catch (Throwable ioe) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.recording.failed"), ioe);
+				Utils.close(tracker);
+				if (thread == null) {
+					throw ioe;
+				}
+				retryAttempt = true;
+				LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.will.retry", TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
+				StreamsThread.sleep(retryPeriod);
 			}
 		} while (thread != null && !thread.isStopRunning());
 	}

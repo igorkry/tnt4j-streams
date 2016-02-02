@@ -220,7 +220,7 @@ public class NumericFormatter {
 			}
 			return numValue.doubleValue() * scale.doubleValue();
 		} catch (NumberFormatException nfe) {
-			throw new ParseException(nfe.getMessage(), 0);
+			throw new ParseException(nfe.getLocalizedMessage(), 0);
 		}
 	}
 }

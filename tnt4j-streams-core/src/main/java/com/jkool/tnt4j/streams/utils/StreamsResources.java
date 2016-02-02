@@ -17,6 +17,8 @@
 package com.jkool.tnt4j.streams.utils;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -26,22 +28,37 @@ import java.util.ResourceBundle;
  * @version $Revision: 1 $
  */
 public class StreamsResources {
-	private static final String RESOURCE_BUNDLE_BASE = "tnt4j-streams"; // NON-NLS
+	/**
+	 * Resource bundle name constant for TNT4J-Streams "core" module.
+	 */
+	public static final String RESOURCE_BUNDLE_CORE = "tnt4j-streams-core"; // NON-NLS
 
-	private static ResourceBundle resBundle;
+	private static Map<String, ResourceBundle> resBundlesMap;
 
 	/**
-	 * Initializes singleton instance of resource bundle for default locale and
-	 * returns it.
+	 * Initializes singleton instance of resource bundle for default locale if
+	 * such is not available in bundles cache map. After initialization bundle
+	 * object is placed into cache map and retrieved from it on subsequent
+	 * calls. Cache map entry key is {@code bundleName}
+	 *
+	 * @param bundleName
+	 *            the base name of the resource bundle
 	 *
 	 * @return default locale bound resource bundle
 	 *
 	 * @see ResourceBundle#getBundle(String)
 	 */
-	public static ResourceBundle getBundle() {
+	public static ResourceBundle getBundle(String bundleName) {
+		ResourceBundle resBundle = null;
 		synchronized (StreamsResources.class) {
+			if (resBundlesMap == null) {
+				resBundlesMap = new HashMap<String, ResourceBundle>(8);
+			}
+
+			resBundle = resBundlesMap.get(bundleName);
 			if (resBundle == null) {
-				resBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE);
+				resBundle = ResourceBundle.getBundle(bundleName);
+				resBundlesMap.put(bundleName, resBundle);
 			}
 		}
 		return resBundle;
@@ -50,18 +67,20 @@ public class StreamsResources {
 	/**
 	 * Returns localized string for the given key.
 	 *
+	 * @param bundleName
+	 *            the base name of the resource bundle
 	 * @param key
 	 *            localized string key
 	 *
 	 * @return localized string
 	 */
-	public static String getString(String key) {
+	public static String getString(String bundleName, String key) {
 		if (key == null) {
 			return null;
 		}
 
 		try {
-			return getBundle().getString(key);
+			return getBundle(bundleName).getString(key);
 		} catch (MissingResourceException mre) {
 			return key;
 		}
@@ -70,6 +89,8 @@ public class StreamsResources {
 	/**
 	 * Returns formatted localized string for the given key.
 	 *
+	 * @param bundleName
+	 *            the base name of the resource bundle
 	 * @param key
 	 *            localized string key
 	 * @param args
@@ -79,13 +100,13 @@ public class StreamsResources {
 	 *
 	 * @see MessageFormat#format(String, Object...)
 	 */
-	public static String getStringFormatted(String key, Object... args) {
+	public static String getStringFormatted(String bundleName, String key, Object... args) {
 		if (key == null) {
 			return null;
 		}
 
 		try {
-			return MessageFormat.format(getBundle().getString(key), args);
+			return MessageFormat.format(getBundle(bundleName).getString(key), args);
 		} catch (MissingResourceException mre) {
 			return key;
 		}
@@ -94,18 +115,20 @@ public class StreamsResources {
 	/**
 	 * Returns localized string for the given enum constant key.
 	 *
+	 * @param bundleName
+	 *            the base name of the resource bundle
 	 * @param key
 	 *            localized string key
 	 *
 	 * @return localized string for enum constant
 	 */
-	public static String getString(Enum<?> key) {
+	public static String getString(String bundleName, Enum<?> key) {
 		if (key == null) {
 			return null;
 		}
 
 		try {
-			return getBundle().getString(String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
+			return getBundle(bundleName).getString(String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
 		} catch (MissingResourceException mre) {
 			return key.toString();
 		}

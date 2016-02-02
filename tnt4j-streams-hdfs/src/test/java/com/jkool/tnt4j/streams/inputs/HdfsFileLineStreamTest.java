@@ -16,6 +16,8 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -25,6 +27,8 @@ import org.apache.hadoop.fs.*;
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.HdfsStreamConstants;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.TestFileList;
 
 /**
@@ -65,6 +69,27 @@ public class HdfsFileLineStreamTest {
 		verify(fs, atLeastOnce()).listStatus(any(Path.class), any(PathFilter.class));
 
 		stream.cleanup();
+	}
+
+	@Test
+	public void testRB() {
+		// String keyModule = "ZorkaConnector.received.null.hello.packet";
+		String keyCore = "ActivityField.field.type.name.empty";
+
+		// String rbs1 =
+		// StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_HDFS,
+		// keyModule);
+		// assertNotEquals("Hdfs resource bundle entry not found", rbs1,
+		// keyModule);
+		// rbs1 =
+		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+		// keyModule);
+		// assertEquals("Hdfs resource bundle entry found in core", rbs1,
+		// keyModule);
+		String rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyCore);
+		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		rbs1 = StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_HDFS, keyCore);
+		assertEquals("Core resource bundle entry found in hdfs", rbs1, keyCore);
 	}
 
 }

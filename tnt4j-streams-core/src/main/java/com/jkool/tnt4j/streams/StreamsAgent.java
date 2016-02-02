@@ -60,7 +60,8 @@ public final class StreamsAgent {
 	 *            </table>
 	 */
 	public static void main(String... args) {
-		LOGGER.log(OpLevel.INFO, StreamsResources.getString("StreamsAgent.start.main"));
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.start.main"));
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			loadConfigAndRun(cfgFileName);
@@ -74,7 +75,8 @@ public final class StreamsAgent {
 	 *            stream configuration file name
 	 */
 	public static void runFromAPI(String cfgFileName) {
-		LOGGER.log(OpLevel.INFO, StreamsResources.getString("StreamsAgent.start.api"));
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.start.api"));
 		loadConfigAndRun(cfgFileName);
 	}
 
@@ -89,7 +91,8 @@ public final class StreamsAgent {
 			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
 			Map<String, TNTInputStream> streamsMap = cfg.getStreams();
 			if (streamsMap == null || streamsMap.isEmpty()) {
-				throw new IllegalStateException(StreamsResources.getString("StreamsAgent.no.activity.streams"));
+				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"StreamsAgent.no.activity.streams"));
 			}
 			ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
 			StreamThread ft;
@@ -101,7 +104,7 @@ public final class StreamsAgent {
 				ft.start();
 			}
 		} catch (Throwable t) {
-			LOGGER.log(OpLevel.ERROR, t.getMessage(), t);
+			LOGGER.log(OpLevel.ERROR, String.valueOf(t.getLocalizedMessage()), t);
 		}
 	}
 
@@ -122,7 +125,8 @@ public final class StreamsAgent {
 			if (arg.startsWith("-f:")) { // NON-NLS
 				cfgFileName = arg.substring(3);
 				if (StringUtils.isEmpty(cfgFileName)) {
-					System.out.println(StreamsResources.getString("StreamsAgent.missing.cfg"));
+					System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"StreamsAgent.missing.cfg"));
 					printUsage();
 					return false;
 				}
@@ -130,7 +134,8 @@ public final class StreamsAgent {
 				printUsage();
 				return false;
 			} else {
-				System.out.println(StreamsResources.getStringFormatted("StreamsAgent.invalid.argument", arg));
+				System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"StreamsAgent.invalid.argument", arg));
 				printUsage();
 				return false;
 			}
@@ -143,6 +148,6 @@ public final class StreamsAgent {
 	 * Prints short standalone application usage manual.
 	 */
 	private static void printUsage() {
-		System.out.println(StreamsResources.getString("StreamsAgent.help"));
+		System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.help"));
 	}
 }

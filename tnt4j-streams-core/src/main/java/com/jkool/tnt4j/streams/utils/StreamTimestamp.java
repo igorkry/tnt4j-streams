@@ -159,7 +159,8 @@ public class StreamTimestamp extends UsecTimestamp {
 	public StreamTimestamp(String timeStampStr, String formatStr, String timeZoneId, String locale)
 			throws ParseException {
 		if (timeStampStr == null) {
-			throw new IllegalArgumentException(StreamsResources.getString("StreamTimestamp.null.timestamp.srt"));
+			throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"StreamTimestamp.null.timestamp.srt"));
 		}
 		long uSecs = 0L;
 		SimpleDateFormat dateFormat;
@@ -173,8 +174,8 @@ public class StreamTimestamp extends UsecTimestamp {
 				int endFmtPos = formatStr.lastIndexOf('S');
 				int fmtFracSecLen = endFmtPos - fmtPos + 1;
 				if (fmtFracSecLen > 6) {
-					throw new ParseException(
-							StreamsResources.getString("StreamTimestamp.fraction.length.not.supported"), 0);
+					throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"StreamTimestamp.fraction.length.not.supported"), 0);
 				}
 				if (fmtFracSecLen > 3) {
 					// format specification represents more than milliseconds,

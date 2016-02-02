@@ -18,6 +18,7 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.io.*;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -152,15 +153,19 @@ public abstract class ActivityParser {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		} else {
 			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted("ActivityParser.data.unsupported", data.getClass().getName()));
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityParser.data.unsupported", data.getClass().getName()));
 		}
 		String str = null;
 		try {
 			str = rdr.readLine();
 		} catch (EOFException eof) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.data.end"), eof);
+			logger.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.data.end"), eof);
 		} catch (IOException ioe) {
-			logger.log(OpLevel.WARNING, StreamsResources.getString("ActivityParser.error.reading"), ioe);
+			logger.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.error.reading"),
+					ioe);
 		}
 
 		return str;
@@ -250,7 +255,7 @@ public abstract class ActivityParser {
 	 * @return tags strings array
 	 */
 	public String[] getTags() {
-		return tags;
+		return tags == null ? null : Arrays.copyOf(tags, tags.length);
 	}
 
 	/**

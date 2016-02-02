@@ -85,8 +85,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * {@inheritDoc}
 	 */
 	public void addField(ActivityField field) {
-		logger.log(OpLevel.DEBUG,
-				StreamsResources.getStringFormatted("ActivityParser.adding.field", field.toDebugString()));
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityParser.adding.field", field.toDebugString()));
 		fieldMap.put(field, field.getLocators());
 	}
 
@@ -147,8 +147,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				applyFieldValue(stream, ai, field, value);
 			}
 		} catch (Exception e) {
-			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("ActivityParser.parsing.failed", field), 0);
+			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}

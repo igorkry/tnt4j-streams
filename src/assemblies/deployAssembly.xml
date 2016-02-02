@@ -90,9 +90,5 @@
             <directory>tnt4j-streams-wmq/samples</directory>
             <outputDirectory>samples</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>tnt4j-streams-zorka/samples</directory>
-            <outputDirectory>samples</outputDirectory>
-        </fileSet>
     </fileSets>
 </assembly>

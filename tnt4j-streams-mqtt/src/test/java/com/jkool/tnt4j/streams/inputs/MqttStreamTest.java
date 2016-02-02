@@ -15,13 +15,15 @@
  */
 package com.jkool.tnt4j.streams.inputs;
 
-import static com.jkool.tnt4j.streams.inputs.InputPropertiesTestUtils.makeTestPropertiesSet;
-import static com.jkool.tnt4j.streams.inputs.InputPropertiesTestUtils.testInputPropertySetAndGet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.MqttStreamConstants;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
 
 /**
  * @author akausinis
@@ -61,5 +63,20 @@ public class MqttStreamTest {
 		input.setProperties(
 				InputPropertiesTestUtils.makeTestPropertiesSet(StreamsConfig.PROP_SERVER_URI, "tcp://localhost:1883"));
 		input.initialize();
+	}
+
+	@Test
+	public void testRB() {
+		String keyModule = "MqttStream.stream.ready";
+		String keyCore = "ActivityField.field.type.name.empty";
+
+		String rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT, keyModule);
+		assertNotEquals("Mqtt resource bundle entry not found", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyModule);
+		assertEquals("Mqtt resource bundle entry found in core", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, keyCore);
+		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT, keyCore);
+		assertEquals("Core resource bundle entry found in mqtt", rbs1, keyCore);
 	}
 }

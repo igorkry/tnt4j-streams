@@ -16,11 +16,10 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import static com.jkool.tnt4j.streams.inputs.InputPropertiesTestUtils.testInputPropertySetAndGet;
-
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
 
 /**
  * @author akausinis
@@ -35,7 +34,7 @@ public class JMSStreamTest {
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_SERVER_URI, "localhost");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_QUEUE_NAME, "test");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_JNDI_FACTORY, "JNDI");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_JMS_CONN_FACTORY, "JMS");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, JMSStreamConstants.PROP_JMS_CONN_FACTORY, "JMS");
 	}
 
 	// @Test

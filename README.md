@@ -1163,6 +1163,7 @@ Sample stream configuration:
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
+        <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
@@ -1264,6 +1265,7 @@ Sample stream configuration:
         </field>
         <field name="ReasonCode" locator="response" locator-type="Label"/>
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
+        <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
@@ -1368,6 +1370,7 @@ Sample stream configuration:
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="SampleObjectParser"/>
         </field>
+        <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
@@ -2149,7 +2152,7 @@ Download the above libraries and place into the `tnt4j-streams/lib directory` di
      |- com.ibm.mq.headers.jar
      |- com.ibm.mq.jar
      |- com.ibm.mq.jmqi.jar
-     |-com.ibm.mq.pcf.jar
+     |- com.ibm.mq.pcf.jar
      jkool-jesl.jar
      tnt4j-api.jar
      tnt4j-log4j12.jar (O)
@@ -2191,5 +2194,3 @@ or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
-* in `zorka` module run JUnit test suite named `AllZorkaTests`
-

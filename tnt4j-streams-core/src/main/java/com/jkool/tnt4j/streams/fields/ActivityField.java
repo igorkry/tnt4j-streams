@@ -55,7 +55,8 @@ public class ActivityField {
 	 */
 	public ActivityField(String fieldTypeName) {
 		if (StringUtils.isEmpty(fieldTypeName)) {
-			throw new IllegalArgumentException(StreamsResources.getString("ActivityField.field.type.name.empty"));
+			throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityField.field.type.name.empty"));
 		}
 		this.fieldTypeName = fieldTypeName;
 	}

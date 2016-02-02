@@ -31,6 +31,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.jkool.tnt4j.streams.utils.Utils;
+
 /**
  * @author akausinis
  * @version 1.0
@@ -107,6 +109,7 @@ public class StreamsConfigTest {
 		StreamsConfig streamsConfig = new StreamsConfig(fileReader);
 		assertNotNull(streamsConfig);
 		isStreamsAndParsersLoaded(streamsConfig);
+		Utils.close(fileReader);
 	}
 
 }

@@ -80,11 +80,13 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("ActivityParser.parsing", data));
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"ActivityParser.parsing", data));
 
 		Map<String, ?> dataMap = getDataMap(data);
 		if (dataMap == null || dataMap.isEmpty()) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getString("ActivityParser.not.find"));
+			logger.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.not.find"));
 			return null;
 		}
 

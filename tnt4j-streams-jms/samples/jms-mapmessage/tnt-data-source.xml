@@ -59,6 +59,7 @@
         </field>
         <field name="ReasonCode" locator="response" locator-type="Label"/>
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
+        <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">

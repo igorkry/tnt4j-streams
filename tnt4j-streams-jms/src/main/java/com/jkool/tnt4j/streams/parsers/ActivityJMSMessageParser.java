@@ -28,6 +28,8 @@ import javax.jms.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.jkool.tnt4j.streams.fields.StreamFieldType;
+import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -111,12 +113,15 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 			} else {
 				parseCustomMessage(message, dataMap);
 			}
+
+			dataMap.put(StreamFieldType.Correlator.toString(), message.getJMSCorrelationID());
 		} catch (JMSException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityJMSMessageParser.payload.data.error"), exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS,
+					"ActivityJMSMessageParser.payload.data.error"), exc);
 		}
 
 		if (!dataMap.isEmpty()) {
-			dataMap.put(StreamsConstants.TRANSPORT_KEY, StreamsConstants.TRANSPORT_JMS);
+			dataMap.put(StreamsConstants.TRANSPORT_KEY, JMSStreamConstants.TRANSPORT_JMS);
 		}
 
 		return dataMap;
@@ -206,7 +211,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				baos.write(buffer);
 			} while (bytesRead != 0);
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString("ActivityJMSMessageParser.bytes.buffer.error"), exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS,
+					"ActivityJMSMessageParser.bytes.buffer.error"), exc);
 		}
 
 		byte[] bytes = baos.toByteArray();
@@ -248,6 +254,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *             if any JMS exception occurs while parsing message.
 	 */
 	protected void parseCustomMessage(Message message, Map<String, Object> dataMap) throws JMSException {
-		LOGGER.log(OpLevel.WARNING, StreamsResources.getString("ActivityJMSMessageParser.parsing.custom.jms.message"));
+		LOGGER.log(OpLevel.WARNING, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_JMS,
+				"ActivityJMSMessageParser.parsing.custom.jms.message"));
 	}
 }

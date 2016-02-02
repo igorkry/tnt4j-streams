@@ -149,7 +149,6 @@
         <module>tnt4j-streams-mqtt</module>
         <module>tnt4j-streams-wmq</module>
         <module>tnt4j-streams-flume-plugin</module>
-        <!--<module>tnt4j-streams-zorka</module>-->
     </modules>
 
 </project>

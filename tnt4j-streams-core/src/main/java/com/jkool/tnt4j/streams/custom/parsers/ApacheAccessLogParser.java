@@ -68,9 +68,11 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
 	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (.*?)( (\\S+))?)|(-))"; // NON-NLS
 
-	// static final String REGEX_TOKENS = "(?<address>\\S+) (?<user>.*?)
-	// \\[(?<when>.*?)\\] \"(?<request>.*?)\" (?<status>[\\d\\-]+)
-	// (?<length>[\\d\\-]+) \"(?<referer>.*?)\" \"(?<agent>.*?)\".*";
+	// NOTE: RegEx matcher with group names available since Java 1.7
+	// static final String REGEX_TOKENS = "(?<address>\\S+)
+	// (?<user>.*?)\\[(?<when>.*?)\\] \"(?<request>.*?)\"
+	// (?<status>[\\d\\-]+)(?<length>[\\d\\-]+) \"(?<referer>.*?)\"
+	// \"(?<agent>.*?)\".*";
 	// static final Pattern PATTERN_TOKENS = Pattern.compile(REGEX_TOKENS,
 	// Pattern.CASE_INSENSITIVE);
 	//
@@ -156,8 +158,8 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					apacheLogPattern = value;
-					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted("ActivityParser.setting", name, value));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityParser.setting", name, value));
 				}
 			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
@@ -167,25 +169,27 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 						String regex = value.substring(idx + 1);
 
 						String oldRegex = userRegexMappings.put(confKey, regex);
-						LOGGER.log(OpLevel.DEBUG,
-								StreamsResources.getStringFormatted("ActivityParser.setting", name, value));
 						LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(
-								"ApacheAccessLogParser.setting.regex.mapping", confKey, oldRegex, regex));
+								StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting", name, value));
+						LOGGER.log(OpLevel.DEBUG,
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"ApacheAccessLogParser.setting.regex.mapping", confKey, oldRegex, regex));
 					}
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted("ActivityParser.ignoring", name));
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityParser.ignoring", name));
 		}
 
 		if (pattern == null && StringUtils.isNotEmpty(apacheLogPattern)) {
 			String regex = makeRegexPattern(apacheLogPattern);
 			if (regex != null) {
 				pattern = Pattern.compile(regex);
-				LOGGER.log(OpLevel.INFO,
-						StreamsResources.getStringFormatted("ApacheAccessLogParser.regex.made", regex));
+				LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ApacheAccessLogParser.regex.made", regex));
 			} else {
-				LOGGER.log(OpLevel.TRACE, StreamsResources
-						.getStringFormatted("ApacheAccessLogParser.could.not.make.regex", apacheLogPattern));
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ApacheAccessLogParser.could.not.make.regex", apacheLogPattern));
 			}
 		}
 	}

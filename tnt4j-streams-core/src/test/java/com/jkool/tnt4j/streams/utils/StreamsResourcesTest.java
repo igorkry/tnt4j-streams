@@ -32,34 +32,35 @@ public class StreamsResourcesTest {
 
 	@Test
 	public void testGetBundle() {
-		assertNotNull(StreamsResources.getBundle());
+		assertNotNull(StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_CORE));
 	}
 
 	@Test
 	public void testGetString() {
-		final String bundle = "tnt4j-streams";
-		final ResourceBundle bundle2 = ResourceBundle.getBundle(bundle);
-		final Enumeration<String> keys = bundle2.getKeys();
+		final String bundleName = "tnt4j-streams-core";
+		final ResourceBundle resourceBundle = ResourceBundle.getBundle(bundleName);
+		final Enumeration<String> keys = resourceBundle.getKeys();
 		while (keys.hasMoreElements()) {
 			final String nextElement = keys.nextElement();
-			final String resource = StreamsResources.getString(nextElement);
+			final String resource = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, nextElement);
 			assertNotNull(resource);
 			if (resource.contains("{1}") && !resource.contains("{2}")) {
 				final String testVar = "TEST";
-				final String formated = StreamsResources.getStringFormatted(resource, testVar);
+				final String formatted = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						resource, testVar);
 				MessageFormat.format(resource, testVar);
-				assertEquals(String.format(resource, testVar), formated);
+				assertEquals(String.format(resource, testVar), formatted);
 			}
 		}
 	}
 
 	@Test
 	public void testNull() {
-		Object string = StreamsResources.getString((String) null);
+		Object string = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, (String) null);
 		assertNull(string);
-		string = StreamsResources.getStringFormatted(null);
+		string = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE, null);
 		assertNull(string);
-		string = StreamsResources.getString((Enum<?>) null);
+		string = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, (Enum<?>) null);
 		assertNull(string);
 	}
 

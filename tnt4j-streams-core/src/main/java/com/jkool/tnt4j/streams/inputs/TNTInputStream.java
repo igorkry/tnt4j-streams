@@ -243,8 +243,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
 		trackersMap.put(defaultSource.getFQName(), tracker);
-		logger.log(OpLevel.DEBUG,
-				StreamsResources.getStringFormatted("TNTInputStream.default.tracker", defaultSource.getFQName()));
+		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"TNTInputStream.default.tracker", defaultSource.getFQName()));
 
 		if (useExecutorService) {
 			streamExecutorService = boundedExecutorModel
@@ -301,7 +301,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
 						logger.log(OpLevel.WARNING,
-								StreamsResources.getStringFormatted("TNTInputStream.tasks.buffer.limit", offerTimeout));
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"TNTInputStream.tasks.buffer.limit", offerTimeout));
 					}
 				} catch (InterruptedException exc) {
 					halt();
@@ -388,8 +389,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 				ai = applyParsers(data);
 			} catch (ParseException exc) {
 				int position = getActivityPosition();
-				ParseException pe = new ParseException(
-						StreamsResources.getStringFormatted("TNTInputStream.failed.to.process", position), position);
+				ParseException pe = new ParseException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.failed.to.process", position), position);
 				pe.initCause(exc);
 				throw pe;
 			}
@@ -551,8 +552,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 				streamConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(streamConfig.build());
 				trackersMap.put(aiSource.getFQName(), tracker);
-				logger.log(OpLevel.DEBUG,
-						StreamsResources.getStringFormatted("TNTInputStream.build.new.tracker", aiSource.getFQName()));
+				logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.build.new.tracker", aiSource.getFQName()));
 			}
 
 			return tracker;
@@ -567,9 +568,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	@Override
 	public void run() {
-		logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.starting"));
+		logger.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"));
 		if (ownerThread == null) {
-			throw new IllegalStateException(StreamsResources.getString("TNTInputStream.no.owner.thread"));
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.no.owner.thread"));
 		}
 		try {
 			initialize();
@@ -577,7 +580,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 				try {
 					T item = getNextItem();
 					if (item == null) {
-						logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.data.stream.ended"));
+						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"TNTInputStream.data.stream.ended"));
 						shutdownExecutors();
 						halt(); // no more data items to process
 					} else {
@@ -588,28 +592,35 @@ public abstract class TNTInputStream<T> implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
-							"TNTInputStream.failed.record.activity.at", getActivityPosition(), ise.getMessage()), ise);
+					logger.log(OpLevel.ERROR,
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
+									ise.getLocalizedMessage()),
+							ise);
 					halt();
 				} catch (Exception exc) {
-					logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(
-							"TNTInputStream.failed.record.activity.at", getActivityPosition(), exc.getMessage()), exc);
+					logger.log(OpLevel.ERROR,
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
+									exc.getLocalizedMessage()),
+							exc);
 				}
 			}
 		} catch (Throwable t) {
-			logger.log(OpLevel.ERROR,
-					StreamsResources.getStringFormatted("TNTInputStream.failed.record.activity", t.getMessage()), t);
+			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.failed.record.activity", t.getLocalizedMessage()), t);
 		} finally {
 			cleanup();
-			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted("TNTInputStream.thread.ended",
-					Thread.currentThread().getName()));
+			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.thread.ended", Thread.currentThread().getName()));
 		}
 	}
 
 	private void processActivityItem(T item) throws Throwable {
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
-			logger.log(OpLevel.INFO, StreamsResources.getString("TNTInputStream.no.parser"));
+			logger.log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"));
 			if (haltIfNoParser) {
 				halt();
 			}
@@ -622,10 +633,14 @@ public abstract class TNTInputStream<T> implements Runnable {
 						tracker.open();
 					} catch (IOException ioe) {
 						logger.log(OpLevel.ERROR,
-								StreamsResources.getStringFormatted("TNTInputStream.failed.to.connect", tracker), ioe);
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"TNTInputStream.failed.to.connect", tracker),
+								ioe);
 						Utils.close(tracker);
-						logger.log(OpLevel.INFO, StreamsResources.getStringFormatted("TNTInputStream.will.retry",
-								TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
+						logger.log(OpLevel.INFO,
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"TNTInputStream.will.retry",
+										TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
 						if (!isHalted()) {
 							StreamsThread.sleep(CONN_RETRY_INTERVAL);
 						}
@@ -654,9 +669,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 			try {
 				processActivityItem(item);
 			} catch (Throwable t) { // TODO: better handling
-				logger.log(OpLevel.ERROR,
-						StreamsResources.getStringFormatted("TNTInputStream.failed.record.activity", t.getMessage()),
-						t);
+				logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.failed.record.activity", t.getLocalizedMessage()), t);
 			}
 		}
 	}

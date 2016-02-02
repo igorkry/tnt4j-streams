@@ -171,7 +171,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		requestHandler = new HttpStreamRequestHandler();
 		requestHandler.initialize();
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString("HttpStream.stream.ready"));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "HttpStream.stream.ready"));
 
 		requestHandler.start();
 	}
@@ -198,13 +199,15 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		@Override
 		public void log(final Exception ex) {
 			if (ex instanceof SocketTimeoutException) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("HttpStream.connection.timed.out"));
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"HttpStream.connection.timed.out"));
 			} else if (ex instanceof ConnectionClosedException) {
-				LOGGER.log(OpLevel.ERROR, ex.getMessage());
+				LOGGER.log(OpLevel.ERROR, String.valueOf(ex.getLocalizedMessage()));
 				// } else if (ex instanceof SocketException) {
 				// LOGGER.log(OpLevel.ERROR, ex.getMessage());
 			} else {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString("HttpStream.http.server.exception"), ex);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"HttpStream.http.server.exception"), ex);
 			}
 		}
 	}
@@ -255,7 +258,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				try {
 					server.start();
 				} catch (IOException exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString("HttpStream.could.not.receive.data"), exc);
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"HttpStream.could.not.receive.data"), exc);
 					shutdown();
 				}
 
@@ -296,7 +300,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			if (!(request instanceof HttpEntityEnclosingRequest)) {
 				response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
-				String msg = StreamsResources.getString("HttpStream.bad.http.request");
+				String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"HttpStream.bad.http.request");
 				response.setEntity(createHtmlStringEntity(msg));
 				LOGGER.log(OpLevel.DEBUG, msg);
 			} else {
@@ -329,17 +334,19 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 				if (!activityAvailable) {
 					response.setStatusCode(HttpStatus.SC_NO_CONTENT);
-					String msg = StreamsResources.getString("HttpStream.no.activity");
+					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"HttpStream.no.activity");
 					response.setEntity(createHtmlStringEntity(msg));
 					LOGGER.log(OpLevel.DEBUG, msg);
 				} else if (!added) {
 					response.setStatusCode(HttpStatus.SC_INSUFFICIENT_STORAGE);
-					String msg = StreamsResources.getString("HttpStream.activities.buffer.size.limit");
+					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"HttpStream.activities.buffer.size.limit");
 					response.setEntity(createHtmlStringEntity(msg));
 					LOGGER.log(OpLevel.WARNING, msg);
 				} else {
 					response.setStatusCode(HttpStatus.SC_OK);
-					String msg = StreamsResources.getString("HttpStream.ok");
+					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "HttpStream.ok");
 					response.setEntity(createHtmlStringEntity(msg));
 					LOGGER.log(OpLevel.DEBUG, msg);
 				}

@@ -193,11 +193,6 @@ public class StreamsConfig {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_JMS_CONN_FACTORY = "JMSConnFactory"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	public static final String PROP_SERVER_URI = "ServerURI"; // NON-NLS
 
 	/**
@@ -255,9 +250,10 @@ public class StreamsConfig {
 			config = Thread.currentThread().getContextClassLoader().getResourceAsStream(DFLT_CONFIG_FILE_PATH);
 		}
 		if (config == null) {
-			throw new FileNotFoundException(
-					StreamsResources.getStringFormatted("StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH));
+			throw new FileNotFoundException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH));
 		}
+
 		load(new InputStreamReader(config));
 	}
 
@@ -329,13 +325,15 @@ public class StreamsConfig {
 	 *             if there is an error reading the configuration data
 	 */
 	protected void load(Reader config) throws SAXException, ParserConfigurationException, IOException {
-		SAXParser parser = parserFactory.newSAXParser();
-		ConfigParserHandler hndlr = new ConfigParserHandler();
-		parser.parse(new InputSource(config), hndlr);
-		streams = hndlr.getStreams();
-		parsers = hndlr.getParsers();
-
-		Utils.close(config);
+		try {
+			SAXParser parser = parserFactory.newSAXParser();
+			ConfigParserHandler hndlr = new ConfigParserHandler();
+			parser.parse(new InputSource(config), hndlr);
+			streams = hndlr.getStreams();
+			parsers = hndlr.getParsers();
+		} finally {
+			Utils.close(config);
+		}
 	}
 
 	/**

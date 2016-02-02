@@ -183,8 +183,9 @@ public class TimestampFormatter {
 				return parse(pattern, value, timeZone, locale);
 			}
 		}
-		throw new ParseException(StreamsResources.getStringFormatted("TimestampFormatter.unsupported.pattern",
-				(value == null ? "null" : value.getClass().getName()), units, pattern, locale), 0);
+		throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"TimestampFormatter.unsupported.pattern", (value == null ? "null" : value.getClass().getName()), units,
+				pattern, locale), 0);
 	}
 
 	/**
@@ -248,7 +249,8 @@ public class TimestampFormatter {
 			}
 		} catch (NumberFormatException nfe) {
 			ParseException pe = new ParseException(
-					StreamsResources.getStringFormatted("TimestampFormatter.failed.parsing", value, nfe.getMessage()),
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"TimestampFormatter.failed.parsing", value, nfe.getLocalizedMessage()),
 					0);
 			pe.initCause(nfe);
 			throw pe;

@@ -176,8 +176,9 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
 							msgPutDate, msgPutTime);
 					LOGGER.log(OpLevel.TRACE,
-							StreamsResources.getStringFormatted("MessageActivityXmlParser.msg.signature", value,
-									msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"MessageActivityXmlParser.msg.signature", value, msgType, msgFormat,
+									msgId == null ? "null" : new String(Utils.encodeHex(msgId)),
 									msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName,
 									msgPutDate, msgPutTime));
 				}
