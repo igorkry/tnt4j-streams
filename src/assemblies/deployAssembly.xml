@@ -17,10 +17,13 @@
                 <unpack>false</unpack>
                 <dependencySets>
                     <dependencySet>
-                        <useProjectArtifact>true</useProjectArtifact>
+                        <useProjectArtifact>false</useProjectArtifact>
                         <useTransitiveDependencies>false</useTransitiveDependencies>
                         <outputDirectory>lib_dep</outputDirectory>
                         <unpack>false</unpack>
+                        <excludes>
+                            <exclude>com.jkool.tnt4j:tnt4j-streams*</exclude>
+                        </excludes>
                     </dependencySet>
                 </dependencySets>
             </binaries>
