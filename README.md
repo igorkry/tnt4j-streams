@@ -2194,3 +2194,7 @@ or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
+
+Known Projects Using TNT4J
+===============================================
+* TNT4J-Streams-Zorka - (https://github.com/Nastel/tnt4j-streams-zorka)
