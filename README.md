@@ -1632,6 +1632,7 @@ Sample stream configuration:
 
     <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
+        <property name="ValueDelim" value=";"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
         <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
@@ -2084,12 +2085,14 @@ or
 
  * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
  * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
+ * ValueDelim - delimiter to use if XPath expression evaluates multiple values. Default value - `,`. (Optional)
 
     sample:
 ```xml
     <property name="Namespace" value="xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance"/>
     <property name="Namespace" value="xmlns:tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
     <property name="RequireDefault" value="true"/>
+    <property name="ValueDelim" value=";"/>
 ```
 
 #### Message activity XML parser:

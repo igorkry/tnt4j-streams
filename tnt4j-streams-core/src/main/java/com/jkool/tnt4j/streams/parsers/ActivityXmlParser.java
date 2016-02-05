@@ -58,6 +58,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
  * <li>RequireDefault - indicates that all attributes are required by default.
  * (Optional)</li>
+ * <li>ValueDelim - delimiter to use if XPath expression evaluates multiple
+ * values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -80,7 +82,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	protected boolean requireAll = false;
 
 	/**
-	 * Property indicating what delimiter to use if XPath expression evaluates multiple values.
+	 * Property indicating what delimiter to use if XPath expression evaluates
+	 * multiple values.
 	 */
 	protected String valuesDelim = DEFAULT_DELIM;
 
