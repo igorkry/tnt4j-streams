@@ -408,6 +408,8 @@ public class ActivityInfo {
 	 *         no source defining attributes where parsed from stream.
 	 */
 	public Source getSource() {
+		resolveServer();
+		resolveApplication();
 		StringBuilder fqnB = new StringBuilder();
 
 		addSourceValue(fqnB, SourceType.SERVER, serverName);
@@ -441,11 +443,11 @@ public class ActivityInfo {
 	 *            period in milliseconds between activity resubmission in case
 	 *            of failure
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             indicates an error building data message or sending data to
 	 *             jKool Cloud Service
 	 */
-	public void recordActivity(Tracker tracker, long retryPeriod) throws Throwable {
+	public void recordActivity(Tracker tracker, long retryPeriod) throws Exception {
 		if (tracker == null) {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.tracker.null"));
@@ -453,6 +455,7 @@ public class ActivityInfo {
 		}
 
 		resolveServer();
+		resolveApplication();
 		determineTimes();
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String evtName = StringUtils.isEmpty(eventName) ? UNSPECIFIED_LABEL : eventName;
@@ -499,10 +502,6 @@ public class ActivityInfo {
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
 
-		addEventProperty(event, ActivityEventProperties.EVENT_PROP_APPL_NAME.getKey(), applName);
-		addEventProperty(event, ActivityEventProperties.EVENT_PROP_SERVER_NAME.getKey(), serverName);
-		addEventProperty(event, ActivityEventProperties.EVENT_PROP_SERVER_IP.getKey(), serverIp);
-
 		if (activityProperties != null) {
 			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
 				addEventProperty(event, ape.getKey(), ape.getValue());
@@ -522,7 +521,7 @@ public class ActivityInfo {
 							"ActivityInfo.retry.successful"));
 				}
 				return;
-			} catch (Throwable ioe) {
+			} catch (Exception ioe) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityInfo.recording.failed"), ioe);
 				Utils.close(tracker);
@@ -589,6 +588,15 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(serverIp)) {
 			serverIp = " "; // prevents streams API from resolving it to the
 			// local IP address
+		}
+	}
+
+	/**
+	 * Resolves application name based on values specified.
+	 */
+	private void resolveApplication() {
+		if (StringUtils.isEmpty(applName)) {
+			applName = "com.jkool.tnt4j.streams";
 		}
 	}
 

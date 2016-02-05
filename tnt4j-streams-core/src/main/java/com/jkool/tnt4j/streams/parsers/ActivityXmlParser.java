@@ -27,11 +27,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import com.jkool.tnt4j.streams.configure.ConfigParserHandler;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
@@ -81,6 +80,11 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	protected boolean requireAll = false;
 
 	/**
+	 * Property indicating what delimiter to use if XPath expression evaluates multiple values.
+	 */
+	protected String valuesDelim = DEFAULT_DELIM;
+
+	/**
 	 * Creates a new activity XML string parser.
 	 *
 	 * @throws ParserConfigurationException
@@ -101,7 +105,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -125,7 +129,10 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityParser.setting", name, value));
 				}
+			} else if (StreamsConfig.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
+				valuesDelim = value;
 			}
+
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ActivityParser.ignoring", name));
 		}
@@ -277,40 +284,53 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			if (!StringUtils.isEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
+					val = locator.formatValue(val);
 				} else {
 					// get value for locator (element)
 					try {
 						XPathExpression expr = xPath.compile(locStr);
-						String strVal = (String) expr.evaluate(xmlDoc, XPathConstants.STRING);
-						if (!StringUtils.isEmpty(strVal)) {
-							// Get list of attributes and their values for
-							// current element
-							NodeList attrs = (NodeList) xPath.evaluate(locStr + "/@*", xmlDoc, XPathConstants.NODESET); // NON-NLS
-							int length = attrs == null ? 0 : attrs.getLength();
-							if (length > 0) {
-								String format = null;
-								String locale = null;
-								boolean formatAttrSet = false;
-								for (int i = 0; i < length; i++) {
-									Attr attr = (Attr) attrs.item(i);
-									String attrName = attr.getName();
-									String attrValue = attr.getValue();
-									if (ConfigParserHandler.DATA_TYPE_ATTR.equals(attrName)) {
-										locator.setDataType(ActivityFieldDataType.valueOf(attrValue));
-									} else if (ConfigParserHandler.FORMAT_ATTR.equals(attrName)) {
-										format = attrValue;
-										formatAttrSet = true;
-									} else if (ConfigParserHandler.LOCALE_ATTR.equals(attrName)) {
-										locale = attrValue;
-									} else if (ConfigParserHandler.UNITS_ATTR.equals(attrName)) {
-										locator.setUnits(attrValue);
+						NodeList nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+						int length = nodes == null ? 0 : nodes.getLength();
+
+						if (length > 0) {
+							List<Object> valuesList = new ArrayList<Object>(length);
+							for (int i = 0; i < length; i++) {
+								Attr node = (Attr) nodes.item(i);
+								String strValue = node.getValue();
+								Node parentNode = node.getParentNode() == null ? node.getOwnerElement()
+										: node.getParentNode();
+
+								// Get list of attributes and their values for
+								// current element
+								NamedNodeMap attrsMap = parentNode == null ? null : parentNode.getAttributes();
+
+								Attr attr;
+								Attr attr2;
+								ActivityFieldLocator locCopy = locator.clone();
+								if (attrsMap != null && attrsMap.getLength() > 0) {
+									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.DATA_TYPE_ATTR);
+									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
+										locCopy.setDataType(ActivityFieldDataType.valueOf(attr.getValue()));
+									}
+
+									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.FORMAT_ATTR);
+									attr2 = (Attr) attrsMap.getNamedItem(ConfigParserHandler.LOCALE_ATTR);
+									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
+										locCopy.setFormat(attr.getValue(),
+												attr2 == null || StringUtils.isEmpty(attr2.getValue())
+														? locator.getLocale() : attr2.getValue());
+									}
+
+									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.UNITS_ATTR);
+									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
+										locCopy.setUnits(attr.getValue());
 									}
 								}
-								if (formatAttrSet) {
-									locator.setFormat(format, locale);
-								}
+
+								valuesList.add(locCopy.formatValue(strValue.trim()));
 							}
-							val = strVal.trim();
+
+							val = wrapValue(valuesList);
 						}
 					} catch (XPathExpressionException exc) {
 						ParseException pe = new ParseException(StreamsResources.getString(
@@ -321,10 +341,31 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					}
 				}
 			}
-			val = locator.formatValue(val);
 		}
-		return val;
 
+		return val;
+	}
+
+	private Object wrapValue(List<Object> valuesList) {
+		if (CollectionUtils.isEmpty(valuesList)) {
+			return null;
+		}
+
+		if (valuesList.size() == 1) {
+			return valuesList.get(0);
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < valuesList.size(); i++) {
+			sb.append(valuesList.get(i));
+
+			if (i < valuesList.size() - 1) {
+				sb.append(valuesDelim);
+			}
+		}
+
+		return sb.toString();
 	}
 
 	/**

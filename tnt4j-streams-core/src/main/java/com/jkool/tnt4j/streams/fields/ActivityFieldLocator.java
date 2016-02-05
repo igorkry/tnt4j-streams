@@ -35,7 +35,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 1 $
  */
-public class ActivityFieldLocator {
+public class ActivityFieldLocator implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
 
 	private String type = null;
@@ -552,5 +552,39 @@ public class ActivityFieldLocator {
 		sb.append(", requiredVal='").append(requiredVal).append('\''); // NON-NLS
 		sb.append('}');
 		return sb.toString();
+	}
+
+	/**
+	 * Makes clone copy of activity field locator.
+	 *
+	 * @return clone copy of activity field locator
+	 */
+	public ActivityFieldLocator clone() {
+		try {
+			ActivityFieldLocator cafl = (ActivityFieldLocator) super.clone();
+			cafl.type = type;
+			cafl.locator = locator;
+			cafl.dataType = dataType;
+			cafl.radix = radix;
+			cafl.units = units;
+			cafl.format = format;
+			cafl.locale = locale;
+			cafl.timeZone = timeZone;
+			cafl.cfgValue = cfgValue;
+			cafl.requiredVal = requiredVal;
+			cafl.timeZone = timeZone;
+
+			cafl.builtInType = builtInType;
+			cafl.builtInFormat = builtInFormat;
+			cafl.builtInUnits = builtInUnits;
+			cafl.map = map;
+			cafl.mapCatchAll = mapCatchAll;
+
+			return cafl;
+		} catch (CloneNotSupportedException exc) {
+
+		}
+
+		return null;
 	}
 }
