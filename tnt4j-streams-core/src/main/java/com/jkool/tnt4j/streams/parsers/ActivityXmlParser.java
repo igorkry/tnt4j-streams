@@ -300,8 +300,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							for (int i = 0; i < length; i++) {
 								Attr node = (Attr) nodes.item(i);
 								String strValue = node.getValue();
-								Node parentNode = node.getParentNode() == null ? node.getOwnerElement()
-										: node.getParentNode();
+								Node parentNode = node.getOwnerElement();
 
 								// Get list of attributes and their values for
 								// current element
