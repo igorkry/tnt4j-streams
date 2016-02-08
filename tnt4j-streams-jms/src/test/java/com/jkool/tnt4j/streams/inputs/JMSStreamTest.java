@@ -29,7 +29,7 @@ public class JMSStreamTest {
 	JMSStream input;
 
 	@Test
-	public void testProperties() throws Throwable {
+	public void testProperties() throws Exception {
 		input = new JMSStream();
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_SERVER_URI, "localhost");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_QUEUE_NAME, "test");
@@ -38,7 +38,7 @@ public class JMSStreamTest {
 	}
 
 	// @Test
-	// public void testInitialize() throws Throwable {
+	// public void testInitialize() throws Exception {
 	// testProperties();
 	// input.initialize();
 	// assertTrue(input.jmsDataReceiver.isAlive());

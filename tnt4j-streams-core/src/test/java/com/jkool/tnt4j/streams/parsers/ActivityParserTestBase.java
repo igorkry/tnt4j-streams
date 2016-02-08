@@ -49,12 +49,12 @@ public abstract class ActivityParserTestBase {
 		return props;
 	}
 
-	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) throws Throwable {
+	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) throws Exception {
 		parser.setProperties(makeProperty(propertyName, testValue.toString()));
 	}
 
 	@Test
-	public void setPropertiesNullFailtTest() throws Throwable {
+	public void setPropertiesNullFailTest() throws Exception {
 		parser.setProperties(null);
 	}
 
@@ -83,7 +83,7 @@ public abstract class ActivityParserTestBase {
 	}
 
 	@Test
-	public void getNextString() throws Throwable {
+	public void getNextString() throws Exception {
 
 		final String testString = "Test\n";
 		final String expectedString = "Test";

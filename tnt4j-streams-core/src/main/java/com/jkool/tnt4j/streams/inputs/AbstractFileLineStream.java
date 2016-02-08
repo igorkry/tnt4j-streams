@@ -82,7 +82,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -102,7 +102,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void initialize() throws Throwable {
+	public void initialize() throws Exception {
 		super.initialize();
 		if (StringUtils.isEmpty(fileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -123,7 +123,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 * the file.
 	 */
 	@Override
-	public String getNextItem() throws Throwable {
+	public String getNextItem() throws Exception {
 		if (lineReader == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"FileLineStream.file.not.opened"));

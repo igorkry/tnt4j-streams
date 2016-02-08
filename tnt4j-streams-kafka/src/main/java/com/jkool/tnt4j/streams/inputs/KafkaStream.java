@@ -92,7 +92,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -132,7 +132,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		super.initialize();
 		if (StringUtils.isEmpty(topicNameRegex)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -151,7 +151,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	 * consumer.
 	 */
 	@Override
-	public Map<String, ?> getNextItem() throws Throwable {
+	public Map<String, ?> getNextItem() throws Exception {
 		while (!closed.get()) {
 			if (messageBuffer == null || !messageBuffer.hasNext()) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,

@@ -38,7 +38,7 @@ public class KafkaStreamTest {
 	KafkaStream input;
 
 	@Test
-	public void testProperties() throws Throwable {
+	public void testProperties() throws Exception {
 		input = new KafkaStream();
 
 		final Collection<Entry<String, String>> properties = InputPropertiesTestUtils
@@ -54,7 +54,7 @@ public class KafkaStreamTest {
 	}
 
 	@Test(expected = ZkTimeoutException.class)
-	public void testInitialize() throws Throwable {
+	public void testInitialize() throws Exception {
 		testProperties();
 		input.initialize();
 	}

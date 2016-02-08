@@ -103,7 +103,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -127,7 +127,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void initialize() throws Throwable {
+	public void initialize() throws Exception {
 		super.initialize();
 		if (StringUtils.isEmpty(fileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,

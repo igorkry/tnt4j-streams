@@ -100,7 +100,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}

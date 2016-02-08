@@ -47,7 +47,7 @@ import com.jkool.tnt4j.streams.utils.UtilsTest;
  */
 public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 
-	private final static Object simpleString = "<MsgData format=\"string\">Message Body</MsgData>";
+	private final static Object simpleString = "<MsgData format=\"string\" value=\"Message Body\"/>";
 	private TNTInputStream<String> is;
 
 	@SuppressWarnings("unchecked")
@@ -63,7 +63,8 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		final ActivityFieldLocator locator = mock(ActivityFieldLocator.class);
 		List<ActivityFieldLocator> locatorList = Collections.singletonList(locator);
 		when(field.getLocators()).thenReturn(locatorList);
-		when(locator.getLocator()).thenReturn("MsgData");
+		when(locator.clone()).thenReturn(locator);
+		when(locator.getLocator()).thenReturn("MsgData/@value");
 		parser.addField(field);
 	}
 
@@ -106,7 +107,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 
 	@Override
 	@Test
-	public void setPropertiesTest() throws Throwable {
+	public void setPropertiesTest() throws Exception {
 		setProperty(parser, StreamsConfig.PROP_NAMESPACE, "NAMESPACE=asdcf");
 		setProperty(parser, StreamsConfig.PROP_REQUIRE_ALL, true);
 	}
@@ -114,7 +115,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void getLocatorValue() throws ParseException, ParserConfigurationException, SAXException, IOException {
 		TNTInputStream stream = mock(TNTInputStream.class);
-		ActivityFieldLocator locator = new ActivityFieldLocator("MsgData");
+		ActivityFieldLocator locator = new ActivityFieldLocator("Label", "MsgData/@value");
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document document = builder.parse(UtilsTest.toInputStream(simpleString.toString()));
 

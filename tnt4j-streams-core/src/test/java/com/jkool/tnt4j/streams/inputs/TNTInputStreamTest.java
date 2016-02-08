@@ -59,7 +59,7 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void recordActivityTest() throws Throwable {
+	public void recordActivityTest() throws Exception {
 		Thread inputStreamThread = new Thread(ts);
 		inputStreamThread.start();
 		ts.addParser(parser);
@@ -72,7 +72,7 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void setPropertiesTest() throws Throwable {
+	public void setPropertiesTest() throws Exception {
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
 			{
 				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_HALT_ON_PARSER, "true"));
@@ -93,13 +93,13 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void testMakeActivityInfo() throws Throwable {
+	public void testMakeActivityInfo() throws Exception {
 
 		assertNull(ts.makeActivityInfo("TEST"));
 	}
 
 	@Test(expected = ParseException.class)
-	public void testMakeActivityInfoFails() throws Throwable {
+	public void testMakeActivityInfoFails() throws Exception {
 		ts.addParser(parser);
 		assertNotNull(ts.makeActivityInfo("TESTPARSEEXCEPTION"));
 	}
@@ -144,7 +144,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		public String getNextItem() throws Throwable {
+		public String getNextItem() throws Exception {
 			if (used)
 				return null;
 			used = true;
@@ -160,7 +160,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		public void setProperties(Collection<Entry<String, String>> props) throws Throwable {
+		public void setProperties(Collection<Entry<String, String>> props) throws Exception {
 		}
 
 		@Override

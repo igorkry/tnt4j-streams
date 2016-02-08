@@ -103,8 +103,8 @@ public final class StreamsAgent {
 						String.format("%s:%s", stream.getClass().getSimpleName(), streamName)); // NON-NLS
 				ft.start();
 			}
-		} catch (Throwable t) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(t.getLocalizedMessage()), t);
+		} catch (Exception e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
 	}
 

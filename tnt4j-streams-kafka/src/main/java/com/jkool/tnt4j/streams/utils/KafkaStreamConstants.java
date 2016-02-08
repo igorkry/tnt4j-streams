@@ -5,7 +5,7 @@ package com.jkool.tnt4j.streams.utils;
  *
  * @version $Revision: 1 $
  */
-public class KafkaStreamConstants {
+public final class KafkaStreamConstants {
 	/**
 	 * Resource bundle name constant for TNT4J-Streams "kafka" module.
 	 */
@@ -15,4 +15,8 @@ public class KafkaStreamConstants {
 	 * The constant to indicate activity transport is Apache Kafka.
 	 */
 	public static final String TRANSPORT_KAFKA = "Kafka"; // NON-NLS
+
+	private KafkaStreamConstants() {
+
+	}
 }

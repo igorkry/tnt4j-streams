@@ -57,7 +57,7 @@ public final class SampleIntegration {
 				ft = new StreamThread(streamThreads, stream, streamName);
 				ft.start();
 			}
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			LOGGER.log(OpLevel.ERROR, t.getMessage(), t);
 		}
 	}
@@ -75,7 +75,7 @@ public final class SampleIntegration {
 			TNTInputStream stream = cfg.getStream("StreamName");
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			LOGGER.log(OpLevel.ERROR, t.getMessage(), t);
 		}
 	}

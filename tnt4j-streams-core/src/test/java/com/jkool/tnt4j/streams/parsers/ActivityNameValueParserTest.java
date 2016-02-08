@@ -16,8 +16,9 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class ActivityNameValueParserTest {
 	private TNTInputStream<String> stream = mock(TNTInputStream.class);;
 
 	@Test
-	public void testSetProperties() throws Throwable {
+	public void testSetProperties() throws Exception {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
 				put(StreamsConfig.PROP_FLD_DELIM, "\n");
@@ -58,7 +59,7 @@ public class ActivityNameValueParserTest {
 	}
 
 	@Test
-	public void testParse() throws Throwable {
+	public void testParse() throws Exception {
 		String testString = TEST;
 		testSetProperties();
 		activityNameValueParser.pattern = null;
@@ -69,7 +70,7 @@ public class ActivityNameValueParserTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testParseExc() throws Throwable {
+	public void testParseExc() throws Exception {
 		assertNull(activityNameValueParser.parse(stream, null));
 		activityNameValueParser.fieldDelim = null;
 		assertNull(activityNameValueParser.parse(stream, TEST));

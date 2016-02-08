@@ -5,7 +5,7 @@ package com.jkool.tnt4j.streams.utils;
  *
  * @version $Revision: 1 $
  */
-public class MqttStreamConstants {
+public final class MqttStreamConstants {
 
 	/**
 	 * Resource bundle name constant for TNT4J-Streams "mqtt" module.
@@ -16,4 +16,8 @@ public class MqttStreamConstants {
 	 * The constant to indicate activity transport is MQTT.
 	 */
 	public static final String TRANSPORT_MQTT = "Mqtt"; // NON-NLS
+
+	private MqttStreamConstants() {
+
+	}
 }

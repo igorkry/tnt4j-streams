@@ -38,7 +38,7 @@ import com.jkool.tnt4j.streams.utils.TestFileList;
 public class HdfsFileLineStreamTest {
 
 	@Test()
-	public void test() throws Throwable {
+	public void test() throws Exception {
 		FileSystem fs = mock(FileSystem.class);
 		HdfsFileLineStream stream = new HdfsFileLineStream();
 

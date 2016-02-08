@@ -158,7 +158,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -190,7 +190,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		super.initialize();
 
 		if (StringUtils.isEmpty(fileName) && socketPort == null) {
@@ -248,7 +248,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * errors.
 	 */
 	@Override
-	public BufferedReader getNextItem() throws Throwable {
+	public BufferedReader getNextItem() throws Exception {
 		if (dataReader == null) {
 			startDataStream();
 		}

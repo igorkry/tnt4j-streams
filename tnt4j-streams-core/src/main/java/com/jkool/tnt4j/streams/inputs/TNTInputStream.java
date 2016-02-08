@@ -155,10 +155,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @param props
 	 *            properties to set
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             indicates error with properties
 	 */
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -234,11 +234,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * must call this at start of {@code run} method before entering into
 	 * processing loop.
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             indicates that stream is not configured properly and cannot
 	 *             continue.
 	 */
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		streamConfig = DefaultConfigFactory.getInstance().getConfig("com.jkool.tnt4j.streams"); // NON-NLS
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
@@ -362,10 +362,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @return next raw activity data item, or {@code null} if there is no next
 	 *         item
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             if any errors occurred getting next item
 	 */
-	public abstract T getNextItem() throws Throwable;
+	public abstract T getNextItem() throws Exception;
 
 	/**
 	 * Makes activity information {@code ActivityInfo} object from raw activity
@@ -379,10 +379,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @return activity information object
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             if error occurs while parsing raw activity data item
 	 */
-	protected ActivityInfo makeActivityInfo(T data) throws Throwable {
+	protected ActivityInfo makeActivityInfo(T data) throws Exception {
 		ActivityInfo ai = null;
 		if (data != null) {
 			try {
@@ -616,7 +616,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
-	private void processActivityItem(T item) throws Throwable {
+	private void processActivityItem(T item) throws Exception {
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
 			logger.log(OpLevel.INFO,

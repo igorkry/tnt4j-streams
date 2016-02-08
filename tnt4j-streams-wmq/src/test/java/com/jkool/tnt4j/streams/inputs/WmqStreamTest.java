@@ -37,7 +37,7 @@ public class WmqStreamTest {
 	WmqStream wmqStream = new WmqStream();
 
 	@Test
-	public void propertiesSetTest() throws Throwable {
+	public void propertiesSetTest() throws Exception {
 		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_QMGR_NAME, "TEST");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_QUEUE_NAME, "TEST");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_TOPIC_NAME, "TEST");
@@ -51,20 +51,20 @@ public class WmqStreamTest {
 	}
 
 	@Test
-	public void testInitialize() throws Throwable {
+	public void testInitialize() throws Exception {
 		propertiesSetTest();
 		wmqStream.initialize();
 		assertNotNull(wmqStream.gmo);
 	}
 
 	@Test(expected = MQException.class)
-	public void testConnects() throws Throwable {
+	public void testConnects() throws Exception {
 		propertiesSetTest();
 		wmqStream.connectToQmgr();
 	}
 
 	@Test()
-	public void isConnectedToQmgr() throws Throwable {
+	public void isConnectedToQmgr() throws Exception {
 		final MQQueueManager mqqManager = mock(MQQueueManager.class);
 		final MQException mqe = mock(MQException.class);
 		wmqStream.qmgr = mqqManager;

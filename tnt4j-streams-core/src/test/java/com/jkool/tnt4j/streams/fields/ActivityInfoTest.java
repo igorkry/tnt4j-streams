@@ -111,7 +111,7 @@ public class ActivityInfoTest {
 	}
 
 	@Test
-	public void recordActivityTest() throws Throwable {
+	public void recordActivityTest() throws Exception {
 		Tracker tracker = mock(Tracker.class);
 		UUIDFactory uiFactory = mock(UUIDFactory.class);
 		TrackerConfig tConfig = mock(TrackerConfig.class);

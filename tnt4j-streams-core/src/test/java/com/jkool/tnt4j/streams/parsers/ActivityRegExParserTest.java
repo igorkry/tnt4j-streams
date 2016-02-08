@@ -51,7 +51,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Override
 	@Test
-	public void setPropertiesTest() throws Throwable {
+	public void setPropertiesTest() throws Exception {
 		setProperty(parser, StreamsConfig.PROP_PATTERN, TEST_PATTERN);
 	}
 
@@ -84,7 +84,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	}
 
 	@Test
-	public void testParse() throws Throwable {
+	public void testParse() throws Exception {
 		setPropertiesTest();
 		addField();
 		addGroupField();

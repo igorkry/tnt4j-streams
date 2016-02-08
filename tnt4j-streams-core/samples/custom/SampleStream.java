@@ -66,11 +66,11 @@ public class SampleStream extends TNTInputStream<String> {
 	 * @param props
 	 *            properties to set
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             indicates error with properties
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -89,12 +89,12 @@ public class SampleStream extends TNTInputStream<String> {
 	/**
 	 * Initialize the stream.
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             indicates that stream is not configured properly and cannot
 	 *             continue.
 	 */
 	@Override
-	public void initialize() throws Throwable {
+	public void initialize() throws Exception {
 		super.initialize();
 		if (fileName == null) {
 			throw new IllegalStateException("SampleStream: File name not defined");
@@ -110,7 +110,7 @@ public class SampleStream extends TNTInputStream<String> {
 	 * @returns string containing next line in file.
 	 */
 	@Override
-	public String getNextItem() throws Throwable {
+	public String getNextItem() throws Exception {
 		if (lineReader == null) {
 			throw new IllegalStateException("SampleStream: File is not opened for reading");
 		}

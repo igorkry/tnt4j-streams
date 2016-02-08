@@ -150,7 +150,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 * latest logged activity, then count of lines in log file is calculated
 		 * to mark latest activity position.
 		 *
-		 * @throws Throwable
+		 * @throws Exception
 		 *             indicates that stream is not configured properly and log
 		 *             files monitoring can't initialize and continue.
 		 */

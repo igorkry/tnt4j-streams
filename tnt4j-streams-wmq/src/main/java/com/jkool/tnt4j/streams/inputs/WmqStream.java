@@ -126,7 +126,7 @@ public class WmqStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -197,7 +197,7 @@ public class WmqStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		super.initialize();
 		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(topicString) && StringUtils.isEmpty(topicName)
 				&& StringUtils.isEmpty(subName)) {
@@ -247,11 +247,11 @@ public class WmqStream extends TNTInputStream<String> {
 	 * Establish connection to queue manager and open necessary objects for
 	 * retrieving messages
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             if error connecting to queue manager or opening required
 	 *             objects
 	 */
-	protected void connectToQmgr() throws Throwable {
+	protected void connectToQmgr() throws Exception {
 		qmgr = null;
 		dest = null;
 		Hashtable<String, Object> props = new Hashtable<String, Object>();
@@ -299,7 +299,7 @@ public class WmqStream extends TNTInputStream<String> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getNextItem() throws Throwable {
+	public String getNextItem() throws Exception {
 		while (!isHalted() && !isConnectedToQmgr(null)) {
 			try {
 				connectToQmgr();

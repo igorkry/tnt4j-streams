@@ -37,7 +37,7 @@ public class FileLineStreamTest {
 
 	@Test
 	@SuppressWarnings({ "serial", "unchecked", "rawtypes" })
-	public void searchFilesTest() throws Throwable {
+	public void searchFilesTest() throws Exception {
 		TestFileList files = new TestFileList();
 		FileLineStream fls = new FileLineStream();
 		int count = TestFileList.TEST_FILE_LIST_SIZE;

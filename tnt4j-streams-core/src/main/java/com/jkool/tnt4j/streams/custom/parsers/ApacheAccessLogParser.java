@@ -147,7 +147,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		super.setProperties(props);
 		if (props == null) {
 			return;

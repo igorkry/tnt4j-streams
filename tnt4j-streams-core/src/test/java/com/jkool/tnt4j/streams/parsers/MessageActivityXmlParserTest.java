@@ -41,7 +41,7 @@ public class MessageActivityXmlParserTest {
 	private static final String DELIM = ",";
 
 	@Test
-	public void testProperties() throws Throwable {
+	public void testProperties() throws Exception {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
 				put(StreamsConfig.PROP_SIG_DELIM, DELIM);

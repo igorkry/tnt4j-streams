@@ -36,7 +36,7 @@ public class FilePollingStreamTest {
 
 	@Test
 	@SuppressWarnings({ "serial", "unchecked", "rawtypes" })
-	public void searchFilesTest() throws Throwable {
+	public void searchFilesTest() throws Exception {
 		TestFileList files = new TestFileList();
 		FilePollingStream fps = new FilePollingStream();
 		int count = TestFileList.TEST_FILE_LIST_SIZE;

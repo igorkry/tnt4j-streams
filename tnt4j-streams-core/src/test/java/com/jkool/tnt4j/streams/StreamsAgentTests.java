@@ -85,7 +85,7 @@ public class StreamsAgentTests {
 	}
 
 	@Test
-	public void testRunFromAPI() throws Throwable {
+	public void testRunFromAPI() throws Exception {
 		final String testStreamName = "TestStream";
 		final File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
 		FileWriter fw = new FileWriter(tempConfFile);

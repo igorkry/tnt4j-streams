@@ -27,13 +27,17 @@ import java.util.ResourceBundle;
  *
  * @version $Revision: 1 $
  */
-public class StreamsResources {
+public final class StreamsResources {
 	/**
 	 * Resource bundle name constant for TNT4J-Streams "core" module.
 	 */
 	public static final String RESOURCE_BUNDLE_CORE = "tnt4j-streams-core"; // NON-NLS
 
 	private static Map<String, ResourceBundle> resBundlesMap;
+
+	private StreamsResources() {
+
+	}
 
 	/**
 	 * Initializes singleton instance of resource bundle for default locale if

@@ -51,7 +51,7 @@ public class ActivityMapParserTest extends ActivityParserTestBase {
 	}
 
 	@Override
-	public void setPropertiesTest() throws Throwable {
+	public void setPropertiesTest() throws Exception {
 		// TODO Auto-generated method stub
 
 	}

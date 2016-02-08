@@ -36,7 +36,7 @@ public class AbstractFileLineStreamTest {
 	AbstractFileLineStream afls = new FileLineStream();
 
 	@Test
-	public void setPropertiesTest() throws Throwable {
+	public void setPropertiesTest() throws Exception {
 		final String fileName = "c:/Windows/schemas/TSWorkSpace/tswcx.xml";
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
 			{

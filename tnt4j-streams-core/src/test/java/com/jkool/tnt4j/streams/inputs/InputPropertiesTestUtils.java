@@ -50,7 +50,7 @@ public class InputPropertiesTestUtils {
 	}
 
 	public static void testInputPropertySetAndGet(TNTInputStream input, final String propertyName,
-			final Object testValue) throws Throwable {
+			final Object testValue) throws Exception {
 		final Collection<Entry<String, String>> props = makeTestPropertiesSet(propertyName, testValue);
 		input.setProperties(props);
 		Assert.assertEquals(testValue, input.getProperty(propertyName));

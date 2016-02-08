@@ -35,20 +35,20 @@ public class CharacterStreamTest {
 	CharacterStream cStream = new CharacterStream();
 
 	@Test
-	public void settingsTest() throws Throwable {
+	public void settingsTest() throws Exception {
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_FILENAME, "TestFileName");
 		cStream = new CharacterStream();
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, 8080);
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void settingsFailToSetBothTest() throws Throwable {
+	public void settingsFailToSetBothTest() throws Exception {
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_FILENAME, "TestFileName");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, 8080);
 	}
 
 	@Test
-	public void startDataStreamTest() throws Throwable {
+	public void startDataStreamTest() throws Exception {
 		InputStream is = mock(InputStream.class);
 		// cStream = new CharacterStream(is);
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, PORT);
@@ -57,7 +57,7 @@ public class CharacterStreamTest {
 			public void run() {
 				try {
 					cStream.getNextItem();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 				}
 			}
 		});

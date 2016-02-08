@@ -33,7 +33,7 @@ public class MqttStreamTest {
 	MqttStream input;
 
 	@Test
-	public void testProperties() throws Throwable {
+	public void testProperties() throws Exception {
 		input = new MqttStream();
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_SERVER_URI,
 				"tcp://localhost:1883");
@@ -46,19 +46,19 @@ public class MqttStreamTest {
 	}
 
 	@Test(expected = MqttException.class)
-	public void testInitialize() throws Throwable {
+	public void testInitialize() throws Exception {
 		testProperties();
 		input.initialize();
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testInitializeFailDueToNotAllPropertiesSet() throws Throwable {
+	public void testInitializeFailDueToNotAllPropertiesSet() throws Exception {
 		input = new MqttStream();
 		input.initialize();
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void testInitializeFailDueToNotAllPropertiesSet2() throws Throwable {
+	public void testInitializeFailDueToNotAllPropertiesSet2() throws Exception {
 		input = new MqttStream();
 		input.setProperties(
 				InputPropertiesTestUtils.makeTestPropertiesSet(StreamsConfig.PROP_SERVER_URI, "tcp://localhost:1883"));

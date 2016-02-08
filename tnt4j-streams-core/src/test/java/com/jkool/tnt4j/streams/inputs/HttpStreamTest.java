@@ -50,7 +50,7 @@ import com.jkool.tnt4j.streams.utils.Utils;
  */
 public class HttpStreamTest {
 	@Test
-	public void HttpFilePostTest() throws Throwable {
+	public void HttpFilePostTest() throws Exception {
 		// initializeTest();
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
@@ -78,7 +78,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpFormPostTest() throws Throwable {
+	public void HttpFormPostTest() throws Exception {
 		// initializeTest();
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
@@ -110,7 +110,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpHtmlGetTest() throws Throwable {
+	public void HttpHtmlGetTest() throws Exception {
 		// initializeTest();
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
@@ -127,7 +127,7 @@ public class HttpStreamTest {
 	private static HttpStream htStream;
 
 	@BeforeClass
-	public static void initializeTest() throws Throwable {
+	public static void initializeTest() throws Exception {
 		htStream = new HttpStream();
 		htStream.initialize();
 	}
@@ -138,7 +138,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void propertiesTest() throws Throwable {
+	public void propertiesTest() throws Exception {
 		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_PORT, 8080);
 		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_KEYSTORE, "TEST");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_KEYSTORE_PASS, "TEST");

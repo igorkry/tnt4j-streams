@@ -5,9 +5,13 @@ package com.jkool.tnt4j.streams.utils;
  *
  * @version $Revision: 1 $
  */
-public class HdfsStreamConstants {
+public final class HdfsStreamConstants {
 	/**
 	 * Resource bundle name constant for TNT4J-Streams "hdfs" module.
 	 */
 	public static final String RESOURCE_BUNDLE_HDFS = "tnt4j-streams-hdfs"; // NON-NLS
+
+	private HdfsStreamConstants() {
+
+	}
 }

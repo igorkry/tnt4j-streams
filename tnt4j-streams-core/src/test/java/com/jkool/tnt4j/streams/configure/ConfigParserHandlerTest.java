@@ -48,7 +48,7 @@ public class ConfigParserHandlerTest {
 	};
 
 	@Test
-	public void samplesCanParseTest() throws Throwable {
+	public void samplesCanParseTest() throws Exception {
 
 		List<File> sampleConfigurations = new ArrayList<File>();
 		File samples = new File("./Samples/");

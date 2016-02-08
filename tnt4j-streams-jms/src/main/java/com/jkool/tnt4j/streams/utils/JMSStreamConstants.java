@@ -20,4 +20,8 @@ public final class JMSStreamConstants {
 	 * The constant to indicate activity transport is JMS.
 	 */
 	public static final String TRANSPORT_JMS = "JMS"; // NON-NLS
+
+	private JMSStreamConstants() {
+
+	}
 }

@@ -33,27 +33,27 @@ public class AbstractBufferedStreamTest {
 	AbstractBufferedStream<String> abs = new AbstractBuferedStreamTestStub(es);
 
 	@Test
-	public void getNextItemTest() throws Throwable {
+	public void getNextItemTest() throws Exception {
 		abs.initialize();
 		abs.addInputToBuffer("TEST");
 		assertEquals("TEST", abs.getNextItem());
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void getNextItemFailOnNullTest() throws Throwable {
+	public void getNextItemFailOnNullTest() throws Exception {
 		abs.addInputToBuffer(null);
 		assertEquals(null, abs.getNextItem());
 	}
 
 	@Test
-	public void getNextItemNullOnEmptyTest() throws Throwable {
+	public void getNextItemNullOnEmptyTest() throws Exception {
 		abs.initialize();
 		inputShouldEnd = true;
 		assertNull(abs.getNextItem());
 	}
 
 	@Test(timeout = 4000)
-	public void getNextItemExpectedToWaitTest() throws Throwable {
+	public void getNextItemExpectedToWaitTest() throws Exception {
 		Thread thread = new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -61,7 +61,7 @@ public class AbstractBufferedStreamTest {
 					abs.addInputToBuffer("TEST");
 					assertNotNull(abs.getNextItem());
 					assertNull(abs.getNextItem());
-				} catch (Throwable e) {
+				} catch (Exception e) {
 				}
 			}
 		});
@@ -85,7 +85,7 @@ public class AbstractBufferedStreamTest {
 	int overflowRecordCount = 1024 * 10 + 1;
 
 	@Test(timeout = 5000)
-	public void addInputToBufferOverflowTest() throws Throwable {
+	public void addInputToBufferOverflowTest() throws Exception {
 		abs.initialize();
 
 		Thread thread = new Thread(new Runnable() {

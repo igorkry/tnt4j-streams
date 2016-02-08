@@ -42,4 +42,8 @@ public final class StreamsConstants {
 	 */
 	public static final String TRANSPORT_HTTP = "Http"; // NON-NLS
 
+	private StreamsConstants() {
+
+	}
+
 }

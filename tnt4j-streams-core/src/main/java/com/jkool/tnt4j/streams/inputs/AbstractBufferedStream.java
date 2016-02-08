@@ -62,7 +62,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		super.initialize();
 
 		inputBuffer = new ArrayBlockingQueue<T>(INPUT_BUFFER_SIZE, true);
@@ -76,10 +76,10 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 *
 	 * @return next activity data item, or {@code null} if there is no next item
 	 *
-	 * @throws Throwable
+	 * @throws Exception
 	 *             if any errors occurred getting next item
 	 */
-	public T getNextItem() throws Throwable {
+	public T getNextItem() throws Exception {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"AbstractBufferedStream.changes.buffer.uninitialized"));

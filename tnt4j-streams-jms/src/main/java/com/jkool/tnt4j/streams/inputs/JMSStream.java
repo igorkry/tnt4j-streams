@@ -107,7 +107,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Throwable {
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
@@ -145,7 +145,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void initialize() throws Throwable {
+	protected void initialize() throws Exception {
 		super.initialize();
 
 		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(queueName)) {
