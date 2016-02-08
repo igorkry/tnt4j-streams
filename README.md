@@ -2180,6 +2180,10 @@ Download the above libraries and place into the `tnt4j-streams/lib directory` di
    * to build project run maven goals `clean package`
    * to make release assembly run maven goals `clean package javadoc:aggregate install`
 
+NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true` instead of
+using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test scope
+dependencies checking if UI checkbox 'Skip Tests' is used.
+
 Release assembly is built to `../build/tnt4j-streams` directory.
 
 NOTE: sometimes maven fails to correctly handle dependencies. If dependency configuration looks
