@@ -56,7 +56,7 @@ Running TNT4J-Streams
     * use `bin\tnt4j-streams.bat` or `bin\tnt4j-streams.sh` to run standalone application
 * As API integrated into Your product
     * Write streams configuration file. See 'Streams configuration' chapter for more details
-    * use `StreamsAgent.runFromAPI(configFileName)` in your code
+    * use `StreamsAgent.runFromAPI(configFileName)` in Your code
 
 ## Samples:
 
@@ -989,6 +989,9 @@ parsers. Custom fields values can be found as activity event properties.
 `AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
 'Apache Access log single file' section.
 
+NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+complies Your data format.
+
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### HTTP request form
@@ -1191,6 +1194,9 @@ processed by all stacked parsers. Custom fields values can be found as activity 
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+complies Your data format.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -1505,6 +1511,9 @@ processed by all stacked parsers. Custom fields values can be found as activity 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
 
+NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+complies Your data format.
+
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### MQTT
@@ -1590,7 +1599,7 @@ Sample stream configuration:
     <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:1883"/>
-        <property name="Topic" value="TNT4JStreams"/>
+        <property name="TopicString" value="TNT4JStreams"/>
         <!--<property name="UserName" value="someUser"/>-->
         <!--<property name="Password" value="somePassword"/>-->
         <!--<property name="UseSSL" value="true"/>-->
@@ -1605,7 +1614,7 @@ Sample stream configuration:
 Stream configuration states that `MqttStream` referencing `MqttMessageParser` shall be used.
 
 `MqttStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
-`Topic` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
+`TopicString` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
 processed by all stacked parsers. Custom fields values can be found as activity event properties.
 
@@ -1614,6 +1623,9 @@ processed by all stacked parsers. Custom fields values can be found as activity 
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+complies Your data format.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -2001,7 +2013,7 @@ or
 #### MQTT stream parameters:
 
  * ServerURI - Mqtt server URI. (Required)
- * Topic - topic name to listen. (Required)
+ * TopicString - the topic to subscribe to, which can include wildcards. (Required)
  * UserName - authentication user name. (Optional)
  * Password - user password. (Optional)
  * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
@@ -2187,7 +2199,7 @@ Testing of TNT4J-Streams
 
 ## Testing using maven
 Maven runs tests automatically while building project. To skip test phase add Maven parameter `-Dmaven.test.skip=true`
-or select 'Skip tests' UI element in your IDE  'Maven Run' configuration.
+or select 'Skip tests' UI element in Your IDE  'Maven Run' configuration.
 
 ## Running manually from IDE
 * in `core` module run JUnit test suite named `AllStreamsCoreTests`

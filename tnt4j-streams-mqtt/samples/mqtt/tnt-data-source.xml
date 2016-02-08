@@ -72,7 +72,7 @@
     <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:1883"/>
-        <property name="Topic" value="TNT4JStreams"/>
+        <property name="TopicString" value="TNT4JStreams"/>
         <!--<property name="UserName" value="someUser"/>-->
         <!--<property name="Password" value="somePassword"/>-->
         <!--<property name="UseSSL" value="true"/>-->

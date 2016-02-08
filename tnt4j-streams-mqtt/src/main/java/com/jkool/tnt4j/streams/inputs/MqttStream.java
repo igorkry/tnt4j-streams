@@ -61,7 +61,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * This activity stream supports the following properties:
  * <ul>
  * <li>ServerURI - Mqtt server URI. (Required)</li>
- * <li>Topic - topic name to listen. (Required)</li>
+ * <li>TopicString - the topic to subscribe to, which can include wildcards.
+ * (Required)</li>
  * <li>UserName - authentication user name. (Optional)</li>
  * <li>Password - user password. (Optional)</li>
  * <li>UseSSL - flag identifying to use SSL. (Optional)</li>
@@ -160,6 +161,11 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			} else if (StreamsConfig.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
 				keystorePass = value;
 			}
+		}
+
+		if (StringUtils.isNotEmpty(topic)) {
+			// remove leading and trailing slashes.
+			topic = topic.replaceAll("^/+", "").replaceAll("/+$", ""); // NON-NLS
 		}
 	}
 
