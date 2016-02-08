@@ -164,7 +164,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		}
 
 		if (StringUtils.isNotEmpty(topic)) {
-			// remove leading and trailing slashes.
+			// remove leading and trailing slashes to comply MQTT topic
+			// naming.
 			topic = topic.replaceAll("^/+", "").replaceAll("/+$", ""); // NON-NLS
 		}
 	}
