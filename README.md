@@ -2201,6 +2201,10 @@ Testing of TNT4J-Streams
 Maven runs tests automatically while building project. To skip test phase add Maven parameter `-Dmaven.test.skip=true`
 or select 'Skip tests' UI element in Your IDE  'Maven Run' configuration.
 
+NOTE: if You are using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true` instead of
+using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test scope
+dependencies checking if UI checkbox 'Skip Tests' is used.
+
 ## Running manually from IDE
 * in `core` module run JUnit test suite named `AllStreamsCoreTests`
 * in `flume-plugin` module run JUnit test suite named `AllFlumeTests`
