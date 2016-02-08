@@ -784,9 +784,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		} catch (SAXException exc) {
 			throw exc;
-		} catch (Throwable t) {
-			SAXException se = new SAXException(t.getLocalizedMessage() + getLocationInfo());
-			se.initCause(t);
+		} catch (Exception e) {
+			SAXException se = new SAXException(e.getLocalizedMessage() + getLocationInfo());
+			se.initCause(e);
 			throw se;
 		}
 	}

@@ -36,7 +36,7 @@ public abstract class ActivityParserTestBase {
 
 	public abstract void prepare();
 
-	public abstract void setPropertiesTest() throws Throwable;
+	public abstract void setPropertiesTest() throws Exception;
 
 	public abstract void isDataClassSupportedTest();
 

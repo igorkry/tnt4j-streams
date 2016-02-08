@@ -606,9 +606,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 							exc);
 				}
 			}
-		} catch (Throwable t) {
+		} catch (Exception e) {
 			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.failed.record.activity", t.getLocalizedMessage()), t);
+					"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
 		} finally {
 			cleanup();
 			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -668,9 +668,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 		public void run() {
 			try {
 				processActivityItem(item);
-			} catch (Throwable t) { // TODO: better handling
+			} catch (Exception e) { // TODO: better handling
 				logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"TNTInputStream.failed.record.activity", t.getLocalizedMessage()), t);
+						"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
 			}
 		}
 	}

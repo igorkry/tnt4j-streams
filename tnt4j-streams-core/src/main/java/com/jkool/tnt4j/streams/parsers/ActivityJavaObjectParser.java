@@ -167,7 +167,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			}
 
 			return obj;
-		} catch (Throwable exc) {
+		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityJavaObjectParser.could.not.get.declared.field"),

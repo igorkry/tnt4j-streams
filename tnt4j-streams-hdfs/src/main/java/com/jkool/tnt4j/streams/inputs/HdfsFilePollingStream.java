@@ -272,7 +272,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 						Utils.close(lnr);
 					}
 				}
-			} catch (Throwable exc) {
+			} catch (Exception exc) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"FilePollingStream.error.reading.changes"), exc);
 			} finally {
