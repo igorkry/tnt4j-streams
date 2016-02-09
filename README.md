@@ -162,13 +162,13 @@ Sample stream configuration:
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -213,9 +213,9 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
-        <field name="ElapsedTime" locator="15" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+        <field name="ElapsedTime" locator="15" locator-type="REGroupNum" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>
 
@@ -224,13 +224,13 @@ Sample stream configuration:
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -275,8 +275,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
 
     </parser>
 
@@ -355,13 +355,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -406,9 +406,9 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
-        <field name="ElapsedTime" locator="14" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+        <field name="ElapsedTime" locator="14" locator-type="REGroupNum" datatype="Number" format="#####0.000" locale="en-US" units="Seconds"/>
 
     </parser>
 
@@ -492,13 +492,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -543,8 +543,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
@@ -702,13 +702,13 @@ Sample stream configuration:
             tags="Normal server,Delayed server">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -753,8 +753,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
@@ -903,13 +903,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -954,8 +954,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
@@ -1106,13 +1106,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1157,8 +1157,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
@@ -1424,13 +1424,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1475,8 +1475,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
@@ -1533,13 +1533,13 @@ Sample stream configuration:
     <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1"/>
-        <field name="UserName" locator="3"/>
-        <field name="StartTime" locator="4" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7"/>
-        <field name="ResourceName" locator="8"/>
-        <field name="CompCode" locator="12">
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
             <field-map source="100" target="SUCCESS"/>
             <field-map source="101" target="SUCCESS"/>
             <field-map source="103" target="SUCCESS"/>
@@ -1584,8 +1584,8 @@ Sample stream configuration:
             <field-map source="505" target="ERROR"/>
             <field-map source="511" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="12"/>
-        <field name="MsgValue" locator="13"/>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
