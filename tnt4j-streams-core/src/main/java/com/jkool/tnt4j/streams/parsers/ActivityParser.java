@@ -212,6 +212,9 @@ public abstract class ActivityParser {
 	 */
 	protected void applyFieldValue(TNTInputStream stream, ActivityInfo ai, ActivityField field, Object value)
 			throws IllegalStateException, ParseException {
+
+		applyFieldValue(ai, field, value);
+
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
 			for (ActivityParser stackedParser : field.getStackedParsers()) {
@@ -225,8 +228,6 @@ public abstract class ActivityParser {
 					}
 				}
 			}
-		} else {
-			applyFieldValue(ai, field, value);
 		}
 	}
 
