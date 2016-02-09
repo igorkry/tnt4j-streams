@@ -58,6 +58,232 @@ Running TNT4J-Streams
     * Write streams configuration file. See 'Streams configuration' chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in Your code
 
+## TNT4J Events field mappings
+
+Mapping of streamed data to activity event fields are performed by parser. To map field value You have to define
+`field` tag in parser configuration:
+* `name` attribute defines activity event field name
+* `locator` attribute defines location of data value from streamed data
+* `format` attribute defines format of data value
+* `value` attribute defines predefined (hardcoded) value of field
+* `fieled-map` tag is used to perform manual mapping from streamed data value `source` to field value `target.`
+
+sample:
+```xml
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        ...
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+```
+
+### Predefined fields set
+
+```java
+    /**
+     * Name of application associated with the activity.
+     */
+    ApplName(String.class),
+
+    /**
+     * Host name of server to associate with activity.
+     */
+    ServerName(String.class),
+
+    /**
+     * IP Address of server to associate with activity.
+     */
+    ServerIp(String.class),
+
+    /**
+     * Name to assign to activity entry. Examples are operation, method, API
+     * call, event, etc.
+     */
+    EventName(String.class),
+
+    /**
+     * Type of activity - Value must match values in
+     * {@link com.nastel.jkool.tnt4j.core.OpType} enumeration.
+     */
+    EventType(Enum.class),
+
+    /**
+     * Time action associated with activity started.
+     */
+    StartTime(StreamTimestamp.class),
+
+    /**
+     * Time action associated with activity ended.
+     */
+    EndTime(StreamTimestamp.class),
+
+    /**
+     * Elapsed time of the activity.
+     */
+    ElapsedTime(Long.class),
+
+    /**
+     * Identifier of process where activity event has occurred.
+     */
+    ProcessId(Integer.class),
+
+    /**
+     * Identifier of thread where activity event has occurred.
+     */
+    ThreadId(Integer.class),
+
+    /**
+     * Indicates completion status of the activity - Value must match values in
+     * {@link com.nastel.jkool.tnt4j.core.OpCompCode} enumeration.
+     */
+    CompCode(Enum.class),
+
+    /**
+     * Numeric reason/error code associated with the activity.
+     */
+    ReasonCode(Integer.class),
+
+    /**
+     * Error/exception message associated with the activity.
+     */
+    Exception(String.class),
+
+    /**
+     * Indicates completion status of the activity - Value can either be label
+     * from {@link com.nastel.jkool.tnt4j.core.OpLevel} enumeration or a numeric
+     * value.
+     */
+    Severity(Enum.class),
+
+    /**
+     * Location that activity occurred at.
+     */
+    Location(String.class),
+
+    /**
+     * Identifier used to correlate/relate activity entries to group them into
+     * logical entities.
+     */
+    Correlator(String[].class),
+
+    /**
+     * User-defined label to associate with the activity, generally for locating
+     * activity.
+     */
+    Tag(String[].class),
+
+    /**
+     * Name of user associated with the activity.
+     */
+    UserName(String.class),
+
+    /**
+     * Name of resource associated with the activity.
+     */
+    ResourceName(String.class),
+
+    /**
+     * User data to associate with the activity.
+     */
+    Message(String.class),
+
+    /**
+     * Identifier used to uniquely identify the data associated with this
+     * activity.
+     */
+    TrackingId(String.class),
+
+    /**
+     * Length of activity event message data.
+     */
+    MsgLength(Integer.class),
+
+    /**
+     * MIME type of activity event message data.
+     */
+    MsgMimeType(String.class),
+
+    /**
+     * Encoding of activity event message data.
+     */
+    MsgEncoding(String.class),
+
+    /**
+     * CharSet of activity event message data.
+     */
+    MsgCharSet(String.class),
+
+    /**
+     * Activity event category name.
+     */
+    Category(String.class);
+```
+
+NOTE: `EventType` field is mandatory and can't have value `null`.
+
+NOTE: Custom fields values can be found as activity event properties:
+
+sample:
+```xml
+    <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+    <field name="Topic" locator="TopicName" locator-type="Label"/>
+```
+
+### Stacked parsers
+
+In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
+one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
+
+NOTE: activity event will contain all fields processed by all stacked parsers.
+
+To define stacked parser You have to define `parser-ref` tad in parser `field` definition.
+
+sample:
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        ...
+    </parser>
+
+    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+        ...
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+        ...
+    </parser>
+
+    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+        ...
+        <parser-ref name="SampleJMSParser"/>
+    </stream>
+</tnt-data-source>
+```
+See 'JMS text message' sample for full configuration definition.
+
+In this sample stream named `SampleJMStream` has primary parser reference `SampleJMSParser`. It parses data received
+as JMS message (envelope). Field `MsgBody` carries JMS message payload data (message). In this sample consider we are
+sending Apache Access log entry as JMS message payload. So to parse that Apache access log entry we use stacked parser
+named `AccessLogParserCommon`.
+
+After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
+`AccessLogParserCommon` in the end.
+
 ## Samples:
 
 ### Running samples
@@ -570,8 +796,7 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `sinkName`, `chanelName` and
-`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.  Note that activity event
-will contain all fields processed by all stacked parsers. Custom fields values can be found as activity event properties.
+`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
@@ -781,8 +1006,7 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `path`, `Tag` and `host`.
-`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.  Note that activity event will contain
-all fields processed by all stacked parsers. Custom fields values can be found as activity event properties.
+`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
@@ -983,8 +1207,7 @@ Stream configuration states that `HttpStream` referencing `SampleHttpReqParser` 
 should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
 
 `SampleHttpReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
-`AccessLogParserCommon` to parse format. Note that activity event will contain all fields processed by all stacked
-parsers. Custom fields values can be found as activity event properties.
+`AccessLogParserCommon` to parse format.
 
 `AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
 'Apache Access log single file' section.
@@ -1186,8 +1409,7 @@ Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
 `Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
-Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
-processed by all stacked parsers. Custom fields values can be found as activity event properties.
+Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
@@ -1291,8 +1513,7 @@ Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
 `Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
-Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
-processed by all stacked parsers. Custom fields values can be found as activity event properties.
+Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps activity event data from JMS map message using map entries key labels.
 
@@ -1396,8 +1617,7 @@ Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
 `Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
-Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
-processed by all stacked parsers. Custom fields values can be found as activity event properties.
+Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `SampleObjectParser`.
@@ -1502,8 +1722,7 @@ Stream configuration states that `KafkaStream` referencing `KafkaMessageParser` 
 
 `KafkaStream` connects to server defined using `zookeeper.connect` property, and takes messages from topic defined
 `Topic` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
-Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
-processed by all stacked parsers. Custom fields values can be found as activity event properties.
+Stream puts received message data to map and passes it to parser.
 
 `KafkaMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
@@ -1615,8 +1834,7 @@ Stream configuration states that `MqttStream` referencing `MqttMessageParser` sh
 
 `MqttStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
 `TopicString` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
-Stream puts received message data to map and passes it to parser. Note that activity event will contain all fields
-processed by all stacked parsers. Custom fields values can be found as activity event properties.
+Stream puts received message data to map and passes it to parser.
 
 `MqttMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
