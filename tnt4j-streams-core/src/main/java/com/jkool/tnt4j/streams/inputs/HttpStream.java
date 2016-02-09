@@ -247,7 +247,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(SOCKET_TIMEOUT).setTcpNoDelay(TCP_NO_DELAY)
 					.build();
-			server = ServerBootstrap.bootstrap().setListenerPort(port).setServerInfo("TNT4-Streams-HttpStream") // NON-NLS
+			server = ServerBootstrap.bootstrap().setListenerPort(port).setServerInfo("TNT4J-Streams-HttpStream") // NON-NLS
 					.setSocketConfig(socketConfig).setSslContext(sslcontext)
 					.setExceptionLogger(new HttpStreamExceptionLogger()).registerHandler("*", this).create();
 		}
