@@ -19,10 +19,10 @@
 	
 4. Start TNT4J-Streams agent by running run.bat
 
-5. Copy sample configuration to [logstashdir]\bin\ (or other directory of your choice)
+5. Copy sample configuration to [logstashdir]/bin/ (or other directory of your choice)
 
 6. Start Logstash with supplied sample Logstash configuration:
     ```
-	[logstashdir]bin/logstash -f ls-tcp.cfg
+	[logstashdir]/bin/logstash -f ls-tcp.cfg
     ```
 5. Enjoy 

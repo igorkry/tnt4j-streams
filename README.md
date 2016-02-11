@@ -53,7 +53,7 @@ Running TNT4J-Streams
 * As standalone application
     * write streams configuration file. See 'Streams configuration' chapter for more details
     * configure Your loggers
-    * use `bin\tnt4j-streams.bat` or `bin\tnt4j-streams.sh` to run standalone application
+    * use `bin/tnt4j-streams.bat` or `bin/tnt4j-streams.sh` to run standalone application
 * As API integrated into Your product
     * Write streams configuration file. See 'Streams configuration' chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in Your code
@@ -299,7 +299,7 @@ and JavaDocs.
 
 This sample shows how to stream activity events (orders) data from single log file.
 
-Sample files can be found in `samples\single-log` directory.
+Sample files can be found in `samples/single-log` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
@@ -349,7 +349,7 @@ field string mapping to TNT4J event field value.
 This sample shows how to stream activity events (orders) data from multiple log files using file name matching
 wildcard pattern.
 
-Sample files can be found in `samples\multiple-logs` directory.
+Sample files can be found in `samples/multiple-logs` directory.
 
 `orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
 single order activity event.
@@ -367,7 +367,7 @@ meaning that stream should process not one single file, but file set matching `o
 
 This sample shows how to stream Apache access log records as activity events from single log file.
 
-Sample files can be found in `samples\apache-access-single-log` directory.
+Sample files can be found in `samples/apache-access-single-log` directory.
 
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
@@ -550,7 +550,7 @@ field string mapping to TNT4J event field value.
 This sample shows how to stream Apache access log records as activity events from multiple log files using file name
 matching wildcard pattern.
 
-Sample files can be found in `samples\apache-access-multi-log` directory.
+Sample files can be found in `samples/apache-access-multi-log` directory.
 
 `localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
 
@@ -569,7 +569,7 @@ pattern.
 This sample shows how to stream Apache access log records as activity events from file which is used for logging at
 runtime. File polling technique may be used for any text file. File rolling is also supported.
 
-Sample files can be found in `samples\log-file-polling` directory.
+Sample files can be found in `samples/log-file-polling` directory.
 
 Sample stream configuration:
 ```xml
@@ -671,7 +671,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 These samples shows how to read or poll HDFS files contents. Samples are very similar to 'Log file polling' or
 'Apache Access log single file'. Difference is that specialized stream classes are used.
 
-Sample files can be found in `samples\hdfs-file-stream` and `hdfs-log-file-polling` directories.
+Sample files can be found in `samples/hdfs-file-stream` and `hdfs-log-file-polling` directories.
 
 * Simple HDFS file streaming
 
@@ -704,9 +704,9 @@ This sample shows how to stream activity events from redirected Apache Flume out
 configured to send RAW output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
 to extract log entry data from JSON envelope.
 
-Sample files can be found in `samples\apache-flume` directory.
+Sample files can be found in `samples/apache-flume` directory.
 
-How to install plugin into Apache Flume and configure, see `samples\apache-flume\README.md`
+How to install plugin into Apache Flume and configure, see `samples/apache-flume/README.md`
 
 Sample stream configuration:
 ```xml
@@ -808,9 +808,9 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events from Apache Flume parsed log entry output data. Apache Flume output is
 configured to send parsed log entry data as JSON to `localhost:9595`.
 
-Sample files can be found in `samples\apache-flume-parsed` directory.
+Sample files can be found in `samples/apache-flume-parsed` directory.
 
-How to install plugin into Apache Flume and configure, see `samples\apache-flume-parsed\README.md`
+How to install plugin into Apache Flume and configure, see `samples/apache-flume-parsed/README.md`
 
 `messages.json` file contains sample JSON data package like one is sent from Apache Flume using configuration of
 this sample.
@@ -909,9 +909,9 @@ This sample shows how to stream activity events from redirected Logstash output 
 configured to send RAW output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
 to extract log entry data from JSON envelope.
 
-Sample files can be found in `samples\logstash` directory.
+Sample files can be found in `samples/logstash` directory.
 
-How to configure Logstash see `samples\logstash\README.MD`
+How to configure Logstash see `samples/logstash/README.MD`
 
 `messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
 this sample.
@@ -1018,9 +1018,9 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events from parsed by Logstash. Logstash Grok output plugin is configured to
 send parsed Apache Access log entry data as JSON to `localhost:9595`.
 
-Sample files can be found in `samples\logstash-parsed` directory.
+Sample files can be found in `samples/logstash-parsed` directory.
 
-How to configure Logstash see `samples\logstash-parsed\README.MD`
+How to configure Logstash see `samples/logstash-parsed/README.MD`
 
 `messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
 this sample.
@@ -1111,11 +1111,11 @@ event fields using map entry key labels.
 This sample shows how to stream activity events received over HTTP request as file. Sample also shows how to use
 stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples\http-file` directory.
+Sample files can be found in `samples/http-file` directory.
 
 Over HTTP sent sample file is `log.txt` - snapshot of Apache access log depicting some HTTP server activity.
 
-How to send file data over HTTP see `samples\http-file\README.md`
+How to send file data over HTTP see `samples/http-file/README.md`
 
 Sample stream configuration:
 ```xml
@@ -1221,9 +1221,9 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 
 This sample shows how to stream activity events received over HTTP request as form data.
 
-Sample files can be found in `samples\http-form` directory.
+Sample files can be found in `samples/http-form` directory.
 
-How to send HTTP form data see `samples\http-form\README.md`
+How to send HTTP form data see `samples/http-form/README.md`
 
 Sample stream configuration:
 ```xml
@@ -1315,7 +1315,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events received over JMS transport as text messages. Sample also shows
 how to use stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples\jms-mapmessage` directory.
+Sample files can be found in `samples/jms-mapmessage` directory.
 
 NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
@@ -1426,7 +1426,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 
 This sample shows how to stream activity events received over JMS transport as map messages.
 
-Sample files can be found in `samples\jms-textmessage` directory.
+Sample files can be found in `samples/jms-textmessage` directory.
 
 NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
@@ -1524,7 +1524,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events received over JMS transport as serializable object messages. Sample
 also shows how to use stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples\jms-objectmessage` directory.
+Sample files can be found in `samples/jms-objectmessage` directory.
 
 NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
@@ -1632,7 +1632,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events received over Apache Kafka transport as messages. Sample also shows
 how to use stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples\kafka` directory.
+Sample files can be found in `samples/kafka` directory.
 
 Sample stream configuration:
 ```xml
@@ -1740,7 +1740,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 This sample shows how to stream activity events received over MQTT transport as MQTT messages. Sample also shows how to
 use stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples\mqtt` directory.
+Sample files can be found in `samples/mqtt` directory.
 
 Sample stream configuration:
 ```xml
@@ -1851,7 +1851,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 
 This sample shows how to stream activity events received over WMQ as MQ messages.
 
-Sample files can be found in `samples\message-broker` directory.
+Sample files can be found in `samples/message-broker` directory.
 
 Sample stream configuration:
 ```xml
@@ -1977,7 +1977,7 @@ string and passes it to parser.
 
 This sample shows how to integrate TNT4J-Streams into Your custom API.
 
-Sample files can be found in `samples\custom` directory.
+Sample files can be found in `samples/custom` directory.
 
 `SampleIntegration.java` shows how to make TNT4J-Streams integration into Your API. Also integration could be made using
 `StreamsAgent.runFromAPI(cfgFileName)` call.
@@ -1991,7 +1991,7 @@ See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or 
 
 #### TNT4J-log4j12
 
-* in `config\log4j.properties` file change log appender to
+* in `config/log4j.properties` file change log appender to
 `log4j.appender.tnt4j=com.nastel.jkool.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
 `log4j.appender.tnt4j=` in this file, so please comment or remove all others if available.
 * in `pom.xml` file of `core` change dependencies - uncomment:
@@ -2006,8 +2006,8 @@ See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or 
 
 #### TNT4J-logback
 
-* make logback configuration file `config\logback.xml`.
-* change `bin\tnt-streams.bat` or `bin\tnt-streams.sh` file to pass logback configuration to Java:
+* make logback configuration file `config/logback.xml`.
+* change `bin/tnt-streams.bat` or `bin/tnt-streams.sh` file to pass logback configuration to Java:
 
 `bat` file:
 ```
@@ -2368,7 +2368,7 @@ online mode it should download these defined dependencies automatically.
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public Maven Repository (http://mvnrepository.com/).
 In this case we would recommend to download those dependencies manually into `lib` directory and install into local
-maven repository by running `mvn install` command. See `lib\mvn-install.bat` how to do this.
+maven repository by running `mvn install` command. See `lib/mvn-install.bat` how to do this.
 
 So what to download manually:
 * TNT4J

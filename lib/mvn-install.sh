@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/bash
 
 echo installing TNT4J and JESL libraries...
 mvn install:install-file -Dfile=tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar

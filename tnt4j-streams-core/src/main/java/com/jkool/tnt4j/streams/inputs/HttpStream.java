@@ -84,7 +84,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see com.jkool.tnt4j.streams.parsers.ActivityMapParser
  */
 public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CharacterStream.class);
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(HttpStream.class);
 
 	private static final String HTML_MSG_PATTERN = "<html><body><h1>{0}</h1></body></html>"; // NON-NLS
 
