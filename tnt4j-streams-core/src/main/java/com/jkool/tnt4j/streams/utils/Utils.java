@@ -401,6 +401,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @see Gson#fromJson(String, Class)
 	 * @see Gson#fromJson(Reader, Class)
 	 */
+	@SuppressWarnings("unchecked")
 	public static Map<String, ?> fromJsonToMap(Object jsonData) {
 		Map<String, ?> map = new LinkedTreeMap<String, Object>();
 		Gson gson = new Gson();
@@ -468,13 +469,14 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @return tag strings array, or {@code null} if arrays can't be made
 	 */
+	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
 		if (tagsData instanceof String) {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
 		} else if (tagsData instanceof Collection) {
-			Collection<?> tagsList = (Collection<?>) tagsData;
+			Collection<String> tagsList = (Collection<String>) tagsData;
 			if (!tagsList.isEmpty()) {
 				String[] tags = new String[tagsList.size()];
 				tags = tagsList.toArray(tags);

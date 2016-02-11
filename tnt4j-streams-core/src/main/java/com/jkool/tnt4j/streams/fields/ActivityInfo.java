@@ -596,7 +596,7 @@ public class ActivityInfo {
 	 */
 	private void resolveApplication() {
 		if (StringUtils.isEmpty(applName)) {
-			applName = "com.jkool.tnt4j.streams";
+			applName = "com.jkool.tnt4j.streams"; // NON-NLS
 		}
 	}
 
