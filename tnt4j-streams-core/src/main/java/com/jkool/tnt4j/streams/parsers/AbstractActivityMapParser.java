@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -84,7 +85,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 				"ActivityParser.parsing", data));
 
 		Map<String, ?> dataMap = getDataMap(data);
-		if (dataMap == null || dataMap.isEmpty()) {
+		if (MapUtils.isEmpty(dataMap)) {
 			logger.log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.not.find"));
 			return null;

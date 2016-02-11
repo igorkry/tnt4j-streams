@@ -18,6 +18,7 @@ package com.jkool.tnt4j.streams.configure;
 
 import java.util.*;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -162,7 +163,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (CONFIG_ROOT_ELMT.equals(qName) || CONFIG_ROOT_ELMT_OLD.equals(qName)) {
-			if (streams != null && !streams.isEmpty()) {
+			if (MapUtils.isNotEmpty(streams)) {
 				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ConfigParserHandler.multiple.elements", qName), currParseLocation);
 			}
