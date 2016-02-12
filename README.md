@@ -2152,6 +2152,8 @@ That is why sequence of configuration elements is critical and can't be swapped.
 
 #### Generic stream parameters:
 
+These parameters are applicable to all types of streams.
+
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
 
@@ -2183,7 +2185,7 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
 ```
 
-#### File line stream parameters:
+#### File line stream parameters (and Hdfs):
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
 
@@ -2192,7 +2194,11 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="FileName" value="*_access_log.2015-*.txt"/>
  ```
 
-#### File polling stream parameters:
+In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
+
+Also see 'Generic stream parameters'.
+
+#### File polling stream parameters (and Hdfs):
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
  * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest log entry. If `false` -
@@ -2205,6 +2211,10 @@ That is why sequence of configuration elements is critical and can't be swapped.
     <property name="FileReadDelay" value="5"/>
     <property name="StartFromLatest" value="true"/>
  ```
+
+In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
+
+Also see 'Generic stream parameters'.
 
 #### Character stream parameters:
 
@@ -2220,7 +2230,15 @@ or
     <property name="Port" value="9595"/>
 ```
 
+Also see 'Generic stream parameters'.
+
 NOTE: there can be ony one parser referenced to this stream.
+
+#### OS Piped stream parameters:
+
+This stream does not have any additional configuration parameters.
+
+Also see 'Generic stream parameters'.
 
 #### Http stream parameters:
 
@@ -2238,6 +2256,8 @@ NOTE: there can be ony one parser referenced to this stream.
     <property name="KeystorePass" value="somePassword"/>
     <property name="KeyPass" value="somePassword"/>
 ```
+
+Also see 'Generic stream parameters'.
 
 #### JMS stream parameters:
 
@@ -2264,6 +2284,8 @@ or
     <parser-ref name="SampleJMSParser"/>
 ```
 
+Also see 'Generic stream parameters'.
+
 #### Kafka stream parameters:
 
  * Topic - regex of topic name to listen. (Required)
@@ -2276,6 +2298,8 @@ or
     <property name="zookeeper.connect" value="127.0.0.1:2181"/>
     <property name="group.id" value="TNT4JStreams"/>
 ```
+
+Also see 'Generic stream parameters'.
 
 #### MQTT stream parameters:
 
@@ -2298,6 +2322,8 @@ or
     <property name="KeystorePass" value="somePassword"/>
 ```
 
+Also see 'Generic stream parameters'.
+
 #### WMQ Stream parameters:
 
  * QueueManager - Queue manager name. (Optional)
@@ -2316,6 +2342,8 @@ or
     <property name="Queue" value="EVENT.QUEUE"/>
     <property name="Host" value="wmq.sample.com"/>
 ```
+
+Also see 'Generic stream parameters'.
 
 ### Parsers configuration
 

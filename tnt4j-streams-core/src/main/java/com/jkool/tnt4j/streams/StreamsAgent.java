@@ -42,11 +42,13 @@ public final class StreamsAgent {
 
 	private static final String PARAM_STREAM_CFG = "-f:"; // NON-NLS
 	private static final String PARAM_PARSER_CFG = "-p:"; // NON-NLS
+	private static final String PARAM_SKIP_UNPARSED = "-s"; // NON-NLS
 	private static final String PARAM_HELP1 = "-h"; // NON-NLS
 	private static final String PARAM_HELP2 = "-?"; // NON-NLS
 
 	private static String cfgFileName = null;
 	private static boolean noStreamConfig = false;
+	private static boolean haltOnUnparsed = true;
 
 	private StreamsAgent() {
 	}
@@ -68,6 +70,12 @@ public final class StreamsAgent {
 	 *            <td>&nbsp;-p:&lt;cfg_file_name&gt;</td>
 	 *            <td>(optional) Load parsers configuration from
 	 *            &lt;cfg_file_name&gt;</td>
+	 *            </tr>
+	 *            <tr>
+	 *            <td>&nbsp;&nbsp;</td>
+	 *            <td>&nbsp;&nbsp;&nbsp;-s</td>
+	 *            <td>(optional) Skip unparsed activity data entries and
+	 *            continue streaming</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
@@ -110,8 +118,12 @@ public final class StreamsAgent {
 			if (noStreamConfig) {
 				streamsMap = new HashMap<String, TNTInputStream>(1);
 
+				Map<String, String> props = new HashMap<String, String>(1);
+				props.put(StreamsConfig.PROP_HALT_ON_PARSER, String.valueOf(haltOnUnparsed));
+
 				PipedStream pipeStream = new PipedStream();
 				pipeStream.setName("DefaultSystemPipeStream"); // NON-NLS
+				pipeStream.setProperties(props.entrySet());
 
 				Map<String, ActivityParser> parsersMap = cfg.getParsers();
 				if (MapUtils.isEmpty(parsersMap)) {
@@ -179,6 +191,8 @@ public final class StreamsAgent {
 				}
 
 				noStreamConfig = arg.startsWith(PARAM_PARSER_CFG);
+			} else if (PARAM_SKIP_UNPARSED.equals(arg)) {
+				haltOnUnparsed = false;
 			} else if (PARAM_HELP1.equals(arg) || PARAM_HELP2.equals(arg)) {
 				printUsage();
 				return false;

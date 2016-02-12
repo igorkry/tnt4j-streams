@@ -1,2 +1,2 @@
-more orders.log | jk-pipe parsers.xml
+more orders.log | jk-pipe parsers.xml -s
 pause
