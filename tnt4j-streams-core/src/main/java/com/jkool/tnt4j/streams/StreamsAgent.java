@@ -116,29 +116,7 @@ public final class StreamsAgent {
 			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
 			Map<String, TNTInputStream> streamsMap;
 			if (noStreamConfig) {
-				streamsMap = new HashMap<String, TNTInputStream>(1);
-
-				Map<String, String> props = new HashMap<String, String>(1);
-				props.put(StreamsConfig.PROP_HALT_ON_PARSER, String.valueOf(haltOnUnparsed));
-
-				PipedStream pipeStream = new PipedStream();
-				pipeStream.setName("DefaultSystemPipeStream"); // NON-NLS
-				pipeStream.setProperties(props.entrySet());
-
-				Map<String, ActivityParser> parsersMap = cfg.getParsers();
-				if (MapUtils.isEmpty(parsersMap)) {
-					throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"StreamsAgent.no.piped.activity.parsers"));
-				}
-				for (Map.Entry<String, ActivityParser> parserEntry : parsersMap.entrySet()) {
-					ActivityParser parser = parserEntry.getValue();
-
-					if (parser != null) {
-						pipeStream.addParser(parser);
-					}
-				}
-
-				streamsMap.put(pipeStream.getName(), pipeStream);
+				streamsMap = initPiping(cfg);
 			} else {
 				streamsMap = cfg.getStreams();
 			}
@@ -158,6 +136,34 @@ public final class StreamsAgent {
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
+	}
+
+	private static Map<String, TNTInputStream> initPiping(StreamsConfig cfg) throws Exception {
+		Map<String, TNTInputStream> streamsMap = new HashMap<String, TNTInputStream>(1);
+
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(StreamsConfig.PROP_HALT_ON_PARSER, String.valueOf(haltOnUnparsed));
+
+		PipedStream pipeStream = new PipedStream();
+		pipeStream.setName("DefaultSystemPipeStream"); // NON-NLS
+		pipeStream.setProperties(props.entrySet());
+
+		Map<String, ActivityParser> parsersMap = cfg.getParsers();
+		if (MapUtils.isEmpty(parsersMap)) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"StreamsAgent.no.piped.activity.parsers"));
+		}
+		for (Map.Entry<String, ActivityParser> parserEntry : parsersMap.entrySet()) {
+			ActivityParser parser = parserEntry.getValue();
+
+			if (parser != null) {
+				pipeStream.addParser(parser);
+			}
+		}
+
+		streamsMap.put(pipeStream.getName(), pipeStream);
+
+		return streamsMap;
 	}
 
 	/**
