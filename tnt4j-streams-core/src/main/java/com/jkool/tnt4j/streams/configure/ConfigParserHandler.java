@@ -627,6 +627,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.failed.to.load", STREAM_ELMT, CLASS_ATTR, className, getLocationInfo()), iae);
 		}
+
+		currStream.setName(name);
 		streams.put(name, currStream);
 	}
 
@@ -708,7 +710,14 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currField != null) {
 			currField.addStackedParser(parser);
 		} else {
-			currStream.addParser(parser);
+			try {
+				currStream.addParser(parser);
+			} catch (IllegalStateException exc) {
+				throw new SAXParseException(
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"ConfigParserHandler.could.not.add.stream.parser", currStream.getName(), parserName),
+						currParseLocation, exc);
+			}
 		}
 	}
 

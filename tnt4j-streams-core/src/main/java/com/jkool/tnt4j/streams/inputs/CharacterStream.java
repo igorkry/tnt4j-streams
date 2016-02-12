@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -40,6 +41,11 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This activity stream requires parsers that can support {@code InputStream}s
  * or {@code Reader}s as the source for activity data.
+ *
+ * NOTE: there can be only one parser referenced with this kind of stream!
+ * Because next item returned by this stream is {@code BufferedReader} and
+ * parseable value is retrieved inside parser there is no way to rewind reader
+ * position if first parser fails to parse RAW activity data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -144,6 +150,19 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void addParser(ActivityParser parser) throws IllegalStateException {
+		if (!parsersMap.isEmpty()) {
+			StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"CharacterStream.cannot.have.multiple.parsers");
+		}
+
+		super.addParser(parser);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Object getProperty(String name) {
 		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
@@ -193,12 +212,13 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		if (StringUtils.isEmpty(fileName) && socketPort == null) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined.one.of", StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
-		}
-
 		if (rawStream == null && rawReader == null) {
+			if (StringUtils.isEmpty(fileName) && socketPort == null) {
+				throw new IllegalStateException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.property.undefined.one.of",
+						StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
+			}
+
 			if (fileName != null) {
 				rawStream = new FileInputStream(fileName);
 			} else if (socketPort != null) {

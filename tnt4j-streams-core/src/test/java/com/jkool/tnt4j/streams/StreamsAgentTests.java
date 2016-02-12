@@ -76,7 +76,8 @@ public class StreamsAgentTests {
 		StreamsAgent.main(argument);
 		System.out.flush();
 		final String string = console.getBuffer().toString();
-		String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.missing.cfg");
+		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"StreamsAgent.missing.cfg.file", argument);
 		expected += LINE_SEPARATOR;
 		expected += StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.help");
 		expected += LINE_SEPARATOR;

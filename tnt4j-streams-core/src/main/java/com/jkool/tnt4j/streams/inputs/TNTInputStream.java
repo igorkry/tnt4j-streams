@@ -115,6 +115,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
 
+	private String name;
+
 	/**
 	 * Constructs a new TNTInputStream.
 	 *
@@ -319,8 +321,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param parser
 	 *            parser to add
+	 *
+	 * @throws IllegalStateException
+	 *             if parser can't be added to stream
 	 */
-	public void addParser(ActivityParser parser) {
+	public void addParser(ActivityParser parser) throws IllegalStateException {
 		String[] tags = parser.getTags();
 
 		if (ArrayUtils.isNotEmpty(tags)) {
@@ -650,6 +655,25 @@ public abstract class TNTInputStream<T> implements Runnable {
 				ai.recordActivity(tracker, CONN_RETRY_INTERVAL);
 			}
 		}
+	}
+
+	/**
+	 * Returns stream name value
+	 *
+	 * @return stream name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets stream name value
+	 *
+	 * @param name
+	 *            stream name
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	private class ActivityItemProcessingTask implements Runnable {

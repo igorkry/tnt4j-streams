@@ -16,13 +16,17 @@
 
 package com.jkool.tnt4j.streams;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.inputs.PipedStream;
 import com.jkool.tnt4j.streams.inputs.StreamThread;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -35,7 +39,14 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  */
 public final class StreamsAgent {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsAgent.class);
+
+	private static final String PARAM_STREAM_CFG = "-f:"; // NON-NLS
+	private static final String PARAM_PARSER_CFG = "-p:"; // NON-NLS
+	private static final String PARAM_HELP1 = "-h"; // NON-NLS
+	private static final String PARAM_HELP2 = "-?"; // NON-NLS
+
 	private static String cfgFileName = null;
+	private static boolean noStreamConfig = false;
 
 	private StreamsAgent() {
 	}
@@ -51,6 +62,12 @@ public final class StreamsAgent {
 	 *            <td>&nbsp;-f:&lt;cfg_file_name&gt;</td>
 	 *            <td>(optional) Load TNT4J Streams data source configuration
 	 *            from &lt;cfg_file_name&gt;</td>
+	 *            </tr>
+	 *            <tr>
+	 *            <td>&nbsp;&nbsp;</td>
+	 *            <td>&nbsp;-p:&lt;cfg_file_name&gt;</td>
+	 *            <td>(optional) Load parsers configuration from
+	 *            &lt;cfg_file_name&gt;</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
@@ -89,8 +106,31 @@ public final class StreamsAgent {
 	private static void loadConfigAndRun(String cfgFileName) {
 		try {
 			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
-			Map<String, TNTInputStream> streamsMap = cfg.getStreams();
-			if (streamsMap == null || streamsMap.isEmpty()) {
+			Map<String, TNTInputStream> streamsMap;
+			if (noStreamConfig) {
+				streamsMap = new HashMap<String, TNTInputStream>(1);
+
+				PipedStream pipeStream = new PipedStream();
+				pipeStream.setName("DefaultSystemPipeStream"); // NON-NLS
+
+				Map<String, ActivityParser> parsersMap = cfg.getParsers();
+				if (MapUtils.isEmpty(parsersMap)) {
+					throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"StreamsAgent.no.piped.activity.parsers"));
+				}
+				for (Map.Entry<String, ActivityParser> parserEntry : parsersMap.entrySet()) {
+					ActivityParser parser = parserEntry.getValue();
+
+					if (parser != null) {
+						pipeStream.addParser(parser);
+					}
+				}
+
+				streamsMap.put(pipeStream.getName(), pipeStream);
+			} else {
+				streamsMap = cfg.getStreams();
+			}
+			if (MapUtils.isEmpty(streamsMap)) {
 				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"StreamsAgent.no.activity.streams"));
 			}
@@ -122,15 +162,24 @@ public final class StreamsAgent {
 			if (StringUtils.isEmpty(arg)) {
 				continue;
 			}
-			if (arg.startsWith("-f:")) { // NON-NLS
-				cfgFileName = arg.substring(3);
-				if (StringUtils.isEmpty(cfgFileName)) {
+			if (arg.startsWith(PARAM_STREAM_CFG) || arg.startsWith(PARAM_PARSER_CFG)) {
+				if (StringUtils.isNotEmpty(cfgFileName)) {
 					System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"StreamsAgent.missing.cfg"));
+							"StreamsAgent.invalid.args"));
 					printUsage();
 					return false;
 				}
-			} else if ("-h".equals(arg) || "-?".equals(arg)) { // NON-NLS
+
+				cfgFileName = arg.substring(3);
+				if (StringUtils.isEmpty(cfgFileName)) {
+					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+					printUsage();
+					return false;
+				}
+
+				noStreamConfig = arg.startsWith(PARAM_PARSER_CFG);
+			} else if (PARAM_HELP1.equals(arg) || PARAM_HELP2.equals(arg)) {
 				printUsage();
 				return false;
 			} else {

@@ -18,6 +18,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Apache Flume
     * Logstash
     * WMQ
+    * OS pipes
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
@@ -362,6 +363,52 @@ Sample configuration and sample idea is same as 'Single Log file' with one singl
     <property name="FileName" value="orders-*.log"/>
 ```
 meaning that stream should process not one single file, but file set matching `orders-*.log` wildcard pattern.
+
+#### OS piped stream
+
+This sample shows how to stream activity events (orders) data received over OS pipe from another application or OS
+command.
+
+Sample files can be found in `samples/piping-stream` directory.
+
+`orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
+
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+`jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
+ you need is to pass file name of stream parsers configuration i.e. `parsers.xml`
+
+`run.bat` or `run.sh` files uses OS piping to run sample.
+
+Sample parser configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+</tnt-data-source>
+```
+
+For details on parser configuration see sample named 'Single Log file'.
 
 #### Apache Access log single file
 
@@ -2172,6 +2219,8 @@ or
 ```xml
     <property name="Port" value="9595"/>
 ```
+
+NOTE: there can be ony one parser referenced to this stream.
 
 #### Http stream parameters:
 
