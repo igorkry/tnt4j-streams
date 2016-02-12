@@ -406,11 +406,11 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		Map<String, ?> map = new LinkedTreeMap<String, Object>();
 		Gson gson = new Gson();
 
-		if (jsonData instanceof byte[]) {
+		if (jsonData instanceof String) {
+			map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
+		} else if (jsonData instanceof byte[]) {
 			String str = getString((byte[]) jsonData);
 			map = (Map<String, ?>) gson.fromJson(str, map.getClass());
-		} else if (jsonData instanceof String) {
-			map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
 		} else if (jsonData instanceof Reader) {
 			map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
 		} else if (jsonData instanceof InputStream) {

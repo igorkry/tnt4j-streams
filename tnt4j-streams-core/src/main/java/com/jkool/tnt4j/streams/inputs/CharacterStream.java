@@ -375,7 +375,32 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		@Override
 		public String readLine() throws IOException {
 			try {
-				return super.readLine();
+				String line = super.readLine();
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("CharacterStream.read.line", line));
+
+				return line;
+			} catch (EOFException exc) {
+				throw exc;
+			} catch (IOException ioe) {
+				error = true;
+				throw ioe;
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int read(char cbuf[], int off, int len) throws IOException {
+			try {
+				int total = super.read(cbuf, off, len);
+
+				String line = total == -1 ? "EOF" : new String(cbuf, off, total); // NON-NLS
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("CharacterStream.read.line", line));
+
+				return total;
 			} catch (EOFException exc) {
 				throw exc;
 			} catch (IOException ioe) {
