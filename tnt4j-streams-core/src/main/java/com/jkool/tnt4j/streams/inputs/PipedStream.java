@@ -32,7 +32,7 @@ public class PipedStream extends TNTInputStream<String> {
 	protected Reader rawReader = null;
 
 	/**
-	 * BufferedReader that wraps {@link #rawStream} or {@link #rawReader}
+	 * BufferedReader that wraps {@link #rawReader}
 	 */
 	protected BufferedReader dataReader = null;
 
