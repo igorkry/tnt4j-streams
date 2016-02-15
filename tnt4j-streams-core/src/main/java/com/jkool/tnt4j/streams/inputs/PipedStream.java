@@ -56,7 +56,7 @@ public class PipedStream extends TNTInputStream<String> {
 
 	/**
 	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * InputStream.
+	 * {@code InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -67,7 +67,7 @@ public class PipedStream extends TNTInputStream<String> {
 
 	/**
 	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * Reader.
+	 * {@code Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
