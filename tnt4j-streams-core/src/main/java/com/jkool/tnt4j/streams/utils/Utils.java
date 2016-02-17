@@ -391,6 +391,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param jsonData
 	 *            JSON format data object
+	 * @param jsonAsLine
+	 *            flag indicating that complete JSON data package is single line
 	 *
 	 * @return data map parsed from JSON data object
 	 *
@@ -403,54 +405,27 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @see Gson#fromJson(Reader, Class)
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map<String, ?> fromJsonToMap(Object jsonData) {
+	public static Map<String, ?> fromJsonToMap(Object jsonData, boolean jsonAsLine) {
 		Map<String, ?> map = new LinkedTreeMap<String, Object>();
 		Gson gson = new Gson();
 
-		if (jsonData instanceof String) {
-			map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
-		} else if (jsonData instanceof byte[]) {
-			String str = getString((byte[]) jsonData);
-			map = (Map<String, ?>) gson.fromJson(str, map.getClass());
-		} else if (jsonData instanceof Reader) {
-			map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
-		} else if (jsonData instanceof InputStream) {
-			map = (Map<String, ?>) gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
-					map.getClass());
-		}
-
-		return map;
-	}
-
-	/**
-	 * Deserializes JSON data object ({@code String}, {@code Reader},
-	 * {@code InputStream}) as string line into map structured data.
-	 *
-	 * @param jsonData
-	 *            JSON format data object
-	 *
-	 * @return data map parsed from JSON data object
-	 *
-	 * @throws com.google.gson.JsonSyntaxException
-	 *             if there was a problem reading from the Reader
-	 * @throws com.google.gson.JsonIOException
-	 *             if json is not a valid representation for an object of type
-	 *
-	 * @see Gson#fromJson(String, Class)
-	 */
-	@SuppressWarnings("unchecked")
-	public static Map<String, ?> fromJsonLineToMap(Object jsonData) {
-		Map<String, ?> map = new LinkedTreeMap<String, Object>();
-		Gson gson = new Gson();
-
-		try {
-			String str = getStringLine(jsonData);
-
-			if (str != null) {
-				map = (Map<String, ?>) gson.fromJson(str, map.getClass());
+		if (jsonAsLine) {
+			try {
+				map = (Map<String, ?>) gson.fromJson(getStringLine(jsonData), map.getClass());
+			} catch (IOException ioe) {
+				throw new JsonIOException(ioe);
 			}
-		} catch (IOException ioe) {
-			throw new JsonIOException(ioe);
+		} else {
+			if (jsonData instanceof String) {
+				map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
+			} else if (jsonData instanceof byte[]) {
+				map = (Map<String, ?>) gson.fromJson(getString((byte[]) jsonData), map.getClass());
+			} else if (jsonData instanceof Reader) {
+				map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
+			} else if (jsonData instanceof InputStream) {
+				map = (Map<String, ?>) gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
+						map.getClass());
+			}
 		}
 
 		return map;
@@ -474,14 +449,16 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		if (data == null) {
 			return null;
 		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return getString((byte[]) data);
-		}
 
 		BufferedReader rdr = null;
-		if (data instanceof BufferedReader) {
+		boolean autoClose = false;
+		if (data instanceof String) {
+			rdr = new BufferedReader(new StringReader((String) data));
+			autoClose = true;
+		} else if (data instanceof byte[]) {
+			rdr = new BufferedReader(new StringReader(getString((byte[]) data)));
+			autoClose = true;
+		} else if (data instanceof BufferedReader) {
 			rdr = (BufferedReader) data;
 		} else if (data instanceof Reader) {
 			rdr = new BufferedReader((Reader) data);
@@ -489,9 +466,15 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
 		}
 
-		String str = rdr == null ? null : rdr.readLine();
+		try {
+			String str = rdr == null ? null : rdr.readLine();
 
-		return str;
+			return str;
+		} finally {
+			if (autoClose) {
+				close(rdr);
+			}
+		}
 	}
 
 	/**

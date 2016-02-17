@@ -16,8 +16,10 @@
 
 package com.jkool.tnt4j.streams.parsers;
 
+import java.util.Collection;
 import java.util.Map;
 
+import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -27,6 +29,12 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Implements an activity data parser that assumes each activity data item is an
  * JSON format string, where each field is represented by a key/value pair and
  * the name is used to map each field onto its corresponding activity field.
+ * <p>
+ * This parser supports the following properties:
+ * <ul>
+ * <li>ReadLines - indicates that complete JSON data package is single line.
+ * (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
@@ -35,11 +43,32 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class ActivityJsonParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
 
+	private boolean jsonAsLine = true;
+
 	/**
 	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
 		super(LOGGER);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		if (props == null) {
+			return;
+		}
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+
+			if (StreamsConfig.PROP_READ_LINES.equalsIgnoreCase(name)) {
+				jsonAsLine = Boolean.parseBoolean(value);
+			}
+		}
 	}
 
 	/**
@@ -52,6 +81,6 @@ public class ActivityJsonParser extends AbstractActivityMapParser {
 	 */
 	@Override
 	protected Map<String, ?> getDataMap(Object data) {
-		return Utils.fromJsonLineToMap(data);
+		return Utils.fromJsonToMap(data, jsonAsLine);
 	}
 }

@@ -821,6 +821,8 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="true"/>
+
         <field name="MsgBody" locator="body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
@@ -859,8 +861,8 @@ Sample files can be found in `samples/apache-flume-parsed` directory.
 
 How to install plugin into Apache Flume and configure, see `samples/apache-flume-parsed/README.md`
 
-`messages.json` file contains sample JSON data package like one is sent from Apache Flume using configuration of
-this sample.
+`messages.json` file contains sample Apache Flume output JSON data package prepared using configuration of this sample.
+This sample JSON is for you to see better understand parsers mappings. Do not use it as Apache Flume input!
 
 Sample stream configuration:
 ```xml
@@ -870,6 +872,8 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="FlumeJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="true"/>
+
         <field name="Location" locator="headers.clientip" locator-type="Label"/>
         <field name="UserName" locator="headers.auth" locator-type="Label"/>
         <field name="StartTime" locator="headers.logtime" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
@@ -932,7 +936,6 @@ Sample stream configuration:
     </parser>
 
     <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
-        <!--<property name="FileName" value="messages.json"/>-->
         <property name="Port" value="9595"/>
         <parser-ref name="FlumeJSONParser"/>
     </stream>
@@ -960,8 +963,8 @@ Sample files can be found in `samples/logstash` directory.
 
 How to configure Logstash see `samples/logstash/README.MD`
 
-`messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
-this sample.
+`messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
+sample JSON is for you to see better understand parsers mappings. Do not use it as Logstash input!
 
 Sample stream configuration:
 ```xml
@@ -1030,6 +1033,8 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="true"/>
+
         <field name="MsgBody" locator="message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
@@ -1040,7 +1045,6 @@ Sample stream configuration:
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
-        <!--<property name="FileName" value="messages.json"/>-->
         <property name="Port" value="9595"/>
         <parser-ref name="JSONEnvelopeParser"/>
     </stream>
@@ -1069,8 +1073,8 @@ Sample files can be found in `samples/logstash-parsed` directory.
 
 How to configure Logstash see `samples/logstash-parsed/README.MD`
 
-`messages.json` file contains sample JSON data package like one is sent from Logstash using configuration of
-this sample.
+`messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
+sample JSON is for you to see better understand parsers mappings. Do not use it as Logstash input!
 
 Sample stream configuration:
 ```xml
@@ -1080,6 +1084,8 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="LogstashJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="true"/>
+
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
         <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
@@ -1139,7 +1145,6 @@ Sample stream configuration:
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
-        <!--property name="FileName" value="messages.json"/-->
         <property name="Port" value="9595"/>
         <parser-ref name="LogstashJSONParser"/>
     </stream>
@@ -2428,6 +2433,15 @@ Also see 'Generic stream parameters'.
 ```xml
     <property name="Pattern"
               value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
+```
+
+#### Activity JSON parser:
+
+ * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
+
+    sample:
+```xml
+    <property name="ReadLines" value="false"/>
 ```
 
 How to Build TNT4J-Streams

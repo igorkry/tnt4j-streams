@@ -160,13 +160,13 @@ public class UtilsTest {
 		String testString = "{\"TEST2\"=\"TESTVAL2\", \"TEST3\"=\"TESTVAL3\", \"TEST\"=\"TESTVAL\"}";
 		// Gson gson = new Gson();
 		// final String json = gson.toJson(testMap);
-		Map<String, ?> result = Utils.fromJsonToMap(testString);
+		Map<String, ?> result = Utils.fromJsonToMap(testString, false);
 		assertTrue(testMap.equals(result));
-		result = Utils.fromJsonToMap(testString.getBytes());
+		result = Utils.fromJsonToMap(testString.getBytes(), false);
 		assertTrue(testMap.equals(result));
-		result = Utils.fromJsonToMap(toReader(testString));
+		result = Utils.fromJsonToMap(toReader(testString), false);
 		assertTrue(testMap.equals(result));
-		result = Utils.fromJsonToMap(toInputStream(testString));
+		result = Utils.fromJsonToMap(toInputStream(testString), false);
 		assertTrue(testMap.equals(result));
 
 	}
@@ -181,23 +181,28 @@ public class UtilsTest {
 
 	@Test
 	public void testGetStringLine() throws IOException {
-		String testString = "TEST \n TEST \n";
+		String testString = "TEST \n TEST1 \n TEST2 \n TEST3 \n TEST4 \n TEST5 \n";
 		String testStringLine = "TEST ";
 		String result = Utils.getStringLine(testString);
-		assertEquals(testString, result);
+		assertEquals(testStringLine, result);
 
 		result = Utils.getStringLine(testString.getBytes());
-		assertEquals(testString, result);
-
-		result = Utils.getStringLine(toReader(testString));
 		assertEquals(testStringLine, result);
 
-		result = Utils.getStringLine(new BufferedReader(toReader(testString)));
+		Reader rdr = toReader(testString);
+		result = Utils.getStringLine(rdr);
 		assertEquals(testStringLine, result);
+		Utils.close(rdr);
 
-		result = Utils.getStringLine(toInputStream(testString));
+		rdr = new BufferedReader(toReader(testString));
+		result = Utils.getStringLine(rdr);
 		assertEquals(testStringLine, result);
+		Utils.close(rdr);
 
+		InputStream is = toInputStream(testString);
+		result = Utils.getStringLine(is);
+		assertEquals(testStringLine, result);
+		Utils.close(is);
 	}
 
 	@Test

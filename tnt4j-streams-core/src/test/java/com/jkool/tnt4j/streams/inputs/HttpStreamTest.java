@@ -87,7 +87,7 @@ public class HttpStreamTest {
 		HttpPost post = new HttpPost(url);
 
 		FileReader fileReader = new FileReader(new File("./samples/http-form/form-data.json"));
-		Map<String, ?> jsonMap = Utils.fromJsonToMap(fileReader);
+		Map<String, ?> jsonMap = Utils.fromJsonToMap(fileReader, false);
 		Utils.close(fileReader);
 
 		assertNotNull("Could not load form data from JSON", jsonMap);

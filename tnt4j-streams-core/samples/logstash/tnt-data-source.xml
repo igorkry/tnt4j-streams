@@ -63,6 +63,8 @@
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="true"/>
+
         <field name="MsgBody" locator="message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
