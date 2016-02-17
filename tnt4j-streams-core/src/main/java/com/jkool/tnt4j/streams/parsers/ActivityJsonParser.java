@@ -52,6 +52,6 @@ public class ActivityJsonParser extends AbstractActivityMapParser {
 	 */
 	@Override
 	protected Map<String, ?> getDataMap(Object data) {
-		return Utils.fromJsonToMap(data);
+		return Utils.fromJsonLineToMap(data);
 	}
 }

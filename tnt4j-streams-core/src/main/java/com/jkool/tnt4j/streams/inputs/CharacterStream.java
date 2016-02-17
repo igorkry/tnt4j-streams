@@ -377,7 +377,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			try {
 				String line = super.readLine();
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("CharacterStream.read.line", line));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"CharacterStream.read.line", line));
+
+				if (line == null) {
+					close();
+				}
 
 				return line;
 			} catch (EOFException exc) {
@@ -398,7 +403,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 				String line = total == -1 ? "EOF" : new String(cbuf, off, total); // NON-NLS
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted("CharacterStream.read.line", line));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"CharacterStream.read.line", line));
+
+				if (total == -1) {
+					close();
+				}
 
 				return total;
 			} catch (EOFException exc) {

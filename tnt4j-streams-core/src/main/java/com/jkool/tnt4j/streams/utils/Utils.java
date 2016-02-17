@@ -31,6 +31,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.jkool.tnt4j.streams.parsers.MessageType;
 import com.nastel.jkool.tnt4j.core.OpType;
@@ -416,6 +417,40 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		} else if (jsonData instanceof InputStream) {
 			map = (Map<String, ?>) gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
 					map.getClass());
+		}
+
+		return map;
+	}
+
+	/**
+	 * Deserializes JSON data object ({@code String}, {@code Reader},
+	 * {@code InputStream}) as string line into map structured data.
+	 *
+	 * @param jsonData
+	 *            JSON format data object
+	 *
+	 * @return data map parsed from JSON data object
+	 *
+	 * @throws com.google.gson.JsonSyntaxException
+	 *             if there was a problem reading from the Reader
+	 * @throws com.google.gson.JsonIOException
+	 *             if json is not a valid representation for an object of type
+	 *
+	 * @see Gson#fromJson(String, Class)
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, ?> fromJsonLineToMap(Object jsonData) {
+		Map<String, ?> map = new LinkedTreeMap<String, Object>();
+		Gson gson = new Gson();
+
+		try {
+			String str = getStringLine(jsonData);
+
+			if (str != null) {
+				map = (Map<String, ?>) gson.fromJson(str, map.getClass());
+			}
+		} catch (IOException ioe) {
+			throw new JsonIOException(ioe);
 		}
 
 		return map;
