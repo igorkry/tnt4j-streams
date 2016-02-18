@@ -69,10 +69,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
 	 * <ul>
-	 * <li>{@code java.lang.String}</li>
+	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
-	 * <li>{@code java.io.Reader}</li>
-	 * <li>{@code java.io.InputStream}</li>
+	 * <li>{@link java.io.Reader}</li>
+	 * <li>{@link java.io.InputStream}</li>
 	 * </ul>
 	 */
 	@Override

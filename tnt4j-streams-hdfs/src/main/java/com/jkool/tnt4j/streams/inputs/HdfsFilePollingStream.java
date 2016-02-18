@@ -47,7 +47,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * recorded. Stream reads changes form defined log files every "FileReadDelay"
  * property defined seconds (default is 15sec.).
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -87,7 +87,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 	 * path of directory, where file search should be performed i.e.
 	 * C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just
 	 * file name pattern) then files are searched in
-	 * {@code System.getProperty("user.dir")}. Files describing {@code Path}
+	 * {@code System.getProperty("user.dir")}. Files describing {@link Path}
 	 * array is ordered by file modification timestamp in descending order.
 	 *
 	 * @param path
@@ -192,13 +192,13 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 * file) then file monitoring is interrupted.
 		 * <p>
 		 * If polled file is readable, then monitor checks modification
-		 * timestamp. If it is newer than sored in {@code lastModifTime} file
+		 * timestamp. If it is newer than {@link #lastModifTime} value, file
 		 * gets opened for reading. If not, monitor tries to swap to next
 		 * available log file. If swap can'e be done (no newer readable file)
 		 * then file reading is skipped until next monitor invocation.
 		 * <p>
 		 * When file gets opened for reading reader is rolled to log file marked
-		 * by {@code lineNumber} attribute. If turns out that file got smaller
+		 * by {@link #lineNumber} attribute. If turns out that file got smaller
 		 * in lines count, then monitor tries to swap to previous log file. If
 		 * no previous readable log file is available, then reader is reset to
 		 * first file line.

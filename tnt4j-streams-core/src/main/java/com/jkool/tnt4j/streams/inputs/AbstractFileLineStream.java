@@ -34,7 +34,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * to represent a single activity or event which should be recorded. Files to
  * stream are defined using "FileName" property in stream configuration.
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -161,7 +161,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Load file descriptors matching {@code fileName} into collection.
+	 * Load file descriptors matching {@link #fileName} into collection.
 	 *
 	 * @throws Exception
 	 *             if any errors occurred while loading file descriptors
@@ -208,7 +208,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	protected abstract boolean isFileAvailable(int fileNumber);
 
 	/**
-	 * Returns {@code Reader} object for a file identified by file number in
+	 * Returns {@link Reader} object for a file identified by file number in
 	 * files collection.
 	 *
 	 * @param fileNumber

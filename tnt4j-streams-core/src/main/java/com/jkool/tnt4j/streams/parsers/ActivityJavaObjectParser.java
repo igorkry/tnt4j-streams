@@ -38,7 +38,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * <p>
  * Implements default activity data parser that assumes each activity data item
- * is an plain java {@code Object} data structure, where each field is
+ * is an plain java {@link Object} data structure, where each field is
  * represented by declared class field and the field name is used to map each
  * field onto its corresponding activity field.
  * <p>
@@ -81,7 +81,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
 	 * <ul>
-	 * <li>{@code java.lang.Object}</li>
+	 * <li>{@link java.lang.Object}</li>
 	 * </ul>
 	 */
 	@Override

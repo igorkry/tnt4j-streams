@@ -344,8 +344,8 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map
-	 * are transferred as tracking event properties when {@code recordActivity}
-	 * is invoked.
+	 * are transferred as tracking event properties when
+	 * {@link #recordActivity(Tracker, long)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key

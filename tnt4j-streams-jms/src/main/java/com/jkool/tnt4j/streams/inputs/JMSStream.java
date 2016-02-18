@@ -41,7 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * payload data carried data is assumed to represent a single activity or event
  * which should be recorded.
  * <p>
- * This activity stream requires parsers that can support JMS {@code Message}
+ * This activity stream requires parsers that can support JMS {@link Message}
  * data.
  * <p>
  * This activity stream supports the following properties:

@@ -48,7 +48,7 @@ public class StreamsThread extends Thread {
 	 * Creates new Streams thread.
 	 *
 	 * @param target
-	 *            object whose {@code run} method is called
+	 *            object whose {@link Runnable#run()} method is called
 	 *
 	 * @see Thread#Thread(Runnable)
 	 */
@@ -61,7 +61,7 @@ public class StreamsThread extends Thread {
 	 * Creates new Streams thread.
 	 *
 	 * @param target
-	 *            object whose {@code run} method is called
+	 *            object whose {@link Runnable#run()} method is called
 	 * @param name
 	 *            name of thread
 	 *
@@ -91,7 +91,7 @@ public class StreamsThread extends Thread {
 	 * @param threadGrp
 	 *            thread group to add new thread to
 	 * @param target
-	 *            object whose {@code run} method is called
+	 *            object whose {@link Runnable#run()} method is called
 	 *
 	 * @see Thread#Thread(ThreadGroup, Runnable)
 	 */
@@ -106,7 +106,7 @@ public class StreamsThread extends Thread {
 	 * @param threadGrp
 	 *            thread group to add new thread to
 	 * @param target
-	 *            object whose {@code run} method is called
+	 *            object whose {@link Runnable#run()} method is called
 	 * @param name
 	 *            name of thread
 	 *
@@ -229,7 +229,7 @@ public class StreamsThread extends Thread {
 
 	/**
 	 * Waits at most millis milliseconds for this thread to die. A timeout of 0
-	 * means to wait forever. Differs from {@code java.lang.Thread#join()},
+	 * means to wait forever. Differs from {@link java.lang.Thread#join()},
 	 * which it wraps, in that it does not throw an exception when interrupted.
 	 *
 	 * @param millis

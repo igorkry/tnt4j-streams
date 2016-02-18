@@ -48,8 +48,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * is assumed to represent a single activity or event which should be recorded.
  * Topic to listen is defined using "Topic" property in stream configuration.
  * <p>
- * This activity stream requires parsers that can support {@code Map} data. On
- * message reception message data is packed into {@code Map} filling these
+ * This activity stream requires parsers that can support {@link Map} data. On
+ * message reception message data is packed into {@link Map} filling these
  * entries:
  * <ul>
  * <li>ActivityTopic - topic name message with activity data was received.</li>
@@ -218,7 +218,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	/**
-	 * Mqtt messages receiver thread. It implements {@code MqttCallback}
+	 * Mqtt messages receiver thread. It implements {@link MqttCallback}
 	 * interface and initiates Mqtt client to receive and handle Mqtt messages
 	 * data.
 	 */

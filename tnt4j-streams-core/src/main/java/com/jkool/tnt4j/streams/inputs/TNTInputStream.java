@@ -228,12 +228,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Initialize the stream.
 	 * <p>
-	 * This method is called by default {@code run} method to perform any
+	 * This method is called by default {@link #run()} method to perform any
 	 * necessary initializations before the stream starts processing, including
 	 * verifying that all required properties are set. If subclasses override
 	 * this method to perform any custom initializations, they must call the
-	 * base class method. If subclass also overrides the {@code run} method, it
-	 * must call this at start of {@code run} method before entering into
+	 * base class method. If subclass also overrides the {@link #run()} method,
+	 * it must call this at start of {@link #run()} method before entering into
 	 * processing loop.
 	 *
 	 * @throws Exception
@@ -373,7 +373,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	public abstract T getNextItem() throws Exception;
 
 	/**
-	 * Makes activity information {@code ActivityInfo} object from raw activity
+	 * Makes activity information {@link ActivityInfo} object from raw activity
 	 * data item.
 	 * <p>
 	 * Default implementation simply calls {@link #applyParsers(Object)} to
@@ -516,12 +516,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Cleanup the stream.
 	 * <p>
-	 * This method is called by default {@code run} method to perform any
+	 * This method is called by default {@link #run()} method to perform any
 	 * necessary cleanup before the stream stops processing, releasing any
 	 * resources created by {@link #initialize()} method. If subclasses override
 	 * this method to perform any custom cleanup, they must call the base class
-	 * method. If subclass also overrides the {@code run} method, it must call
-	 * this at end of {@code run} method before returning.
+	 * method. If subclass also overrides the {@link #run()} method, it must
+	 * call this at end of {@link #run()} method before returning.
 	 */
 	protected void cleanup() {
 		if (!trackersMap.isEmpty()) {
@@ -566,7 +566,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * Starts input stream processing. Implementing {@code Runnable} interface
+	 * Starts input stream processing. Implementing {@link Runnable} interface
 	 * makes it possible to process each stream in separate thread.
 	 *
 	 * @see Runnable#run()

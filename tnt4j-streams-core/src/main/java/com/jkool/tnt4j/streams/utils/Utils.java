@@ -386,8 +386,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Deserializes JSON data object ({@code String}, {@code Reader},
-	 * {@code InputStream}) into map structured data.
+	 * Deserializes JSON data object ({@link String}, {@link Reader},
+	 * {@link InputStream}) into map structured data.
 	 *
 	 * @param jsonData
 	 *            JSON format data object
@@ -433,7 +433,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 	/**
 	 * Returns string line read from data source. Data source object can be
-	 * {@code String}, {@code Reader} or {@code InputStream}.
+	 * {@link String}, {@link Reader} or {@link InputStream}.
 	 *
 	 * @param data
 	 *            data source object to read string line
@@ -529,8 +529,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Makes a new {@code String} by decoding the specified array of bytes using
-	 * the UTF-8 charset. If {@code String} can't be constructed using UTF-8
+	 * Makes a new {@link String} by decoding the specified array of bytes using
+	 * the UTF-8 charset. If {@link String} can't be constructed using UTF-8
 	 * charset, then the platform's default charset is used.
 	 *
 	 * @param strBytes

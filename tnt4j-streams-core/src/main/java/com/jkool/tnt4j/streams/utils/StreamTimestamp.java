@@ -31,7 +31,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * <p>
  * Represents a timestamp that has microsecond accuracy. When constructing
- * timestamp values from string it uses {@code Locale} to parse it.
+ * timestamp values from string it uses {@link Locale} to parse it.
  *
  * @version $Revision: 1 $
  *
@@ -219,7 +219,7 @@ public class StreamTimestamp extends UsecTimestamp {
 	 * @return a clone of this instance.
 	 *
 	 * @throws CloneNotSupportedException
-	 *             if the object's class does not support the {@code Cloneable}
+	 *             if the object's class does not support the {@link Cloneable}
 	 *             interface. Subclasses that override the {@code clone} method
 	 *             can also throw this exception to indicate that an instance
 	 *             cannot be cloned.

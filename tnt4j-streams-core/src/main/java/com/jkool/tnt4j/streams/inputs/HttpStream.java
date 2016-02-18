@@ -59,8 +59,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </ul>
  * Running this stream Http server is started on configuration defined port.
  * <p>
- * This activity stream requires parsers that can support {@code Map} data. On
- * message reception message data is packed into {@code Map} filling these
+ * This activity stream requires parsers that can support {@link Map} data. On
+ * message reception message data is packed into {@link Map} filling these
  * entries:
  * <ul>
  * <li>ActivityData - raw activity data as {@code byte[]} retrieved from http

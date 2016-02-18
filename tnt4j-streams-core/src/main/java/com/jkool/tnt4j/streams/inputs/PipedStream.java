@@ -13,10 +13,10 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Implements piped activity stream, where each piped RAW data line is assumed
  * to represent a single activity or event which should be recorded. This class
- * wraps the RAW {@code InputStream} or {@code Reader} with a
- * {@code BufferedReader}. Default RAW input stream is {@code System.in}.
+ * wraps the RAW {@link InputStream} or {@link Reader} with a
+ * {@link BufferedReader}. Default RAW input stream is {@link System#in}.
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  *
  * @version $Revision: 1 $
@@ -27,7 +27,7 @@ public class PipedStream extends TNTInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(PipedStream.class);
 
 	/**
-	 * Reader from which activity data is read
+	 * {@link Reader} from which activity data is read
 	 */
 	protected Reader rawReader = null;
 
@@ -37,7 +37,7 @@ public class PipedStream extends TNTInputStream<String> {
 	protected BufferedReader dataReader = null;
 
 	/**
-	 * Construct empty PipedStream. Default input stream is {@code System.in}.
+	 * Construct empty PipedStream. Default input stream is {@link System#in}.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -48,7 +48,7 @@ public class PipedStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Construct empty PipedStream. Default input stream is {@code System.in}.
+	 * Construct empty PipedStream. Default input stream is {@link System#in}.
 	 */
 	public PipedStream() {
 		this(System.in);
@@ -56,7 +56,7 @@ public class PipedStream extends TNTInputStream<String> {
 
 	/**
 	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * {@code InputStream}.
+	 * {@link InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -67,7 +67,7 @@ public class PipedStream extends TNTInputStream<String> {
 
 	/**
 	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * {@code Reader}.
+	 * {@link Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -78,7 +78,7 @@ public class PipedStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Sets reader from which activity data should be read.
+	 * Sets {@link Reader} from which activity data should be read.
 	 *
 	 * @param reader
 	 *            reader to read data from

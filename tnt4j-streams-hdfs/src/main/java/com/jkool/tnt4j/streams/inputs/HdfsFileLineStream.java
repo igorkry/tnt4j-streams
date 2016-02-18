@@ -42,7 +42,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Files to stream are defined using "FileName" property in stream
  * configuration.
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>

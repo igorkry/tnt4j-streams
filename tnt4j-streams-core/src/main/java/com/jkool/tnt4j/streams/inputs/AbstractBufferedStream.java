@@ -72,7 +72,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	/**
 	 * Get the next activity data item to be processed. Method blocks and waits
 	 * for activity input data available in input buffer. Input buffer is filled
-	 * by {@code InputProcessor} thread.
+	 * by {@link InputProcessor} thread.
 	 *
 	 * @return next activity data item, or {@code null} if there is no next item
 	 *

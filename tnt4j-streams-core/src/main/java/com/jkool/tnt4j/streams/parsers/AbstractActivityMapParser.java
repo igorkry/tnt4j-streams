@@ -35,7 +35,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 /**
  * <p>
  * Base class for abstract activity data parser that assumes each activity data
- * item can be transformed into an {@code Map} data structure, where each field
+ * item can be transformed into an {@link Map} data structure, where each field
  * is represented by a key/value pair and the name is used to map each field
  * onto its corresponding activity field.
  * <p>

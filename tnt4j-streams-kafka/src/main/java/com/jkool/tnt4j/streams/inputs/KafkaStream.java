@@ -45,8 +45,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * recorded. Topic to listen is defined using "Topic" property in stream
  * configuration.
  * <p>
- * This activity stream requires parsers that can support {@code Map} data. On
- * message reception message data is packed into {@code Map} filling these
+ * This activity stream requires parsers that can support {@link Map} data. On
+ * message reception message data is packed into {@link Map} filling these
  * entries:
  * <ul>
  * <li>ActivityTopic - topic name message with activity data was received.</li>

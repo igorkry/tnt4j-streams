@@ -41,7 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Implements default activity data parser that assumes each activity data item
  * is an JMS message data structure. Message payload data is put into map entry
- * using key defined in {@code StreamsConstants.ACTIVITY_DATA_KEY}. This parser
+ * using key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
  * supports JMS messages of those types:
  * <ul>
  * <li>TextMessage - activity data is message text</li>
@@ -73,7 +73,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * This parser supports the following class types (and all classes
 	 * extending/implementing any of these):
 	 * <ul>
-	 * <li>{@code javax.jms.Message}</li>
+	 * <li>{@link javax.jms.Message}</li>
 	 * </ul>
 	 */
 	@Override
@@ -128,12 +128,12 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@code TextMessage} activity info into activity data map.
+	 * Parse JMS {@link TextMessage} activity info into activity data map.
 	 *
 	 * @param textMessage
 	 *            JMS text message
 	 * @param dataMap
-	 *            activity data map collected from JMS {@code TextMessage}
+	 *            activity data map collected from JMS {@link TextMessage}
 	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting text from message.
@@ -146,12 +146,12 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@code BytesMessage} activity info into activity data map.
+	 * Parse JMS {@link BytesMessage} activity info into activity data map.
 	 *
 	 * @param bytesMessage
 	 *            JMS bytes message
 	 * @param dataMap
-	 *            activity data map collected from JMS {@code BytesMessage}
+	 *            activity data map collected from JMS {@link BytesMessage}
 	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while reading bytes from message.
@@ -166,12 +166,12 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@code MapMessage} activity info into activity data map.
+	 * Parse JMS {@link MapMessage} activity info into activity data map.
 	 *
 	 * @param mapMessage
 	 *            JMS map message
 	 * @param dataMap
-	 *            activity data map collected from JMS {@code MapMessage}
+	 *            activity data map collected from JMS {@link MapMessage}
 	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting map entries from
@@ -186,12 +186,12 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@code StreamMessage} activity info into activity data map.
+	 * Parse JMS {@link StreamMessage} activity info into activity data map.
 	 *
 	 * @param streamMessage
 	 *            JMS stream message
 	 * @param dataMap
-	 *            activity data map collected from JMS {@code StreamMessage}
+	 *            activity data map collected from JMS {@link StreamMessage}
 	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while reading bytes from message.
@@ -224,15 +224,15 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@code ObjectMessage} activity info into activity data map.
+	 * Parse JMS {@link ObjectMessage} activity info into activity data map.
 	 *
 	 * @param objMessage
 	 *            JMS object message
 	 * @param dataMap
-	 *            activity data map collected from JMS {@code ObjectMessage}
+	 *            activity data map collected from JMS {@link ObjectMessage}
 	 *
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting {@code Serializable}
+	 *             if JMS exception occurs while getting {@link Serializable}
 	 *             object from message.
 	 */
 	protected void parseObjectMessage(ObjectMessage objMessage, Map<String, Object> dataMap) throws JMSException {

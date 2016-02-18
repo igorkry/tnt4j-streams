@@ -41,7 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>LogPattern - access log pattern. (Optional, if RegEx {@code Pattern}
+ * <li>LogPattern - access log pattern. (Optional, if RegEx {@link Pattern}
  * property is defined)</li>
  * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional,
  * actual only if {@code LogPattern} property is used)</li>

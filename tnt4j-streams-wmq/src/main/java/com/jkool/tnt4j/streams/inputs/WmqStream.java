@@ -41,7 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * the specified WMQ Object (queue or topic) on the given (possibly remote)
  * queue manager.
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * It currently does not strip off any WMQ headers, assuming that the message
  * data only contains the actual input for the configured parsers.
  * <p>

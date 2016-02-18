@@ -36,7 +36,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Stream reads changes form defined log files every "FileReadDelay" property
  * defined seconds (default is 15sec.).
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
@@ -213,7 +213,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		/**
 		 * Performs continuous file monitoring until stream thread is halted or
 		 * monitoring is interrupted. Log file monitoring is performed with
-		 * {@code logWatcherDelay} defined delays between iterations.
+		 * {@link #logWatcherDelay} defined delays between iterations.
 		 */
 		@Override
 		public void run() {

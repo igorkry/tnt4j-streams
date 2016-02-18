@@ -34,7 +34,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * represent a single activity or event which should be recorded. Files to
  * stream are defined using "FileName" property in stream configuration.
  * <p>
- * This activity stream requires parsers that can support {@code String} data.
+ * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
