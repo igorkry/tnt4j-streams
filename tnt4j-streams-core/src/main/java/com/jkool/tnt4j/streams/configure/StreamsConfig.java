@@ -216,6 +216,11 @@ public class StreamsConfig {
 	public static final String PROP_READ_LINES = "ReadLines"; // NON-NLS
 
 	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_RESTART_ON_CLOSE = "RestartOnInputClose"; // NON-NLS
+
+	/**
 	 * Name of default configuration file name ({@value})
 	 */
 	public static final String DFLT_CFG_FILE_NAME = "tnt-data-source.xml"; // NON-NLS

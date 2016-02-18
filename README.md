@@ -1045,6 +1045,7 @@ Sample stream configuration:
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
+        <property name="RestartOnInputClose" value="true"/>
         <property name="Port" value="9595"/>
         <parser-ref name="JSONEnvelopeParser"/>
     </stream>
@@ -2225,6 +2226,7 @@ Also see 'Generic stream parameters'.
 
  * FileName - concrete file name. (Required - just one `FileName` or `Port`)
  * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
+ * RestartOnInputClose - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
 
     sample:
 ```xml
@@ -2233,6 +2235,7 @@ Also see 'Generic stream parameters'.
 or
 ```xml
     <property name="Port" value="9595"/>
+    <property name="RestartOnInputClose" value="true"/>
 ```
 
 Also see 'Generic stream parameters'.

@@ -36,14 +36,14 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * Implements a character arrays based activity stream, where activity data is
  * read from the specified InputStream-based stream or Reader-based reader. This
- * class wraps the raw {@code InputStream} or {@code Reader} with a
- * {@code BufferedReader}.
+ * class wraps the raw {@link InputStream} or {@link Reader} with a
+ * {@link BufferedReader}.
  * <p>
- * This activity stream requires parsers that can support {@code InputStream}s
- * or {@code Reader}s as the source for activity data.
+ * This activity stream requires parsers that can support {@link InputStream}s
+ * or {@link Reader}s as the source for activity data.
  *
  * NOTE: there can be only one parser referenced with this kind of stream!
- * Because next item returned by this stream is {@code BufferedReader} and
+ * Because next item returned by this stream is {@link BufferedReader} and
  * parseable value is retrieved inside parser there is no way to rewind reader
  * position if first parser fails to parse RAW activity data.
  * <p>
@@ -53,6 +53,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * </li>
  * <li>Port - port number to accept character stream over TCP/IP. (Required -
  * just one 'FileName' or 'Port')</li>
+ * <li>RestartOnInputClose - flag indicating to restart stream if input socked
+ * gets closed. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -69,12 +71,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	private Socket socket = null;
 
 	/**
-	 * InputStream from which activity data is read
+	 * {@link InputStream} from which activity data is read
 	 */
 	protected InputStream rawStream = null;
 
 	/**
-	 * Reader from which activity data is read
+	 * {@link Reader} from which activity data is read
 	 */
 	protected Reader rawReader = null;
 
@@ -82,6 +84,13 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * BufferedReader that wraps {@link #rawStream} or {@link #rawReader}
 	 */
 	protected FeedReader dataReader = null;
+
+	/**
+	 * Indicates whether stream should restart listening for incoming data if
+	 * RAW data socket gets closed (set by {@code RestartOnInputClose} property)
+	 * - default: {@code false}
+	 */
+	protected boolean restartOnInputClose = false;
 
 	/**
 	 * Construct empty CharacterStream. Requires configuration settings to set
@@ -104,7 +113,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 	/**
 	 * Constructs a new CharacterStream to obtain activity data from the
-	 * specified InputStream.
+	 * specified {@link InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -116,7 +125,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 	/**
 	 * Constructs a new CharacterStream to obtain activity data from the
-	 * specified Reader.
+	 * specified {@link Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -127,7 +136,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Sets stream from which activity data should be read.
+	 * Sets {@link InputStream} from which activity data should be read.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -137,7 +146,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Sets reader from which activity data should be read.
+	 * Sets {@link Reader} from which activity data should be read.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -170,6 +179,9 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
 			return socketPort;
 		}
+		if (StreamsConfig.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+			return restartOnInputClose;
+		}
 		return super.getProperty(name);
 	}
 
@@ -201,6 +213,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 							StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
 				}
 				socketPort = Integer.valueOf(value);
+			} else if (StreamsConfig.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+				restartOnInputClose = Boolean.parseBoolean(value);
 			}
 		}
 	}
@@ -212,6 +226,10 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
+		initializeStreamInternals();
+	}
+
+	private void initializeStreamInternals() throws Exception {
 		if (rawStream == null && rawReader == null) {
 			if (StringUtils.isEmpty(fileName) && socketPort == null) {
 				throw new IllegalStateException(StreamsResources.getStringFormatted(
@@ -262,7 +280,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * <p>
 	 * This method does not actually return the next item, but the
 	 * {@link BufferedReader} from which the next item should be read. This is
-	 * useful for parsers that accept {@code Reader}s that are using underlying
+	 * useful for parsers that accept {@link Reader}s that are using underlying
 	 * classes to process the data from an input stream. The parser, or its
 	 * underlying data reader needs to handle all I/O, along with any associated
 	 * errors.
@@ -273,11 +291,27 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			startDataStream();
 		}
 		if (dataReader.isClosed() || dataReader.hasError()) {
-			return null;
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"CharacterStream.reader.terminated"));
+			if (restartOnInputClose && socketPort != null) {
+				resetDataStream();
+				return getNextItem();
+			} else {
+				return null;
+			}
 		}
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.stream.still.open"));
 		return dataReader;
+	}
+
+	private void resetDataStream() throws Exception {
+		cleanupStreamInternals();
+
+		initializeStreamInternals();
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"CharacterStream.resetting.stream", socket));
 	}
 
 	/**
@@ -285,6 +319,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 */
 	@Override
 	protected void cleanup() {
+		cleanupStreamInternals();
+
+		super.cleanup();
+	}
+
+	private void cleanupStreamInternals() {
 		Utils.close(socket);
 		Utils.close(svrSocket);
 		Utils.close(rawStream);
@@ -296,8 +336,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		rawStream = null;
 		rawReader = null;
 		dataReader = null;
-
-		super.cleanup();
 	}
 
 	/**
@@ -343,8 +381,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 
 		/**
-		 * Constructs a new FeedReader, buffering the specified InputStream,
-		 * using an internal buffer with the given size.
+		 * Constructs a new FeedReader, buffering the specified
+		 * {@link InputStream}, using an internal buffer with the given size.
 		 *
 		 * @param in
 		 *            InputStream to buffer
@@ -358,7 +396,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 
 		/**
-		 * Constructs a new FeedReader, buffering the specified InputStream.
+		 * Constructs a new FeedReader, buffering the specified
+		 * {@link InputStream}.
 		 *
 		 * @param in
 		 *            InputStream to buffer

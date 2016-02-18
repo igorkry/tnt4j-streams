@@ -61,7 +61,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 
 	/**
 	 * Contains the field separator (set by {@code FieldDelim} property) -
-	 * Default: ","
+	 * default: ","
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
