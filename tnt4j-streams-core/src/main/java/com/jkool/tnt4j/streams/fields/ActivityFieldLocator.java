@@ -252,7 +252,7 @@ public class ActivityFieldLocator implements Cloneable {
 		this.units = units;
 		builtInUnits = null;
 		try {
-			builtInUnits = ActivityFieldUnitsType.valueOf(this.format);
+			builtInUnits = ActivityFieldUnitsType.valueOf(this.units);
 		} catch (Exception e) {
 		}
 	}

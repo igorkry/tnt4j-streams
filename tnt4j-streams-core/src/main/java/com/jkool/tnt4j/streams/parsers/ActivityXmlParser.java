@@ -32,7 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
-import com.jkool.tnt4j.streams.configure.ConfigParserHandler;
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
@@ -66,6 +65,23 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  */
 public class ActivityXmlParser extends GenericActivityParser<Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
+
+	/**
+	 * Constant for XML tag attribute name 'data type'.
+	 */
+	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'units'.
+	 */
+	private static final String UNITS_ATTR = "units"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'format'.
+	 */
+	private static final String FORMAT_ATTR = "format"; // NON-NLS
+	/**
+	 * Constant for XML tag attribute name 'locale'.
+	 */
+	private static final String LOCALE_ATTR = "locale"; // NON-NLS
 
 	/**
 	 * Contains the XML namespace mappings.
@@ -298,34 +314,45 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						if (length > 0) {
 							List<Object> valuesList = new ArrayList<Object>(length);
 							for (int i = 0; i < length; i++) {
-								Attr node = (Attr) nodes.item(i);
-								String strValue = node.getValue();
-								Node parentNode = node.getOwnerElement();
+								Node node = nodes.item(i);
+
+								String strValue = node.getTextContent();
+								Node attrsNode = node;
+
+								if (node instanceof Attr) {
+									Attr attr = (Attr) node;
+
+									attrsNode = attr.getOwnerElement();
+								}
 
 								// Get list of attributes and their values for
 								// current element
-								NamedNodeMap attrsMap = parentNode == null ? null : parentNode.getAttributes();
+								NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
 
-								Attr attr;
-								Attr attr2;
+								Node attr;
+								String attrVal;
 								ActivityFieldLocator locCopy = locator.clone();
 								if (attrsMap != null && attrsMap.getLength() > 0) {
-									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.DATA_TYPE_ATTR);
-									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
-										locCopy.setDataType(ActivityFieldDataType.valueOf(attr.getValue()));
+									attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+									attrVal = attr == null ? null : attr.getTextContent();
+									if (StringUtils.isNotEmpty(attrVal)) {
+										locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
 									}
 
-									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.FORMAT_ATTR);
-									attr2 = (Attr) attrsMap.getNamedItem(ConfigParserHandler.LOCALE_ATTR);
-									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
-										locCopy.setFormat(attr.getValue(),
-												attr2 == null || StringUtils.isEmpty(attr2.getValue())
-														? locator.getLocale() : attr2.getValue());
+									attr = attrsMap.getNamedItem(FORMAT_ATTR);
+									attrVal = attr == null ? null : attr.getTextContent();
+									if (StringUtils.isNotEmpty(attrVal)) {
+										attr = attrsMap.getNamedItem(LOCALE_ATTR);
+										String attrLVal = attr == null ? null : attr.getTextContent();
+
+										locCopy.setFormat(attrVal,
+												StringUtils.isEmpty(attrLVal) ? locator.getLocale() : attrLVal);
 									}
 
-									attr = (Attr) attrsMap.getNamedItem(ConfigParserHandler.UNITS_ATTR);
-									if (attr != null && StringUtils.isEmpty(attr.getValue())) {
-										locCopy.setUnits(attr.getValue());
+									attr = attrsMap.getNamedItem(UNITS_ATTR);
+									attrVal = attr == null ? null : attr.getTextContent();
+									if (StringUtils.isNotEmpty(attrVal)) {
+										locCopy.setUnits(attrVal);
 									}
 								}
 
