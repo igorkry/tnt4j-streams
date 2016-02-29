@@ -1,0 +1,24 @@
+[
+  {
+    "browser": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+    "url": "/phones",
+    "eventName": "",
+    "properties": "",
+    "rid": "dummy-request-correlator-id-1",
+    "sid": "dummy-session=correlator-id-0",
+    "pageLoad": 441,
+    "timestamp": 1456756393630
+  },
+  {
+    "browser": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36",
+    "url": "/phones/motorola-xoom-with-wi-fi",
+    "eventName": "Image View",
+    "properties": {
+      "eventType": "click"
+    },
+    "rid": "dummy-request-correlator-id-2",
+    "sid": "dummy-session=correlator-id-0",
+    "pageLoad": 224,
+    "timestamp": 1456756395150
+  }
+]

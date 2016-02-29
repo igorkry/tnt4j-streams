@@ -1,0 +1,11 @@
+{
+  "name": "tnt4j-angulatics-plugin",
+  "description": "Angulatics plugin for TNT4J and JKoolCloud",
+  "main": "angulartics-tnt4j",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "https://www.jkoolcloud.com/",
+  "dependencies": {
+    "angulartics": "^1.0.3"
+  }
+}

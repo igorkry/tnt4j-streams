@@ -1,0 +1,15 @@
+{
+  "name": "tnt4j-angulatics-plugin",
+  "version": "1.0.0",
+  "description": "Angulatrics plugin for TNT4J and JKoolCloud",
+  "main": "angulartics-tnt4j.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nastel/"
+  },
+  "author": "Nastel",
+  "license": "MIT"
+}
