@@ -32,6 +32,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
 * It can be integrated with:
     * Logstash
     * Apache Flume
+    * Angulartics
 
 just by applying configuration and without additional coding.
 
@@ -2025,6 +2026,58 @@ string and passes it to parser.
 
 `Namespace` property adds `wmb` namespace definition mapping to mapping
 `http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event`.
+
+#### Angulartics (AngularJS tracing)
+
+This sample shows how to stream JavaScript events traces from Angulartics. TNT4J-Angulartics-plugin sends
+trace data over HTTP request `http://localhost:9595`. Thus to process this we will need `HttpStream` running on port
+`9595`.
+
+Sample files can be found in `samples/angular-js-tracing` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="ResourceName" locator="url" locator-type="Label"/>
+        <field name="Correlator" locator="sid" locator-type="Label"/>
+        <field name="Correlator" locator="rid" locator-type="Label"/>
+        <field name="EventName" locator="eventName" locator-type="Label"/>
+        <field name="EventType" value="EVENT"/>
+        <field name="ElapsedTime" locator="pageLoad" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="browser" locator="browser" locator-type="Label"/>
+        <field name="eventProperties" locator="properties" locator-type="Label"/>
+    </parser>
+
+    <parser name="AngularticsReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="AngularticsHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="AngularticsReqParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `AngularticsReqParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`AngularticsReqParser` by default converts `byte[]` for entry `ActivityData` to JSON format string and uses stacked
+parser named `JSONPayloadParser` to parse it.
+
+`JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
 
 #### Integrating TNT4J-Streams into custom API
 
