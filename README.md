@@ -2035,6 +2035,8 @@ trace data over HTTP request `http://localhost:9595`. Thus to process this we wi
 
 Sample files can be found in `samples/angular-js-tracing` directory.
 
+How to configure Angulartics see `samples/angular-js-tracing/readme.md`
+
 Sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
