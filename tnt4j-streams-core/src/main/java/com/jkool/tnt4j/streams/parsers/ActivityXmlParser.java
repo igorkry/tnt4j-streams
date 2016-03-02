@@ -57,8 +57,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
  * <li>RequireDefault - indicates that all attributes are required by default.
  * (Optional)</li>
- * <li>ValueDelim - delimiter to use if XPath expression evaluates multiple
- * values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -96,12 +94,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * Property indicating that all attributes are required by default.
 	 */
 	protected boolean requireAll = false;
-
-	/**
-	 * Property indicating what delimiter to use if XPath expression evaluates
-	 * multiple values.
-	 */
-	protected String valuesDelim = DEFAULT_DELIM;
 
 	/**
 	 * Creates a new activity XML string parser.
@@ -148,8 +140,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityParser.setting", name, value));
 				}
-			} else if (StreamsConfig.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
-				valuesDelim = value;
 			}
 
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -214,10 +204,10 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			String[] savedLocales = null;
 			// apply fields for parser
 			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
+			for (int i = 0; i < fieldList.size(); i++) {
 				value = null;
-				field = fieldEntry.getKey();
-				List<ActivityFieldLocator> locations = fieldEntry.getValue();
+				field = fieldList.get(i);
+				List<ActivityFieldLocator> locations = field.getLocators();
 				if (locations != null) {
 					// need to save format and units specification from config
 					// in case individual entry in activity data overrides it
@@ -299,11 +289,11 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {
+			boolean unformatted = true;
 			String locStr = locator.getLocator();
 			if (!StringUtils.isEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
-					val = locator.formatValue(val);
 				} else {
 					// get value for locator (element)
 					try {
@@ -360,6 +350,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							}
 
 							val = wrapValue(valuesList);
+							unformatted = false;
 						}
 					} catch (XPathExpressionException exc) {
 						ParseException pe = new ParseException(StreamsResources.getString(
@@ -369,6 +360,10 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						throw pe;
 					}
 				}
+			}
+
+			if (unformatted) {
+				val = locator.formatValue(val);
 			}
 		}
 
@@ -380,21 +375,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			return null;
 		}
 
-		if (valuesList.size() == 1) {
-			return valuesList.get(0);
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < valuesList.size(); i++) {
-			sb.append(valuesList.get(i));
-
-			if (i < valuesList.size() - 1) {
-				sb.append(valuesDelim);
-			}
-		}
-
-		return sb.toString();
+		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
 	}
 
 	/**

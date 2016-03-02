@@ -19,9 +19,8 @@ package com.jkool.tnt4j.streams.parsers;
 import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
@@ -48,10 +47,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected static final String DEFAULT_DELIM = ","; // NON-NLS
 
 	/**
-	 * Defines the mapping of activity fields to the location(s) in the raw data
-	 * from which to extract their values.
+	 * List of supported activity fields used to extract values from RAW
+	 * activity data defined by field location(s).
 	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> fieldMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
+	protected final List<ActivityField> fieldList = new ArrayList<ActivityField>();
 
 	/**
 	 * Creates a new GenericActivityParser.
@@ -87,7 +86,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	public void addField(ActivityField field) {
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"ActivityParser.adding.field", field.toDebugString()));
-		fieldMap.put(field, field.getLocators());
+		fieldList.add(field);
 	}
 
 	/**
@@ -124,10 +123,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 			// apply fields for parser
 			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldEntry : fieldMap.entrySet()) {
+			for (int i = 0; i < fieldList.size(); i++) {
 				value = null;
-				field = fieldEntry.getKey();
-				List<ActivityFieldLocator> locations = fieldEntry.getValue();
+				field = fieldList.get(i);
+				List<ActivityFieldLocator> locations = field.getLocators();
 				if (locations != null) {
 					if (locations.size() == 1) {
 						// field value is based on single raw data location, get

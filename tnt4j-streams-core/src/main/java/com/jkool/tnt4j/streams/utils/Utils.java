@@ -22,6 +22,8 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
@@ -44,7 +46,9 @@ import com.nastel.jkool.tnt4j.core.OpType;
 public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 	private static final String TAG_DELIM = ","; // NON-NLS
-	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)");
+	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
+	private static final Pattern UUID_PATTERN = Pattern
+			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
 
 	private Utils() {
 	}
@@ -224,46 +228,27 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	private static OpType mapOpType(String opType) {
-		if (opType.equalsIgnoreCase("OTHER")) { // NON-NLS
-			return OpType.OTHER;
+		try {
+			return OpType.valueOf(opType.toUpperCase());
+		} catch (IllegalArgumentException exc) {
+			if (opType.equalsIgnoreCase("END")) { // NON-NLS
+				return OpType.STOP;
+			}
 		}
-		if (opType.equalsIgnoreCase("START")) { // NON-NLS
-			return OpType.START;
-		}
-		if (opType.equalsIgnoreCase("OPEN")) { // NON-NLS
-			return OpType.OPEN;
-		}
-		if (opType.equalsIgnoreCase("SEND")) { // NON-NLS
-			return OpType.SEND;
-		}
-		if (opType.equalsIgnoreCase("RECEIVE")) { // NON-NLS
-			return OpType.RECEIVE;
-		}
-		if (opType.equalsIgnoreCase("CLOSE")) { // NON-NLS
-			return OpType.CLOSE;
-		}
-		if (opType.equalsIgnoreCase("END")) { // NON-NLS
-			return OpType.STOP;
-		}
-		if (opType.equalsIgnoreCase("INQUIRE")) { // NON-NLS
-			return OpType.INQUIRE;
-		}
-		if (opType.equalsIgnoreCase("SET")) { // NON-NLS
-			return OpType.SET;
-		}
-		if (opType.equalsIgnoreCase("CALL")) { // NON-NLS
-			return OpType.CALL;
-		}
-		if (opType.equalsIgnoreCase("URL")) { // NON-NLS
-			return OpType.OTHER;
-		}
-		if (opType.equalsIgnoreCase("BROWSE")) { // NON-NLS
-			return OpType.BROWSE;
-		}
+
 		return OpType.OTHER;
 	}
 
 	private static OpType mapOpType(int opType) {
+		try {
+			return OpType.valueOf(opType);
+		} catch (IllegalArgumentException exc) {
+		}
+
+		return OpType.OTHER;
+	}
+
+	private static OpType mapOpTypeTW(int opType) {
 		switch (opType) {
 		case 0:
 			return OpType.OTHER;
@@ -344,6 +329,32 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		}
 
 		return count;
+	}
+
+	/**
+	 * Counts text lines available in input.
+	 *
+	 * @param reader
+	 *            a {@link Reader} object to provide the underlying input stream
+	 *
+	 * @return number of lines currently available in input
+	 *
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public static int countLines(Reader reader) throws IOException {
+		int lCount = 0;
+		LineNumberReader lineReader = null;
+		try {
+			lineReader = new LineNumberReader(reader);
+			lineReader.skip(Long.MAX_VALUE);
+			// NOTE: Add 1 because line index starts at 0
+			lCount = lineReader.getLineNumber() + 1;
+		} finally {
+			Utils.close(lineReader);
+		}
+
+		return lCount;
 	}
 
 	/**
@@ -552,5 +563,23 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 				return new String(strBytes);
 			}
 		}
+	}
+
+	/**
+	 * Returns UUID found in provided string.
+	 *
+	 * @param str
+	 *            string to find UUID
+	 * 
+	 * @return found uuid
+	 */
+	public static UUID findUUID(String str) {
+		Matcher m = UUID_PATTERN.matcher(str);
+		String fnUUID = null;
+		if (m.find()) {
+			fnUUID = m.group();
+		}
+
+		return StringUtils.isEmpty(fnUUID) ? null : UUID.fromString(fnUUID);
 	}
 }

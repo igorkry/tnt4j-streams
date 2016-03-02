@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transaction version="6.00" ID="414d5120514d445020202020202020207871d456200d4403" agentRole="sourceAgent"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd"
+             xmlns="">
+    <action time="2016-03-01T12:46:54.143Z">progress</action>
+    <sourceAgent agent="MQFT_QMDP" QMgr="QMDP" agentType="STANDARD">
+        <systemInfo architecture="amd64" name="Windows 8" version="6.2"/>
+    </sourceAgent>
+    <destinationAgent agent="MQFT_QMDP" QMgr="QMDP" agentType="STANDARD">
+        <systemInfo architecture="amd64" name="Windows 8" version="6.2"/>
+    </destinationAgent>
+    <originator>
+        <hostName>192.168.0.5</hostName>
+        <userID>Richard</userID>
+        <mqmdUserID>Richard</mqmdUserID>
+    </originator>
+    <transferSet index="0" size="1" startTime="2016-03-01T12:46:37.042Z" total="1" bytesSent="524254145">
+        <item mode="binary">
+            <source disposition="leave" type="file">
+                <file size="524254145" last-modified="2014-06-02T19:18:43.531Z">
+                    C:\Software\WS_MQ_FOR_WINDOWS_V8.0_EIMAGE.zip
+                </file>
+                <checksum method="MD5">bc377d9db239643b466e4067699a5121</checksum>
+            </source>
+            <destination exist="overwrite" type="file">
+                <file size="524254145" last-modified="2016-03-01T12:46:54.104Z">C:\CityTest\eeee.csv</file>
+                <checksum method="MD5">bc377d9db239643b466e4067699a5121</checksum>
+            </destination>
+            <status resultCode="0"></status>
+        </item>
+    </transferSet>
+</transaction>

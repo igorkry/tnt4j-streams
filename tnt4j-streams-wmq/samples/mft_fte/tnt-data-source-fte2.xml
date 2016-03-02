@@ -32,12 +32,18 @@
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" locator="/transaction/transferSet/item/status/supplement" locator-type="Label"/>
         <field name="Exception" locator="/transaction/status/supplement" locator-type="Label"/>
+        <field name="EventType" value="NOOP"/>
 
     </parser>
 
     <stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
-        <property name="QueueManager" value="MB8QMGR"/>
-        <property name="Queue" value="NASTEL.FTE.EVENTS"/>
-        <parser-ref name="MQFTEParser"/>
+    <property name="QueueManager" value="MB8QMGR"/>
+    <property name="Queue" value="NASTEL.FTE.EVENTS"/>
+    <parser-ref name="MQFTEParser"/>
     </stream>
+
+    <!--<stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">-->
+        <!--<property name="FileName" value=".\tnt4j-streams-wmq\samples\mft_fte\message.xml"/>-->
+        <!--<parser-ref name="MQFTEParser"/>-->
+    <!--</stream>-->
 </tnt-data-source>

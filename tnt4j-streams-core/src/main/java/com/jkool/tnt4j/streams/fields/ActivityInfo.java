@@ -116,48 +116,55 @@ public class ActivityInfo {
 	public void applyField(ActivityField field, Object value) throws ParseException {
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"ActivityInfo.applying.field", field, value));
-		List<ActivityFieldLocator> locators = field.getLocators();
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
 			if (values.length == 1) {
 				value = values[0];
 			}
 		}
+
 		Object fieldValue;
-		if (value instanceof Object[]) {
-			Object[] values = (Object[]) value;
-			if (field.isEnumeration()) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityInfo.multiple.locators", field), 0);
+		List<ActivityFieldLocator> locators = field.getLocators();
+		if (CollectionUtils.isEmpty(locators)) {
+			if (value instanceof Object[]) {
+			 	fieldValue = Arrays.toString((Object[])value); //TODO:
+			} else {
+				fieldValue = value;
 			}
-			if (locators.size() != values.length) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityInfo.failed.parsing", field), 0);
-			}
-			StringBuilder sb = new StringBuilder();
-			for (int v = 0; v < values.length; v++) {
-				ActivityFieldLocator locator = locators.get(v);
-				String format = locator.getFormat();
-				Object fmtValue = formatValue(field, locator, values[v]);
-				if (v > 0) {
-					sb.append(field.getSeparator());
+		} else {
+			if (value instanceof Object[]) {
+				Object[] values = (Object[]) value;
+				if (field.isEnumeration()) {
+					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityInfo.multiple.locators", field), 0);
 				}
-				if (fmtValue != null) {
-					if (fmtValue instanceof UsecTimestamp && !StringUtils.isEmpty(format)) {
-						sb.append(((UsecTimestamp) fmtValue).toString(format));
-					} else {
-						sb.append(getStringValue(fmtValue));
+				if (locators.size() > 1 && locators.size() != values.length) {
+					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityInfo.failed.parsing", field), 0);
+				}
+				StringBuilder sb = new StringBuilder();
+				ActivityFieldLocator locator;
+				for (int v = 0; v < values.length; v++) {
+					locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
+					String format = locator.getFormat();
+					Object fmtValue = formatValue(field, locator, values[v]);
+					if (v > 0) {
+						sb.append(field.getSeparator());
+					}
+					if (fmtValue != null) {
+						if (fmtValue instanceof UsecTimestamp && !StringUtils.isEmpty(format)) {
+							sb.append(((UsecTimestamp) fmtValue).toString(format));
+						} else {
+							sb.append(getStringValue(fmtValue));
+						}
 					}
 				}
-			}
-			fieldValue = sb.toString();
-		} else {
-			if (locators == null) {
-				fieldValue = value;
+				fieldValue = sb.toString();
 			} else {
 				fieldValue = locators.size() > 1 ? value : formatValue(field, locators.get(0), value);
 			}
 		}
+
 		if (fieldValue == null) {
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ActivityInfo.field.null", field));
