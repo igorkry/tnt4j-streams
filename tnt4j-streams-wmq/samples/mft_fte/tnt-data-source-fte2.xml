@@ -32,7 +32,7 @@
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" locator="/transaction/transferSet/item/status/supplement" locator-type="Label"/>
         <field name="Exception" locator="/transaction/status/supplement" locator-type="Label"/>
-        <field name="EventType" value="NOOP"/>
+        <field name="EventType" value="EVENT"/>
 
     </parser>
 

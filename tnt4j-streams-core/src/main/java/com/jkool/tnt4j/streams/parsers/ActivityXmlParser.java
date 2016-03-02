@@ -162,11 +162,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				"ActivityParser.parsing", data));
 
 		Document xmlDoc = null;
+		String xmlString = null;
 		try {
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
 			} else {
-				String xmlString = getNextXmlString(data);
+				xmlString = getNextXmlString(data);
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
@@ -180,7 +181,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			throw pe;
 		}
 
-		return parsePreparedItem(stream, null, xmlDoc);
+		return parsePreparedItem(stream, xmlString, xmlDoc);
 	}
 
 	@Override
@@ -289,7 +290,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {
-			boolean unformatted = true;
+			boolean format = true;
 			String locStr = locator.getLocator();
 			if (!StringUtils.isEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
@@ -336,7 +337,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 										String attrLVal = attr == null ? null : attr.getTextContent();
 
 										locCopy.setFormat(attrVal,
-												StringUtils.isEmpty(attrLVal) ? locator.getLocale() : attrLVal);
+												StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
 									}
 
 									attr = attrsMap.getNamedItem(UNITS_ATTR);
@@ -350,7 +351,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							}
 
 							val = wrapValue(valuesList);
-							unformatted = false;
+							format = false;
 						}
 					} catch (XPathExpressionException exc) {
 						ParseException pe = new ParseException(StreamsResources.getString(
@@ -362,7 +363,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				}
 			}
 
-			if (unformatted) {
+			if (format) {
 				val = locator.formatValue(val);
 			}
 		}
