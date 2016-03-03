@@ -1,28 +1,30 @@
 /*
  * Copyright 2014-2016 JKOOL, LLC.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.configure;
+package com.jkool.tnt4j.streams.configure.sax;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.jkool.tnt4j.streams.configure.StreamsConfigData;
+import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
@@ -33,12 +35,11 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * Implements the SAX DefaultHandler for parsing jKool LLC TNT4J-Streams
- * configuration.
+ * Implements the SAX DefaultHandler for parsing TNT4J-Streams configuration.
  *
  * @version $Revision: 1 $
  *
- * @see StreamsConfig
+ * @see StreamsConfigLoader
  */
 public class ConfigParserHandler extends DefaultHandler {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
@@ -46,7 +47,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for default location delimiter in configuration definition.
 	 */
-	public static final String LOC_DELIM = ","; // NON-NLS
+	public static final String LOC_DELIM = "|"; // NON-NLS
 
 	private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed"; // NON-NLS
 	private static final String CONFIG_ROOT_ELMT = "tnt-data-source"; // NON-NLS
@@ -57,6 +58,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String FIELD_MAP_ELMT = "field-map"; // NON-NLS
 	private static final String FIELD_LOC_ELMT = "field-locator"; // NON-NLS
 	private static final String PARSER_REF_ELMT = "parser-ref"; // NON-NLS
+	private static final String TNT4J_PROPERTIES_ELMT = "tnt4j-properties"; // NON-NLS
 	private static final String FILTER_ELMT = "filter"; // NON-NLS
 	private static final String RULE_ELMT = "rule"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS
@@ -70,20 +72,20 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for XML tag attribute name 'data type'.
 	 */
-	public static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
+	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
 	/**
 	 * Constant for XML tag attribute name 'units'.
 	 */
-	public static final String UNITS_ATTR = "units"; // NON-NLS
+	private static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
 	 * Constant for XML tag attribute name 'format'.
 	 */
-	public static final String FORMAT_ATTR = "format"; // NON-NLS
+	private static final String FORMAT_ATTR = "format"; // NON-NLS
 	/**
 	 * Constant for XML tag attribute name 'locale'.
 	 */
-	public static final String LOCALE_ATTR = "locale"; // NON-NLS
+	private static final String LOCALE_ATTR = "locale"; // NON-NLS
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
 	private static final String SOURCE_ATTR = "source";
 	private static final String TARGET_ATTR = "target"; // NON-NLS
@@ -103,10 +105,11 @@ public class ConfigParserHandler extends DefaultHandler {
 	private boolean currFieldHasLocElmt = false;
 	private boolean currFieldHasMapElmt = false;
 
-	private Map<String, ActivityParser> parsers = null;
-	private Map<String, TNTInputStream> streams = null;
+	private StreamsConfigData streamsConfigData = null;
 
 	private Locator currParseLocation = null;
+
+	private boolean processingTNT4JProperties = false;
 
 	/**
 	 * Constructs a new ConfigurationParserHandler.
@@ -115,21 +118,12 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Returns the set of streams found in the configuration.
-	 *
-	 * @return set of streams found
+	 * Returns streams and parsers data loaded from configuration.
+	 * 
+	 * @return un-marshaled streams and parsers data
 	 */
-	public Map<String, TNTInputStream> getStreams() {
-		return streams;
-	}
-
-	/**
-	 * Returns the set of parsers found in the configuration.
-	 *
-	 * @return set of parsers found
-	 */
-	public Map<String, ActivityParser> getParsers() {
-		return parsers;
+	public StreamsConfigData getStreamsConfigData() {
+		return streamsConfigData;
 	}
 
 	/**
@@ -153,8 +147,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		currFieldHasLocValAttr = false;
 		currFieldHasLocElmt = false;
 		currFieldHasMapElmt = false;
-		streams = new HashMap<String, TNTInputStream>();
-		parsers = new HashMap<String, ActivityParser>();
+		processingTNT4JProperties = false;
+		streamsConfigData = new StreamsConfigData();
 	}
 
 	/**
@@ -163,7 +157,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (CONFIG_ROOT_ELMT.equals(qName) || CONFIG_ROOT_ELMT_OLD.equals(qName)) {
-			if (MapUtils.isNotEmpty(streams)) {
+			if (streamsConfigData.isStreamsAvailable()) {
 				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ConfigParserHandler.multiple.elements", qName), currParseLocation);
 			}
@@ -187,6 +181,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			processRule(attributes);
 		} else if (STEP_ELMT.equals(qName)) {
 			processStep(attributes);
+		} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
+			processTNT4JProperties(attributes);
 		}
 	}
 
@@ -226,7 +222,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PARSER_ELMT, CLASS_ATTR), currParseLocation);
 		}
-		if (parsers.containsKey(name)) {
+		if (streamsConfigData.getParser(name) != null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.duplicate.parser.definition", name), currParseLocation);
 		}
@@ -253,7 +249,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currParser != null) {
 			currParser.setName(name);
 			currParser.setTags(tags);
-			parsers.put(name, currParser);
+			streamsConfigData.addParser(currParser);
 		}
 	}
 
@@ -354,7 +350,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			af.addLocator(afl);
 		} else if (locator != null) {
 			currFieldHasLocValAttr = true;
-			String[] locators = locator.split(LOC_DELIM);
+			String[] locators = locator.split(Pattern.quote(LOC_DELIM));
 			for (String loc : locators) {
 				if (StringUtils.isEmpty(loc)) {
 					af.addLocator(null);
@@ -603,7 +599,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", STREAM_ELMT, CLASS_ATTR), currParseLocation);
 		}
-		if (streams.containsKey(name)) {
+		if (streamsConfigData.getStream(name) != null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.duplicate", STREAM_ELMT, name), currParseLocation);
 		}
@@ -629,7 +625,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		currStream.setName(name);
-		streams.put(name, currStream);
+		streamsConfigData.addStream(currStream);
 	}
 
 	/**
@@ -667,10 +663,15 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR), currParseLocation);
 		}
-		if (currProperties == null) {
-			currProperties = new ArrayList<Map.Entry<String, String>>();
+
+		if (processingTNT4JProperties) {
+			currStream.addTNT4JProperty(name, value);
+		} else {
+			if (currProperties == null) {
+				currProperties = new ArrayList<Map.Entry<String, String>>();
+			}
+			currProperties.add(new AbstractMap.SimpleEntry<String, String>(name, value));
 		}
-		currProperties.add(new AbstractMap.SimpleEntry<String, String>(name, value));
 	}
 
 	/**
@@ -701,7 +702,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PARSER_REF_ELMT, NAME_ATTR), currParseLocation);
 		}
-		ActivityParser parser = parsers.get(parserName);
+		ActivityParser parser = streamsConfigData.getParser(parserName);
 		if (parser == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.undefined.reference", PARSER_REF_ELMT, parserName), currParseLocation);
@@ -759,6 +760,10 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	}
 
+	private void processTNT4JProperties(Attributes attrs) {
+		processingTNT4JProperties = true;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -791,6 +796,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFieldHasMapElmt = false;
 			} else if (FIELD_LOC_ELMT.equals(qName)) {
 				currLocator = null;
+			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
+				processingTNT4JProperties = false;
 			}
 		} catch (SAXException exc) {
 			throw exc;
