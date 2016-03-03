@@ -299,7 +299,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					// get value for locator (element)
 					try {
 						XPathExpression expr = xPath.compile(locStr);
-						NodeList nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+						NodeList nodes = null;
+						try {
+							nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+						} catch (XPathException exc) {
+							val = expr.evaluate(xmlDoc);
+						}
 						int length = nodes == null ? 0 : nodes.getLength();
 
 						if (length > 0) {
