@@ -350,7 +350,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			af.addLocator(afl);
 		} else if (locator != null) {
 			currFieldHasLocValAttr = true;
-			String[] locators = locator.split(Pattern.quote(LOC_DELIM));
+			String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM)) : new String[] { locator };
 			for (String loc : locators) {
 				if (StringUtils.isEmpty(loc)) {
 					af.addLocator(null);

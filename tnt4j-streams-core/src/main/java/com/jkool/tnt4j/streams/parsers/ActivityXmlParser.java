@@ -154,6 +154,14 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean canHaveDelimitedLocators() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;

@@ -268,4 +268,21 @@ public abstract class ActivityParser {
 	public void setTags(String tags) {
 		this.tags = Utils.getTags(tags);
 	}
+
+	/**
+	 * Returns whether this parser supports delimited locators in parser fields
+	 * configuration. This allows user to define multiple locations for a field
+	 * using locators delimiter
+	 * {@link com.jkool.tnt4j.streams.configure.sax.ConfigParserHandler#LOC_DELIM}
+	 * field value.
+	 * <p>
+	 * But if locators are some complex expressions like XPath functions, it may
+	 * be better to deny this feature for a parser to correctly load locator
+	 * expression.
+	 *
+	 * @return flag indicating if parser supports delimited locators
+	 */
+	public boolean canHaveDelimitedLocators() {
+		return true;
+	}
 }
