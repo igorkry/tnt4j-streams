@@ -110,6 +110,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		XPathFactory xPathFactory = XPathFactory.newInstance();
 		xPath = xPathFactory.newXPath();
 		xmlBuffer = new StringBuilder(1024);
+
+		if (namespaces == null) {
+			namespaces = new NamespaceMap();
+			namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
+			namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
+		}
 	}
 
 	/**
@@ -125,10 +131,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			String value = prop.getValue();
 			if (StreamsConfig.PROP_NAMESPACE.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
-					if (namespaces == null) {
-						namespaces = new NamespaceMap();
-						namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
-					}
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -187,6 +189,15 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			pe.initCause(e);
 
 			throw pe;
+		}
+
+		if (xmlString == null) {
+			try {
+				xmlString = Utils.documentToString(xmlDoc);
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityXmlParser.xmlDocument.toString.error"), exc);
+			}
 		}
 
 		return parsePreparedItem(stream, xmlString, xmlDoc);

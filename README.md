@@ -2457,8 +2457,8 @@ Also see 'Generic stream parameters'.
 
     sample:
 ```xml
-    <property name="Namespace" value="xmlns:xsi=http://www.w3.org/2001/XMLSchema-instance"/>
-    <property name="Namespace" value="xmlns:tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
+    <property name="Namespace" value="xsi=http://www.w3.org/2001/XMLSchema-instance"/>
+    <property name="Namespace" value="tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
     <property name="RequireDefault" value="true"/>
 ```
 

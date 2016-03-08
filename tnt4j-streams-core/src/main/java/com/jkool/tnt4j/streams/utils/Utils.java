@@ -26,11 +26,19 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -49,6 +57,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
+	private static final double DEFAULT_EPSILON = 0.000001;
 
 	private Utils() {
 	}
@@ -215,7 +224,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @param opType
 	 *            object to be mapped to OpType enumeration constant
 	 *
-	 * @return OpType mapping or {@code null} if mapping not found.
+	 * @return OpType mapping or {@code null} if mapping not found
 	 */
 	public static OpType mapOpType(Object opType) {
 		if (opType == null) {
@@ -286,7 +295,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @param fileName
 	 *            file name to check if it contains wildcard characters
 	 *
-	 * @return {@code true} if file name con
+	 * @return {@code true} if file name contains wildcard characters
 	 */
 	public static boolean isWildcardFileName(String fileName) {
 		if (StringUtils.isNotEmpty(fileName)) {
@@ -526,7 +535,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @param <T>
 	 *            type of raw activity data
 	 *
-	 * @return raw activity data without 'new line' symbols.
+	 * @return raw activity data without 'new line' symbols
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T cleanActivityData(T activityData) {
@@ -547,7 +556,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
 	 *
-	 * @return string constructed from specified byte array. s
+	 * @return string constructed from specified byte array
 	 *
 	 * @see String#String(byte[], Charset)
 	 * @see String#String(byte[], String)
@@ -581,5 +590,66 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		}
 
 		return StringUtils.isEmpty(fnUUID) ? null : UUID.fromString(fnUUID);
+	}
+
+	/**
+	 * Transforms (serializes) XML DOM document to string.
+	 *
+	 * @param doc
+	 *            document to transform to string
+	 *
+	 * @return XML string representation of document
+	 *
+	 * @throws TransformerException
+	 *             If an exception occurs while transforming XML DOM document to
+	 *             string
+	 */
+	public static String documentToString(Document doc) throws TransformerException {
+		StringWriter sw = new StringWriter();
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer = tf.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+		transformer.transform(new DOMSource(doc), new StreamResult(sw));
+
+		return sw.toString(); // sw.toString().replaceAll("\n|\r", ""); //NOTE:
+								// if single line
+	}
+
+	/**
+	 * Checks equality of two double numbers with difference tolerance
+	 * {@value DEFAULT_EPSILON}.
+	 *
+	 * @param d1
+	 *            first double to compare
+	 * @param d2
+	 *            second double to compare
+	 *
+	 * @return {@code true} if difference is less than epsilon, {@code false} -
+	 *         otherwise
+	 */
+	public static boolean equals(double d1, double d2) {
+		return equals(d1, d2, DEFAULT_EPSILON);
+	}
+
+	/**
+	 * Checks equality of two double numbers with given difference tolerance
+	 * {@code epsilon}.
+	 * 
+	 * @param d1
+	 *            first double to compare
+	 * @param d2
+	 *            second double to compare
+	 * @param epsilon
+	 *            value of difference tolerance
+	 *
+	 * @return {@code true} if difference is less than epsilon, {@code false} -
+	 *         otherwise
+	 */
+	public static boolean equals(double d1, double d2, double epsilon) {
+		return Math.abs(d1 - d2) < epsilon;
 	}
 }
