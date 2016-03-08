@@ -24,10 +24,10 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfigData;
-import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkool.tnt4j.streams.fields.ActivityFieldMappingType;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -39,7 +39,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  *
  * @version $Revision: 1 $
  *
- * @see StreamsConfigLoader
+ * @see com.jkool.tnt4j.streams.configure.StreamsConfigLoader
  */
 public class ConfigParserHandler extends DefaultHandler {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
@@ -89,6 +89,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
 	private static final String SOURCE_ATTR = "source";
 	private static final String TARGET_ATTR = "target"; // NON-NLS
+	private static final String TYPE_ATTR = "type"; // NON-NLS
 	private static final String FIELD_REF_ATTR = "field-ref"; // NON-NLS
 	private static final String COMPARATOR_ATTR = "comparator"; // NON-NLS
 	private static final String TAGS_ATTR = "tags"; // NON-NLS
@@ -350,7 +351,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			af.addLocator(afl);
 		} else if (locator != null) {
 			currFieldHasLocValAttr = true;
-			String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM)) : new String[] { locator };
+			String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM))
+					: new String[] { locator };
 			for (String loc : locators) {
 				if (StringUtils.isEmpty(loc)) {
 					af.addLocator(null);
@@ -536,6 +538,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		String source = null;
 		String target = null;
+		String type = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -543,6 +546,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				source = attValue;
 			} else if (TARGET_ATTR.equals(attName)) {
 				target = attValue;
+			} else if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
 			}
 		}
 		if (source == null) {
@@ -554,7 +559,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.missing.attribute", FIELD_MAP_ELMT, TARGET_ATTR), currParseLocation);
 		}
 		if (currLocator != null) {
-			currLocator.addValueMap(source, target);
+			currLocator.addValueMap(source, target, type == null ? null : ActivityFieldMappingType.valueOf(type));
 		} else {
 			currFieldHasMapElmt = true;
 			List<ActivityFieldLocator> locators = currField.getLocators();
