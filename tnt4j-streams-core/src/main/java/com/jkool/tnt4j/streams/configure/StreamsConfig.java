@@ -332,7 +332,7 @@ public class StreamsConfig {
 	 */
 	protected void load(Reader config) throws SAXException, ParserConfigurationException, IOException {
 		try {
-			streamsCfgData = StreamsConfigSAXParser.parse(config);
+			StreamsConfigData streamsCfgData = StreamsConfigSAXParser.parse(config);
 			streams = streamsCfgData.getStreams(); 
 			parsers = streamsCfgData.getParsers();
 		} finally {
