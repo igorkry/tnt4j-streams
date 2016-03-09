@@ -608,10 +608,10 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		StringWriter sw = new StringWriter();
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); // NON-NLS
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // NON-NLS
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 

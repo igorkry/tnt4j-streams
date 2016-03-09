@@ -538,6 +538,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		String source = null;
 		String target = null;
+		String type = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -545,7 +546,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				source = attValue;
 			} else if (TARGET_ATTR.equals(attName)) {
 				target = attValue;
-			} 
+			} else if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
+			}
 		}
 		if (source == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -556,7 +559,8 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.missing.attribute", FIELD_MAP_ELMT, TARGET_ATTR), currParseLocation);
 		}
 		if (currLocator != null) {
-			currLocator.addValueMap(source, target);
+			currLocator.addValueMap(source, target,
+					StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type));
 		} else {
 			currFieldHasMapElmt = true;
 			List<ActivityFieldLocator> locators = currField.getLocators();

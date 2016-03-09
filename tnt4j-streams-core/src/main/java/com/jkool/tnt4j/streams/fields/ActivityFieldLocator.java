@@ -18,9 +18,13 @@ package com.jkool.tnt4j.streams.fields;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -38,6 +42,9 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class ActivityFieldLocator implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
 
+	private static final Pattern RANGE_PATTERN = Pattern.compile("(-?(\\d+)*(\\.\\d*)?)");
+	private static final String RANGE_SEPARATOR = ":";
+
 	private String type = null;
 	private String locator = null;
 	private ActivityFieldDataType dataType = ActivityFieldDataType.String;
@@ -52,7 +59,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private ActivityFieldLocatorType builtInType = null;
 	private ActivityFieldFormatType builtInFormat = null;
 	private ActivityFieldUnitsType builtInUnits = null;
-	private Map<Object, Object> map = null;
+	private Map<Object, Object> valueMap = null;
 	private Object mapCatchAll = null;
 
 	private NumericFormatter numberParser = null;
@@ -372,13 +379,46 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            value to translate raw value to
 	 */
 	public void addValueMap(String source, String target) {
+		addValueMap(source, target, null);
+	}
+
+	/**
+	 * Adds a mapping to translate a raw data value to the corresponding
+	 * converted data value.
+	 *
+	 * @param source
+	 *            raw data value
+	 * @param target
+	 *            value to translate raw value to
+	 * @param mapType
+	 *            type of values mapping
+	 */
+	public void addValueMap(String source, String target, ActivityFieldMappingType mapType) {
 		if (StringUtils.isEmpty(source)) {
 			mapCatchAll = target;
 		} else {
-			if (map == null) {
-				map = new HashMap<Object, Object>();
+			if (valueMap == null) {
+				valueMap = new ValueMap<Object, Object>();
 			}
-			map.put(source, target);
+			try {
+				if (mapType == null) {
+					mapType = ActivityFieldMappingType.Value;
+				}
+
+				switch (mapType) {
+				case Range:
+					valueMap.put(getRangeKey(source), target);
+					break;
+				case Calc:
+					valueMap.put(getCalcKey(source), target);
+					break;
+				default:
+					valueMap.put(source, target);
+				}
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityFieldLocator.mapping.add.error", source, target, mapType));
+			}
 		}
 	}
 
@@ -392,17 +432,16 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @return converted value
 	 */
 	protected Object getMappedValue(Object source) {
-		if (map == null && mapCatchAll == null) {
+		if (valueMap == null && mapCatchAll == null) {
 			return source;
 		}
 		Object target = null;
 		if (source == null) {
 			target = mapCatchAll;
 		} else {
-			String srcString = source instanceof Number ? String.valueOf(((Number) source).longValue())
-					: source.toString();
-			if (map != null) {
-				target = map.get(srcString);
+			String srcString = String.valueOf(source);
+			if (valueMap != null) {
+				target = valueMap.get(srcString);
 			}
 			if (target == null) {
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -577,7 +616,7 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.builtInType = builtInType;
 			cafl.builtInFormat = builtInFormat;
 			cafl.builtInUnits = builtInUnits;
-			cafl.map = map;
+			cafl.valueMap = valueMap;
 			cafl.mapCatchAll = mapCatchAll;
 
 			return cafl;
@@ -586,5 +625,176 @@ public class ActivityFieldLocator implements Cloneable {
 		}
 
 		return null;
+	}
+
+	private static Range getRangeKey(String source) throws Exception {
+		String cs = StringUtils.trimToNull(source);
+		if (StringUtils.isEmpty(cs)) {
+			throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ActivityFieldLocator.range.string.empty"));
+		}
+		int rCharIdx = cs.indexOf(RANGE_SEPARATOR);
+
+		String[] numStrs = new String[2];
+		int si = 0;
+		Matcher m = RANGE_PATTERN.matcher(cs);
+		int pos = 0;
+		while (m.find()) {
+			String g = m.group();
+			if (StringUtils.isNotEmpty(g)) {
+				numStrs[si++] = g;
+			}
+			pos = m.end();
+		}
+
+		String fromStr = null;
+		String toStr = null;
+
+		if (rCharIdx == -1) {
+			fromStr = numStrs.length > 0 ? numStrs[0] : null;
+			toStr = fromStr;
+		} else {
+			if (rCharIdx == 0) {
+				toStr = numStrs.length > 0 ? numStrs[0] : null;
+			} else if (rCharIdx == cs.length()) {
+				fromStr = numStrs.length > 0 ? numStrs[0] : null;
+			} else {
+				fromStr = numStrs.length > 0 ? numStrs[0] : null;
+				toStr = numStrs.length > 1 ? numStrs[1] : null;
+			}
+		}
+
+		Double from = StringUtils.isEmpty(fromStr) ? -Double.MAX_VALUE : NumberUtils.createDouble(fromStr);
+		Double to = StringUtils.isEmpty(toStr) ? Double.MAX_VALUE : NumberUtils.createDouble(toStr);
+
+		return new Range(from, to);
+	}
+
+	private static Calc getCalcKey(String source) throws IllegalArgumentException {
+		return new Calc(ActivityFieldMappingCalc.valueOf(source.toUpperCase()));
+	}
+
+	private static class Range {
+		private Double from;
+		private Double to;
+
+		Range(Double from, Double to) {
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof Number) {
+				return inRange(((Number) obj).doubleValue());
+			}
+
+			if (obj instanceof String) {
+				try {
+					return inRange(NumberUtils.createDouble((String) obj));
+				} catch (NumberFormatException exc) {
+				}
+			}
+
+			return super.equals(obj);
+		}
+
+		private boolean inRange(Double num) {
+			int compareMin = from.compareTo(num);
+			int compareMax = to.compareTo(num);
+
+			return compareMin <= 0 && compareMax >= 0;
+		}
+
+		@Override
+		public String toString() {
+			return String.valueOf(from) + RANGE_SEPARATOR + String.valueOf(to);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = from.hashCode();
+			result = 31 * result + to.hashCode();
+			return result;
+		}
+	}
+
+	private static class Calc {
+		private ActivityFieldMappingCalc function;
+
+		Calc(ActivityFieldMappingCalc functionName) {
+			this.function = functionName;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof Number) {
+				return match(((Number) obj).doubleValue());
+			}
+
+			if (obj instanceof String) {
+				try {
+					return match(NumberUtils.createDouble((String) obj));
+				} catch (NumberFormatException exc) {
+				}
+			}
+
+			return super.equals(obj);
+		}
+
+		public boolean match(Double num) {
+			switch (function) {
+			case ODD:
+				return num % 2 != 0;
+			case EVEN:
+				return num % 2 == 0;
+			default:
+				return false;
+			}
+		}
+
+		@Override
+		public String toString() {
+			return String.valueOf(function);
+		}
+	}
+
+	private class ValueMap<K, V> extends HashMap<K, V> {
+		public ValueMap() {
+			super();
+		}
+
+		public ValueMap(int ic) {
+			super(ic);
+		}
+
+		@Override
+		public V get(Object key) {
+			V e = super.get(key);
+
+			if (e == null) {
+				e = getCompared(key);
+			}
+
+			return e;
+		}
+
+		private V getCompared(Object key) {
+			Iterator<Map.Entry<K, V>> i = entrySet().iterator();
+			if (key == null) {
+				while (i.hasNext()) {
+					Map.Entry<K, V> e = i.next();
+					if (e.getKey() == null)
+						return e.getValue();
+				}
+			} else {
+				while (i.hasNext()) {
+					Map.Entry<K, V> e = i.next();
+					if (e.getKey() != null && e.getKey().equals(key))
+						return e.getValue();
+				}
+			}
+			return null;
+		}
 	}
 }

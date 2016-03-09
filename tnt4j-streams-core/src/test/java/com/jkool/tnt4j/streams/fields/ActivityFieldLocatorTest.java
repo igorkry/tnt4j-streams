@@ -129,11 +129,89 @@ public class ActivityFieldLocatorTest {
 	}
 
 	@Test
-	public void testGetMappedValue() {
-		locator = new ActivityFieldLocator("TEST", "1");
-		assertEquals("TEST", locator.getMappedValue("TEST"));
+	public void testGetMappedValueByValue() {
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "testLocator");
+		assertEquals("Unexpected mapped value", "TEST", locator.getMappedValue("TEST"));
+
 		locator.addValueMap("TEST", "VALUE");
-		assertEquals("VALUE", locator.getMappedValue("TEST"));
+		locator.addValueMap("200", "SUCCESS");
+		locator.addValueMap("301", "WARNING", ActivityFieldMappingType.Value);
+		locator.addValueMap("404", "ERROR");
+
+		assertNotEquals("Mapped value should be different", "TEST", locator.getMappedValue("TEST"));
+		assertNotEquals("Mapped value should be different", "200", locator.getMappedValue(200));
+		assertNotEquals("Mapped value should be different", "301", locator.getMappedValue("301"));
+		assertNotEquals("Mapped value should be different", "404", locator.getMappedValue("404"));
+
+		assertEquals("Unexpected mapped value", "VALUE", locator.getMappedValue("TEST"));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue("200"));
+		assertEquals("Unexpected mapped value", "WARNING", locator.getMappedValue("301"));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue("404"));
 	}
 
+	@Test
+	public void testGetMappedValueByCalc() {
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "testLocator");
+		locator.addValueMap("odd", "odd number", ActivityFieldMappingType.Calc);
+		locator.addValueMap("Even", "even number", ActivityFieldMappingType.Calc);
+		locator.addValueMap("EVEN", "other even number");
+
+		assertNotEquals("Mapped value should be different", "0", locator.getMappedValue("0"));
+		assertNotEquals("Mapped value should be different", "1", locator.getMappedValue("1"));
+		assertNotEquals("Mapped value should be different", "3", locator.getMappedValue("3"));
+
+		assertEquals("Unexpected mapped value", "even number", locator.getMappedValue("-2"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("-1"));
+		assertEquals("Unexpected mapped value", "even number", locator.getMappedValue("0"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("1"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("1.9999"));
+		assertEquals("Unexpected mapped value", "even number",
+				locator.getMappedValue("1.9999999999999999999999999999999"));
+		assertEquals("Unexpected mapped value", "even number", locator.getMappedValue("2"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("2.4"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("2.5"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("2.6"));
+		assertEquals("Unexpected mapped value", "odd number", locator.getMappedValue("3"));
+	}
+
+	@Test
+	public void testGetMappedValueByRange() {
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "testLocator");
+		locator.addValueMap(":-101", "UNKNOWN_FATAL", ActivityFieldMappingType.Range);
+		locator.addValueMap("-100:-50", "UNKNOWN_LN", ActivityFieldMappingType.Range);
+		locator.addValueMap("-49:99", "UNKNOWN_L", ActivityFieldMappingType.Range);
+		locator.addValueMap("100:206", "SUCCESS", ActivityFieldMappingType.Range);
+		locator.addValueMap("207", "CRITICAL", ActivityFieldMappingType.Range);
+		locator.addValueMap("208.:220.1223124", "ELECTRO", ActivityFieldMappingType.Range);
+		locator.addValueMap("300:308", "WARNING", ActivityFieldMappingType.Range);
+		locator.addValueMap("400:417", "ERROR", ActivityFieldMappingType.Range);
+		locator.addValueMap("500:511", "ERROR", ActivityFieldMappingType.Range);
+		locator.addValueMap("512:", "UNKNOWN_U", ActivityFieldMappingType.Range);
+
+		assertEquals("Unexpected mapped value", "UNKNOWN_FATAL", locator.getMappedValue(-200));
+		assertEquals("Unexpected mapped value", "UNKNOWN_FATAL", locator.getMappedValue(-101));
+		assertEquals("Unexpected mapped value", "UNKNOWN_LN", locator.getMappedValue("-100"));
+		assertEquals("Unexpected mapped value", "UNKNOWN_LN", locator.getMappedValue("-50"));
+		assertEquals("Unexpected mapped value", "UNKNOWN_L", locator.getMappedValue(-49));
+		assertEquals("Unexpected mapped value", "UNKNOWN_L", locator.getMappedValue("0"));
+		assertEquals("Unexpected mapped value", "UNKNOWN_L", locator.getMappedValue(99));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue("100"));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue(102));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue("206"));
+		assertEquals("Unexpected mapped value", "CRITICAL", locator.getMappedValue(207));
+		assertEquals("Unexpected mapped value", "WARNING", locator.getMappedValue("300"));
+		assertEquals("Unexpected mapped value", "WARNING", locator.getMappedValue(303));
+		assertEquals("Unexpected mapped value", "WARNING", locator.getMappedValue("308"));
+		assertEquals("Unexpected mapped value", 309, locator.getMappedValue(309));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue("400"));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue(404));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue("417"));
+		assertEquals("Unexpected mapped value", "418", locator.getMappedValue("418"));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue(500));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue(505));
+		assertEquals("Unexpected mapped value", "ERROR", locator.getMappedValue("511"));
+		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue(512));
+		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue("666"));
+		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue(99999));
+	}
 }

@@ -17,23 +17,18 @@
 package com.jkool.tnt4j.streams.fields;
 
 /**
- * Defines supported activity field value mapping types.
+ * Defines supported calculable activity field value mapping keys.
  *
  * @version $Revision: 1 $
  */
-public enum ActivityFieldMappingType {
+public enum ActivityFieldMappingCalc {
 	/**
-	 * Mapping type is straight mapping from source value to target value.
+	 * Defines value mapping key for odd numbers
 	 */
-	Value,
+	ODD,
 
 	/**
-	 * Mapping type is from range of source values to single target value.
+	 * Defines value mapping key for even numbers
 	 */
-	Range,
-
-	/**
-	 * Mapping type is from calculated source value to single target value.
-	 */
-	Calc
+	EVEN
 }
