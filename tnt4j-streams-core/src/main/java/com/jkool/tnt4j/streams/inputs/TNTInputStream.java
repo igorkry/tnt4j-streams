@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -680,7 +679,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 					if (item == null) {
 						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 								"TNTInputStream.data.stream.ended"));
-						shutdownExecutors();
 						halt(); // no more data items to process
 					} else {
 						currActivityIndex++;
