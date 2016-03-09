@@ -566,7 +566,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			List<ActivityFieldLocator> locators = currField.getLocators();
 			if (locators != null) {
 				for (ActivityFieldLocator loc : locators) {
-					loc.addValueMap(source, target);
+					loc.addValueMap(source, target,
+							StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type));
 				}
 			}
 		}

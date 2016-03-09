@@ -213,5 +213,11 @@ public class ActivityFieldLocatorTest {
 		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue(512));
 		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue("666"));
 		assertEquals("Unexpected mapped value", "UNKNOWN_U", locator.getMappedValue(99999));
+
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue("200"));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue(200));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue(200.0));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue(new Double(200.0)));
+		assertEquals("Unexpected mapped value", "SUCCESS", locator.getMappedValue("200.0"));
 	}
 }
