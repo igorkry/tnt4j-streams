@@ -20,10 +20,14 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -32,9 +36,11 @@ import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.TrackingLogger;
 import com.nastel.jkool.tnt4j.config.DefaultConfigFactory;
 import com.nastel.jkool.tnt4j.config.TrackerConfig;
+import com.nastel.jkool.tnt4j.config.TrackerConfigStore;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.source.Source;
+import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 
 /**
@@ -57,7 +63,7 @@ import com.nastel.jkool.tnt4j.tracker.Tracker;
  * executor service to terminate. (Optional)</li>
  * <li>ExecutorsBoundedModel - identifies whether executor service should use
  * bounded tasks queue model. (Optional)</li>
- * <li>ExecutorsTerminationTimeout -time to wait (in seconds) for a task to be
+ * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be
  * inserted into bounded queue if max. queue size is reached. (Optional, actual
  * only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
  * </ul>
@@ -74,6 +80,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
 	private static final int DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT = 20;
+
+	private static final String DEFAULT_SOURCE_NAME = "com.jkool.tnt4j.streams"; // NON-NLS
 
 	/**
 	 * Stream logger.
@@ -95,10 +103,15 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	protected final Map<String, Tracker> trackersMap = new HashMap<String, Tracker>();
 
+	private String sourceName;
+	private String tnt4jCfgFilePath;
 	private TrackerConfig streamConfig;
 	private Source defaultSource;
+	private Map<String, String> tnt4jProperties;
 
 	private boolean haltIfNoParser = true;
+
+	private int currActivityIndex = 0;
 
 	/**
 	 * Delay between retries to submit data package to jKool Cloud Service if
@@ -125,6 +138,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	protected TNTInputStream(EventSink logger) {
 		this.logger = logger;
+		this.sourceName = DEFAULT_SOURCE_NAME;
 	}
 
 	/**
@@ -168,17 +182,17 @@ public abstract class TNTInputStream<T> implements Runnable {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
 				haltIfNoParser = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
 				useExecutorService = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
 				executorThreadsQty = Integer.parseInt(value);
-			} else if (StreamsConfig.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
 				executorRejectedTaskOfferTimeout = Integer.parseInt(value);
-			} else if (StreamsConfig.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
 				executorsTerminationTimeout = Integer.parseInt(value);
-			} else if (StreamsConfig.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
 				boundedExecutorModel = Boolean.parseBoolean(value);
 			}
 		}
@@ -189,36 +203,32 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * {@link #setProperties(Collection)}, they should generally override this
 	 * method as well to return the value of custom properties, and invoke the
 	 * base class method to handle any built-in properties.
-	 * <p>
-	 * The default implementation handles the
-	 * {@value com.jkool.tnt4j.streams.configure.StreamsConfig#PROP_DATETIME}
-	 * property and returns the value of the {@link #getDate()} method.
-	 *
+	 * 
 	 * @param name
 	 *            name of property whose value is to be retrieved
 	 *
 	 * @return value for property, or {@code null} if property does not exist
 	 */
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_DATETIME.equals(name)) {
+		if (StreamProperties.PROP_DATETIME.equals(name)) {
 			return getDate();
 		}
-		if (StreamsConfig.PROP_HALT_ON_PARSER.equals(name)) {
+		if (StreamProperties.PROP_HALT_ON_PARSER.equals(name)) {
 			return haltIfNoParser;
 		}
-		if (StreamsConfig.PROP_USE_EXECUTOR_SERVICE.equals(name)) {
+		if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equals(name)) {
 			return useExecutorService;
 		}
-		if (StreamsConfig.PROP_EXECUTOR_THREADS_QTY.equals(name)) {
+		if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equals(name)) {
 			return executorThreadsQty;
 		}
-		if (StreamsConfig.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equals(name)) {
+		if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equals(name)) {
 			return executorRejectedTaskOfferTimeout;
 		}
-		if (StreamsConfig.PROP_EXECUTORS_TERMINATION_TIMEOUT.equals(name)) {
+		if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equals(name)) {
 			return executorsTerminationTimeout;
 		}
-		if (StreamsConfig.PROP_EXECUTORS_BOUNDED.equals(name)) {
+		if (StreamProperties.PROP_EXECUTORS_BOUNDED.equals(name)) {
 			return boundedExecutorModel;
 		}
 
@@ -241,7 +251,16 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *             continue.
 	 */
 	protected void initialize() throws Exception {
-		streamConfig = DefaultConfigFactory.getInstance().getConfig("com.jkool.tnt4j.streams"); // NON-NLS
+		streamConfig = StringUtils.isEmpty(sourceName) ? DefaultConfigFactory.getInstance().getConfig()
+				: DefaultConfigFactory.getInstance().getConfig(sourceName, SourceType.APPL, tnt4jCfgFilePath);
+		if (MapUtils.isNotEmpty(tnt4jProperties)) {
+			for (Map.Entry<String, String> tnt4jProp : tnt4jProperties.entrySet()) {
+				streamConfig.setProperty(tnt4jProp.getKey(), tnt4jProp.getValue());
+			}
+
+			((TrackerConfigStore) streamConfig).applyProperties();
+		}
+
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		defaultSource = streamConfig.getSource();
 		trackersMap.put(defaultSource.getFQName(), tracker);
@@ -253,6 +272,62 @@ public abstract class TNTInputStream<T> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		}
+	}
+
+	/**
+	 * Gets TNT4J configuration source name.
+	 * 
+	 * @return TNT4J configuration source name
+	 */
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	/**
+	 * Sets TNT4J configuration source name.
+	 *
+	 * @param sourceName
+	 *            source name used to load TNT4J configuration
+	 */
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public String getTnt4jCfgFilePath() {
+		return tnt4jCfgFilePath;
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param tnt4jCfgFilePath
+	 */
+	public void setTnt4jCfgFilePath(String tnt4jCfgFilePath) {
+		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
+	}
+
+	/**
+	 * Adds TNT4J configuration property specific for this stream.
+	 *
+	 * @param key
+	 *            property key
+	 * @param value
+	 *            property value
+	 *
+	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
+	 *         if there was no mapping for <tt>key</tt>.
+	 */
+	public String addTNT4JProperty(String key, String value) {
+		if (tnt4jProperties == null) {
+			tnt4jProperties = new HashMap<String, String>();
+		}
+
+		return tnt4jProperties.put(key, value);
 	}
 
 	/**
@@ -268,8 +343,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @see Executors#newFixedThreadPool(int)
 	 */
 	private static ExecutorService getDefaultExecutorService(int threadsQty) {
-		return Executors.newFixedThreadPool(threadsQty,
-				new StreamExecutorThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
+		return Executors.newFixedThreadPool(threadsQty, new StreamsThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
 	}
 
 	/**
@@ -293,8 +367,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingDeque<Runnable>(threadsQty * 2),
-				new StreamExecutorThreadFactory("StreamBoundedExecutorThread-")); // NON-NLS
+				new LinkedBlockingQueue<Runnable>(threadsQty * 2),
+				new StreamsThreadFactory("StreamBoundedExecutorThread-")); // NON-NLS
 
 		tpe.setRejectedExecutionHandler(new RejectedExecutionHandler() {
 			@Override
@@ -357,6 +431,24 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @return current position in activity data source being processed
 	 */
 	public int getActivityPosition() {
+		return 0;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public int getCurrentActivity() {
+		return currActivityIndex;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return total number of activities available to stream
+	 */
+	public int getTotalActivities() {
 		return 0;
 	}
 
@@ -576,8 +668,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 		logger.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"));
 		if (ownerThread == null) {
-			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.no.owner.thread"));
+			IllegalStateException e = new IllegalStateException(StreamsResources
+					.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.owner.thread"));
+			throw e;
 		}
 		try {
 			initialize();
@@ -590,6 +683,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 						shutdownExecutors();
 						halt(); // no more data items to process
 					} else {
+						currActivityIndex++;
+
 						if (streamExecutorService == null) {
 							processActivityItem(item);
 						} else {
@@ -615,6 +710,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
 		} finally {
+			shutdownExecutors();
 			cleanup();
 			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.thread.ended", Thread.currentThread().getName()));
@@ -699,27 +795,34 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
-	private static class StreamExecutorThreadFactory implements ThreadFactory {
-		private int count = 0;
+	/**
+	 * TNT4J-Streams thread factory.
+	 *
+	 * @version $Revision: 1 $
+	 */
+	public static class StreamsThreadFactory implements ThreadFactory {
+		private AtomicInteger count = new AtomicInteger(1);
 		private String prefix;
 
 		/**
-		 * Constructs a new StreamExecutorThreadFactory.
+		 * Constructs a new StreamsThreadFactory.
 		 *
-		 * @param pfix
+		 * @param prefix
 		 *            thread name prefix
 		 */
-		StreamExecutorThreadFactory(String pfix) {
-			prefix = pfix;
+		public StreamsThreadFactory(String prefix) {
+			this.prefix = prefix;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		@Override
 		public Thread newThread(Runnable r) {
-			Thread task = new Thread(r, prefix + count++);
+			StreamsThread task = new StreamsThread(r, prefix + count.getAndIncrement());
 			task.setDaemon(true);
 
 			return task;
 		}
 	}
-
 }
