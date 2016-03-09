@@ -19,6 +19,8 @@ package com.jkool.tnt4j.streams.inputs;
 import com.jkool.tnt4j.streams.fields.StreamStatus;
 
 /**
+ * TODO
+ *
  * @author akausinis
  * @version 1.0
  * @created 2016-03-07 15:03

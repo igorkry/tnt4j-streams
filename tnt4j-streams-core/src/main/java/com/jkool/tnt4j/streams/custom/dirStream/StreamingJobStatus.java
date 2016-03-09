@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.custom.dirStream;
 
 /**
- * TODO
- *
  * @author akausinis
- * @version 1.0
- * @created 2016-03-07 15:05
+ * @version 1.0 TODO
  */
-public enum StreamStatus {
+public enum StreamingJobStatus {
 	NEW, STARTED, SUCCESS, FAILURE, CANCEL, DROP_OFF, REJECT,
 }

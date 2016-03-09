@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.custom.dirStream;
 
 /**
- * TODO
- *
  * @author akausinis
- * @version 1.0
- * @created 2016-03-07 15:05
+ * @version 1.0 TODO
  */
-public enum StreamStatus {
-	NEW, STARTED, SUCCESS, FAILURE, CANCEL, DROP_OFF, REJECT,
+public interface StreamingJobListener<T> {
+	void onProgressUpdate(StreamingJob job, int current, int total);
+
+	void onSuccess(StreamingJob job, T result);
+
+	void onFailure(StreamingJob job, String msg, Throwable exc, Integer code);
+
+	void onStatusChange(StreamingJob job, StreamingJobStatus status);
+
+	void onFinish(StreamingJob job);
 }
