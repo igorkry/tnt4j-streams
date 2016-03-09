@@ -26,6 +26,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.jkool.tnt4j.streams.configure.sax.StreamsConfigSAXParser;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -331,11 +332,9 @@ public class StreamsConfig {
 	 */
 	protected void load(Reader config) throws SAXException, ParserConfigurationException, IOException {
 		try {
-			SAXParser parser = parserFactory.newSAXParser();
-			ConfigParserHandler hndlr = new ConfigParserHandler();
-			parser.parse(new InputSource(config), hndlr);
-			streams = hndlr.getStreams();
-			parsers = hndlr.getParsers();
+			StreamsConfigData streamsCfgData = StreamsConfigSAXParser.parse(config);
+			streams = streamsCfgData.getStreams(); 
+			parsers = streamsCfgData.getParsers();
 		} finally {
 			Utils.close(config);
 		}

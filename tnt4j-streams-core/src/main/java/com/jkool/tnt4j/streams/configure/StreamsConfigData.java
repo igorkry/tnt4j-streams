@@ -46,8 +46,8 @@ public class StreamsConfigData {
 	 * @return collection of configuration defined streams or {@code null} if
 	 *         there is no streams defined
 	 */
-	public Collection<TNTInputStream> getStreams() {
-		return streams == null ? null : streams.values();
+	public Map<String, TNTInputStream> getStreams() {
+		return streams;
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class StreamsConfigData {
 	 * @return collection of configuration defined parsers or {@code null} if
 	 *         there is no parsers defined
 	 */
-	public Collection<ActivityParser> getParsers() {
-		return parsers == null ? null : parsers.values();
+	public Map<String, ActivityParser> getParsers() {
+		return parsers;
 	}
 
 	/**
