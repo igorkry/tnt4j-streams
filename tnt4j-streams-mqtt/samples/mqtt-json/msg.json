@@ -1,0 +1,6 @@
+{
+  "temperature": 75,
+  "id": "sensor02",
+  "room": "livingroom",
+  "connected": true
+}

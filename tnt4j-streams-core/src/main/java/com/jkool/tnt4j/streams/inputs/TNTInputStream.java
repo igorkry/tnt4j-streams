@@ -22,12 +22,14 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.fields.StreamStatus;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.StreamsThread;
@@ -111,6 +113,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private boolean haltIfNoParser = true;
 
 	private int currActivityIndex = 0;
+
+	private List<InputStreamListener> streamListeners;
 
 	/**
 	 * Delay between retries to submit data package to jKool Cloud Service if
@@ -378,6 +382,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 						logger.log(OpLevel.WARNING,
 								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 										"TNTInputStream.tasks.buffer.limit", offerTimeout));
+						notifyStatusChange(StreamStatus.REJECT);
 					}
 				} catch (InterruptedException exc) {
 					halt();
@@ -623,6 +628,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 			trackersMap.clear();
 		}
+
+		if (CollectionUtils.isNotEmpty(streamListeners)) {
+			streamListeners.clear();
+		}
 	}
 
 	private synchronized void shutdownExecutors() {
@@ -664,24 +673,31 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	@Override
 	public void run() {
+		notifyStatusChange(StreamStatus.NEW);
+
 		logger.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"));
 		if (ownerThread == null) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
 					.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.owner.thread"));
+			notifyFailed(null, e, null);
+
 			throw e;
 		}
 		try {
 			initialize();
+			notifyStatusChange(StreamStatus.STARTED);
 			while (!isHalted()) {
 				try {
 					T item = getNextItem();
 					if (item == null) {
 						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 								"TNTInputStream.data.stream.ended"));
+						// notifyStreamingSuccess();
 						halt(); // no more data items to process
 					} else {
 						currActivityIndex++;
+						notifyProgressUpdate(currActivityIndex, getTotalActivities());
 
 						if (streamExecutorService == null) {
 							processActivityItem(item);
@@ -695,6 +711,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
 									ise.getLocalizedMessage()),
 							ise);
+					notifyFailed(null, ise, null);
 					halt();
 				} catch (Exception exc) {
 					logger.log(OpLevel.ERROR,
@@ -707,9 +724,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 		} catch (Exception e) {
 			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
+			notifyFailed(null, e, null);
 		} finally {
 			shutdownExecutors();
 			cleanup();
+			notifyFinished();
 			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.thread.ended", Thread.currentThread().getName()));
 		}
@@ -721,6 +740,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 			logger.log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"));
 			if (haltIfNoParser) {
+				notifyFailed(
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"),
+						null, null);
 				halt();
 			}
 		} else {
@@ -768,6 +790,97 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param l
+	 */
+	public void addStreamListener(InputStreamListener l) {
+		if (streamListeners == null) {
+			streamListeners = new ArrayList<InputStreamListener>();
+		}
+
+		streamListeners.add(l);
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param l
+	 */
+	public void removeStreamListener(InputStreamListener l) {
+		if (streamListeners != null) {
+			streamListeners.remove(l);
+		}
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param curr
+	 * @param total
+	 */
+	protected void notifyProgressUpdate(int curr, int total) {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onProgressUpdate(this, curr, total);
+			}
+		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param result
+	 */
+	@SuppressWarnings("unchecked")
+	public void notifyStreamSuccess(T result) {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onSuccess(this, result);
+			}
+		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param msg
+	 * @param exc
+	 * @param code
+	 */
+	protected void notifyFailed(String msg, Throwable exc, Integer code) {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onFailure(this, msg, exc, code);
+			}
+		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param newStatus
+	 */
+	protected void notifyStatusChange(StreamStatus newStatus) {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onStatusChange(this, newStatus);
+			}
+		}
+	}
+
+	/**
+	 * TODO
+	 */
+	protected void notifyFinished() {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onFinish(this);
+			}
+		}
 	}
 
 	private class ActivityItemProcessingTask implements Runnable {
