@@ -23,10 +23,10 @@ import java.util.Map;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.fields.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.GenericActivityParser;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -69,7 +69,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			LOGGER.log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
-			if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = value;
 			}
 		}

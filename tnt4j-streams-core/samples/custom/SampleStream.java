@@ -22,7 +22,7 @@ import java.io.LineNumberReader;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.fields.StreamProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -54,7 +54,7 @@ public class SampleStream extends TNTInputStream<String> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
 		return super.getProperty(name);
@@ -80,7 +80,7 @@ public class SampleStream extends TNTInputStream<String> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				fileName = value;
 			}
 		}
