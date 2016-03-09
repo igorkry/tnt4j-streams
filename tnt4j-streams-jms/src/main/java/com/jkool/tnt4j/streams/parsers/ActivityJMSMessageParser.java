@@ -177,8 +177,9 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *             if JMS exception occurs while getting map entries from
 	 *             message.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void parseMapMessage(MapMessage mapMessage, Map<String, Object> dataMap) throws JMSException {
-		Enumeration<String> en = mapMessage.getMapNames();
+		Enumeration<String> en = (Enumeration<String>) mapMessage.getMapNames();
 		while (en.hasMoreElements()) {
 			String key = en.nextElement();
 			dataMap.put(key, mapMessage.getObject(key));

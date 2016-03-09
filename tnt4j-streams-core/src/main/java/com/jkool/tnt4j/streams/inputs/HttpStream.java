@@ -41,7 +41,7 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -115,19 +115,19 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 			return serverPort;
 		}
-		if (StreamsConfig.PROP_USE_SSL.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
 			return useSSL;
 		}
-		if (StreamsConfig.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 			return keystore;
 		}
-		if (StreamsConfig.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
 			return keystorePass;
 		}
-		if (StreamsConfig.PROP_KEY_PASS.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
 			return keyPass;
 		}
 		return super.getProperty(name);
@@ -147,15 +147,15 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 				serverPort = Integer.valueOf(value);
-			} else if (StreamsConfig.PROP_USE_SSL.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
 				useSSL = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 				keystore = value;
-			} else if (StreamsConfig.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
 				keystorePass = value;
-			} else if (StreamsConfig.PROP_KEY_PASS.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
 				keyPass = value;
 			}
 		}
@@ -269,7 +269,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				//
 				// }
 
-				Runtime.getRuntime().addShutdownHook(new Thread() {
+				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 					@Override
 					public void run() {
 						if (server != null) {
@@ -277,7 +277,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 							// server.stop();
 						}
 					}
-				});
+				}));
 			}
 		}
 

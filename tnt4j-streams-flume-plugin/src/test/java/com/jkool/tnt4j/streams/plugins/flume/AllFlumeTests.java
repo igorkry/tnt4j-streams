@@ -19,11 +19,13 @@ package com.jkool.tnt4j.streams.plugins.flume;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.jkool.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
+
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ TNT4JStreamsEventSinkTest.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, TNT4JStreamsEventSinkTest.class })
 public class AllFlumeTests {
 }

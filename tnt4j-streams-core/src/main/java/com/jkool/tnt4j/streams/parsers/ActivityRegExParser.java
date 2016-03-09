@@ -23,9 +23,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -87,7 +87,7 @@ public class ActivityRegExParser extends ActivityParser {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,

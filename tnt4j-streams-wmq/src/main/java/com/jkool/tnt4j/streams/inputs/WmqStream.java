@@ -27,7 +27,7 @@ import com.ibm.mq.*;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.MQHeaderIterator;
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.StreamsThread;
 import com.jkool.tnt4j.streams.utils.WmqStreamConstants;
@@ -136,23 +136,23 @@ public class WmqStream extends TNTInputStream<String> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
 				qmgrName = value;
-			} else if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 				queueName = value;
-			} else if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				topicName = value;
-			} else if (StreamsConfig.PROP_SUB_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_SUB_NAME.equalsIgnoreCase(name)) {
 				subName = value;
-			} else if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 				topicString = value;
-			} else if (StreamsConfig.PROP_HOST.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
 				qmgrHostName = value;
-			} else if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 				qmgrPort = Integer.valueOf(value);
-			} else if (StreamsConfig.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
 				qmgrChannelName = value;
-			} else if (StreamsConfig.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 				stripHeaders = Boolean.parseBoolean(value);
 			}
 		}
@@ -163,31 +163,31 @@ public class WmqStream extends TNTInputStream<String> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
 			return qmgrName;
 		}
-		if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 			return queueName;
 		}
-		if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 			return topicName;
 		}
-		if (StreamsConfig.PROP_SUB_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_SUB_NAME.equalsIgnoreCase(name)) {
 			return subName;
 		}
-		if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 			return topicString;
 		}
-		if (StreamsConfig.PROP_HOST.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
 			return qmgrHostName;
 		}
-		if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 			return qmgrPort;
 		}
-		if (StreamsConfig.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
 			return qmgrChannelName;
 		}
-		if (StreamsConfig.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 			return stripHeaders;
 		}
 		return super.getProperty(name);
@@ -202,8 +202,8 @@ public class WmqStream extends TNTInputStream<String> {
 		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(topicString) && StringUtils.isEmpty(topicName)
 				&& StringUtils.isEmpty(subName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_WMQ,
-					"WmqStream.must.specify.one", StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME,
-					StreamsConfig.PROP_TOPIC_STRING, StreamsConfig.PROP_SUB_NAME));
+					"WmqStream.must.specify.one", StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME,
+					StreamProperties.PROP_TOPIC_STRING, StreamProperties.PROP_SUB_NAME));
 		}
 		// Prevents WMQ library from writing exceptions to stderr
 		MQException.log = null;

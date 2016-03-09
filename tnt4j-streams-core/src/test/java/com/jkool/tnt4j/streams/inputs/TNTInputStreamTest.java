@@ -30,10 +30,11 @@ import java.util.Map.Entry;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
+import com.jkool.tnt4j.streams.utils.StreamsThread;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 
@@ -60,7 +61,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void recordActivityTest() throws Exception {
-		Thread inputStreamThread = new Thread(ts);
+		StreamsThread inputStreamThread = new StreamsThread(ts);
 		inputStreamThread.start();
 		ts.addParser(parser);
 		when(ai.isFiltered()).thenReturn(false);
@@ -73,16 +74,16 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void setPropertiesTest() throws Exception {
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_HALT_ON_PARSER, "true"));
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_EXECUTOR_THREADS_QTY, "5"));
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_USE_EXECUTOR_SERVICE, "true"));
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, "500"));
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_EXECUTORS_TERMINATION_TIMEOUT, "500"));
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_EXECUTORS_BOUNDED, "true"));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Entry<String, String>>(6);
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_HALT_ON_PARSER, "true"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_USE_EXECUTOR_SERVICE, "true"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(
+				StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, "500"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT,
+				"500"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_EXECUTORS_BOUNDED, "true"));
+
 		ts.setProperties(props);
 		for (Map.Entry<String, String> property : props) {
 			String name = property.getKey();

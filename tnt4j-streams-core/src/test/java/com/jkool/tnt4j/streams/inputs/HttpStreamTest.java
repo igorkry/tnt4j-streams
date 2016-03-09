@@ -41,7 +41,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
@@ -139,10 +139,10 @@ public class HttpStreamTest {
 
 	@Test
 	public void propertiesTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_PORT, 8080);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_KEYSTORE, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_KEYSTORE_PASS, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamsConfig.PROP_KEY_PASS, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_PORT, 8080);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEYSTORE, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEYSTORE_PASS, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEY_PASS, "TEST");
 
 	}
 

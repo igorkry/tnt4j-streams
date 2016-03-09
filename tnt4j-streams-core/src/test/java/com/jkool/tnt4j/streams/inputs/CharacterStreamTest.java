@@ -24,7 +24,8 @@ import java.net.Socket;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
+import com.jkool.tnt4j.streams.utils.StreamsThread;
 
 /**
  * @author akausinis
@@ -36,24 +37,24 @@ public class CharacterStreamTest {
 
 	@Test
 	public void settingsTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_FILENAME, "TestFileName");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_FILENAME, "TestFileName");
 		cStream = new CharacterStream();
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, 8080);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, 8080);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void settingsFailToSetBothTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_FILENAME, "TestFileName");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, 8080);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_FILENAME, "TestFileName");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, 8080);
 	}
 
 	@Test
 	public void startDataStreamTest() throws Exception {
 		InputStream is = mock(InputStream.class);
 		// cStream = new CharacterStream(is);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamsConfig.PROP_PORT, PORT);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, PORT);
 		cStream.initialize();
-		Thread thread = new Thread(new Runnable() {
+		StreamsThread thread = new StreamsThread(new Runnable() {
 			public void run() {
 				try {
 					cStream.getNextItem();

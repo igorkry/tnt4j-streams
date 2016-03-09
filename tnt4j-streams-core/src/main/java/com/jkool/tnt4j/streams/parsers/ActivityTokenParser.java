@@ -27,10 +27,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -98,17 +98,17 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityParser.setting", name, fieldDelim));
-			} else if (StreamsConfig.PROP_PATTERN.equalsIgnoreCase(name)) {
+			} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityParser.setting", name, value));
 				}
-			} else if (StreamsConfig.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
+			} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityParser.setting", name, value));

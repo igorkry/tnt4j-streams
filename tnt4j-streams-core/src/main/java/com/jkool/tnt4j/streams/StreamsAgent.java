@@ -16,13 +16,17 @@
 
 package com.jkool.tnt4j.streams;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
+import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.inputs.PipedStream;
 import com.jkool.tnt4j.streams.inputs.StreamThread;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
@@ -106,64 +110,88 @@ public final class StreamsAgent {
 	}
 
 	/**
-	 * Configure streams and parsers, and run each stream in its own thread.
-	 * 
-	 * @param cfgFileName
-	 *            stream configuration file name
+	 * Main entry point for running as a API integration.
+	 *
+	 * @param cfgFile
+	 *            stream configuration file
 	 */
+	public static void runFromAPI(File cfgFile) {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.start.api"));
+		loadConfigAndRun(cfgFile);
+	}
+
 	private static void loadConfigAndRun(String cfgFileName) {
 		try {
-			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
-			Map<String, TNTInputStream> streamsMap;
-			if (noStreamConfig) {
-				streamsMap = initPiping(cfg);
-			} else {
-				streamsMap = cfg.getStreams();
-			}
-			if (MapUtils.isEmpty(streamsMap)) {
-				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"StreamsAgent.no.activity.streams"));
-			}
-			ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
-			StreamThread ft;
-			for (Map.Entry<String, TNTInputStream> streamEntry : streamsMap.entrySet()) {
-				String streamName = streamEntry.getKey();
-				TNTInputStream stream = streamEntry.getValue();
-				ft = new StreamThread(streamThreads, stream,
-						String.format("%s:%s", stream.getClass().getSimpleName(), streamName)); // NON-NLS
-				ft.start();
-			}
+			initAndRun(StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader()
+					: new StreamsConfigLoader(cfgFileName));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
 	}
 
-	private static Map<String, TNTInputStream> initPiping(StreamsConfig cfg) throws Exception {
-		Map<String, TNTInputStream> streamsMap = new HashMap<String, TNTInputStream>(1);
+	private static void loadConfigAndRun(File cfgFile) {
+		try {
+			initAndRun(cfgFile == null ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFile));
+		} catch (Exception e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+		}
+	}
+
+	/**
+	 * Configure streams and parsers, and run each stream in its own thread.
+	 *
+	 * @param cfg
+	 *            stream configuration
+	 */
+	private static void initAndRun(StreamsConfigLoader cfg) throws Exception {
+		if (cfg == null) {
+			return;
+		}
+
+		Collection<TNTInputStream> streams;
+		if (noStreamConfig) {
+			streams = initPiping(cfg);
+		} else {
+			streams = cfg.getStreams();
+		}
+		if (CollectionUtils.isEmpty(streams)) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"StreamsAgent.no.activity.streams"));
+		}
+		ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
+		StreamThread ft;
+		for (TNTInputStream stream : streams) {
+			ft = new StreamThread(streamThreads, stream,
+					String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
+			ft.start();
+		}
+	}
+
+	private static Collection<TNTInputStream> initPiping(StreamsConfigLoader cfg) throws Exception {
+		Collection<TNTInputStream> streams = new ArrayList<TNTInputStream>(1);
 
 		Map<String, String> props = new HashMap<String, String>(1);
-		props.put(StreamsConfig.PROP_HALT_ON_PARSER, String.valueOf(haltOnUnparsed));
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(haltOnUnparsed));
 
 		PipedStream pipeStream = new PipedStream();
 		pipeStream.setName("DefaultSystemPipeStream"); // NON-NLS
 		pipeStream.setProperties(props.entrySet());
 
-		Map<String, ActivityParser> parsersMap = cfg.getParsers();
-		if (MapUtils.isEmpty(parsersMap)) {
+		Collection<ActivityParser> parsers = cfg.getParsers();
+		if (CollectionUtils.isEmpty(parsers)) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"StreamsAgent.no.piped.activity.parsers"));
 		}
-		for (Map.Entry<String, ActivityParser> parserEntry : parsersMap.entrySet()) {
-			ActivityParser parser = parserEntry.getValue();
-
+		for (ActivityParser parser : parsers) {
 			if (parser != null) {
 				pipeStream.addParser(parser);
 			}
 		}
 
-		streamsMap.put(pipeStream.getName(), pipeStream);
+		streams.add(pipeStream);
 
-		return streamsMap;
+		return streams;
 	}
 
 	/**

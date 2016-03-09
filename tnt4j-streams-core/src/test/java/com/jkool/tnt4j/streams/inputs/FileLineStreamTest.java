@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.TestFileList;
 
 /**
@@ -43,11 +43,8 @@ public class FileLineStreamTest {
 		int count = TestFileList.TEST_FILE_LIST_SIZE;
 		final String fileName = files.get(0).getParentFile() + File.separator + "TEST*";
 
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_FILENAME, fileName));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
+		props.add(new AbstractMap.SimpleEntry(StreamProperties.PROP_FILENAME, fileName));
 
 		fls.setProperties(props);
 		fls.initialize();

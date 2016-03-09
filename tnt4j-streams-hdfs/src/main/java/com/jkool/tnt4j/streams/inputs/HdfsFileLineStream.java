@@ -95,6 +95,23 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 			activityFiles = new Path[] { filePath };
 		}
 
+		totalLinesCount = getTotalLinesCount(fs, activityFiles);
+	}
+
+	private static int getTotalLinesCount(FileSystem fs, Path[] activityFiles) {
+		if (activityFiles == null) {
+			return 0;
+		}
+
+		int tlc = 0;
+		for (Path f : activityFiles) {
+			try {
+				tlc += Utils.countLines(new InputStreamReader(fs.open(f)));
+			} catch (IOException exc) {
+			}
+		}
+
+		return tlc;
 	}
 
 	/**

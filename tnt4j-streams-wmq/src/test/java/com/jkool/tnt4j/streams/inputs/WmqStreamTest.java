@@ -25,7 +25,7 @@ import com.ibm.mq.MQDestination;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.WmqStreamConstants;
 
@@ -38,16 +38,16 @@ public class WmqStreamTest {
 
 	@Test
 	public void propertiesSetTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_QUEUE_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_TOPIC_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_SUB_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_TOPIC_STRING, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_HOST, "localhost");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_PORT, 8080);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_CHANNEL_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamsConfig.PROP_STRIP_HEADERS, false);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QUEUE_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_SUB_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_STRING, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_HOST, "localhost");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_PORT, 8080);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_CHANNEL_NAME, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_STRIP_HEADERS, false);
 	}
 
 	@Test

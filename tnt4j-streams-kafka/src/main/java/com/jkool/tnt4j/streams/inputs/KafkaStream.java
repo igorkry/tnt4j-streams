@@ -29,7 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -79,7 +79,6 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	private String topicNameRegex;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
-	private int partition = 0;
 
 	/**
 	 * Constructs a new KafkaStream.
@@ -102,7 +101,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				topicNameRegex = value;
 			} else {
 				properties.put(name, value);
@@ -116,7 +115,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 			return topicNameRegex;
 		}
 
@@ -136,7 +135,7 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		super.initialize();
 		if (StringUtils.isEmpty(topicNameRegex)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined", StreamsConfig.PROP_TOPIC_NAME));
+					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
@@ -204,13 +203,4 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 
 		super.cleanup();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int getActivityPosition() {
-		return partition;
-	}
-
 }

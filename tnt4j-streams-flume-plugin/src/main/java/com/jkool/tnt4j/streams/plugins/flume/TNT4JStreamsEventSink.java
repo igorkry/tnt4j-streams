@@ -28,7 +28,7 @@ import org.apache.flume.sink.AbstractSink;
 import com.google.common.base.Throwables;
 import com.google.gson.Gson;
 import com.jkool.tnt4j.streams.StreamsAgent;
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.utils.FlumeConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -62,7 +62,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 
 	private static final String DEFAULT_HOST = "localhost"; // NON-NLS
 	private static final int DEFAULT_PORT = 9595;
-	private static final String DEFAULT_CONFIG_FILE_NAME = StreamsConfig.DFLT_CFG_FILE_NAME;
+	private static final String DEFAULT_CONFIG_FILE_NAME = StreamsConfigLoader.DFLT_CFG_FILE_NAME;
 
 	private String hostname;
 	private String streamConfig;

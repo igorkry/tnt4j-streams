@@ -19,7 +19,7 @@ package com.jkool.tnt4j.streams.parsers;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -65,7 +65,7 @@ public class ActivityJsonParser extends AbstractActivityMapParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 
-			if (StreamsConfig.PROP_READ_LINES.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
 				jsonAsLine = Boolean.parseBoolean(value);
 			}
 		}

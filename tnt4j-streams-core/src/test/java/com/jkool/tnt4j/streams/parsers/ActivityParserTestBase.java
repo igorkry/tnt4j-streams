@@ -41,11 +41,9 @@ public abstract class ActivityParserTestBase {
 	public abstract void isDataClassSupportedTest();
 
 	public Collection<Map.Entry<String, String>> makeProperty(final String propertyName, final String testValue) {
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(propertyName, String.valueOf(testValue)));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
+		props.add(new AbstractMap.SimpleEntry<String, String>(propertyName, String.valueOf(testValue)));
+
 		return props;
 	}
 

@@ -28,7 +28,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -84,16 +84,16 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
 			return serverURL;
 		}
-		if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 			return queueName;
 		}
-		if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 			return topicName;
 		}
-		if (StreamsConfig.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 			return jndiFactory;
 		}
 		if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
@@ -117,23 +117,23 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
 				serverURL = value;
-			} else if (StreamsConfig.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(topicName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
-							StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
+							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				queueName = value;
-			} else if (StreamsConfig.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(queueName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
-							StreamsConfig.PROP_QUEUE_NAME, StreamsConfig.PROP_TOPIC_NAME));
+							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				topicName = value;
-			} else if (StreamsConfig.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 				jndiFactory = value;
 			} else if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 				jmsConnFactory = value;
@@ -148,14 +148,14 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(queueName)) {
+		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(topicName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined.one.of", StreamsConfig.PROP_QUEUE_NAME,
-					StreamsConfig.PROP_TOPIC_NAME));
+					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_QUEUE_NAME,
+					StreamProperties.PROP_TOPIC_NAME));
 		}
 
 		jmsDataReceiver = new JMSDataReceiver();
-		Hashtable env = new Hashtable();
+		Hashtable<String, String> env = new Hashtable<String, String>(2);
 		env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
 		env.put(Context.PROVIDER_URL, serverURL);
 

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotEquals;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.MqttStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 
@@ -35,14 +35,14 @@ public class MqttStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new MqttStream();
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_SERVER_URI,
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_SERVER_URI,
 				"tcp://localhost:1883");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_USERNAME, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_PASSWORD, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_TOPIC_STRING, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_USE_SSL, false);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_KEYSTORE, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_KEYSTORE_PASS, "");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_USERNAME, "");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_PASSWORD, "");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_TOPIC_STRING, "TEST");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_USE_SSL, false);
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_KEYSTORE, "");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_KEYSTORE_PASS, "");
 	}
 
 	@Test(expected = MqttException.class)
@@ -60,8 +60,8 @@ public class MqttStreamTest {
 	@Test(expected = IllegalStateException.class)
 	public void testInitializeFailDueToNotAllPropertiesSet2() throws Exception {
 		input = new MqttStream();
-		input.setProperties(
-				InputPropertiesTestUtils.makeTestPropertiesSet(StreamsConfig.PROP_SERVER_URI, "tcp://localhost:1883"));
+		input.setProperties(InputPropertiesTestUtils.makeTestPropertiesSet(StreamProperties.PROP_SERVER_URI,
+				"tcp://localhost:1883"));
 		input.initialize();
 	}
 

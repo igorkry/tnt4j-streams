@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -107,21 +107,21 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FLD_DELIM.equals(name)) {
+			if (ParserProperties.PROP_FLD_DELIM.equals(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityParser.setting", name, fieldDelim));
-			} else if (StreamsConfig.PROP_VAL_DELIM.equals(name)) {
+			} else if (ParserProperties.PROP_VAL_DELIM.equals(name)) {
 				valueDelim = value;
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityParser.setting", name, value));
-			} else if (StreamsConfig.PROP_PATTERN.equals(name)) {
+			} else if (ParserProperties.PROP_PATTERN.equals(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityParser.setting", name, value));
 				}
-			} else if (StreamsConfig.PROP_STRIP_QUOTES.equals(name)) {
+			} else if (ParserProperties.PROP_STRIP_QUOTES.equals(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"ActivityParser.setting", name, value));
@@ -175,7 +175,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
-				String[] nv = field.split(valueDelim);
+				String[] nv = field.split(valueDelim);// Pattern.quote(valueDelim));
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}

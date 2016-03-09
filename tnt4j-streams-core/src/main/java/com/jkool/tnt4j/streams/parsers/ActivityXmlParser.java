@@ -32,7 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -114,7 +114,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		if (namespaces == null) {
 			namespaces = new NamespaceMap();
 			namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
-			namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
+			namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
 		}
 	}
 
@@ -129,14 +129,14 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_NAMESPACE.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityXmlParser.adding.mapping"), name, value);
 				}
-			} else if (StreamsConfig.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
+			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,

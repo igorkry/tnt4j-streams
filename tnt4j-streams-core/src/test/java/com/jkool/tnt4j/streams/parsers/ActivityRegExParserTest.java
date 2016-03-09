@@ -28,10 +28,10 @@ import java.util.regex.Pattern;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -52,7 +52,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	@Override
 	@Test
 	public void setPropertiesTest() throws Exception {
-		setProperty(parser, StreamsConfig.PROP_PATTERN, TEST_PATTERN);
+		setProperty(parser, ParserProperties.PROP_PATTERN, TEST_PATTERN);
 	}
 
 	@Test

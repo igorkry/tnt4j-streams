@@ -35,7 +35,7 @@ public class TimestampFormatterTest {
 
 	@Test
 	public void testConvert() throws ParseException {
-		Number testNum = new Long(100000);
+		Number testNum = 100000L;
 		for (ActivityFieldUnitsType fromUnits : ActivityFieldUnitsType.values()) {
 			for (ActivityFieldUnitsType toUnits : ActivityFieldUnitsType.values()) {
 				final Number convert = TimestampFormatter.convert(testNum, fromUnits, toUnits);

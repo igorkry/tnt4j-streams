@@ -33,7 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.MqttStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -107,25 +107,25 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
 			return serverURI;
 		}
-		if (StreamsConfig.PROP_USERNAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
 			return userName;
 		}
-		if (StreamsConfig.PROP_PASSWORD.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 			return password;
 		}
-		if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 			return topic;
 		}
-		if (StreamsConfig.PROP_USE_SSL.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
 			return useSSL;
 		}
-		if (StreamsConfig.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 			return keystore;
 		}
-		if (StreamsConfig.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
 			return keystorePass;
 		}
 
@@ -146,19 +146,19 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
 				serverURI = value;
-			} else if (StreamsConfig.PROP_USERNAME.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
 				userName = value;
-			} else if (StreamsConfig.PROP_PASSWORD.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 				password = value;
-			} else if (StreamsConfig.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 				topic = value;
-			} else if (StreamsConfig.PROP_USE_SSL.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
 				useSSL = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 				keystore = value;
-			} else if (StreamsConfig.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
 				keystorePass = value;
 			}
 		}
@@ -178,11 +178,11 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		super.initialize();
 		if (StringUtils.isEmpty(serverURI)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined", StreamsConfig.PROP_SERVER_URI));
+					"TNTInputStream.property.undefined", StreamProperties.PROP_SERVER_URI));
 		}
 		if (StringUtils.isEmpty(topic)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined", StreamsConfig.PROP_TOPIC_STRING));
+					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_STRING));
 		}
 
 		mqttDataReceiver = new MqttDataReceiver();

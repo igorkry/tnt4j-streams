@@ -24,7 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.fields.StreamFieldType;
@@ -81,7 +81,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+			if (ParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					sigDelim = value;
 				}
@@ -126,7 +126,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 				} else if (value instanceof String) {
 					String sigStr = (String) value;
 					if (sigStr.contains(sigDelim)) {
-						sigItems = sigStr.split(sigDelim);
+						sigItems = sigStr.split(sigDelim);// Pattern.quote(sigDelim));
 					}
 				}
 				if (sigItems != null) {
@@ -145,8 +145,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 						}
 						switch (i) {
 						case 0:
-							msgType = item instanceof Number ? MessageType.valueOf(((Number) item).intValue())
-									: MessageType.valueOf(Integer.parseInt(item.toString()));
+							msgType = MessageType.valueOf(item instanceof Number ? ((Number) item).intValue()
+									: Integer.parseInt(item.toString()));
 							break;
 						case 1:
 							msgFormat = item.toString();

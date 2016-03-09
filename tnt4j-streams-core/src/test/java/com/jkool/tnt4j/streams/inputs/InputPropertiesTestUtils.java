@@ -28,7 +28,7 @@ import org.junit.Assert;
  * @author akausinis
  * @version 1.0
  */
-public class InputPropertiesTestUtils {
+public final class InputPropertiesTestUtils {
 	// public enum Type {
 	// NUMBER("1"),
 	// STRING("TEST");
@@ -41,11 +41,9 @@ public class InputPropertiesTestUtils {
 	public static Collection<Map.Entry<String, String>> makeTestPropertiesSet(final String propertyName,
 			final Object testValue) {
 
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(propertyName, String.valueOf(testValue)));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Entry<String, String>>(1);
+		props.add(new AbstractMap.SimpleEntry<String, String>(propertyName, String.valueOf(testValue)));
+
 		return props;
 	}
 

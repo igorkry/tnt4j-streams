@@ -69,6 +69,24 @@ public class FileLineStream extends AbstractFileLineStream {
 		} else {
 			activityFiles = new File[] { new File(fileName) };
 		}
+
+		totalLinesCount = getTotalLinesCount(activityFiles);
+	}
+
+	private static int getTotalLinesCount(File[] activityFiles) {
+		if (activityFiles == null) {
+			return 0;
+		}
+
+		int tlc = 0;
+		for (File f : activityFiles) {
+			try {
+				tlc += Utils.countLines(new FileReader(f));
+			} catch (IOException exc) {
+			}
+		}
+
+		return tlc;
 	}
 
 	/**

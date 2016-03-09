@@ -17,7 +17,6 @@
 package com.jkool.tnt4j.streams.configure;
 
 import com.jkool.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -26,6 +25,6 @@ import org.junit.runners.Suite;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class, StreamsConfigTest.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, StreamsConfigLoaderTest.class })
 public class AllConfigureTests {
 }

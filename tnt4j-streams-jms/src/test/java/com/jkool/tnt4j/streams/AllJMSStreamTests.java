@@ -19,6 +19,7 @@ package com.jkool.tnt4j.streams;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.jkool.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
 import com.jkool.tnt4j.streams.inputs.AllInputsTests;
 import com.jkool.tnt4j.streams.parsers.AllParsersTests;
 
@@ -27,6 +28,6 @@ import com.jkool.tnt4j.streams.parsers.AllParsersTests;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AllInputsTests.class, AllParsersTests.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllInputsTests.class, AllParsersTests.class })
 public class AllJMSStreamTests {
 }

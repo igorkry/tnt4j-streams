@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -87,13 +87,13 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
-		if (StreamsConfig.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
 			return startFromLatestActivity;
 		}
-		if (StreamsConfig.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
 			return logWatcherDelay;
 		}
 		return super.getProperty(name);
@@ -113,11 +113,11 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				fileName = value;
-			} else if (StreamsConfig.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
 				startFromLatestActivity = Boolean.parseBoolean(value);
-			} else if (StreamsConfig.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
 				logWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
 			}
 		}
@@ -131,7 +131,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		super.initialize();
 		if (StringUtils.isEmpty(fileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined", StreamsConfig.PROP_FILENAME));
+					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"FileLineStream.initializing.stream", fileName));

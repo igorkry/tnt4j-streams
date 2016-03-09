@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -56,6 +56,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 	private int fileNumber = -1;
 	private int lineNumber = 0;
+	protected int totalLinesCount = 0;
 
 	/**
 	 * Constructs a new AbstractFileLineStream.
@@ -72,7 +73,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
 		return super.getProperty(name);
@@ -92,7 +93,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				fileName = value;
 			}
 		}
@@ -106,7 +107,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		super.initialize();
 		if (StringUtils.isEmpty(fileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.property.undefined", StreamsConfig.PROP_FILENAME));
+					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"FileLineStream.initializing.stream", fileName));
@@ -147,6 +148,16 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	@Override
 	public int getActivityPosition() {
 		return lineNumber;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns total lines count in all streamed files.
+	 */
+	@Override
+	public int getTotalActivities() {
+		return totalLinesCount;
 	}
 
 	/**

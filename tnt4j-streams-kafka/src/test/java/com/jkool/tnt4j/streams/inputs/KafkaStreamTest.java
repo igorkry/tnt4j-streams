@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 
@@ -42,7 +42,7 @@ public class KafkaStreamTest {
 		input = new KafkaStream();
 
 		final Collection<Entry<String, String>> properties = InputPropertiesTestUtils
-				.makeTestPropertiesSet(StreamsConfig.PROP_TOPIC_NAME, "TEST");
+				.makeTestPropertiesSet(StreamProperties.PROP_TOPIC_NAME, "TEST");
 		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("Topic", "TEST"));
 		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("zookeeper.connect", "127.0.0.1:2181"));
 		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("group.id", "TEST"));

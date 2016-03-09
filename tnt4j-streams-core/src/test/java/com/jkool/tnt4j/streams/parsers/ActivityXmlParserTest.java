@@ -34,10 +34,10 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.UtilsTest;
 
@@ -108,8 +108,8 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	@Override
 	@Test
 	public void setPropertiesTest() throws Exception {
-		setProperty(parser, StreamsConfig.PROP_NAMESPACE, "NAMESPACE=asdcf");
-		setProperty(parser, StreamsConfig.PROP_REQUIRE_ALL, true);
+		setProperty(parser, ParserProperties.PROP_NAMESPACE, "NAMESPACE=asdcf");
+		setProperty(parser, ParserProperties.PROP_REQUIRE_ALL, true);
 	}
 
 	@Test

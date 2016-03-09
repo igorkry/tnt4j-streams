@@ -18,7 +18,7 @@ package com.jkool.tnt4j.streams.inputs;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
 
 /**
@@ -31,9 +31,9 @@ public class JMSStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new JMSStream();
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_SERVER_URI, "localhost");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_QUEUE_NAME, "test");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamsConfig.PROP_JNDI_FACTORY, "JNDI");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_SERVER_URI, "localhost");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_QUEUE_NAME, "test");
+		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_JNDI_FACTORY, "JNDI");
 		InputPropertiesTestUtils.testInputPropertySetAndGet(input, JMSStreamConstants.PROP_JMS_CONN_FACTORY, "JMS");
 	}
 

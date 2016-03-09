@@ -21,12 +21,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import org.apache.hadoop.fs.*;
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.HdfsStreamConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.TestFileList;
@@ -37,6 +39,40 @@ import com.jkool.tnt4j.streams.utils.TestFileList;
  */
 public class HdfsFileLineStreamTest {
 
+	private final class TestInputStreamStub extends InputStream implements PositionedReadable, Seekable {
+		@Override
+		public int read() throws IOException {
+			return -1;
+		}
+
+		@Override
+		public int read(long position, byte[] buffer, int offset, int length) throws IOException {
+			return -1;
+		}
+
+		@Override
+		public void readFully(long position, byte[] buffer, int offset, int length) throws IOException {
+		}
+
+		@Override
+		public void readFully(long position, byte[] buffer) throws IOException {
+		}
+
+		@Override
+		public void seek(long pos) throws IOException {
+		}
+
+		@Override
+		public long getPos() throws IOException {
+			return 0;
+		}
+
+		@Override
+		public boolean seekToNewSource(long targetPos) throws IOException {
+			return false;
+		}
+	}
+
 	@Test()
 	public void test() throws Exception {
 		FileSystem fs = mock(FileSystem.class);
@@ -46,18 +82,15 @@ public class HdfsFileLineStreamTest {
 
 		final String fileName = (files.get(0).getParentFile() + File.separator + "TEST*").replace("\\", "/");
 
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_FILENAME, fileName));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME, fileName));
 
-		when(fs.open(any(Path.class))).thenReturn(mock(FSDataInputStream.class));
+		when(fs.open(any(Path.class))).thenReturn(new FSDataInputStream(new TestInputStreamStub()));
 		final FileStatus fileStatusMock = mock(FileStatus.class);
 		final FileStatus[] array = new FileStatus[10];
 		Arrays.fill(array, fileStatusMock);
 		when(fs.listStatus(any(Path.class), any(PathFilter.class))).thenReturn(array);
-		when(fileStatusMock.getModificationTime()).thenReturn(new Long(1L), new Long(2L), 3L);
+		when(fileStatusMock.getModificationTime()).thenReturn(1L, 2L, 3L);
 		when(fileStatusMock.getPath()).thenReturn(mock(Path.class));
 
 		stream.setFs(fs);

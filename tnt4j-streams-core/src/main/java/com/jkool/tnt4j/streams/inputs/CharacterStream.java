@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -173,13 +173,13 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 */
 	@Override
 	public Object getProperty(String name) {
-		if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
-		if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 			return socketPort;
 		}
-		if (StreamsConfig.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+		if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
 			return restartOnInputClose;
 		}
 		return super.getProperty(name);
@@ -199,21 +199,21 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (StreamsConfig.PROP_FILENAME.equalsIgnoreCase(name)) {
+			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				if (socketPort != null) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
-							StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
+							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 				}
 				fileName = value;
-			} else if (StreamsConfig.PROP_PORT.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(fileName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.cannot.set.both",
-							StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
+							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 				}
 				socketPort = Integer.valueOf(value);
-			} else if (StreamsConfig.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+			} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
 				restartOnInputClose = Boolean.parseBoolean(value);
 			}
 		}
@@ -234,7 +234,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			if (StringUtils.isEmpty(fileName) && socketPort == null) {
 				throw new IllegalStateException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.property.undefined.one.of",
-						StreamsConfig.PROP_FILENAME, StreamsConfig.PROP_PORT));
+						StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 			}
 
 			if (fileName != null) {

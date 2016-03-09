@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -35,25 +35,25 @@ import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 public class ActivityNameValueParserTest {
 
 	private static final String TEST = "TEST=TESTVALUE\nTEST2=TESTVALUE2";
-	private ActivityNameValueParser activityNameValueParser = new ActivityNameValueParser();;
-	private TNTInputStream<String> stream = mock(TNTInputStream.class);;
+	private ActivityNameValueParser activityNameValueParser = new ActivityNameValueParser();
+	private TNTInputStream<String> stream = mock(TNTInputStream.class);
 
 	@Test
 	public void testSetProperties() throws Exception {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
-				put(StreamsConfig.PROP_FLD_DELIM, "\n");
-				put(StreamsConfig.PROP_VAL_DELIM, "=");
-				put(StreamsConfig.PROP_PATTERN, ".*");
-				put(StreamsConfig.PROP_STRIP_QUOTES, "false");
+				put(ParserProperties.PROP_FLD_DELIM, "\n");
+				put(ParserProperties.PROP_VAL_DELIM, "=");
+				put(ParserProperties.PROP_PATTERN, ".*");
+				put(ParserProperties.PROP_STRIP_QUOTES, "false");
 			}
 		};
 		activityNameValueParser.setProperties(propertiesMap.entrySet());
-		// assertEquals(propertiesMap.get(StreamsConfig.PROP_FLD_DELIM),
+		// assertEquals(propertiesMap.get(ParserProperties.PROP_FLD_DELIM),
 		// activityNameValueParser.fieldDelim.);
-		assertEquals(propertiesMap.get(StreamsConfig.PROP_VAL_DELIM), activityNameValueParser.valueDelim.toString());
-		assertEquals(propertiesMap.get(StreamsConfig.PROP_PATTERN), activityNameValueParser.pattern.toString());
-		assertEquals(propertiesMap.get(StreamsConfig.PROP_STRIP_QUOTES),
+		assertEquals(propertiesMap.get(ParserProperties.PROP_VAL_DELIM), activityNameValueParser.valueDelim.toString());
+		assertEquals(propertiesMap.get(ParserProperties.PROP_PATTERN), activityNameValueParser.pattern.toString());
+		assertEquals(propertiesMap.get(ParserProperties.PROP_STRIP_QUOTES),
 				activityNameValueParser.stripQuotes ? "true" : "false");
 
 	}

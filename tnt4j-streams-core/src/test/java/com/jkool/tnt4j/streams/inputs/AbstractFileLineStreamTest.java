@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
@@ -38,14 +38,11 @@ public class AbstractFileLineStreamTest {
 	@Test
 	public void setPropertiesTest() throws Exception {
 		final String fileName = "c:/Windows/schemas/TSWorkSpace/tswcx.xml";
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>() {
-			{
-				add(new AbstractMap.SimpleEntry(StreamsConfig.PROP_FILENAME, fileName));
-			}
-		};
+		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME, fileName));
 
 		afls.setProperties(props);
-		final Object property = afls.getProperty(StreamsConfig.PROP_FILENAME);
+		final Object property = afls.getProperty(StreamProperties.PROP_FILENAME);
 		assertTrue(fileName.equals(property));
 	}
 

@@ -152,15 +152,7 @@ public class FilePollingStream extends AbstractFilePollingStream {
 
 			if (startFromLatestActivity && pollingFile != null) {
 				lastModifTime = pollingFile.lastModified();
-				LineNumberReader lineReader = null;
-				try {
-					lineReader = new LineNumberReader(new FileReader(pollingFile));
-					long skippedCharsCount = lineReader.skip(Long.MAX_VALUE);
-					// NOTE: Add 1 because line index starts at 0
-					lineNumber = lineReader.getLineNumber() + 1;
-				} finally {
-					Utils.close(lineReader);
-				}
+				lineNumber = Utils.countLines(new FileReader(pollingFile));
 
 				// NOTE: this one should be "faster"
 				// lineNumber = Utils.countLines(pollingFile);

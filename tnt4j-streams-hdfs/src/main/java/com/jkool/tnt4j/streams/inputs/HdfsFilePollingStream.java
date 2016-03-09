@@ -169,15 +169,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 
 			if (startFromLatestActivity && pollingFile != null) {
 				lastModifTime = getModificationTime(pollingFile, fs);
-				LineNumberReader lineReader = null;
-				try {
-					lineReader = new LineNumberReader(new InputStreamReader(fs.open(pollingFile)));
-					lineReader.skip(Long.MAX_VALUE);
-					// NOTE: Add 1 because line index starts at 0
-					lineNumber = lineReader.getLineNumber() + 1;
-				} finally {
-					Utils.close(lineReader);
-				}
+				lineNumber = Utils.countLines(new InputStreamReader(fs.open(pollingFile)));
 			}
 
 			Utils.close(fs);

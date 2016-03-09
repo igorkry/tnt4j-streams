@@ -27,9 +27,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.StreamFieldType;
 
 /**
@@ -44,7 +44,7 @@ public class MessageActivityXmlParserTest {
 	public void testProperties() throws Exception {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
-				put(StreamsConfig.PROP_SIG_DELIM, DELIM);
+				put(ParserProperties.PROP_SIG_DELIM, DELIM);
 			}
 		};
 		MessageActivityXmlParser parser = new MessageActivityXmlParser();

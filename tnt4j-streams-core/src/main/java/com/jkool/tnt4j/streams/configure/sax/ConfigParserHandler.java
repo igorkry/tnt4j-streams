@@ -671,7 +671,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (processingTNT4JProperties) {
-			//currStream.addTNT4JProperty(name, value);
+			currStream.addTNT4JProperty(name, value);
 		} else {
 			if (currProperties == null) {
 				currProperties = new ArrayList<Map.Entry<String, String>>();

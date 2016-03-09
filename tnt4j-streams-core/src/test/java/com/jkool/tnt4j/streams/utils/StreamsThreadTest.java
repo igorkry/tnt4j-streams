@@ -49,8 +49,8 @@ public class StreamsThreadTest {
 
 	private void assertThreadNameCorrect(final String name, StreamsThread thread) {
 		final String actualName = thread.getName();
-		final int indexOfNameWithoudIdStart = String.valueOf(thread.getId()).length() + 1;
-		assertEquals(name, actualName.substring(indexOfNameWithoudIdStart));
+		final int indexOfNameWithoutIdStart = String.valueOf(thread.getId()).length() + 1;
+		assertEquals(name, actualName.substring(indexOfNameWithoutIdStart));
 	}
 
 	@Test
