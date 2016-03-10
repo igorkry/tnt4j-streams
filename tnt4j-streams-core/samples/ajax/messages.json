@@ -1,0 +1,13 @@
+{
+  "eventType": "Ajax",
+  "startOfLoading": 1457431180041,
+  "endOfLoading": 1457431180166,
+  "elapsedTime": 125,
+  "contentSize": 890,
+  "statuss": 200,
+  "message": "",
+  "url": "http://localhost:8000/app/partials/phone-list.html",
+  "error": false,
+  "abort": false
+}
+

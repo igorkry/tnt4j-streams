@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="ResourceName" separator=",">
+			<field-locator locator="file"  locator-type="Label"/>
+			<field-locator locator="line" locator-type="Label"/>
+		</field>
+		
+		<field name="Method" locator="name" locator-type="Label"/>
+			
+        <field name="EventName" value="node.js Trace"/>
+        <field name="EventType" value="EVENT"/>
+		
+		<field name="Exception" locator="exception" locator-type="Label"/>
+		
+		<field name="CompCode" locator="exception" locator-type="Label">
+			<field-map source="false" target="SUCCESS"/>
+			<field-map source="true" target="ERROR"/>
+		</field>
+		
+    </parser>
+
+    <parser name="njstraceParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="njstraceHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="njstraceParser"/>
+    </stream>
+</tnt-data-source>
