@@ -120,6 +120,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 			switch (fieldType) {
 			case Correlator:
 			case TrackingId:
+			//case ParentId:
 				Object[] sigItems = null;
 				if (value instanceof Object[]) {
 					sigItems = (Object[]) value;

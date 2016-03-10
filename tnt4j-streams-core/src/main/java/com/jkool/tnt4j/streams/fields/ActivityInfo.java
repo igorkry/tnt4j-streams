@@ -74,6 +74,7 @@ public class ActivityInfo {
 	private Collection<String> correlator = null;
 
 	private String trackingId = null;
+	private String parentId = null;
 	private Collection<String> tag = null;
 	private Object message = null;
 	private String msgCharSet = null;
@@ -127,7 +128,7 @@ public class ActivityInfo {
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (CollectionUtils.isEmpty(locators)) {
 			if (value instanceof Object[]) {
-			 	fieldValue = Arrays.toString((Object[])value); //TODO:
+				fieldValue = Arrays.toString((Object[]) value); // TODO:
 			} else {
 				fieldValue = value;
 			}
@@ -338,6 +339,9 @@ public class ActivityInfo {
 			case Category:
 				category = getStringValue(fieldValue);
 				break;
+			case ParentId:
+				parentId = getStringValue(fieldValue);
+				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.unrecognized.activity", field));
@@ -471,6 +475,7 @@ public class ActivityInfo {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
+		event.setParentId(parentId);
 		event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
 		if (CollectionUtils.isNotEmpty(tag)) {
 			event.setTag(tag);
@@ -758,6 +763,10 @@ public class ActivityInfo {
 			category = otherAi.category;
 		}
 
+		if (StringUtils.isEmpty(parentId)) {
+			parentId = otherAi.parentId;
+		}
+
 		filtered |= otherAi.filtered;
 
 		if (otherAi.activityProperties != null) {
@@ -1001,6 +1010,15 @@ public class ActivityInfo {
 	 */
 	public String getCategory() {
 		return category;
+	}
+
+	/**
+	 * Gets parent activity identifier.
+	 *
+	 * @return the parent activity identifier
+	 */
+	public String getParentId() {
+		return parentId;
 	}
 
 	/**

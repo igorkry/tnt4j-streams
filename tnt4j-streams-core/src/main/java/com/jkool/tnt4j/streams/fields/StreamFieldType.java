@@ -170,7 +170,13 @@ public enum StreamFieldType {
 	/**
 	 * Activity event category name.
 	 */
-	Category(String.class);
+	Category(String.class),
+
+	/**
+	 * Identifier used to uniquely identify parent activity associated with this
+	 * activity.
+	 */
+	ParentId(String.class);
 
 	private Class dataType;
 
