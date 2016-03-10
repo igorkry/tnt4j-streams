@@ -230,7 +230,13 @@ sample:
     /**
      * Activity event category name.
      */
-    Category(String.class);
+    Category(String.class),
+
+    /**
+     * Identifier used to uniquely identify parent activity associated with this
+     * activity.
+     */
+    ParentId(String.class);
 ```
 
 NOTE: `EventType` field is mandatory and can't have value `null`.
