@@ -18,9 +18,8 @@ Put 'angulartics-tnt4j.js' under your script diretory
 Then add angulartics-tnt4j.js to your page.
 
 ```html
-  <script src="js/angulartics-tnt4j.js"></script>
+    <script src="js/angulartics-tnt4j.js"></script>
 ```
-
 
 # Simple use tutorial
 
@@ -30,6 +29,7 @@ Angulartics - analytics for AngularJS applications.
 ## Prerequisites
 
 * NodeJS
+* Bower
 
 If you dont have these, you can simply fallow instructions on (https://docs.angularjs.org/tutorial#get-started)
 	
@@ -44,32 +44,40 @@ Clone angular-phonecat tutorial app.
 Install all dependencies.
 	
 * `npm install`
+* `bower install`
 
 ## Step 3
+
+Install angulartics
+
+```
+bower install angulartics
+````
+
+## Step 4
+
+Put 'angulartics-tnt4j.js' under your script diretory './js'
+	
+## Step 5
 	
 'cd angular-phonecat\app\' and edit `index.html` to add `angulartics-tnt4j` and `angulartics` scripts.
 	
 ```html
     <script src="js/angulartics-tnt4j.js"></script>
-	<script src="bower_components/angulartics/dist/angulartics.min.js"></script>
+    <script src="bower_components/angulartics/dist/angulartics.min.js"></script>
 ```
 	
-## Step 4
+## Step 6
 
-Put 'angulartics-tnt4j.js' under your script diretory
+`cd js` and edit `app.js` to add `angulartics-tnt4j` and `angulartics` dependencies to existing app.
 
-Then add angulartics-tnt4j.js to your page.
-
-```html
-  <script src="js/angulartics-tnt4j.js"></script>
-```
 	
-## Step 5
+## Step 7
 
 Run TNT4J-streams application with configuration provided in this folder. Ensure your JKoolCloud tokens configured in
 `tnt4j.properties`
 	
-## Step 6
+## Step 8
 	
 Allow CORS access:
 * Edit `package.json`
@@ -82,14 +90,14 @@ Allow CORS access:
 
     I.E. in Chrome add plugin (https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
 	
-## Step 7
+## Step 9
 	
 Run included web-server 'npm start' and access `http://localhost:8000/app/`
 	
 Now all angular Routed pages are tracked.
 	
 	
-## Step 8
+## Step 10
 
 Assume you want to add one's every image click:
 Edit phone-detail.html
@@ -103,5 +111,3 @@ and add `analytics-on="click" analytics-event="Image View"` to `img`
         </li>
     </ul>
 ```
-
-	
