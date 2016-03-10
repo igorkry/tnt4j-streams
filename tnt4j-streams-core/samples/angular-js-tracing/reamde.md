@@ -3,37 +3,35 @@
 Single page application using AngularJS tracking and analytics offers great challenge for developers. JKoolCloud offers
 Angulartics plugin to deal this with easy.
 
-# Install
+# Installation
 
 ### npm
 
 ```shell
-npm install angulartics-tnt4j --save
+npm install tnt4j-angulatics-plugin --save
 ```
 
-### Bower
-
-To install Angulartics core module:
-```shell
-bower install angulartics-tnt4j  --save
-```
-
-### Manual 
+### manual
 
 Put 'angulartics-tnt4j.js' under your script diretory
 
+Then add angulartics-tnt4j.js to your page.
 
-#Simple use tutorial 
+```html
+  <script src="js/angulartics-tnt4j.js"></script>
+```
+
+
+# Simple use tutorial
 
 This simple use tutorial based on Google's phonecat tutorial, this one extends AngularJS tutorial by adding
 Angulartics - analytics for AngularJS applications.
 
-#Prerequisites
+## Prerequisites
 
 * NodeJS
-* Bower
 
-If you dont have these, you can simply fallow instructions on https://docs.angularjs.org/tutorial#get-started
+If you dont have these, you can simply fallow instructions on (https://docs.angularjs.org/tutorial#get-started)
 	
 ## Step 1
 	
@@ -46,25 +44,29 @@ Clone angular-phonecat tutorial app.
 Install all dependencies.
 	
 * `npm install`
-* `bower install`
-	
+
 ## Step 3
 	
 'cd angular-phonecat\app\' and edit `index.html` to add `angulartics-tnt4j` and `angulartics` scripts.
 	
-```xml
+```html
     <script src="js/angulartics-tnt4j.js"></script>
 	<script src="bower_components/angulartics/dist/angulartics.min.js"></script>
 ```
 	
 ## Step 4
 
-`cd js` and edit `app.js` to add `angulartics-tnt4j` and `angulartics` dependencies to existing app.
+Put 'angulartics-tnt4j.js' under your script diretory
 
+Then add angulartics-tnt4j.js to your page.
+
+```html
+  <script src="js/angulartics-tnt4j.js"></script>
+```
 	
 ## Step 5
 
-Run TNT4J-streams application with configuration provided in this folder. Ensure your JKollCloud tokens configured in
+Run TNT4J-streams application with configuration provided in this folder. Ensure your JKoolCloud tokens configured in
 `tnt4j.properties`
 	
 ## Step 6
@@ -72,17 +74,19 @@ Run TNT4J-streams application with configuration provided in this folder. Ensure
 Allow CORS access:
 * Edit `package.json`
 
-    "start": "http-server -a 0.0.0.0 -p 8000 --cors",
+```json
+  "start": "http-server -a 0.0.0.0 -p 8000 --cors",
+```
 
 * Allow CORS in browser:
 
-	I.E. in Chrome add plugin "https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi"
+    I.E. in Chrome add plugin (https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
 	
 ## Step 7
 	
 Run included web-server 'npm start' and access `http://localhost:8000/app/`
 	
-Now all angular Routed pagel are tracked
+Now all angular Routed pages are tracked.
 	
 	
 ## Step 8
@@ -90,7 +94,7 @@ Now all angular Routed pagel are tracked
 Assume you want to add one's every image click:
 Edit phone-detail.html
 	
-and add  `analytics-on="click" analytics-event="Image View"` to `img`
+and add `analytics-on="click" analytics-event="Image View"` to `img`
 	
 ```html
     <ul class="phone-thumbs">
