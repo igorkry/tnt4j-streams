@@ -21,7 +21,6 @@ package com.jkool.tnt4j.streams.fields;
  *
  * @author akausinis
  * @version 1.0
- * @created 2016-03-07 15:05
  */
 public enum StreamStatus {
 	NEW, STARTED, SUCCESS, FAILURE, CANCEL, DROP_OFF, REJECT,

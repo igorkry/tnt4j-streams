@@ -57,7 +57,12 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
-	private static final double DEFAULT_EPSILON = 0.000001;
+
+	/**
+	 * Default floating point numbers equality comparison difference tolerance
+	 * {@value}.
+	 */
+	public static final double DEFAULT_EPSILON = 0.000001;
 
 	private Utils() {
 	}
@@ -621,7 +626,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 	/**
 	 * Checks equality of two double numbers with difference tolerance
-	 * {@value DEFAULT_EPSILON}.
+	 * {@value #DEFAULT_EPSILON}.
 	 *
 	 * @param d1
 	 *            first double to compare

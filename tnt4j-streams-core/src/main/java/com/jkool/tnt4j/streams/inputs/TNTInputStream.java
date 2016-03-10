@@ -297,18 +297,19 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
-	 * 
-	 * @return
+	 * Gets path string of TNT4J configuration file.
+	 *
+	 * @return returns path of TNT4J configuration file
 	 */
 	public String getTnt4jCfgFilePath() {
 		return tnt4jCfgFilePath;
 	}
 
 	/**
-	 * TODO
+	 * Sets path string of TNT4J configuration file.
 	 *
 	 * @param tnt4jCfgFilePath
+	 *            path of TNT4J configuration file
 	 */
 	public void setTnt4jCfgFilePath(String tnt4jCfgFilePath) {
 		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
@@ -441,7 +442,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * TODO
 	 * 
-	 * @return
+	 * @return currently processed activity index
 	 */
 	public int getCurrentActivity() {
 		return currActivityIndex;

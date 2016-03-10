@@ -23,7 +23,6 @@ import com.jkool.tnt4j.streams.fields.StreamStatus;
  *
  * @author akausinis
  * @version 1.0
- * @created 2016-03-07 15:03
  */
 public interface InputStreamListener<T> {
 	void onProgressUpdate(TNTInputStream stream, int current, int total);

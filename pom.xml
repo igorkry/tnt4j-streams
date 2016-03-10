@@ -38,6 +38,18 @@
         <release.deploy.dir>../build/${project.name}</release.deploy.dir>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <javadoc.opts>-Xdoclint:none</javadoc.opts>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -84,7 +96,7 @@
                     <version>true</version>
                     <nodeprecatedlist>false</nodeprecatedlist>
                     <nodeprecatedlist>false</nodeprecatedlist>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <additionalparam>${javadoc.opts}</additionalparam>
                 </configuration>
             </plugin>
             <plugin>

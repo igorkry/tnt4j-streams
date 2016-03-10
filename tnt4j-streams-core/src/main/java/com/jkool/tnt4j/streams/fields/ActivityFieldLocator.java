@@ -650,15 +650,15 @@ public class ActivityFieldLocator implements Cloneable {
 		String fromStr = null;
 		String toStr = null;
 
-		if (rCharIdx == -1) {
+		if (rCharIdx == -1) { // no range separator symbol found - unary range
 			fromStr = numStrs.length > 0 ? numStrs[0] : null;
 			toStr = fromStr;
 		} else {
-			if (rCharIdx == 0) {
+			if (rCharIdx == 0) { // unbound low range
 				toStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else if (rCharIdx == cs.length()) {
+			} else if (rCharIdx == cs.length()) { // unbound high range
 				fromStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else {
+			} else { // bounded range
 				fromStr = numStrs.length > 0 ? numStrs[0] : null;
 				toStr = numStrs.length > 1 ? numStrs[1] : null;
 			}
