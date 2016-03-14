@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2014-2016 JKOOL, LLC.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value="|"/>
+        <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="2"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="3"/>
+        <field name="UserName" locator="4"/>
+        <field name="EventName" locator="5"/>
+        <field name="EventType" locator="5">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="8"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+        <property name="FileName" value=".\..\temp\orders.log"/>
+        <parser-ref name="TokenParser"/>
+
+        <tnt4j-properties>
+            <property name="event.sink.factory.Token" value="gqE52EU79toRcypXAVs7fTZVjbEze1sb"/>
+            <property name="event.sink.factory.Filename" value="logs/tnt4j-streams-activities_custom.log"/>
+            <property name="source.factory.GEOADDR" value="Marijampole"/>
+            <property name="source.factory.DATACENTER" value="Kazkas"/>
+            <property name="source.factory.APPL" value="JKoolUIDirStream"/>
+            <property name="source.factory.RootFQN"
+                      value="RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?#APPL=?#USER=?"/>
+            <property name="source.factory.RootSSN" value="TNT4J-Streams-dir_stream"/>
+        </tnt4j-properties>
+
+    </stream>
+</tnt-data-source>
