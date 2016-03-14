@@ -1,14 +1,14 @@
 var Formatter = require('njstrace/lib/formatter.js'),
     request = require('request');
 
-function Tnt4JStremsFormatter() {
+function Tnt4JStreamsFormatter() {
 }
 
-require('util').inherits(Tnt4JStremsFormatter, Formatter);
+require('util').inherits(Tnt4JStreamsFormatter, Formatter);
 
 
 // Implement the onEntry method
-Tnt4JStremsFormatter.prototype.onEntry = function (args) {
+Tnt4JStreamsFormatter.prototype.onEntry = function (args) {
     request({
         url: "http://localhost:9595",
         method: "POST",
@@ -27,7 +27,7 @@ Tnt4JStremsFormatter.prototype.onEntry = function (args) {
 };
 
 // Implement the onExit method
-Tnt4JStremsFormatter.prototype.onExit = function (args) {
+Tnt4JStreamsFormatter.prototype.onExit = function (args) {
     request({
         url: "http://localhost:9595",
         method: "POST",
@@ -45,4 +45,4 @@ Tnt4JStremsFormatter.prototype.onExit = function (args) {
     // args.name, args.file, args.line, args.exception, args.retLine, args.span, args.returnValue !== null);
 };
 
-module.exports.Tnt4JStremsFormatter = Tnt4JStremsFormatter;
+module.exports.Tnt4JStreamsFormatter = Tnt4JStreamsFormatter;
