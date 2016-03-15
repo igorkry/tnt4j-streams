@@ -21,8 +21,8 @@ Since the instrumentation happens when the Module._compile() is called, only mod
 to njstrace.inject() would get instrumented.
 
 ```js
-var Tnt4JStremsFormatter = require('../../../njsTraceFormatter-tnt4j.js').Tnt4JStremsFormatter;
-var njstrace = require('njstrace').inject({	formatter: new Tnt4JStremsFormatter(), inspectArgs: false,
+var Tnt4jStreamsFormatter = require('../../../njsTraceFormatter-tnt4j.js').Tnt4jStreamsFormatter;
+var njstrace = require('njstrace').inject({	formatter: new Tnt4jStreamsFormatter(), inspectArgs: false,
 											files: ['**/*.js', '!**/node_modules/**',  '**/node_modules/http-server/**'],});
 ```
 

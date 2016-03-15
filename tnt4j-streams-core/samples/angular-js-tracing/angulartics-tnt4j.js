@@ -18,7 +18,7 @@
 
 var plugin = angular.module('angulartics.tnt4j', ['angulartics']);
 
-plugin.factory('Tnt4JStreamsService', function ($http, $document) {
+plugin.factory('Tnt4jStreamsService', function ($http, $document) {
     return {
         sendPath: function (path) {
             this.sendEventToStream(this.event(path, null, null));
@@ -58,14 +58,14 @@ plugin.factory('Tnt4JStreamsService', function ($http, $document) {
     }
 });
 
-plugin.config(['$analyticsProvider', 'Tnt4JStreamsServiceProvider', function ($analyticsProvider, Tnt4JStreamsServiceProvider) {
-    var Tnt4JStreamsService = Tnt4JStreamsServiceProvider.$get();
+plugin.config(['$analyticsProvider', 'Tnt4jStreamsServiceProvider', function ($analyticsProvider, Tnt4jStreamsServiceProvider) {
+    var Tnt4jStreamsService = Tnt4jStreamsServiceProvider.$get();
     $analyticsProvider.registerPageTrack(function (path) {
-        Tnt4JStreamsService.sendPath(path);
+        Tnt4jStreamsService.sendPath(path);
     });
 
     $analyticsProvider.registerEventTrack(function (action, properties) {
-        Tnt4JStreamsService.sendAction(action, properties);
+        Tnt4jStreamsService.sendAction(action, properties);
     });
 }]);
 
