@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -115,6 +116,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private int currActivityIndex = 0;
 
 	private List<InputStreamListener> streamListeners;
+	private List<StreamTasksListener> streamTasksListeners;
 
 	/**
 	 * Delay between retries to submit data package to jKool Cloud Service if
@@ -342,12 +344,16 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @param threadsQty
 	 *            the number of threads in the pool
 	 *
-	 * @return the newly created thread pool
+	 * @return the newly created thread pool executor
 	 *
-	 * @see Executors#newFixedThreadPool(int)
+	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
+	 *      BlockingQueue, ThreadFactory)
 	 */
 	private static ExecutorService getDefaultExecutorService(int threadsQty) {
-		return Executors.newFixedThreadPool(threadsQty, new StreamsThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
+		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(), new StreamsThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
+
+		return tpe;
 	}
 
 	/**
@@ -364,7 +370,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @param offerTimeout
 	 *            how long to wait before giving up on offering task to queue
 	 *
-	 * @return the newly created thread pool
+	 * @return the newly created thread pool executor
 	 *
 	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
 	 *      BlockingQueue, ThreadFactory)
@@ -383,7 +389,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 						logger.log(OpLevel.WARNING,
 								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 										"TNTInputStream.tasks.buffer.limit", offerTimeout));
-						notifyStatusChange(StreamStatus.REJECT);
+						notifyStreamTaskRejected(r);
 					}
 				} catch (InterruptedException exc) {
 					halt();
@@ -428,33 +434,51 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
+	 * <p>
 	 * Get the position in the source activity data currently being processed.
-	 * For line-based data sources, this is generally the line number.
+	 * For line-based data sources, this is generally the line number of
+	 * currently processed file or other text source. If activity items source
+	 * (i.e. file) changes - activity position gets reset.
+	 * <p>
 	 * Subclasses should override this to provide meaningful information, if
 	 * relevant. The default implementation just returns 0.
 	 *
-	 * @return current position in activity data source being processed
+	 * @return current position in activity data source being processed, or
+	 *         {@code 0} if activity position can't be determined
+	 *
+	 * @see #getCurrentActivity()
 	 */
 	public int getActivityPosition() {
 		return 0;
 	}
 
 	/**
-	 * TODO
+	 * Returns currently streamed activity item index. Index is constantly
+	 * incremented when streaming begins and activity items gets available to
+	 * stream.
+	 * <p>
+	 * It does not matter if activity item source changes (i.e. file). To get
+	 * actual source dependent position see {@link #getActivityPosition()}.
 	 * 
-	 * @return currently processed activity index
+	 * @return currently processed activity item index
+	 *
+	 * @see #getActivityPosition()
+	 * @see #getTotalActivities()
 	 */
 	public int getCurrentActivity() {
 		return currActivityIndex;
 	}
 
 	/**
-	 * TODO
+	 * Returns total number of activity items to be streamed.
 	 * 
-	 * @return total number of activities available to stream
+	 * @return total number of activities available to stream, or {@code -1} if
+	 *         total number of activities is undetermined
+	 *
+	 * @see #getCurrentActivity()
 	 */
 	public int getTotalActivities() {
-		return 0;
+		return -1;
 	}
 
 	/**
@@ -633,6 +657,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 		if (CollectionUtils.isNotEmpty(streamListeners)) {
 			streamListeners.clear();
 		}
+
+		if (CollectionUtils.isNotEmpty(streamTasksListeners)) {
+			streamTasksListeners.clear();
+		}
 	}
 
 	private synchronized void shutdownExecutors() {
@@ -646,7 +674,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 		} catch (InterruptedException exc) {
 			halt();
 		} finally {
-			streamExecutorService.shutdownNow();
+			List<Runnable> droppedTasks = streamExecutorService.shutdownNow();
+
+			if (CollectionUtils.isNotEmpty(droppedTasks)) {
+				notifyStreamTasksDropOff(droppedTasks);
+			}
 		}
 	}
 
@@ -685,6 +717,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 			throw e;
 		}
+
+		AtomicBoolean failureFlag = new AtomicBoolean(false);
 		try {
 			initialize();
 			notifyStatusChange(StreamStatus.STARTED);
@@ -694,16 +728,14 @@ public abstract class TNTInputStream<T> implements Runnable {
 					if (item == null) {
 						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 								"TNTInputStream.data.stream.ended"));
-						// notifyStreamingSuccess();
 						halt(); // no more data items to process
 					} else {
-						currActivityIndex++;
-						notifyProgressUpdate(currActivityIndex, getTotalActivities());
+						notifyProgressUpdate(++currActivityIndex, getTotalActivities());
 
 						if (streamExecutorService == null) {
-							processActivityItem(item);
+							processActivityItem(item, failureFlag);
 						} else {
-							streamExecutorService.submit(new ActivityItemProcessingTask(item));
+							streamExecutorService.submit(new ActivityItemProcessingTask(item, failureFlag));
 						}
 					}
 				} catch (IllegalStateException ise) {
@@ -712,6 +744,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
 									ise.getLocalizedMessage()),
 							ise);
+					failureFlag.set(true);
 					notifyFailed(null, ise, null);
 					halt();
 				} catch (Exception exc) {
@@ -725,22 +758,30 @@ public abstract class TNTInputStream<T> implements Runnable {
 		} catch (Exception e) {
 			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
+			failureFlag.set(true);
 			notifyFailed(null, e, null);
 		} finally {
 			shutdownExecutors();
-			cleanup();
+
+			if (!failureFlag.get()) {
+				notifyStreamSuccess(null);
+			}
 			notifyFinished();
+
+			cleanup();
+
 			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.thread.ended", Thread.currentThread().getName()));
 		}
 	}
 
-	private void processActivityItem(T item) throws Exception {
+	private void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
 			logger.log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"));
 			if (haltIfNoParser) {
+				failureFlag.set(true);
 				notifyFailed(
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"),
 						null, null);
@@ -775,6 +816,22 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
+	 * Signals that streaming process was canceled and invokes status change
+	 * event. TODO
+	 */
+	public void cancel() { // TODO
+		halt();
+
+		// ownerThread.join();
+
+		notifyStatusChange(StreamStatus.CANCEL);
+		// notifyFinished();
+
+		// shutdownExecutors();
+		// cleanup();
+	}
+
+	/**
 	 * Returns stream name value
 	 *
 	 * @return stream name
@@ -794,9 +851,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Adds defined {@code InputStreamListener} to stream listeners list.
 	 *
 	 * @param l
+	 *            the {@code InputStreamListener} to be added
 	 */
 	public void addStreamListener(InputStreamListener l) {
 		if (streamListeners == null) {
@@ -807,9 +865,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Removes defined {@code InputStreamListener} from stream listeners list.
 	 *
 	 * @param l
+	 *            the {@code InputStreamListener} to be removed
 	 */
 	public void removeStreamListener(InputStreamListener l) {
 		if (streamListeners != null) {
@@ -818,10 +877,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Notifies that activity items streaming process progress has updated.
 	 *
 	 * @param curr
+	 *            index of currently streamed activity item
 	 * @param total
+	 *            total number of activity items to stream
 	 */
 	protected void notifyProgressUpdate(int curr, int total) {
 		if (streamListeners != null) {
@@ -832,12 +893,15 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
-	 * 
+	 * Notifies that activity items streaming process has completed
+	 * successfully.
+	 *
 	 * @param result
+	 *            result got after streaming completion
 	 */
 	@SuppressWarnings("unchecked")
-	public void notifyStreamSuccess(T result) {
+	public void notifyStreamSuccess(Object result) {
+		notifyStatusChange(StreamStatus.SUCCESS);
 		if (streamListeners != null) {
 			for (InputStreamListener l : streamListeners) {
 				l.onSuccess(this, result);
@@ -846,13 +910,17 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
-	 * 
+	 * Notifies that activity items streaming process has failed.
+	 *
 	 * @param msg
+	 *            failure message
 	 * @param exc
+	 *            failure exception
 	 * @param code
+	 *            failure code
 	 */
-	protected void notifyFailed(String msg, Throwable exc, Integer code) {
+	protected void notifyFailed(String msg, Throwable exc, String code) {
+		notifyStatusChange(StreamStatus.FAILURE);
 		if (streamListeners != null) {
 			for (InputStreamListener l : streamListeners) {
 				l.onFailure(this, msg, exc, code);
@@ -861,9 +929,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
-	 * 
+	 * Notifies that activity items streaming process status has changed.
+	 *
 	 * @param newStatus
+	 *            new stream status value
 	 */
 	protected void notifyStatusChange(StreamStatus newStatus) {
 		if (streamListeners != null) {
@@ -874,7 +943,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Notifies that activity items streaming process has finished independent
+	 * of completion state.
 	 */
 	protected void notifyFinished() {
 		if (streamListeners != null) {
@@ -884,8 +954,66 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
+	/**
+	 * Adds defined {@code StreamTasksListener} to stream tasks listeners list.
+	 *
+	 * @param l
+	 *            the {@code StreamTasksListener} to be added
+	 */
+	public void addStreamTasksListener(StreamTasksListener l) {
+		if (streamTasksListeners == null) {
+			streamTasksListeners = new ArrayList<StreamTasksListener>();
+		}
+
+		streamTasksListeners.add(l);
+	}
+
+	/**
+	 * Removes defined {@code StreamTasksListener} from stream tasks listeners
+	 * list.
+	 *
+	 * @param l
+	 *            the {@code StreamTasksListener} to be removed
+	 */
+	public void removeStreamTasksListener(StreamTasksListener l) {
+		if (streamTasksListeners != null) {
+			streamTasksListeners.remove(l);
+		}
+	}
+
+	/**
+	 * Notifies that stream executor service has rejected offered activity items
+	 * streaming task to queue.
+	 * 
+	 * @param task
+	 *            executor rejected task
+	 */
+	protected void notifyStreamTaskRejected(Runnable task) {
+		if (streamTasksListeners != null) {
+			for (StreamTasksListener l : streamTasksListeners) {
+				l.onReject(this, task);
+			}
+		}
+	}
+
+	/**
+	 * Notifies that stream executor service has been shot down and some of
+	 * unprocessed activity items streaming tasks has been dropped of the queue.
+	 * 
+	 * @param tasks
+	 *            list of executor dropped of tasks
+	 */
+	protected void notifyStreamTasksDropOff(List<Runnable> tasks) {
+		if (streamTasksListeners != null) {
+			for (StreamTasksListener l : streamTasksListeners) {
+				l.onDropOff(this, tasks);
+			}
+		}
+	}
+
 	private class ActivityItemProcessingTask implements Runnable {
 		private T item;
+		private AtomicBoolean failureFlag;
 
 		/**
 		 * Constructs a new ActivityItemProcessingTask.
@@ -893,17 +1021,31 @@ public abstract class TNTInputStream<T> implements Runnable {
 		 * @param activityItem
 		 *            raw activity data item to process asynchronously
 		 */
-		ActivityItemProcessingTask(T activityItem) {
+		ActivityItemProcessingTask(T activityItem, AtomicBoolean failureFlag) {
 			this.item = activityItem;
+			this.failureFlag = failureFlag;
 		}
 
 		public void run() {
 			try {
-				processActivityItem(item);
+				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
 				logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 						"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
+				failureFlag.set(true);
+				notifyFailed(null, e, null);
 			}
+		}
+
+		/**
+		 * Return string representing class name of task object and wrapped
+		 * activity item data.
+		 *
+		 * @return a string representing activity item processing task
+		 */
+		@Override
+		public String toString() {
+			return "ActivityItemProcessingTask{" + "item=" + item + '}';
 		}
 	}
 

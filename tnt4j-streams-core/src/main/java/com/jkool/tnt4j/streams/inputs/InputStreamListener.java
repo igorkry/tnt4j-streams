@@ -19,19 +19,73 @@ package com.jkool.tnt4j.streams.inputs;
 import com.jkool.tnt4j.streams.fields.StreamStatus;
 
 /**
- * TODO
+ * <p>
+ * A streaming progress/status notifications listener interface. This interface
+ * can be implemented by classes that are interested in streaming process
+ * progress and status changes.
+ * </p>
  *
- * @author akausinis
- * @version 1.0
+ * @see TNTInputStream#addStreamListener(InputStreamListener)
+ *
+ * @version $Revision: 1 $
+ *
  */
 public interface InputStreamListener<T> {
+	/**
+	 * This method gets called when activity items streaming process progress
+	 * has updated.
+	 * 
+	 * @param stream
+	 *            stream sending notification
+	 * @param current
+	 *            index of currently streamed activity item
+	 * @param total
+	 *            total number of activity items to stream
+	 */
 	void onProgressUpdate(TNTInputStream stream, int current, int total);
 
+	/**
+	 * This method gets called when activity items streaming process has
+	 * completed successfully.
+	 *
+	 * @param stream
+	 *            stream sending notification
+	 * @param result
+	 *            result got after streaming completion
+	 */
 	void onSuccess(TNTInputStream stream, T result);
 
-	void onFailure(TNTInputStream stream, String msg, Throwable exc, Integer code);
+	/**
+	 * This method gets called when activity items streaming process has failed.
+	 * 
+	 * @param stream
+	 *            stream sending notification
+	 * @param msg
+	 *            failure message
+	 * @param exc
+	 *            failure exception
+	 * @param code
+	 *            failure code
+	 */
+	void onFailure(TNTInputStream stream, String msg, Throwable exc, String code);
 
+	/**
+	 * This method gets called when activity items streaming process status has
+	 * changed.
+	 *
+	 * @param stream
+	 *            stream sending notification
+	 * @param status
+	 *            new stream status value
+	 */
 	void onStatusChange(TNTInputStream stream, StreamStatus status);
 
+	/**
+	 * This method gets called when activity items streaming process has
+	 * finished independent of completion state.
+	 *
+	 * @param stream
+	 *            stream sending notification
+	 */
 	void onFinish(TNTInputStream stream);
 }

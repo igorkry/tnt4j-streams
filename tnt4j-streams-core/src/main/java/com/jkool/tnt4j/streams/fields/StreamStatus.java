@@ -17,11 +17,33 @@
 package com.jkool.tnt4j.streams.fields;
 
 /**
- * TODO
+ * Defines supported streaming process status values.
  *
- * @author akausinis
- * @version 1.0
+ * @version $Revision: 1 $
  */
 public enum StreamStatus {
-	NEW, STARTED, SUCCESS, FAILURE, CANCEL, DROP_OFF, REJECT,
+	/**
+	 * Indicates streaming process status is new/initialized.
+	 */
+	NEW,
+
+	/**
+	 * Indicates streaming process status is started.
+	 */
+	STARTED,
+
+	/**
+	 * Indicates streaming process finished successfully.
+	 */
+	SUCCESS,
+
+	/**
+	 * Indicates streaming process finished with failure.
+	 */
+	FAILURE,
+
+	/**
+	 * Indicates streaming process is canceled.
+	 */
+	CANCEL,
 }
