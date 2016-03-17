@@ -22,7 +22,7 @@
     </parser>
 
     <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
-        <property name="FileName" value="orders-*.log"/>
+        <property name="FileName" value=".\tnt4j-streams-core\samples\multiple-logs\orders-*.log"/>
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>

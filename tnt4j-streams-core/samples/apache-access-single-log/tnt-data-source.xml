@@ -55,7 +55,7 @@
 
     <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value="access.log"/>
+        <property name="FileName" value=".\tnt4j-streams-core\samples\apache-access-single-log\access.log"/>
 
         <!--<property name="UseExecutors" value="true"/>-->
         <!--<property name="ExecutorThreadsQuantity" value="5"/>-->

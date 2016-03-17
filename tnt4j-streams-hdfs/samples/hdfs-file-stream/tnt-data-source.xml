@@ -24,7 +24,7 @@
     </parser>
 
     <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
-        <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
+        <property name="FileName" value="hdfs://[host]:[port]/[path]/log.txt*"/>
         <parser-ref name="AccessLogParserCommon"/>
     </stream>
 </tnt-data-source>
