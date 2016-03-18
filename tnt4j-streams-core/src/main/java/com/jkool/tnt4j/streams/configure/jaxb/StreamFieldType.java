@@ -59,6 +59,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="MsgEncoding"/>
  *     &lt;enumeration value="MsgCharSet"/>
  *     &lt;enumeration value="Category"/>
+ *     &lt;enumeration value="ParentId"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -66,7 +67,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "StreamFieldType")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T10:53:03+02:00", comments = "JAXB RI v2.2.4-2")
 public enum StreamFieldType {
 
 	/**
@@ -282,7 +283,16 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Category") CATEGORY("Category");
+	@XmlEnumValue("Category") CATEGORY("Category"),
+
+	/**
+	 * 
+	 * Identifier used to uniquely identify parent activity associated with this
+	 * activity.
+	 * 
+	 * 
+	 */
+	@XmlEnumValue("ParentId") PARENT_ID("ParentId");
 	private final String value;
 
 	StreamFieldType(String v) {

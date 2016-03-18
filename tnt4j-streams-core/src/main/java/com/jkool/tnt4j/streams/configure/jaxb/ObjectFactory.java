@@ -43,35 +43,35 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link StreamType }
+	 * 
+	 */
+	public StreamType createStreamType() {
+		return new StreamType();
+	}
+
+	/**
+	 * Create an instance of {@link ParserType }
+	 * 
+	 */
+	public ParserType createParserType() {
+		return new ParserType();
+	}
+
+	/**
+	 * Create an instance of {@link ParserType.Field }
+	 * 
+	 */
+	public ParserType.Field createParserTypeField() {
+		return new ParserType.Field();
+	}
+
+	/**
 	 * Create an instance of {@link TntDataSource }
 	 * 
 	 */
 	public TntDataSource createTntDataSource() {
 		return new TntDataSource();
-	}
-
-	/**
-	 * Create an instance of {@link TntDataSource.Stream }
-	 * 
-	 */
-	public TntDataSource.Stream createTntDataSourceStream() {
-		return new TntDataSource.Stream();
-	}
-
-	/**
-	 * Create an instance of {@link TntDataSource.Parser }
-	 * 
-	 */
-	public TntDataSource.Parser createTntDataSourceParser() {
-		return new TntDataSource.Parser();
-	}
-
-	/**
-	 * Create an instance of {@link TntDataSource.Parser.Field }
-	 * 
-	 */
-	public TntDataSource.Parser.Field createTntDataSourceParserField() {
-		return new TntDataSource.Parser.Field();
 	}
 
 	/**
@@ -115,19 +115,19 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link TntDataSource.Stream.Tnt4JProperties }
+	 * Create an instance of {@link StreamType.Tnt4JProperties }
 	 * 
 	 */
-	public TntDataSource.Stream.Tnt4JProperties createTntDataSourceStreamTnt4JProperties() {
-		return new TntDataSource.Stream.Tnt4JProperties();
+	public StreamType.Tnt4JProperties createStreamTypeTnt4JProperties() {
+		return new StreamType.Tnt4JProperties();
 	}
 
 	/**
-	 * Create an instance of {@link TntDataSource.Parser.Field.FieldLocator }
+	 * Create an instance of {@link ParserType.Field.FieldLocator }
 	 * 
 	 */
-	public TntDataSource.Parser.Field.FieldLocator createTntDataSourceParserFieldFieldLocator() {
-		return new TntDataSource.Parser.Field.FieldLocator();
+	public ParserType.Field.FieldLocator createParserTypeFieldFieldLocator() {
+		return new ParserType.Field.FieldLocator();
 	}
 
 }
