@@ -16,6 +16,9 @@
 
 package com.jkool.tnt4j.streams.custom.dirStream;
 
+import com.jkool.tnt4j.streams.inputs.StreamingStatus;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+
 /**
  * @author akausinis
  * @version 1.0 TODO
@@ -25,9 +28,11 @@ public interface StreamingJobListener<T> {
 
 	void onSuccess(StreamingJob job, T result);
 
-	void onFailure(StreamingJob job, String msg, Throwable exc, Integer code);
+	void onFailure(StreamingJob job, String msg, Throwable exc, String code);
 
-	void onStatusChange(StreamingJob job, StreamingJobStatus status);
+	void onStatusChange(StreamingJob job, StreamingStatus status);
 
 	void onFinish(StreamingJob job);
+
+	void onStreamEvent(StreamingJob job, OpLevel level, String message, Object source);
 }

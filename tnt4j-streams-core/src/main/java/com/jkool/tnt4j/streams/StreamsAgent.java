@@ -27,9 +27,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
-import com.jkool.tnt4j.streams.inputs.PipedStream;
-import com.jkool.tnt4j.streams.inputs.StreamThread;
-import com.jkool.tnt4j.streams.inputs.TNTInputStream;
+import com.jkool.tnt4j.streams.inputs.*;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
@@ -94,6 +92,9 @@ public final class StreamsAgent {
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			loadConfigAndRun(cfgFileName);
+			// DefaultTNTStreamListener dsl = new
+			// DefaultTNTStreamListener(LOGGER);
+			// loadConfigAndRun(cfgFileName, dsl, dsl);
 		}
 	}
 
@@ -104,9 +105,24 @@ public final class StreamsAgent {
 	 *            stream configuration file name
 	 */
 	public static void runFromAPI(String cfgFileName) {
+		runFromAPI(cfgFileName, null, null);
+	}
+
+	/**
+	 * Main entry point for running as a API integration.
+	 *
+	 * @param cfgFileName
+	 *            stream configuration file name
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 */
+	public static void runFromAPI(String cfgFileName, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.start.api"));
-		loadConfigAndRun(cfgFileName);
+		loadConfigAndRun(cfgFileName, streamListener, streamTasksListener);
 	}
 
 	/**
@@ -116,23 +132,49 @@ public final class StreamsAgent {
 	 *            stream configuration file
 	 */
 	public static void runFromAPI(File cfgFile) {
+		runFromAPI(cfgFile, null, null);
+	}
+
+	/**
+	 *
+	 * @param cfgFile
+	 *            stream configuration file
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 */
+	public static void runFromAPI(File cfgFile, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsAgent.start.api"));
-		loadConfigAndRun(cfgFile);
+		loadConfigAndRun(cfgFile, streamListener, streamTasksListener);
 	}
 
 	private static void loadConfigAndRun(String cfgFileName) {
+		loadConfigAndRun(cfgFileName, null, null);
+	}
+
+	private static void loadConfigAndRun(String cfgFileName, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) {
 		try {
-			initAndRun(StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader()
-					: new StreamsConfigLoader(cfgFileName));
+			initAndRun(
+					StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFileName),
+					streamListener, streamTasksListener);
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
 	}
 
 	private static void loadConfigAndRun(File cfgFile) {
+		loadConfigAndRun(cfgFile, null, null);
+	}
+
+	private static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) {
 		try {
-			initAndRun(cfgFile == null ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFile));
+			initAndRun(cfgFile == null ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFile), streamListener,
+					streamTasksListener);
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
@@ -143,8 +185,13 @@ public final class StreamsAgent {
 	 *
 	 * @param cfg
 	 *            stream configuration
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
 	 */
-	private static void initAndRun(StreamsConfigLoader cfg) throws Exception {
+	private static void initAndRun(StreamsConfigLoader cfg, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) throws Exception {
 		if (cfg == null) {
 			return;
 		}
@@ -159,9 +206,18 @@ public final class StreamsAgent {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"StreamsAgent.no.activity.streams"));
 		}
+
 		ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
 		StreamThread ft;
 		for (TNTInputStream stream : streams) {
+			if (streamListener != null) {
+				stream.addStreamListener(streamListener);
+			}
+
+			if (streamTasksListener != null) {
+				stream.addStreamTasksListener(streamTasksListener);
+			}
+
 			ft = new StreamThread(streamThreads, stream,
 					String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 			ft.start();

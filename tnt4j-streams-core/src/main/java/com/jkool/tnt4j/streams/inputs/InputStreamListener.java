@@ -16,7 +16,7 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import com.jkool.tnt4j.streams.fields.StreamStatus;
+import com.nastel.jkool.tnt4j.core.OpLevel;
 
 /**
  * <p>
@@ -88,4 +88,19 @@ public interface InputStreamListener<T> {
 	 *            stream sending notification
 	 */
 	void onFinish(TNTInputStream stream);
+
+	/**
+	 * This method gets called when activity items streaming process detects
+	 * some notable event.
+	 *
+	 * @param stream
+	 *            stream sending notification
+	 * @param level
+	 *            event severity level
+	 * @param message
+	 *            event related message
+	 * @param source
+	 *            event source
+	 */
+	void onStreamEvent(TNTInputStream stream, OpLevel level, String message, Object source);
 }

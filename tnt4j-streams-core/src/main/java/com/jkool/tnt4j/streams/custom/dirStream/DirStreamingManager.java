@@ -17,12 +17,15 @@
 package com.jkool.tnt4j.streams.custom.dirStream;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
@@ -58,6 +61,11 @@ public class DirStreamingManager {
 
 	private String tnt4jCfgFilePath;
 
+	private List<StreamingJobListener> streamingJobsListeners;
+
+	protected DirStreamingManager() {
+	}
+
 	public DirStreamingManager(String dirPath) {
 		this(dirPath, null);
 	}
@@ -83,6 +91,7 @@ public class DirStreamingManager {
 						LOGGER.log(OpLevel.WARNING,
 								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 										"TNTInputStream.tasks.buffer.limit", offerTimeout)); // TODO
+						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {
 					LOGGER.log(OpLevel.WARNING, "Streaming job adding to executor queue was interrupted", exc);
@@ -135,7 +144,13 @@ public class DirStreamingManager {
 			executorService.awaitTermination(executorsTerminationTimeout, TimeUnit.SECONDS);
 		} catch (InterruptedException exc) {
 		} finally {
-			executorService.shutdownNow();
+			List<Runnable> droppedJobs = executorService.shutdownNow();
+
+			if (CollectionUtils.isNotEmpty(droppedJobs)) {
+				for (Runnable job : droppedJobs) {
+					notifyStreamingJobDropOff(job);
+				}
+			}
 		}
 	}
 
@@ -160,6 +175,12 @@ public class DirStreamingManager {
 
 		DefaultStreamingJob sJob = new DefaultStreamingJob(jobId, jobCfgFile);
 		sJob.setTnt4jCfgFilePath(tnt4jCfgFilePath);
+
+		if (CollectionUtils.isNotEmpty(streamingJobsListeners)) {
+			for (StreamingJobListener sjl : streamingJobsListeners) {
+				sJob.addStreamingJobListener(sjl);
+			}
+		}
 
 		executorService.submit(sJob);
 	}
@@ -202,6 +223,23 @@ public class DirStreamingManager {
 		}
 	}
 
+	// public void cancelJob(String jobId) { //TODO
+	// if (jobId == null) {
+	// return;
+	// }
+	//
+	// synchronized (executorService) {
+	// for (Runnable r : executorService.getQueue()) {
+	// DefaultStreamingJob sJob = (DefaultStreamingJob) r;
+	//
+	// if (sJob.equals(jobId)) {
+	// executorService.remove(sJob);
+	// break;
+	// }
+	// }
+	// }
+	// }
+
 	public String getTnt4jCfgFilePath() {
 		return tnt4jCfgFilePath;
 	}
@@ -210,6 +248,79 @@ public class DirStreamingManager {
 		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
 	}
 
+	/**
+	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners
+	 * list.
+	 *
+	 * @param l
+	 *            the {@code StreamingJobListener} to be added
+	 */
+	public void addStreamingJobListener(StreamingJobListener l) {
+		if (l == null) {
+			return;
+		}
+
+		if (streamingJobsListeners == null) {
+			streamingJobsListeners = new ArrayList<StreamingJobListener>();
+		}
+
+		streamingJobsListeners.add(l);
+	}
+
+	/**
+	 * Removes defined {@code StreamingJobListener} from streaming jobs
+	 * listeners list.
+	 *
+	 * @param l
+	 *            the {@code StreamingJobListener} to be removed
+	 */
+	public void removeStreamingJobListener(StreamingJobListener l) {
+		if (l != null && streamingJobsListeners != null) {
+			streamingJobsListeners.remove(l);
+		}
+	}
+
+	/**
+	 * Notifies that stream executor service has rejected offered activity items
+	 * streaming task to queue. TODO
+	 *
+	 * @param job
+	 *            executor rejected streaming job
+	 */
+	protected void notifyStreamingJobRejected(Runnable job) {
+		if (streamingJobsListeners != null) {
+			for (StreamingJobListener l : streamingJobsListeners) {
+				l.onStatusChange((StreamingJob) job, StreamingJobStatus.REJECT);
+			}
+		}
+	}
+
+	/**
+	 * Notifies that stream executor service has been shot down and some of
+	 * unprocessed activity items streaming tasks has been dropped of the queue.
+	 * TODO
+	 *
+	 * @param jobs
+	 *            executor dropped of streaming job
+	 */
+	protected void notifyStreamingJobDropOff(Runnable job) {
+		if (streamingJobsListeners != null) {
+			for (StreamingJobListener l : streamingJobsListeners) {
+				l.onStatusChange((StreamingJob) job, StreamingJobStatus.DROP_OFF);
+			}
+		}
+	}
+
+	// /**
+	// * Sample how to run directory streaming as standalone application.
+	// *
+	// * @param args
+	// * command-line arguments. Supported arguments: dirPath
+	// * fileWildcardName tnt4jCfgFilePath
+	// *
+	// * @throws Exception
+	// * if an error occurs while running application
+	// */
 	// public static void main(String... args) throws Exception {
 	// final DirStreamingManager dm = new DirStreamingManager(args[0], args[1]);
 	// dm.setTnt4jCfgFilePath(args[2]);

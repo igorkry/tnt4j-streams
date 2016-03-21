@@ -34,7 +34,6 @@ import org.apache.commons.lang.StringUtils;
  * @version 1.0 TODO
  */
 public class DirWatchdog {
-
 	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = 5 * 1000L;
 
 	private String dirPath;
@@ -44,18 +43,42 @@ public class DirWatchdog {
 	private FileAlterationObserver observer = null;
 	private FileAlterationMonitor monitor = null;
 
+	/**
+	 * TODO
+	 * 
+	 * @param dirPath
+	 */
 	public DirWatchdog(String dirPath) {
 		this(dirPath, DEFAULT_WATCH_REFRESH_INTERVAL, null);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param dirPath
+	 * @param refreshInterval
+	 */
 	public DirWatchdog(String dirPath, long refreshInterval) {
 		this(dirPath, refreshInterval, null);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param dirPath
+	 * @param filter
+	 */
 	public DirWatchdog(String dirPath, FileFilter filter) {
 		this(dirPath, DEFAULT_WATCH_REFRESH_INTERVAL, filter);
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param dirPath
+	 * @param refreshInterval
+	 * @param filter
+	 */
 	public DirWatchdog(String dirPath, long refreshInterval, FileFilter filter) {
 		if (StringUtils.isEmpty(dirPath)) {
 			throw new IllegalArgumentException("Path of directory to watch must be non-empty");
@@ -75,24 +98,45 @@ public class DirWatchdog {
 		monitor.addObserver(observer);
 	}
 
+	/**
+	 * TODO
+	 *
+	 * @param l
+	 */
 	public void addObserverListener(FileAlterationListener l) {
 		if (l != null) {
 			observer.addListener(l);
 		}
 	}
 
+	/**
+	 * TODO
+	 *
+	 * @throws Exception
+	 */
 	public void start() throws Exception {
 		if (monitor != null) {
 			monitor.start();
 		}
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @throws Exception
+	 */
 	public void stop() throws Exception {
 		if (monitor != null) {
 			monitor.stop();
 		}
 	}
 
+	/**
+	 * TODO
+	 * 
+	 * @param fileWildcardName
+	 * @return
+	 */
 	public static FileFilter getDefaultFilter(String fileWildcardName) {
 		if (StringUtils.isEmpty(fileWildcardName)) {
 			return null;

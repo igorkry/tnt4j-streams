@@ -14,36 +14,13 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.inputs;
 
 /**
- * Defines supported streaming process status values.
- *
- * @version $Revision: 1 $
+ * @author akausinis
+ * @version 1.0
+ * @created 2016-03-17 13:11
  */
-public enum StreamStatus {
-	/**
-	 * Indicates streaming process status is new/initialized.
-	 */
-	NEW,
-
-	/**
-	 * Indicates streaming process status is started.
-	 */
-	STARTED,
-
-	/**
-	 * Indicates streaming process finished successfully.
-	 */
-	SUCCESS,
-
-	/**
-	 * Indicates streaming process finished with failure.
-	 */
-	FAILURE,
-
-	/**
-	 * Indicates streaming process is canceled.
-	 */
-	CANCEL,
+public interface StreamingStatus {
+	String name();
 }

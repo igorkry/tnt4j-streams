@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.ArrayUtils;
 
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -70,23 +71,25 @@ public class FileLineStream extends AbstractFileLineStream {
 			activityFiles = new File[] { new File(fileName) };
 		}
 
-		totalLinesCount = getTotalLinesCount(activityFiles);
+		int[] totals = getFilesTotals(activityFiles);
+		totalBytesCount = totals[0];
+		totalLinesCount = totals[1];
 	}
 
-	private static int getTotalLinesCount(File[] activityFiles) {
-		if (activityFiles == null) {
-			return 0;
-		}
-
+	private static int[] getFilesTotals(File[] activityFiles) {
+		int tbc = 0;
 		int tlc = 0;
-		for (File f : activityFiles) {
-			try {
-				tlc += Utils.countLines(new FileReader(f));
-			} catch (IOException exc) {
+		if (ArrayUtils.isNotEmpty(activityFiles)) {
+			for (File f : activityFiles) {
+				tbc += f.length();
+				try {
+					tlc += Utils.countLines(new FileReader(f));
+				} catch (IOException exc) {
+				}
 			}
 		}
 
-		return tlc;
+		return new int[] { tbc, tlc };
 	}
 
 	/**

@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.*;
 
 /**
  * 
- * Defines TNT4J Stream data source.
+ * Defines TNT4J-Streams data source configuration.
  * 
  * 
  * <p>

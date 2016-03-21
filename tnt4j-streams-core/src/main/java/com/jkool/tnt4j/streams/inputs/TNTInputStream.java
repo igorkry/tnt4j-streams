@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.fields.StreamStatus;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.StreamsThread;
@@ -481,6 +480,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 		return -1;
 	}
 
+	public long getStreamedBytesCount() {
+		return 0;
+	}
+
 	/**
 	 * Get the next raw activity data item to be processed. All subclasses must
 	 * implement this.
@@ -786,6 +789,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"),
 						null, null);
 				halt();
+			} else {
+				notifyStreamEvent(OpLevel.WARNING, "Could not parse activity data {0}", item);
 			}
 		} else {
 			if (!ai.isFiltered()) {
@@ -815,21 +820,21 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
-	/**
-	 * Signals that streaming process was canceled and invokes status change
-	 * event. TODO
-	 */
-	public void cancel() { // TODO
-		halt();
-
-		// ownerThread.join();
-
-		notifyStatusChange(StreamStatus.CANCEL);
-		// notifyFinished();
-
-		// shutdownExecutors();
-		// cleanup();
-	}
+	// /**
+	// * Signals that streaming process has to be canceled and invokes status
+	// * change event.
+	// */
+	// public void cancel() { // TODO
+	// halt();
+	//
+	// // ownerThread.join();
+	//
+	// notifyStatusChange(StreamStatus.CANCEL);
+	// // notifyFinished();
+	//
+	// // shutdownExecutors();
+	// // cleanup();
+	// }
 
 	/**
 	 * Returns stream name value
@@ -857,6 +862,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *            the {@code InputStreamListener} to be added
 	 */
 	public void addStreamListener(InputStreamListener l) {
+		if (l == null) {
+			return;
+		}
+
 		if (streamListeners == null) {
 			streamListeners = new ArrayList<InputStreamListener>();
 		}
@@ -871,7 +880,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *            the {@code InputStreamListener} to be removed
 	 */
 	public void removeStreamListener(InputStreamListener l) {
-		if (streamListeners != null) {
+		if (l != null && streamListeners != null) {
 			streamListeners.remove(l);
 		}
 	}
@@ -955,12 +964,35 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
+	 * Notifies that activity items streaming process detects some notable
+	 * event.
+	 * 
+	 * @param level
+	 *            event severity level
+	 * @param message
+	 *            event related message
+	 * @param source
+	 *            event source
+	 */
+	protected void notifyStreamEvent(OpLevel level, String message, Object source) {
+		if (streamListeners != null) {
+			for (InputStreamListener l : streamListeners) {
+				l.onStreamEvent(this, level, message, source);
+			}
+		}
+	}
+
+	/**
 	 * Adds defined {@code StreamTasksListener} to stream tasks listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamTasksListener} to be added
 	 */
 	public void addStreamTasksListener(StreamTasksListener l) {
+		if (l == null) {
+			return;
+		}
+
 		if (streamTasksListeners == null) {
 			streamTasksListeners = new ArrayList<StreamTasksListener>();
 		}
@@ -976,7 +1008,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *            the {@code StreamTasksListener} to be removed
 	 */
 	public void removeStreamTasksListener(StreamTasksListener l) {
-		if (streamTasksListeners != null) {
+		if (l != null && streamTasksListeners != null) {
 			streamTasksListeners.remove(l);
 		}
 	}

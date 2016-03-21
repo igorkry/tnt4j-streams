@@ -17,6 +17,7 @@
 package com.jkool.tnt4j.streams.custom.dirStream;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,8 @@ import java.util.UUID;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
+import com.jkool.tnt4j.streams.inputs.InputStreamListener;
+import com.jkool.tnt4j.streams.inputs.StreamStatus;
 import com.jkool.tnt4j.streams.inputs.StreamThread;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -103,8 +106,12 @@ public class DefaultStreamingJob implements StreamingJob {
 
 			ThreadGroup streamThreads = new ThreadGroup(DefaultStreamingJob.class.getName() + "Threads"); // NON-NLS
 			StreamThread ft;
+
+			DefaultStreamListener dsl = new DefaultStreamListener();
+
 			for (TNTInputStream stream : streams) {
 				stream.setTnt4jCfgFilePath(tnt4jCfgFilePath);
+				stream.addStreamListener(dsl);
 				ft = new StreamThread(streamThreads, stream,
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
@@ -112,6 +119,11 @@ public class DefaultStreamingJob implements StreamingJob {
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "DefaultStreamingJob{" + "jobId=" + jobId + '}';
 	}
 
 	@Override
@@ -137,5 +149,105 @@ public class DefaultStreamingJob implements StreamingJob {
 	@Override
 	public int hashCode() {
 		return jobId.hashCode();
+	}
+
+	private void cleanup() {
+		if (jobListeners != null) {
+			jobListeners.clear();
+		}
+	}
+
+	/**
+	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners
+	 * list.
+	 *
+	 * @param l
+	 *            the {@code StreamingJobListener} to be added
+	 */
+	public void addStreamingJobListener(StreamingJobListener l) {
+		if (l == null) {
+			return;
+		}
+
+		if (jobListeners == null) {
+			jobListeners = new ArrayList<StreamingJobListener>();
+		}
+
+		jobListeners.add(l);
+	}
+
+	/**
+	 * Removes defined {@code StreamingJobListener} from streaming jobs
+	 * listeners list.
+	 *
+	 * @param l
+	 *            the {@code StreamingJobListener} to be removed
+	 */
+	public void removeStreamingJobListener(StreamingJobListener l) {
+		if (l != null && jobListeners != null) {
+			jobListeners.remove(l);
+		}
+	}
+
+	private class DefaultStreamListener implements InputStreamListener<Object> {
+
+		@Override
+		public void onProgressUpdate(TNTInputStream stream, int current, int total) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onProgressUpdate(DefaultStreamingJob.this, current, total);
+				}
+			}
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void onSuccess(TNTInputStream stream, Object result) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onSuccess(DefaultStreamingJob.this, result);
+				}
+			}
+		}
+
+		@Override
+		public void onFailure(TNTInputStream stream, String msg, Throwable exc, String code) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onFailure(DefaultStreamingJob.this, msg, exc, code);
+				}
+			}
+		}
+
+		@Override
+		public void onStatusChange(TNTInputStream stream, StreamStatus status) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onStatusChange(DefaultStreamingJob.this, status);
+				}
+			}
+		}
+
+		@Override
+		public void onFinish(TNTInputStream stream) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onFinish(DefaultStreamingJob.this);
+				}
+			}
+
+			cleanup();
+		}
+
+		@Override
+		public void onStreamEvent(TNTInputStream stream, OpLevel level, String message, Object source) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onStreamEvent(DefaultStreamingJob.this, level, message, source);
+				}
+			}
+
+			cleanup();
+		}
 	}
 }

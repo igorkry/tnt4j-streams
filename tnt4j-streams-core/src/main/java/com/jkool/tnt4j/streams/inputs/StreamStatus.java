@@ -14,25 +14,36 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.custom.dirStream;
-
-import com.jkool.tnt4j.streams.inputs.StreamingStatus;
+package com.jkool.tnt4j.streams.inputs;
 
 /**
- * Defines supported streaming job status values.
+ * Defines supported streaming process status values.
  *
  * @version $Revision: 1 $
  */
-public enum StreamingJobStatus implements StreamingStatus {
+public enum StreamStatus implements StreamingStatus {
 	/**
-	 * Indicates streaming job was rejected while adding to executor queue.
+	 * Indicates streaming process status is new/initialized.
 	 */
-	REJECT,
+	NEW,
 
 	/**
-	 * Indicates streaming jobs where dropped off from executor queue before
-	 * executing (i.e. executor was shot down before starting to process that
-	 * job).
+	 * Indicates streaming process status is started.
 	 */
-	DROP_OFF,
+	STARTED,
+
+	/**
+	 * Indicates streaming process finished successfully.
+	 */
+	SUCCESS,
+
+	/**
+	 * Indicates streaming process finished with failure.
+	 */
+	FAILURE,
+
+	/**
+	 * Indicates streaming process is canceled.
+	 */
+	CANCEL,
 }
