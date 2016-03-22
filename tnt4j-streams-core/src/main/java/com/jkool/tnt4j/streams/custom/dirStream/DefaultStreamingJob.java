@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.inputs.InputStreamListener;
