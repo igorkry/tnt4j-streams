@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.utils.*;
 import com.nastel.jkool.tnt4j.core.*;
+import com.nastel.jkool.tnt4j.format.JSONFormatter;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.source.DefaultSourceFactory;
@@ -611,7 +612,7 @@ public class ActivityInfo {
 			activity.setCorrelator(correlator);
 		}
 		if (CollectionUtils.isNotEmpty(tag)) {
-			addActivityProperty(StreamFieldType.Tag.name(), tag);
+			addActivityProperty(JSONFormatter.JSON_MSG_TAG_FIELD, tag);
 		}
 		if (message != null) {
 			String strData;
@@ -624,17 +625,17 @@ public class ActivityInfo {
 				strData = String.valueOf(message);
 			}
 
-			addActivityProperty(StreamFieldType.Message.name(), strData);
-			addActivityProperty(StreamFieldType.MsgLength.name(), msgLength == null ? strData.length() : msgLength);
+			addActivityProperty(JSONFormatter.JSON_MSG_TEXT_FIELD, strData);
+			addActivityProperty(JSONFormatter.JSON_MSG_SIZE_FIELD, msgLength == null ? strData.length() : msgLength);
 		}
 		if (StringUtils.isNotEmpty(msgMimeType)) {
-			addActivityProperty(StreamFieldType.MsgMimeType.name(), msgMimeType);
+			addActivityProperty(JSONFormatter.JSON_MSG_MIME_FIELD, msgMimeType);
 		}
 		if (StringUtils.isNotEmpty(msgEncoding)) {
-			addActivityProperty(StreamFieldType.MsgEncoding.name(), msgEncoding);
+			addActivityProperty(JSONFormatter.JSON_MSG_ENC_FIELD, msgEncoding);
 		}
 		if (StringUtils.isNotEmpty(msgCharSet)) {
-			addActivityProperty(StreamFieldType.MsgCharSet.name(), msgCharSet);
+			addActivityProperty(JSONFormatter.JSON_MSG_CHARSET_FIELD, msgCharSet);
 		}
 
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
