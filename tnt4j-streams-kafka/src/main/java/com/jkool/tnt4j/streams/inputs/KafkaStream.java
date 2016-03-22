@@ -183,6 +183,8 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 					msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
 					msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
 					msgDataMap.put(StreamsConstants.TRANSPORT_KEY, KafkaStreamConstants.TRANSPORT_KAFKA);
+
+					addStreamedBytesCount(msgPayload.length);
 				}
 
 				return msgDataMap;

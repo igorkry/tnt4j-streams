@@ -27,6 +27,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -113,6 +114,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 	private boolean haltIfNoParser = true;
 
 	private int currActivityIndex = 0;
+	private long streamedBytesCount = 0;
+	private long startTime = -1;
+	private long endTime = -1;
 
 	private List<InputStreamListener> streamListeners;
 	private List<StreamTasksListener> streamTasksListeners;
@@ -480,8 +484,58 @@ public abstract class TNTInputStream<T> implements Runnable {
 		return -1;
 	}
 
-	public long getStreamedBytesCount() {
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public long getTotalBytes() {
 		return 0;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public long getStreamedBytesCount() {
+		return streamedBytesCount;
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param bytesCount
+	 */
+	protected void addStreamedBytesCount(long bytesCount) {
+		streamedBytesCount += bytesCount;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public long getElapsedTime() {
+		long et = endTime < 0 ? System.currentTimeMillis() : endTime;
+
+		return startTime < 0 ? -1 : et - startTime;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public StreamStats getStreamStatistics() {
+		StreamStats stats = new StreamStats();
+		stats.setActivitiesTotal(getTotalActivities());
+		stats.setCurrActivity(getCurrentActivity());
+		stats.setTotalBytes(getTotalBytes());
+		stats.setBytesStreamed(getStreamedBytesCount());
+		stats.setElapsedTime(getElapsedTime());
+
+		return stats;
 	}
 
 	/**
@@ -724,6 +778,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		AtomicBoolean failureFlag = new AtomicBoolean(false);
 		try {
 			initialize();
+			startTime = System.currentTimeMillis();
 			notifyStatusChange(StreamStatus.STARTED);
 			while (!isHalted()) {
 				try {
@@ -766,6 +821,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		} finally {
 			shutdownExecutors();
 
+			endTime = System.currentTimeMillis();
 			if (!failureFlag.get()) {
 				notifyStreamSuccess(null);
 			}
@@ -957,8 +1013,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	protected void notifyFinished() {
 		if (streamListeners != null) {
+			StreamStats stats = getStreamStatistics();
 			for (InputStreamListener l : streamListeners) {
-				l.onFinish(this);
+				l.onFinish(this, stats);
 			}
 		}
 	}
@@ -1109,6 +1166,96 @@ public abstract class TNTInputStream<T> implements Runnable {
 			task.setDaemon(true);
 
 			return task;
+		}
+	}
+
+	/**
+	 * TODO
+	 */
+	public static class StreamStats {
+		private int activitiesTotal;
+		private int currActivity;
+
+		private long totalBytes;
+		private long bytesStreamed;
+
+		private long elapsedTime;
+
+		/**
+		 * TODO
+		 * 
+		 * @return
+		 */
+		public int getActivitiesTotal() {
+			return activitiesTotal;
+		}
+
+		void setActivitiesTotal(int activitiesTotal) {
+			this.activitiesTotal = activitiesTotal;
+		}
+
+		/**
+		 * TODO
+		 *
+		 * @return
+		 */
+		public int getCurrActivity() {
+			return currActivity;
+		}
+
+		void setCurrActivity(int currActivity) {
+			this.currActivity = currActivity;
+		}
+
+		/**
+		 * TODO
+		 *
+		 * @return
+		 */
+		public long getTotalBytes() {
+			return totalBytes;
+		}
+
+		void setTotalBytes(long totalBytes) {
+			this.totalBytes = totalBytes;
+		}
+
+		/**
+		 * TODO
+		 *
+		 * @return
+		 */
+		public long getBytesStreamed() {
+			return bytesStreamed;
+		}
+
+		void setBytesStreamed(long bytesStreamed) {
+			this.bytesStreamed = bytesStreamed;
+		}
+
+		/**
+		 * TODO
+		 *
+		 * @return
+		 */
+		public long getElapsedTime() {
+			return elapsedTime;
+		}
+
+		void setElapsedTime(long elapsedTime) {
+			this.elapsedTime = elapsedTime;
+		}
+
+		/**
+		 * TODO
+		 * 
+		 * @return
+		 */
+		@Override
+		public String toString() {
+			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity
+					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", elapsed time="
+					+ DurationFormatUtils.formatDurationHMS(elapsedTime) + '}';
 		}
 	}
 }

@@ -133,6 +133,10 @@ public class PipedStream extends TNTInputStream<String> {
 
 		String line = dataReader.readLine();
 
+		if (line != null) {
+			addStreamedBytesCount(line.getBytes().length);
+		}
+
 		return line;
 	}
 

@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,7 @@ import com.nastel.jkool.tnt4j.source.Source;
 import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.TimeTracker;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
+import com.nastel.jkool.tnt4j.tracker.TrackingActivity;
 import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
 
@@ -468,15 +470,74 @@ public class ActivityInfo {
 		resolveServer();
 		resolveApplication();
 		determineTimes();
+
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
-		String evtName = StringUtils.isEmpty(eventName) ? UNSPECIFIED_LABEL : eventName;
+		String trackName = StringUtils.isEmpty(eventName) ? UNSPECIFIED_LABEL : eventName;
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
-		String resName = StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName;
-		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, evtName, (String) null,
+
+		Trackable trackable;
+
+		if (eventType == OpType.ACTIVITY) {
+			trackable = buildActivity(tracker, trackName, trackId);
+		} else {
+			trackable = buildEvent(tracker, trackName, trackId);
+		}
+
+		StreamsThread thread = null;
+		if (Thread.currentThread() instanceof StreamsThread) {
+			thread = (StreamsThread) Thread.currentThread();
+		}
+		boolean retryAttempt = false;
+		do {
+			try {
+				if (trackable instanceof TrackingActivity) {
+					tracker.tnt((TrackingActivity) trackable);
+				} else {
+					tracker.tnt((TrackingEvent) trackable);
+				}
+
+				if (retryAttempt) {
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityInfo.retry.successful"));
+				}
+				return;
+			} catch (Exception ioe) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.recording.failed"), ioe);
+				Utils.close(tracker);
+				if (thread == null) {
+					throw ioe;
+				}
+				retryAttempt = true;
+				LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityInfo.will.retry", TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
+				StreamsThread.sleep(retryPeriod);
+			}
+		} while (thread != null && !thread.isStopRunning());
+	}
+
+	/**
+	 * Builds {@link TrackingEvent} for activity data recording.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param trackName
+	 *            name of tracking event
+	 * @param trackId
+	 *            identifier (signature) of tracking event
+	 *
+	 * @return tracking event instance
+	 */
+	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId) {
+		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, trackName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
 		event.setParentId(parentId);
-		event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
+		// event.setCorrelator(CollectionUtils.isEmpty(correlator) ?
+		// Collections.singletonList(trackId) : correlator);
+		if (CollectionUtils.isNotEmpty(correlator)) {
+			event.setCorrelator(correlator);
+		}
 		if (CollectionUtils.isNotEmpty(tag)) {
 			event.setTag(tag);
 		}
@@ -505,52 +566,106 @@ public class ActivityInfo {
 		event.getOperation().setReasonCode(reasonCode);
 		event.getOperation().setType(eventType);
 		event.getOperation().setException(exception);
-		event.getOperation().setLocation(location);
-		event.getOperation().setResource(resName);
-		event.getOperation().setUser(userName);
+		if (StringUtils.isNotEmpty(location)) {
+			event.getOperation().setLocation(location);
+		}
+		event.getOperation().setResource(StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName);
+		if (StringUtils.isNotEmpty(userName)) {
+			event.getOperation().setUser(userName);
+		}
 		event.getOperation().setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		event.getOperation().setPID(processId == null ? Utils.getVMPID() : processId);
-		event.getOperation().setSeverity(severity == null ? OpLevel.INFO : severity);
+		// event.getOperation().setSeverity(severity == null ? OpLevel.INFO :
+		// severity);
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
 			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
-				addEventProperty(event, ape.getKey(), ape.getValue());
+				addTrackableProperty(event.getOperation(), ape.getKey(), ape.getValue());
 			}
 		}
 
-		StreamsThread thread = null;
-		if (Thread.currentThread() instanceof StreamsThread) {
-			thread = (StreamsThread) Thread.currentThread();
-		}
-		boolean retryAttempt = false;
-		do {
-			try {
-				tracker.tnt(event);
-				if (retryAttempt) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityInfo.retry.successful"));
-				}
-				return;
-			} catch (Exception ioe) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityInfo.recording.failed"), ioe);
-				Utils.close(tracker);
-				if (thread == null) {
-					throw ioe;
-				}
-				retryAttempt = true;
-				LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityInfo.will.retry", TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
-				StreamsThread.sleep(retryPeriod);
-			}
-		} while (thread != null && !thread.isStopRunning());
+		return event;
 	}
 
-	private static void addEventProperty(TrackingEvent event, String key, Object value) {
-		if (event != null && value != null) {
-			event.getOperation().addProperty(new Property(key, value));
+	/**
+	 * Builds {@link TrackingActivity} for activity data recording.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param trackName
+	 *            name of tracking activity
+	 * @param trackId
+	 *            identifier (signature) of tracking activity
+	 *
+	 * @return tracking activity instance
+	 */
+	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId) {
+		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
+		activity.setTrackingId(trackId);
+		activity.setParentId(parentId);
+		// activity.setCorrelator(CollectionUtils.isEmpty(correlator) ?
+		// Collections.singletonList(trackId) : correlator);
+		if (CollectionUtils.isNotEmpty(correlator)) {
+			activity.setCorrelator(correlator);
+		}
+		if (CollectionUtils.isNotEmpty(tag)) {
+			addActivityProperty(StreamFieldType.Tag.name(), tag);
+		}
+		if (message != null) {
+			String strData;
+			if (message instanceof byte[]) {
+				byte[] binData = (byte[]) message;
+				strData = new String(Base64.encodeBase64(binData));
+				msgEncoding = "base64"; // NON-NLS
+				msgMimeType = "application/octet-stream"; // NON-NLS
+			} else {
+				strData = String.valueOf(message);
+			}
+
+			addActivityProperty(StreamFieldType.Message.name(), strData);
+			addActivityProperty(StreamFieldType.MsgLength.name(), msgLength == null ? strData.length() : msgLength);
+		}
+		if (StringUtils.isNotEmpty(msgMimeType)) {
+			addActivityProperty(StreamFieldType.MsgMimeType.name(), msgMimeType);
+		}
+		if (StringUtils.isNotEmpty(msgEncoding)) {
+			addActivityProperty(StreamFieldType.MsgEncoding.name(), msgEncoding);
+		}
+		if (StringUtils.isNotEmpty(msgCharSet)) {
+			addActivityProperty(StreamFieldType.MsgCharSet.name(), msgCharSet);
+		}
+
+		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
+		activity.setReasonCode(reasonCode);
+		activity.setType(eventType);
+		activity.setException(exception);
+		if (StringUtils.isNotEmpty(location)) {
+			activity.setLocation(location);
+		}
+		activity.setResource(StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName);
+		if (StringUtils.isNotEmpty(userName)) {
+			activity.setUser(userName);
+		}
+		activity.setTID(threadId == null ? Thread.currentThread().getId() : threadId);
+		activity.setPID(processId == null ? Utils.getVMPID() : processId);
+		// activity.setSeverity(severity == null ? OpLevel.INFO : severity);
+		activity.start(startTime);
+		activity.stop(endTime, elapsedTime);
+
+		if (activityProperties != null) {
+			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
+				addTrackableProperty(activity, ape.getKey(), ape.getValue());
+			}
+		}
+
+		return activity;
+	}
+
+	private static void addTrackableProperty(Operation trackableOp, String key, Object value) {
+		if (trackableOp != null && value != null) {
+			trackableOp.addProperty(new Property(key, value));
 		}
 	}
 

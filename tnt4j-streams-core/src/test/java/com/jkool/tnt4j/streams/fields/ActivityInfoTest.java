@@ -166,7 +166,7 @@ public class ActivityInfoTest {
 	}
 
 	private static enum TestEnum {
-		TestEnum1, Skip;
+		TestEnum1, Skip
 	}
 
 	private class TestPair {

@@ -56,7 +56,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 
 	private int fileNumber = -1;
 	private int lineNumber = 0;
-	private long streamedBytesCount = 0;
 
 	protected int totalBytesCount = 0;
 	protected int totalLinesCount = 0;
@@ -136,12 +135,12 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		String line = lineReader.readLine();
 		lineNumber = lineReader.getLineNumber();
 
-		if (line != null) {
-			streamedBytesCount += line.getBytes().length;
-		}
-
 		if (line == null && hasNextFile()) {
 			line = getNextItem();
+		}
+
+		if (line != null) {
+			addStreamedBytesCount(line.getBytes().length);
 		}
 
 		return line;
@@ -167,9 +166,12 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		return totalLinesCount;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public long getStreamedBytesCount() {
-		return streamedBytesCount;
+	public long getTotalBytes() {
+		return totalBytesCount;
 	}
 
 	/**

@@ -340,6 +340,7 @@ public class WmqStream extends TNTInputStream<String> {
 					"WmqStream.message.data", msgData.length(), msgData));
 			qmgr.commit();
 			curFailCount = 0;
+			addStreamedBytesCount(mqMsg.getDataLength());
 			return msgData;
 		} catch (MQException mqe) {
 			curFailCount++;

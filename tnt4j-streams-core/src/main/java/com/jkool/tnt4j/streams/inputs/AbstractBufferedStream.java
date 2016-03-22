@@ -91,8 +91,18 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 
 		T activityInput = inputBuffer.take();
 
+		addStreamedBytesCount(getActivityItemByteSize(activityInput));
+
 		return activityInput;
 	}
+
+	/**
+	 * TODO
+	 *
+	 * @param activityItem
+	 * @return
+	 */
+	protected abstract long getActivityItemByteSize(T activityItem);
 
 	/**
 	 * {@inheritDoc}

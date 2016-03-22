@@ -30,7 +30,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 public class AbstractBufferedStreamTest {
 	public boolean inputShouldEnd = false;
 	EventSink es = mock(EventSink.class);
-	AbstractBufferedStream<String> abs = new AbstractBuferedStreamTestStub(es);
+	AbstractBufferedStream<String> abs = new AbstractBufferedStreamTestStub(es);
 
 	@Test
 	public void getNextItemTest() throws Exception {
@@ -71,14 +71,19 @@ public class AbstractBufferedStreamTest {
 		thread.interrupt();
 	}
 
-	private class AbstractBuferedStreamTestStub extends AbstractBufferedStream<String> {
-		protected AbstractBuferedStreamTestStub(EventSink logger) {
+	private class AbstractBufferedStreamTestStub extends AbstractBufferedStream<String> {
+		protected AbstractBufferedStreamTestStub(EventSink logger) {
 			super(logger);
 		}
 
 		@Override
 		protected boolean isInputEnded() {
 			return inputShouldEnd;
+		}
+
+		@Override
+		protected long getActivityItemByteSize(String item) {
+			return item == null ? 0 : item.getBytes().length;
 		}
 	}
 
@@ -104,5 +109,4 @@ public class AbstractBufferedStreamTest {
 			assertEquals(Thread.State.WAITING, thread.getState());
 		}
 	}
-
 }

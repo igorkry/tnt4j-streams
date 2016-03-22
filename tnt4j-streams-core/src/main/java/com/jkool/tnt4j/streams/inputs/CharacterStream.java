@@ -349,7 +349,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	 * @see BufferedReader
 	 * @see InputStreamReader
 	 */
-	private static class FeedReader extends BufferedReader {
+	private class FeedReader extends BufferedReader {
 		private boolean closed = false;
 		private boolean error = false;
 
@@ -421,6 +421,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 				if (line == null) {
 					close();
+				} else {
+					addStreamedBytesCount(line.getBytes().length);
 				}
 
 				return line;
@@ -447,6 +449,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 				if (total == -1) {
 					close();
+				} else {
+					addStreamedBytesCount(total);
 				}
 
 				return total;

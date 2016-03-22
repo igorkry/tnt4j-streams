@@ -86,8 +86,11 @@ public interface InputStreamListener<T> {
 	 *
 	 * @param stream
 	 *            stream sending notification
+	 * @param stats
+	 *            stream statistics
+	 *
 	 */
-	void onFinish(TNTInputStream stream);
+	void onFinish(TNTInputStream stream, TNTInputStream.StreamStats stats);
 
 	/**
 	 * This method gets called when activity items streaming process detects

@@ -17,6 +17,7 @@
 package com.jkool.tnt4j.streams.custom.dirStream;
 
 import com.jkool.tnt4j.streams.inputs.StreamingStatus;
+import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 
 /**
@@ -50,8 +51,8 @@ public class StreamingJobLogger implements StreamingJobListener<Object> {
 	}
 
 	@Override
-	public void onFinish(StreamingJob job) {
-		System.out.println("Streaming job finished: job=" + job);
+	public void onFinish(StreamingJob job, TNTInputStream.StreamStats stats) {
+		System.out.println("Streaming job finished: job=" + job + " stats=" + stats);
 	}
 
 	@Override

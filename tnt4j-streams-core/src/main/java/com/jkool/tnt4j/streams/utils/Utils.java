@@ -17,6 +17,8 @@
 package com.jkool.tnt4j.streams.utils;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
@@ -656,5 +658,41 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 */
 	public static boolean equals(double d1, double d2, double epsilon) {
 		return Math.abs(d1 - d2) < epsilon;
+	}
+
+	/**
+	 * Close an socket without exceptions.
+	 * <p>
+	 * For Java 6 backward comparability.
+	 *
+	 * @param socket
+	 *            socket to close
+	 */
+	public static void close(Socket socket) {
+		if (socket != null) {
+			try {
+				socket.close();
+			} catch (IOException exc) {
+
+			}
+		}
+	}
+
+	/**
+	 * Close an server socket without exceptions.
+	 * <p>
+	 * For Java 6 backward comparability.
+	 *
+	 * @param socket
+	 *            server socket to close
+	 */
+	public static void close(ServerSocket socket) {
+		if (socket != null) {
+			try {
+				socket.close();
+			} catch (IOException exc) {
+
+			}
+		}
 	}
 }

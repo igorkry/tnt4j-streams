@@ -187,6 +187,16 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		return jmsDataReceiver.isInputEnded();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected long getActivityItemByteSize(Message itemMsg) {
+		// return itemMsg == null ? 0 : itemMsg.getBytes().length;
+
+		return 0; // TODO
+	}
+
 	private class JMSDataReceiver extends InputProcessor implements MessageListener {
 
 		private ConnectionFactory jmsConFactory;

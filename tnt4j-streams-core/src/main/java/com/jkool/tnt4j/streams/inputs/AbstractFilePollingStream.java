@@ -167,6 +167,14 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected long getActivityItemByteSize(String activityItem) {
+		return activityItem == null ? 0 : activityItem.getBytes().length;
+	}
+
+	/**
 	 * Base class containing common log watcher features.
 	 */
 	protected abstract class LogWatcher extends InputProcessor {

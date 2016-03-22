@@ -218,6 +218,16 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected long getActivityItemByteSize(Map<String, ?> itemMap) {
+		byte[] payload = (byte[]) itemMap.get(StreamsConstants.ACTIVITY_DATA_KEY);
+
+		return payload == null ? 0 : payload.length;
+	}
+
+	/**
 	 * Mqtt messages receiver thread. It implements {@link MqttCallback}
 	 * interface and initiates Mqtt client to receive and handle Mqtt messages
 	 * data.

@@ -25,11 +25,9 @@ import java.util.Comparator;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.fs.*;
 
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -95,23 +93,26 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 			activityFiles = new Path[] { filePath };
 		}
 
-		totalLinesCount = getTotalLinesCount(fs, activityFiles);
+		int[] totals = getFilesTotals(fs, activityFiles);
+		totalBytesCount = totals[0];
+		totalLinesCount = totals[1];
 	}
 
-	private static int getTotalLinesCount(FileSystem fs, Path[] activityFiles) {
-		if (activityFiles == null) {
-			return 0;
-		}
-
+	private static int[] getFilesTotals(FileSystem fs, Path[] activityFiles) {
+		int tbc = 0;
 		int tlc = 0;
-		for (Path f : activityFiles) {
-			try {
-				tlc += Utils.countLines(new InputStreamReader(fs.open(f)));
-			} catch (IOException exc) {
+		if (ArrayUtils.isNotEmpty(activityFiles)) {
+			for (Path f : activityFiles) {
+				try {
+					ContentSummary cSummary = fs.getContentSummary(f);
+					tbc += cSummary.getLength();
+					tlc += Utils.countLines(new InputStreamReader(fs.open(f)));
+				} catch (IOException exc) {
+				}
 			}
 		}
 
-		return tlc;
+		return new int[] { tbc, tlc };
 	}
 
 	/**

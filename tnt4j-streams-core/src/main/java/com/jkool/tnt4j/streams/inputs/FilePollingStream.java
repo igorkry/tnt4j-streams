@@ -17,8 +17,6 @@
 package com.jkool.tnt4j.streams.inputs;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
@@ -99,15 +97,11 @@ public class FilePollingStream extends AbstractFilePollingStream {
 			Arrays.sort(activityFiles, new Comparator<File>() {
 				@Override
 				public int compare(File o1, File o2) {
-					try {
-						BasicFileAttributes bfa1 = Files.readAttributes(o1.toPath(), BasicFileAttributes.class);
-						BasicFileAttributes bfa2 = Files.readAttributes(o2.toPath(), BasicFileAttributes.class);
-
-						// NOTE: we want files to be sorted from oldest
-						return bfa1.lastModifiedTime().compareTo(bfa2.lastModifiedTime()) * (-1);
-					} catch (IOException exc) {
-						return 0;
-					}
+					long f1ct = o1.lastModified();
+					long f2ct = o2.lastModified();
+					// NOTE: we want files to be sorted from newest->oldest
+					// (DESCENDING)
+					return f1ct < f2ct ? 1 : (f1ct == f2ct ? 0 : -1);
 				}
 			});
 		}

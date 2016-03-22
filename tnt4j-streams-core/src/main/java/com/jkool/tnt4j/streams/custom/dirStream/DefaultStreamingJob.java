@@ -229,10 +229,10 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 
 		@Override
-		public void onFinish(TNTInputStream stream) {
+		public void onFinish(TNTInputStream stream, TNTInputStream.StreamStats stats) {
 			if (jobListeners != null) {
 				for (StreamingJobListener l : jobListeners) {
-					l.onFinish(DefaultStreamingJob.this);
+					l.onFinish(DefaultStreamingJob.this, stats);
 				}
 			}
 

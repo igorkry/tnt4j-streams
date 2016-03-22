@@ -195,6 +195,16 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		return requestHandler.isInputEnded();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected long getActivityItemByteSize(Map<String, ?> itemMap) {
+		byte[] payload = (byte[]) itemMap.get(StreamsConstants.ACTIVITY_DATA_KEY);
+
+		return payload == null ? 0 : payload.length;
+	}
+
 	private static class HttpStreamExceptionLogger implements ExceptionLogger {
 		@Override
 		public void log(final Exception ex) {

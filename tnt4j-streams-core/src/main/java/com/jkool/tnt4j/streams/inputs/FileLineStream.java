@@ -17,8 +17,6 @@
 package com.jkool.tnt4j.streams.inputs;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -98,7 +96,7 @@ public class FileLineStream extends AbstractFileLineStream {
 	 * C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just
 	 * file name pattern) then files are searched in
 	 * {@code System.getProperty("user.dir")}. Files array is ordered by file
-	 * create timestamp in descending order.
+	 * modification timestamp in ascending order.
 	 *
 	 * @param namePattern
 	 *            name pattern to find files
@@ -117,15 +115,11 @@ public class FileLineStream extends AbstractFileLineStream {
 			Arrays.sort(activityFiles, new Comparator<File>() {
 				@Override
 				public int compare(File o1, File o2) {
-					try {
-						BasicFileAttributes bfa1 = Files.readAttributes(o1.toPath(), BasicFileAttributes.class);
-						BasicFileAttributes bfa2 = Files.readAttributes(o2.toPath(), BasicFileAttributes.class);
-
-						// NOTE: we want files to be sorted from oldest
-						return bfa1.creationTime().compareTo(bfa2.creationTime()) * (-1);
-					} catch (IOException exc) {
-						return 0;
-					}
+					long f1ct = o1.lastModified();
+					long f2ct = o2.lastModified();
+					// NOTE: we want files to be sorted oldest->newest
+					// (ASCENDING)
+					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
 				}
 			});
 		}
