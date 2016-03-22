@@ -40,7 +40,7 @@ public class FilePollingStreamTest {
 		TestFileList files = new TestFileList();
 		FilePollingStream fps = new FilePollingStream();
 		int count = TestFileList.TEST_FILE_LIST_SIZE;
-		final String fileName = files.get(0).getParentFile() + File.separator + "TEST*";
+		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST";
 
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
 		props.add(new AbstractMap.SimpleEntry(StreamProperties.PROP_FILENAME, fileName));

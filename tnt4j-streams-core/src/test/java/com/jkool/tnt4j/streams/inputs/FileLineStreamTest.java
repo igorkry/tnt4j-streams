@@ -19,6 +19,7 @@ package com.jkool.tnt4j.streams.inputs;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.Reader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.TestFileList;
+import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -41,7 +43,7 @@ public class FileLineStreamTest {
 		TestFileList files = new TestFileList();
 		FileLineStream fls = new FileLineStream();
 		int count = TestFileList.TEST_FILE_LIST_SIZE;
-		final String fileName = files.get(0).getParentFile() + File.separator + "TEST*";
+		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST";
 
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
 		props.add(new AbstractMap.SimpleEntry(StreamProperties.PROP_FILENAME, fileName));
@@ -49,10 +51,12 @@ public class FileLineStreamTest {
 		fls.setProperties(props);
 		fls.initialize();
 
-		for (int i = count; i >= 0; i--) {
+		for (int i = 0; i < count; i++) {
 			assertTrue(fls.isFileAvailable(i));
-			assertNotNull(fls.getFileReader(i));
-			assertEquals(files.get(count - i).getName(), fls.getFileName(i));
+			Reader fr = fls.getFileReader(i);
+			assertNotNull(fr);
+			Utils.close(fr);
+			assertEquals(files.get(i).getName(), fls.getFileName(i));
 		}
 		fls.cleanup();
 		files.cleanup();

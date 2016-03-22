@@ -19,7 +19,6 @@ package com.jkool.tnt4j.streams.utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -31,24 +30,31 @@ public class TestFileList extends ArrayList<File> {
 	public static final int TEST_FILE_LIST_SIZE = 5;
 	private static final long serialVersionUID = 1L;
 
+	private String prefix;
+
 	public TestFileList() throws IOException, InterruptedException {
 		super();
-		Long date = null;
 		final int count = TEST_FILE_LIST_SIZE;
-		for (int i = 0; i <= count; i++) {
-			File tempFile = File.createTempFile("TEST", "TST");
-			if (count / 2 >= i)
-				date = (new Date()).getTime();
+		prefix = "TEST" + String.valueOf(System.currentTimeMillis()).substring(5);
+
+		for (int i = 0; i < count; i++) {
+			File tempFile = File.createTempFile(prefix, ".TST");
+			if (count / 2 >= i) {
+				// tempFile.setLastModified(System.currentTimeMillis() + 50000);
+			}
 			this.add(tempFile);
 			Thread.sleep(1);
 		}
+	}
 
+	public String getPrefix() {
+		return prefix;
 	}
 
 	public void cleanup() {
 		final Iterator<File> iterator = this.iterator();
 		while (iterator.hasNext()) {
-			iterator.next().deleteOnExit();
+			iterator.next().delete();
 		}
 	}
 }

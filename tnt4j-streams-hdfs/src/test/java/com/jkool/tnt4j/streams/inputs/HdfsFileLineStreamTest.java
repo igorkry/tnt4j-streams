@@ -80,7 +80,8 @@ public class HdfsFileLineStreamTest {
 
 		TestFileList files = new TestFileList();
 
-		final String fileName = (files.get(0).getParentFile() + File.separator + "TEST*").replace("\\", "/");
+		final String fileName = (files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST")
+				.replace("\\", "/");
 
 		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
 		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME, fileName));
