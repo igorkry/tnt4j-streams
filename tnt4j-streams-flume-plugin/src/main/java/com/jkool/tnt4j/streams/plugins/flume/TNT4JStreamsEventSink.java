@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;

@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;

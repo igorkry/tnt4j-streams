@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;

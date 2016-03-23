@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.config.SocketConfig;

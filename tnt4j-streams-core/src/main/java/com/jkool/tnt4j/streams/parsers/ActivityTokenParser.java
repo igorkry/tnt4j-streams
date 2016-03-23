@@ -22,15 +22,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
 
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;

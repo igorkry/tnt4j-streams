@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;

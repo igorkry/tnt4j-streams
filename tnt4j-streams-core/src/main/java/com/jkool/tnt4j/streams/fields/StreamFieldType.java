@@ -16,7 +16,7 @@
 
 package com.jkool.tnt4j.streams.fields;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.utils.StreamTimestamp;
 import com.jkool.tnt4j.streams.utils.StreamsResources;

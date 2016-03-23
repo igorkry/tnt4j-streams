@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -270,7 +270,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
-		defaultSource = streamConfig.getSource();
+		defaultSource = streamConfig.getSource().getSource(); // TODO??
 		trackersMap.put(defaultSource.getFQName(), tracker);
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"TNTInputStream.default.tracker", defaultSource.getFQName()));
@@ -850,7 +850,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 			}
 		} else {
 			if (!ai.isFiltered()) {
-				Tracker tracker = getTracker(ai.getSource());
+				Tracker tracker = getTracker(ai.getSource(defaultSource));
 
 				while (!isHalted() && !tracker.isOpen()) {
 					try {

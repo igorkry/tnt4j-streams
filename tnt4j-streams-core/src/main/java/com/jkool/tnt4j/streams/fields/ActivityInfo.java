@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.utils.*;
@@ -34,6 +34,7 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.source.DefaultSourceFactory;
 import com.nastel.jkool.tnt4j.source.Source;
+import com.nastel.jkool.tnt4j.source.SourceFactoryImpl;
 import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.TimeTracker;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
@@ -49,11 +50,6 @@ import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
-
-	/**
-	 * The constant to indicate undefined value.
-	 */
-	protected static final String UNSPECIFIED_LABEL = "<UNSPECIFIED>"; // NON-NLS
 
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
@@ -254,45 +250,44 @@ public class ActivityInfo {
 		if (fieldType != null) {
 			switch (fieldType) {
 			case Message:
-				message = fieldValue;
+				message = substitute(message, fieldValue);
 				break;
 			case EventName:
-				eventName = getStringValue(fieldValue);
+				eventName = substitute(eventName, getStringValue(fieldValue));
 				break;
 			case EventType:
 				eventType = Utils.mapOpType(fieldValue);
 				break;
 			case ApplName:
-				applName = getStringValue(fieldValue);
+				applName = substitute(applName, getStringValue(fieldValue));
 				break;
 			case Correlator:
 				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
-				elapsedTime = fieldValue instanceof Number ? ((Number) fieldValue).longValue()
-						: Long.parseLong(getStringValue(fieldValue));
+				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue));
 				break;
 			case EndTime:
 				endTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
 						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
 				break;
 			case Exception:
-				exception = getStringValue(fieldValue);
+				exception = substitute(exception, getStringValue(fieldValue));
 				break;
 			case Location:
-				location = getStringValue(fieldValue);
+				location = substitute(location, getStringValue(fieldValue));
 				break;
 			case ReasonCode:
-				reasonCode = getIntValue(fieldValue);
+				reasonCode = substitute(reasonCode, getIntValue(fieldValue));
 				break;
 			case ResourceName:
-				resourceName = getStringValue(fieldValue);
+				resourceName = substitute(resourceName, getStringValue(fieldValue));
 				break;
 			case ServerIp:
-				serverIp = getStringValue(fieldValue);
+				serverIp = substitute(serverIp, getStringValue(fieldValue));
 				break;
 			case ServerName:
-				serverName = getStringValue(fieldValue);
+				serverName = substitute(serverName, getStringValue(fieldValue));
 				break;
 			case Severity:
 				if (fieldValue instanceof Number) {
@@ -302,7 +297,7 @@ public class ActivityInfo {
 				}
 				break;
 			case TrackingId:
-				trackingId = getStringValue(fieldValue);
+				trackingId = substitute(trackingId, getStringValue(fieldValue));
 				break;
 			case StartTime:
 				startTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
@@ -319,31 +314,31 @@ public class ActivityInfo {
 				addTag(Utils.getTags(fieldValue));
 				break;
 			case UserName:
-				userName = getStringValue(fieldValue);
+				userName = substitute(userName, getStringValue(fieldValue));
 				break;
 			case MsgCharSet:
-				msgCharSet = getStringValue(fieldValue);
+				msgCharSet = substitute(msgCharSet, getStringValue(fieldValue));
 				break;
 			case MsgEncoding:
-				msgEncoding = getStringValue(fieldValue);
+				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue));
 				break;
 			case MsgLength:
-				msgLength = getIntValue(fieldValue);
+				msgLength = substitute(msgLength, getIntValue(fieldValue));
 				break;
 			case MsgMimeType:
-				msgMimeType = getStringValue(fieldValue);
+				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue));
 				break;
 			case ProcessId:
-				processId = getIntValue(fieldValue);
+				processId = substitute(processId, getIntValue(fieldValue));
 				break;
 			case ThreadId:
-				threadId = getIntValue(fieldValue);
+				threadId = substitute(threadId, getIntValue(fieldValue));
 				break;
 			case Category:
-				category = getStringValue(fieldValue);
+				category = substitute(category, getStringValue(fieldValue));
 				break;
 			case ParentId:
-				parentId = getStringValue(fieldValue);
+				parentId = substitute(parentId, getStringValue(fieldValue));
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
@@ -354,6 +349,26 @@ public class ActivityInfo {
 		}
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"ActivityInfo.set.field", field, fieldValue));
+	}
+
+	private static String substitute(String value, String newValue) {
+		return StringUtils.isEmpty(newValue) ? value : newValue;
+	}
+
+	private static Integer substitute(Integer value, Integer newValue) {
+		return substitute(value, newValue, Integer.class);
+	}
+
+	private static Long substitute(Long value, Long newValue) {
+		return substitute(value, newValue, Long.class);
+	}
+
+	private static Object substitute(Object value, Object newValue) {
+		return substitute(value, newValue, Object.class);
+	}
+
+	private static <T> T substitute(T value, T newValue, Class<T> clazz) {
+		return newValue == null ? value : newValue;
 	}
 
 	/**
@@ -416,27 +431,33 @@ public class ActivityInfo {
 
 	/**
 	 * Makes fully qualified name of activity source. Name is made from stream
-	 * parsed data attributes.
+	 * parsed data attributes combined with default source values loaded from
+	 * TNT4J configuration.
+	 *
+	 * @param defaultSource
+	 *            source defined in TNT4J configuration.
 	 *
 	 * @return fully qualified name of this activity source, or {@code null} if
 	 *         no source defining attributes where parsed from stream.
 	 */
-	public Source getSource() {
+	public Source getSource(Source defaultSource) {
 		resolveServer();
 		resolveApplication();
 		StringBuilder fqnB = new StringBuilder();
 
-		addSourceValue(fqnB, SourceType.SERVER, serverName);
-		addSourceValue(fqnB, SourceType.NETADDR, serverIp);
-		addSourceValue(fqnB, SourceType.APPL, applName);
-		addSourceValue(fqnB, SourceType.USER, userName);
+		Map<String, Object> srcFqnMap = ((SourceFactoryImpl) defaultSource.getSourceFactory()).getConfiguration();
+
+		addSourceValue(fqnB, SourceType.SERVER, serverName, srcFqnMap);
+		addSourceValue(fqnB, SourceType.NETADDR, serverIp, srcFqnMap);
+		addSourceValue(fqnB, SourceType.APPL, applName, srcFqnMap);
+		addSourceValue(fqnB, SourceType.USER, userName, srcFqnMap);
 
 		String fqn = fqnB.toString();
 
-		return StringUtils.isEmpty(fqn) ? null : DefaultSourceFactory.getInstance().newFromFQN(fqn);
+		return StringUtils.isEmpty(fqn) ? defaultSource : DefaultSourceFactory.getInstance().newFromFQN(fqn);
 	}
 
-	private static void addSourceValue(StringBuilder sb, SourceType type, String value) {
+	private static void addSourceValue(StringBuilder sb, SourceType type, String value, Map<String, ?> srcFnqMap) {
 		if (StringUtils.isNotEmpty(value)) {
 			if (sb.length() > 0) {
 				sb.append("#"); // NON-NLS
@@ -473,15 +494,14 @@ public class ActivityInfo {
 		determineTimes();
 
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
-		String trackName = StringUtils.isEmpty(eventName) ? UNSPECIFIED_LABEL : eventName;
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
 
 		Trackable trackable;
 
 		if (eventType == OpType.ACTIVITY) {
-			trackable = buildActivity(tracker, trackName, trackId);
+			trackable = buildActivity(tracker, eventName, trackId);
 		} else {
-			trackable = buildEvent(tracker, trackName, trackId);
+			trackable = buildEvent(tracker, eventName, trackId);
 		}
 
 		StreamsThread thread = null;
@@ -570,7 +590,7 @@ public class ActivityInfo {
 		if (StringUtils.isNotEmpty(location)) {
 			event.getOperation().setLocation(location);
 		}
-		event.getOperation().setResource(StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName);
+		event.getOperation().setResource(resourceName);
 		if (StringUtils.isNotEmpty(userName)) {
 			event.getOperation().setUser(userName);
 		}
@@ -641,11 +661,12 @@ public class ActivityInfo {
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		activity.setReasonCode(reasonCode);
 		activity.setType(eventType);
+		activity.setStatus(StringUtils.isNoneEmpty(exception) ? ActivityStatus.EXCEPTION : ActivityStatus.END);
 		activity.setException(exception);
 		if (StringUtils.isNotEmpty(location)) {
 			activity.setLocation(location);
 		}
-		activity.setResource(StringUtils.isEmpty(resourceName) ? UNSPECIFIED_LABEL : resourceName);
+		activity.setResource(resourceName);
 		if (StringUtils.isNotEmpty(userName)) {
 			activity.setUser(userName);
 		}
@@ -777,6 +798,10 @@ public class ActivityInfo {
 
 	private static Integer getIntValue(Object value) {
 		return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(getStringValue(value));
+	}
+
+	private static Long getLongValue(Object value) {
+		return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(getStringValue(value));
 	}
 
 	/**

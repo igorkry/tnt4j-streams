@@ -25,7 +25,7 @@ import java.util.Comparator;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 

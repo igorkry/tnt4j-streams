@@ -26,7 +26,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.JMSStreamConstants;

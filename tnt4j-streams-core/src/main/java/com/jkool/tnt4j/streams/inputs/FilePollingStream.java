@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;

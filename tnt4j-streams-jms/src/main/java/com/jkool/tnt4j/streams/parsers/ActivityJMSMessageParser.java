@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.jms.*;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.fields.StreamFieldType;
 import com.jkool.tnt4j.streams.utils.JMSStreamConstants;
