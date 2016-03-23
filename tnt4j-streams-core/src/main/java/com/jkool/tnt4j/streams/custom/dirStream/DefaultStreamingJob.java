@@ -246,8 +246,6 @@ public class DefaultStreamingJob implements StreamingJob {
 					l.onStreamEvent(DefaultStreamingJob.this, level, message, source);
 				}
 			}
-
-			cleanup();
 		}
 	}
 }
