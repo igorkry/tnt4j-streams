@@ -32,9 +32,6 @@ import com.nastel.jkool.tnt4j.core.*;
 import com.nastel.jkool.tnt4j.format.JSONFormatter;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
-import com.nastel.jkool.tnt4j.source.DefaultSourceFactory;
-import com.nastel.jkool.tnt4j.source.Source;
-import com.nastel.jkool.tnt4j.source.SourceFactoryImpl;
 import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.TimeTracker;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
@@ -431,40 +428,30 @@ public class ActivityInfo {
 
 	/**
 	 * Makes fully qualified name of activity source. Name is made from stream
-	 * parsed data attributes combined with default source values loaded from
-	 * TNT4J configuration.
-	 *
-	 * @param defaultSource
-	 *            source defined in TNT4J configuration.
+	 * parsed data attributes.
 	 *
 	 * @return fully qualified name of this activity source, or {@code null} if
 	 *         no source defining attributes where parsed from stream.
 	 */
-	public Source getSource(Source defaultSource) {
+	public String getSourceFQN() {
 		resolveServer();
-		resolveApplication();
 		StringBuilder fqnB = new StringBuilder();
 
-		Map<String, Object> srcFqnMap = ((SourceFactoryImpl) defaultSource.getSourceFactory()).getConfiguration();
-
-		addSourceValue(fqnB, SourceType.SERVER, serverName, srcFqnMap);
-		addSourceValue(fqnB, SourceType.NETADDR, serverIp, srcFqnMap);
-		addSourceValue(fqnB, SourceType.APPL, applName, srcFqnMap);
-		addSourceValue(fqnB, SourceType.USER, userName, srcFqnMap);
+		addSourceValue(fqnB, SourceType.APPL, applName);
+		addSourceValue(fqnB, SourceType.SERVER, serverName);
+		addSourceValue(fqnB, SourceType.NETADDR, serverIp);
 
 		String fqn = fqnB.toString();
 
-		return StringUtils.isEmpty(fqn) ? defaultSource : DefaultSourceFactory.getInstance().newFromFQN(fqn);
+		return StringUtils.isEmpty(fqn) ? null : fqn;
 	}
 
-	private static void addSourceValue(StringBuilder sb, SourceType type, String value, Map<String, ?> srcFnqMap) {
+	private static void addSourceValue(StringBuilder sb, SourceType type, String value) {
 		if (StringUtils.isNotEmpty(value)) {
 			if (sb.length() > 0) {
 				sb.append("#"); // NON-NLS
 			}
-			if (!value.isEmpty()) {
-				sb.append(type).append("=").append(value); // NON-NLS
-			}
+			sb.append(type).append("=").append(value); // NON-NLS
 		}
 	}
 
@@ -490,7 +477,6 @@ public class ActivityInfo {
 		}
 
 		resolveServer();
-		resolveApplication();
 		determineTimes();
 
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
@@ -591,9 +577,7 @@ public class ActivityInfo {
 			event.getOperation().setLocation(location);
 		}
 		event.getOperation().setResource(resourceName);
-		if (StringUtils.isNotEmpty(userName)) {
-			event.getOperation().setUser(userName);
-		}
+		event.getOperation().setUser(StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
 		event.getOperation().setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		event.getOperation().setPID(processId == null ? Utils.getVMPID() : processId);
 		// event.getOperation().setSeverity(severity == null ? OpLevel.INFO :
@@ -661,15 +645,13 @@ public class ActivityInfo {
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		activity.setReasonCode(reasonCode);
 		activity.setType(eventType);
-		activity.setStatus(StringUtils.isNoneEmpty(exception) ? ActivityStatus.EXCEPTION : ActivityStatus.END);
+		activity.setStatus(StringUtils.isNotEmpty(exception) ? ActivityStatus.EXCEPTION : ActivityStatus.END);
 		activity.setException(exception);
 		if (StringUtils.isNotEmpty(location)) {
 			activity.setLocation(location);
 		}
 		activity.setResource(resourceName);
-		if (StringUtils.isNotEmpty(userName)) {
-			activity.setUser(userName);
-		}
+		activity.setUser(StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
 		activity.setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		activity.setPID(processId == null ? Utils.getVMPID() : processId);
 		// activity.setSeverity(severity == null ? OpLevel.INFO : severity);
@@ -737,15 +719,6 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(serverIp)) {
 			serverIp = " "; // prevents streams API from resolving it to the
 			// local IP address
-		}
-	}
-
-	/**
-	 * Resolves application name based on values specified.
-	 */
-	private void resolveApplication() {
-		if (StringUtils.isEmpty(applName)) {
-			applName = "com.jkool.tnt4j.streams"; // NON-NLS
 		}
 	}
 
