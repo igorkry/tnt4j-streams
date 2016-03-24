@@ -268,7 +268,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
-		defaultSource = streamConfig.getSource();
+		// NOTE: removing APPL=streams "layer" from default source and copy
+		// SSN=streams value from config
+		defaultSource = streamConfig.getSource().getSource();
+		defaultSource.setSSN(streamConfig.getSource().getSSN());
 		trackersMap.put(defaultSource.getFQName(), tracker);
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"TNTInputStream.default.tracker", defaultSource.getFQName()));
