@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
@@ -612,6 +613,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 			if (parser.isDataClassSupported(data)) {
 				ActivityInfo ai = parser.parse(this, data);
 				if (ai != null) {
+					// NOTE: TNT4J API fails if operation name is null
+					if (StringUtils.isEmpty(ai.getEventName())) {
+						ai.setEventName(name == null ? parser.getName() : name);
+					}
+
 					return ai;
 				}
 			}

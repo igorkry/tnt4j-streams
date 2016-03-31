@@ -48,11 +48,6 @@ import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 
-	/**
-	 * The constant to indicate undefined value.
-	 */
-	public static final String UNKNOWN_VALUE = "UNKNOWN"; // NON-NLS
-
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
 	private String serverName = null;
@@ -487,15 +482,13 @@ public class ActivityInfo {
 
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
-		// NOTE: TNT4J API fails if operation name is null
-		String trackName = StringUtils.isEmpty(eventName) ? UNKNOWN_VALUE : eventName;
 
 		Trackable trackable;
 
 		if (eventType == OpType.ACTIVITY) {
-			trackable = buildActivity(tracker, trackName, trackId);
+			trackable = buildActivity(tracker, eventName, trackId);
 		} else {
-			trackable = buildEvent(tracker, trackName, trackId);
+			trackable = buildEvent(tracker, eventName, trackId);
 		}
 
 		StreamsThread thread = null;
@@ -944,6 +937,16 @@ public class ActivityInfo {
 	 */
 	public String getEventName() {
 		return eventName;
+	}
+
+	/**
+	 * Sets event name.
+	 *
+	 * @param eventName
+	 *            the event name
+	 */
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
 	}
 
 	/**
