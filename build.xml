@@ -1,4 +1,4 @@
-<project name="tnt4j-streams-core" default="build" basedir=".">
+<project name="tnt4j-streams-core" default="all" basedir=".">
 
 	<echo message="Processing ${ant.project.name}${line.separator}" level="info" />
 	
@@ -10,15 +10,31 @@
 	    <os family="unix" />
 	</condition>
 
-	<target name="build" depends="mvn_windows, mvn_unix"/>
+	<target name="clean" depends="mvn_windows_clean, mvn_unix_clean"/>
+	
+	<target name="rebuild" depends="mvn_windows_build, mvn_unix_build"/>
+	
+	<target name="all" depends="rebuild"/>
 
-	<target name="mvn_windows" if="isWindows">
+	<target name="mvn_windows_clean" if="isWindows">
+	    <exec dir="." executable="cmd">
+	        <arg line="/c mvn clean" />
+	    </exec>
+	</target>
+
+	<target name="mvn_unix_clean" if="isUnix">
+	    <exec dir="." executable="sh">
+	        <arg line="-c 'mvn clean'" />
+	    </exec>
+	</target>
+	
+	<target name="mvn_windows_build" if="isWindows">
 	    <exec dir="." executable="cmd">
 	        <arg line="/c mvn clean package javadoc:aggregate install" />
 	    </exec>
 	</target>
 
-	<target name="mvn_unix" if="isUnix">
+	<target name="mvn_unix_build" if="isUnix">
 	    <exec dir="." executable="sh">
 	        <arg line="-c 'mvn clean package javadoc:aggregate install'" />
 	    </exec>
