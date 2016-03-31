@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,7 @@ public class ActivityFieldLocator implements Cloneable {
 
 	private ActivityFieldLocatorType builtInType = null;
 	private ActivityFieldFormatType builtInFormat = null;
-	private ActivityFieldUnitsType builtInUnits = null;
+	private TimeUnit builtInUnits = null;
 	private Map<Object, Object> valueMap = null;
 	private Object mapCatchAll = null;
 
@@ -240,7 +241,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @return the builtInUnits built-in format type, or {@code null} if this
 	 *         units specification is a custom one.
 	 */
-	public ActivityFieldUnitsType getBuiltInUnits() {
+	public TimeUnit getBuiltInUnits() {
 		return builtInUnits;
 	}
 
@@ -259,7 +260,9 @@ public class ActivityFieldLocator implements Cloneable {
 		this.units = units;
 		builtInUnits = null;
 		try {
-			builtInUnits = ActivityFieldUnitsType.valueOf(this.units);
+			if (units != null) {
+				builtInUnits = TimeUnit.valueOf(units.toUpperCase());
+			}
 		} catch (Exception e) {
 		}
 	}
@@ -547,11 +550,11 @@ public class ActivityFieldLocator implements Cloneable {
 			return (StreamTimestamp) value;
 		}
 		if (timeParser == null) {
-			ActivityFieldDataType fDataType = this.dataType == null ? ActivityFieldDataType.DateTime : this.dataType;
-			ActivityFieldUnitsType fUnits = ActivityFieldUnitsType.Milliseconds;
-			if (this.units != null) {
+			ActivityFieldDataType fDataType = dataType == null ? ActivityFieldDataType.DateTime : dataType;
+			TimeUnit fUnits = TimeUnit.MILLISECONDS;
+			if (units != null) {
 				try {
-					fUnits = ActivityFieldUnitsType.valueOf(this.units);
+					fUnits = TimeUnit.valueOf(units.toUpperCase());
 				} catch (Exception e) {
 				}
 			}

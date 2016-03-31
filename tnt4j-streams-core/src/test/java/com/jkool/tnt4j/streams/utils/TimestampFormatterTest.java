@@ -22,10 +22,9 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
-
-import com.jkool.tnt4j.streams.fields.ActivityFieldUnitsType;
 
 /**
  * @author akausinis
@@ -36,8 +35,8 @@ public class TimestampFormatterTest {
 	@Test
 	public void testConvert() throws ParseException {
 		Number testNum = 100000L;
-		for (ActivityFieldUnitsType fromUnits : ActivityFieldUnitsType.values()) {
-			for (ActivityFieldUnitsType toUnits : ActivityFieldUnitsType.values()) {
+		for (TimeUnit fromUnits : TimeUnit.values()) {
+			for (TimeUnit toUnits : TimeUnit.values()) {
 				final Number convert = TimestampFormatter.convert(testNum, fromUnits, toUnits);
 				final Number convertBack = TimestampFormatter.convert(testNum, toUnits, fromUnits);
 			}
@@ -47,32 +46,32 @@ public class TimestampFormatterTest {
 	@Test
 	public void testParse() throws ParseException {
 		final Date date = new Date();
-		TimestampFormatter formatter = new TimestampFormatter(ActivityFieldUnitsType.Milliseconds);
-		assertNotNull(TimestampFormatter.parse(ActivityFieldUnitsType.Milliseconds, date));
+		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
+		assertNotNull(TimestampFormatter.parse(TimeUnit.MILLISECONDS, date));
 		assertNotNull(formatter.parse(date));
-		assertNotNull(TimestampFormatter.parse(ActivityFieldUnitsType.Microseconds, Calendar.getInstance()));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.MICROSECONDS, Calendar.getInstance()));
 		assertNotNull(formatter.parse(Calendar.getInstance()));
-		assertNotNull(TimestampFormatter.parse(ActivityFieldUnitsType.Seconds, date.getTime()));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.SECONDS, date.getTime()));
 		assertNotNull(formatter.parse(String.valueOf(date.getTime())));
-		assertNotNull(formatter.parse((Number) date.getTime()));
+		assertNotNull(formatter.parse(date.getTime()));
 		// formatter.setPattern("# ", Locale.FRENCH.toString()); XXX
 		// assertNotNull(formatter.parse(String.valueOf(date.getTime())));
 	}
 
 	@Test(expected = ParseException.class)
 	public void testParseExcepion() throws ParseException {
-		TimestampFormatter.parse(ActivityFieldUnitsType.Microseconds, "TEST");
+		TimestampFormatter.parse(TimeUnit.MICROSECONDS, "TEST");
 	}
 
 	@Test(expected = ParseException.class)
 	public void testParseExcepion2() throws ParseException {
-		TimestampFormatter formatter = new TimestampFormatter(ActivityFieldUnitsType.Milliseconds);
+		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
 		formatter.parse(this);
 	}
 
 	@Test
 	public void testTimeZone() {
-		TimestampFormatter formatter = new TimestampFormatter(ActivityFieldUnitsType.Milliseconds);
+		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
 		final String timezone = TimeZone.getDefault().toString();
 		formatter.setTimeZone(timezone);
 		assertEquals(timezone, formatter.getTimeZone());

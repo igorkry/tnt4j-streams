@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -75,7 +76,7 @@ public class ActivityFieldLocatorTest {
 		locator = new ActivityFieldLocator(1);
 		locator.setUnits("TEST");
 		assertNull(locator.getBuiltInUnits());
-		for (ActivityFieldUnitsType unit : ActivityFieldUnitsType.values()) {
+		for (TimeUnit unit : TimeUnit.values()) {
 			locator.setFormat(unit.name(), null); // XXX
 			locator.setUnits(unit.name());
 			assertEquals("Failed on " + unit.name(), unit, locator.getBuiltInUnits());
@@ -101,7 +102,7 @@ public class ActivityFieldLocatorTest {
 		StreamTimestamp ts = new StreamTimestamp(new Date());
 		assertEquals(ts, locator.formatDateValue(ts));
 		locator.setDataType(ActivityFieldDataType.DateTime);
-		locator.setUnits(ActivityFieldUnitsType.Milliseconds.name());
+		locator.setUnits(TimeUnit.MILLISECONDS.name());
 		locator.formatDateValue(new Date());
 	}
 

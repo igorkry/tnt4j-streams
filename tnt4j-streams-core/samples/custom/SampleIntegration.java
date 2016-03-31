@@ -18,7 +18,7 @@ package com.jkool.tnt4j.streams.samples.custom;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfig;
 import com.jkool.tnt4j.streams.inputs.StreamThread;

@@ -127,6 +127,9 @@
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
+            <xs:enumeration value="Days"/>
+            <xs:enumeration value="Hours"/>
+            <xs:enumeration value="Minutes"/>
             <xs:enumeration value="Seconds"/>
             <xs:enumeration value="Milliseconds"/>
             <xs:enumeration value="Microseconds"/>

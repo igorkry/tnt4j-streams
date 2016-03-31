@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
@@ -41,6 +40,7 @@ import com.nastel.jkool.tnt4j.config.TrackerConfig;
 import com.nastel.jkool.tnt4j.config.TrackerConfigStore;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.nastel.jkool.tnt4j.source.DefaultSourceFactory;
 import com.nastel.jkool.tnt4j.source.Source;
 import com.nastel.jkool.tnt4j.source.SourceType;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
@@ -105,7 +105,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	protected final Map<String, Tracker> trackersMap = new HashMap<String, Tracker>();
 
-	private String sourceName;
 	private String tnt4jCfgFilePath;
 	private TrackerConfig streamConfig;
 	private Source defaultSource;
@@ -146,7 +145,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 */
 	protected TNTInputStream(EventSink logger) {
 		this.logger = logger;
-		this.sourceName = DEFAULT_SOURCE_NAME;
 	}
 
 	/**
@@ -259,8 +257,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *             continue.
 	 */
 	protected void initialize() throws Exception {
-		streamConfig = StringUtils.isEmpty(sourceName) ? DefaultConfigFactory.getInstance().getConfig()
-				: DefaultConfigFactory.getInstance().getConfig(sourceName, SourceType.APPL, tnt4jCfgFilePath);
+		streamConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
+				tnt4jCfgFilePath);
 		if (MapUtils.isNotEmpty(tnt4jProperties)) {
 			for (Map.Entry<String, String> tnt4jProp : tnt4jProperties.entrySet()) {
 				streamConfig.setProperty(tnt4jProp.getKey(), tnt4jProp.getValue());
@@ -270,7 +268,10 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
-		defaultSource = streamConfig.getSource().getSource(); // TODO??
+		// NOTE: removing APPL=streams "layer" from default source and copy
+		// SSN=streams value from config
+		defaultSource = streamConfig.getSource().getSource();
+		defaultSource.setSSN(streamConfig.getSource().getSSN());
 		trackersMap.put(defaultSource.getFQName(), tracker);
 		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"TNTInputStream.default.tracker", defaultSource.getFQName()));
@@ -280,25 +281,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		}
-	}
-
-	/**
-	 * Gets TNT4J configuration source name.
-	 * 
-	 * @return TNT4J configuration source name
-	 */
-	public String getSourceName() {
-		return sourceName;
-	}
-
-	/**
-	 * Sets TNT4J configuration source name.
-	 *
-	 * @param sourceName
-	 *            source name used to load TNT4J configuration
-	 */
-	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
 	}
 
 	/**
@@ -739,10 +721,11 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
-	private Tracker getTracker(Source aiSource) {
+	private Tracker getTracker(String aiSourceFQN) {
 		synchronized (trackersMap) {
-			Tracker tracker = trackersMap.get(aiSource == null ? defaultSource.getFQName() : aiSource.getFQName());
+			Tracker tracker = trackersMap.get(aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN);
 			if (tracker == null) {
+				Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(aiSourceFQN);
 				aiSource.setSSN(defaultSource.getSSN());
 				streamConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(streamConfig.build());
@@ -850,7 +833,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 			}
 		} else {
 			if (!ai.isFiltered()) {
-				Tracker tracker = getTracker(ai.getSource(defaultSource));
+				Tracker tracker = getTracker(ai.getSourceFQN());
 
 				while (!isHalted() && !tracker.isOpen()) {
 					try {
