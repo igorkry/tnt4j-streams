@@ -55,13 +55,13 @@ public class ActivityInfoTest {
 			SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		ActivityInfo activityInfo = new ActivityInfo();
 		for (StreamFieldType field : StreamFieldType.values()) {
-
 			TestPair value = fillInField(field, activityInfo);
-			if (value == null)
+			if (value == null) {
 				continue;
+			}
+
 			Method method = ActivityInfo.class.getMethod("get" + field.name());
 			if (test) {
-
 				final Object result = method.invoke(activityInfo);
 				assertEquals("Value not equal", value.valueExpected, result);
 			}

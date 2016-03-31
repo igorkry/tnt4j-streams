@@ -1991,6 +1991,7 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-cor
     lib
      |- jkool-jesl.jar
      |- tnt4j-api.jar
+     |- tnt4j-api-utils.jar
      |- tnt4j-log4j12.jar (O)
      |- tnt4j-logback.jar (O)
 ```

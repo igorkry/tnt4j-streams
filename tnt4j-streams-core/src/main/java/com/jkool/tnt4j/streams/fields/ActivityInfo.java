@@ -48,6 +48,11 @@ import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 
+	/**
+	 * The constant to indicate undefined value.
+	 */
+	public static final String UNKNOWN_VALUE = "UNKNOWN"; // NON-NLS
+
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
 
 	private String serverName = null;
@@ -202,11 +207,12 @@ public class ActivityInfo {
 			case ElapsedTime:
 				try {
 					// Elapsed time needs to be converted to usec
-					ActivityFieldUnitsType units = ActivityFieldUnitsType.valueOf(locator.getUnits());
+					TimeUnit units = StringUtils.isEmpty(locator.getUnits()) ? TimeUnit.MICROSECONDS
+							: TimeUnit.valueOf(locator.getUnits().toUpperCase());
 					if (!(value instanceof Number)) {
 						value = Long.valueOf(getStringValue(value));
 					}
-					value = TimestampFormatter.convert((Number) value, units, ActivityFieldUnitsType.Microseconds);
+					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
 				} catch (Exception e) {
 				}
 				break;
@@ -481,13 +487,15 @@ public class ActivityInfo {
 
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
+		// NOTE: TNT4J API fails if operation name is null
+		String trackName = StringUtils.isEmpty(eventName) ? UNKNOWN_VALUE : eventName;
 
 		Trackable trackable;
 
 		if (eventType == OpType.ACTIVITY) {
-			trackable = buildActivity(tracker, eventName, trackId);
+			trackable = buildActivity(tracker, trackName, trackId);
 		} else {
-			trackable = buildEvent(tracker, eventName, trackId);
+			trackable = buildEvent(tracker, trackName, trackId);
 		}
 
 		StreamsThread thread = null;
@@ -730,15 +738,7 @@ public class ActivityInfo {
 		if (elapsedTime < 0L) {
 			long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
 					: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
-			try {
-				Number elapsedTimeMicro = TimestampFormatter.convert(elapsedTimeNano,
-						ActivityFieldUnitsType.Nanoseconds, ActivityFieldUnitsType.Microseconds);
-
-				if (elapsedTimeMicro != null) {
-					elapsedTime = elapsedTimeMicro.longValue();
-				}
-			} catch (Exception exc) {
-			}
+			elapsedTime = TimestampFormatter.convert(elapsedTimeNano, TimeUnit.NANOSECONDS, TimeUnit.MICROSECONDS);
 		}
 		if (endTime == null) {
 			if (startTime != null) {

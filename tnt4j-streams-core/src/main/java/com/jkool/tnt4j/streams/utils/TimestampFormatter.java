@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.fields.ActivityFieldUnitsType;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -51,7 +50,7 @@ public class TimestampFormatter {
 
 	private String pattern = null;
 	private String timeZone = null;
-	private ActivityFieldUnitsType units = null;
+	private TimeUnit units = null;
 	private DateFormat formatter = null;
 	private String locale = null;
 
@@ -62,7 +61,7 @@ public class TimestampFormatter {
 	 * @param units
 	 *            resolution of timestamp values
 	 */
-	public TimestampFormatter(ActivityFieldUnitsType units) {
+	public TimestampFormatter(TimeUnit units) {
 		setUnits(units);
 	}
 
@@ -115,7 +114,7 @@ public class TimestampFormatter {
 	 *
 	 * @return resolution of timestamp values
 	 */
-	public ActivityFieldUnitsType getUnits() {
+	public TimeUnit getUnits() {
 		return units;
 	}
 
@@ -125,7 +124,7 @@ public class TimestampFormatter {
 	 * @param units
 	 *            resolution of timestamp values
 	 */
-	protected void setUnits(ActivityFieldUnitsType units) {
+	protected void setUnits(TimeUnit units) {
 		this.units = units;
 		this.pattern = null;
 		this.formatter = null;
@@ -214,37 +213,39 @@ public class TimestampFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 */
-	public static StreamTimestamp parse(ActivityFieldUnitsType units, Object value) throws ParseException {
+	public static StreamTimestamp parse(TimeUnit units, Object value) throws ParseException {
 		StreamTimestamp ts;
 		try {
 			long time;
 			if (value instanceof Date) {
 				time = ((Date) value).getTime();
-				units = ActivityFieldUnitsType.Milliseconds;
+				units = TimeUnit.MILLISECONDS;
 			} else if (value instanceof Calendar) {
 				time = ((Calendar) value).getTimeInMillis();
-				units = ActivityFieldUnitsType.Milliseconds;
+				units = TimeUnit.MILLISECONDS;
 			} else {
 				time = value instanceof Number ? ((Number) value).longValue() : Long.parseLong(value.toString());
 			}
+
+			if (units == null) {
+				units = TimeUnit.MILLISECONDS;
+			}
+
 			switch (units) {
-			case Nanoseconds:
+			case NANOSECONDS:
 				long scale = 1000000L;
 				long mSecs = time / scale;
 				long uSecs = (time - mSecs * scale) / 1000L;
 				ts = new StreamTimestamp(mSecs, uSecs);
 				break;
-			case Microseconds:
+			case MICROSECONDS:
 				scale = 1000L;
 				mSecs = time / scale;
 				uSecs = time - mSecs * scale;
 				ts = new StreamTimestamp(mSecs, uSecs);
 				break;
-			case Seconds:
-				ts = new StreamTimestamp(TimeUnit.SECONDS.toMillis(time));
-				break;
 			default:
-				ts = new StreamTimestamp(time);
+				ts = new StreamTimestamp(units.toMillis(time));
 				break;
 			}
 		} catch (NumberFormatException nfe) {
@@ -315,81 +316,8 @@ public class TimestampFormatter {
 	 *
 	 * @return converted numeric timestamp in precision units specified by
 	 *         toUnits
-	 *
-	 * @throws ParseException
-	 *             if an error parsing or converting the timestamp
 	 */
-	public static Number convert(Number timestamp, ActivityFieldUnitsType fromUnits, ActivityFieldUnitsType toUnits)
-			throws ParseException {
-		double scale = 1.0;
-		if (fromUnits != null && toUnits != null) {
-			switch (fromUnits) {
-			case Nanoseconds:
-				switch (toUnits) {
-				case Nanoseconds:
-					scale = 1.0;
-					break;
-				case Microseconds:
-					scale = 0.001;
-					break;
-				case Milliseconds:
-					scale = 0.000001;
-					break;
-				case Seconds:
-					scale = 0.000000001;
-					break;
-				}
-				break;
-			case Microseconds:
-				switch (toUnits) {
-				case Nanoseconds:
-					scale = 1000.0;
-					break;
-				case Microseconds:
-					scale = 1.0;
-					break;
-				case Milliseconds:
-					scale = 0.001;
-					break;
-				case Seconds:
-					scale = 0.000001;
-					break;
-				}
-				break;
-			case Milliseconds:
-				switch (toUnits) {
-				case Nanoseconds:
-					scale = 1000000.0;
-					break;
-				case Microseconds:
-					scale = 1000.0;
-					break;
-				case Milliseconds:
-					scale = 1.0;
-					break;
-				case Seconds:
-					scale = 0.001;
-					break;
-				}
-				break;
-			case Seconds:
-				switch (toUnits) {
-				case Nanoseconds:
-					scale = 1000000000.0;
-					break;
-				case Microseconds:
-					scale = 1000000.0;
-					break;
-				case Milliseconds:
-					scale = 1000.0;
-					break;
-				case Seconds:
-					scale = 1.0;
-					break;
-				}
-				break;
-			}
-		}
-		return NumericFormatter.parse(null, timestamp, scale);
+	public static long convert(Number timestamp, TimeUnit fromUnits, TimeUnit toUnits) {
+		return toUnits.convert(timestamp == null ? 0 : timestamp.longValue(), fromUnits);
 	}
 }
