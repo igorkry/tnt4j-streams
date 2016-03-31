@@ -1976,29 +1976,54 @@ Some of required and optional dependencies may be not available in public Maven 
 In this case we would recommend to download those dependencies manually into `lib` directory and install into local
 maven repository by running `mvn install` command. See `lib/mvn-install.bat` how to do this.
 
-So what to download manually:
+#### `Core` module
+This module is mandatory for using TNT4J-Streams. All optional modules depends to `core` module and can't be build and
+run without it.
+
+What to download manually:
 * TNT4J
 * JESL
-* IBM MQ 7.5 - if You wish to use WMQ module. If not just comment out that module in main `pom.xml` file.
-* TNT4J-log4j12 - if You wish to use this logger. See 'How to use TNT4J loggers' section for more details.
-* TNT4J-logback - if You wish to use this logger. See 'How to use TNT4J loggers' section for more details.
+* TNT4J-log4j12 - (optional) to use this logger see 'How to use TNT4J loggers' section for more details.
+* TNT4J-logback - (optional) to use this logger. See 'How to use TNT4J loggers' section for more details.
 
-Download the above libraries and place into the `tnt4j-streams/lib directory` directory like this:
+Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-core/lib` directory like this:
 ```
     lib
-     + ibm.mq (O)
-     |- com.ibm.mq.commonservices.jar
-     |- com.ibm.mq.headers.jar
-     |- com.ibm.mq.jar
-     |- com.ibm.mq.jmqi.jar
-     |- com.ibm.mq.pcf.jar
-     jkool-jesl.jar
-     tnt4j-api.jar
-     tnt4j-log4j12.jar (O)
-     tnt4j-logback.jar (O)
+     |- jkool-jesl.jar
+     |- tnt4j-api.jar
+     |- tnt4j-log4j12.jar (O)
+     |- tnt4j-logback.jar (O)
+```
+(O) marked libraries are optional
+
+#### `WMQ` module
+To use `WMQ` module uncomment `tnt4j-streams-wmq` module in root TNT4J-Streams `pom.xml` file.
+
+What to download manually:
+* IBM MQ 7.5
+
+Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq/lib` directory like this:
+```
+    lib
+     + ibm.mq
+         |- com.ibm.mq.commonservices.jar
+         |- com.ibm.mq.headers.jar
+         |- com.ibm.mq.jar
+         |- com.ibm.mq.jmqi.jar
+         |- com.ibm.mq.pcf.jar
 ```
 
-(O) marked libraries are optional
+#### `WS` module
+To use `WS` module uncomment `tnt4j-streams-ws` module in root TNT4J-Streams `pom.xml` file.
+
+What to download manually:
+* curl-java (optional) (https://github.com/pjlegato/curl-java)
+
+Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-ws/lib` directory like this:
+```
+    lib
+     |- curl-java.jar
+```
 
 ## Building
    * to build project run maven goals `clean package`
