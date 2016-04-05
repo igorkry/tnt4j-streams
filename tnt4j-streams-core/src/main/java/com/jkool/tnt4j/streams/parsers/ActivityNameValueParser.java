@@ -109,25 +109,29 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			String value = prop.getValue();
 			if (ParserProperties.PROP_FLD_DELIM.equals(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityParser.setting", name, fieldDelim));
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+						name, fieldDelim);
 			} else if (ParserProperties.PROP_VAL_DELIM.equals(name)) {
 				valueDelim = value;
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityParser.setting", name, value));
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+						name, value);
 			} else if (ParserProperties.PROP_PATTERN.equals(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityParser.setting", name, value));
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+							name, value);
 				}
 			} else if (ParserProperties.PROP_STRIP_QUOTES.equals(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityParser.setting", name, value));
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+						name, value);
 			}
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityParser.ignoring", name));
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -151,13 +155,13 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.parsing", dataStr));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing"), dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityParser.input.not.match", getName()));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityParser.input.not.match"), getName());
 				return null;
 			}
 		}
@@ -170,8 +174,9 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.not.find"));
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.split", fields.length));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.split"),
+				fields.length);
 		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
@@ -179,8 +184,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityNameValueParser.found", field));
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityNameValueParser.found"), field);
 			}
 		}
 

@@ -160,9 +160,8 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 				if (CollectionUtils.isNotEmpty(streams)) {
 					kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(0);
 					messageBuffer = stream.iterator();
-					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
-									"KafkaStream.retrieved.new.messages", stream.size()));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
+							"KafkaStream.retrieved.new.messages"), stream.size());
 				} else {
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
 							"KafkaStream.retrieved.no.new.messages"));
@@ -174,8 +173,8 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 				byte[] msgPayload = msg.message();
 				String msgData = Utils.getString(msgPayload);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(
-						KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA, "KafkaStream.next.message", msgData));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_KAFKA,
+						"KafkaStream.next.message"), msgData);
 
 				Map<String, Object> msgDataMap = new HashMap<String, Object>();
 

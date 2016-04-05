@@ -99,7 +99,7 @@ public class ActivityField {
 	 */
 	public StreamFieldType getFieldType() {
 		try {
-			StreamFieldType sft = StreamFieldType.valueOfIgnoreCase(fieldTypeName);
+			StreamFieldType sft = StreamFieldType._valueOfIgnoreCase(fieldTypeName);
 			return sft;
 		} catch (IllegalArgumentException exc) {
 		}

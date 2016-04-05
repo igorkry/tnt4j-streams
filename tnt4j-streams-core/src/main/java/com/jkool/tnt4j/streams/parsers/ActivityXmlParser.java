@@ -133,19 +133,20 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				if (!StringUtils.isEmpty(value)) {
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityXmlParser.adding.mapping"), name, value);
 				}
 			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityParser.setting", name, value));
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+							name, value);
 				}
 			}
 
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityParser.ignoring", name));
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.ignoring"), name);
 		}
 		if (namespaces != null) {
 			xPath.setNamespaceContext(namespaces);
@@ -168,8 +169,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.parsing", data));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing"), data);
 
 		Document xmlDoc = null;
 		String xmlString = null;
@@ -243,9 +244,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						savedLocales[0] = loc.getLocale();
 						value = getLocatorValue(stream, loc, xmlDoc);
 						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-							LOGGER.log(OpLevel.TRACE,
-									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-											"ActivityXmlParser.required.locator.not.found", field));
+							LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"ActivityXmlParser.required.locator.not.found"), field);
 							return null;
 						}
 					} else {
@@ -258,8 +258,9 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							values[li] = getLocatorValue(stream, loc, xmlDoc);
 							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
 								LOGGER.log(OpLevel.TRACE,
-										StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-												"ActivityXmlParser.required.locator.not.found", field));
+										StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+												"ActivityXmlParser.required.locator.not.found"),
+										field);
 								return null;
 							}
 						}

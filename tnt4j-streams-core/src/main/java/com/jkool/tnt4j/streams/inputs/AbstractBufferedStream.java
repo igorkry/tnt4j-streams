@@ -131,9 +131,8 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 				boolean added = inputBuffer.offer(inputData, INPUT_BUFFER_OFFER_TIMEOUT, TimeUnit.SECONDS);
 
 				if (!added) {
-					logger.log(OpLevel.WARNING,
-							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-									"AbstractBufferedStream.changes.buffer.limit", inputData));
+					logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"AbstractBufferedStream.changes.buffer.limit"), inputData);
 				}
 
 				return added;

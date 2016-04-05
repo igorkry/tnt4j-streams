@@ -88,9 +88,8 @@ public class DirStreamingManager {
 				try {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
-						LOGGER.log(OpLevel.WARNING,
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"TNTInputStream.tasks.buffer.limit", offerTimeout)); // TODO
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"TNTInputStream.tasks.buffer.limit"), offerTimeout); // TODO
 						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {

@@ -16,6 +16,9 @@
 
 package com.jkool.tnt4j.streams.fields;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.utils.StreamTimestamp;
@@ -401,5 +404,40 @@ public enum StreamFieldType {
 
 		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 				"StreamFieldType.no.enum.constant", name, StreamFieldType.class.getSimpleName()));
+	}
+
+	private static final Map<String, Object> CACHE = new HashMap<String, Object>();
+	private static final Object NULL_VALUE = new Object();
+
+	/**
+	 * Gets the field enumeration object based on enumeration object name value
+	 * ignoring case.
+	 *
+	 * @param name
+	 *            name of field type
+	 *
+	 * @return field type enumeration object, or {@code null} if name is empty
+	 *         or does not match any enumeration object
+	 */
+	static StreamFieldType _valueOfIgnoreCase(String name) {
+		if (StringUtils.isNotEmpty(name)) {
+			Object sft = CACHE.get(name);
+
+			if (sft == null) {
+				StreamFieldType[] enumConstants = StreamFieldType.values();
+				for (int i = 0; i < enumConstants.length; i++) {
+					if (enumConstants[i].name().equalsIgnoreCase(name)) {
+						CACHE.put(name, enumConstants[i]);
+						return enumConstants[i];
+					}
+				}
+
+				CACHE.put(name, NULL_VALUE);
+			}
+
+			return NULL_VALUE.equals(sft) ? null : (StreamFieldType) sft;
+		}
+
+		return null;
 	}
 }

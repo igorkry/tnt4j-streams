@@ -158,7 +158,7 @@ public abstract class ActivityParser {
 		}
 		String str = null;
 		try {
-			str = rdr.readLine();
+			str = Utils.getNonEmptyLine(rdr);
 		} catch (EOFException eof) {
 			logger.log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.data.end"), eof);

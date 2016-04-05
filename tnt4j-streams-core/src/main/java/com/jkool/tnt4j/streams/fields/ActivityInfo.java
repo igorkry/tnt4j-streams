@@ -49,6 +49,8 @@ public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
+	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
+	private static final String LOCAL_SERVER_IP_KEY = "LOCAL_SERVER_IP_KEY"; // NON-NLS
 
 	private String serverName = null;
 	private String serverIp = null;
@@ -111,8 +113,9 @@ public class ActivityInfo {
 	 *             definition (e.g. does not match defined format, etc.)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityInfo.applying.field", field, value));
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.applying.field"), field,
+				value);
 		if (value instanceof Object[]) {
 			Object[] values = (Object[]) value;
 			if (values.length == 1) {
@@ -163,12 +166,14 @@ public class ActivityInfo {
 		}
 
 		if (fieldValue == null) {
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityInfo.field.null", field));
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.field.null"),
+					field);
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityInfo.applying.field.value", field, fieldValue));
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.applying.field.value"),
+				field, fieldValue);
 		setFieldValue(field, fieldValue);
 	}
 
@@ -345,8 +350,9 @@ public class ActivityInfo {
 		} else {
 			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityInfo.set.field", field, fieldValue));
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.set.field"), field,
+				fieldValue);
 	}
 
 	private static String substitute(String value, String newValue) {
@@ -517,8 +523,9 @@ public class ActivityInfo {
 					throw ioe;
 				}
 				retryAttempt = true;
-				LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityInfo.will.retry", TimeUnit.MILLISECONDS.toSeconds(retryPeriod)));
+				LOGGER.log(OpLevel.INFO,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityInfo.will.retry"),
+						TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
 				StreamsThread.sleep(retryPeriod);
 			}
 		} while (thread != null && !thread.isStopRunning());
@@ -679,44 +686,52 @@ public class ActivityInfo {
 	 */
 	private void resolveServer() {
 		if (StringUtils.isEmpty(serverName) && StringUtils.isEmpty(serverIp)) {
-			serverName = Utils.getLocalHostName();
-			serverIp = Utils.getLocalHostAddress();
-		} else if (StringUtils.isEmpty(serverName)) {
-			if (StringUtils.isEmpty(serverIp)) {
+			serverName = HOST_CACHE.get(LOCAL_SERVER_NAME_KEY);
+			serverIp = HOST_CACHE.get(LOCAL_SERVER_IP_KEY);
+
+			if (serverName == null) {
 				serverName = Utils.getLocalHostName();
+				HOST_CACHE.put(LOCAL_SERVER_NAME_KEY, serverName);
+			}
+			if (serverIp == null) {
 				serverIp = Utils.getLocalHostAddress();
-			} else {
-				try {
-					serverName = HOST_CACHE.get(serverIp);
-					if (StringUtils.isEmpty(serverName)) {
-						serverName = Utils.resolveAddressToHostName(serverIp);
-						if (StringUtils.isEmpty(serverName)) {
-							// Add entry so we don't repeatedly attempt to look
-							// up unresolvable IP Address
-							HOST_CACHE.put(serverIp, "");
-						} else {
-							HOST_CACHE.put(serverIp, serverName);
-							HOST_CACHE.put(serverName, serverIp);
-						}
-					}
-				} catch (Exception e) {
-					serverName = serverIp;
-				}
+				HOST_CACHE.put(LOCAL_SERVER_IP_KEY, serverIp);
 			}
-		} else if (StringUtils.isEmpty(serverIp)) {
-			serverIp = HOST_CACHE.get(serverName);
-			if (StringUtils.isEmpty(serverIp)) {
-				serverIp = Utils.resolveHostNameToAddress(serverName);
-				if (StringUtils.isEmpty(serverIp)) {
-					// Add entry so we don't repeatedly attempt to look up
-					// unresolvable host name
-					HOST_CACHE.put(serverName, "");
-				} else {
-					HOST_CACHE.put(serverIp, serverName);
-					HOST_CACHE.put(serverName, serverIp);
-				}
-			}
+		} else if (StringUtils.isEmpty(serverName)) {
+			// try {
+			// serverName = HOST_CACHE.get(serverIp);
+			// if (StringUtils.isEmpty(serverName)) {
+			// serverName = Utils.resolveAddressToHostName(serverIp);
+			// if (StringUtils.isEmpty(serverName)) {
+			// // Add entry so we don't repeatedly attempt to look
+			// // up unresolvable IP Address
+			// HOST_CACHE.put(serverIp, "");
+			// } else {
+			// HOST_CACHE.put(serverIp, serverName);
+			// HOST_CACHE.put(serverName, serverIp);
+			// }
+			// }
+			// } catch (Exception e) {
+			// serverName = serverIp;
+			// }
+
+			serverName = serverIp;
 		}
+		// else if (StringUtils.isEmpty(serverIp)) {
+		// serverIp = HOST_CACHE.get(serverName);
+		// if (StringUtils.isEmpty(serverIp)) {
+		// serverIp = Utils.resolveHostNameToAddress(serverName);
+		// if (StringUtils.isEmpty(serverIp)) {
+		// // Add entry so we don't repeatedly attempt to look up
+		// // unresolvable host name
+		// HOST_CACHE.put(serverName, "");
+		// } else {
+		// HOST_CACHE.put(serverIp, serverName);
+		// HOST_CACHE.put(serverName, serverIp);
+		// }
+		// }
+		// }
+
 		if (StringUtils.isEmpty(serverIp)) {
 			serverIp = " "; // prevents streams API from resolving it to the
 			// local IP address

@@ -33,7 +33,7 @@ public final class StreamsResources {
 	 */
 	public static final String RESOURCE_BUNDLE_CORE = "tnt4j-streams-core"; // NON-NLS
 
-	private static Map<String, ResourceBundle> resBundlesMap;
+	private static final Map<String, ResourceBundle> resBundlesMap = new HashMap<String, ResourceBundle>(8);
 
 	private StreamsResources() {
 
@@ -53,19 +53,15 @@ public final class StreamsResources {
 	 * @see ResourceBundle#getBundle(String)
 	 */
 	public static ResourceBundle getBundle(String bundleName) {
-		ResourceBundle resBundle = null;
-		synchronized (StreamsResources.class) {
-			if (resBundlesMap == null) {
-				resBundlesMap = new HashMap<String, ResourceBundle>(8);
-			}
-
-			resBundle = resBundlesMap.get(bundleName);
+		synchronized (resBundlesMap) {
+			ResourceBundle resBundle = resBundlesMap.get(bundleName);
 			if (resBundle == null) {
 				resBundle = ResourceBundle.getBundle(bundleName);
 				resBundlesMap.put(bundleName, resBundle);
 			}
+
+			return resBundle;
 		}
-		return resBundle;
 	}
 
 	/**

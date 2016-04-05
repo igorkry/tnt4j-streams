@@ -179,8 +179,8 @@ public class StreamsThread extends Thread {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"StreamsThread.sleep.interrupted", (System.currentTimeMillis() - startTime), millis));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"StreamsThread.sleep.interrupted"), (System.currentTimeMillis() - startTime), millis);
 		}
 	}
 
@@ -217,11 +217,11 @@ public class StreamsThread extends Thread {
 				long sleepMillis = System.currentTimeMillis() - startTime;
 				remainMillis -= sleepMillis;
 				interruptCount++;
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"StreamsThread.sleepFully.interrupted", interruptCount, sleepMillis, millis));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"StreamsThread.sleepFully.interrupted"), interruptCount, sleepMillis, millis);
 				if (remainMillis > 0L) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"StreamsThread.sleepFully.remaining", remainMillis));
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"StreamsThread.sleepFully.remaining"), remainMillis);
 				}
 			}
 		}
@@ -243,7 +243,8 @@ public class StreamsThread extends Thread {
 			join(millis);
 		} catch (InterruptedException e) {
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"StreamsThread.wait.for", (System.currentTimeMillis() - startTime)));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamsThread.wait.for"),
+				(System.currentTimeMillis() - startTime));
 	}
 }

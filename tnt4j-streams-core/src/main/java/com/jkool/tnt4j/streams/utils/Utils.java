@@ -695,4 +695,31 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 			}
 		}
 	}
+
+	/**
+	 * Returns first non empty text string available to read from defined
+	 * reader.
+	 *
+	 * @param reader
+	 *            reader to use for reading
+	 *
+	 * @return non empty text string, or {@code null} if the end of the stream
+	 *         has been reached
+	 *
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public static String getNonEmptyLine(BufferedReader reader) throws IOException {
+		String line;
+
+		while ((line = reader.readLine()) != null) {
+			if (line.trim().isEmpty()) {
+				// empty line
+			} else {
+				break;
+			}
+		}
+
+		return line;
+	}
 }

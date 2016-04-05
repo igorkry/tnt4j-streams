@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -131,7 +132,7 @@ public class PipedStream extends TNTInputStream<String> {
 					"PipedStream.raw.stream.not.opened"));
 		}
 
-		String line = dataReader.readLine();
+		String line = Utils.getNonEmptyLine(dataReader);
 
 		if (line != null) {
 			addStreamedBytesCount(line.getBytes().length);

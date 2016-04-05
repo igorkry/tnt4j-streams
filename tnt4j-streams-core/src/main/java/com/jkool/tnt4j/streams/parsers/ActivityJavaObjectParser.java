@@ -97,8 +97,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.parsing", data));
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing"), data);
 
 		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 		return parsePreparedItem(stream, dataStr, data);
@@ -169,7 +169,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			return obj;
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ActivityJavaObjectParser.could.not.get.declared.field"),
 					path[i], dataObj.getClass().getSimpleName(), exc);
 			return null;

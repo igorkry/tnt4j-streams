@@ -23,9 +23,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.jkool.tnt4j.streams.configure.ParserProperties;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.*;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
@@ -90,12 +90,13 @@ public class ActivityRegExParser extends ActivityParser {
 			if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityParser.setting", name, value));
+					LOGGER.log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.setting"),
+							name, value);
 				}
 			}
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityParser.ignoring", name));
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -116,8 +117,9 @@ public class ActivityRegExParser extends ActivityParser {
 				locType = ActivityFieldLocatorType.valueOf(locator.getType());
 			} catch (Exception e) {
 			}
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityParser.adding.field", field.toDebugString()));
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.adding.field"),
+					field.toDebugString());
 			if (locType == ActivityFieldLocatorType.REMatchNum) {
 				if (groupMap.containsKey(field)) {
 					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
@@ -174,12 +176,13 @@ public class ActivityRegExParser extends ActivityParser {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.parsing", dataStr));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing"), dataStr);
 		Matcher matcher = pattern.matcher(dataStr);
 		if (matcher == null || !matcher.matches()) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ActivityParser.input.not.match", getName()));
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.input.not.match"),
+					getName());
 			return null;
 		}
 		ActivityInfo ai = new ActivityInfo();
@@ -189,27 +192,27 @@ public class ActivityRegExParser extends ActivityParser {
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityRegExParser.applying.regex", matchMap.size()));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityRegExParser.applying.regex"), matchMap.size());
 				ArrayList<String> matches = new ArrayList<String>();
 				matches.add(""); // dummy entry to index array with match
 									// locations
 				while (matcher.find()) {
 					String matchStr = matcher.group().trim();
 					matches.add(matchStr);
-					LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityRegExParser.match", matches.size(), matchStr));
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityRegExParser.match"), matches.size(), matchStr);
 				}
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityRegExParser.found.matches", matches.size()));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityRegExParser.found.matches"), matches.size());
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 					value = null;
 					if (locations != null) {
-						LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityRegExParser.setting.field", field));
+						LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"ActivityRegExParser.setting.field"), field);
 						if (locations.size() == 1) {
 							value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REMatchNum,
 									matcher, matches);
@@ -238,8 +241,8 @@ public class ActivityRegExParser extends ActivityParser {
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 				value = null;
 				if (locations != null) {
-					LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ActivityRegExParser.setting.group.field", field));
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ActivityRegExParser.setting.group.field"), field);
 					if (locations.size() == 1) {
 						value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REGroupNum, matcher,
 								null);

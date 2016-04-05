@@ -25,12 +25,12 @@
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="MsgBody" locator="body" locator-type="Label">
+        <field name="MsgBody" locator="$.body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        <field name="sinkName" locator="sinkName" locator-type="Label"/>
-        <field name="chanelName" locator="chanelName" locator-type="Label"/>
-        <field name="headers" locator="headers" locator-type="Label"/>
+        <field name="sinkName" locator="$.sinkName" locator-type="Label"/>
+        <field name="chanelName" locator="$.chanelName" locator-type="Label"/>
+        <field name="headers" locator="$.headers" locator-type="Label"/>
     </parser>
 
     <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">

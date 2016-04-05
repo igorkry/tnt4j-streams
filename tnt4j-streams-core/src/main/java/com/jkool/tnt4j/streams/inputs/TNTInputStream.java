@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -113,8 +114,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 	private boolean haltIfNoParser = true;
 
-	private int currActivityIndex = 0;
-	private long streamedBytesCount = 0;
+	private AtomicInteger currActivityIndex = new AtomicInteger(0);
+	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
+	private AtomicLong streamedBytesCount = new AtomicLong(0);
 	private long startTime = -1;
 	private long endTime = -1;
 
@@ -268,20 +270,27 @@ public abstract class TNTInputStream<T> implements Runnable {
 			((TrackerConfigStore) streamConfig).applyProperties();
 		}
 
-		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		// NOTE: removing APPL=streams "layer" from default source and copy
 		// SSN=streams value from config
+		streamConfig = streamConfig.build();
 		defaultSource = streamConfig.getSource().getSource();
 		defaultSource.setSSN(streamConfig.getSource().getSSN());
-		trackersMap.put(defaultSource.getFQName(), tracker);
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"TNTInputStream.default.tracker", defaultSource.getFQName()));
 
 		if (useExecutorService) {
 			streamExecutorService = boundedExecutorModel
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
+		} else {
+			initNewDefaultTracker(ownerThread);
 		}
+	}
+
+	private void initNewDefaultTracker(Thread t) {
+		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
+		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.default.tracker"),
+				t.getName(), defaultSource.getFQName());
 	}
 
 	/**
@@ -335,9 +344,17 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
 	 *      BlockingQueue, ThreadFactory)
 	 */
-	private static ExecutorService getDefaultExecutorService(int threadsQty) {
+	private ExecutorService getDefaultExecutorService(int threadsQty) {
+		StreamsThreadFactory stf = new StreamsThreadFactory("StreamDefaultExecutorThread-"); // NON-NLS
+		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
+			@Override
+			public void newThreadCreated(Thread t) {
+				initNewDefaultTracker(t);
+			}
+		});
+
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(), new StreamsThreadFactory("StreamDefaultExecutorThread-")); // NON-NLS
+				new LinkedBlockingQueue<Runnable>(), stf);
 
 		return tpe;
 	}
@@ -362,9 +379,16 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *      BlockingQueue, ThreadFactory)
 	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
+		StreamsThreadFactory stf = new StreamsThreadFactory("StreamBoundedExecutorThread-"); // NON-NLS
+		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
+			@Override
+			public void newThreadCreated(Thread t) {
+				initNewDefaultTracker(t);
+			}
+		});
+
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(threadsQty * 2),
-				new StreamsThreadFactory("StreamBoundedExecutorThread-")); // NON-NLS
+				new LinkedBlockingQueue<Runnable>(threadsQty * 2), stf);
 
 		tpe.setRejectedExecutionHandler(new RejectedExecutionHandler() {
 			@Override
@@ -372,9 +396,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 				try {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
-						logger.log(OpLevel.WARNING,
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"TNTInputStream.tasks.buffer.limit", offerTimeout));
+						logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"TNTInputStream.tasks.buffer.limit"), offerTimeout);
 						notifyStreamTaskRejected(r);
 					}
 				} catch (InterruptedException exc) {
@@ -452,7 +475,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @see #getTotalActivities()
 	 */
 	public int getCurrentActivity() {
-		return currActivityIndex;
+		return currActivityIndex.get();
 	}
 
 	/**
@@ -482,7 +505,16 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @return
 	 */
 	public long getStreamedBytesCount() {
-		return streamedBytesCount;
+		return streamedBytesCount.get();
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public int getSkippedActivitiesCount() {
+		return skippedActivitiesCount.get();
 	}
 
 	/**
@@ -491,7 +523,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * @param bytesCount
 	 */
 	protected void addStreamedBytesCount(long bytesCount) {
-		streamedBytesCount += bytesCount;
+		streamedBytesCount.addAndGet(bytesCount);
 	}
 
 	/**
@@ -516,6 +548,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		stats.setCurrActivity(getCurrentActivity());
 		stats.setTotalBytes(getTotalBytes());
 		stats.setBytesStreamed(getStreamedBytesCount());
+		stats.setSkippedActivities(getSkippedActivitiesCount());
 		stats.setElapsedTime(getElapsedTime());
 
 		return stats;
@@ -666,6 +699,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * thread will terminate.
 	 */
 	public void halt() {
+		shutdownExecutors();
+
 		ownerThread.halt();
 	}
 
@@ -727,21 +762,26 @@ public abstract class TNTInputStream<T> implements Runnable {
 		}
 	}
 
-	private Tracker getTracker(String aiSourceFQN) {
+	private Tracker getTracker(String aiSourceFQN, Thread t) {
 		synchronized (trackersMap) {
-			Tracker tracker = trackersMap.get(aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN);
+			Tracker tracker = trackersMap
+					.get(getTrackersMapKey(t, aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN));
 			if (tracker == null) {
 				Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(aiSourceFQN);
 				aiSource.setSSN(defaultSource.getSSN());
 				streamConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(streamConfig.build());
-				trackersMap.put(aiSource.getFQName(), tracker);
-				logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"TNTInputStream.build.new.tracker", aiSource.getFQName()));
+				trackersMap.put(getTrackersMapKey(t, aiSource.getFQName()), tracker);
+				logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.build.new.tracker"), aiSource.getFQName());
 			}
 
 			return tracker;
 		}
+	}
+
+	private static String getTrackersMapKey(Thread t, String sourceFQN) {
+		return t.getId() + ":?:" + sourceFQN; // NON-NLS
 	}
 
 	/**
@@ -755,7 +795,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 		notifyStatusChange(StreamStatus.NEW);
 
 		logger.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"));
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"),
+				getName());
 		if (ownerThread == null) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
 					.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.owner.thread"));
@@ -774,11 +815,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 					T item = getNextItem();
 					if (item == null) {
 						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-								"TNTInputStream.data.stream.ended"));
+								"TNTInputStream.data.stream.ended"), getName());
 						halt(); // no more data items to process
 					} else {
-						notifyProgressUpdate(++currActivityIndex, getTotalActivities());
-
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
 						} else {
@@ -787,29 +826,25 @@ public abstract class TNTInputStream<T> implements Runnable {
 					}
 				} catch (IllegalStateException ise) {
 					logger.log(OpLevel.ERROR,
-							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-									ise.getLocalizedMessage()),
-							ise);
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"TNTInputStream.failed.record.activity.at"),
+							getActivityPosition(), ise.getLocalizedMessage(), ise);
 					failureFlag.set(true);
 					notifyFailed(null, ise, null);
 					halt();
 				} catch (Exception exc) {
 					logger.log(OpLevel.ERROR,
-							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-									exc.getLocalizedMessage()),
-							exc);
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"TNTInputStream.failed.record.activity.at"),
+							getActivityPosition(), exc.getLocalizedMessage(), exc);
 				}
 			}
 		} catch (Exception e) {
-			logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
+			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
 		} finally {
-			shutdownExecutors();
-
 			endTime = System.currentTimeMillis();
 			if (!failureFlag.get()) {
 				notifyStreamSuccess(null);
@@ -818,42 +853,45 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 			cleanup();
 
-			logger.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"TNTInputStream.thread.ended", Thread.currentThread().getName()));
+			logger.log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.thread.ended"),
+					Thread.currentThread().getName());
+			logger.log(OpLevel.INFO, "Stream ''{0}'' statistics: {1}", getName(), getStreamStatistics());
 		}
 	}
 
 	private void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {
+		notifyProgressUpdate(currActivityIndex.incrementAndGet(), getTotalActivities());
+
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
-			logger.log(OpLevel.INFO,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"));
+			logger.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"),
+					item);
+			skippedActivitiesCount.incrementAndGet();
 			if (haltIfNoParser) {
 				failureFlag.set(true);
-				notifyFailed(
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.parser"),
-						null, null);
+				notifyFailed(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.no.parser", item), null, null);
 				halt();
 			} else {
-				notifyStreamEvent(OpLevel.WARNING, "Could not parse activity data {0}", item);
+				notifyStreamEvent(OpLevel.WARNING, "Could not parse activity data: {0}", item);
 			}
 		} else {
 			if (!ai.isFiltered()) {
-				Tracker tracker = getTracker(ai.getSourceFQN());
+				Tracker tracker = getTracker(ai.getSourceFQN(), Thread.currentThread());
 
 				while (!isHalted() && !tracker.isOpen()) {
 					try {
 						tracker.open();
 					} catch (IOException ioe) {
-						logger.log(OpLevel.ERROR,
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"TNTInputStream.failed.to.connect", tracker),
-								ioe);
+						logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"TNTInputStream.failed.to.connect"), tracker, ioe);
 						Utils.close(tracker);
 						logger.log(OpLevel.INFO,
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"TNTInputStream.will.retry",
-										TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL)));
+								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"TNTInputStream.will.retry"),
+								TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL));
 						if (!isHalted()) {
 							StreamsThread.sleep(CONN_RETRY_INTERVAL);
 						}
@@ -1108,8 +1146,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 			try {
 				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
-				logger.log(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"TNTInputStream.failed.record.activity", e.getLocalizedMessage()), e);
+				logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 				failureFlag.set(true);
 				notifyFailed(null, e, null);
 			}
@@ -1135,6 +1173,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	public static class StreamsThreadFactory implements ThreadFactory {
 		private AtomicInteger count = new AtomicInteger(1);
 		private String prefix;
+		private List<StreamsThreadFactoryListener> listeners = null;
 
 		/**
 		 * Constructs a new StreamsThreadFactory.
@@ -1154,7 +1193,39 @@ public abstract class TNTInputStream<T> implements Runnable {
 			StreamsThread task = new StreamsThread(r, prefix + count.getAndIncrement());
 			task.setDaemon(true);
 
+			notifyNewThreadCreated(task);
+
 			return task;
+		}
+
+		void notifyNewThreadCreated(Thread t) {
+			if (listeners != null) {
+				for (StreamsThreadFactoryListener l : listeners) {
+					l.newThreadCreated(t);
+				}
+			}
+		}
+
+		public void addThreadFactoryListener(StreamsThreadFactoryListener l) {
+			if (l == null) {
+				return;
+			}
+
+			if (listeners == null) {
+				listeners = new ArrayList<StreamsThreadFactoryListener>();
+			}
+
+			listeners.add(l);
+		}
+
+		public void removeStreamListener(StreamsThreadFactoryListener l) {
+			if (l != null && listeners != null) {
+				listeners.remove(l);
+			}
+		}
+
+		public interface StreamsThreadFactoryListener {
+			void newThreadCreated(Thread t);
 		}
 	}
 
@@ -1167,6 +1238,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 		private long totalBytes;
 		private long bytesStreamed;
+
+		private long skippedActivities;
+		private long streamedBytes;
 
 		private long elapsedTime;
 
@@ -1235,6 +1309,14 @@ public abstract class TNTInputStream<T> implements Runnable {
 			this.elapsedTime = elapsedTime;
 		}
 
+		public long getSkippedActivities() {
+			return skippedActivities;
+		}
+
+		public void setSkippedActivities(long skippedActivities) {
+			this.skippedActivities = skippedActivities;
+		}
+
 		/**
 		 * TODO
 		 * 
@@ -1243,8 +1325,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 		@Override
 		public String toString() {
 			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity
-					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", elapsed time="
-					+ DurationFormatUtils.formatDurationHMS(elapsedTime) + '}';
+					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities="
+					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}';
 		}
 	}
 }

@@ -257,12 +257,12 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	protected void startDataStream() throws IOException {
 		if (rawStream == null && rawReader == null) {
 			if (svrSocket != null) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"CharacterStream.waiting.for.connection", socketPort));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"CharacterStream.waiting.for.connection"), socketPort);
 				socket = svrSocket.accept();
 				rawStream = socket.getInputStream();
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"CharacterStream.accepted.connection", socket));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"CharacterStream.accepted.connection"), socket);
 				// only accept one connection, close down server socket
 				Utils.close(svrSocket);
 				svrSocket = null;
@@ -310,8 +310,9 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 		initializeStreamInternals();
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"CharacterStream.resetting.stream", socket));
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.resetting.stream"),
+				socket);
 	}
 
 	/**
@@ -416,8 +417,9 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			try {
 				String line = super.readLine();
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"CharacterStream.read.line", line));
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.read.line"),
+						line);
 
 				if (line == null) {
 					close();
@@ -444,8 +446,9 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 
 				String line = total == -1 ? "EOF" : new String(cbuf, off, total); // NON-NLS
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"CharacterStream.read.line", line));
+				LOGGER.log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "CharacterStream.read.line"),
+						line);
 
 				if (total == -1) {
 					close();

@@ -419,8 +419,8 @@ public class ActivityFieldLocator implements Cloneable {
 					valueMap.put(source, target);
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityFieldLocator.mapping.add.error", source, target, mapType));
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityFieldLocator.mapping.add.error"), source, target, mapType);
 			}
 		}
 	}
@@ -447,13 +447,14 @@ public class ActivityFieldLocator implements Cloneable {
 				target = valueMap.get(srcString);
 			}
 			if (target == null) {
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"ActivityFieldLocator.mapped.default", type));
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ActivityFieldLocator.mapped.default"), type);
 				target = mapCatchAll != null ? mapCatchAll : source;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityFieldLocator.mapped.result", source, target, type));
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityFieldLocator.mapped.result"),
+				source, target, type);
 		return target;
 	}
 

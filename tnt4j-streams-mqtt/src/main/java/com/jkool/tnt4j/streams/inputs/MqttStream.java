@@ -318,8 +318,9 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			String msgData = Utils.getString(message.getPayload());
 
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
-					"MqttStream.message.received", msgData));
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT, "MqttStream.message.received"),
+					msgData);
 
 			Map<String, Object> msgDataMap = new HashMap<String, Object>();
 

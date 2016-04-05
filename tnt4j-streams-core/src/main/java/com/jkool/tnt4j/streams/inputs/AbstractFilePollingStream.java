@@ -133,8 +133,9 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"FileLineStream.initializing.stream", fileName));
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "FileLineStream.initializing.stream"),
+				fileName);
 
 		logWatcher = createLogWatcher();
 		logWatcher.initialize();
@@ -254,7 +255,9 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		protected void readNewLogLines(LineNumberReader lnr) throws IOException {
 			String line;
 			while ((line = lnr.readLine()) != null) {
-				addInputToBuffer(line);
+				if (StringUtils.isNotEmpty(line)) {
+					addInputToBuffer(line);
+				}
 				lineNumber = lnr.getLineNumber();
 			}
 		}

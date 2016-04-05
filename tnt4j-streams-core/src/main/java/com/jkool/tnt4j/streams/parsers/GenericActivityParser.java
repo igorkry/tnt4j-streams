@@ -84,8 +84,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * {@inheritDoc}
 	 */
 	public void addField(ActivityField field) {
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.adding.field", field.toDebugString()));
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.adding.field"),
+				field.toDebugString());
 		fieldList.add(field);
 	}
 

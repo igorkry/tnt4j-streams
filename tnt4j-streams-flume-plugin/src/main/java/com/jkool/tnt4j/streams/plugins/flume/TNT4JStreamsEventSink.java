@@ -101,7 +101,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 
 				out.println(jsonEvent);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(FlumeConstants.RESOURCE_BUNDLE_FLUME,
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 						"TNT4JStreamsEventSink.sending.json"), hostname, port, jsonEvent);
 			}
 			transaction.commit();
@@ -194,27 +194,27 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 		streamConfig = context.getString(PROP_STREAM_CONFIG);
 
 		if (hostname == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(FlumeConstants.RESOURCE_BUNDLE_FLUME,
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 					"TNT4JStreamsEventSink.no.hostname.configured"), DEFAULT_HOST);
 			hostname = DEFAULT_HOST;
 		}
 
 		if (portStr == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(FlumeConstants.RESOURCE_BUNDLE_FLUME,
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 					"TNT4JStreamsEventSink.no.port.configured"), DEFAULT_PORT);
 			port = DEFAULT_PORT;
 		} else {
 			try {
 				port = Integer.parseInt(portStr);
 			} catch (NumberFormatException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(FlumeConstants.RESOURCE_BUNDLE_FLUME,
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 						"TNT4JStreamsEventSink.parse.port.error"), portStr);
 				port = DEFAULT_PORT;
 			}
 		}
 
 		if (streamConfig == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getStringFormatted(FlumeConstants.RESOURCE_BUNDLE_FLUME,
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 					"TNT4JStreamsEventSink.no.tnt4j.config"), DEFAULT_CONFIG_FILE_NAME);
 			streamConfig = DEFAULT_CONFIG_FILE_NAME;
 		}

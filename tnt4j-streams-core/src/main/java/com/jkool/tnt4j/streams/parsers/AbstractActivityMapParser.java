@@ -18,6 +18,7 @@ package com.jkool.tnt4j.streams.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -81,8 +82,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-				"ActivityParser.parsing", data));
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.parsing"), data);
 
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
@@ -161,8 +162,18 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 		if (i < path.length - 1 && val instanceof Map) {
 			val = getNode(path, (Map<String, ?>) val, ++i);
+		} else if (i < path.length - 2 && val instanceof List) {
+			try {
+				int lii = Integer.parseInt(getItemIndexStr(path[i + 1]));
+				val = getNode(path, (Map<String, ?>) ((List) val).get(lii), i + 2);
+			} catch (NumberFormatException exc) {
+			}
 		}
 
 		return val;
+	}
+
+	private static String getItemIndexStr(String indexToken) {
+		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 }

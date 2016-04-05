@@ -178,8 +178,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 		 */
 		@Override
 		protected void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"FilePollingStream.reading.changes", pollingFile.getAbsolutePath()));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"FilePollingStream.reading.changes"), pollingFile.getAbsolutePath());
 			readingLatestLogFile = true;
 
 			if (!pollingFile.canRead()) {
@@ -199,10 +199,10 @@ public class FilePollingStream extends AbstractFilePollingStream {
 				long flm = pollingFile.lastModified();
 				if (flm > lastModifTime) {
 					LOGGER.log(OpLevel.DEBUG,
-							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-									"FilePollingStream.file.updated",
-									TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-									TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime)));
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+									"FilePollingStream.file.updated"),
+							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
+							TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
 
 					lastModifTime = flm;
 				} else {
@@ -276,8 +276,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					return rollToCurrentLine();
 				} else {
 					if (lnr.markSupported()) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_CORE, "FilePollingStream.resetting.reader", 0));
+						LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"FilePollingStream.resetting.reader"), 0);
 
 						lnr.reset();
 					}
@@ -297,8 +297,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lastModifTime = prevFile.lastModified();
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"FilePollingStream.changing.to.previous", prevFile.getAbsolutePath()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.previous"), prevFile.getAbsolutePath());
 				}
 
 				return prevFile != null;
@@ -318,8 +318,8 @@ public class FilePollingStream extends AbstractFilePollingStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"FilePollingStream.changing.to.next", nextFile.getAbsolutePath()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.next"), nextFile.getAbsolutePath());
 				}
 
 				return nextFile != null;

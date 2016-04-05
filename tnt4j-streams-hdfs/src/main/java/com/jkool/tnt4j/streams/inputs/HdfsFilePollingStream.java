@@ -200,8 +200,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 */
 		@Override
 		protected void readLogChanges() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"FilePollingStream.reading.changes", pollingFile.toString()));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"FilePollingStream.reading.changes"), pollingFile.toString());
 			readingLatestLogFile = true;
 
 			FileSystem fs = null;
@@ -227,10 +227,10 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					long flm = fStatus.getModificationTime();
 					if (flm > lastModifTime) {
 						LOGGER.log(OpLevel.DEBUG,
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"FilePollingStream.file.updated",
-										TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-										TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime)));
+								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"FilePollingStream.file.updated"),
+								TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
+								TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
 
 						lastModifTime = flm;
 					} else {
@@ -310,8 +310,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					return rollToCurrentLine(fs);
 				} else {
 					if (lnr.markSupported()) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_CORE, "FilePollingStream.resetting.reader", 0));
+						LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+								"FilePollingStream.resetting.reader"), 0);
 
 						lnr.reset();
 					}
@@ -334,8 +334,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					lastModifTime = getModificationTime(prevFile, fs);
 					readingLatestLogFile = false;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"FilePollingStream.changing.to.previous", prevFile.toUri()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.previous"), prevFile.toUri());
 				}
 
 				return prevFile != null;
@@ -357,8 +357,8 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 					lineNumber = 0;
 					readingLatestLogFile = nextFile.equals(foundFiles[0]);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"FilePollingStream.changing.to.next", nextFile.toUri()));
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"FilePollingStream.changing.to.next"), nextFile.toUri());
 				}
 
 				return nextFile != null;
