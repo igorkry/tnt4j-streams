@@ -26,12 +26,12 @@
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="MsgBody" locator="message" locator-type="Label">
+        <field name="MsgBody" locator="$.message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        <field name="path" locator="path" locator-type="Label"/>
-        <field name="Tag" locator="tags" locator-type="Label"/>
-        <field name="host" locator="host" locator-type="Label"/>
+        <field name="path" locator="$.path" locator-type="Label"/>
+        <field name="Tag" locator="$.tags" locator-type="Label"/>
+        <field name="host" locator="$.host" locator-type="Label"/>
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">

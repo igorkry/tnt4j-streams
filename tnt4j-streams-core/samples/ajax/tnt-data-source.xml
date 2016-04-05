@@ -4,28 +4,28 @@
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
-        <field name="StartTime" locator="startOfLoading" locator-type="Label" datatype="Timestamp"
+        <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
                units="Nanoseconds"/>
-        <field name="ResourceName" locator="url" locator-type="Label"/>
-        <field name="EventName" locator="eventType" locator-type="Label"/>
-        <field name="Message" locator="message" locator-type="Label"/>
-        <field name="Tag" locator="eventType" locator-type="Label"/>
+        <field name="ResourceName" locator="$.url" locator-type="Label"/>
+        <field name="EventName" locator="$.eventType" locator-type="Label"/>
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Tag" locator="$.eventType" locator-type="Label"/>
 
-        <field name="CompCode" locator="statuss" locator-type="Label">
+        <field name="CompCode" locator="$.statuss" locator-type="Label">
             <field-map source="100:206" target="SUCCESS" type="Range"/>
             <field-map source="300:308" target="WARNING" type="Range"/>
             <field-map source="400:417" target="ERROR" type="Range"/>
             <field-map source="500:511" target="ERROR" type="Range"/>
         </field>
-        <field name="ReasonCode" locator="statuss" locator-type="Label"/>
+        <field name="ReasonCode" locator="$.statuss" locator-type="Label"/>
 
         <field name="EventType" value="EVENT"/>
-        <field name="EndTime" locator="endOfLoading" locator-type="Label" datatype="Timestamp"
+        <field name="EndTime" locator="$.endOfLoading" locator-type="Label" datatype="Timestamp"
                units="Milliseconds"/>
-        <field name="ElapsedTime" locator="elapsedTime" locator-type="Label" datatype="Number" format="#####0"/>
-        <field name="ContentSize" locator="contentSize" locator-type="Label"/>
-        <field name="IsError" locator="error" locator-type="Label"/>
-        <field name="IsAborted" locator="abort" locator-type="Label"/>
+        <field name="ElapsedTime" locator="$.elapsedTime" locator-type="Label" datatype="Number" format="#####0"/>
+        <field name="ContentSize" locator="$.contentSize" locator-type="Label"/>
+        <field name="IsError" locator="$.error" locator-type="Label"/>
+        <field name="IsAborted" locator="$.abort" locator-type="Label"/>
     </parser>
 
     <parser name="AjaxEventParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
