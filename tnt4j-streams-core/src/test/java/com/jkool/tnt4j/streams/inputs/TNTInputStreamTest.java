@@ -34,7 +34,6 @@ import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
-import com.jkool.tnt4j.streams.utils.StreamsThread;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 
@@ -61,11 +60,10 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void recordActivityTest() throws Exception {
-		StreamsThread inputStreamThread = new StreamsThread(ts);
-		inputStreamThread.start();
 		ts.addParser(parser);
+		streamThread.start();
 		when(ai.isFiltered()).thenReturn(false);
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		verify(ai).recordActivity(any(Tracker.class), any(Long.class));
 		ts.halt();
 		ts.cleanup();
@@ -88,7 +86,7 @@ public class TNTInputStreamTest {
 		for (Map.Entry<String, String> property : props) {
 			String name = property.getKey();
 			String expectedValue = property.getValue();
-			assertEquals("Prperty not set as expected", expectedValue, ts.getProperty(name).toString());
+			assertEquals("Property not set as expected", expectedValue, ts.getProperty(name).toString());
 		}
 
 	}

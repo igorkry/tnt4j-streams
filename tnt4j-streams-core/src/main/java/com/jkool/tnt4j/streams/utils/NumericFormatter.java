@@ -19,7 +19,6 @@ package com.jkool.tnt4j.streams.utils;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -112,8 +111,8 @@ public class NumericFormatter {
 	public void setPattern(String pattern, String locale) {
 		this.pattern = pattern;
 		formatter = StringUtils.isEmpty(pattern) ? null
-				: locale == null ? new DecimalFormat(pattern)
-						: new DecimalFormat(pattern, new DecimalFormatSymbols(Locale.forLanguageTag(locale)));
+				: StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
+						: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
 	}
 
 	/**

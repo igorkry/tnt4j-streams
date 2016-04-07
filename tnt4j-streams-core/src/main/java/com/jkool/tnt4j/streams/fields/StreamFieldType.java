@@ -21,11 +21,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpCompCode;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.core.OpType;
+import com.nastel.jkool.tnt4j.core.UsecTimestamp;
 
 /**
  * <p>
@@ -67,12 +67,12 @@ public enum StreamFieldType {
 	/**
 	 * Time action associated with activity started.
 	 */
-	StartTime(StreamTimestamp.class),
+	StartTime(UsecTimestamp.class),
 
 	/**
 	 * Time action associated with activity ended.
 	 */
-	EndTime(StreamTimestamp.class),
+	EndTime(UsecTimestamp.class),
 
 	/**
 	 * Elapsed time of the activity.
@@ -223,6 +223,10 @@ public enum StreamFieldType {
 			throw new IllegalArgumentException(StreamsResources
 					.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE, "StreamFieldType.not.defined", this));
 		}
+	}
+
+	boolean isEnumField() {
+		return dataType == Enum.class;
 	}
 
 	/**

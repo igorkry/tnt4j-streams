@@ -16,16 +16,15 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
-import java.io.InputStream;
 import java.net.Socket;
 
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
-import com.jkool.tnt4j.streams.utils.StreamsThread;
+import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -50,23 +49,21 @@ public class CharacterStreamTest {
 
 	@Test
 	public void startDataStreamTest() throws Exception {
-		InputStream is = mock(InputStream.class);
+		// InputStream is = mock(InputStream.class);
 		// cStream = new CharacterStream(is);
 		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, PORT);
-		cStream.initialize();
-		StreamsThread thread = new StreamsThread(new Runnable() {
-			public void run() {
-				try {
-					cStream.getNextItem();
-				} catch (Exception e) {
-				}
-			}
-		});
+		StreamThread thread = new StreamThread(cStream);
 		thread.start();
 		Thread.sleep(250);
 		Socket socket = new Socket("localhost", PORT);
 		socket.getOutputStream().write(55);
-		assertNotNull(socket.getOutputStream());
+		socket.getOutputStream().flush();
+		Utils.close(socket);
+		Thread.sleep(250);
+
+		assertEquals("No activities processed", 1, cStream.getCurrentActivity());
+		assertTrue("Stream is not closed", cStream.isHalted());
+
 		cStream.cleanup();
 	}
 }

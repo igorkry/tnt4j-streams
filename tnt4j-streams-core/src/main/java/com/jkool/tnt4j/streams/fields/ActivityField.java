@@ -89,7 +89,7 @@ public class ActivityField {
 	public boolean isEnumeration() {
 		StreamFieldType sft = getFieldType();
 
-		return sft == null ? false : sft.getEnumerationClass() != null;
+		return sft != null && sft.isEnumField();
 	}
 
 	/**

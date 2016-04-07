@@ -281,7 +281,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
-			initNewDefaultTracker(ownerThread);
+			initNewDefaultTracker(ownerThread == null ? Thread.currentThread() : ownerThread);
 		}
 	}
 
@@ -290,7 +290,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
 		logger.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.default.tracker"),
-				t.getName(), defaultSource.getFQName());
+				(t == null ? "null" : t.getName()), defaultSource.getFQName());
 	}
 
 	/**
@@ -781,7 +781,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	private static String getTrackersMapKey(Thread t, String sourceFQN) {
-		return t.getId() + ":?:" + sourceFQN; // NON-NLS
+		return (t == null ? "null" : t.getId()) + ":?:" + sourceFQN; // NON-NLS
 	}
 
 	/**
@@ -1198,7 +1198,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 			return task;
 		}
 
-		void notifyNewThreadCreated(Thread t) {
+		private void notifyNewThreadCreated(Thread t) {
 			if (listeners != null) {
 				for (StreamsThreadFactoryListener l : listeners) {
 					l.newThreadCreated(t);

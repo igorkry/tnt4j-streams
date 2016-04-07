@@ -29,12 +29,8 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
 import com.nastel.jkool.tnt4j.config.TrackerConfig;
-import com.nastel.jkool.tnt4j.core.OpCompCode;
-import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.core.OpType;
-import com.nastel.jkool.tnt4j.core.Operation;
+import com.nastel.jkool.tnt4j.core.*;
 import com.nastel.jkool.tnt4j.tracker.Tracker;
 import com.nastel.jkool.tnt4j.tracker.TrackingEvent;
 import com.nastel.jkool.tnt4j.uuid.UUIDFactory;
@@ -157,8 +153,8 @@ public class ActivityInfoTest {
 			return 111L;
 		} else if (className.equals("java.lang.Enum")) {
 			return TestEnum.Skip;
-		} else if (className.equals("com.jkool.tnt4j.streams.utils.StreamTimestamp")) {
-			return new StreamTimestamp(new Date());
+		} else if (className.equals("com.nastel.jkool.tnt4j.core.UsecTimestamp")) {
+			return new UsecTimestamp(new Date());
 		} else {
 			fail("No such test case for class: " + className);
 		}

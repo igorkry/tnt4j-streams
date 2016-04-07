@@ -27,7 +27,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.utils.*;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.StreamsThread;
+import com.jkool.tnt4j.streams.utils.TimestampFormatter;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.*;
 import com.nastel.jkool.tnt4j.format.JSONFormatter;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -61,8 +64,8 @@ public class ActivityInfo {
 
 	private String eventName = null;
 	private OpType eventType = null;
-	private StreamTimestamp startTime = null;
-	private StreamTimestamp endTime = null;
+	private UsecTimestamp startTime = null;
+	private UsecTimestamp endTime = null;
 	private long elapsedTime = -1L;
 	private OpCompCode compCode = null;
 	private int reasonCode = 0;
@@ -271,7 +274,7 @@ public class ActivityInfo {
 				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue));
 				break;
 			case EndTime:
-				endTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+				endTime = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
 						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
 				break;
 			case Exception:
@@ -303,7 +306,7 @@ public class ActivityInfo {
 				trackingId = substitute(trackingId, getStringValue(fieldValue));
 				break;
 			case StartTime:
-				startTime = fieldValue instanceof StreamTimestamp ? (StreamTimestamp) fieldValue
+				startTime = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
 						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
 				break;
 			case CompCode:
@@ -441,7 +444,7 @@ public class ActivityInfo {
 	 *         no source defining attributes where parsed from stream.
 	 */
 	public String getSourceFQN() {
-		resolveServer();
+		resolveServer(false);
 		StringBuilder fqnB = new StringBuilder();
 
 		addSourceValue(fqnB, SourceType.APPL, applName);
@@ -483,7 +486,7 @@ public class ActivityInfo {
 			return;
 		}
 
-		resolveServer();
+		resolveServer(false);
 		determineTimes();
 
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
@@ -683,8 +686,12 @@ public class ActivityInfo {
 
 	/**
 	 * Resolves server name and/or IP Address based on values specified.
+	 *
+	 * @param resolveOverDNS
+	 *            flag indicating whether to use DNS to resolve server names and
+	 *            IP addresses
 	 */
-	private void resolveServer() {
+	private void resolveServer(boolean resolveOverDNS) {
 		if (StringUtils.isEmpty(serverName) && StringUtils.isEmpty(serverIp)) {
 			serverName = HOST_CACHE.get(LOCAL_SERVER_NAME_KEY);
 			serverIp = HOST_CACHE.get(LOCAL_SERVER_IP_KEY);
@@ -698,39 +705,42 @@ public class ActivityInfo {
 				HOST_CACHE.put(LOCAL_SERVER_IP_KEY, serverIp);
 			}
 		} else if (StringUtils.isEmpty(serverName)) {
-			// try {
-			// serverName = HOST_CACHE.get(serverIp);
-			// if (StringUtils.isEmpty(serverName)) {
-			// serverName = Utils.resolveAddressToHostName(serverIp);
-			// if (StringUtils.isEmpty(serverName)) {
-			// // Add entry so we don't repeatedly attempt to look
-			// // up unresolvable IP Address
-			// HOST_CACHE.put(serverIp, "");
-			// } else {
-			// HOST_CACHE.put(serverIp, serverName);
-			// HOST_CACHE.put(serverName, serverIp);
-			// }
-			// }
-			// } catch (Exception e) {
-			// serverName = serverIp;
-			// }
-
-			serverName = serverIp;
+			if (resolveOverDNS) {
+				try {
+					serverName = HOST_CACHE.get(serverIp);
+					if (StringUtils.isEmpty(serverName)) {
+						serverName = Utils.resolveAddressToHostName(serverIp);
+						if (StringUtils.isEmpty(serverName)) {
+							// Add entry so we don't repeatedly attempt to look
+							// up unresolvable IP Address
+							HOST_CACHE.put(serverIp, "");
+						} else {
+							HOST_CACHE.put(serverIp, serverName);
+							HOST_CACHE.put(serverName, serverIp);
+						}
+					}
+				} catch (Exception e) {
+					serverName = serverIp;
+				}
+			} else {
+				serverName = serverIp;
+			}
+		} else if (StringUtils.isEmpty(serverIp)) {
+			if (resolveOverDNS) {
+				serverIp = HOST_CACHE.get(serverName);
+				if (StringUtils.isEmpty(serverIp)) {
+					serverIp = Utils.resolveHostNameToAddress(serverName);
+					if (StringUtils.isEmpty(serverIp)) {
+						// Add entry so we don't repeatedly attempt to look up
+						// unresolvable host name
+						HOST_CACHE.put(serverName, "");
+					} else {
+						HOST_CACHE.put(serverIp, serverName);
+						HOST_CACHE.put(serverName, serverIp);
+					}
+				}
+			}
 		}
-		// else if (StringUtils.isEmpty(serverIp)) {
-		// serverIp = HOST_CACHE.get(serverName);
-		// if (StringUtils.isEmpty(serverIp)) {
-		// serverIp = Utils.resolveHostNameToAddress(serverName);
-		// if (StringUtils.isEmpty(serverIp)) {
-		// // Add entry so we don't repeatedly attempt to look up
-		// // unresolvable host name
-		// HOST_CACHE.put(serverName, "");
-		// } else {
-		// HOST_CACHE.put(serverIp, serverName);
-		// HOST_CACHE.put(serverName, serverIp);
-		// }
-		// }
-		// }
 
 		if (StringUtils.isEmpty(serverIp)) {
 			serverIp = " "; // prevents streams API from resolving it to the
@@ -750,14 +760,14 @@ public class ActivityInfo {
 		}
 		if (endTime == null) {
 			if (startTime != null) {
-				endTime = new StreamTimestamp(startTime);
+				endTime = new UsecTimestamp(startTime);
 				endTime.add(0L, elapsedTime);
 			} else {
-				endTime = new StreamTimestamp();
+				endTime = new UsecTimestamp();
 			}
 		}
 		if (startTime == null) {
-			startTime = new StreamTimestamp(endTime);
+			startTime = new UsecTimestamp(endTime);
 			startTime.subtract(0L, elapsedTime);
 		}
 	}
@@ -978,7 +988,7 @@ public class ActivityInfo {
 	 *
 	 * @return the start time
 	 */
-	public StreamTimestamp getStartTime() {
+	public UsecTimestamp getStartTime() {
 		return startTime;
 	}
 
@@ -987,7 +997,7 @@ public class ActivityInfo {
 	 *
 	 * @return the end time
 	 */
-	public StreamTimestamp getEndTime() {
+	public UsecTimestamp getEndTime() {
 		return endTime;
 	}
 

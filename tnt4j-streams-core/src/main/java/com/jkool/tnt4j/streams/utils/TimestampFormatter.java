@@ -21,11 +21,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.nastel.jkool.tnt4j.core.UsecTimestamp;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -43,7 +43,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 1 $
  *
  * @see SimpleDateFormat
- * @see StreamTimestamp
+ * @see UsecTimestamp
  */
 public class TimestampFormatter {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TimestampFormatter.class);
@@ -106,7 +106,7 @@ public class TimestampFormatter {
 		this.locale = locale;
 		formatter = StringUtils.isEmpty(pattern) ? new SimpleDateFormat()
 				: StringUtils.isEmpty(locale) ? new SimpleDateFormat(pattern)
-						: new SimpleDateFormat(pattern, Locale.forLanguageTag(locale));
+						: new SimpleDateFormat(pattern, Utils.getLocale(locale));
 	}
 
 	/**
@@ -165,15 +165,15 @@ public class TimestampFormatter {
 	 *             if an error parsing the specified value based timestamp
 	 *             pattern supported by this parser;
 	 */
-	public StreamTimestamp parse(Object value) throws ParseException {
-		if (value instanceof StreamTimestamp) {
-			return (StreamTimestamp) value;
+	public UsecTimestamp parse(Object value) throws ParseException {
+		if (value instanceof UsecTimestamp) {
+			return (UsecTimestamp) value;
 		}
 		if (value instanceof Date) {
-			return new StreamTimestamp((Date) value);
+			return new UsecTimestamp((Date) value);
 		}
 		if (value instanceof Calendar) {
-			return new StreamTimestamp(((Calendar) value).getTimeInMillis());
+			return new UsecTimestamp(((Calendar) value).getTimeInMillis(), 0);
 		}
 		if (value instanceof String || value instanceof Number) {
 			if (units != null) {
@@ -213,8 +213,8 @@ public class TimestampFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 */
-	public static StreamTimestamp parse(TimeUnit units, Object value) throws ParseException {
-		StreamTimestamp ts;
+	public static UsecTimestamp parse(TimeUnit units, Object value) throws ParseException {
+		UsecTimestamp ts;
 		try {
 			long time;
 			if (value instanceof Date) {
@@ -236,16 +236,16 @@ public class TimestampFormatter {
 				long scale = 1000000L;
 				long mSecs = time / scale;
 				long uSecs = (time - mSecs * scale) / 1000L;
-				ts = new StreamTimestamp(mSecs, uSecs);
+				ts = new UsecTimestamp(mSecs, uSecs);
 				break;
 			case MICROSECONDS:
 				scale = 1000L;
 				mSecs = time / scale;
 				uSecs = time - mSecs * scale;
-				ts = new StreamTimestamp(mSecs, uSecs);
+				ts = new UsecTimestamp(mSecs, uSecs);
 				break;
 			default:
-				ts = new StreamTimestamp(units.toMillis(time));
+				ts = new UsecTimestamp(units.toMicros(time));
 				break;
 			}
 		} catch (NumberFormatException nfe) {
@@ -280,10 +280,10 @@ public class TimestampFormatter {
 	 *             if an error parsing the specified value based on pattern
 	 * @see java.util.TimeZone
 	 */
-	public static StreamTimestamp parse(String pattern, Object value, String timeZoneId, String locale)
+	public static UsecTimestamp parse(String pattern, Object value, String timeZoneId, String locale)
 			throws ParseException {
 		String dateStr = value.toString();
-		return new StreamTimestamp(dateStr, pattern, timeZoneId, locale);
+		return new UsecTimestamp(dateStr, pattern, timeZoneId, locale);
 	}
 
 	/**

@@ -27,8 +27,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.jkool.tnt4j.streams.utils.*;
+import com.jkool.tnt4j.streams.utils.NumericFormatter;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.TimestampFormatter;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.core.UsecTimestamp;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -546,9 +550,9 @@ public class ActivityFieldLocator implements Cloneable {
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined format, etc.)
 	 */
-	protected StreamTimestamp formatDateValue(Object value) throws ParseException {
-		if (value instanceof StreamTimestamp) {
-			return (StreamTimestamp) value;
+	protected UsecTimestamp formatDateValue(Object value) throws ParseException {
+		if (value instanceof UsecTimestamp) {
+			return (UsecTimestamp) value;
 		}
 		if (timeParser == null) {
 			ActivityFieldDataType fDataType = dataType == null ? ActivityFieldDataType.DateTime : dataType;

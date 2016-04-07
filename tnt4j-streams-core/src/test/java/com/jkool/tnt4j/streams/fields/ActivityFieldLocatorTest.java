@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import com.jkool.tnt4j.streams.utils.StreamTimestamp;
+import com.nastel.jkool.tnt4j.core.UsecTimestamp;
 
 /**
  * @author akausinis
@@ -99,7 +99,7 @@ public class ActivityFieldLocatorTest {
 	@Test
 	public void testFormatDateValue() throws ParseException {
 		locator = new ActivityFieldLocator(1);
-		StreamTimestamp ts = new StreamTimestamp(new Date());
+		UsecTimestamp ts = new UsecTimestamp(new Date());
 		assertEquals(ts, locator.formatDateValue(ts));
 		locator.setDataType(ActivityFieldDataType.DateTime);
 		locator.setUnits(TimeUnit.MILLISECONDS.name());
