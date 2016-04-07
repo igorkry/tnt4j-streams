@@ -20,7 +20,6 @@ set MVN=C:\maven\bin\mvn
 
 echo installing TNT4J and JESL libraries...
 call %MVN% install:install-file -Dfile=tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar
-call %MVN% install:install-file -Dfile=tnt4j-api-utils.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api-utils -Dversion=1.0.0 -Dpackaging=jar
 call %MVN% install:install-file -Dfile=jkool-jesl.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=jkool-jesl -Dversion=1.0.0 -Dpackaging=jar
 
 echo installing TNT4J logger libraries...
