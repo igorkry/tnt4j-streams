@@ -124,12 +124,12 @@ sample:
     /**
      * Time action associated with activity started.
      */
-    StartTime(StreamTimestamp.class),
+    StartTime(UsecTimestamp.class),
 
     /**
      * Time action associated with activity ended.
      */
-    EndTime(StreamTimestamp.class),
+    EndTime(UsecTimestamp.class),
 
     /**
      * Elapsed time of the activity.
@@ -674,12 +674,12 @@ Sample stream configuration:
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="MsgBody" locator="body" locator-type="Label">
+        <field name="MsgBody" locator="$.body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        <field name="sinkName" locator="sinkName" locator-type="Label"/>
-        <field name="chanelName" locator="chanelName" locator-type="Label"/>
-        <field name="headers" locator="headers" locator-type="Label"/>
+        <field name="sinkName" locator="$.sinkName" locator-type="Label"/>
+        <field name="chanelName" locator="$.chanelName" locator-type="Label"/>
+        <field name="headers" locator="$.headers" locator-type="Label"/>
     </parser>
 
     <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
@@ -725,25 +725,25 @@ Sample stream configuration:
     <parser name="FlumeJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="Location" locator="headers.clientip" locator-type="Label"/>
-        <field name="UserName" locator="headers.auth" locator-type="Label"/>
-        <field name="StartTime" locator="headers.logtime" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+        <field name="Location" locator="$.headers.clientip" locator-type="Label"/>
+        <field name="UserName" locator="$.headers.auth" locator-type="Label"/>
+        <field name="StartTime" locator="$.headers.logtime" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
                locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="headers.method" locator-type="Label"/>
-        <field name="ResourceName" locator="headers.param" locator-type="Label"/>
-        <field name="CompCode" locator="headers.response" locator-type="Label">
+        <field name="EventName" locator="$.headers.method" locator-type="Label"/>
+        <field name="ResourceName" locator="$.headers.param" locator-type="Label"/>
+        <field name="CompCode" locator="$.headers.response" locator-type="Label">
             <field-map source="100:206" target="SUCCESS" type="Range"/>
             <field-map source="300:308" target="WARNING" type="Range"/>
             <field-map source="400:417" target="ERROR" type="Range"/>
             <field-map source="500:511" target="ERROR" type="Range"/>
         </field>
-        <field name="ReasonCode" locator="headers.response" locator-type="Label"/>
-        <field name="MsgValue" locator="headers.bytes" locator-type="Label"/>
-        <field name="Message" locator="body" locator-type="Label"/>
+        <field name="ReasonCode" locator="$.headers.response" locator-type="Label"/>
+        <field name="MsgValue" locator="$.headers.bytes" locator-type="Label"/>
+        <field name="Message" locator="$.body" locator-type="Label"/>
         <field name="Tag" separator=",">
-            <field-locator locator="sinkName" locator-type="Label"/>
-            <field-locator locator="chanelName" locator-type="Label"/>
+            <field-locator locator="$.sinkName" locator-type="Label"/>
+            <field-locator locator="$.chanelName" locator-type="Label"/>
         </field>
     </parser>
 
@@ -808,12 +808,12 @@ Sample stream configuration:
     <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="MsgBody" locator="message" locator-type="Label">
+        <field name="MsgBody" locator="$.message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        <field name="path" locator="path" locator-type="Label"/>
-        <field name="Tag" locator="tags" locator-type="Label"/>
-        <field name="host" locator="host" locator-type="Label"/>
+        <field name="path" locator="$.path" locator-type="Label"/>
+        <field name="Tag" locator="$.tags" locator-type="Label"/>
+        <field name="host" locator="$.host" locator-type="Label"/>
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
@@ -860,23 +860,23 @@ Sample stream configuration:
     <parser name="LogstashJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
-        <field name="Location" locator="clientip" locator-type="Label"/>
-        <field name="UserName" locator="auth" locator-type="Label"/>
-        <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+        <field name="Location" locator="$.clientip" locator-type="Label"/>
+        <field name="UserName" locator="$.auth" locator-type="Label"/>
+        <field name="StartTime" locator="$.timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
                locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="verb" locator-type="Label"/>
-        <field name="ResourceName" locator="request" locator-type="Label"/>
-        <field name="CompCode" locator="response" locator-type="Label">
+        <field name="EventName" locator="$.verb" locator-type="Label"/>
+        <field name="ResourceName" locator="$.request" locator-type="Label"/>
+        <field name="CompCode" locator="$.response" locator-type="Label">
             <field-map source="100:206" target="SUCCESS" type="Range"/>
             <field-map source="300:308" target="WARNING" type="Range"/>
             <field-map source="400:417" target="ERROR" type="Range"/>
             <field-map source="500:511" target="ERROR" type="Range"/>
         </field>
-        <field name="ReasonCode" locator="response" locator-type="Label"/>
-        <field name="MsgValue" locator="bytes" locator-type="Label"/>
-        <field name="Message" locator="message" locator-type="Label"/>
-        <field name="Tag" locator="tags" locator-type="Label"/>
+        <field name="ReasonCode" locator="$.response" locator-type="Label"/>
+        <field name="MsgValue" locator="$.bytes" locator-type="Label"/>
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Tag" locator="$.tags" locator-type="Label"/>
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
@@ -1504,15 +1504,15 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
-        <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="ResourceName" locator="url" locator-type="Label"/>
-        <field name="Correlator" locator="sid" locator-type="Label"/>
-        <field name="Correlator" locator="rid" locator-type="Label"/>
-        <field name="EventName" locator="eventName" locator-type="Label"/>
+        <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="ResourceName" locator="$.url" locator-type="Label"/>
+        <field name="Correlator" locator="$.sid" locator-type="Label"/>
+        <field name="Correlator" locator="$.rid" locator-type="Label"/>
+        <field name="EventName" locator="$.eventName" locator-type="Label"/>
         <field name="EventType" value="EVENT"/>
-        <field name="ElapsedTime" locator="pageLoad" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="browser" locator="browser" locator-type="Label"/>
-        <field name="eventProperties" locator="properties" locator-type="Label"/>
+        <field name="ElapsedTime" locator="$.pageLoad" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="browser" locator="$.browser" locator-type="Label"/>
+        <field name="eventProperties" locator="$.properties" locator-type="Label"/>
     </parser>
 
     <parser name="AngularticsReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
@@ -1961,6 +1961,23 @@ Also see 'Generic stream parameters'.
 
 How to Build TNT4J-Streams
 =========================================
+## Modules
+
+Modules list:
+   * `Core` (M)
+   * `Flume-Plugin` (O)
+   * `Hdfs` (O)
+   * `JMS` (O)
+   * `Kafka` (O)
+   * `Mqtt` (O)
+   * `WMQ` (O)
+
+(M) marked modules are mandatory, (O) marked modules - optional.
+
+All optional modules (extentions) depends to `core` module and can't be build and run without it.
+
+If You want to build and use optional modules, uncomment those in root TNT4J-Streams `pom.xml` file. I.e. to use `WMQ`
+module uncomment `tnt4j-streams-wmq` module.
 
 ## Requirements
 * JDK 1.6+
@@ -1973,12 +1990,11 @@ online mode it should download these defined dependencies automatically.
 
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public Maven Repository (http://mvnrepository.com/).
-In this case we would recommend to download those dependencies manually into `lib` directory and install into local
-maven repository by running `mvn install` command. See `lib/mvn-install.bat` how to do this.
+In this case we would recommend to download those dependencies manually into module `lib` directory and install into
+local maven repository by running `mvn install` command. See `tnt4j-streams/tnt4j-streams-core/lib/mvn-install.bat`
+how to do this.
 
 #### `Core` module
-This module is mandatory for using TNT4J-Streams. All optional modules depends to `core` module and can't be build and
-run without it.
 
 What to download manually:
 * TNT4J
@@ -1991,14 +2007,12 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-cor
     lib
      |- jkool-jesl.jar
      |- tnt4j-api.jar
-     |- tnt4j-api-utils.jar
      |- tnt4j-log4j12.jar (O)
      |- tnt4j-logback.jar (O)
 ```
 (O) marked libraries are optional
 
 #### `WMQ` module
-To use `WMQ` module uncomment `tnt4j-streams-wmq` module in root TNT4J-Streams `pom.xml` file.
 
 What to download manually:
 * IBM MQ 7.5
@@ -2012,18 +2026,6 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
          |- com.ibm.mq.jar
          |- com.ibm.mq.jmqi.jar
          |- com.ibm.mq.pcf.jar
-```
-
-#### `WS` module
-To use `WS` module uncomment `tnt4j-streams-ws` module in root TNT4J-Streams `pom.xml` file.
-
-What to download manually:
-* curl-java (optional) (https://github.com/pjlegato/curl-java)
-
-Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-ws/lib` directory like this:
-```
-    lib
-     |- curl-java.jar
 ```
 
 ## Building
