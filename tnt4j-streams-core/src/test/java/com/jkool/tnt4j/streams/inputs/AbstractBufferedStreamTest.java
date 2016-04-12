@@ -55,6 +55,7 @@ public class AbstractBufferedStreamTest {
 	@Test(timeout = 4000)
 	public void getNextItemExpectedToWaitTest() throws Exception {
 		Thread thread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					abs.initialize();
@@ -94,6 +95,7 @@ public class AbstractBufferedStreamTest {
 		abs.initialize();
 
 		Thread thread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				for (; overflowRecordCount >= 0; overflowRecordCount--) {
 					abs.addInputToBuffer("T");

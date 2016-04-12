@@ -95,16 +95,13 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	private MqttDataReceiver mqttDataReceiver;
 
 	/**
-	 * Construct empty MqttStream. Requires configuration settings to set input
-	 * stream source.
+	 * Constructs an empty MqttStream. Requires configuration settings to set
+	 * input stream source.
 	 */
 	public MqttStream() {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
@@ -132,9 +129,6 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -170,9 +164,6 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -194,9 +185,6 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		mqttDataReceiver.start();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		try {
@@ -209,17 +197,11 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		super.cleanup();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isInputEnded() {
 		return mqttDataReceiver.isInputEnded();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected long getActivityItemByteSize(Map<String, ?> itemMap) {
 		byte[] payload = (byte[]) itemMap.get(StreamsConstants.ACTIVITY_DATA_KEY);
@@ -279,6 +261,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		 * @throws MqttException
 		 *             if Mqtt fails to disconnect client due to internal error
 		 */
+		@Override
 		void close() throws MqttException {
 			halt();
 		}

@@ -491,45 +491,48 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Returns size in bytes of activity data items available to stream. If
+	 * total size can't be determined, then {@code 0} is returned.
 	 * 
-	 * @return
+	 * @return total size in bytes of activity data items
 	 */
 	public long getTotalBytes() {
 		return 0;
 	}
 
 	/**
-	 * TODO
+	 * Returns size in bytes if streamed activity data items.
 	 * 
-	 * @return
+	 * @return streamed activity data items size in bytes
 	 */
 	public long getStreamedBytesCount() {
 		return streamedBytesCount.get();
 	}
 
 	/**
-	 * TODO
+	 * Returns number of activity data items skipped from streaming. Item may be
+	 * skipped if it can't be parsed or some non-critical exception occurs.
 	 * 
-	 * @return
+	 * @return number of skipped activities
 	 */
 	public int getSkippedActivitiesCount() {
 		return skippedActivitiesCount.get();
 	}
 
 	/**
-	 * TODO
+	 * Adds number of bytes to streamed bytes counter.
 	 *
 	 * @param bytesCount
+	 *            number of bytes to add
 	 */
 	protected void addStreamedBytesCount(long bytesCount) {
 		streamedBytesCount.addAndGet(bytesCount);
 	}
 
 	/**
-	 * TODO
+	 * Returns duration of streaming process.
 	 * 
-	 * @return
+	 * @return duration of steaming process
 	 */
 	public long getElapsedTime() {
 		long et = endTime < 0 ? System.currentTimeMillis() : endTime;
@@ -538,18 +541,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Creates snapshot of instant stream statistics.
 	 * 
-	 * @return
+	 * @return snapshot of instant stream statistics
 	 */
 	public StreamStats getStreamStatistics() {
-		StreamStats stats = new StreamStats();
-		stats.setActivitiesTotal(getTotalActivities());
-		stats.setCurrActivity(getCurrentActivity());
-		stats.setTotalBytes(getTotalBytes());
-		stats.setBytesStreamed(getStreamedBytesCount());
-		stats.setSkippedActivities(getSkippedActivitiesCount());
-		stats.setElapsedTime(getElapsedTime());
+		StreamStats stats = new StreamStats(this);
 
 		return stats;
 	}
@@ -787,16 +784,13 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Starts input stream processing. Implementing {@link Runnable} interface
 	 * makes it possible to process each stream in separate thread.
-	 *
-	 * @see Runnable#run()
 	 */
 	@Override
 	public void run() {
 		notifyStatusChange(StreamStatus.NEW);
 
 		logger.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"),
-				getName());
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.starting"), name);
 		if (ownerThread == null) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
 					.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.no.owner.thread"));
@@ -815,7 +809,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 					T item = getNextItem();
 					if (item == null) {
 						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-								"TNTInputStream.data.stream.ended"), getName());
+								"TNTInputStream.data.stream.ended"), name);
 						halt(); // no more data items to process
 					} else {
 						if (streamExecutorService == null) {
@@ -847,7 +841,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		} finally {
 			endTime = System.currentTimeMillis();
 			if (!failureFlag.get()) {
-				notifyStreamSuccess(null);
+				notifyStreamSuccess();
 			}
 			notifyFinished();
 
@@ -856,7 +850,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 			logger.log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "TNTInputStream.thread.ended"),
 					Thread.currentThread().getName());
-			logger.log(OpLevel.INFO, "Stream ''{0}'' statistics: {1}", getName(), getStreamStatistics());
+			logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.stream.statistics"), name, getStreamStatistics());
 		}
 	}
 
@@ -875,7 +870,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 						"TNTInputStream.no.parser", item), null, null);
 				halt();
 			} else {
-				notifyStreamEvent(OpLevel.WARNING, "Could not parse activity data: {0}", item);
+				notifyStreamEvent(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"TNTInputStream.could.not.parse.activity"), item);
 			}
 		} else {
 			if (!ai.isFiltered()) {
@@ -987,16 +983,13 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Notifies that activity items streaming process has completed
 	 * successfully.
-	 *
-	 * @param result
-	 *            result got after streaming completion
 	 */
 	@SuppressWarnings("unchecked")
-	public void notifyStreamSuccess(Object result) {
+	public void notifyStreamSuccess() {
 		notifyStatusChange(StreamStatus.SUCCESS);
 		if (streamListeners != null) {
 			for (InputStreamListener l : streamListeners) {
-				l.onSuccess(this, result);
+				l.onSuccess(this);
 			}
 		}
 	}
@@ -1142,6 +1135,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 			this.failureFlag = failureFlag;
 		}
 
+		@Override
 		public void run() {
 			try {
 				processActivityItem(item, failureFlag);
@@ -1161,7 +1155,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 		 */
 		@Override
 		public String toString() {
-			return "ActivityItemProcessingTask{" + "item=" + item + '}';
+			return "ActivityItemProcessingTask{" + "item=" + item + '}'; // NON-NLS
 		}
 	}
 
@@ -1185,9 +1179,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 			this.prefix = prefix;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Thread newThread(Runnable r) {
 			StreamsThread task = new StreamsThread(r, prefix + count.getAndIncrement());
@@ -1230,7 +1221,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
-	 * TODO
+	 * Class representing snapshot of instant stream statistics.
 	 */
 	public static class StreamStats {
 		private int activitiesTotal;
@@ -1244,89 +1235,79 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 		private long elapsedTime;
 
+		StreamStats(TNTInputStream stream) {
+			this.activitiesTotal = stream.getTotalActivities();
+			this.currActivity = stream.getCurrentActivity();
+			this.totalBytes = stream.getTotalBytes();
+			this.bytesStreamed = stream.getStreamedBytesCount();
+			this.skippedActivities = stream.getSkippedActivitiesCount();
+			this.elapsedTime = stream.getElapsedTime();
+		}
+
 		/**
-		 * TODO
+		 * Returns total number of activities available to stream.
 		 * 
-		 * @return
+		 * @return total number of available activities
 		 */
 		public int getActivitiesTotal() {
 			return activitiesTotal;
 		}
 
-		void setActivitiesTotal(int activitiesTotal) {
-			this.activitiesTotal = activitiesTotal;
-		}
-
 		/**
-		 * TODO
+		 * Returns number of currently streamed activity data item.
 		 *
-		 * @return
+		 * @return activity data item number.
 		 */
 		public int getCurrActivity() {
 			return currActivity;
 		}
 
-		void setCurrActivity(int currActivity) {
-			this.currActivity = currActivity;
-		}
-
 		/**
-		 * TODO
+		 * Returns total size (in bytes) of activity items available to stream.
 		 *
-		 * @return
+		 * @return number of total bytes
 		 */
 		public long getTotalBytes() {
 			return totalBytes;
 		}
 
-		void setTotalBytes(long totalBytes) {
-			this.totalBytes = totalBytes;
-		}
-
 		/**
-		 * TODO
+		 * Returns size (in bytes) of streamed activity data items.
 		 *
-		 * @return
+		 * @return number of streamed bytes
 		 */
 		public long getBytesStreamed() {
 			return bytesStreamed;
 		}
 
-		void setBytesStreamed(long bytesStreamed) {
-			this.bytesStreamed = bytesStreamed;
-		}
-
 		/**
-		 * TODO
+		 * Returns duration of streaming process.
 		 *
-		 * @return
+		 * @return streaming process duration
 		 */
 		public long getElapsedTime() {
 			return elapsedTime;
 		}
 
-		void setElapsedTime(long elapsedTime) {
-			this.elapsedTime = elapsedTime;
-		}
-
+		/**
+		 * Returns number of activities skipped by stream.
+		 * 
+		 * @return number of skipped activities.
+		 */
 		public long getSkippedActivities() {
 			return skippedActivities;
 		}
 
-		public void setSkippedActivities(long skippedActivities) {
-			this.skippedActivities = skippedActivities;
-		}
-
 		/**
-		 * TODO
+		 * Returns stream statistics as text string.
 		 * 
-		 * @return
+		 * @return stream statistics text string
 		 */
 		@Override
 		public String toString() {
-			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity
-					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities="
-					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}';
+			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
+					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
+					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
 		}
 	}
 }

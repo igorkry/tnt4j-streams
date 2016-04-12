@@ -76,9 +76,6 @@ public class ActivityRegExParser extends ActivityParser {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -100,9 +97,6 @@ public class ActivityRegExParser extends ActivityParser {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addField(ActivityField field) {
 		List<ActivityFieldLocator> locations = field.getLocators();
@@ -160,9 +154,6 @@ public class ActivityRegExParser extends ActivityParser {
 				|| InputStream.class.isInstance(data);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {

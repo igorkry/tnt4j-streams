@@ -19,9 +19,18 @@ package com.jkool.tnt4j.streams.custom.dirStream;
 import java.util.UUID;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * This interface defines streaming job providing unique identification.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see StreamingJobListener
  */
 public interface StreamingJob extends Runnable {
+	/**
+	 * Returns unique job identifier.
+	 *
+	 * @return unique job identifier
+	 */
 	UUID getJobId();
 }

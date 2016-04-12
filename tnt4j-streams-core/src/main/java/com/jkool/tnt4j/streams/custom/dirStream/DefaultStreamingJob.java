@@ -35,50 +35,39 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * This class implements a default directory files streaming job. In general it
+ * defines stream configuration attributes and initiates new stream thread when
+ * job gets invoked by executor service.
+ *
+ * @version $Revision: 1 $
  */
 public class DefaultStreamingJob implements StreamingJob {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(DefaultStreamingJob.class);
 
-	private File jobCfgFile;
+	private File streamCfgFile;
 	private UUID jobId;
 
 	private String tnt4jCfgFilePath;
 
 	private List<StreamingJobListener> jobListeners;
 
-	public DefaultStreamingJob(UUID jobId, File jobCfgFile) {
+	/**
+	 * Constructs a new DefaultStreamingJob.
+	 * 
+	 * @param jobId
+	 *            unique job identifier
+	 * @param streamCfgFile
+	 *            stream configuration file
+	 */
+	public DefaultStreamingJob(UUID jobId, File streamCfgFile) {
 		this.jobId = jobId;
-		this.jobCfgFile = jobCfgFile;
+		this.streamCfgFile = streamCfgFile;
 	}
 
-	/**
-	 * Gets job identifier.
-	 *
-	 * @return job identifier UUID.
-	 */
+	@Override
 	public UUID getJobId() {
 		return jobId;
-	}
-
-	/**
-	 * Sets job identifier.
-	 *
-	 * @param jobId
-	 *            job identifier UUID
-	 */
-	public void setJobId(UUID jobId) {
-		this.jobId = jobId;
-	}
-
-	/**
-	 * Gets path string of TNT4J configuration file.
-	 *
-	 * @return returns path of TNT4J configuration file
-	 */
-	public String getTnt4jCfgFilePath() {
-		return tnt4jCfgFilePath;
 	}
 
 	/**
@@ -91,12 +80,16 @@ public class DefaultStreamingJob implements StreamingJob {
 		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
 	}
 
+	/**
+	 * Initializes and starts configuration defined {@link TNTInputStream}s when
+	 * job gets invoked by executor service.
+	 */
 	@Override
 	public void run() {
-		// StreamsAgent.runFromAPI(jobCfgFile);
+		// StreamsAgent.runFromAPI(streamCfgFile);
 
 		try {
-			StreamsConfigLoader cfg = new StreamsConfigLoader(jobCfgFile);
+			StreamsConfigLoader cfg = new StreamsConfigLoader(streamCfgFile);
 			Collection<TNTInputStream> streams = cfg.getStreams();
 
 			if (CollectionUtils.isEmpty(streams)) {
@@ -121,31 +114,50 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 	}
 
+	/**
+	 * Returns text string representing streaming job.
+	 *
+	 * @return job string representation
+	 */
 	@Override
 	public String toString() {
-		return "DefaultStreamingJob{" + "jobId=" + jobId + '}';
+		return "DefaultStreamingJob{" + "jobId=" + jobId + '}'; // NON-NLS
 	}
 
+	/**
+	 * Indicates whether some other streaming job is "equal to" this one.
+	 *
+	 * @param otherJob
+	 *            the reference job object to compare
+	 *
+	 * @return {@code true} if this job is the same as the otherJob argument,
+	 *         {@code false} - otherwise
+	 */
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
+	public boolean equals(Object otherJob) {
+		if (this == otherJob) {
 			return true;
 		}
-		if (other == null) {
+		if (otherJob == null) {
 			return false;
 		}
 
-		if (other instanceof String) {
-			return jobId.toString().equals(other.toString());
-		} else if (other instanceof UUID) {
-			return jobId.equals(other);
-		} else if (other instanceof DefaultStreamingJob) {
-			return jobId.equals(((DefaultStreamingJob) other).jobId);
+		if (otherJob instanceof String) {
+			return jobId.toString().equals(otherJob.toString());
+		} else if (otherJob instanceof UUID) {
+			return jobId.equals(otherJob);
+		} else if (otherJob instanceof DefaultStreamingJob) {
+			return jobId.equals(((DefaultStreamingJob) otherJob).jobId);
 		}
 
-		return super.equals(other);
+		return super.equals(otherJob);
 	}
 
+	/**
+	 * Returns a hash code value for the streaming job.
+	 *
+	 * @return job hash code value
+	 */
 	@Override
 	public int hashCode() {
 		return jobId.hashCode();
@@ -202,10 +214,10 @@ public class DefaultStreamingJob implements StreamingJob {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void onSuccess(TNTInputStream stream, Object result) {
+		public void onSuccess(TNTInputStream stream) {
 			if (jobListeners != null) {
 				for (StreamingJobListener l : jobListeners) {
-					l.onSuccess(DefaultStreamingJob.this, result);
+					l.onSuccess(DefaultStreamingJob.this);
 				}
 			}
 		}

@@ -48,7 +48,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
 
 	private static final Pattern RANGE_PATTERN = Pattern.compile("(-?(\\d+)*(\\.\\d*)?)");
-	private static final String RANGE_SEPARATOR = ":";
+	private static final String RANGE_SEPARATOR = ":"; // NON-NLS
 
 	private String type = null;
 	private String locator = null;
@@ -586,19 +586,10 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @return debugging string representation
 	 */
 	public String toDebugString() {
-		final StringBuilder sb = new StringBuilder("ActivityFieldLocator{"); // NON-NLS
-		sb.append("type='").append(type).append('\''); // NON-NLS
-		sb.append(", locator='").append(locator).append('\''); // NON-NLS
-		sb.append(", dataType=").append(dataType); // NON-NLS
-		sb.append(", radix=").append(radix); // NON-NLS
-		sb.append(", units='").append(units).append('\''); // NON-NLS
-		sb.append(", format='").append(format).append('\''); // NON-NLS
-		sb.append(", locale='").append(locale).append('\''); // NON-NLS
-		sb.append(", timeZone='").append(timeZone).append('\''); // NON-NLS
-		sb.append(", cfgValue=").append(cfgValue); // NON-NLS
-		sb.append(", requiredVal='").append(requiredVal).append('\''); // NON-NLS
-		sb.append('}');
-		return sb.toString();
+		return "ActivityFieldLocator{" + "type='" + type + '\'' + ", locator='" + locator + '\'' + ", dataType=" // NON-NLS
+				+ dataType + ", radix=" + radix + ", units='" + units + '\'' + ", format='" + format + '\'' // NON-NLS
+				+ ", locale='" + locale + '\'' + ", timeZone='" + timeZone + '\'' + ", cfgValue=" + cfgValue // NON-NLS
+				+ ", requiredVal='" + requiredVal + '\'' + '}'; // NON-NLS
 	}
 
 	/**
@@ -606,6 +597,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *
 	 * @return clone copy of activity field locator
 	 */
+	@Override
 	public ActivityFieldLocator clone() {
 		try {
 			ActivityFieldLocator cafl = (ActivityFieldLocator) super.clone();
@@ -768,11 +760,11 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	private class ValueMap<K, V> extends HashMap<K, V> {
-		public ValueMap() {
+		ValueMap() {
 			super();
 		}
 
-		public ValueMap(int ic) {
+		ValueMap(int ic) {
 			super(ic);
 		}
 

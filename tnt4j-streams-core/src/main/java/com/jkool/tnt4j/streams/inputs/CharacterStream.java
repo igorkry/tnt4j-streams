@@ -93,8 +93,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	protected boolean restartOnInputClose = false;
 
 	/**
-	 * Construct empty CharacterStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty CharacterStream. Requires configuration settings to
+	 * set input stream source.
 	 * 
 	 * @param logger
 	 *            logger used by activity stream
@@ -104,8 +104,8 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Construct empty CharacterStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty CharacterStream. Requires configuration settings to
+	 * set input stream source.
 	 */
 	public CharacterStream() {
 		super(LOGGER);
@@ -155,9 +155,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		rawReader = reader;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addParser(ActivityParser parser) throws IllegalStateException {
 		if (!parsersMap.isEmpty()) {
@@ -168,9 +165,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		super.addParser(parser);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
@@ -185,9 +179,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -219,9 +210,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -315,9 +303,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 				socket);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		cleanupStreamInternals();
@@ -365,7 +350,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @see BufferedReader#BufferedReader(Reader, int)
 		 */
-		public FeedReader(Reader in, int size) {
+		FeedReader(Reader in, int size) {
 			super(in, size);
 		}
 
@@ -377,7 +362,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @see BufferedReader#BufferedReader(Reader)
 		 */
-		public FeedReader(Reader in) {
+		FeedReader(Reader in) {
 			super(in);
 		}
 
@@ -392,7 +377,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @see BufferedReader#BufferedReader(Reader, int)
 		 */
-		public FeedReader(InputStream in, int size) {
+		FeedReader(InputStream in, int size) {
 			this(new InputStreamReader(in), size);
 		}
 
@@ -405,13 +390,10 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @see BufferedReader#BufferedReader(Reader)
 		 */
-		public FeedReader(InputStream in) {
+		FeedReader(InputStream in) {
 			this(new InputStreamReader(in));
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public String readLine() throws IOException {
 			try {
@@ -436,9 +418,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public int read(char cbuf[], int off, int len) throws IOException {
 			try {
@@ -474,9 +453,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 			return error;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void close() throws IOException {
 			closed = true;

@@ -243,8 +243,6 @@ public class ActivityField {
 	 *
 	 * @return {@code true} if this field is the same as the obj argument,
 	 *         {@code false} otherwise
-	 *
-	 * @see Object#equals(Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -262,8 +260,6 @@ public class ActivityField {
 	 * Returns hash code for this filed object.
 	 *
 	 * @return a hash code value for this field.
-	 *
-	 * @see Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
@@ -310,14 +306,8 @@ public class ActivityField {
 	 * @return debugging string representation
 	 */
 	public String toDebugString() {
-		final StringBuilder sb = new StringBuilder("ActivityField{"); // NON-NLS
-		sb.append("fieldTypeName=").append(fieldTypeName); // NON-NLS
-		sb.append(", format='").append(format).append('\''); // NON-NLS
-		sb.append(", locale='").append(locale).append('\''); // NON-NLS
-		sb.append(", separator='").append(separator).append('\''); // NON-NLS
-		sb.append(", reqValue='").append(reqValue).append('\''); // NON-NLS
-		sb.append(", stackedParsers='").append(stackedParsers).append('\''); // NON-NLS
-		sb.append('}');
-		return sb.toString();
+		return "ActivityField{" + "fieldTypeName=" + fieldTypeName + ", format='" + format + '\'' + ", locale='" // NON-NLS
+				+ locale + '\'' + ", separator='" + separator + '\'' + ", reqValue='" + reqValue + '\'' // NON-NLS
+				+ ", stackedParsers='" + stackedParsers + '\'' + '}'; // NON-NLS
 	}
 }

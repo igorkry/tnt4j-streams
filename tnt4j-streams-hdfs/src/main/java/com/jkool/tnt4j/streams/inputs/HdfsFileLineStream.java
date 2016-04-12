@@ -66,9 +66,6 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		Utils.close(fs);
@@ -76,9 +73,6 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 		super.cleanup();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void loadFiles() throws Exception {
 		final URI fileUri = new URI(fileName);
@@ -162,23 +156,17 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 		return activityFiles;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected boolean isFileAvailable(int fileNumber) {
 		return activityFiles != null && fileNumber < activityFiles.length;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected Reader getFileReader(int fileNumber) throws IOException {
 		return new InputStreamReader(fs.open(activityFiles[fileNumber]));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected String getFileName(int fileNumber) {
 		return activityFiles[fileNumber].getName();
 	}

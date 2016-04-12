@@ -103,16 +103,13 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	private HttpStreamRequestHandler requestHandler;
 
 	/**
-	 * Construct empty HttpStream. Requires configuration settings to set input
-	 * stream source.
+	 * Constructs an empty HttpStream. Requires configuration settings to set
+	 * input stream source.
 	 */
 	public HttpStream() {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
@@ -133,9 +130,6 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -161,9 +155,6 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -177,9 +168,6 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		requestHandler.start();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		requestHandler.shutdown();
@@ -187,17 +175,11 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		super.cleanup();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isInputEnded() {
 		return requestHandler.isInputEnded();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected long getActivityItemByteSize(Map<String, ?> itemMap) {
 		byte[] payload = (byte[]) itemMap.get(StreamsConstants.ACTIVITY_DATA_KEY);
@@ -229,7 +211,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		/**
 		 * Instantiates a new Http stream request handler.
 		 */
-		public HttpStreamRequestHandler() {
+		HttpStreamRequestHandler() {
 			super("HttpStream.HttpStreamRequestHandler"); // NON-NLS
 		}
 
@@ -291,9 +273,6 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		void close() throws Exception {
 			if (server != null) {
@@ -305,6 +284,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 			super.close();
 		}
 
+		@Override
 		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context)
 				throws HttpException, IOException {
 

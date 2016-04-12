@@ -82,9 +82,6 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		super(logger);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
@@ -99,9 +96,6 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -123,9 +117,6 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void initialize() throws Exception {
 		super.initialize();
@@ -142,9 +133,6 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		logWatcher.start();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		logWatcher.shutdown();
@@ -159,17 +147,11 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	 */
 	protected abstract LogWatcher createLogWatcher();
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isInputEnded() {
 		return logWatcher.isInputEnded();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected long getActivityItemByteSize(String activityItem) {
 		return activityItem == null ? 0 : activityItem.getBytes().length;

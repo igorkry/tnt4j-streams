@@ -57,9 +57,6 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		super(logger);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -74,9 +71,6 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		// }
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
@@ -125,6 +119,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
+	@Override
 	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, Map<String, ?> dataMap)
 			throws ParseException {
 		Object val = null;

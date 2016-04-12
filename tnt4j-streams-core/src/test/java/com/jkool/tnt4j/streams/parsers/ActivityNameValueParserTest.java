@@ -51,7 +51,7 @@ public class ActivityNameValueParserTest {
 		activityNameValueParser.setProperties(propertiesMap.entrySet());
 		// assertEquals(propertiesMap.get(ParserProperties.PROP_FLD_DELIM),
 		// activityNameValueParser.fieldDelim.);
-		assertEquals(propertiesMap.get(ParserProperties.PROP_VAL_DELIM), activityNameValueParser.valueDelim.toString());
+		assertEquals(propertiesMap.get(ParserProperties.PROP_VAL_DELIM), activityNameValueParser.valueDelim);
 		assertEquals(propertiesMap.get(ParserProperties.PROP_PATTERN), activityNameValueParser.pattern.toString());
 		assertEquals(propertiesMap.get(ParserProperties.PROP_STRIP_QUOTES),
 				activityNameValueParser.stripQuotes ? "true" : "false");

@@ -74,9 +74,6 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected LogWatcher createLogWatcher() {
 		return new HdfsLogWatcher();
@@ -154,6 +151,7 @@ public class HdfsFilePollingStream extends AbstractFilePollingStream {
 		 *             indicates that stream is not configured properly and log
 		 *             files monitoring can't initialize and continue.
 		 */
+		@Override
 		protected void initialize() throws Exception {
 			final URI fileUri = new URI(fileName);
 			FileSystem fs = FileSystem.get(fileUri, new Configuration());

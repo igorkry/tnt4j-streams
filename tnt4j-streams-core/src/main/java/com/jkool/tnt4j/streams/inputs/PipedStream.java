@@ -54,7 +54,8 @@ public class PipedStream extends TNTInputStream<String> {
 	protected BufferedReader dataReader = null;
 
 	/**
-	 * Construct empty PipedStream. Default input stream is {@link System#in}.
+	 * Constructs an empty PipedStream. Default input stream is
+	 * {@link System#in}.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -65,7 +66,8 @@ public class PipedStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Construct empty PipedStream. Default input stream is {@link System#in}.
+	 * Constructs an empty PipedStream. Default input stream is
+	 * {@link System#in}.
 	 */
 	public PipedStream() {
 		this(System.in);
@@ -104,9 +106,6 @@ public class PipedStream extends TNTInputStream<String> {
 		rawReader = reader;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -141,9 +140,6 @@ public class PipedStream extends TNTInputStream<String> {
 		return line;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		// NOTE: we just pipe input and did not open System.in or other RAW

@@ -87,9 +87,6 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -119,9 +116,6 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {

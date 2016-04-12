@@ -107,6 +107,7 @@ public class StreamsThreadTest {
 	@Test
 	public void testSleep() {
 		StreamsThread thread = new StreamsThread(new Runnable() {
+			@Override
 			public void run() {
 				StreamsThread.sleep(500);
 			}
@@ -121,6 +122,7 @@ public class StreamsThreadTest {
 		final long testStartTime = System.currentTimeMillis();
 
 		StreamsThread thread = new StreamsThread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(20);
@@ -147,6 +149,7 @@ public class StreamsThreadTest {
 		final long testStartTime = System.currentTimeMillis();
 
 		StreamsThread thread = new StreamsThread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(sleepTime);
@@ -162,6 +165,7 @@ public class StreamsThreadTest {
 	}
 
 	final Runnable simpleRunnable = new Runnable() {
+		@Override
 		public void run() {
 			for (int i = 0; i <= 500000; i++) {
 			}

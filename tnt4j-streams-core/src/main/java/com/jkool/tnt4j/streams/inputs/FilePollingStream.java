@@ -64,9 +64,6 @@ public class FilePollingStream extends AbstractFilePollingStream {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected LogWatcher createLogWatcher() {
 		return new FileLogWatcher();

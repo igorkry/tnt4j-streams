@@ -29,9 +29,21 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * This class implements directory watchdog.
+ * <p>
+ * Monitoring is performed with defined refresh interval. Default refresh
+ * interval value is 5sec, but can be overridden defining new value in
+ * milliseconds scale.
+ * <p>
+ * Monitored files can be filtered defining file filter.
+ * <p>
+ * Notifications about file or file state changes are published over added file
+ * alteration listeners.
+ * 
+ * @version $Revision: 1 $
  */
 public class DirWatchdog {
 	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = 5 * 1000L;
@@ -44,44 +56,55 @@ public class DirWatchdog {
 	private FileAlterationMonitor monitor = null;
 
 	/**
-	 * TODO
+	 * Constructs a new DirWatchdog. Monitoring is performed on all files
+	 * without filtering with refresh interval every 5sec.
 	 * 
 	 * @param dirPath
+	 *            watched directory path string
 	 */
 	public DirWatchdog(String dirPath) {
 		this(dirPath, DEFAULT_WATCH_REFRESH_INTERVAL, null);
 	}
 
 	/**
-	 * TODO
+	 * Constructs a new DirWatchdog. Monitoring is performed on all files
+	 * without filtering.
 	 * 
 	 * @param dirPath
+	 *            watched directory path string
 	 * @param refreshInterval
+	 *            watchdog refresh interval in milliseconds
 	 */
 	public DirWatchdog(String dirPath, long refreshInterval) {
 		this(dirPath, refreshInterval, null);
 	}
 
 	/**
-	 * TODO
+	 * Constructs a new DirWatchdog. Sets default refresh interval to 5 sec.
 	 * 
 	 * @param dirPath
+	 *            watched directory path string
 	 * @param filter
+	 *            file filter
 	 */
 	public DirWatchdog(String dirPath, FileFilter filter) {
 		this(dirPath, DEFAULT_WATCH_REFRESH_INTERVAL, filter);
 	}
 
 	/**
-	 * TODO
+	 * Constructs a new DirWatchdog.
 	 * 
 	 * @param dirPath
+	 *            watched directory path string
 	 * @param refreshInterval
+	 *            watchdog refresh interval in milliseconds
 	 * @param filter
+	 *            file filter
 	 */
 	public DirWatchdog(String dirPath, long refreshInterval, FileFilter filter) {
 		if (StringUtils.isEmpty(dirPath)) {
-			throw new IllegalArgumentException("Path of directory to watch must be non-empty");
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "DirWatchdog.empty.dir.path"));
 		}
 
 		this.dirPath = dirPath;
@@ -99,9 +122,11 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * TODO
+	 * Adds defined {@link FileAlterationListener} to directory observer file
+	 * alteration listeners list.
 	 *
 	 * @param l
+	 *            {@link FileAlterationListener} to be added
 	 */
 	public void addObserverListener(FileAlterationListener l) {
 		if (l != null) {
@@ -110,9 +135,10 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * TODO
+	 * Starts directory watchdog.
 	 *
 	 * @throws Exception
+	 *             if exception occurs while starting monitor
 	 */
 	public void start() throws Exception {
 		if (monitor != null) {
@@ -121,9 +147,10 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * TODO
+	 * Stops directory watchdog.
 	 * 
 	 * @throws Exception
+	 *             if exception occurs while stopping monitor
 	 */
 	public void stop() throws Exception {
 		if (monitor != null) {
@@ -132,10 +159,12 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * TODO
+	 * Creates default file filter matching file wildcard name pattern.
 	 * 
 	 * @param fileWildcardName
-	 * @return
+	 *            file wildcard name pattern string
+	 *
+	 * @return created file filter
 	 */
 	public static FileFilter getDefaultFilter(String fileWildcardName) {
 		if (StringUtils.isEmpty(fileWildcardName)) {

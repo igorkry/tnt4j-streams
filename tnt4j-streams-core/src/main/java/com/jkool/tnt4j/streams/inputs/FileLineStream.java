@@ -58,9 +58,6 @@ public class FileLineStream extends AbstractFileLineStream {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void loadFiles() {
 		if (Utils.isWildcardFileName(fileName)) {
@@ -127,23 +124,17 @@ public class FileLineStream extends AbstractFileLineStream {
 		return activityFiles;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected boolean isFileAvailable(int fileNumber) {
 		return activityFiles != null && fileNumber < activityFiles.length;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected Reader getFileReader(int fileNumber) throws IOException {
 		return new FileReader(activityFiles[fileNumber]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected String getFileName(int fileNumber) {
 		return activityFiles[fileNumber].getName();
 	}

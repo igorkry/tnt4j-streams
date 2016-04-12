@@ -58,9 +58,6 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 		super(logger);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -79,6 +76,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 * @throws Exception
 	 *             if any errors occurred getting next item
 	 */
+	@Override
 	public T getNextItem() throws Exception {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -97,16 +95,15 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	}
 
 	/**
-	 * TODO
+	 * Gets activity data item size in bytes.
 	 *
 	 * @param activityItem
-	 * @return
+	 *            activity data item
+	 *
+	 * @return activity data item size in bytes
 	 */
 	protected abstract long getActivityItemByteSize(T activityItem);
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		inputBuffer.clear();

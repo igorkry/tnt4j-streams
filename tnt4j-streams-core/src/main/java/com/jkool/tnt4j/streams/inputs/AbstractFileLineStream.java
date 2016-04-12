@@ -70,9 +70,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		super(logger);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
@@ -81,9 +78,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -101,9 +95,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void initialize() throws Exception {
 		super.initialize();
@@ -167,17 +158,11 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 		return totalLinesCount;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public long getTotalBytes() {
 		return totalBytesCount;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		Utils.close(lineReader);

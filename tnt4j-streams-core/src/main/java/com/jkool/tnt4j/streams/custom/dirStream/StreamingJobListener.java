@@ -21,19 +21,85 @@ import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * A streaming job progress/status notifications listener interface. This
+ * interface can be implemented by classes that are interested in streaming
+ * process progress and status changes.
+ * <p>
+ * Mainly it covers {@link com.jkool.tnt4j.streams.inputs.InputStreamListener}
+ * functions mapping stream instance to job definition.
+ *
+ * @see DefaultStreamingJob#addStreamingJobListener(StreamingJobListener)
+ * 
+ * @version $Revision: 1 $
  */
 public interface StreamingJobListener<T> {
+	/**
+	 * This method gets called when streaming job progress has updated.
+	 * 
+	 * @param job
+	 *            job sending notification
+	 * @param current
+	 *            index of currently streamed activity item
+	 * @param total
+	 *            total number of activity items to stream
+	 */
 	void onProgressUpdate(StreamingJob job, int current, int total);
 
-	void onSuccess(StreamingJob job, T result);
+	/**
+	 * This method gets called when streaming job has completed successfully.
+	 *
+	 * @param job
+	 *            job sending notification
+	 */
+	void onSuccess(StreamingJob job);
 
+	/**
+	 * This method gets called when streaming job process has failed.
+	 *
+	 * @param job
+	 *            job sending notification
+	 * @param msg
+	 *            text message describing failure
+	 * @param exc
+	 *            failure related exception
+	 * @param code
+	 *            failure code
+	 */
 	void onFailure(StreamingJob job, String msg, Throwable exc, String code);
 
+	/**
+	 * This method gets called when streaming job status has changed.
+	 *
+	 * @param job
+	 *            job sending notification
+	 * @param status
+	 *            new stream job status value
+	 */
 	void onStatusChange(StreamingJob job, StreamingStatus status);
 
+	/**
+	 * This method gets called when streaming job has finished independent of
+	 * completion state.
+	 * 
+	 * @param job
+	 *            job sending notification
+	 * @param stats
+	 *            stream statistics
+	 */
 	void onFinish(StreamingJob job, TNTInputStream.StreamStats stats);
 
+	/**
+	 * This method gets called when streaming job detects some notable event.
+	 * 
+	 * @param job
+	 *            job sending notification
+	 * @param level
+	 *            event severity level
+	 * @param message
+	 *            event related message
+	 * @param source
+	 *            event source
+	 */
 	void onStreamEvent(StreamingJob job, OpLevel level, String message, Object source);
 }

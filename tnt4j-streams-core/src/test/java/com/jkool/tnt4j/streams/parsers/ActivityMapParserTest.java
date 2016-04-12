@@ -32,11 +32,13 @@ import com.jkool.tnt4j.streams.utils.StreamsConstants;
  * @version 1.0
  */
 public class ActivityMapParserTest extends ActivityParserTestBase {
+	@Override
 	@Before
 	public void prepare() {
 		parser = new ActivityMapParser();
 	}
 
+	@Override
 	@Test
 	public void isDataClassSupportedTest() {
 		assertTrue(parser.isDataClassSupported(mock(Map.class)));

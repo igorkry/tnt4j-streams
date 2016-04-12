@@ -143,9 +143,6 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		configRegexMappings.put("%O", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		super.setProperties(props);

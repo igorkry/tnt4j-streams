@@ -80,9 +80,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				|| InputStream.class.isInstance(data);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addField(ActivityField field) {
 		logger.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.adding.field"),

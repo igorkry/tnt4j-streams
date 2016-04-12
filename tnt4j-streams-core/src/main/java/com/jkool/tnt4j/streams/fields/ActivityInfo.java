@@ -130,7 +130,8 @@ public class ActivityInfo {
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (CollectionUtils.isEmpty(locators)) {
 			if (value instanceof Object[]) {
-				fieldValue = Arrays.toString((Object[]) value); // TODO:
+				// TODO: better array value handling
+				fieldValue = Arrays.toString((Object[]) value);
 			} else {
 				fieldValue = value;
 			}

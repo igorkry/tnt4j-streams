@@ -72,16 +72,13 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	private JMSDataReceiver jmsDataReceiver;
 
 	/**
-	 * Construct empty JMSStream. Requires configuration settings to set input
-	 * stream source.
+	 * Constructs an empty JMSStream. Requires configuration settings to set
+	 * input stream source.
 	 */
 	public JMSStream() {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
@@ -103,9 +100,6 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -141,9 +135,6 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -169,9 +160,6 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		jmsDataReceiver.start();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		jmsDataReceiver.shutdown();
@@ -179,17 +167,11 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		super.cleanup();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isInputEnded() {
 		return jmsDataReceiver.isInputEnded();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected long getActivityItemByteSize(Message itemMsg) {
 		// return itemMsg == null ? 0 : itemMsg.getBytes().length;
@@ -226,8 +208,6 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		 *
 		 * @param msg
 		 *            received JMS message
-		 *
-		 * @see javax.jms.MessageListener#onMessage(Message)
 		 */
 		@Override
 		public void onMessage(Message msg) {
@@ -244,6 +224,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		 * @throws JMSException
 		 *             if JMS fails to close objects due to internal error
 		 */
+		@Override
 		void close() throws Exception {
 			jmsReceiver.close();
 			jmsSession.close();

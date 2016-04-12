@@ -21,8 +21,9 @@ import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * For internal development use.
+ * 
+ * @version $Revision: 1 $
  */
 public class StreamingJobLogger implements StreamingJobListener<Object> {
 
@@ -36,8 +37,8 @@ public class StreamingJobLogger implements StreamingJobListener<Object> {
 	}
 
 	@Override
-	public void onSuccess(StreamingJob job, Object result) {
-		System.out.println("Streaming job success: job=" + job + " result=" + result);
+	public void onSuccess(StreamingJob job) {
+		System.out.println("Streaming job success: job=" + job);
 	}
 
 	@Override

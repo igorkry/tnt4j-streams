@@ -102,6 +102,7 @@ public class TNT4JStreamsEventSinkTest {
 		flumeSink.configure(context);
 
 		Thread serverThread = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				ServerSocket server;
 				try {

@@ -188,6 +188,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	 * @param context
 	 *            Apache Flume configuration context
 	 */
+	@Override
 	public void configure(Context context) {
 		hostname = context.getString(PROP_HOST);
 		String portStr = context.getString(PROP_PORT);

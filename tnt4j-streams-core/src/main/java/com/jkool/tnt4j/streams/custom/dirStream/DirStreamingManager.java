@@ -36,10 +36,12 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0
+ * TODO
+ * 
+ * @version $Revision: 1 $
  *
- *          TODO
+ * @see DirWatchdog
+ * @see DefaultStreamingJob
  */
 public class DirStreamingManager {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(DirStreamingManager.class);
@@ -63,13 +65,31 @@ public class DirStreamingManager {
 
 	private List<StreamingJobListener> streamingJobsListeners;
 
+	/**
+	 * Constructs an empty DirStreamingManager.
+	 */
 	protected DirStreamingManager() {
 	}
 
+	/**
+	 * Constructs a new DirStreamingManager. Defines watched directory path.
+	 * 
+	 * @param dirPath
+	 *            watched directory path
+	 */
 	public DirStreamingManager(String dirPath) {
 		this(dirPath, null);
 	}
 
+	/**
+	 * Constructs a new DirStreamingManager. Defines watched directory path and
+	 * monitored files wildcard name pattern.
+	 * 
+	 * @param dirPath
+	 *            watched directory path
+	 * @param fileWildcardName
+	 *            monitored files wildcard name pattern
+	 */
 	public DirStreamingManager(String dirPath, String fileWildcardName) {
 		this.dirPath = dirPath;
 		this.fileWildcardName = fileWildcardName;
@@ -89,7 +109,7 @@ public class DirStreamingManager {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
 						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-								"TNTInputStream.tasks.buffer.limit"), offerTimeout); // TODO
+								"TNTInputStream.tasks.buffer.limit"), offerTimeout);
 						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {
@@ -120,15 +140,21 @@ public class DirStreamingManager {
 				fileWildcardName);
 	}
 
+	/**
+	 * Starts directory files streaming manager.
+	 */
 	public void start() {
 		try {
 			dirWatchdog.start();
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.ERROR, "Could not start directory watchdog", exc);
-			cleanup();
+			stop();
 		}
 	}
 
+	/**
+	 * Stops directory streaming manager.
+	 */
 	public void stop() {
 		cleanup();
 	}
@@ -153,6 +179,10 @@ public class DirStreamingManager {
 		}
 	}
 
+	/**
+	 * Cleans up directory files streaming manager referenced objects after
+	 * manager has stopped. Stops directory watchdog and shuts down executors.
+	 */
 	protected void cleanup() {
 		try {
 			dirWatchdog.stop();
@@ -163,6 +193,12 @@ public class DirStreamingManager {
 		shutdownExecutors();
 	}
 
+	/**
+	 * Handles streaming job configuration file creation notification.
+	 * 
+	 * @param jobCfgFile
+	 *            streaming job configuration file
+	 */
 	protected void handleJobConfigCreate(File jobCfgFile) {
 		LOGGER.log(OpLevel.DEBUG, "Job config created {0}", jobCfgFile);
 
@@ -184,6 +220,12 @@ public class DirStreamingManager {
 		executorService.submit(sJob);
 	}
 
+	/**
+	 * Handles streaming job configuration file change notification.
+	 * 
+	 * @param jobCfgFile
+	 *            streaming job configuration file
+	 */
 	protected void handleJobConfigChange(File jobCfgFile) {
 		LOGGER.log(OpLevel.DEBUG, "Job config changed {0}", jobCfgFile);
 		// TODO: restart, add new job?
@@ -201,6 +243,12 @@ public class DirStreamingManager {
 		}
 	}
 
+	/**
+	 * Handles streaming job configuration file removal notification.
+	 *
+	 * @param jobCfgFile
+	 *            streaming job configuration file
+	 */
 	protected void handleJobConfigRemoval(File jobCfgFile) {
 		LOGGER.log(OpLevel.DEBUG, "Job config deleted {0}", jobCfgFile);
 
@@ -239,10 +287,12 @@ public class DirStreamingManager {
 	// }
 	// }
 
-	public String getTnt4jCfgFilePath() {
-		return tnt4jCfgFilePath;
-	}
-
+	/**
+	 * Sets TNT4J configuration file (tnt4j.properties) path.
+	 * 
+	 * @param tnt4jCfgFilePath
+	 *            TNT4J configuration file path string
+	 */
 	public void setTnt4jCfgFilePath(String tnt4jCfgFilePath) {
 		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
 	}
@@ -280,11 +330,11 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Notifies that stream executor service has rejected offered activity items
-	 * streaming task to queue. TODO
+	 * Notifies that stream executor service has rejected offered files
+	 * streaming job to queue.
 	 *
 	 * @param job
-	 *            executor rejected streaming job
+	 *            executor rejected files streaming job
 	 */
 	protected void notifyStreamingJobRejected(Runnable job) {
 		if (streamingJobsListeners != null) {
@@ -295,12 +345,11 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Notifies that stream executor service has been shot down and some of
-	 * unprocessed activity items streaming tasks has been dropped of the queue.
-	 * TODO
+	 * Notifies that stream executor service has been shot down and unprocessed
+	 * files streaming job has been dropped off the queue.
 	 *
-	 * @param jobs
-	 *            executor dropped of streaming job
+	 * @param job
+	 *            executor dropped off files streaming job
 	 */
 	protected void notifyStreamingJobDropOff(Runnable job) {
 		if (streamingJobsListeners != null) {

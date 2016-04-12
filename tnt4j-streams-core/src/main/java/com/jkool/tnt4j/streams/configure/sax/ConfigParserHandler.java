@@ -19,6 +19,7 @@ package com.jkool.tnt4j.streams.configure.sax;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -40,6 +41,7 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 1 $
  *
  * @see com.jkool.tnt4j.streams.configure.StreamsConfigLoader
+ * @see com.jkool.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class ConfigParserHandler extends DefaultHandler {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
@@ -127,17 +129,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		return streamsConfigData;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setDocumentLocator(Locator locator) {
 		currParseLocation = locator;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void startDocument() throws SAXException {
 		currStream = null;
@@ -152,9 +148,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		streamsConfigData = new StreamsConfigData();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (CONFIG_ROOT_ELMT.equals(qName) || CONFIG_ROOT_ELMT_OLD.equals(qName)) {
@@ -771,9 +764,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		processingTNT4JProperties = true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
@@ -790,8 +780,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				currParser = null;
 				currProperties = null;
 			} else if (FIELD_ELMT.equals(qName)) {
-				List<ActivityFieldLocator> locators = currField.getLocators();
-				if (locators == null || locators.isEmpty()) {
+				if (CollectionUtils.isEmpty(currField.getLocators())) {
 					throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 							"ConfigParserHandler.element.must.have", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR,
 							FIELD_LOC_ELMT, getLocationInfo()));

@@ -87,9 +87,6 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -110,9 +107,6 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		kafkaProperties = new ConsumerConfig(properties);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
@@ -127,9 +121,6 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		return prop;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -194,9 +185,6 @@ public class KafkaStream extends TNTInputStream<Map<String, ?>> {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cleanup() {
 		closed.set(true);

@@ -17,10 +17,16 @@
 package com.jkool.tnt4j.streams.inputs;
 
 /**
- * @author akausinis
- * @version 1.0
- * @created 2016-03-17 13:11
+ * This interface defines stream status. It allows to define independent states
+ * in different enum's by implementing this interface.
+ *
+ * @version $Revision: 1 $
  */
 public interface StreamingStatus {
+	/**
+	 * Returns the name of stream status.
+	 *
+	 * @return the name of stream status
+	 */
 	String name();
 }

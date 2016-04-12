@@ -69,9 +69,6 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	public MessageActivityXmlParser() throws ParserConfigurationException {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {

@@ -28,23 +28,23 @@
         </exec>
     </target>
 
-	<target name="mvn_windows_init" if="isWindows">
+    <target name="mvn_windows_init" if="isWindows">
         <exec dir="." executable="cmd">
             <arg line="/c mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar"/>
         </exec>
         <exec dir="." executable="cmd">
             <arg line="/c mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=jkool-jesl -Dversion=1.0.0 -Dpackaging=jar"/>
         </exec>
-	</target>
+    </target>
 
-	<target name="mvn_unix_init" if="isUnix">
+    <target name="mvn_unix_init" if="isUnix">
         <exec dir="." executable="cmd">
             <arg line="-c 'mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar'"/>
         </exec>
         <exec dir="." executable="cmd">
             <arg line="-c 'mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=jkool-jesl -Dversion=1.0.0 -Dpackaging=jar'"/>
         </exec>
-	</target>
+    </target>
 
     <target name="mvn_windows_build" if="isWindows">
         <exec dir="." executable="cmd">

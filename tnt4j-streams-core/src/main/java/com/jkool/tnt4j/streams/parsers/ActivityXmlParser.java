@@ -118,9 +118,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -153,17 +150,11 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
@@ -466,7 +457,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		return xmlString;
 	}
 
-	private static class NamespaceMap implements NamespaceContext {
+	private static final class NamespaceMap implements NamespaceContext {
 		private final Map<String, String> map = new HashMap<String, String>();
 
 		private NamespaceMap() {
@@ -484,9 +475,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			map.put(prefix, uri);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public String getNamespaceURI(String prefix) {
 			String uri = map.get(prefix);
@@ -496,9 +484,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			return uri;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public String getPrefix(String namespaceURI) {
 			for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -509,9 +494,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			return XMLConstants.DEFAULT_NS_PREFIX;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Iterator<String> getPrefixes(String namespaceURI) {
 			return map.keySet().iterator();

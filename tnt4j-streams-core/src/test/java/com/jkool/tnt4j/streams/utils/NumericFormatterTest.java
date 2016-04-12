@@ -55,7 +55,7 @@ public class NumericFormatterTest {
 
 	@Test
 	public void testParseStringObjectNumber() throws ParseException {
-		NumericFormatter.parse(null, 10, (Number) 1);
+		NumericFormatter.parse(null, 10, 1);
 	}
 
 	@Test

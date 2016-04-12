@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -46,6 +47,12 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * <p>
  * See <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more
  * details.
+ * <p>
+ * This parser supports the following properties:
+ * <ul>
+ * <li>ReadLines - indicates that complete JSON data package is single line.
+ * (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 2 $
  */
@@ -54,6 +61,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 	private static final String JSON_PATH_ROOT = "$.";// NON-NLS
 
+	private boolean jsonAsLine = true;
+
 	/**
 	 * Constructs a new ActivityJsonParser.
 	 */
@@ -61,25 +70,22 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
 
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		// NOTE: nothing to set
-		// }
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+
+			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
+				jsonAsLine = Boolean.parseBoolean(value);
+			}
+		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
@@ -99,7 +105,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			if (data instanceof DocumentContext) {
 				jsonDoc = (DocumentContext) data;
 			} else {
-				jsonString = getNextJSONString(data);
+				jsonString = getNextJSONString(data, jsonAsLine);
 				if (StringUtils.isEmpty(jsonString)) {
 					return null;
 				}
@@ -122,6 +128,9 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 *
 	 * @param data
 	 *            input source for activity data
+	 * @param jsonAsLine
+	 *            if {@code true} indicates complete JSON package is line, if
+	 *            {@code false} - whole data available to read
 	 *
 	 * @return JSON document string, or {@code null} if end of input source has
 	 *         been reached
@@ -129,7 +138,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */
-	protected String getNextJSONString(Object data) {
+	protected String getNextJSONString(Object data, boolean jsonAsLine) {
 		if (data == null) {
 			return null;
 		}
@@ -156,6 +165,9 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		try {
 			while ((line = rdr.readLine()) != null) {
 				jsonStringBuilder.append(line);
+				if (jsonAsLine) {
+					break;
+				}
 			}
 		} catch (EOFException eof) {
 			LOGGER.log(OpLevel.DEBUG,
@@ -170,6 +182,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, DocumentContext data)
 			throws ParseException {
 		Object val = null;

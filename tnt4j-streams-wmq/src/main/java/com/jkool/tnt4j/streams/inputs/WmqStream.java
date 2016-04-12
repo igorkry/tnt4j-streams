@@ -115,16 +115,13 @@ public class WmqStream extends TNTInputStream<String> {
 	private boolean stripHeaders = true;
 
 	/**
-	 * Construct empty WmqStream. Requires configuration settings to set input
-	 * source.
+	 * Constructs an empty WmqStream. Requires configuration settings to set
+	 * input source.
 	 */
 	public WmqStream() {
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -158,9 +155,6 @@ public class WmqStream extends TNTInputStream<String> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
@@ -193,9 +187,6 @@ public class WmqStream extends TNTInputStream<String> {
 		return super.getProperty(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
@@ -301,9 +292,6 @@ public class WmqStream extends TNTInputStream<String> {
 		curFailCount = 0;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getNextItem() throws Exception {
 		while (!isHalted() && !isConnectedToQmgr(null)) {

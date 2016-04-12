@@ -149,7 +149,7 @@ public class UtilsTest {
 
 	@Test
 	public void testFromJsonToMap() {
-		HashMap<String, String> testMap = new HashMap<String, String>() {
+		Map<String, String> testMap = new HashMap<String, String>() {
 			{
 				put("TEST", "TESTVAL");
 				put("TEST2", "TESTVAL2");

@@ -181,7 +181,7 @@ public enum StreamFieldType {
 	 */
 	ParentId(String.class);
 
-	private Class dataType;
+	private final Class dataType;
 
 	private StreamFieldType(Class type) {
 		this.dataType = type;

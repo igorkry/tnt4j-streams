@@ -96,9 +96,6 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		super(LOGGER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -135,9 +132,6 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
