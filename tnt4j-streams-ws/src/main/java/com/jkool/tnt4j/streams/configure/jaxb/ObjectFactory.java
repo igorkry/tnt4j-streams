@@ -83,14 +83,6 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link FieldMap }
-	 * 
-	 */
-	public FieldMap createFieldMap() {
-		return new FieldMap();
-	}
-
-	/**
 	 * Create an instance of {@link ParserProperty }
 	 * 
 	 */
@@ -115,6 +107,22 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link FieldMap }
+	 * 
+	 */
+	public FieldMap createFieldMap() {
+		return new FieldMap();
+	}
+
+	/**
+	 * Create an instance of {@link ScheduleSimpleType }
+	 * 
+	 */
+	public ScheduleSimpleType createScheduleSimpleType() {
+		return new ScheduleSimpleType();
+	}
+
+	/**
 	 * Create an instance of {@link ScenarioStepType }
 	 * 
 	 */
@@ -128,6 +136,14 @@ public class ObjectFactory {
 	 */
 	public ScenarioType createScenarioType() {
 		return new ScenarioType();
+	}
+
+	/**
+	 * Create an instance of {@link ScheduleCronType }
+	 * 
+	 */
+	public ScheduleCronType createScheduleCronType() {
+		return new ScheduleCronType();
 	}
 
 	/**

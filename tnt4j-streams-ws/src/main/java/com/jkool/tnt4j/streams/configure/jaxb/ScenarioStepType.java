@@ -17,15 +17,11 @@
 package com.jkool.tnt4j.streams.configure.jaxb;
 
 import javax.annotation.Generated;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 /**
  * 
- * Defines scenario step providing request/command params and CRON schedule
- * expression.
+ * Defines scenario step providing request/command params and scheduler.
  * 
  * 
  * <p>
@@ -39,10 +35,16 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType name="ScenarioStepType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;choice>
+ *           &lt;element name="schedule-cron" type="{}ScheduleCronType"/>
+ *           &lt;element name="schedule-simple" type="{}ScheduleSimpleType"/>
+ *         &lt;/choice>
+ *         &lt;element name="request" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="request" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="schedule" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="iterations" type="{http://www.w3.org/2001/XMLSchema}long" />
+ *       &lt;attribute name="url" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="method" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -51,44 +53,72 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ScenarioStepType")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+@XmlType(name = "ScenarioStepType", propOrder = { "scheduleCron", "scheduleSimple", "request" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 public class ScenarioStepType {
 
-	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	protected String name;
-	@XmlAttribute(name = "request", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@XmlElement(name = "schedule-cron")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	protected ScheduleCronType scheduleCron;
+	@XmlElement(name = "schedule-simple")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	protected ScheduleSimpleType scheduleSimple;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String request;
-	@XmlAttribute(name = "schedule")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	protected String schedule;
-	@XmlAttribute(name = "iterations")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	protected Long iterations;
+	@XmlAttribute(name = "name", required = true)
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String name;
+	@XmlAttribute(name = "url")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String url;
+	@XmlAttribute(name = "method")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String method;
 
 	/**
-	 * Gets the value of the name property.
+	 * Gets the value of the scheduleCron property.
 	 * 
-	 * @return possible object is {@link String }
+	 * @return possible object is {@link ScheduleCronType }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public String getName() {
-		return name;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public ScheduleCronType getScheduleCron() {
+		return scheduleCron;
 	}
 
 	/**
-	 * Sets the value of the name property.
+	 * Sets the value of the scheduleCron property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link String }
+	 *            allowed object is {@link ScheduleCronType }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public void setName(String value) {
-		this.name = value;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setScheduleCron(ScheduleCronType value) {
+		this.scheduleCron = value;
+	}
+
+	/**
+	 * Gets the value of the scheduleSimple property.
+	 * 
+	 * @return possible object is {@link ScheduleSimpleType }
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public ScheduleSimpleType getScheduleSimple() {
+		return scheduleSimple;
+	}
+
+	/**
+	 * Sets the value of the scheduleSimple property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link ScheduleSimpleType }
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setScheduleSimple(ScheduleSimpleType value) {
+		this.scheduleSimple = value;
 	}
 
 	/**
@@ -97,7 +127,7 @@ public class ScenarioStepType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getRequest() {
 		return request;
 	}
@@ -109,55 +139,78 @@ public class ScenarioStepType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setRequest(String value) {
 		this.request = value;
 	}
 
 	/**
-	 * Gets the value of the schedule property.
+	 * Gets the value of the name property.
 	 * 
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public String getSchedule() {
-		return schedule;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * Sets the value of the schedule property.
+	 * Sets the value of the name property.
 	 * 
 	 * @param value
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public void setSchedule(String value) {
-		this.schedule = value;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setName(String value) {
+		this.name = value;
 	}
 
 	/**
-	 * Gets the value of the iterations property.
+	 * Gets the value of the url property.
 	 * 
-	 * @return possible object is {@link Long }
+	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public Long getIterations() {
-		return iterations;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getUrl() {
+		return url;
 	}
 
 	/**
-	 * Sets the value of the iterations property.
+	 * Sets the value of the url property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link Long }
+	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public void setIterations(Long value) {
-		this.iterations = value;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setUrl(String value) {
+		this.url = value;
+	}
+
+	/**
+	 * Gets the value of the method property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getMethod() {
+		return method;
+	}
+
+	/**
+	 * Sets the value of the method property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setMethod(String value) {
+		this.method = value;
 	}
 
 }
