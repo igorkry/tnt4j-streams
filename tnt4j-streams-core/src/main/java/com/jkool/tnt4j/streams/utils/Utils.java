@@ -722,4 +722,31 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 		return line;
 	}
+
+	/**
+	 * Reads text lines into one string from provided input stream.
+	 *
+	 * @param is
+	 *            input stream to read
+	 * @param separateLines
+	 *            flag indicating whether to make string lines separated
+	 *
+	 * @return string read from input stream
+	 */
+	public static String readInput(InputStream is, boolean separateLines) {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		StringBuilder builder = new StringBuilder();
+		try {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				builder.append(line);
+				builder.append(separateLines ? System.getProperty("line.separator") : " ");
+			}
+		} catch (IOException exc) {
+		} finally {
+			Utils.close(reader);
+		}
+
+		return builder.toString();
+	}
 }

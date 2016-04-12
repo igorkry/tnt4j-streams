@@ -54,7 +54,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed"; // NON-NLS
 	private static final String CONFIG_ROOT_ELMT = "tnt-data-source"; // NON-NLS
 	private static final String PARSER_ELMT = "parser"; // NON-NLS
-	private static final String STREAM_ELMT = "stream"; // NON-NLS
+	protected static final String STREAM_ELMT = "stream"; // NON-NLS
 	private static final String PROPERTY_ELMT = "property"; // NON-NLS
 	private static final String FIELD_ELMT = "field"; // NON-NLS
 	private static final String FIELD_MAP_ELMT = "field-map"; // NON-NLS
@@ -65,7 +65,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String RULE_ELMT = "rule"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS
 
-	private static final String NAME_ATTR = "name"; // NON-NLS
+	protected static final String NAME_ATTR = "name"; // NON-NLS
 	private static final String CLASS_ATTR = "class"; // NON-NLS
 	private static final String VALUE_ATTR = "value"; // NON-NLS
 	private static final String LOC_TYPE_ATTR = "locator-type"; // NON-NLS
@@ -79,7 +79,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for XML tag attribute name 'units'.
 	 */
-	private static final String UNITS_ATTR = "units"; // NON-NLS
+	protected static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
 	 * Constant for XML tag attribute name 'format'.
 	 */
@@ -98,7 +98,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private static final String REQUIRED_VALUE = "required"; // NON-NLS
 
-	private TNTInputStream currStream = null;
+	protected TNTInputStream currStream = null;
 	private Collection<Map.Entry<String, String>> currProperties = null;
 	private ActivityParser currParser = null;
 	private ActivityField currField = null;
@@ -110,7 +110,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private StreamsConfigData streamsConfigData = null;
 
-	private Locator currParseLocation = null;
+	protected Locator currParseLocation = null;
 
 	private boolean processingTNT4JProperties = false;
 
@@ -810,7 +810,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *
 	 * @return string representing current line number being parsed
 	 */
-	private String getLocationInfo() {
+	protected String getLocationInfo() {
 		String locInfo = "";
 		if (currParseLocation != null) {
 			locInfo = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,

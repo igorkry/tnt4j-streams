@@ -17,7 +17,9 @@
 package com.jkool.tnt4j.streams.configure.sax;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -27,6 +29,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jkool.tnt4j.streams.configure.StreamsConfigData;
+import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * Utility class dedicated to load TNT4J-Streams configuration using SAX-based
@@ -35,6 +38,8 @@ import com.jkool.tnt4j.streams.configure.StreamsConfigData;
  * @version $Revision: 1 $
  */
 public final class StreamsConfigSAXParser {
+
+	private static final String HANDLER_PROP_KEY = "tnt4j.streams.config.sax.handler";
 
 	private StreamsConfigSAXParser() {
 	}
@@ -55,9 +60,25 @@ public final class StreamsConfigSAXParser {
 	 */
 	public static StreamsConfigData parse(Reader config)
 			throws ParserConfigurationException, SAXException, IOException {
+		Properties p = new Properties();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InputStream ins = loader.getResourceAsStream("sax.properties"); // NON-NLS
+		p.load(ins);
+		Utils.close(ins);
+
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();
-		ConfigParserHandler hndlr = new ConfigParserHandler();
+		ConfigParserHandler hndlr = null;
+		try {
+			String handlerClassName = p.getProperty(HANDLER_PROP_KEY, ConfigParserHandler.class.getName());
+			hndlr = (ConfigParserHandler) Utils.createInstance(handlerClassName);
+		} catch (Exception exc) {
+		}
+
+		if (hndlr == null) {
+			hndlr = new ConfigParserHandler();
+		}
+
 		parser.parse(new InputSource(config), hndlr);
 
 		return hndlr.getStreamsConfigData();

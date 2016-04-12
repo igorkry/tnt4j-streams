@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="TNTDataSourceWS" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:redefine schemaLocation="../../config/tnt-data-source.xsd">
+        <xs:complexType name="StreamType">
+            <xs:complexContent>
+                <xs:extension base="StreamType">
+                    <xs:sequence>
+                        <xs:element name="scenario" type="ScenarioType" minOccurs="0" maxOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Defines scenario steps set for WS type streams to define request/command data
+                                    and request/command invocation schedule expression.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:redefine>
+
+    <!-- Cron scheduler type definition -->
+    <xs:complexType name="ScheduleCronType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines Cron scheduler parameters.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="expression" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Cron expression.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- Simple scheduler type definition -->
+    <xs:complexType name="ScheduleSimpleType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines simple scheduler parameters.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="interval" use="required" type="xs:nonNegativeInteger">
+            <xs:annotation>
+                <xs:documentation>
+                    Repeat interval.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="units" use="optional" type="UnitsTypes" default="Milliseconds">
+            <xs:annotation>
+                <xs:documentation>
+                    Repeat interval units.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="repeatCount" use="optional" type="xs:integer" default="1">
+            <xs:annotation>
+                <xs:documentation>
+                    Repeat iterations count.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- Scenario step definition -->
+    <xs:complexType name="ScenarioStepType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines scenario step providing request/command params and scheduler.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:sequence>
+            <xs:choice maxOccurs="1">
+                <xs:element name="schedule-cron" type="ScheduleCronType" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Defines Cron type scheduler.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="schedule-simple" type="ScheduleSimpleType" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Defines simple type scheduler.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:choice>
+            <xs:element name="request" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Request (or command) data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="name" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Name of scenario step.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="url" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Service endpoint URL.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="method" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Request method.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- Scenario definition -->
+    <xs:complexType name="ScenarioType">
+        <xs:sequence>
+            <xs:element name="step" type="ScenarioStepType" minOccurs="1"
+                        maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines a scenario step.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="name" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Name of scenario.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+</xs:schema>
