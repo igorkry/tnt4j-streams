@@ -312,42 +312,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Counts text lines available in file.
-	 *
-	 * @param file
-	 *            file to count lines
-	 *
-	 * @return number of lines currently available in file
-	 */
-	public static int countLines(File file) {
-		int count = 0;
-		InputStream is = null;
-
-		try {
-			is = new BufferedInputStream(new FileInputStream(file));
-			byte[] c = new byte[1024];
-			int readChars = 0;
-			boolean endsWithoutNewLine = false;
-			while ((readChars = is.read(c)) != -1) {
-				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n')
-						++count;
-				}
-				endsWithoutNewLine = (c[readChars - 1] != '\n');
-			}
-			if (endsWithoutNewLine) {
-				++count;
-			}
-		} catch (IOException exc) {
-
-		} finally {
-			close(is);
-		}
-
-		return count;
-	}
-
-	/**
 	 * Counts text lines available in input.
 	 *
 	 * @param reader

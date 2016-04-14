@@ -108,21 +108,6 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testCountLines() throws IOException {
-		File tempFile = File.createTempFile("TEST", "TST");
-		FileWriter wr = new FileWriter(tempFile);
-		for (int i = 1; i <= FILE_WR_LINES; i++) {
-			wr.write("TEST\n");
-		}
-		System.out.println(tempFile.getAbsolutePath());
-		wr.flush();
-		Utils.close(wr);
-		final int lines = Utils.countLines(tempFile);
-		assertEquals(FILE_WR_LINES, lines);
-
-	}
-
-	@Test
 	public void testGetFirstNewer() throws IOException, InterruptedException {
 		final int count = 5;
 		Long date = null;

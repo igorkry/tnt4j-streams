@@ -238,7 +238,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 				KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 				FileInputStream fis = null;
 				try {
-					keyStore.load(new FileInputStream(keystore), keystorePass.toCharArray());
+					fis = new FileInputStream(keystore);
+					keyStore.load(fis, keystorePass.toCharArray());
 				} finally {
 					Utils.close(fis);
 				}

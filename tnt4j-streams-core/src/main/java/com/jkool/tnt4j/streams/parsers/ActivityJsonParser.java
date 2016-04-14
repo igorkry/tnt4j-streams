@@ -119,6 +119,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			throw pe;
 		}
 
+		if (jsonString == null) {
+			jsonString = jsonDoc.jsonString();
+		}
+
 		return parsePreparedItem(stream, jsonString, jsonDoc);
 	}
 
