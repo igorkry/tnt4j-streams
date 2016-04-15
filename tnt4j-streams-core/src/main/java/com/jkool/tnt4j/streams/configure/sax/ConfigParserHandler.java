@@ -32,6 +32,7 @@ import com.jkool.tnt4j.streams.fields.ActivityFieldMappingType;
 import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
@@ -221,24 +222,16 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.duplicate.parser.definition", name), currParseLocation);
 		}
 		try {
-			ClassLoader cl = getClass().getClassLoader();
-			Class<?> streamClass = cl.loadClass(className);
-			Object newStream = streamClass.newInstance();
+			Object newStream = Utils.createInstance(className);
 			if (!(newStream instanceof ActivityParser)) {
 				throw new SAXNotSupportedException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_CORE, "ConfigParserHandler.not.implement.interface",
 						PARSER_ELMT, CLASS_ATTR, className, ActivityParser.class.getName(), getLocationInfo()));
 			}
 			currParser = (ActivityParser) newStream;
-		} catch (ClassNotFoundException cnfe) {
+		} catch (Exception exc) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", PARSER_ELMT, CLASS_ATTR, className, getLocationInfo()), cnfe);
-		} catch (InstantiationException ie) {
-			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", PARSER_ELMT, CLASS_ATTR, className, getLocationInfo()), ie);
-		} catch (IllegalAccessException iae) {
-			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", PARSER_ELMT, CLASS_ATTR, className, getLocationInfo()), iae);
+					"ConfigParserHandler.failed.to.load", PARSER_ELMT, CLASS_ATTR, className, getLocationInfo()), exc);
 		}
 		if (currParser != null) {
 			currParser.setName(name);
@@ -604,24 +597,16 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.duplicate", STREAM_ELMT, name), currParseLocation);
 		}
 		try {
-			ClassLoader cl = getClass().getClassLoader();
-			Class<?> streamClass = cl.loadClass(className);
-			Object newStream = streamClass.newInstance();
+			Object newStream = Utils.createInstance(className);
 			if (!(newStream instanceof TNTInputStream)) {
 				throw new SAXNotSupportedException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_CORE, "ConfigParserHandler.not.extend.class", STREAM_ELMT,
 						CLASS_ATTR, className, TNTInputStream.class.getName(), getLocationInfo()));
 			}
 			currStream = (TNTInputStream) newStream;
-		} catch (ClassNotFoundException cnfe) {
+		} catch (Exception exc) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", STREAM_ELMT, CLASS_ATTR, className, getLocationInfo()), cnfe);
-		} catch (InstantiationException ie) {
-			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", STREAM_ELMT, CLASS_ATTR, className, getLocationInfo()), ie);
-		} catch (IllegalAccessException iae) {
-			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.failed.to.load", STREAM_ELMT, CLASS_ATTR, className, getLocationInfo()), iae);
+					"ConfigParserHandler.failed.to.load", STREAM_ELMT, CLASS_ATTR, className, getLocationInfo()), exc);
 		}
 
 		currStream.setName(name);

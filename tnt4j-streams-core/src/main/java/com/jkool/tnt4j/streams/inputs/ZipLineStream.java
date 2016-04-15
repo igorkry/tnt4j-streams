@@ -1,0 +1,269 @@
+/*
+ * Copyright 2014-2016 JKOOL, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.jkool.tnt4j.streams.inputs;
+
+import java.io.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.jar.JarInputStream;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.jkool.tnt4j.streams.configure.StreamProperties;
+import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
+import com.nastel.jkool.tnt4j.core.OpLevel;
+import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
+import com.nastel.jkool.tnt4j.sink.EventSink;
+
+/**
+ * <p>
+ * Base class for files activity stream, where each line of the zipped file
+ * entry is assumed to represent a single activity or event which should be
+ * recorded. Zip file and entry names to stream are defined using "FileName"
+ * property in stream configuration.
+ * <p>
+ * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports the following properties:
+ * <ul>
+ * <li>FileName - defines zip file path and concrete zip file entry name or
+ * entry name pattern defined using characters '*' and '?'. Definition pattern
+ * is "zipFilePath!entryNameWildcard". I.e.:
+ * ".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt". (Required)</li>
+ * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default
+ * value - ZIP. (Optional)</li>
+ * </ul>
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
+ */
+public class ZipLineStream extends TNTInputStream<String> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ZipLineStream.class);
+
+	private static final String ZIP_PATH_SEPARATOR = "!"; // NON-NLS
+
+	private String zipFileName;
+	private String archType;
+
+	private String zipPath;
+	private String zipEntriesMask;
+
+	private LineNumberReader lineReader;
+	private InflaterInputStream zipStream;
+
+	private int lineNumber = 0;
+	protected int totalBytesCount = 0;
+
+	/**
+	 * Constructs a new ZipLineStream.
+	 */
+	public ZipLineStream() {
+		super(LOGGER);
+		archType = ArchiveTypes.ZIP.name();
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			return zipFileName;
+		}
+		if (StreamProperties.PROP_ARCH_TYPE.equalsIgnoreCase(name)) {
+			return archType;
+		}
+		return super.getProperty(name);
+	}
+
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		if (props == null) {
+			return;
+		}
+
+		super.setProperties(props);
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+				zipFileName = value;
+
+				if (StringUtils.isNotEmpty(zipFileName)) {
+					String zdp[] = zipFileName.split(Pattern.quote(ZIP_PATH_SEPARATOR));
+
+					if (zdp != null) {
+						if (zdp.length > 0) {
+							zipPath = zdp[0];
+						}
+						if (zdp.length > 1) {
+							zipEntriesMask = StringUtils.isEmpty(zdp[1]) ? null
+									: zdp[1].replace("\\", "/").replace("?", ".?").replace("*", ".*?");
+							if (zipEntriesMask != null) {
+								zipEntriesMask = "^" + zipEntriesMask + "$";
+							}
+						}
+					}
+				}
+			} else if (StreamProperties.PROP_ARCH_TYPE.equalsIgnoreCase(name)) {
+				archType = value;
+			}
+		}
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
+		if (StringUtils.isEmpty(zipFileName)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
+		}
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ZipLineStream.initializing.stream"),
+				zipFileName);
+
+		InputStream fis = loadFile(zipPath);
+
+		try {
+			if (ArchiveTypes.JAR.name().equalsIgnoreCase(archType)) {
+				zipStream = new JarInputStream(fis);
+			} else if (ArchiveTypes.GZIP.name().equalsIgnoreCase(archType)) {
+				zipStream = new GZIPInputStream(fis);
+			} else {
+				zipStream = new ZipInputStream(fis);
+			}
+		} catch (IOException exc) {
+			Utils.close(fis);
+
+			throw exc;
+		}
+
+		if (zipStream instanceof GZIPInputStream) {
+			lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zipStream)));
+		}
+
+		hasNextEntry();
+	}
+
+	/**
+	 * Loads zip file as input stream to read.
+	 * 
+	 * @param zipPath
+	 *            system dependent zip file path
+	 * 
+	 * @return file input stream to read
+	 *
+	 * @throws Exception
+	 *             If path defined file is not found
+	 */
+	protected InputStream loadFile(String zipPath) throws Exception {
+		return new FileInputStream(zipPath);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns a string containing the contents of the next line in
+	 * the zip file entry.
+	 */
+	@Override
+	public String getNextItem() throws Exception {
+		if (lineReader == null) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ZipLineStream.zip.input.not.opened"));
+		}
+
+		String line = Utils.getNonEmptyLine(lineReader);
+		lineNumber = lineReader.getLineNumber();
+
+		if (line == null && hasNextEntry()) {
+			line = getNextItem();
+		}
+
+		if (line != null) {
+			addStreamedBytesCount(line.getBytes().length);
+		}
+
+		return line;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns line number of the zip file entry last read.
+	 */
+	@Override
+	public int getActivityPosition() {
+		return lineNumber;
+	}
+
+	@Override
+	public long getTotalBytes() {
+		return totalBytesCount;
+	}
+
+	@Override
+	protected void cleanup() {
+		Utils.close(lineReader);
+		lineReader = null;
+
+		if (zipStream instanceof ZipInputStream) {
+			try {
+				((ZipInputStream) zipStream).closeEntry();
+			} catch (IOException exc) {
+			}
+		}
+
+		Utils.close(zipStream);
+		zipStream = null;
+
+		super.cleanup();
+	}
+
+	private boolean hasNextEntry() throws IOException {
+		if (zipStream instanceof ZipInputStream) {
+			ZipInputStream zis = (ZipInputStream) zipStream;
+
+			ZipEntry entry;
+			while ((entry = zis.getNextEntry()) != null) {
+				String entryName = entry.getName();
+
+				if (entry.getSize() > 0 && (zipEntriesMask == null || entryName.matches(zipEntriesMask))) {
+					totalBytesCount += entry.getSize();
+					lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zis)));
+					lineNumber = 0;
+
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ZipLineStream.opening.entry"), entryName);
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private enum ArchiveTypes {
+		ZIP, GZIP, JAR
+	}
+}

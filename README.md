@@ -19,6 +19,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * WMQ
     * OS pipes
+    * Zipped files (HDFS also)
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
@@ -347,8 +348,11 @@ Sample stream configuration:
 ```
 
 Stream configuration states that `FileLineStream` referencing `TokenParser` shall be used.
+
 `FileStream` reads data from `orders.log` file.
+
 `TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
+
 Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
@@ -416,6 +420,88 @@ Sample parser configuration:
 ```
 
 For details on parser configuration see sample named 'Single Log file'.
+
+#### Zipped file lines
+
+This sample shows how to stream activity events (orders) data from zipped file entries.
+
+Sample files can be found in `samples/zip-stream` directory.
+
+`sample.zip` and `sample.gz` files contains set of compressed Apache access log files.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
+
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+        <field name="ElapsedTime" locator="15" locator-type="REGroupNum" datatype="Number" format="#####0.000"
+               locale="en-US" units="Seconds"/>
+    </parser>
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
+
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+    </parser>
+
+    <stream name="SampleZipFileStream" class="com.jkool.tnt4j.streams.inputs.ZipLineStream">
+        <property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip"/>
+        <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt"/>-->
+        <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz"/>-->
+        <!--<property name="ArchType" value="GZIP"/>-->
+
+        <parser-ref name="AccessLogParserExt"/>
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `ZipLineStream` referencing `AccessLogParserExt` and `AccessLogParserCommon` shall be
+used.
+
+`ZipLineStream` reads all entries lines from `sample.zip` file.
+
+To filter zip file entries use zip entry name wildcard pattern i.e. `sample.zip!2/*.txt`. In this case stream will read
+just zipped files having extension `txt` from internal zip directory named `2` (from sub-directories also).
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
 
 #### Apache Access log single file
 
@@ -608,9 +694,9 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 These samples shows how to read or poll HDFS files contents. Samples are very similar to 'Log file polling' or
 'Apache Access log single file'. Difference is that specialized stream classes are used.
 
-Sample files can be found in `samples/hdfs-file-stream` and `hdfs-log-file-polling` directories.
-
 * Simple HDFS file streaming
+
+Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-file-stream` directory.
 
 ```xml
     <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
@@ -623,6 +709,8 @@ To stream HDFS file lines `HdfsFileLineStream` shall be used. `FileName` is defi
 
 * HDFS file polling
 
+Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-file-polling` directory.
+
 ```xml
     <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFilePollingStream">
         <property name="FileName"
@@ -634,6 +722,21 @@ To stream HDFS file lines `HdfsFileLineStream` shall be used. `FileName` is defi
 To poll HDFS file `HdfsFilePollingStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+
+* Zipped HDFS file streaming
+
+Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-zip-stream` directory.
+
+```xml
+    <stream name="SampleHdfsZipLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsZipLineStream">
+        <property name="FileName"
+                  value="hdfs://[host]:[port]/[path]/sample.zip!2/*.txt"/>
+        <property name="ArchType" value="ZIP"/>
+        ...
+    </stream>
+```
+
+To stream HDFS zipped file lines `HdfsZipLineStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
 
 #### Apache Flume RAW data
 
@@ -1864,6 +1967,24 @@ Also see 'Generic stream parameters'.
     <property name="Queue" value="EVENT.QUEUE"/>
     <property name="Host" value="wmq.sample.com"/>
 ```
+
+Also see 'Generic stream parameters'.
+
+#### Zipped file line stream parameters (and Hdfs):
+
+ * FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
+ and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
+ `.\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt`. (Required)
+ * ArchType - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)</li>
+
+    sample:
+```xml
+    <property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz"/>
+    <property name="ArchType" value="GZIP"/>
+```
+
+In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Zip entry name may contain
+wildcards.
 
 Also see 'Generic stream parameters'.
 

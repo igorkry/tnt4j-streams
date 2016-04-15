@@ -68,9 +68,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 
 	@Override
 	protected void cleanup() {
-		Utils.close(fs);
-
 		super.cleanup();
+
+		Utils.close(fs);
 	}
 
 	@Override

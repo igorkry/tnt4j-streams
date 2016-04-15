@@ -167,4 +167,9 @@ public interface StreamProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	public static final String PROP_RESTART_ON_CLOSE = "RestartOnInputClose"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_ARCH_TYPE = "ArchType"; // NON-NLS
 }
