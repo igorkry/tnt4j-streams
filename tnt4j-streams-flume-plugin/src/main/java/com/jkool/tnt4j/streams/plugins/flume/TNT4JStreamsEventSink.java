@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import com.jkool.tnt4j.streams.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
@@ -130,16 +131,10 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	}
 
 	private void openSocket() throws IOException {
-		closeSocket();
+		Utils.close(socket);
 
 		socket = new Socket(hostname, port);
 		out = new PrintWriter(socket.getOutputStream(), true);
-	}
-
-	private void closeSocket() throws IOException {
-		if (socket != null && !socket.isClosed()) {
-			socket.close();
-		}
 	}
 
 	/**
@@ -171,12 +166,8 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	public synchronized void stop() {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 				"TNT4JStreamsEventSink.plugin.stopping"));
-		try {
-			closeSocket();
-		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
-					"TNT4JStreamsEventSink.io.exception.occurred"), exc);
-		}
+		Utils.close(socket);
+
 		super.stop();
 		LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_FLUME,
 				"TNT4JStreamsEventSink.plugin.stopped"));

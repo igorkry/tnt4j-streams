@@ -104,7 +104,7 @@ public class StreamsAgentTests {
 		sb.append("</stream>" + LINE_SEPARATOR + "</tnt-data-source>");
 		fw.write(sb.toString());
 		fw.flush();
-		fw.close();
+		Utils.close(fw);
 		StreamsAgent.runFromAPI(tempConfFile.getAbsolutePath());
 		Thread.sleep(500);
 		tempConfFile.delete();

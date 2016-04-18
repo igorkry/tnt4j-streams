@@ -633,7 +633,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            socket to close
 	 */
 	public static void close(Socket socket) {
-		if (socket != null) {
+		if (socket != null && !socket.isClosed()) {
 			try {
 				socket.close();
 			} catch (IOException exc) {
@@ -651,7 +651,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            server socket to close
 	 */
 	public static void close(ServerSocket socket) {
-		if (socket != null) {
+		if (socket != null && !socket.isClosed()) {
 			try {
 				socket.close();
 			} catch (IOException exc) {

@@ -27,9 +27,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
 
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.StreamFieldType;
 
 /**
