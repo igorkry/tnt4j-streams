@@ -65,6 +65,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String FILTER_ELMT = "filter"; // NON-NLS
 	private static final String RULE_ELMT = "rule"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS
+	private static final String REF_ELMT = "reference"; // NON-NLS
+	private static final String JAVA_OBJ_ELMT = "java-object"; // NON-NLS
+	private static final String PARAM_ELMT = "param"; // NON-NLS
 
 	protected static final String NAME_ATTR = "name"; // NON-NLS
 	private static final String CLASS_ATTR = "class"; // NON-NLS
@@ -110,10 +113,12 @@ public class ConfigParserHandler extends DefaultHandler {
 	private boolean currFieldHasMapElmt = false;
 
 	private StreamsConfigData streamsConfigData = null;
+	private Map<String, Object> javaObjectsMap = null;
 
 	protected Locator currParseLocation = null;
 
 	private boolean processingTNT4JProperties = false;
+	private JavaObjectData javaObjectData = null;
 
 	/**
 	 * Constructs a new ConfigurationParserHandler.
@@ -147,6 +152,12 @@ public class ConfigParserHandler extends DefaultHandler {
 		currFieldHasMapElmt = false;
 		processingTNT4JProperties = false;
 		streamsConfigData = new StreamsConfigData();
+		javaObjectsMap = new HashMap<String, Object>();
+	}
+
+	@Override
+	public void endDocument() throws SAXException {
+		javaObjectsMap.clear();
 	}
 
 	@Override
@@ -178,6 +189,12 @@ public class ConfigParserHandler extends DefaultHandler {
 			processStep(attributes);
 		} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 			processTNT4JProperties(attributes);
+		} else if (REF_ELMT.equals(qName)) {
+			processReference(attributes);
+		} else if (JAVA_OBJ_ELMT.equals(qName)) {
+			processJavaObject(attributes);
+		} else if (PARAM_ELMT.equals(qName)) {
+			processParam(attributes);
 		}
 	}
 
@@ -708,6 +725,160 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
+	 * Processes a reference element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error parsing element
+	 */
+	private void processReference(Attributes attrs) throws SAXException {
+		if (currStream == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.malformed.configuration2", REF_ELMT, STREAM_ELMT), currParseLocation);
+		}
+		String refObjName = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				refObjName = attValue;
+			}
+		}
+		if (StringUtils.isEmpty(refObjName)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", REF_ELMT, NAME_ATTR), currParseLocation);
+		}
+		Object refObject = findReference(refObjName);
+		if (refObject == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.undefined.reference", REF_ELMT, refObjName), currParseLocation);
+		}
+
+		try {
+			currStream.addReference(refObject);
+		} catch (IllegalStateException exc) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ConfigParserHandler.could.not.add.stream.reference", currStream.getName(), refObjName),
+					currParseLocation, exc);
+		}
+	}
+
+	private Object findReference(String refName) {
+		Object refObject = streamsConfigData == null ? null : streamsConfigData.getParser(refName);
+		if (refObject == null) {
+			refObject = streamsConfigData == null ? null : streamsConfigData.getStream(refName);
+		}
+		if (refObject == null) {
+			refObject = javaObjectsMap == null ? null : javaObjectsMap.get(refName);
+		}
+
+		return refObject;
+	}
+
+	/**
+	 * Processes a java-object element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error parsing element
+	 */
+	private void processJavaObject(Attributes attrs) throws SAXException {
+		if (javaObjectData == null) {
+			javaObjectData = new JavaObjectData();
+		}
+
+		String name = null;
+		String className = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				name = attValue;
+			} else if (CLASS_ATTR.equals(attName)) {
+				className = attValue;
+			}
+		}
+
+		if (StringUtils.isEmpty(name)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", JAVA_OBJ_ELMT, NAME_ATTR), currParseLocation);
+		}
+		if (StringUtils.isEmpty(className)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", JAVA_OBJ_ELMT, CLASS_ATTR), currParseLocation);
+		}
+
+		javaObjectData.name = name;
+		javaObjectData.className = className;
+	}
+
+	/**
+	 * Processes a param element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error parsing element
+	 */
+	private void processParam(Attributes attrs) throws SAXException {
+		if (javaObjectData == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ConfigParserHandler.malformed.configuration2", PARAM_ELMT, JAVA_OBJ_ELMT),
+					currParseLocation);
+		}
+
+		String name = null;
+		String value = null;
+		String type = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				name = attValue;
+			} else if (VALUE_ATTR.equals(attName)) {
+				value = attValue;
+			} else if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
+			}
+		}
+
+		if (StringUtils.isEmpty(name)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", PARAM_ELMT, NAME_ATTR), currParseLocation);
+		}
+		if (StringUtils.isEmpty(type)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", PARAM_ELMT, TYPE_ATTR), currParseLocation);
+		}
+
+		try {
+			Object obj;
+			if (StringUtils.isEmpty(value)) {
+				obj = Utils.createInstance(type);
+			} else {
+				obj = javaObjectsMap.get(value);
+				if (obj == null) {
+					obj = Utils.createInstance(type, new Object[] { value }, String.class);
+				}
+			}
+			javaObjectData.addArg(obj);
+			javaObjectData.addType(type);
+		} catch (Exception exc) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ConfigParserHandler.could.not.init.obj.param", javaObjectData.name, name),
+					currParseLocation, exc);
+		}
+	}
+
+	/**
 	 * TODO
 	 *
 	 * @param attrs
@@ -779,6 +950,11 @@ public class ConfigParserHandler extends DefaultHandler {
 				currLocator = null;
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 				processingTNT4JProperties = false;
+			} else if (JAVA_OBJ_ELMT.equals(qName)) {
+				if (javaObjectData != null) {
+					constructJavaObject(javaObjectData);
+					javaObjectData.reset();
+				}
 			}
 		} catch (SAXException exc) {
 			throw exc;
@@ -787,6 +963,17 @@ public class ConfigParserHandler extends DefaultHandler {
 			se.initCause(e);
 			throw se;
 		}
+	}
+
+	private void constructJavaObject(JavaObjectData javaObjectData) throws Exception {
+		if (javaObjectData == null) {
+			return;
+		}
+
+		Object obj = Utils.createInstance(javaObjectData.className, javaObjectData.getArgs(),
+				javaObjectData.getTypes());
+
+		javaObjectsMap.put(javaObjectData.name, obj);
 	}
 
 	/**
@@ -802,5 +989,56 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.at.line", currParseLocation.getLineNumber());
 		}
 		return locInfo;
+	}
+
+	private static class JavaObjectData {
+		private String name;
+		private String className;
+		private List<Object> args;
+		private List<Class> types;
+
+		void addArg(Object arg) {
+			if (args == null) {
+				args = new ArrayList<Object>();
+			}
+
+			args.add(arg);
+		}
+
+		void addType(String typeClass) throws ClassNotFoundException {
+			addType(Class.forName(typeClass));
+		}
+
+		void addType(Class typeClass) {
+			if (types == null) {
+				types = new ArrayList<Class>();
+			}
+
+			types.add(typeClass);
+		}
+
+		Object[] getArgs() {
+			return args == null ? new Object[0] : args.toArray();
+		}
+
+		Class[] getTypes() {
+			Class[] typesArray = new Class[types == null ? 0 : types.size()];
+			if (types != null) {
+				typesArray = types.toArray(typesArray);
+			}
+
+			return typesArray;
+		}
+
+		void reset() {
+			name = "";
+			className = "";
+			if (args != null) {
+				args.clear();
+			}
+			if (types != null) {
+				types.clear();
+			}
+		}
 	}
 }

@@ -83,6 +83,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link JavaObjectType }
+	 * 
+	 */
+	public JavaObjectType createJavaObjectType() {
+		return new JavaObjectType();
+	}
+
+	/**
 	 * Create an instance of {@link ParserProperty }
 	 * 
 	 */
@@ -91,11 +99,11 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ParserRef }
+	 * Create an instance of {@link ParamType }
 	 * 
 	 */
-	public ParserRef createParserRef() {
-		return new ParserRef();
+	public ParamType createParamType() {
+		return new ParamType();
 	}
 
 	/**
@@ -136,6 +144,14 @@ public class ObjectFactory {
 	 */
 	public ScenarioType createScenarioType() {
 		return new ScenarioType();
+	}
+
+	/**
+	 * Create an instance of {@link Reference }
+	 * 
+	 */
+	public Reference createReference() {
+		return new Reference();
 	}
 
 	/**

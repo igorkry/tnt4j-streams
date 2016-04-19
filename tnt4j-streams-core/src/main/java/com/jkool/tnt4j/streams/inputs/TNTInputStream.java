@@ -443,6 +443,22 @@ public abstract class TNTInputStream<T> implements Runnable {
 	}
 
 	/**
+	 * Adds reference to specified entity object being used by this stream.
+	 *
+	 * @param refObject
+	 *            entity object to reference
+	 *
+	 * @throws IllegalStateException
+	 *             if referenced object can't be linked to stream
+	 */
+	public void addReference(Object refObject) throws IllegalStateException {
+		if (refObject instanceof ActivityParser) {
+			ActivityParser ap = (ActivityParser) refObject;
+			addParser(ap);
+		}
+	}
+
+	/**
 	 * <p>
 	 * Get the position in the source activity data currently being processed.
 	 * For line-based data sources, this is generally the line number of

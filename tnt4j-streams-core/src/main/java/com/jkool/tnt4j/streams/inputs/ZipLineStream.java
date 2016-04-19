@@ -37,8 +37,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>
- * Base class for files activity stream, where each line of the zipped file
- * entry is assumed to represent a single activity or event which should be
+ * Implements a zipped content activity stream, where each line of the zipped
+ * file entry is assumed to represent a single activity or event which should be
  * recorded. Zip file and entry names to stream are defined using "FileName"
  * property in stream configuration.
  * <p>
@@ -159,9 +159,9 @@ public class ZipLineStream extends TNTInputStream<String> {
 
 		if (zipStream instanceof GZIPInputStream) {
 			lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zipStream)));
+		} else {
+			hasNextEntry();
 		}
-
-		hasNextEntry();
 	}
 
 	/**

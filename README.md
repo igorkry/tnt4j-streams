@@ -20,6 +20,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * WMQ
     * OS pipes
     * Zipped files (HDFS also)
+    * Standard Java InputStream/Reader
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
@@ -423,7 +424,7 @@ For details on parser configuration see sample named 'Single Log file'.
 
 #### Zipped file lines
 
-This sample shows how to stream activity events (orders) data from zipped file entries.
+This sample shows how to stream activity events (Apache access log records) data from zipped file entries.
 
 Sample files can be found in `samples/zip-stream` directory.
 
@@ -499,6 +500,101 @@ used.
 
 To filter zip file entries use zip entry name wildcard pattern i.e. `sample.zip!2/*.txt`. In this case stream will read
 just zipped files having extension `txt` from internal zip directory named `2` (from sub-directories also).
+
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
+'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+
+#### Standard Java InputStream/Reader
+
+This sample shows how to stream activity events (Apache access log records) data read from standard Java input.
+
+Sample files can be found in `samples/java-stream` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
+
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+        <field name="ElapsedTime" locator="15" locator-type="REGroupNum" datatype="Number" format="#####0.000"
+               locale="en-US" units="Seconds"/>
+    </parser>
+
+    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
+        <property name="ConfRegexMapping" value="%*i=(.*?)"/>
+
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+    </parser>
+
+    <java-object name="SampleFileStream" class="java.io.FileInputStream">
+        <param name="fileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz" type="java.lang.String"/>
+    </java-object>
+    <java-object name="SampleZipStream" class="java.util.zip.GZIPInputStream">
+        <param name="stream" value="SampleFileStream" type="java.io.InputStream"/>
+    </java-object>
+    <!--java-object name="SampleFileReader" class="java.io.FileReader">
+        <param name="fileName" value=".\tnt4j-streams-core\samples\apache-access-single-log\access.log"
+            type="java.lang.String"/>
+    </java-object-->
+
+    <stream name="SampleJavaInputStream" class="com.jkool.tnt4j.streams.inputs.JavaInputStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <reference name="SampleZipStream"/>
+        <!--reference name="SampleFileReader"/-->
+
+        <reference name="AccessLogParserExt"/>
+        <reference name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `SampleJavaInputStream` referencing `AccessLogParserExt` and `AccessLogParserCommon`
+shall be used.
+
+`SampleJavaInputStream` reads all lines from `SampleZipStream` referring FileInputStream `SampleFileStream` which reads
+file `sample.gz`.
+
+NOTE: that `java-object/param@value` value may be reference to configuration already defined object
+like `SampleFileStream` in this particular sample.
+
+To use `Reader` as input you should uncomment configuration lines defining and referring `SampleFileReader` and comment
+out `SampleZipStream` reference.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.

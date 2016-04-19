@@ -75,6 +75,27 @@ public class ScenarioStepType {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String method;
 
+	public ScenarioStepType() {
+
+	}
+
+	public ScenarioStepType(String expression, String request, String name, String url, String method) {
+		this.scheduleCron = new ScheduleCronType(expression);
+		this.request = request;
+		this.name = name;
+		this.url = url;
+		this.method = method;
+	}
+
+	public ScenarioStepType(int interval, UnitsTypes units, Integer repeatCount, String request, String name,
+			String url, String method) {
+		this.scheduleSimple = new ScheduleSimpleType(interval, units, repeatCount);
+		this.request = request;
+		this.name = name;
+		this.url = url;
+		this.method = method;
+	}
+
 	/**
 	 * Gets the value of the scheduleCron property.
 	 * 

@@ -19,11 +19,13 @@ package com.jkool.tnt4j.streams.utils;
 import static org.junit.Assert.*;
 
 import java.io.*;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.Map.Entry;
 
 import org.junit.Test;
 
+import com.jkool.tnt4j.streams.parsers.MessageType;
 import com.nastel.jkool.tnt4j.core.OpType;
 
 /**
@@ -58,15 +60,21 @@ public class UtilsTest {
 	// }
 
 	@Test
-	public void testComputeSignatureMessageTypeStringByteArrayStringStringStringStringString() {
-		// TODO
-		// fail("Not yet implemented");
-	}
+	public void testComputeSignature() throws Exception {
+		String sigMD5 = Utils.computeSignature(MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID",
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
 
-	@Test
-	public void testComputeSignatureMessageDigestMessageTypeStringByteArrayStringStringStringStringString() {
-		// TODO
-		// fail("Not yet implemented");
+		MessageDigest msgDig = MessageDigest.getInstance("SHA1");
+		String sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(),
+				"USER_ID", "APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
+
+		assertNotEquals("Messages signatures should not match", sigMD5, sigOther);
+
+		msgDig = MessageDigest.getInstance("MD5");
+		sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID",
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
+
+		assertEquals("Messages signatures should match", sigMD5, sigOther);
 	}
 
 	@Test
@@ -87,7 +95,6 @@ public class UtilsTest {
 
 		final Set<Entry<String, OpType>> entrySet = opTypes.entrySet();
 		for (Entry<String, OpType> entry : entrySet) {
-
 			assertEquals(entry.getValue(), Utils.mapOpType(entry.getKey()));
 		}
 	}

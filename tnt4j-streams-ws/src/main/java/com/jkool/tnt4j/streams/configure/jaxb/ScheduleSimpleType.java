@@ -54,6 +54,16 @@ public class ScheduleSimpleType {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	protected BigInteger repeatCount;
 
+	public ScheduleSimpleType() {
+
+	}
+
+	public ScheduleSimpleType(int interval, UnitsTypes units, Integer repeatCount) {
+		this.interval = BigInteger.valueOf(interval);
+		this.units = units;
+		this.repeatCount = repeatCount == null ? null : BigInteger.valueOf(repeatCount);
+	}
+
 	/**
 	 * Gets the value of the interval property.
 	 * 

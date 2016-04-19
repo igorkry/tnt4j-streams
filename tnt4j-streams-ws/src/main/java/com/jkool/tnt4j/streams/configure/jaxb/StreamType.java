@@ -39,7 +39,8 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *               &lt;sequence>
  *                 &lt;element name="property" type="{}StreamProperty" maxOccurs="unbounded" minOccurs="0"/>
- *                 &lt;element name="parser-ref" type="{}ParserRef" maxOccurs="unbounded"/>
+ *                 &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded"/>
+ *                 &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;element name="tnt4j-properties" minOccurs="0">
  *                   &lt;complexType>
  *                     &lt;complexContent>

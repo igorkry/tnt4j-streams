@@ -16,10 +16,7 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
@@ -51,7 +48,9 @@ public class PipedStream extends TNTInputStream<String> {
 	/**
 	 * BufferedReader that wraps {@link #rawReader}
 	 */
-	protected BufferedReader dataReader = null;
+	protected LineNumberReader dataReader = null;
+
+	private int lineNumber = 0;
 
 	/**
 	 * Constructs an empty PipedStream. Default input stream is
@@ -115,7 +114,7 @@ public class PipedStream extends TNTInputStream<String> {
 					"CharacterStream.no.stream.reader"));
 		}
 
-		dataReader = new BufferedReader(rawReader);
+		dataReader = new LineNumberReader(new BufferedReader(rawReader));
 	}
 
 	/**
@@ -132,12 +131,23 @@ public class PipedStream extends TNTInputStream<String> {
 		}
 
 		String line = Utils.getNonEmptyLine(dataReader);
+		lineNumber = dataReader.getLineNumber();
 
 		if (line != null) {
 			addStreamedBytesCount(line.getBytes().length);
 		}
 
 		return line;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns line number last read from pipe.
+	 */
+	@Override
+	public int getActivityPosition() {
+		return lineNumber;
 	}
 
 	@Override

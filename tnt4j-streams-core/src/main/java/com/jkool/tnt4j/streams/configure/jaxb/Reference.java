@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.jkool.tnt4j.streams.configure.jaxb;
 
 import javax.annotation.Generated;
@@ -23,18 +24,18 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- * Associates enclosing entity with defined parser reference.
+ * Associates enclosing entity with other defined entity reference.
  * 
  * 
  * <p>
- * Java class for ParserRef complex type.
+ * Java class for Reference complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within
  * this class.
  * 
  * <pre>
- * &lt;complexType name="ParserRef">
+ * &lt;complexType name="Reference">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -46,40 +47,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ParserRef")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
-public class ParserRef {
+@XmlType(name = "Reference")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
+public class Reference {
 
 	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 
-	public ParserRef() {
+	public Reference() {
 	}
 
-	public ParserRef(String name) {
+	public Reference(String name) {
 		this.name = name;
 	}
 
 	/**
 	 * Gets the value of the name property.
-	 * 
+	 *
 	 * @return possible object is {@link String }
-	 * 
+	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
 
 	/**
 	 * Sets the value of the name property.
-	 * 
+	 *
 	 * @param value
 	 *            allowed object is {@link String }
-	 * 
+	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}

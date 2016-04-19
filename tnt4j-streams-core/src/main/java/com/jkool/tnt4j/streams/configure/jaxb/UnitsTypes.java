@@ -33,6 +33,9 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;simpleType name="UnitsTypes">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+ *     &lt;enumeration value="Days"/>
+ *     &lt;enumeration value="Hours"/>
+ *     &lt;enumeration value="Minutes"/>
  *     &lt;enumeration value="Seconds"/>
  *     &lt;enumeration value="Milliseconds"/>
  *     &lt;enumeration value="Microseconds"/>
@@ -44,12 +47,13 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "UnitsTypes")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
 public enum UnitsTypes {
 
-	@XmlEnumValue("Seconds") SECONDS("Seconds"), @XmlEnumValue("Milliseconds") MILLISECONDS(
-			"Milliseconds"), @XmlEnumValue("Microseconds") MICROSECONDS(
-					"Microseconds"), @XmlEnumValue("Nanoseconds") NANOSECONDS("Nanoseconds");
+	@XmlEnumValue("Days") DAYS("Days"), @XmlEnumValue("Hours") HOURS("Hours"), @XmlEnumValue("Minutes") MINUTES(
+			"Minutes"), @XmlEnumValue("Seconds") SECONDS("Seconds"), @XmlEnumValue("Milliseconds") MILLISECONDS(
+					"Milliseconds"), @XmlEnumValue("Microseconds") MICROSECONDS(
+							"Microseconds"), @XmlEnumValue("Nanoseconds") NANOSECONDS("Nanoseconds");
 	private final String value;
 
 	UnitsTypes(String v) {

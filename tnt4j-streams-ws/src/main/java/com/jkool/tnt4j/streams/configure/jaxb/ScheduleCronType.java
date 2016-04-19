@@ -46,6 +46,14 @@ public class ScheduleCronType {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String expression;
 
+	public ScheduleCronType() {
+
+	}
+
+	public ScheduleCronType(String expression) {
+		this.expression = expression;
+	}
+
 	/**
 	 * Gets the value of the expression property.
 	 * 

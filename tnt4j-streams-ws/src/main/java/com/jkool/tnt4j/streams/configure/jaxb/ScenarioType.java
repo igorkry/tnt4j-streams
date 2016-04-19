@@ -88,6 +88,19 @@ public class ScenarioType {
 		return this.step;
 	}
 
+	public void addStep(ScenarioStepType s) {
+		getStep().add(s);
+	}
+
+	public void addStep(String expression, String request, String name, String url, String method) {
+		getStep().add(new ScenarioStepType(expression, request, name, url, method));
+	}
+
+	public void addStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
+			String method) {
+		getStep().add(new ScenarioStepType(interval, units, repeatCount, request, name, url, method));
+	}
+
 	/**
 	 * Gets the value of the name property.
 	 * 
