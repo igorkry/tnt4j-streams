@@ -117,9 +117,9 @@ public class ZipLineStream extends TNTInputStream<String> {
 						}
 						if (zdp.length > 1) {
 							zipEntriesMask = StringUtils.isEmpty(zdp[1]) ? null
-									: zdp[1].replace("\\", "/").replace("?", ".?").replace("*", ".*?");
+									: zdp[1].replace("\\", "/").replace("?", ".?").replace("*", ".*?"); // NON-NLS
 							if (zipEntriesMask != null) {
-								zipEntriesMask = "^" + zipEntriesMask + "$";
+								zipEntriesMask = '^' + zipEntriesMask + '$'; // NON-NLS
 							}
 						}
 					}

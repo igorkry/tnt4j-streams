@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.UsecTimestamp;
 
 /**
@@ -77,10 +78,10 @@ public class ActivityFieldLocatorTest {
 		locator.setUnits("TEST");
 		assertNull(locator.getBuiltInUnits());
 		for (TimeUnit unit : TimeUnit.values()) {
-			locator.setFormat(unit.name(), null); // XXX
+			locator.setFormat(unit.name(), null); // TODO
 			locator.setUnits(unit.name());
 			assertEquals("Failed on " + unit.name(), unit, locator.getBuiltInUnits());
-			locator.toDebugString();
+			Utils.getDebugString(locator);
 		}
 	}
 
@@ -122,11 +123,11 @@ public class ActivityFieldLocatorTest {
 
 		locator.setDataType(ActivityFieldDataType.Binary);
 		locator.setFormat(ActivityFieldFormatType.hexBinary.name(), null);
-		// assertTrue(locator.formatValue("1") instanceof Byte[]); //XXX
+		// assertTrue(locator.formatValue("1") instanceof Byte[]); //TODO
 
 		locator.setDataType(ActivityFieldDataType.Binary);
 		locator.setFormat(ActivityFieldFormatType.base64Binary.name(), null);
-		// assertTrue(locator.formatValue("1") instanceof String); //XXX
+		// assertTrue(locator.formatValue("1") instanceof String); //TODO
 	}
 
 	@Test

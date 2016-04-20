@@ -580,19 +580,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Gets a string representation of this object for use in debugging, which
-	 * includes the value of each data member.
-	 *
-	 * @return debugging string representation
-	 */
-	public String toDebugString() {
-		return "ActivityFieldLocator{" + "type='" + type + '\'' + ", locator='" + locator + '\'' + ", dataType=" // NON-NLS
-				+ dataType + ", radix=" + radix + ", units='" + units + '\'' + ", format='" + format + '\'' // NON-NLS
-				+ ", locale='" + locale + '\'' + ", timeZone='" + timeZone + '\'' + ", cfgValue=" + cfgValue // NON-NLS
-				+ ", requiredVal='" + requiredVal + '\'' + '}'; // NON-NLS
-	}
-
-	/**
 	 * Makes clone copy of activity field locator.
 	 *
 	 * @return clone copy of activity field locator

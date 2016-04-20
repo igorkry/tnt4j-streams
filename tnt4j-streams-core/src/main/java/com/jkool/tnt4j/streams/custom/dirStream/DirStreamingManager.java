@@ -36,10 +36,65 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * TODO
+ * This class implements directory files streaming manager. Manager monitors
+ * directory (and subdirectories) for stream configuration files (i.e.
+ * tnt-data-source*.xml) and invokes streaming actions on stream configuration
+ * files changes. Stream configuration file name must also contain job
+ * identifier (@link UUID) set by job producer (i.e.
+ * tnt-data-source_123e4567-e89b-12d3-a456-426655440000.xml) to make
+ * events/actions correlations between all participating pats: job producer,
+ * TNT4J-Streams API and JKoolCloud. Without identifier, stream job
+ * configurations won't be processed.
+ * <p>
+ * Because streaming actions are invoked on stream configuration file changes,
+ * it is recommended to upload (make to be available for steaming) actual
+ * activities RAW data files before stream configuration file gets available in
+ * monitored directory.
+ * <p>
+ * Streaming jobs are processed using {@link ThreadPoolExecutor} with 10 core
+ * threads and max 100 threads by default.
+ * <p>
+ * Directory monitoring is performed using {@link DirWatchdog}. Manager handles
+ * those watchdog invoked file notifications:
+ * <ul>
+ * <li>Create - creates new streaming job and enqueues it to executor service.
+ * </li>
+ * <li>Change - creates new streaming job if such job is not available in
+ * executor queue.</li>
+ * <li>Delete - removes streaming job from executor queue.</li>
+ * </ul>
+ *
+ * <p>
+ * Sample:
  * 
+ * <pre>
+ * String dirPath = "./../temp/";
+ * String fwn = "tnt-data-source*.xml";
+ * 
+ * final DirStreamingManager dm = new DirStreamingManager(dirPath, fwn);
+ * dm.setTnt4jCfgFilePath("./../config/tnt4j.properties");
+ * dm.addStreamingJobListener(new StreamingJobLogger());
+ * 
+ * Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+ * 	&#64;Override
+ * 	public void run() {
+ * 		System.out.println("JVM exiting!...");
+ * 		synchronized (dm) {
+ * 			dm.notify();
+ * 		}
+ * 		dm.stop();
+ * 	}
+ * }));
+ * 
+ * dm.start();
+ * synchronized (dm) {
+ * 	dm.wait();
+ * }
+ * </pre>
+ *
  * @version $Revision: 1 $
  *
+ * @see ThreadPoolExecutor
  * @see DirWatchdog
  * @see DefaultStreamingJob
  */
@@ -113,7 +168,8 @@ public class DirStreamingManager {
 						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {
-					LOGGER.log(OpLevel.WARNING, "Streaming job adding to executor queue was interrupted", exc);
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"DirStreamingManager.job.offer.interrupted"), ((StreamingJob) r).getJobId(), exc);
 				}
 			}
 		});
@@ -136,8 +192,8 @@ public class DirStreamingManager {
 			}
 		});
 
-		LOGGER.log(OpLevel.DEBUG, "Directory ''{0}'' monitoring for files ''{1}'' has started...", dirPath,
-				fileWildcardName);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+				"DirStreamingManager.dir.monitoring.started"), dirPath, fileWildcardName);
 	}
 
 	/**
@@ -147,7 +203,8 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.start();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "Could not start directory watchdog", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"DirStreamingManager.could.not.start.watchdog"), exc);
 			stop();
 		}
 	}
@@ -187,7 +244,8 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.stop();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "Could not stop directory watchdog correctly", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"DirStreamingManager.could.not.stop.watchdog"), exc);
 		}
 
 		shutdownExecutors();
@@ -200,11 +258,15 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigCreate(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG, "Job config created {0}", jobCfgFile);
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "DirStreamingManager.job.created"),
+				jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
 			return;
 		}
 
@@ -227,16 +289,20 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigChange(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG, "Job config changed {0}", jobCfgFile);
-		// TODO: restart, add new job?
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "DirStreamingManager.job.changed"),
+				jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
 			return;
 		}
 
 		synchronized (executorService) {
+			// TODO: check job state - if already processing halt and restart???
 			if (!executorService.getQueue().contains(jobId)) {
 				handleJobConfigCreate(jobCfgFile);
 			}
@@ -250,11 +316,15 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigRemoval(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG, "Job config deleted {0}", jobCfgFile);
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "DirStreamingManager.job.deleted"),
+				jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
 			return;
 		}
 

@@ -411,7 +411,7 @@ public class WmqStream extends TNTInputStream<String> {
 	 * @return string identifying exception, including {@code MQRC_} constant
 	 *         label
 	 */
-	protected String formatMqException(MQException mqe) {
+	protected static String formatMqException(MQException mqe) {
 		return String.format("%s (%s)", mqe, MQConstants.lookupReasonCode(mqe.getReason())); // NON-NLS
 	}
 }

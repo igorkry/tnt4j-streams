@@ -229,12 +229,4 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 		return val;
 	}
-
-	private Object wrapValue(List<Object> valuesList) {
-		if (CollectionUtils.isEmpty(valuesList)) {
-			return null;
-		}
-
-		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
-	}
 }

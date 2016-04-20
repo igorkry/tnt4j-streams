@@ -36,7 +36,7 @@ public class StreamsThread extends Thread {
 	protected boolean stopRunning = false;
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @see Thread#Thread()
 	 */
@@ -45,7 +45,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param target
 	 *            object whose {@link Runnable#run()} method is called
@@ -58,7 +58,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param target
 	 *            object whose {@link Runnable#run()} method is called
@@ -73,7 +73,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param name
 	 *            name of thread
@@ -86,7 +86,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param threadGrp
 	 *            thread group to add new thread to
@@ -101,7 +101,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param threadGrp
 	 *            thread group to add new thread to
@@ -118,7 +118,7 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Creates new Streams thread.
+	 * Constructs a new Streams thread.
 	 *
 	 * @param threadGrp
 	 *            thread group to add new thread to

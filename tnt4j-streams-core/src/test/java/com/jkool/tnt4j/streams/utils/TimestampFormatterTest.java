@@ -54,7 +54,7 @@ public class TimestampFormatterTest {
 		assertNotNull(TimestampFormatter.parse(TimeUnit.SECONDS, date.getTime()));
 		assertNotNull(formatter.parse(String.valueOf(date.getTime())));
 		assertNotNull(formatter.parse(date.getTime()));
-		// formatter.setPattern("# ", Locale.FRENCH.toString()); XXX
+		// formatter.setPattern("# ", Locale.FRENCH.toString()); TODO
 		// assertNotNull(formatter.parse(String.valueOf(date.getTime())));
 	}
 

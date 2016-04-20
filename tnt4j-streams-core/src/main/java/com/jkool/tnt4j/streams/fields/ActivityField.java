@@ -45,7 +45,7 @@ public class ActivityField {
 	private Collection<ActivityParser> stackedParsers;
 
 	/**
-	 * Creates a new activity field entry.
+	 * Constructs a new activity field entry.
 	 *
 	 * @param fieldTypeName
 	 *            name of activity field type
@@ -62,7 +62,7 @@ public class ActivityField {
 	}
 
 	/**
-	 * Creates a new activity field entry.
+	 * Constructs a new activity field entry.
 	 *
 	 * @param fieldTypeName
 	 *            name of activity field type
@@ -297,17 +297,5 @@ public class ActivityField {
 	 */
 	public Collection<ActivityParser> getStackedParsers() {
 		return stackedParsers;
-	}
-
-	/**
-	 * Gets a string representation of this object for use in debugging, which
-	 * includes the value of each data member.
-	 *
-	 * @return debugging string representation
-	 */
-	public String toDebugString() {
-		return "ActivityField{" + "fieldTypeName=" + fieldTypeName + ", format='" + format + '\'' + ", locale='" // NON-NLS
-				+ locale + '\'' + ", separator='" + separator + '\'' + ", reqValue='" + reqValue + '\'' // NON-NLS
-				+ ", stackedParsers='" + stackedParsers + '\'' + '}'; // NON-NLS
 	}
 }

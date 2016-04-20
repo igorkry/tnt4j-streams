@@ -27,7 +27,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
@@ -96,7 +95,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	protected boolean requireAll = false;
 
 	/**
-	 * Creates a new activity XML string parser.
+	 * Constructs a new activity XML string parser.
 	 *
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser
@@ -385,14 +384,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		}
 
 		return val;
-	}
-
-	private Object wrapValue(List<Object> valuesList) {
-		if (CollectionUtils.isEmpty(valuesList)) {
-			return null;
-		}
-
-		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
 	}
 
 	/**

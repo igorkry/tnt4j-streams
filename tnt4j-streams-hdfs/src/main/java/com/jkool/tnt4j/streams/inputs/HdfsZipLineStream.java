@@ -66,6 +66,7 @@ public class HdfsZipLineStream extends ZipLineStream {
 	 * @throws Exception
 	 *             If path defined file is not found or can't be opened
 	 */
+	@Override
 	protected InputStream loadFile(String zipPath) throws Exception {
 		final URI fileUri = new URI(zipPath);
 		if (fs == null) {

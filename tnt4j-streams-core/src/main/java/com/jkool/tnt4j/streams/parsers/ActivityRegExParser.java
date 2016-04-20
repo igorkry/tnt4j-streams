@@ -113,7 +113,7 @@ public class ActivityRegExParser extends ActivityParser {
 			}
 			LOGGER.log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.adding.field"),
-					field.toDebugString());
+					field); // Utils.getDebugString(field));
 			if (locType == ActivityFieldLocatorType.REMatchNum) {
 				if (groupMap.containsKey(field)) {
 					throw new IllegalArgumentException(StreamsResources.getStringFormatted(

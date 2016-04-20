@@ -31,7 +31,7 @@ Angulartics - analytics for AngularJS applications.
 * NodeJS
 * Bower
 
-If you dont have these, you can simply fallow instructions on (https://docs.angularjs.org/tutorial#get-started)
+If you don't have these, you can simply fallow instructions on (https://docs.angularjs.org/tutorial#get-started)
 	
 ## Step 1
 	

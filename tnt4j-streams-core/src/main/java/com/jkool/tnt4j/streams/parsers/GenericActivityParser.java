@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.jkool.tnt4j.streams.fields.ActivityField;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -53,7 +55,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected final List<ActivityField> fieldList = new ArrayList<ActivityField>();
 
 	/**
-	 * Creates a new GenericActivityParser.
+	 * Constructs a new GenericActivityParser.
 	 *
 	 * @param logger
 	 *            logger used by activity parser
@@ -84,7 +86,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	public void addField(ActivityField field) {
 		logger.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE, "ActivityParser.adding.field"),
-				field.toDebugString());
+				field); // Utils.getDebugString(field));
 		fieldList.add(field);
 	}
 
@@ -176,4 +178,22 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected abstract Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, T data)
 			throws ParseException;
+
+	/**
+	 * Wrapps list of locator prepraed values.
+	 *
+	 * @param valuesList
+	 *            list of values
+	 * 
+	 * @return extracts actual object if list contains single item, array of
+	 *         values if list contains more than one item, {@code null} if list
+	 *         is empty or {@code valuesList == null}.
+	 */
+	protected static Object wrapValue(List<Object> valuesList) {
+		if (CollectionUtils.isEmpty(valuesList)) {
+			return null;
+		}
+
+		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
+	}
 }

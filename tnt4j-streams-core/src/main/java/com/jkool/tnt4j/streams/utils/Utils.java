@@ -17,11 +17,13 @@
 package com.jkool.tnt4j.streams.utils;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -586,8 +588,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
-		return sw.toString(); // sw.toString().replaceAll("\n|\r", ""); //NOTE:
-								// if single line
+		return sw.toString();
+		// NOTE: if return as single line
+		// return sw.toString().replaceAll("\n|\r", ""); // NON-NLS
 	}
 
 	/**
@@ -713,4 +716,51 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 
 		return builder.toString();
 	}
+
+	/**
+	 * Gets a string representation of specified object for use in debugging,
+	 * which includes the value of each object field.
+	 * 
+	 * @param obj
+	 *            object to get debugging info
+	 *
+	 * @return debugging string representation
+	 */
+	public static String getDebugString(Object obj) {
+		if (obj == null) {
+			return "null";
+		}
+
+		StringBuilder sb = new StringBuilder();
+		Class objClass = obj.getClass();
+		sb.append(objClass.getSimpleName()).append("{");
+
+		try {
+			Field[] valueObjFields = objClass.getDeclaredFields();
+
+			for (int i = 0; i < valueObjFields.length; i++) {
+				String fieldName = valueObjFields[i].getName();
+				valueObjFields[i].setAccessible(true);
+
+				Object fieldValue = valueObjFields[i].get(obj);
+
+				String valueStr;
+				if (fieldValue instanceof Object[]) {
+					valueStr = Arrays.toString((Object[]) fieldValue);
+				} else {
+					valueStr = String.valueOf(fieldValue);
+				}
+
+				sb.append(fieldName).append("='").append(valueStr).append('\'')
+						.append(i < valueObjFields.length - 1 ? ", " : "");
+			}
+		} catch (Exception exc) {
+			sb.append(exc.toString());
+		}
+
+		sb.append("}");
+
+		return sb.toString();
+	}
+
 }
