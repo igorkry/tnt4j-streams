@@ -112,7 +112,8 @@
                 <xs:element name="HostInfo" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            String identifying information (e.g. type, version) about system where tracking event occurred.
+                            String identifying information (e.g. type, version) about system where tracking event
+                            occurred.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -192,7 +193,8 @@
                 <xs:element name="Signature" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                            Unique identifier for message in tracking event (message with same signature are treated as same message).
+                            Unique identifier for message in tracking event (message with same signature are treated as
+                            same message).
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import com.jkool.tnt4j.streams.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
@@ -32,6 +31,7 @@ import com.jkool.tnt4j.streams.StreamsAgent;
 import com.jkool.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkool.tnt4j.streams.utils.FlumeConstants;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;

@@ -136,7 +136,7 @@
             <artifactId>json-path</artifactId>
             <version>2.2.0</version>
         </dependency>
-       
+
         <dependency>
             <groupId>com.nastel.jkool.tnt4j</groupId>
             <artifactId>tnt4j-api</artifactId>
