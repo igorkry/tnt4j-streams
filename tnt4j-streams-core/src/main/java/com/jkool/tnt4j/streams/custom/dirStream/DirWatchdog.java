@@ -43,7 +43,7 @@ import com.jkool.tnt4j.streams.utils.StreamsResources;
  * Notifications about file or file state changes are published over added file
  * alteration listeners.
  *
- * @version $Revision : 1 $
+ * @version $Revision: 1 $
  */
 public class DirWatchdog {
 	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = 5 * 1000L;
