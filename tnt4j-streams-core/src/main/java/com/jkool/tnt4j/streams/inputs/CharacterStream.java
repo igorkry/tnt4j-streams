@@ -95,7 +95,7 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 	/**
 	 * Constructs an empty CharacterStream. Requires configuration settings to
 	 * set input stream source.
-	 * 
+	 *
 	 * @param logger
 	 *            logger used by activity stream
 	 */
@@ -347,7 +347,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *            Reader to buffer
 		 * @param size
 		 *            buffer size
-		 *
 		 * @see BufferedReader#BufferedReader(Reader, int)
 		 */
 		FeedReader(Reader in, int size) {
@@ -359,7 +358,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @param in
 		 *            Reader to buffer
-		 *
 		 * @see BufferedReader#BufferedReader(Reader)
 		 */
 		FeedReader(Reader in) {
@@ -374,7 +372,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *            InputStream to buffer
 		 * @param size
 		 *            buffer size
-		 *
 		 * @see BufferedReader#BufferedReader(Reader, int)
 		 */
 		FeedReader(InputStream in, int size) {
@@ -387,7 +384,6 @@ public class CharacterStream extends TNTInputStream<BufferedReader> {
 		 *
 		 * @param in
 		 *            InputStream to buffer
-		 *
 		 * @see BufferedReader#BufferedReader(Reader)
 		 */
 		FeedReader(InputStream in) {

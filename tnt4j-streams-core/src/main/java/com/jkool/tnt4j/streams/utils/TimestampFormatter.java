@@ -158,9 +158,7 @@ public class TimestampFormatter {
 	 *
 	 * @param value
 	 *            value to convert
-	 *
 	 * @return formatted value of timestamp
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based timestamp
 	 *             pattern supported by this parser;
@@ -192,7 +190,6 @@ public class TimestampFormatter {
 	 *
 	 * @param value
 	 *            date/time to format
-	 *
 	 * @return date/time formatted as a string
 	 */
 	public String format(Object value) {
@@ -207,9 +204,7 @@ public class TimestampFormatter {
 	 *            units that value is in
 	 * @param value
 	 *            value to convert
-	 *
 	 * @return microsecond timestamp
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 */
@@ -273,9 +268,7 @@ public class TimestampFormatter {
 	 *            timeStampStr does not represent a string in local time zone.
 	 * @param locale
 	 *            locale for date format to use.
-	 *
 	 * @return microsecond timestamp
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on pattern
 	 * @see java.util.TimeZone
@@ -296,7 +289,6 @@ public class TimestampFormatter {
 	 *            date/time to format
 	 * @param locale
 	 *            locale for date format to use.
-	 *
 	 * @return date /time formatted as a string
 	 */
 	public static String format(String pattern, Object value, String locale) {
@@ -313,7 +305,6 @@ public class TimestampFormatter {
 	 *            precision units timestamp is in
 	 * @param toUnits
 	 *            precision units to convert timestamp to
-	 *
 	 * @return converted numeric timestamp in precision units specified by
 	 *         toUnits
 	 */

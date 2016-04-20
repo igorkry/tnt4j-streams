@@ -136,6 +136,7 @@ public final class StreamsAgent {
 	}
 
 	/**
+	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFile
 	 *            stream configuration file

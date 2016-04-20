@@ -394,10 +394,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 *
 	 * @param data
 	 *            input source for activity data
-	 *
 	 * @return XML document string, or {@code null} if end of input source has
 	 *         been reached
-	 *
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */

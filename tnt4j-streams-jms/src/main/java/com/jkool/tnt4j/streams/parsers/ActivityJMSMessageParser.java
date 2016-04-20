@@ -134,7 +134,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *            JMS text message
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link TextMessage}
-	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting text from message.
 	 */
@@ -152,7 +151,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *            JMS bytes message
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link BytesMessage}
-	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while reading bytes from message.
 	 */
@@ -172,7 +170,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *            JMS map message
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link MapMessage}
-	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting map entries from
 	 *             message.
@@ -193,7 +190,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *            JMS stream message
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link StreamMessage}
-	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while reading bytes from message.
 	 */
@@ -231,7 +227,6 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *            JMS object message
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link ObjectMessage}
-	 *
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting {@link Serializable}
 	 *             object from message.
@@ -245,12 +240,11 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 
 	/**
 	 * Parse custom message activity info into activity data map.
-	 * 
+	 *
 	 * @param message
 	 *            custom JMS message
 	 * @param dataMap
 	 *            activity data map collected from custom JMS message
-	 *
 	 * @throws JMSException
 	 *             if any JMS exception occurs while parsing message.
 	 */

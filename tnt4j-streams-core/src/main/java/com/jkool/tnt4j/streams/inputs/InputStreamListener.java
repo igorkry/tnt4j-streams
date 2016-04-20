@@ -24,16 +24,15 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
  * can be implemented by classes that are interested in streaming process
  * progress and status changes.
  *
- * @see TNTInputStream#addStreamListener(InputStreamListener)
- *
  * @version $Revision: 1 $
  *
+ * @see TNTInputStream#addStreamListener(InputStreamListener)
  */
-public interface InputStreamListener<T> {
+public interface InputStreamListener {
 	/**
 	 * This method gets called when activity items streaming process progress
 	 * has updated.
-	 * 
+	 *
 	 * @param stream
 	 *            stream sending notification
 	 * @param current
@@ -54,7 +53,7 @@ public interface InputStreamListener<T> {
 
 	/**
 	 * This method gets called when activity items streaming process has failed.
-	 * 
+	 *
 	 * @param stream
 	 *            stream sending notification
 	 * @param msg
@@ -85,7 +84,6 @@ public interface InputStreamListener<T> {
 	 *            stream sending notification
 	 * @param stats
 	 *            stream statistics
-	 *
 	 */
 	void onFinish(TNTInputStream stream, TNTInputStream.StreamStats stats);
 

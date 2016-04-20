@@ -22,10 +22,10 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
 
 /**
  * For internal development use.
- * 
+ *
  * @version $Revision: 1 $
  */
-public class StreamingJobLogger implements StreamingJobListener<Object> {
+public class StreamingJobLogger implements StreamingJobListener {
 
 	public StreamingJobLogger() {
 

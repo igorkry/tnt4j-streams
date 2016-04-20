@@ -128,7 +128,7 @@ public class DirStreamingManager {
 
 	/**
 	 * Constructs a new DirStreamingManager. Defines watched directory path.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path
 	 */
@@ -139,7 +139,7 @@ public class DirStreamingManager {
 	/**
 	 * Constructs a new DirStreamingManager. Defines watched directory path and
 	 * monitored files wildcard name pattern.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path
 	 * @param fileWildcardName
@@ -253,7 +253,7 @@ public class DirStreamingManager {
 
 	/**
 	 * Handles streaming job configuration file creation notification.
-	 * 
+	 *
 	 * @param jobCfgFile
 	 *            streaming job configuration file
 	 */
@@ -284,7 +284,7 @@ public class DirStreamingManager {
 
 	/**
 	 * Handles streaming job configuration file change notification.
-	 * 
+	 *
 	 * @param jobCfgFile
 	 *            streaming job configuration file
 	 */
@@ -359,7 +359,7 @@ public class DirStreamingManager {
 
 	/**
 	 * Sets TNT4J configuration file (tnt4j.properties) path.
-	 * 
+	 *
 	 * @param tnt4jCfgFilePath
 	 *            TNT4J configuration file path string
 	 */

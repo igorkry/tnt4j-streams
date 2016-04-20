@@ -73,7 +73,7 @@ public class ZipLineStream extends TNTInputStream<String> {
 	private InflaterInputStream zipStream;
 
 	private int lineNumber = 0;
-	protected int totalBytesCount = 0;
+	private int totalBytesCount = 0;
 
 	/**
 	 * Constructs a new ZipLineStream.
@@ -166,12 +166,10 @@ public class ZipLineStream extends TNTInputStream<String> {
 
 	/**
 	 * Loads zip file as input stream to read.
-	 * 
+	 *
 	 * @param zipPath
 	 *            system dependent zip file path
-	 * 
 	 * @return file input stream to read
-	 *
 	 * @throws Exception
 	 *             If path defined file is not found
 	 */
@@ -264,6 +262,17 @@ public class ZipLineStream extends TNTInputStream<String> {
 	}
 
 	private enum ArchiveTypes {
-		ZIP, GZIP, JAR
+		/**
+		 * Zip archive type.
+		 */
+		ZIP,
+		/**
+		 * GZip archive type.
+		 */
+		GZIP,
+		/**
+		 * Jar archive type.
+		 */
+		JAR
 	}
 }

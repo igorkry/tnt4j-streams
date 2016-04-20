@@ -40,7 +40,6 @@ public class StreamThread extends StreamsThread {
 	 *
 	 * @param target
 	 *            the TNTInputStream to run
-	 *
 	 * @see Thread#Thread(Runnable)
 	 */
 	public StreamThread(TNTInputStream target) {
@@ -56,7 +55,6 @@ public class StreamThread extends StreamsThread {
 	 *            the TNTInputStream to run
 	 * @param name
 	 *            the name for thread
-	 *
 	 * @see Thread#Thread(Runnable, String)
 	 */
 	public StreamThread(TNTInputStream target, String name) {
@@ -74,7 +72,6 @@ public class StreamThread extends StreamsThread {
 	 *            the TNTInputStream to run
 	 * @param name
 	 *            the name for thread
-	 *
 	 * @see Thread#Thread(ThreadGroup, Runnable, String)
 	 */
 	public StreamThread(ThreadGroup group, TNTInputStream target, String name) {
@@ -90,7 +87,6 @@ public class StreamThread extends StreamsThread {
 	 *            the thread group new thread is to belong to
 	 * @param target
 	 *            the TNTInputStream to run
-	 *
 	 * @see Thread#Thread(ThreadGroup, Runnable)
 	 */
 	public StreamThread(ThreadGroup group, TNTInputStream target) {

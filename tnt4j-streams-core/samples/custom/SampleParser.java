@@ -35,6 +35,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Sample custom parser.
+ *
+ * @version $Revision: 1 $
  */
 public class SampleParser extends GenericActivityParser<String[]> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleParser.class);
@@ -56,7 +58,6 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 *
 	 * @param props
 	 *            properties to set
-	 *
 	 * @throws Exception
 	 *             indicates error with properties
 	 */
@@ -75,9 +76,6 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
@@ -112,14 +110,11 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 *            activity field locator
 	 * @param fields
 	 *            activity object data fields array
-	 *
 	 * @return value formatted based on locator definition or {@code null} if
 	 *         locator is not defined
-	 *
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified
 	 *             value
-	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override

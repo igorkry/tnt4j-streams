@@ -73,7 +73,6 @@ public abstract class ActivityParser {
 	 *
 	 * @param props
 	 *            properties to set
-	 *
 	 * @throws Exception
 	 *             indicates error with properties
 	 */
@@ -96,15 +95,12 @@ public abstract class ActivityParser {
 	 *            parent stream
 	 * @param data
 	 *            raw activity data to parse
-	 *
 	 * @return converted activity info, or {@code null} if raw activity data
 	 *         does not match format for this parser
-	 *
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing raw data string
-	 * 
 	 * @see #isDataClassSupported(Object)
 	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String,
 	 *      Object)
@@ -118,7 +114,6 @@ public abstract class ActivityParser {
 	 *
 	 * @param data
 	 *            data object whose class is to be verified
-	 *
 	 * @return {@code true} if this parser can process data in the specified
 	 *         format, {@code false} - otherwise
 	 */
@@ -129,9 +124,7 @@ public abstract class ActivityParser {
 	 *
 	 * @param data
 	 *            input source for activity data
-	 *
 	 * @return string, or {@code null} if end of input source has been reached
-	 *
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */
@@ -180,7 +173,6 @@ public abstract class ActivityParser {
 	 *            field to apply value to
 	 * @param value
 	 *            value to apply for this field
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 */
@@ -202,12 +194,10 @@ public abstract class ActivityParser {
 	 *            field to apply value to
 	 * @param value
 	 *            value to apply for this field
-	 *
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing the specified value
-	 *
 	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream stream, ActivityInfo ai, ActivityField field, Object value)

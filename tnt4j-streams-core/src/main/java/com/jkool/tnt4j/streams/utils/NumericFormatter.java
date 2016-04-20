@@ -121,9 +121,7 @@ public class NumericFormatter {
 	 *
 	 * @param value
 	 *            value to convert
-	 *
 	 * @return formatted value of field in required internal data type
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined pattern, etc.)
@@ -140,9 +138,7 @@ public class NumericFormatter {
 	 *            value to convert
 	 * @param scale
 	 *            value to multiply the formatted value by
-	 *
 	 * @return formatted value of field in required internal data type
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined pattern, etc.)
@@ -161,9 +157,7 @@ public class NumericFormatter {
 	 *            value to convert
 	 * @param scale
 	 *            value to multiply the formatted value by
-	 *
 	 * @return formatted value of field in required internal data type
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined pattern, etc.)

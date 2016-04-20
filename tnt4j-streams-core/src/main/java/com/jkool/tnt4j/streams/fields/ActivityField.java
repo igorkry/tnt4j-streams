@@ -49,7 +49,6 @@ public class ActivityField {
 	 *
 	 * @param fieldTypeName
 	 *            name of activity field type
-	 *
 	 * @throws IllegalArgumentException
 	 *             if field name is {@code null} or empty
 	 */
@@ -68,7 +67,6 @@ public class ActivityField {
 	 *            name of activity field type
 	 * @param dataType
 	 *            type of field data type
-	 *
 	 * @throws NullPointerException
 	 *             if field type is {@code null}
 	 */

@@ -54,7 +54,7 @@ public class DefaultStreamingJob implements StreamingJob {
 
 	/**
 	 * Constructs a new DefaultStreamingJob.
-	 * 
+	 *
 	 * @param jobId
 	 *            unique job identifier
 	 * @param streamCfgFile
@@ -201,7 +201,7 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 	}
 
-	private class DefaultStreamListener implements InputStreamListener<Object> {
+	private class DefaultStreamListener implements InputStreamListener {
 
 		@Override
 		public void onProgressUpdate(TNTInputStream stream, int current, int total) {

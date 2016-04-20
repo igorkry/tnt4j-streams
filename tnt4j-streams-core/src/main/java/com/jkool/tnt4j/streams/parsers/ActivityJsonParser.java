@@ -135,10 +135,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * @param jsonAsLine
 	 *            if {@code true} indicates complete JSON package is line, if
 	 *            {@code false} - whole data available to read
-	 *
 	 * @return JSON document string, or {@code null} if end of input source has
 	 *         been reached
-	 *
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */

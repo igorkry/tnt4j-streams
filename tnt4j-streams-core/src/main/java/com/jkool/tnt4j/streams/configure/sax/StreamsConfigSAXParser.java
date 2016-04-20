@@ -50,11 +50,11 @@ public final class StreamsConfigSAXParser {
 	 *
 	 * @param config
 	 *            Reader to get configuration data from
-	 *
-	 * @throws SAXException
-	 *             if there was an error parsing the configuration
+	 * @return streams configuration data
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
+	 * @throws SAXException
+	 *             if there was an error parsing the configuration
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
 	 */

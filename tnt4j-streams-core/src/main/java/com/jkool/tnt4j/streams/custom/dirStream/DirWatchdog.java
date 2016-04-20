@@ -42,8 +42,8 @@ import com.jkool.tnt4j.streams.utils.StreamsResources;
  * <p>
  * Notifications about file or file state changes are published over added file
  * alteration listeners.
- * 
- * @version $Revision: 1 $
+ *
+ * @version $Revision : 1 $
  */
 public class DirWatchdog {
 	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = 5 * 1000L;
@@ -58,7 +58,7 @@ public class DirWatchdog {
 	/**
 	 * Constructs a new DirWatchdog. Monitoring is performed on all files
 	 * without filtering with refresh interval every 5sec.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path string
 	 */
@@ -69,7 +69,7 @@ public class DirWatchdog {
 	/**
 	 * Constructs a new DirWatchdog. Monitoring is performed on all files
 	 * without filtering.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path string
 	 * @param refreshInterval
@@ -81,7 +81,7 @@ public class DirWatchdog {
 
 	/**
 	 * Constructs a new DirWatchdog. Sets default refresh interval to 5 sec.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path string
 	 * @param filter
@@ -93,7 +93,7 @@ public class DirWatchdog {
 
 	/**
 	 * Constructs a new DirWatchdog.
-	 * 
+	 *
 	 * @param dirPath
 	 *            watched directory path string
 	 * @param refreshInterval
@@ -148,7 +148,7 @@ public class DirWatchdog {
 
 	/**
 	 * Stops directory watchdog.
-	 * 
+	 *
 	 * @throws Exception
 	 *             if exception occurs while stopping monitor
 	 */
@@ -160,7 +160,7 @@ public class DirWatchdog {
 
 	/**
 	 * Creates default file filter matching file wildcard name pattern.
-	 * 
+	 *
 	 * @param fileWildcardName
 	 *            file wildcard name pattern string
 	 *

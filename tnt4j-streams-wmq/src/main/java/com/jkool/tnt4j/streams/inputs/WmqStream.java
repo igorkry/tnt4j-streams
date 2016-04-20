@@ -209,7 +209,6 @@ public class WmqStream extends TNTInputStream<String> {
 	 *
 	 * @param mqe
 	 *            MQ exception object
-	 *
 	 * @return flag identifying if connected to queue manager
 	 */
 	protected boolean isConnectedToQmgr(MQException mqe) {
@@ -407,7 +406,6 @@ public class WmqStream extends TNTInputStream<String> {
 	 *
 	 * @param mqe
 	 *            WMQ exception
-	 *
 	 * @return string identifying exception, including {@code MQRC_} constant
 	 *         label
 	 */

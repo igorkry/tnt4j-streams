@@ -84,7 +84,6 @@ public class StreamsConfigLoader {
 	 *
 	 * @param configFileName
 	 *            name of configuration file
-	 *
 	 * @throws SAXException
 	 *             if there was an error parsing the file
 	 * @throws ParserConfigurationException
@@ -102,7 +101,6 @@ public class StreamsConfigLoader {
 	 *
 	 * @param configFile
 	 *            configuration file
-	 *
 	 * @throws SAXException
 	 *             if there was an error parsing the file
 	 * @throws ParserConfigurationException
@@ -120,7 +118,6 @@ public class StreamsConfigLoader {
 	 *
 	 * @param configReader
 	 *            Reader to get configuration data from
-	 *
 	 * @throws SAXException
 	 *             if there was an error parsing the configuration
 	 * @throws ParserConfigurationException
@@ -137,14 +134,12 @@ public class StreamsConfigLoader {
 	 *
 	 * @param config
 	 *            Reader to get configuration data from.
-	 *
 	 * @throws SAXException
 	 *             if there was an error parsing the configuration
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
-	 *
 	 * @see StreamsConfigSAXParser#parse(Reader)
 	 */
 	protected void load(Reader config) throws SAXException, ParserConfigurationException, IOException {
@@ -160,7 +155,6 @@ public class StreamsConfigLoader {
 	 *
 	 * @param streamName
 	 *            name of stream, as specified in configuration file
-	 *
 	 * @return stream with specified name, or {@code null} if no such stream
 	 */
 	public TNTInputStream getStream(String streamName) {
@@ -190,7 +184,6 @@ public class StreamsConfigLoader {
 	 *
 	 * @param parserName
 	 *            name of parser, as specified in configuration file
-	 *
 	 * @return parser with specified name, or {@code null} if no such parser
 	 */
 	public ActivityParser getParser(String parserName) {

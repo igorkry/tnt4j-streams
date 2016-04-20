@@ -110,7 +110,6 @@ public class ActivityInfo {
 	 * @param value
 	 *            value to apply for this field, which could be an array of
 	 *            objects if value for field consists of multiple locations
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined format, etc.)
@@ -191,7 +190,6 @@ public class ActivityInfo {
 	 *            locator information for value
 	 * @param value
 	 *            raw value of field
-	 *
 	 * @return formatted value of field in required internal data type
 	 */
 	protected Object formatValue(ActivityField field, ActivityFieldLocator locator, Object value) {
@@ -388,10 +386,8 @@ public class ActivityInfo {
 	 *            activity item property key
 	 * @param propValue
 	 *            activity item property value
-	 *
 	 * @return previous property value replaced by {@code propValue} or
 	 *         {@code null} if there was no such activity property set
-	 *
 	 * @see Map#put(Object, Object)
 	 * @see #recordActivity(Tracker, long)
 	 */
@@ -475,7 +471,6 @@ public class ActivityInfo {
 	 * @param retryPeriod
 	 *            period in milliseconds between activity resubmission in case
 	 *            of failure
-	 *
 	 * @throws Exception
 	 *             indicates an error building data message or sending data to
 	 *             jKool Cloud Service
@@ -537,14 +532,13 @@ public class ActivityInfo {
 
 	/**
 	 * Builds {@link TrackingEvent} for activity data recording.
-	 * 
+	 *
 	 * @param tracker
 	 *            communication gateway to use to record activity
 	 * @param trackName
 	 *            name of tracking event
 	 * @param trackId
 	 *            identifier (signature) of tracking event
-	 *
 	 * @return tracking event instance
 	 */
 	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId) {

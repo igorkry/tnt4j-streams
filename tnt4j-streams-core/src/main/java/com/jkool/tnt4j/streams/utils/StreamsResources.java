@@ -47,9 +47,7 @@ public final class StreamsResources {
 	 *
 	 * @param bundleName
 	 *            the base name of the resource bundle
-	 *
 	 * @return default locale bound resource bundle
-	 *
 	 * @see ResourceBundle#getBundle(String)
 	 */
 	public static ResourceBundle getBundle(String bundleName) {
@@ -71,7 +69,6 @@ public final class StreamsResources {
 	 *            the base name of the resource bundle
 	 * @param key
 	 *            localized string key
-	 *
 	 * @return localized string
 	 */
 	public static String getString(String bundleName, String key) {
@@ -95,9 +92,7 @@ public final class StreamsResources {
 	 *            localized string key
 	 * @param args
 	 *            formatted string parameters
-	 *
 	 * @return localized string
-	 *
 	 * @see MessageFormat#format(String, Object...)
 	 */
 	public static String getStringFormatted(String bundleName, String key, Object... args) {
@@ -119,7 +114,6 @@ public final class StreamsResources {
 	 *            the base name of the resource bundle
 	 * @param key
 	 *            localized string key
-	 *
 	 * @return localized string for enum constant
 	 */
 	public static String getString(String bundleName, Enum<?> key) {

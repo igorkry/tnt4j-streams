@@ -65,7 +65,6 @@ public class StreamsConfigData {
 	 *
 	 * @param streamName
 	 *            name of stream, as specified in configuration file
-	 *
 	 * @return stream with specified name, or {@code null} if no such stream
 	 */
 	public TNTInputStream getStream(String streamName) {
@@ -77,7 +76,6 @@ public class StreamsConfigData {
 	 *
 	 * @param parserName
 	 *            name of parser, as specified in configuration file
-	 *
 	 * @return parser with specified name, or {@code null} if no such parser
 	 */
 	public ActivityParser getParser(String parserName) {
@@ -86,7 +84,7 @@ public class StreamsConfigData {
 
 	/**
 	 * Checks if configuration has any streams defined.
-	 * 
+	 *
 	 * @return {@code true} if streams collection contains at least one stream
 	 *         object, {@code false} - otherwise.
 	 */
@@ -106,7 +104,7 @@ public class StreamsConfigData {
 
 	/**
 	 * Adds stream object to streams collection.
-	 * 
+	 *
 	 * @param stream
 	 *            stream object to add
 	 */
@@ -120,7 +118,7 @@ public class StreamsConfigData {
 
 	/**
 	 * Adds activity parser object to parsers collection.
-	 * 
+	 *
 	 * @param parser
 	 *            activity parser to add
 	 */

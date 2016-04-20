@@ -202,7 +202,6 @@ public enum StreamFieldType {
 	 *
 	 * @return enumeration class for field, or {@code null} if this field is not
 	 *         an enumeration
-	 *
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -225,6 +224,11 @@ public enum StreamFieldType {
 		}
 	}
 
+	/**
+	 * Checks if field type is {@link Enum}.
+	 *
+	 * @return {@code true} if field is of enum type, {@code false} - otherwise.
+	 */
 	boolean isEnumField() {
 		return dataType == Enum.class;
 	}
@@ -235,10 +239,8 @@ public enum StreamFieldType {
 	 *
 	 * @param enumLabel
 	 *            name of enumeration constant
-	 *
 	 * @return ordinal value for enumeration with specified name, or {@code -1}
 	 *         if this field is not an enumeration
-	 *
 	 * @throws IllegalArgumentException
 	 *             if enumLabel is not a valid enumeration label
 	 */
@@ -267,10 +269,8 @@ public enum StreamFieldType {
 	 *
 	 * @param enumLabel
 	 *            name of enumeration constant
-	 *
 	 * @return enumeration constant, or {@code null} if this field is not an
 	 *         enumeration
-	 *
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -299,10 +299,8 @@ public enum StreamFieldType {
 	 *
 	 * @param value
 	 *            value for enumeration
-	 *
 	 * @return enumLabel name of enumeration constant, or {@code null} if this
 	 *         field is not an enumeration
-	 *
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -331,10 +329,8 @@ public enum StreamFieldType {
 	 *
 	 * @param value
 	 *            value for enumeration
-	 *
 	 * @return enumeration constant, or {@code null} if this field is not an
 	 *         enumeration
-	 *
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -363,9 +359,7 @@ public enum StreamFieldType {
 	 *
 	 * @param ordinal
 	 *            enumeration ordinal value
-	 *
 	 * @return field type enumeration object
-	 *
 	 * @throws IndexOutOfBoundsException
 	 *             if ordinal value is outside the range of enumeration ordinal
 	 *             values
@@ -386,9 +380,7 @@ public enum StreamFieldType {
 	 *
 	 * @param name
 	 *            name of field type
-	 *
 	 * @return field type enumeration object
-	 *
 	 * @throws IllegalArgumentException
 	 *             if name is not a valid enumeration object name
 	 */
@@ -419,7 +411,6 @@ public enum StreamFieldType {
 	 *
 	 * @param name
 	 *            name of field type
-	 *
 	 * @return field type enumeration object, or {@code null} if name is empty
 	 *         or does not match any enumeration object
 	 */

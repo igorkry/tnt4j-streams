@@ -80,7 +80,6 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @param locator
 	 *            key to use to locate raw data value - interpretation of this
 	 *            value depends on locator type
-	 *
 	 * @throws IllegalArgumentException
 	 *             if locator type is a numeric value and is not a positive
 	 *             number
@@ -435,7 +434,6 @@ public class ActivityFieldLocator implements Cloneable {
 	 *
 	 * @param source
 	 *            raw data value
-	 *
 	 * @return converted value
 	 */
 	protected Object getMappedValue(Object source) {
@@ -467,9 +465,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *
 	 * @param value
 	 *            value to format
-	 *
 	 * @return value formatted based on locator definition
-	 *
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified
 	 *             value
@@ -510,9 +506,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *
 	 * @param value
 	 *            raw value of field
-	 *
 	 * @return formatted value of field in required internal data type
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined format, etc.)
@@ -543,9 +537,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *
 	 * @param value
 	 *            raw value of field
-	 *
 	 * @return formatted value of field in required internal data type
-	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field
 	 *             definition (e.g. does not match defined format, etc.)
@@ -665,7 +657,7 @@ public class ActivityFieldLocator implements Cloneable {
 		private Double from;
 		private Double to;
 
-		Range(Double from, Double to) {
+		private Range(Double from, Double to) {
 			this.from = from;
 			this.to = to;
 		}
@@ -709,7 +701,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private static class Calc {
 		private ActivityFieldMappingCalc function;
 
-		Calc(ActivityFieldMappingCalc functionName) {
+		private Calc(ActivityFieldMappingCalc functionName) {
 			this.function = functionName;
 		}
 
@@ -729,7 +721,7 @@ public class ActivityFieldLocator implements Cloneable {
 			return super.equals(obj);
 		}
 
-		public boolean match(Double num) {
+		private boolean match(Double num) {
 			switch (function) {
 			case ODD:
 				return num % 2 != 0;
@@ -747,11 +739,11 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	private class ValueMap<K, V> extends HashMap<K, V> {
-		ValueMap() {
+		private ValueMap() {
 			super();
 		}
 
-		ValueMap(int ic) {
+		private ValueMap(int ic) {
 			super(ic);
 		}
 

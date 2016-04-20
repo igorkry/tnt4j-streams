@@ -99,7 +99,6 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 *
 	 * @param activityItem
 	 *            activity data item
-	 *
 	 * @return activity data item size in bytes
 	 */
 	protected abstract long getActivityItemByteSize(T activityItem);
@@ -116,10 +115,8 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 *
 	 * @param inputData
 	 *            input data to add to buffer
-	 *
 	 * @return {@code true} if input data is added to buffer, {@code false} -
 	 *         otherwise
-	 *
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
@@ -147,7 +144,6 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 * Checks if stream data input is ended.
 	 *
 	 * @return {@code true} if stream input ended, {@code false} - otherwise
-	 *
 	 * @see InputProcessor#isInputEnded()
 	 */
 	protected abstract boolean isInputEnded();
@@ -199,7 +195,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 		/**
 		 * Closes opened data input resources and marks stream data input as
 		 * ended.
-		 * 
+		 *
 		 * @throws Exception
 		 *             if fails to close opened resources due to internal error
 		 */

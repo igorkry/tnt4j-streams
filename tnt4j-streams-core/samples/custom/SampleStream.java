@@ -31,6 +31,8 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Sample custom stream.
+ *
+ * @version $Revision: 1 $
  */
 public class SampleStream extends TNTInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleStream.class);
@@ -105,9 +107,10 @@ public class SampleStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Returns the next line in the file.
-	 *
-	 * @returns string containing next line in file.
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns a string containing the contents of the next line in
+	 * the file.
 	 */
 	@Override
 	public String getNextItem() throws Exception {
@@ -120,7 +123,9 @@ public class SampleStream extends TNTInputStream<String> {
 	}
 
 	/**
-	 * Returns line number of the file last read.
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns line number of the file last read.
 	 */
 	@Override
 	public int getActivityPosition() {

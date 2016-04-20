@@ -49,7 +49,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	/**
 	 * Constructs a new AbstractActivityMapParser.
-	 * 
+	 *
 	 * @param logger
 	 *            logger used by activity parser
 	 */
@@ -94,7 +94,6 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *
 	 * @param data
 	 *            activity object data
-	 *
 	 * @return activity object data map
 	 */
 	protected abstract Map<String, ?> getDataMap(Object data);

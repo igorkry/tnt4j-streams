@@ -57,7 +57,13 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	private int fileNumber = -1;
 	private int lineNumber = 0;
 
+	/**
+	 * Total bytes count available to stream.
+	 */
 	protected int totalBytesCount = 0;
+	/**
+	 * Total lines count available to stream.
+	 */
 	protected int totalLinesCount = 0;
 
 	/**
@@ -211,7 +217,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 *
 	 * @param fileNumber
 	 *            file number in file descriptors collection
-	 *
 	 * @return {@code true} if file descriptors collection contains element with
 	 *         index equal to fileNumber, {@code false} - if file descriptors
 	 *         collection is {@code null} or fileNumber is out if collection
@@ -225,9 +230,7 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 *
 	 * @param fileNumber
 	 *            file number in file descriptors collection
-	 *
 	 * @return file reader
-	 *
 	 * @throws IOException
 	 *             if reader can't be initialized.
 	 */
@@ -238,7 +241,6 @@ public abstract class AbstractFileLineStream extends TNTInputStream<String> {
 	 *
 	 * @param fileNumber
 	 *            file number in file descriptors collection
-	 *
 	 * @return file name
 	 */
 	protected abstract String getFileName(int fileNumber);

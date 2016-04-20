@@ -55,6 +55,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed"; // NON-NLS
 	private static final String CONFIG_ROOT_ELMT = "tnt-data-source"; // NON-NLS
 	private static final String PARSER_ELMT = "parser"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration element {@value}.
+	 */
 	protected static final String STREAM_ELMT = "stream"; // NON-NLS
 	private static final String PROPERTY_ELMT = "property"; // NON-NLS
 	private static final String FIELD_ELMT = "field"; // NON-NLS
@@ -69,6 +72,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String JAVA_OBJ_ELMT = "java-object"; // NON-NLS
 	private static final String PARAM_ELMT = "param"; // NON-NLS
 
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration attribute {@value}.
+	 */
 	protected static final String NAME_ATTR = "name"; // NON-NLS
 	private static final String CLASS_ATTR = "class"; // NON-NLS
 	private static final String VALUE_ATTR = "value"; // NON-NLS
@@ -81,7 +87,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'units'.
+	 * Constant for name of TNT4J-Streams XML configuration attribute {@value}.
 	 */
 	protected static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
@@ -102,6 +108,9 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private static final String REQUIRED_VALUE = "required"; // NON-NLS
 
+	/**
+	 * Currently configured TNT input stream.
+	 */
 	protected TNTInputStream currStream = null;
 	private Collection<Map.Entry<String, String>> currProperties = null;
 	private ActivityParser currParser = null;
@@ -115,6 +124,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	private StreamsConfigData streamsConfigData = null;
 	private Map<String, Object> javaObjectsMap = null;
 
+	/**
+	 * Configuration parsing locator.
+	 */
 	protected Locator currParseLocation = null;
 
 	private boolean processingTNT4JProperties = false;
@@ -128,7 +140,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	/**
 	 * Returns streams and parsers data loaded from configuration.
-	 * 
+	 *
 	 * @return un-marshaled streams and parsers data
 	 */
 	public StreamsConfigData getStreamsConfigData() {
@@ -997,7 +1009,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		private List<Object> args;
 		private List<Class> types;
 
-		void addArg(Object arg) {
+		private void addArg(Object arg) {
 			if (args == null) {
 				args = new ArrayList<Object>();
 			}
@@ -1005,11 +1017,11 @@ public class ConfigParserHandler extends DefaultHandler {
 			args.add(arg);
 		}
 
-		void addType(String typeClass) throws ClassNotFoundException {
+		private void addType(String typeClass) throws ClassNotFoundException {
 			addType(Class.forName(typeClass));
 		}
 
-		void addType(Class typeClass) {
+		private void addType(Class typeClass) {
 			if (types == null) {
 				types = new ArrayList<Class>();
 			}
@@ -1017,11 +1029,11 @@ public class ConfigParserHandler extends DefaultHandler {
 			types.add(typeClass);
 		}
 
-		Object[] getArgs() {
+		private Object[] getArgs() {
 			return args == null ? new Object[0] : args.toArray();
 		}
 
-		Class[] getTypes() {
+		private Class[] getTypes() {
 			Class[] typesArray = new Class[types == null ? 0 : types.size()];
 			if (types != null) {
 				typesArray = types.toArray(typesArray);
@@ -1030,7 +1042,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			return typesArray;
 		}
 
-		void reset() {
+		private void reset() {
 			name = "";
 			className = "";
 			if (args != null) {

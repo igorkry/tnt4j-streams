@@ -179,7 +179,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param props
 	 *            properties to set
-	 *
 	 * @throws Exception
 	 *             indicates error with properties
 	 */
@@ -212,10 +211,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * {@link #setProperties(Collection)}, they should generally override this
 	 * method as well to return the value of custom properties, and invoke the
 	 * base class method to handle any built-in properties.
-	 * 
+	 *
 	 * @param name
 	 *            name of property whose value is to be retrieved
-	 *
 	 * @return value for property, or {@code null} if property does not exist
 	 */
 	public Object getProperty(String name) {
@@ -319,7 +317,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *            property key
 	 * @param value
 	 *            property value
-	 *
 	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
 	 *         if there was no mapping for <tt>key</tt>.
 	 */
@@ -415,7 +412,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param parser
 	 *            parser to add
-	 *
 	 * @throws IllegalStateException
 	 *             if parser can't be added to stream
 	 */
@@ -447,7 +443,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param refObject
 	 *            entity object to reference
-	 *
 	 * @throws IllegalStateException
 	 *             if referenced object can't be linked to stream
 	 */
@@ -470,7 +465,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @return current position in activity data source being processed, or
 	 *         {@code 0} if activity position can't be determined
-	 *
 	 * @see #getCurrentActivity()
 	 */
 	public int getActivityPosition() {
@@ -484,9 +478,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 * <p>
 	 * It does not matter if activity item source changes (i.e. file). To get
 	 * actual source dependent position see {@link #getActivityPosition()}.
-	 * 
-	 * @return currently processed activity item index
 	 *
+	 * @return currently processed activity item index
 	 * @see #getActivityPosition()
 	 * @see #getTotalActivities()
 	 */
@@ -496,10 +489,9 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 	/**
 	 * Returns total number of activity items to be streamed.
-	 * 
+	 *
 	 * @return total number of activities available to stream, or {@code -1} if
 	 *         total number of activities is undetermined
-	 *
 	 * @see #getCurrentActivity()
 	 */
 	public int getTotalActivities() {
@@ -509,7 +501,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Returns size in bytes of activity data items available to stream. If
 	 * total size can't be determined, then {@code 0} is returned.
-	 * 
+	 *
 	 * @return total size in bytes of activity data items
 	 */
 	public long getTotalBytes() {
@@ -518,7 +510,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 	/**
 	 * Returns size in bytes if streamed activity data items.
-	 * 
+	 *
 	 * @return streamed activity data items size in bytes
 	 */
 	public long getStreamedBytesCount() {
@@ -528,7 +520,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Returns number of activity data items skipped from streaming. Item may be
 	 * skipped if it can't be parsed or some non-critical exception occurs.
-	 * 
+	 *
 	 * @return number of skipped activities
 	 */
 	public int getSkippedActivitiesCount() {
@@ -547,7 +539,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 	/**
 	 * Returns duration of streaming process.
-	 * 
+	 *
 	 * @return duration of steaming process
 	 */
 	public long getElapsedTime() {
@@ -558,7 +550,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 	/**
 	 * Creates snapshot of instant stream statistics.
-	 * 
+	 *
 	 * @return snapshot of instant stream statistics
 	 */
 	public StreamStats getStreamStatistics() {
@@ -573,7 +565,6 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @return next raw activity data item, or {@code null} if there is no next
 	 *         item
-	 *
 	 * @throws Exception
 	 *             if any errors occurred getting next item
 	 */
@@ -588,9 +579,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param data
 	 *            raw activity data item.
-	 *
 	 * @return activity information object
-	 *
 	 * @throws Exception
 	 *             if error occurs while parsing raw activity data item
 	 */
@@ -617,10 +606,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *
 	 * @param data
 	 *            activity data item to process
-	 *
 	 * @return processed activity data item, or {@code null} if activity data
 	 *         item does not match rules for any parsers
-	 *
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
@@ -640,10 +627,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 	 *            {@code null}.
 	 * @param data
 	 *            activity data item to process
-	 *
 	 * @return processed activity data item, or {@code null} if activity data
 	 *         item does not match rules for any parsers
-	 *
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
@@ -1059,7 +1044,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Notifies that activity items streaming process detects some notable
 	 * event.
-	 * 
+	 *
 	 * @param level
 	 *            event severity level
 	 * @param message
@@ -1109,7 +1094,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Notifies that stream executor service has rejected offered activity items
 	 * streaming task to queue.
-	 * 
+	 *
 	 * @param task
 	 *            executor rejected task
 	 */
@@ -1124,7 +1109,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 	/**
 	 * Notifies that stream executor service has been shot down and some of
 	 * unprocessed activity items streaming tasks has been dropped of the queue.
-	 * 
+	 *
 	 * @param tasks
 	 *            list of executor dropped of tasks
 	 */
@@ -1145,6 +1130,8 @@ public abstract class TNTInputStream<T> implements Runnable {
 		 *
 		 * @param activityItem
 		 *            raw activity data item to process asynchronously
+		 * @param failureFlag
+		 *            failure flag to set value if task processing fails
 		 */
 		ActivityItemProcessingTask(T activityItem, AtomicBoolean failureFlag) {
 			this.item = activityItem;
@@ -1213,6 +1200,13 @@ public abstract class TNTInputStream<T> implements Runnable {
 			}
 		}
 
+		/**
+		 * Adds defined {@code StreamsThreadFactoryListener} to thread factory
+		 * listeners list.
+		 *
+		 * @param l
+		 *            the {@code StreamsThreadFactoryListener} to be added
+		 */
 		public void addThreadFactoryListener(StreamsThreadFactoryListener l) {
 			if (l == null) {
 				return;
@@ -1225,13 +1219,30 @@ public abstract class TNTInputStream<T> implements Runnable {
 			listeners.add(l);
 		}
 
-		public void removeStreamListener(StreamsThreadFactoryListener l) {
+		/**
+		 * Removes defined {@code StreamsThreadFactoryListener} from thread
+		 * factory listeners list.
+		 *
+		 * @param l
+		 *            the {@code StreamsThreadFactoryListener} to be removed
+		 */
+		public void removeThreadFactoryListener(StreamsThreadFactoryListener l) {
 			if (l != null && listeners != null) {
 				listeners.remove(l);
 			}
 		}
 
+		/**
+		 * A {@link StreamsThreadFactory} listener interface.
+		 */
 		public interface StreamsThreadFactoryListener {
+			/**
+			 * This method gets called when {@link StreamsThreadFactory} creates
+			 * new thread.
+			 *
+			 * @param t
+			 *            factory created thread
+			 */
 			void newThreadCreated(Thread t);
 		}
 	}
@@ -1251,6 +1262,12 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 		private long elapsedTime;
 
+		/**
+		 * Constructs a new StreamStats.
+		 *
+		 * @param stream
+		 *            TNT4J input stream statistics to get
+		 */
 		StreamStats(TNTInputStream stream) {
 			this.activitiesTotal = stream.getTotalActivities();
 			this.currActivity = stream.getCurrentActivity();
@@ -1262,7 +1279,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 		/**
 		 * Returns total number of activities available to stream.
-		 * 
+		 *
 		 * @return total number of available activities
 		 */
 		public int getActivitiesTotal() {
@@ -1307,7 +1324,7 @@ public abstract class TNTInputStream<T> implements Runnable {
 
 		/**
 		 * Returns number of activities skipped by stream.
-		 * 
+		 *
 		 * @return number of skipped activities.
 		 */
 		public long getSkippedActivities() {

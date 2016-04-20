@@ -29,14 +29,14 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
  * Mainly it covers {@link com.jkool.tnt4j.streams.inputs.InputStreamListener}
  * functions mapping stream instance to job definition.
  *
- * @see DefaultStreamingJob#addStreamingJobListener(StreamingJobListener)
- * 
  * @version $Revision: 1 $
+ *
+ * @see DefaultStreamingJob#addStreamingJobListener(StreamingJobListener)
  */
-public interface StreamingJobListener<T> {
+public interface StreamingJobListener {
 	/**
 	 * This method gets called when streaming job progress has updated.
-	 * 
+	 *
 	 * @param job
 	 *            job sending notification
 	 * @param current
@@ -81,7 +81,7 @@ public interface StreamingJobListener<T> {
 	/**
 	 * This method gets called when streaming job has finished independent of
 	 * completion state.
-	 * 
+	 *
 	 * @param job
 	 *            job sending notification
 	 * @param stats
@@ -91,7 +91,7 @@ public interface StreamingJobListener<T> {
 
 	/**
 	 * This method gets called when streaming job detects some notable event.
-	 * 
+	 *
 	 * @param job
 	 *            job sending notification
 	 * @param level

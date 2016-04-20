@@ -72,9 +72,7 @@ public enum MessageType {
 	 *
 	 * @param value
 	 *            enumeration value to convert
-	 *
 	 * @return enumeration member
-	 *
 	 * @throws IllegalArgumentException
 	 *             if there is no member of the enumeration with the specified
 	 *             value
@@ -109,9 +107,7 @@ public enum MessageType {
 	 *
 	 * @param value
 	 *            object to convert
-	 *
 	 * @return enumeration member
-	 *
 	 * @throws IllegalArgumentException
 	 *             if value is {@code null} or object cannot be matched to a
 	 *             member of the enumeration

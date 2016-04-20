@@ -100,10 +100,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            raw activity data string
 	 * @param data
 	 *            prepared activity data item to parse
-	 *
 	 * @return converted activity info, or {@code null} if activity data is
 	 *         {@code null}
-	 *
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified
 	 *             value
@@ -166,14 +164,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity field locator
 	 * @param data
 	 *            activity object data
-	 *
 	 * @return value formatted based on locator definition or {@code null} if
 	 *         locator is not defined
-	 *
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified
 	 *             value
-	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	protected abstract Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, T data)
@@ -184,7 +179,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @param valuesList
 	 *            list of values
-	 * 
 	 * @return extracts actual object if list contains single item, array of
 	 *         values if list contains more than one item, {@code null} if list
 	 *         is empty or {@code valuesList == null}.

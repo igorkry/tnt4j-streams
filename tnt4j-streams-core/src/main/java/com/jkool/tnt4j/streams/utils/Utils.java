@@ -76,7 +76,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param src
 	 *            byte sequence to encode
-	 *
 	 * @return encoded byte sequence
 	 */
 	public static byte[] base64Encode(byte[] src) {
@@ -88,7 +87,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param src
 	 *            byte sequence to decode
-	 *
 	 * @return decoded byte sequence
 	 */
 	public static byte[] base64Decode(byte[] src) {
@@ -101,7 +99,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param src
 	 *            byte sequence to encode
-	 *
 	 * @return encoded character sequence
 	 */
 	public static char[] encodeHex(byte[] src) {
@@ -113,7 +110,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param str
 	 *            String to convert
-	 *
 	 * @return decoded byte sequence
 	 */
 	public static byte[] decodeHex(String str) {
@@ -154,7 +150,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            date (GMT) the message was originated
 	 * @param putTime
 	 *            time (GMT) the message was originated
-	 *
 	 * @return unique message signature
 	 */
 	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
@@ -194,7 +189,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            date (GMT) the message was originated
 	 * @param putTime
 	 *            time (GMT) the message was originated
-	 *
 	 * @return unique message signature
 	 */
 	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
@@ -232,7 +226,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param opType
 	 *            object to be mapped to OpType enumeration constant
-	 *
 	 * @return OpType mapping or {@code null} if mapping not found
 	 */
 	public static OpType mapOpType(Object opType) {
@@ -303,7 +296,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param fileName
 	 *            file name to check if it contains wildcard characters
-	 *
 	 * @return {@code true} if file name contains wildcard characters
 	 */
 	public static boolean isWildcardFileName(String fileName) {
@@ -318,9 +310,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param reader
 	 *            a {@link Reader} object to provide the underlying input stream
-	 *
 	 * @return number of lines currently available in input
-	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -349,7 +339,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * @param lastModif
 	 *            last modification time to compare. If {@code null} - then
 	 *            newest file is returned
-	 *
 	 * @return first file from array which has modification time later than
 	 *         {@code lastModif}, or {@code null} if {@code files} is empty or
 	 *         does not contain readable file with last modification time later
@@ -386,14 +375,11 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            JSON format data object
 	 * @param jsonAsLine
 	 *            flag indicating that complete JSON data package is single line
-	 *
 	 * @return data map parsed from JSON data object
-	 *
 	 * @throws com.google.gson.JsonSyntaxException
 	 *             if there was a problem reading from the Reader
 	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
-	 *
 	 * @see Gson#fromJson(String, Class)
 	 * @see Gson#fromJson(Reader, Class)
 	 */
@@ -430,12 +416,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param data
 	 *            data source object to read string line
-	 *
 	 * @return string line read from data source
-	 *
 	 * @throws IOException
 	 *             If an I/O error occurs while reading line
-	 *
 	 * @see BufferedReader#readLine()
 	 */
 	public static String getStringLine(Object data) throws IOException {
@@ -477,7 +460,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param tagsData
 	 *            tags data object
-	 *
 	 * @return tag strings array, or {@code null} if arrays can't be made
 	 */
 	@SuppressWarnings("unchecked")
@@ -503,11 +485,10 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 * Cleans raw activity data. If activity data is string, removes 'new line'
 	 * symbols from it. Returns same object otherwise.
 	 *
-	 * @param activityData
-	 *            raw activity data
 	 * @param <T>
 	 *            type of raw activity data
-	 *
+	 * @param activityData
+	 *            raw activity data
 	 * @return raw activity data without 'new line' symbols
 	 */
 	@SuppressWarnings("unchecked")
@@ -528,9 +509,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
-	 *
 	 * @return string constructed from specified byte array
-	 *
 	 * @see String#String(byte[], Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
@@ -552,7 +531,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param str
 	 *            string to find UUID
-	 * 
 	 * @return found uuid
 	 */
 	public static UUID findUUID(String str) {
@@ -570,9 +548,7 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param doc
 	 *            document to transform to string
-	 *
 	 * @return XML string representation of document
-	 *
 	 * @throws TransformerException
 	 *             If an exception occurs while transforming XML DOM document to
 	 *             string
@@ -601,7 +577,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            first double to compare
 	 * @param d2
 	 *            second double to compare
-	 *
 	 * @return {@code true} if difference is less than epsilon, {@code false} -
 	 *         otherwise
 	 */
@@ -612,14 +587,13 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	/**
 	 * Checks equality of two double numbers with given difference tolerance
 	 * {@code epsilon}.
-	 * 
+	 *
 	 * @param d1
 	 *            first double to compare
 	 * @param d2
 	 *            second double to compare
 	 * @param epsilon
 	 *            value of difference tolerance
-	 *
 	 * @return {@code true} if difference is less than epsilon, {@code false} -
 	 *         otherwise
 	 */
@@ -669,10 +643,8 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *
 	 * @param reader
 	 *            reader to use for reading
-	 *
 	 * @return non empty text string, or {@code null} if the end of the stream
 	 *         has been reached
-	 *
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -697,7 +669,6 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	 *            input stream to read
 	 * @param separateLines
 	 *            flag indicating whether to make string lines separated
-	 *
 	 * @return string read from input stream
 	 */
 	public static String readInput(InputStream is, boolean separateLines) {
@@ -720,10 +691,9 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 	/**
 	 * Gets a string representation of specified object for use in debugging,
 	 * which includes the value of each object field.
-	 * 
+	 *
 	 * @param obj
 	 *            object to get debugging info
-	 *
 	 * @return debugging string representation
 	 */
 	public static String getDebugString(Object obj) {

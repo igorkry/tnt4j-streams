@@ -27,10 +27,9 @@ import java.util.List;
  * Note, that {@code TNTInputStream} should use executors to get this listener
  * notified.
  *
- * @see TNTInputStream#addStreamTasksListener(StreamTasksListener)
- *
  * @version $Revision: 1 $
  *
+ * @see TNTInputStream#addStreamTasksListener(StreamTasksListener)
  */
 public interface StreamTasksListener {
 
@@ -49,7 +48,7 @@ public interface StreamTasksListener {
 	 * This method gets called when stream executor service has been shot down
 	 * and some of unprocessed activity items streaming tasks has been dropped
 	 * of the queue.
-	 * 
+	 *
 	 * @param stream
 	 *            stream sending notification
 	 * @param tasks

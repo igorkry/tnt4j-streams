@@ -49,7 +49,6 @@ public class StreamsThread extends Thread {
 	 *
 	 * @param target
 	 *            object whose {@link Runnable#run()} method is called
-	 *
 	 * @see Thread#Thread(Runnable)
 	 */
 	public StreamsThread(Runnable target) {
@@ -64,7 +63,6 @@ public class StreamsThread extends Thread {
 	 *            object whose {@link Runnable#run()} method is called
 	 * @param name
 	 *            name of thread
-	 *
 	 * @see Thread#Thread(Runnable, String)
 	 */
 	public StreamsThread(Runnable target, String name) {
@@ -77,7 +75,6 @@ public class StreamsThread extends Thread {
 	 *
 	 * @param name
 	 *            name of thread
-	 *
 	 * @see Thread#Thread(String)
 	 */
 	public StreamsThread(String name) {
@@ -92,7 +89,6 @@ public class StreamsThread extends Thread {
 	 *            thread group to add new thread to
 	 * @param target
 	 *            object whose {@link Runnable#run()} method is called
-	 *
 	 * @see Thread#Thread(ThreadGroup, Runnable)
 	 */
 	public StreamsThread(ThreadGroup threadGrp, Runnable target) {
@@ -109,7 +105,6 @@ public class StreamsThread extends Thread {
 	 *            object whose {@link Runnable#run()} method is called
 	 * @param name
 	 *            name of thread
-	 *
 	 * @see Thread#Thread(ThreadGroup, Runnable, String)
 	 */
 	public StreamsThread(ThreadGroup threadGrp, Runnable target, String name) {
@@ -124,7 +119,6 @@ public class StreamsThread extends Thread {
 	 *            thread group to add new thread to
 	 * @param name
 	 *            name of thread
-	 *
 	 * @see Thread#Thread(ThreadGroup, String)
 	 */
 	public StreamsThread(ThreadGroup threadGrp, String name) {
@@ -171,7 +165,6 @@ public class StreamsThread extends Thread {
 	 *
 	 * @param millis
 	 *            the length of time to sleep in milliseconds
-	 *
 	 * @see Thread#sleep(long)
 	 */
 	public static void sleep(long millis) {
@@ -194,7 +187,6 @@ public class StreamsThread extends Thread {
 	 *
 	 * @param millis
 	 *            the length of time to sleep in milliseconds
-	 *
 	 * @see Thread#sleep(long)
 	 */
 	public void sleepFully(long millis) {
@@ -234,7 +226,6 @@ public class StreamsThread extends Thread {
 	 *
 	 * @param millis
 	 *            time to wait in milliseconds
-	 *
 	 * @see Thread#join()
 	 */
 	public void waitFor(long millis) {
