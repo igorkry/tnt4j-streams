@@ -33,8 +33,6 @@ import com.jkool.tnt4j.streams.inputs.TNTInputStream;
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Implements the SAX DefaultHandler for parsing TNT4J-Streams configuration.
@@ -45,65 +43,166 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see com.jkool.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class ConfigParserHandler extends DefaultHandler {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
 
 	/**
 	 * Constant for default location delimiter in configuration definition.
 	 */
 	public static final String LOC_DELIM = "|"; // NON-NLS
 
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String CONFIG_ROOT_ELMT_OLD = "tw-direct-feed"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String CONFIG_ROOT_ELMT = "tnt-data-source"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String PARSER_ELMT = "parser"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration element {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	protected static final String STREAM_ELMT = "stream"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String PROPERTY_ELMT = "property"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String FIELD_ELMT = "field"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String FIELD_MAP_ELMT = "field-map"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String FIELD_LOC_ELMT = "field-locator"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String PARSER_REF_ELMT = "parser-ref"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String TNT4J_PROPERTIES_ELMT = "tnt4j-properties"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String FILTER_ELMT = "filter"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String RULE_ELMT = "rule"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String STEP_ELMT = "step"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String REF_ELMT = "reference"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String JAVA_OBJ_ELMT = "java-object"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String PARAM_ELMT = "param"; // NON-NLS
 
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration attribute {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
 	 */
 	protected static final String NAME_ATTR = "name"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String CLASS_ATTR = "class"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String VALUE_ATTR = "value"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String LOC_TYPE_ATTR = "locator-type"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String LOCATOR_ATTR = "locator"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String SEPARATOR_ATTR = "separator"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'data type'.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
 	 */
 	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration attribute {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
 	 */
 	protected static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'format'.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
 	 */
 	private static final String FORMAT_ATTR = "format"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'locale'.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
 	 */
 	private static final String LOCALE_ATTR = "locale"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String SOURCE_ATTR = "source";
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String TARGET_ATTR = "target"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String TYPE_ATTR = "type"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String FIELD_REF_ATTR = "field-ref"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String COMPARATOR_ATTR = "comparator"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
 	private static final String TAGS_ATTR = "tags"; // NON-NLS
 
 	private static final String REQUIRED_VALUE = "required"; // NON-NLS
