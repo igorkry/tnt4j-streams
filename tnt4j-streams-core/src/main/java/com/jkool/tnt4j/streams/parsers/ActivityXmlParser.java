@@ -64,19 +64,19 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
 
 	/**
-	 * Constant for XML tag attribute name 'data type'.
+	 * Constant for XML tag attribute name {@value}.
 	 */
 	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'units'.
+	 * Constant for XML tag attribute name {@value}.
 	 */
 	private static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'format'.
+	 * Constant for XML tag attribute name {@value}.
 	 */
 	private static final String FORMAT_ATTR = "format"; // NON-NLS
 	/**
-	 * Constant for XML tag attribute name 'locale'.
+	 * Constant for XML tag attribute name {@value}.
 	 */
 	private static final String LOCALE_ATTR = "locale"; // NON-NLS
 
