@@ -18,7 +18,7 @@ package com.jkool.tnt4j.streams.fields;
 
 /**
  * This class defines TNT4J-Streams-WS configuration scenario step.
- * 
+ *
  * @version $Revision: 1 $
  */
 public class WsScenarioStep {
@@ -64,7 +64,7 @@ public class WsScenarioStep {
 	 * <p>
 	 * Used by {@link com.jkool.tnt4j.streams.inputs.RestStream} and
 	 * {@link com.jkool.tnt4j.streams.inputs.WsStream}.
-	 * 
+	 *
 	 * @param urlStr
 	 *            service URL string.
 	 */
@@ -74,7 +74,7 @@ public class WsScenarioStep {
 
 	/**
 	 * Returns request/command data.
-	 * 
+	 *
 	 * @return request data
 	 */
 	public String getRequest() {
@@ -95,7 +95,7 @@ public class WsScenarioStep {
 	 * Returns request invocation method name.
 	 * <p>
 	 * Used by {@link com.jkool.tnt4j.streams.inputs.RestStream}.
-	 * 
+	 *
 	 * @return request invocation method name
 	 */
 	public String getMethod() {

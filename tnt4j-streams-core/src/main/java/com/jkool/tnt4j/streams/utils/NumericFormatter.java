@@ -22,9 +22,6 @@ import java.text.ParseException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
-
 /**
  * Provides methods for parsing objects into numeric values and for formatting
  * numeric values as strings.
@@ -34,7 +31,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see DecimalFormat
  */
 public class NumericFormatter {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(NumericFormatter.class);
 
 	private int radix = 10;
 	private String pattern = null;
@@ -198,7 +194,6 @@ public class NumericFormatter {
 			if (formatter == null && value instanceof String) {
 				String strValue = (String) value;
 				if (strValue.startsWith("0x") || strValue.startsWith("0X")) { // NON-NLS
-																				// NON-NLS
 					numValue = Long.parseLong(strValue.substring(2), 16);
 				}
 			}

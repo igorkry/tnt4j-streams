@@ -32,7 +32,7 @@ public class SimpleSchedulerData implements SchedulerData {
 	/**
 	 * Constructs a new SimpleSchedulerData. Defines invocations interval in
 	 * milliseconds.
-	 * 
+	 *
 	 * @param interval
 	 *            request/call/command invocations interval.
 	 */
@@ -43,8 +43,8 @@ public class SimpleSchedulerData implements SchedulerData {
 
 	/**
 	 * Returns request/call/command invocations interval
-	 * 
-	 * @return request/call/command invocations interval.
+	 *
+	 * @return request /call/command invocations interval.
 	 */
 	public int getInterval() {
 		return interval;
@@ -61,7 +61,7 @@ public class SimpleSchedulerData implements SchedulerData {
 
 	/**
 	 * Sets invocation interval time units.
-	 * 
+	 *
 	 * @param units
 	 *            interval time units.
 	 */

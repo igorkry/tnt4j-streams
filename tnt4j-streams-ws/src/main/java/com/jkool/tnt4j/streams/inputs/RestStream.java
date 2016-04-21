@@ -63,6 +63,15 @@ public class RestStream extends AbstractWsStream {
 				.usingJobData(JOB_PROP_REQ_METHOD_KEY, step.getMethod()).build();
 	}
 
+	/**
+	 * TODO.
+	 *
+	 * @param uriStr
+	 *            the uri str
+	 * @return the string
+	 * @throws Exception
+	 *             the exception
+	 */
 	protected static String executeGET(String uriStr) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS,
@@ -95,6 +104,17 @@ public class RestStream extends AbstractWsStream {
 		return respStr;
 	}
 
+	/**
+	 * TODO.
+	 *
+	 * @param uriStr
+	 *            the uri str
+	 * @param reqData
+	 *            the req data
+	 * @return the string
+	 * @throws Exception
+	 *             the exception
+	 */
 	protected static String executePOST(String uriStr, String reqData) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS,

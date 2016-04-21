@@ -255,7 +255,18 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 * TODO
 	 */
 	enum ReqMethod {
-		GET, POST, COMMAND
+		/**
+		 * Get req method.
+		 */
+		GET,
+		/**
+		 * Post req method.
+		 */
+		POST,
+		/**
+		 * Command req method.
+		 */
+		COMMAND
 	}
 
 }

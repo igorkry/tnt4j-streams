@@ -24,8 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkool.tnt4j.streams.parsers.ActivityParser;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Represents a specific activity field, containing the necessary information on
@@ -34,7 +32,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @version $Revision: 1 $
  */
 public class ActivityField {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
 	private final String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;

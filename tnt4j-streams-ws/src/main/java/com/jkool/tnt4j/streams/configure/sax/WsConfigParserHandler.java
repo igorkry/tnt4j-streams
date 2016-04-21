@@ -31,8 +31,6 @@ import com.jkool.tnt4j.streams.fields.WsScenarioStep;
 import com.jkool.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.WsStreamConstants;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Extends default TNT4J-Streams configuration SAX parser handler and adds
@@ -44,7 +42,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see com.jkool.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class WsConfigParserHandler extends ConfigParserHandler {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsConfigParserHandler.class);
 
 	private static final String SCENARIO_ELMT = "scenario"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS

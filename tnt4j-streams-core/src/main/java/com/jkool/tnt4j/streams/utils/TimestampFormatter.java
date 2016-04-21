@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 import com.nastel.jkool.tnt4j.core.UsecTimestamp;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * <p>
@@ -46,7 +44,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see UsecTimestamp
  */
 public class TimestampFormatter {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TimestampFormatter.class);
 
 	private String pattern = null;
 	private String timeZone = null;

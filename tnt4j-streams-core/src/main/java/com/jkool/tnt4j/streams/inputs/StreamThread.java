@@ -17,8 +17,6 @@
 package com.jkool.tnt4j.streams.inputs;
 
 import com.jkool.tnt4j.streams.utils.StreamsThread;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
  * Base class for threads running an TNTInputStream.
@@ -28,7 +26,6 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see TNTInputStream
  */
 public class StreamThread extends StreamsThread {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamThread.class);
 
 	/**
 	 * TNTInputStream being executed by this thread.
