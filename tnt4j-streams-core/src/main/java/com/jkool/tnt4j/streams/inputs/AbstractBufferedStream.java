@@ -120,7 +120,7 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
-		if (inputData != null) {
+		if (inputData != null && !isHalted()) {
 			try {
 				boolean added = inputBuffer.offer(inputData, INPUT_BUFFER_OFFER_TIMEOUT, TimeUnit.SECONDS);
 

@@ -74,7 +74,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 
 	/**
 	 * Constructs a new AbstractFilePollingStream.
-	 * 
+	 *
 	 * @param logger
 	 *            logger used by activity stream
 	 */
@@ -158,6 +158,16 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns line number of the file last read.
+	 */
+	@Override
+	public int getActivityPosition() {
+		return logWatcher == null ? 0 : logWatcher.lineNumber;
+	}
+
+	/**
 	 * Base class containing common log watcher features.
 	 */
 	protected abstract class LogWatcher extends InputProcessor {
@@ -181,7 +191,7 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 
 		/**
 		 * Constructs a new LogWatcher.
-		 * 
+		 *
 		 * @param name
 		 *            the name of log watcher thread
 		 */
@@ -230,17 +240,16 @@ public abstract class AbstractFilePollingStream extends AbstractBufferedStream<S
 		 *
 		 * @param lnr
 		 *            line number reader
-		 * 
 		 * @throws IOException
 		 *             if error occurs when reading log line
 		 */
 		protected void readNewLogLines(LineNumberReader lnr) throws IOException {
 			String line;
-			while ((line = lnr.readLine()) != null) {
+			while ((line = lnr.readLine()) != null && !isInputEnded()) {
+				lineNumber = lnr.getLineNumber();
 				if (StringUtils.isNotEmpty(line)) {
 					addInputToBuffer(line);
 				}
-				lineNumber = lnr.getLineNumber();
 			}
 		}
 	}

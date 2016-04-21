@@ -187,12 +187,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	@Override
 	protected void cleanup() {
-		try {
-			mqttDataReceiver.close();
-		} catch (MqttException exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_MQTT,
-					"MqttStream.error.closing.receiver"), exc);
-		}
+		mqttDataReceiver.shutdown();
 
 		super.cleanup();
 	}
@@ -263,8 +258,10 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		 *             if Mqtt fails to disconnect client due to internal error
 		 */
 		@Override
-		void close() throws MqttException {
-			halt();
+		void close() throws Exception {
+			closeConnection();
+
+			super.close();
 		}
 
 		private void closeConnection() throws MqttException {
