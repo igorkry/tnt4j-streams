@@ -492,6 +492,8 @@ public class ActivityInfo {
 
 		if (eventType == OpType.ACTIVITY) {
 			trackable = buildActivity(tracker, eventName, trackId);
+		} else if (eventType == OpType.SNAPSHOT) {
+			trackable = buildSnapshot(tracker, eventName, trackId);
 		} else {
 			trackable = buildEvent(tracker, eventName, trackId);
 		}
@@ -671,6 +673,75 @@ public class ActivityInfo {
 		}
 
 		return activity;
+	}
+
+	/**
+	 * Builds {@link Snapshot} for activity data recording.
+	 *
+	 * @param tracker
+	 *            communication gateway to use to record snapshot
+	 * @param trackName
+	 *            name of snapshot
+	 * @param trackId
+	 *            identifier (signature) of snapshot
+	 *
+	 * @return snapshot instance
+	 */
+	private Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
+		PropertySnapshot snapshot = (PropertySnapshot) tracker.newSnapshot(trackName);
+		snapshot.setTrackingId(trackId);
+		snapshot.setParentId(parentId);
+		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);
+		if (CollectionUtils.isNotEmpty(correlator)) {
+			snapshot.setCorrelator(correlator);
+		}
+		if (CollectionUtils.isNotEmpty(tag)) {
+			snapshot.add(JSONFormatter.JSON_MSG_TAG_FIELD, tag);
+		}
+		if (message != null) {
+			String strData;
+			if (message instanceof byte[]) {
+				byte[] binData = (byte[]) message;
+				strData = new String(Base64.encodeBase64(binData));
+				msgEncoding = "base64"; // NON-NLS
+				msgMimeType = "application/octet-stream"; // NON-NLS
+			} else {
+				strData = String.valueOf(message);
+			}
+
+			addActivityProperty(JSONFormatter.JSON_MSG_TEXT_FIELD, strData);
+			addActivityProperty(JSONFormatter.JSON_MSG_SIZE_FIELD, msgLength == null ? strData.length() : msgLength);
+		}
+		if (StringUtils.isNotEmpty(msgMimeType)) {
+			snapshot.add(JSONFormatter.JSON_MSG_MIME_FIELD, msgMimeType);
+		}
+		if (StringUtils.isNotEmpty(msgEncoding)) {
+			snapshot.add(JSONFormatter.JSON_MSG_ENC_FIELD, msgEncoding);
+		}
+		if (StringUtils.isNotEmpty(msgCharSet)) {
+			snapshot.add(JSONFormatter.JSON_MSG_CHARSET_FIELD, msgCharSet);
+		}
+
+		snapshot.add(JSONFormatter.JSON_COMP_CODE_FIELD, compCode == null ? OpCompCode.SUCCESS : compCode);
+		snapshot.add(JSONFormatter.JSON_REASON_CODE_FIELD, reasonCode);
+		snapshot.add(JSONFormatter.JSON_TYPE_FIELD, eventType);
+		snapshot.add(JSONFormatter.JSON_EXCEPTION_FIELD, exception);
+		if (StringUtils.isNotEmpty(location)) {
+			snapshot.add(JSONFormatter.JSON_LOCATION_FIELD, location);
+		}
+		snapshot.add(JSONFormatter.JSON_RESOURCE_FIELD, resourceName);
+		snapshot.add(JSONFormatter.JSON_USER_FIELD,
+				StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
+		snapshot.add(JSONFormatter.JSON_TID_FIELD, threadId == null ? Thread.currentThread().getId() : threadId);
+		snapshot.add(JSONFormatter.JSON_PID_FIELD, processId == null ? Utils.getVMPID() : processId);
+
+		if (activityProperties != null) {
+			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
+				snapshot.add(ape.getKey(), ape.getValue());
+			}
+		}
+
+		return snapshot;
 	}
 
 	private static void addTrackableProperty(Operation trackableOp, String key, Object value) {
