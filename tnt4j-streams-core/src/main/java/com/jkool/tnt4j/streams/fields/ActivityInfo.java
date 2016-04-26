@@ -507,6 +507,8 @@ public class ActivityInfo {
 			try {
 				if (trackable instanceof TrackingActivity) {
 					tracker.tnt((TrackingActivity) trackable);
+				} else if (trackable instanceof Snapshot) {
+					tracker.tnt((Snapshot) trackable);
 				} else {
 					tracker.tnt((TrackingEvent) trackable);
 				}
