@@ -37,8 +37,21 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * Implements a scheduled JAX-WS service call activity stream, where each call
+ * responce is assumed to represent a single activity or event which should be
+ * recorded.
+ * <p>
+ * Service call is performed by invoking
+ * {@link SOAPConnection#call(SOAPMessage, Object)}. Provided request XML data
+ * is set as {@link SOAPMessage} body data.
+ * <p>
+ * This activity stream requires parsers that can support {@link String} data.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
+ * @see SOAPConnection#call(SOAPMessage, Object)
  */
 public class WsStream extends AbstractWsStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsStream.class);
@@ -53,20 +66,25 @@ public class WsStream extends AbstractWsStream {
 
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
+		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+
 		return JobBuilder.newJob(WsCallJob.class).withIdentity(scenario.getName() + ":" + step.getName()) // NON-NLS
-				.usingJobData(jobAttrs).usingJobData(JOB_PROP_URL_KEY, step.getUrlStr())
-				.usingJobData(JOB_PROP_REQ_KEY, step.getRequest()).build();
+				.usingJobData(jobAttrs).build();
 	}
 
 	/**
-	 * TODO
+	 * Performs JAX-WS service call using SOAP API.
 	 *
-	 * @param soapRequestXml
 	 * @param url
-	 * @return
+	 *            JAX-WS service URL
+	 * @param soapRequestXml
+	 *            JAX-WS service request body data as XML string
+	 * @return service responce string
 	 * @throws Exception
+	 *             if exception occurs while performing JAX-WS service call
 	 */
-	protected static String callWebService(String soapRequestXml, String url) throws Exception {
+	protected static String callWebService(String url, String soapRequestXml) throws Exception {
 		if (StringUtils.isEmpty(url)) {
 			LOGGER.log(OpLevel.DEBUG,
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "WsStream.cant.execute.request"),
@@ -110,12 +128,12 @@ public class WsStream extends AbstractWsStream {
 	}
 
 	/**
-	 * TODO
+	 * Scheduler job to execute JAX-WS call.
 	 */
 	public static class WsCallJob implements Job {
 
 		/**
-		 * TODO
+		 * Constructs a new WsCallJob.
 		 */
 		public WsCallJob() {
 		}
@@ -131,7 +149,7 @@ public class WsStream extends AbstractWsStream {
 			String reqData = dataMap.getString(JOB_PROP_REQ_KEY);
 
 			try {
-				respStr = callWebService(reqData, urlStr);
+				respStr = callWebService(urlStr, reqData);
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.WARNING,
 						StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "WsStream.execute.exception"),

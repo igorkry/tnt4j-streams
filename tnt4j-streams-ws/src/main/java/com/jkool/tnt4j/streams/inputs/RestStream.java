@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -36,14 +37,28 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * Implements a scheduled JAX-RS service call activity stream, where each call
+ * responce is assumed to represent a single activity or event which should be
+ * recorded.
+ * <p>
+ * Service call is performed by invoking
+ * {@link org.apache.http.client.HttpClient#execute(HttpUriRequest)} with GET or
+ * POST method request depending on scenario step configuration parameter
+ * 'method'. Default method is GET.
+ * <p>
+ * This activity stream requires parsers that can support {@link String} data.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
+ * @see org.apache.http.client.HttpClient#execute(HttpUriRequest)
  */
 public class RestStream extends AbstractWsStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RestStream.class);
 
 	/**
-	 * TODO
+	 * Constant for name of built-in scheduler job property {@value}.
 	 */
 	protected static final String JOB_PROP_REQ_METHOD_KEY = "reqMethod"; // NON-NLS
 
@@ -57,20 +72,22 @@ public class RestStream extends AbstractWsStream {
 
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
+		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+		jobAttrs.put(JOB_PROP_REQ_METHOD_KEY, step.getMethod());
+
 		return JobBuilder.newJob(RestCallJob.class).withIdentity(scenario.getName() + ":" + step.getName()) // NON-NLS
-				.usingJobData(jobAttrs).usingJobData(JOB_PROP_URL_KEY, step.getUrlStr())
-				.usingJobData(JOB_PROP_REQ_KEY, step.getRequest())
-				.usingJobData(JOB_PROP_REQ_METHOD_KEY, step.getMethod()).build();
+				.usingJobData(jobAttrs).build();
 	}
 
 	/**
-	 * TODO.
+	 * Performs JAX-RS service call over HTTP GET method request.
 	 *
 	 * @param uriStr
-	 *            the uri str
-	 * @return the string
+	 *            JAX-RS service URI
+	 * @return service responce string
 	 * @throws Exception
-	 *             the exception
+	 *             if exception occurs while performing JAX-RS service call
 	 */
 	protected static String executeGET(String uriStr) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
@@ -105,15 +122,15 @@ public class RestStream extends AbstractWsStream {
 	}
 
 	/**
-	 * TODO.
+	 * Performs JAX-RS service call over HTTP POST method request.
 	 *
 	 * @param uriStr
-	 *            the uri str
+	 *            JAX-RS service URI
 	 * @param reqData
-	 *            the req data
-	 * @return the string
+	 *            request data
+	 * @return service responce string
 	 * @throws Exception
-	 *             the exception
+	 *             if exception occurs while performing JAX-RS service call
 	 */
 	protected static String executePOST(String uriStr, String reqData) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
@@ -238,14 +255,14 @@ public class RestStream extends AbstractWsStream {
 	// }
 
 	/**
-	 * TODO
+	 * Scheduler job to execute JAX-RS call.
 	 */
-	public static class RestCallJob implements Job {
+	private static class RestCallJob implements Job {
 
 		/**
-		 * TODO
+		 * Constructs a new RestCallJob.
 		 */
-		public RestCallJob() {
+		private RestCallJob() {
 		}
 
 		@Override

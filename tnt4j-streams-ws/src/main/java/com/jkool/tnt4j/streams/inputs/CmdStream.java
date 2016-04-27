@@ -29,8 +29,19 @@ import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * Implements a scheduled system command call activity stream, where each call
+ * responce is assumed to represent a single activity or event which should be
+ * recorded.
+ * <p>
+ * System command call is performed by invoking {@link Runtime#exec(String)}.
+ * <p>
+ * This activity stream requires parsers that can support {@link String} data.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
+ * @see java.lang.Runtime#exec(String)
  */
 public class CmdStream extends AbstractWsStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CmdStream.class);
@@ -45,41 +56,45 @@ public class CmdStream extends AbstractWsStream {
 
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+
 		return JobBuilder.newJob(CmdCallJob.class).withIdentity(scenario.getName() + ":" + step.getName()) // NON-NLS
-				.usingJobData(jobAttrs).usingJobData(JOB_PROP_REQ_KEY, step.getRequest()).build();
+				.usingJobData(jobAttrs).build();
 	}
 
 	/**
-	 * TODO
+	 * Performs system command call.
 	 * 
-	 * @param reqData
-	 * @return
+	 * @param cmdData
+	 *            command data: name and parameters
+	 * @return command response string
 	 * @throws Exception
+	 *             if exception occurs while performing system command call
 	 */
-	protected static String executeCommand(String reqData) throws Exception {
-		if (StringUtils.isEmpty(reqData)) {
+	protected static String executeCommand(String cmdData) throws Exception {
+		if (StringUtils.isEmpty(cmdData)) {
 			LOGGER.log(OpLevel.DEBUG,
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "CmdStream.cant.execute.cmd"),
-					reqData);
+					cmdData);
 			return null;
 		}
 
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "CmdStream.invoking.command"),
-				reqData);
+				cmdData);
 
-		Process p = Runtime.getRuntime().exec(reqData);
+		Process p = Runtime.getRuntime().exec(cmdData);
 
 		return Utils.readInput(p.getInputStream(), false);
 	}
 
 	/**
-	 * TODO.
+	 * Scheduler job to execute system command call.
 	 */
 	public static class CmdCallJob implements Job {
 
 		/**
-		 * TODO.
+		 * Constructs a new CmdCallJob.
 		 */
 		public CmdCallJob() {
 		}

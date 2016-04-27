@@ -34,21 +34,29 @@ import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * <p>
+ * Base class for scheduled service or system command request/call produced
+ * activity stream, where each call/request responce is assumed to represent a
+ * single activity or event which should be recorded.
+ * <p>
+ * This activity stream requires parsers that can support {@link String} data.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkool.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	/**
-	 * TODO
+	 * Constant for name of built-in scheduler job property {@value}.
 	 */
 	protected static final String JOB_PROP_STREAM_KEY = "streamObj"; // NON-NLS
 	/**
-	 * TODO
+	 * Constant for name of built-in scheduler job property {@value}.
 	 */
 	protected static final String JOB_PROP_URL_KEY = "urlStr"; // NON-NLS
 	/**
-	 * TODO
+	 * Constant for name of built-in scheduler job property {@value}.
 	 */
 	protected static final String JOB_PROP_REQ_KEY = "reqData"; // NON-NLS
 
@@ -170,12 +178,15 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	}
 
 	/**
-	 * TODO
+	 * Builds scheduler job for call scenario step.
 	 * 
 	 * @param scenario
+	 *            scenario details
 	 * @param step
+	 *            scenario step details
 	 * @param jobAttrs
-	 * @return
+	 *            additional job attributes
+	 * @return scheduler job detail object.
 	 */
 	protected abstract JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs);
 
@@ -185,9 +196,10 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	}
 
 	/**
-	 * TODO
+	 * Adds scenario to scenarios list.
 	 *
 	 * @param scenario
+	 *            scenario to be added to list
 	 */
 	public void addScenario(WsScenario scenario) {
 		if (scenarioList == null) {
@@ -252,19 +264,19 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	}
 
 	/**
-	 * TODO
+	 * Request method types enumeration.
 	 */
 	enum ReqMethod {
 		/**
-		 * Get req method.
+		 * Request method GET.
 		 */
 		GET,
 		/**
-		 * Post req method.
+		 * Request method POST.
 		 */
 		POST,
 		/**
-		 * Command req method.
+		 * Request method COMMAND.
 		 */
 		COMMAND
 	}
