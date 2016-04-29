@@ -60,8 +60,6 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
 
-	private StringBuilder cdata;
-
 	@Override
 	public void startDocument() throws SAXException {
 		super.startDocument();
@@ -224,16 +222,6 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		}
 
 		cdata = new StringBuilder();
-	}
-
-	@Override
-	public void characters(char[] ch, int start, int length) throws SAXException {
-
-		String cdata = new String(ch, start, length);
-
-		if (this.cdata != null) {
-			this.cdata.append(cdata);
-		}
 	}
 
 	@Override

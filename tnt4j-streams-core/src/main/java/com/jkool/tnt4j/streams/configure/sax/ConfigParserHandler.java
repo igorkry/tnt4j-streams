@@ -230,6 +230,12 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private boolean processingTNT4JProperties = false;
 	private JavaObjectData javaObjectData = null;
+	private Property currProperty = null;
+
+	/**
+	 * Buffer to put element data value
+	 */
+	protected StringBuilder cdata;
 
 	/**
 	 * Constructs a new ConfigurationParserHandler.
@@ -757,6 +763,11 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration3", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT),
 					currParseLocation);
 		}
+
+		if (currProperty == null) {
+			currProperty = new Property();
+		}
+
 		String name = null;
 		String value = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
@@ -772,19 +783,11 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, NAME_ATTR), currParseLocation);
 		}
-		if (value == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR), currParseLocation);
-		}
+		
+		currProperty.name = name;
+		currProperty.value = value;
 
-		if (processingTNT4JProperties) {
-			currStream.addTNT4JProperty(name, value);
-		} else {
-			if (currProperties == null) {
-				currProperties = new ArrayList<Map.Entry<String, String>>();
-			}
-			currProperties.add(new AbstractMap.SimpleEntry<String, String>(name, value));
-		}
+		cdata = new StringBuilder();
 	}
 
 	/**
@@ -825,7 +828,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			currField.addStackedParser(parser);
 		} else {
 			try {
-				currStream.addParser(parser);
+				currStream.addReference(parser);
 			} catch (IllegalStateException exc) {
 				throw new SAXParseException(
 						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
@@ -1032,6 +1035,16 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	@Override
+	public void characters(char[] ch, int start, int length) throws SAXException {
+
+		String cdata = new String(ch, start, length);
+
+		if (this.cdata != null) {
+			this.cdata.append(cdata);
+		}
+	}
+
+	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
 			if (STREAM_ELMT.equals(qName)) {
@@ -1065,6 +1078,40 @@ public class ConfigParserHandler extends DefaultHandler {
 				if (javaObjectData != null) {
 					constructJavaObject(javaObjectData);
 					javaObjectData.reset();
+				}
+			} else if (PROPERTY_ELMT.equals(qName)) {
+				if (currProperty != null) {
+					if (cdata != null) {
+						String cDataVal = cdata.toString().trim();
+
+						if (currProperty.value != null && cDataVal.length() > 0) {
+							throw new SAXException(StreamsResources.getStringFormatted(
+									StreamsResources.RESOURCE_BUNDLE_CORE, "ConfigParserHandler.element.has.both3",
+									PROPERTY_ELMT, VALUE_ATTR, getLocationInfo()));
+						} else if (currProperty.value == null) {
+							currProperty.value = cDataVal;
+						}
+					}
+
+					if (currProperty.value == null) {
+						throw new SAXParseException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+										"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR),
+								currParseLocation);
+					}
+
+					if (processingTNT4JProperties) {
+						currStream.addTNT4JProperty(currProperty.name, currProperty.value);
+					} else {
+						if (currProperties == null) {
+							currProperties = new ArrayList<Map.Entry<String, String>>();
+						}
+						currProperties.add(
+								new AbstractMap.SimpleEntry<String, String>(currProperty.name, currProperty.value));
+					}
+
+					currProperty.reset();
+					cdata = null;
 				}
 			}
 		} catch (SAXException exc) {
@@ -1100,6 +1147,16 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.at.line", currParseLocation.getLineNumber());
 		}
 		return locInfo;
+	}
+
+	private static class Property {
+		private String name;
+		private String value;
+
+		private void reset() {
+			name = null;
+			value = null;
+		}
 	}
 
 	private static class JavaObjectData {

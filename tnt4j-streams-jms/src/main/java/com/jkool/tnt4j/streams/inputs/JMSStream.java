@@ -174,7 +174,21 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	protected long getActivityItemByteSize(Message itemMsg) {
-		// return itemMsg == null ? 0 : itemMsg.getBytes().length;
+		try {
+			if (itemMsg instanceof BytesMessage) {
+				return ((BytesMessage) itemMsg).getBodyLength();
+			} else if (itemMsg instanceof MapMessage) {
+
+			} else if (itemMsg instanceof ObjectMessage) {
+
+			} else if (itemMsg instanceof StreamMessage) {
+
+			} else if (itemMsg instanceof TextMessage) {
+				String text = ((TextMessage) itemMsg).getText();
+				return text == null ? 0 : text.length();
+			}
+		} catch (JMSException exc) {
+		}
 
 		return 0; // TODO
 	}
