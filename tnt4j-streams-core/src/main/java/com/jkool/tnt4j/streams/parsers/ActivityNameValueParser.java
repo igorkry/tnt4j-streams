@@ -174,7 +174,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
-				String[] nv = field.split(valueDelim);// Pattern.quote(valueDelim));
+				String[] nv = field.split(Pattern.quote(valueDelim));
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}

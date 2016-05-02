@@ -20,11 +20,13 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkool.tnt4j.streams.configure.ParserProperties;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkool.tnt4j.streams.fields.ActivityInfo;
@@ -41,11 +43,23 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * onto its corresponding activity field.
  * <p>
  * If map entry value is inner map, entries of that map can be accessed using
- * '.' as naming hierarchy separator: i.e. 'headers.auth.name'.
+ * '.' as naming hierarchy delimiter: i.e. 'headers.auth.name'. Locator path
+ * delimiter value can be configured over parser 'LocPathDelim' property.
+ * <p>
+ * This parser supports the following properties:
+ * <ul>
+ * <li>LocPathDelim - locator path in map delimiter. Empty value means locator
+ * value should not be delimited into path elements. Default value - '.'.
+ * (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
+
+	private static final String DEFAULT_NODE_PATH_DELIM = "."; // NON-NLS
+
+	private String nodePathDelim = DEFAULT_NODE_PATH_DELIM;
 
 	/**
 	 * Constructs a new AbstractActivityMapParser.
@@ -63,12 +77,14 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			return;
 		}
 
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
-		// // no any additional properties are required yet.
-		// }
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+
+			if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
+				nodePathDelim = value;
+			}
+		}
 	}
 
 	@Override
@@ -128,7 +144,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
 				} else {
-					String[] path = getNodePath(locStr);
+					String[] path = getNodePath(locStr, nodePathDelim);
 					val = getNode(path, dataMap, 0);
 				}
 			}
@@ -138,9 +154,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		return val;
 	}
 
-	private static String[] getNodePath(String locStr) {
+	private static String[] getNodePath(String locStr, String nps) {
 		if (StringUtils.isNotEmpty(locStr)) {
-			return locStr.split("\\."); // NON-NLS
+			// Pattern.quote(nps);
+			return StringUtils.isEmpty(nps) ? new String[] { locStr } : locStr.split(Pattern.quote(nps));
 		}
 
 		return null;

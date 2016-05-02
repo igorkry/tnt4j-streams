@@ -233,9 +233,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	private Property currProperty = null;
 
 	/**
-	 * Buffer to put element data value
+	 * Buffer to put current configuration element (token) data value
 	 */
-	protected StringBuilder cdata;
+	protected StringBuilder elementData;
 
 	/**
 	 * Constructs a new ConfigurationParserHandler.
@@ -783,11 +783,11 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, NAME_ATTR), currParseLocation);
 		}
-		
+
 		currProperty.name = name;
 		currProperty.value = value;
 
-		cdata = new StringBuilder();
+		elementData = new StringBuilder();
 	}
 
 	/**
@@ -1039,9 +1039,20 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		String cdata = new String(ch, start, length);
 
-		if (this.cdata != null) {
-			this.cdata.append(cdata);
+		if (this.elementData != null) {
+			this.elementData.append(cdata);
 		}
+	}
+
+	/**
+	 * Returns string buffer contained string for current configuration element
+	 * (token).
+	 *
+	 * @return configuration element (token) data string value, or {@code null}
+	 *         if no element data
+	 */
+	protected String getElementData() {
+		return elementData == null ? null : elementData.toString().trim();
 	}
 
 	@Override
@@ -1081,15 +1092,14 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			} else if (PROPERTY_ELMT.equals(qName)) {
 				if (currProperty != null) {
-					if (cdata != null) {
-						String cDataVal = cdata.toString().trim();
-
-						if (currProperty.value != null && cDataVal.length() > 0) {
+					String eDataVal = getElementData();
+					if (eDataVal != null) {
+						if (currProperty.value != null && eDataVal.length() > 0) {
 							throw new SAXException(StreamsResources.getStringFormatted(
 									StreamsResources.RESOURCE_BUNDLE_CORE, "ConfigParserHandler.element.has.both3",
 									PROPERTY_ELMT, VALUE_ATTR, getLocationInfo()));
 						} else if (currProperty.value == null) {
-							currProperty.value = cDataVal;
+							currProperty.value = eDataVal;
 						}
 					}
 
@@ -1111,7 +1121,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					}
 
 					currProperty.reset();
-					cdata = null;
+					elementData = null;
 				}
 			}
 		} catch (SAXException exc) {

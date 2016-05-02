@@ -67,4 +67,9 @@ public interface ParserProperties {
 	 */
 	public static final String PROP_READ_LINES = "ReadLines"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_LOC_PATH_DELIM = "LocPathDelim"; // NON-NLS
+
 }

@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -140,7 +141,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 	private static String[] getNodePath(String locStr) {
 		if (StringUtils.isNotEmpty(locStr)) {
-			return locStr.split("\\."); // NON-NLS
+			return locStr.split(Pattern.quote(".")); // NON-NLS
 		}
 
 		return null;

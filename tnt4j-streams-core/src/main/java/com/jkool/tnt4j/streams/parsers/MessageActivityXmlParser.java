@@ -19,6 +19,7 @@ package com.jkool.tnt4j.streams.parsers;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -123,7 +124,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 				} else if (value instanceof String) {
 					String sigStr = (String) value;
 					if (sigStr.contains(sigDelim)) {
-						sigItems = sigStr.split(sigDelim);// Pattern.quote(sigDelim));
+						sigItems = sigStr.split(Pattern.quote(sigDelim));
 					}
 				}
 				if (sigItems != null) {

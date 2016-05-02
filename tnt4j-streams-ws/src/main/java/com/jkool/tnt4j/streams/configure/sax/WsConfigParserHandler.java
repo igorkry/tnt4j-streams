@@ -221,7 +221,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					"ConfigParserHandler.malformed.configuration2", REQ_ELMT, STEP_ELMT), currParseLocation);
 		}
 
-		cdata = new StringBuilder();
+		elementData = new StringBuilder();
 	}
 
 	@Override
@@ -257,8 +257,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				currScenario.addStep(currStep);
 				currStep = null;
 			} else if (REQ_ELMT.equals(qName)) {
-				currStep.setRequest(cdata == null ? null : cdata.toString());
-				cdata = null;
+				if (elementData != null) {
+					currStep.setRequest(getElementData());
+					elementData = null;
+				}
 			}
 		} catch (SAXException exc) {
 			throw exc;
