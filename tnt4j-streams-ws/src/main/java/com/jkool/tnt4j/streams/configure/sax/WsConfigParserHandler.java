@@ -265,9 +265,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		} catch (SAXException exc) {
 			throw exc;
 		} catch (Exception e) {
-			SAXException se = new SAXException(e.getLocalizedMessage() + getLocationInfo());
-			se.initCause(e);
-			throw se;
+			throw new SAXException(e.getLocalizedMessage() + getLocationInfo(), e);
 		}
 	}
 

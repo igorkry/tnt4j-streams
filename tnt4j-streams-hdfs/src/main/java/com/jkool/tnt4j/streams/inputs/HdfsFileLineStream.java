@@ -143,7 +143,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream {
 			Arrays.sort(dir, new Comparator<FileStatus>() {
 				@Override
 				public int compare(FileStatus o1, FileStatus o2) {
-					return Long.valueOf(o1.getModificationTime()).compareTo(Long.valueOf(o2.getModificationTime()))
+					return Long.valueOf(o1.getModificationTime()).compareTo(o2.getModificationTime())
 							* (-1);
 				}
 			});

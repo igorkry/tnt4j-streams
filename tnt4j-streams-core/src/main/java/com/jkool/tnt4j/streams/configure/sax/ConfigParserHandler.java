@@ -231,6 +231,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private boolean processingTNT4JProperties = false;
 	private JavaObjectData javaObjectData = null;
 	private Property currProperty = null;
+	private FieldLocator currFieldLocator = null;
 
 	/**
 	 * Buffer to put current configuration element (token) data value
@@ -539,100 +540,64 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.element.has.both2", FIELD_ELMT, FIELD_LOC_ELMT, FIELD_MAP_ELMT,
 					getLocationInfo()));
 		}
-		ActivityFieldDataType dataType = null;
-		String locatorType = null;
-		String locator = null;
-		String units = null;
-		String format = null;
-		String locale = null;
-		String timeZone = null;
-		String value = null;
-		int radix = 10;
-		String reqVal = ""; /* string to allow override */
+
+		if (currFieldLocator == null) {
+			currFieldLocator = new FieldLocator();
+		} else {
+			currFieldLocator.reset();
+		}
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (DATA_TYPE_ATTR.equals(attName)) {
-				dataType = ActivityFieldDataType.valueOf(attValue);
+				currFieldLocator.dataType = ActivityFieldDataType.valueOf(attValue);
 			} else if (LOC_TYPE_ATTR.equals(attName)) {
-				locatorType = attValue;
+				currFieldLocator.locatorType = attValue;
 			} else if (LOCATOR_ATTR.equals(attName)) {
-				locator = attValue;
+				currFieldLocator.locator = attValue;
 			} else if (RADIX_ATTR.equals(attName)) {
-				radix = Integer.parseInt(attValue);
+				currFieldLocator.radix = Integer.parseInt(attValue);
 			} else if (UNITS_ATTR.equals(attName)) {
-				units = attValue;
+				currFieldLocator.units = attValue;
 			} else if (FORMAT_ATTR.equals(attName)) {
-				format = attValue;
+				currFieldLocator.format = attValue;
 			} else if (LOCALE_ATTR.equals(attName)) {
-				locale = attValue;
+				currFieldLocator.locale = attValue;
 			} else if (TIMEZONE_ATTR.equals(attName)) {
-				timeZone = attValue;
+				currFieldLocator.timeZone = attValue;
 			} else if (VALUE_ATTR.equals(attName)) {
-				value = attValue;
+				currFieldLocator.value = attValue;
 			} else if (REQUIRED_VALUE.equals(attName)) {
-				reqVal = attValue;
+				currFieldLocator.reqVal = attValue;
 			}
 		}
-		if (locator != null && locator.isEmpty()) {
-			locator = null;
+
+		if (currFieldLocator.value != null && currFieldLocator.value.isEmpty()) {
+			currFieldLocator.value = null;
 		}
-		if (value != null && value.isEmpty()) {
-			value = null;
-		}
-		// make sure common required fields are present
-		if (locator == null && value == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ConfigParserHandler.must.contain", FIELD_LOC_ELMT, LOCATOR_ATTR, VALUE_ATTR),
-					currParseLocation);
-		}
-		if (locator != null && value != null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"ConfigParserHandler.cannot.contain", FIELD_LOC_ELMT, LOCATOR_ATTR, VALUE_ATTR),
-					currParseLocation);
-		}
+
 		// make sure any fields that are required based on other fields are
 		// specified
-		if (ActivityFieldDataType.DateTime == dataType) {
-			if (format == null) {
-				throw new SAXParseException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-								"ConfigParserHandler.missing.attribute2", FIELD_LOC_ELMT, FORMAT_ATTR, dataType),
-						currParseLocation);
+		if (ActivityFieldDataType.DateTime == currFieldLocator.dataType) {
+			if (currFieldLocator.format == null) {
+				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ConfigParserHandler.missing.attribute2", FIELD_LOC_ELMT, FORMAT_ATTR,
+						currFieldLocator.dataType), currParseLocation);
 			}
 			// if (locale == null)
 			// {
 			//
 			// }
-		} else if (ActivityFieldDataType.Timestamp == dataType) {
-			if (units == null) {
-				throw new SAXParseException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-								"ConfigParserHandler.missing.attribute2", FIELD_LOC_ELMT, UNITS_ATTR, dataType),
-						currParseLocation);
+		} else if (ActivityFieldDataType.Timestamp == currFieldLocator.dataType) {
+			if (currFieldLocator.units == null) {
+				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ConfigParserHandler.missing.attribute2", FIELD_LOC_ELMT, UNITS_ATTR,
+						currFieldLocator.dataType), currParseLocation);
 			}
 		}
-		ActivityFieldLocator afl = value != null ? new ActivityFieldLocator(value)
-				: new ActivityFieldLocator(locatorType, locator);
-		afl.setRadix(radix);
-		afl.setRequired(reqVal);
-		if (format != null) {
-			afl.setFormat(format, locale);
-		}
-		if (dataType != null) {
-			afl.setDataType(dataType);
-		}
-		if (units != null) {
-			afl.setUnits(units);
-		}
-		if (timeZone != null) {
-			afl.setTimeZone(timeZone);
-		}
-		currLocator = afl;
-		currField.addLocator(afl);
 		currFieldHasLocElmt = true;
+
+		elementData = new StringBuilder();
 	}
 
 	/**
@@ -766,26 +731,22 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		if (currProperty == null) {
 			currProperty = new Property();
+		} else {
+			currProperty.reset();
 		}
-
-		String name = null;
-		String value = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
-				name = attValue;
+				currProperty.name = attValue;
 			} else if (VALUE_ATTR.equals(attName)) {
-				value = attValue;
+				currProperty.value = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(name)) {
+		if (StringUtils.isEmpty(currProperty.name)) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, NAME_ATTR), currParseLocation);
 		}
-
-		currProperty.name = name;
-		currProperty.value = value;
 
 		elementData = new StringBuilder();
 	}
@@ -1082,43 +1043,25 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFieldHasLocElmt = false;
 				currFieldHasMapElmt = false;
 			} else if (FIELD_LOC_ELMT.equals(qName)) {
+				if (currFieldLocator != null) {
+					handleFieldLocator(currFieldLocator);
+
+					currFieldLocator.reset();
+					elementData = null;
+				}
+
 				currLocator = null;
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 				processingTNT4JProperties = false;
 			} else if (JAVA_OBJ_ELMT.equals(qName)) {
 				if (javaObjectData != null) {
-					constructJavaObject(javaObjectData);
+					handleJavaObject(javaObjectData);
+
 					javaObjectData.reset();
 				}
 			} else if (PROPERTY_ELMT.equals(qName)) {
 				if (currProperty != null) {
-					String eDataVal = getElementData();
-					if (eDataVal != null) {
-						if (currProperty.value != null && eDataVal.length() > 0) {
-							throw new SAXException(StreamsResources.getStringFormatted(
-									StreamsResources.RESOURCE_BUNDLE_CORE, "ConfigParserHandler.element.has.both3",
-									PROPERTY_ELMT, VALUE_ATTR, getLocationInfo()));
-						} else if (currProperty.value == null) {
-							currProperty.value = eDataVal;
-						}
-					}
-
-					if (currProperty.value == null) {
-						throw new SAXParseException(
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
-										"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR),
-								currParseLocation);
-					}
-
-					if (processingTNT4JProperties) {
-						currStream.addTNT4JProperty(currProperty.name, currProperty.value);
-					} else {
-						if (currProperties == null) {
-							currProperties = new ArrayList<Map.Entry<String, String>>();
-						}
-						currProperties.add(
-								new AbstractMap.SimpleEntry<String, String>(currProperty.name, currProperty.value));
-					}
+					handleProperty(currProperty);
 
 					currProperty.reset();
 					elementData = null;
@@ -1127,13 +1070,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		} catch (SAXException exc) {
 			throw exc;
 		} catch (Exception e) {
-			SAXException se = new SAXException(e.getLocalizedMessage() + getLocationInfo());
-			se.initCause(e);
-			throw se;
+			throw new SAXException(e.getLocalizedMessage() + getLocationInfo(), e);
 		}
 	}
 
-	private void constructJavaObject(JavaObjectData javaObjectData) throws Exception {
+	private void handleJavaObject(JavaObjectData javaObjectData) throws Exception {
 		if (javaObjectData == null) {
 			return;
 		}
@@ -1142,6 +1083,83 @@ public class ConfigParserHandler extends DefaultHandler {
 				javaObjectData.getTypes());
 
 		javaObjectsMap.put(javaObjectData.name, obj);
+	}
+
+	private void handleProperty(Property currProperty) throws SAXException {
+		String eDataVal = getElementData();
+		if (eDataVal != null) {
+			if (currProperty.value != null && eDataVal.length() > 0) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ConfigParserHandler.element.has.both3", PROPERTY_ELMT, VALUE_ATTR, getLocationInfo()));
+			} else if (currProperty.value == null) {
+				currProperty.value = eDataVal;
+			}
+		}
+
+		if (currProperty.value == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR), currParseLocation);
+		}
+
+		if (processingTNT4JProperties) {
+			currStream.addTNT4JProperty(currProperty.name, currProperty.value);
+		} else {
+			if (currProperties == null) {
+				currProperties = new ArrayList<Map.Entry<String, String>>();
+			}
+			currProperties.add(new AbstractMap.SimpleEntry<String, String>(currProperty.name, currProperty.value));
+		}
+	}
+
+	private void handleFieldLocator(FieldLocator currFieldLocator) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			if (currFieldLocator.locator != null && eDataVal.length() > 0) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+						"ConfigParserHandler.element.has.both3", FIELD_LOC_ELMT, LOCATOR_ATTR, getLocationInfo()));
+			} else if (currFieldLocator.locator == null) {
+				currFieldLocator.locator = eDataVal;
+			}
+		}
+
+		if (currFieldLocator.locator != null && currFieldLocator.locator.isEmpty()) {
+			currFieldLocator.locator = null;
+		}
+
+		// make sure common required fields are present
+		if (currFieldLocator.locator == null && currFieldLocator.value == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ConfigParserHandler.must.contain", FIELD_LOC_ELMT, LOCATOR_ATTR, VALUE_ATTR),
+					currParseLocation);
+		}
+		if (currFieldLocator.locator != null && currFieldLocator.value != null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+							"ConfigParserHandler.cannot.contain", FIELD_LOC_ELMT, LOCATOR_ATTR, VALUE_ATTR),
+					currParseLocation);
+		}
+
+		ActivityFieldLocator afl = currFieldLocator.value != null ? new ActivityFieldLocator(currFieldLocator.value)
+				: new ActivityFieldLocator(currFieldLocator.locatorType, currFieldLocator.locator);
+		afl.setRadix(currFieldLocator.radix);
+		afl.setRequired(currFieldLocator.reqVal);
+		if (currFieldLocator.format != null) {
+			afl.setFormat(currFieldLocator.format, currFieldLocator.locale);
+		}
+		if (currFieldLocator.dataType != null) {
+			afl.setDataType(currFieldLocator.dataType);
+		}
+		if (currFieldLocator.units != null) {
+			afl.setUnits(currFieldLocator.units);
+		}
+		if (currFieldLocator.timeZone != null) {
+			afl.setTimeZone(currFieldLocator.timeZone);
+		}
+
+		currLocator = afl;
+		currField.addLocator(afl);
 	}
 
 	/**
@@ -1163,9 +1181,43 @@ public class ConfigParserHandler extends DefaultHandler {
 		private String name;
 		private String value;
 
+		private Property() {
+			reset();
+		}
+
 		private void reset() {
 			name = null;
 			value = null;
+		}
+	}
+
+	private static class FieldLocator {
+		ActivityFieldDataType dataType;
+		String locatorType;
+		String locator;
+		String units;
+		String format;
+		String locale;
+		String timeZone;
+		String value;
+		int radix;
+		String reqVal;
+
+		private FieldLocator() {
+			reset();
+		}
+
+		private void reset() {
+			dataType = null;
+			locatorType = null;
+			locator = null;
+			units = null;
+			format = null;
+			locale = null;
+			timeZone = null;
+			value = null;
+			radix = 10;
+			reqVal = ""; /* string to allow override */
 		}
 	}
 

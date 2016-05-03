@@ -139,6 +139,11 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
+		if (StringUtils.isEmpty(serverURL)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
+					"TNTInputStream.property.undefined", StreamProperties.PROP_SERVER_URI));
+		}
+
 		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(topicName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_QUEUE_NAME,
