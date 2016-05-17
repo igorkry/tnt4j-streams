@@ -14,32 +14,13 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.scenario;
 
 /**
- * This class defines TNT4J-Streams-WS configuration Cron scheduler expression.
+ * This interface defines request/call/command execution scheduler configuration
+ * data.
  *
  * @version $Revision: 1 $
  */
-public class CronSchedulerData implements SchedulerData {
-	private String expression;
-
-	/**
-	 * Constructs a new CronSchedulerData. Defines Cron scheduler expression.
-	 *
-	 * @param expression
-	 *            Cron scheduler expression
-	 */
-	public CronSchedulerData(String expression) {
-		this.expression = expression;
-	}
-
-	/**
-	 * Return Cron scheduler expression.
-	 *
-	 * @return Cron scheduler expression
-	 */
-	public String getExpression() {
-		return expression;
-	}
+public interface SchedulerData {
 }

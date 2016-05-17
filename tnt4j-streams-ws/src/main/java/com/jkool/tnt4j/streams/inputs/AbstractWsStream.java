@@ -24,10 +24,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.jkool.tnt4j.streams.fields.CronSchedulerData;
-import com.jkool.tnt4j.streams.fields.SimpleSchedulerData;
-import com.jkool.tnt4j.streams.fields.WsScenario;
-import com.jkool.tnt4j.streams.fields.WsScenarioStep;
+import com.jkool.tnt4j.streams.scenario.CronSchedulerData;
+import com.jkool.tnt4j.streams.scenario.SimpleSchedulerData;
+import com.jkool.tnt4j.streams.scenario.WsScenario;
+import com.jkool.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.WsStreamConstants;
 import com.nastel.jkool.tnt4j.core.OpLevel;

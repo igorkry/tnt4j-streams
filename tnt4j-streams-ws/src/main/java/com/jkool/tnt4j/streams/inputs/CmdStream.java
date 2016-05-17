@@ -19,8 +19,8 @@ package com.jkool.tnt4j.streams.inputs;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
-import com.jkool.tnt4j.streams.fields.WsScenario;
-import com.jkool.tnt4j.streams.fields.WsScenarioStep;
+import com.jkool.tnt4j.streams.scenario.WsScenario;
+import com.jkool.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.Utils;
 import com.jkool.tnt4j.streams.utils.WsStreamConstants;

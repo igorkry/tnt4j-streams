@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="EventType" value="Event"/>
+        <field name="ApplName" value="weather"/>
+        <field name="Location" locator="$.name" locator-type="Label"/>
+        <field name="GeoLocation" separator=",">
+            <field-locator locator="$.coord.lon" locator-type="Label"/>
+            <field-locator locator="$.coord.lat" locator-type="Label"/>
+        </field>
+        <field name="Temperature" locator="$.main.temp" locator-type="Label"/>
+        <field name="Humidity" locator="$.main.humidity" locator-type="Label"/>
+        <field name="Wind Speed" locator="$.wind.speed" locator-type="Label"/>
+    </parser>
+
+    <stream name="RESTfulSampleJSONStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample REST stream scenario">
+            <step name="Step Kaunas"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Kaunas&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-cron expression="0/15 * * * * ? *"/>
+            </step>
+            <step name="Step Vilnius"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Vilnius&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-cron expression="0/30 * * * * ? *"/>
+            </step>
+            <step name="Step Klaipeda"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-simple interval="45" units="Seconds" repeatCount="10"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="RESTResponseParser"/>
+    </stream>
+</tnt-data-source>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.jkool.tnt4j.streams.fields;
+package com.jkool.tnt4j.streams.scenario;
 
 import java.util.ArrayList;
 import java.util.List;

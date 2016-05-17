@@ -90,11 +90,6 @@
             <artifactId>quartz-jobs</artifactId>
             <version>2.2.2</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>curl</groupId>-->
-        <!--<artifactId>curl-java</artifactId>-->
-        <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>com.jkool.tnt4j</groupId>

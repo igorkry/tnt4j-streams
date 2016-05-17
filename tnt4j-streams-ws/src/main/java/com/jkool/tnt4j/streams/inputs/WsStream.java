@@ -16,8 +16,11 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,9 +31,10 @@ import org.quartz.*;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import com.jkool.tnt4j.streams.fields.WsScenario;
-import com.jkool.tnt4j.streams.fields.WsScenarioStep;
+import com.jkool.tnt4j.streams.scenario.WsScenario;
+import com.jkool.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
+import com.jkool.tnt4j.streams.utils.Utils;
 import com.jkool.tnt4j.streams.utils.WsStreamConstants;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
@@ -78,13 +82,13 @@ public class WsStream extends AbstractWsStream {
 	 *
 	 * @param url
 	 *            JAX-WS service URL
-	 * @param soapRequestXml
-	 *            JAX-WS service request body data as XML string
+	 * @param soapRequestData
+	 *            JAX-WS service request data: headers and body XML string
 	 * @return service responce string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-WS service call
 	 */
-	protected static String callWebService(String url, String soapRequestXml) throws Exception {
+	protected static String callWebService(String url, String soapRequestData) throws Exception {
 		if (StringUtils.isEmpty(url)) {
 			LOGGER.log(OpLevel.DEBUG,
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "WsStream.cant.execute.request"),
@@ -94,13 +98,43 @@ public class WsStream extends AbstractWsStream {
 
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "WsStream.invoking.request"), url,
-				soapRequestXml);
+				soapRequestData);
+
+		Map<String, String> headers = new HashMap<String, String>();
+		// separate SOAP message header values from request body XML
+		BufferedReader br = new BufferedReader(new StringReader(soapRequestData));
+		StringBuilder sb = new StringBuilder();
+		try {
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (line.trim().startsWith("<")) { // NON-NLS
+					sb.append(line).append("\n"); // NON-NLS
+				} else {
+					int bi = line.indexOf(':'); // NON-NLS
+					if (bi >= 0) {
+						String hKey = line.substring(0, bi).trim();
+						String hValue = line.substring(bi + 1).trim();
+						headers.put(hKey, hValue);
+					} else {
+						sb.append(line).append("\n"); // NON-NLS
+					}
+				}
+			}
+		} finally {
+			Utils.close(br);
+		}
+
+		soapRequestData = sb.toString();
+
+		LOGGER.log(OpLevel.DEBUG,
+				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_WS, "WsStream.invoking.request"), url,
+				soapRequestData);
 
 		// Create Request body XML document
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(new InputSource(new StringReader(soapRequestXml)));
+		Document doc = builder.parse(new InputSource(new StringReader(soapRequestData)));
 
 		// Create SOAP Connection
 		SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
@@ -112,6 +146,14 @@ public class WsStream extends AbstractWsStream {
 		// SOAPPart part = soapRequest.getSOAPPart();
 		// SOAPEnvelope envelope = part.getEnvelope();
 		// envelope.addNamespaceDeclaration();
+
+		if (!headers.isEmpty()) {
+			MimeHeaders mimeHeaders = soapRequest.getMimeHeaders();
+
+			for (Map.Entry<String, String> e : headers.entrySet()) {
+				mimeHeaders.addHeader(e.getKey(), e.getValue());
+			}
+		}
 
 		SOAPBody body = soapRequest.getSOAPBody();
 		body.addDocument(doc);

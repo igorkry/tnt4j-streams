@@ -36,9 +36,9 @@ public class WsStreamConstants {
 	 */
 	public static final String TRANSPORT_REST = "REST"; // NON-NLS
 	/**
-	 * The constant to indicate activity transport is cURL.
+	 * The constant to indicate activity transport is SysCmd.
 	 */
-	public static final String TRANSPORT_CURL = "cURL"; // NON-NLS
+	public static final String TRANSPORT_SYS_CMD = "SysCmd"; // NON-NLS
 
 	private WsStreamConstants() {
 

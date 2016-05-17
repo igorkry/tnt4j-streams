@@ -24,11 +24,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.jkool.tnt4j.streams.fields.CronSchedulerData;
-import com.jkool.tnt4j.streams.fields.SimpleSchedulerData;
-import com.jkool.tnt4j.streams.fields.WsScenario;
-import com.jkool.tnt4j.streams.fields.WsScenarioStep;
 import com.jkool.tnt4j.streams.inputs.AbstractWsStream;
+import com.jkool.tnt4j.streams.scenario.CronSchedulerData;
+import com.jkool.tnt4j.streams.scenario.SimpleSchedulerData;
+import com.jkool.tnt4j.streams.scenario.WsScenario;
+import com.jkool.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.jkool.tnt4j.streams.utils.WsStreamConstants;
 

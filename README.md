@@ -21,6 +21,9 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * OS pipes
     * Zipped files (HDFS also)
     * Standard Java InputStream/Reader
+    * JAX-RS service (JSON/XML)
+    * JAX-WS service
+    * System command
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
@@ -757,9 +760,10 @@ Sample stream configuration:
 
     </parser>
 
-    <stream name="SampleFilePolingStream" class="com.jkool.tnt4j.streams.inputs.FilePollingStream">
+    <stream name="SampleFilePollingStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName"
                   value="[PATH_TO_LOGS_REPOSITORY]/logs/localhost_access_log.*.txt"/>
+        <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="20"/>
         <property name="StartFromLatest" value="true"/>
         <parser-ref name="AccessLogParserCommon"/>
@@ -777,6 +781,8 @@ entries and don't stop if such situation occurs.
 
 `FileName` property defines that stream should watch for files matching `localhost_access_log.*.txt` wildcard pattern.
  This is needed to properly handle file rolling.
+
+`FilePolling` property indicates that stream polls files for changes.
 
 `FileReadDelay` property indicates that file changes are streamed every 20 seconds.
 
@@ -808,14 +814,16 @@ To stream HDFS file lines `HdfsFileLineStream` shall be used. `FileName` is defi
 Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-file-polling` directory.
 
 ```xml
-    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFilePollingStream">
+    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
+        <property name="FilePolling" value="true"/>
         ...
     </stream>
 ```
 
-To poll HDFS file `HdfsFilePollingStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
+To poll HDFS file `HdfsFileLineStream` shall be used with property `FilePolling` value set to `true`. `FileName` is
+defined using URI starting `hdfs://`.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -895,7 +903,8 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `sinkName`, `chanelName` and
-`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.
+`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property
+indicates that every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
@@ -959,7 +968,7 @@ Stream configuration states that `CharacterStream` referencing `FlumeJSONParser`
 
 `FlumeJSONParser` transforms received JSON data package to Map entries. Note that some entries like `headers` in map
 has inner map as value. Fields of such entries can be accessed defining field name using `.` as field hierarchy
-separator.
+separator. `ReadLines` property indicates that every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
@@ -1030,7 +1039,8 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `path`, `Tag` and `host`.
-`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`.
+`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property indicates that
+every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
 'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
@@ -1090,7 +1100,8 @@ Stream configuration states that `CharacterStream` referencing `LogstashJSONPars
 `CharacterStream` starts server socket on port defined using `Port` property.
 
 `LogstashJSONParser` transforms received JSON data package to Map data structure and maps map entries to activity
-event fields using map entry key labels.
+event fields using map entry key labels. `ReadLines` property indicates that every line in parsed string represents
+single JSON data package.
 
 #### HTTP request file
 
@@ -1739,6 +1750,318 @@ parser named `JSONPayloadParser` to parse it.
 
 `JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
 
+#### JAX-WS
+
+This sample shows how to stream responses from JAX-WS (SOAP) services as SOAP compliant XML data.
+
+Sample files can be found in `samples/ws-stream` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="WsResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="s=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="a=http://schemas.datacontract.org/2004/07/"/>
+        <property name="Namespace" value="i=http://www.w3.org/2001/XMLSchema-instance"/>
+        <property name="Namespace" value="b=http://tempuri.org/"/>
+
+        <field name="EventType" value="Event"/>
+        <field name="ApplName" value="weather"/>
+        <field name="GeoLocation" separator=",">
+            <field-locator
+                    locator="/s:Envelope/s:Body/b:GetCurrentWeatherInformationByStationIDResponse/b:GetCurrentWeatherInformationByStationIDResult/a:Latitude"
+                    locator-type="Label"/>
+            <field-locator
+                    locator="/s:Envelope/s:Body/b:GetCurrentWeatherInformationByStationIDResponse/b:GetCurrentWeatherInformationByStationIDResult/a:Longitude"
+                    locator-type="Label"/>
+        </field>
+        <field name="Temperature"
+               locator="/s:Envelope/s:Body/b:GetCurrentWeatherInformationByStationIDResponse/b:GetCurrentWeatherInformationByStationIDResult/a:TemperatureInFahrenheit"
+               locator-type="Label"/>
+        <field name="Humidity"
+               locator="/s:Envelope/s:Body/b:GetCurrentWeatherInformationByStationIDResponse/b:GetCurrentWeatherInformationByStationIDResult/a:RelativeHumidity"
+               locator-type="Label"/>
+        <field name="Wind Speed"
+               locator="/s:Envelope/s:Body/b:GetCurrentWeatherInformationByStationIDResponse/b:GetCurrentWeatherInformationByStationIDResult/a:WindSpeedInMPH"
+               locator-type="Label"/>
+    </parser>
+
+    <stream name="WsSampleStream" class="com.jkool.tnt4j.streams.inputs.WsStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample WS stream scenario">
+            <step name="Step 1"
+                  url="http://wsdot.wa.gov/traffic/api/WeatherInformation/WeatherInformation.svc">
+                <schedule-simple interval="35" units="Seconds" repeatCount="10"/>
+                <request>
+                    <![CDATA[
+                        SOAPAction:http://tempuri.org/IWeatherInformation/GetCurrentWeatherInformationByStationID
+                        <tem:GetCurrentWeatherInformationByStationID xmlns:tem="http://tempuri.org/">
+                            <tem:AccessCode>aeb652b7-f6f5-49e6-9bdb-e2b737ebd507</tem:AccessCode>
+                            <tem:StationID>1909</tem:StationID>
+                        </tem:GetCurrentWeatherInformationByStationID>
+                    ]]>
+                </request>
+            </step>
+        </scenario>
+
+        <parser-ref name="WsResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `WsStream` referencing `WsResponseParser` shall be used. Stream takes response received
+SOAP compliant XML string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario consists of one step defining service request URL, scheduler definition: `10 times with 35 seconds
+interval`. `request` definition contains SOAP request header `SOAPAction` and SOAP request body data
+`tem:GetCurrentWeatherInformationByStationID`.
+
+`WsResponseParser` maps XML data values to activity event fields `GeoLocation`, `Temperature`, `Humidity` and
+`Wind Speed`. Parser property `Namespace` adds additional namespaces required to parse received JAX-WS XML response
+using XPath.
+
+#### JAX-RS
+
+##### JAX-RS JSON
+
+This sample shows how to stream responses from JAX-RS as JSON data.
+
+Sample files can be found in `samples/restful-stream-json` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="EventType" value="Event"/>
+        <field name="ApplName" value="weather"/>
+        <field name="Location" locator="$.name" locator-type="Label"/>
+        <field name="GeoLocation" separator=",">
+            <field-locator locator="$.coord.lon" locator-type="Label"/>
+            <field-locator locator="$.coord.lat" locator-type="Label"/>
+        </field>
+        <field name="Temperature" locator="$.main.temp" locator-type="Label"/>
+        <field name="Humidity" locator="$.main.humidity" locator-type="Label"/>
+        <field name="Wind Speed" locator="$.wind.speed" locator-type="Label"/>
+    </parser>
+
+    <stream name="RESTfulSampleJSONStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample REST stream scenario">
+            <step name="Step Kaunas"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Kaunas&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-cron expression="0/15 * * * * ? *"/>
+            </step>
+            <step name="Step Vilnius"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Vilnius&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-cron expression="0/30 * * * * ? *"/>
+            </step>
+            <step name="Step Klaipeda"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+                  method="GET">
+                <schedule-simple interval="45" units="Seconds" repeatCount="10"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="RESTResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `RestStream` referencing `RESTResponseParser` shall be used. Stream takes response
+received JSON string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario consists of three steps defining service request URL's, request methods (all `GET`) and scheduler
+definitions.
+Step named `Step Kaunas` defines Cron scheduler expression stating: `invoke every 15 seconds`.
+Step named `Step Vilnius` defines Cron scheduler expression stating: `invoke every 30 seconds`.
+Step named `Step Klaipeda` defines simple scheduler expression stating: `10 times with 45 seconds interval`.
+
+`RESTResponseParser` maps JSON data values to activity event fields `Location`, `GeoLocation`, `Temperature`, `Humidity`
+and `Wind Speed`. Parser property `ReadLines` indicates that whole parsed string represents single JSON data package.
+
+##### JAX-RS XML
+
+This sample shows how to stream responses from JAX-RS as XML data.
+
+Sample files can be found in `samples/restful-stream-xml` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="EventType" value="Event"/>
+        <field name="ApplName" value="weather"/>
+        <field name="Location" locator="/current/city/@name" locator-type="Label"/>
+        <field name="GeoLocation" separator=",">
+            <field-locator locator="/current/city/coord/@lon" locator-type="Label"/>
+            <field-locator locator="/current/city/coord/@lat" locator-type="Label"/>
+        </field>
+        <field name="Temperature" locator="/current/temperature/@value" locator-type="Label"/>
+        <field name="Humidity" locator="/current/humidity/@value" locator-type="Label"/>
+        <field name="Wind Speed" locator="/current/wind/speed/@value" locator-type="Label"/>
+    </parser>
+
+    <stream name="RESTfulSampleXMLStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample REST stream scenario">
+            <step name="Step Kaunas"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Kaunas&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric&amp;mode=XML"
+                  method="GET">
+                <schedule-cron expression="0/15 * * * * ? *"/>
+            </step>
+            <step name="Step Vilnius"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Vilnius&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric&amp;mode=XML"
+                  method="GET">
+                <schedule-cron expression="0/30 * * * * ? *"/>
+            </step>
+            <step name="Step Klaipeda"
+                  url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric&amp;mode=XML"
+                  method="GET">
+                <schedule-simple interval="45" units="Seconds" repeatCount="10"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="RESTResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `RestStream` referencing `RESTResponseParser` shall be used. Stream takes response
+received XML string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario consists of three steps defining service request URL's, request methods (all `GET`) and scheduler
+definitions.
+Step named `Step Kaunas` defines Cron scheduler expression stating: `invoke every 15 seconds`.
+Step named `Step Vilnius` defines Cron scheduler expression stating: `invoke every 30 seconds`.
+Step named `Step Klaipeda` defines simple scheduler expression stating: `10 times with 45 seconds interval`.
+
+`RESTResponseParser` maps XML data values to activity event fields `Location`, `GeoLocation`, `Temperature`, `Humidity`
+and `Wind Speed`.
+
+#### System command
+
+##### Windows
+
+This sample shows how to stream responses from executed Windows OS command.
+
+Sample files can be found in `samples/win-cmd-stream` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="ResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"
+                  value="(\s*)&quot;\((.*)\)&quot;,&quot;(.*)&quot; &quot;(.*)&quot;,&quot;(.*)&quot;(.*)"/>
+
+        <field name="EventType" value="SNAPSHOT"/>
+        <field name="ProcessorTime" locator="5" locator-type="REGroupNum"/>
+    </parser>
+
+    <stream name="WinCmdStream" class="com.jkool.tnt4j.streams.inputs.CmdStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample Win Cmd stream scenario">
+            <step name="Step Windows">
+                <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
+                <schedule-simple interval="25" units="Seconds" repeatCount="-1"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="ResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `CmdStream` referencing `ResponseParser` shall be used. Stream takes command response
+output string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario consists of one step defining system command to execute as `request` tag data and scheduler
+definition stating `execute endlessly every 25 seconds`.
+
+`ResponseParser` parses command output string using `Pattern` property defined RegEx and produces activity snapshot
+containing field `ProcessorTime`.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+
+##### *nix
+
+This sample shows how to stream responses from executed *nix type OS command.
+
+Sample files can be found in `samples/unix-cmd-stream` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="ResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)"/>
+
+        <field name="EventType" value="SNAPSHOT"/>
+        <field name="TomcatActive" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
+    <stream name="UnixCmdStream" class="com.jkool.tnt4j.streams.inputs.CmdStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample *nix Cmd stream scenario">
+            <step name="Step Is Active Tomcat">
+                <request>systemctl is-active tomcat7.servicesystemctl is-active tomcat7.service</request>
+                <schedule-simple interval="45" units="Seconds" repeatCount="-1"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="ResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `CmdStream` referencing `ResponseParser` shall be used. Stream takes command response
+output string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario consists of one step defining system command to execute as `request` tag data and scheduler
+definition stating `execute endlessly every 45 seconds`.
+
+`ResponseParser` parses command output string using `Pattern` property defined RegEx and produces activity snapshot
+containing field `TomcatActive`.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+
 #### Integrating TNT4J-Streams into custom API
 
 This sample shows how to integrate TNT4J-Streams into Your custom API.
@@ -1869,19 +2192,11 @@ Note that `stream` uses `parser` reference:
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
 
-#### Generic stream parameters:
-
-These parameters are applicable to all types of streams.
-
- * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
- If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
-
-    sample:
-```xml
-    <property name="HaltIfNoParser" value="false"/>
-```
+#### Generic streams parameters:
 
 ##### Stream executors related parameters:
+
+These parameters are applicable to all types of streams.
 
  * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously
  or not. Default value - `false`. (Optional)
@@ -1904,36 +2219,55 @@ These parameters are applicable to all types of streams.
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
 ```
 
+##### Parseable streams parameters:
+
+These parameters are applicable to streams which uses parsers to parse input data.
+
+ * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
+ If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
+
+    sample:
+```xml
+    <property name="HaltIfNoParser" value="false"/>
+```
+
+##### Buffered streams parameters:
+
+ * BufferSize - maximal buffer queue capacity. Default value - `512`. (Optional)
+ * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
+ queue. Default value - 45sec. (Optional)
+
+     sample:
+ ```xml
+     <property name="BufferSize" value="1024"/>
+     <property name="BufferOfferTimeout" value="90"/>
+ ```
+
 #### File line stream parameters (and Hdfs):
 
  * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
-
-    sample:
- ```xml
-    <property name="FileName" value="*_access_log.2015-*.txt"/>
- ```
-
-In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
-
-Also see 'Generic stream parameters'.
-
-#### File polling stream parameters (and Hdfs):
-
- * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
- * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest log entry. If `false` -
-  then latest log file is streamed from beginning. Default value - `true`. (Optional)
- * FileReadDelay - delay is seconds between log file reading iterations. Default value - `15sec`. (Optional)
+ * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
+ are read from oldest to newest sequentially one single time. Default value - `false`. (Optional)
+    * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest file entry line. If
+    `false` - then all lines from available files are streamed on startup. Actual just if `FilePolling` property is set
+    to `true`. Default value - `true`. (Optional)
+    * FileReadDelay - delay is seconds between file reading iterations. Actual just if `FilePolling` property is set to
+    `true`. Default value - 15sec. (Optional)
+ * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart.
+ Default value - `true`. (Optional)
 
     sample:
  ```xml
     <property name="FileName" value="C:/Tomcat_7_0_34/logs/localhost_access_log.*.txt"/>
     <property name="FileReadDelay" value="5"/>
     <property name="StartFromLatest" value="true"/>
+    <property name="FilePolling" value="true"/>
+    <property name="RestoreState" value="false"/>
  ```
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 #### Character stream parameters:
 
@@ -1951,7 +2285,7 @@ or
     <property name="RestartOnInputClose" value="true"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters'.
 
 NOTE: there can be ony one parser referenced to this stream.
 
@@ -1959,7 +2293,7 @@ NOTE: there can be ony one parser referenced to this stream.
 
 This stream does not have any additional configuration parameters.
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters'.
 
 #### Http stream parameters:
 
@@ -1978,7 +2312,7 @@ Also see 'Generic stream parameters'.
     <property name="KeyPass" value="somePassword"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 #### JMS stream parameters:
 
@@ -2005,7 +2339,7 @@ or
     <parser-ref name="SampleJMSParser"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 #### Kafka stream parameters:
 
@@ -2020,7 +2354,7 @@ Also see 'Generic stream parameters'.
     <property name="group.id" value="TNT4JStreams"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters'.
 
 #### MQTT stream parameters:
 
@@ -2043,7 +2377,7 @@ Also see 'Generic stream parameters'.
     <property name="KeystorePass" value="somePassword"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 #### WMQ Stream parameters:
 
@@ -2064,14 +2398,14 @@ Also see 'Generic stream parameters'.
     <property name="Host" value="wmq.sample.com"/>
 ```
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters'.
 
 #### Zipped file line stream parameters (and Hdfs):
 
  * FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
  and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
  `.\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt`. (Required)
- * ArchType - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)</li>
+ * ArchType - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)
 
     sample:
 ```xml
@@ -2082,7 +2416,67 @@ Also see 'Generic stream parameters'.
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Zip entry name may contain
 wildcards.
 
-Also see 'Generic stream parameters'.
+Also see 'Generic streams parameters'.
+
+#### Ws Stream parameters:
+
+This kind of stream (Rest/WS/Cmd) has no additional configuration parameters.
+
+But has special configuration section - `scnario`. Streaming scenarios allows define `step`'s. Step defines
+request/invocation/execution parameters and scheduler. Steps are invoked/executed independently of each other.
+
+ * `scenario` tag has required attribute - `name` (any string).
+    * `step` tag has required attribute - `name` (any string) and optional attributes `url` (service request URL),
+    `method` (`GET`/`POST` - default value `GET`).
+        * `schedule-cron` tag has required attribute `expression` (Cron expression).
+        * `schedule-simple` tag has required attribute `interval` (positive integer numeric value) and optional
+        attributes `units` (time units - default value `MILLISECONDS`), `repeatCount` (integer numeric value - default
+        value `1`, `-1` means endless).
+        * `request` is XML tag to define string represented request data (i.e. system command with parameters). To
+        define XML contents it is recommended to use `CDATA`.
+
+    sample:
+```xml
+    <!-- Sample scenario for RESTful services request -->
+    <scenario name="Sample REST stream scenario">
+        <step name="Step Kaunas"
+            url="http://api.openweathermap.org/data/2.5/weather?q=Kaunas&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+            method="GET" >
+            <schedule-cron expression="0/15 * * * * ? *"/>
+        </step>
+        ...
+        <step name="Step Klaipeda"
+              url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
+              method="GET">
+            <schedule-simple interval="45" units="Seconds" repeatCount="10"/>
+        </step>
+    </scenario>
+    <!-- Sample scenario for SOAP services request -->
+    <scenario name="Sample WS stream scenario">
+        <step name="Step 1"
+              url="http://wsdot.wa.gov/traffic/api/WeatherInformation/WeatherInformation.svc">
+            <schedule-simple interval="35" units="Seconds" repeatCount="10"/>
+            <request>
+                <![CDATA[
+                    SOAPAction:http://tempuri.org/IWeatherInformation/GetCurrentWeatherInformationByStationID
+                    <tem:GetCurrentWeatherInformationByStationID xmlns:tem="http://tempuri.org/">
+                        <tem:AccessCode>aeb652b7-f6f5-49e6-9bdb-e2b737ebd507</tem:AccessCode>
+                        <tem:StationID>1909</tem:StationID>
+                    </tem:GetCurrentWeatherInformationByStationID>
+                ]]>
+            </request>
+        </step>
+    </scenario>
+    <!-- Sample scenario for System Cmd invocation -->
+    <scenario name="Sample CMD stream scenario">
+        <step name="Step Windows">
+            <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
+            <schedule-simple interval="25" units="Seconds" repeatCount="-1"/>
+        </step>
+    </scenario>
+```
+
+Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 ### Parsers configuration
 
@@ -2188,6 +2582,7 @@ Modules list:
    * `Kafka` (O)
    * `Mqtt` (O)
    * `WMQ` (O)
+   * `Ws` (O)
 
 (M) marked modules are mandatory, (O) marked modules - optional.
 
@@ -2286,6 +2681,7 @@ dependencies checking if UI checkbox 'Skip Tests' is used.
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
+* in `ws` module run JUnit test suite named `AllWsStreamTests`
 
 Known Projects Using TNT4J
 ===============================================

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="ResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)"/>
+
+        <field name="EventType" value="SNAPSHOT"/>
+        <field name="TomcatActive" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
+    <stream name="UnixCmdStream" class="com.jkool.tnt4j.streams.inputs.CmdStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample *nix Cmd stream scenario">
+            <step name="Step Is Active Tomcat">
+                <request>systemctl is-active tomcat7.servicesystemctl is-active tomcat7.service</request>
+                <schedule-simple interval="45" units="Seconds" repeatCount="-1"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="ResponseParser"/>
+    </stream>
+</tnt-data-source>
