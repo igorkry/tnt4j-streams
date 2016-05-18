@@ -94,7 +94,7 @@ public class HdfsFileLineStreamTest {
 		when(fileStatusMock.getModificationTime()).thenReturn(1L, 2L, 3L);
 		when(fileStatusMock.getPath()).thenReturn(mock(Path.class));
 
-		stream.setFs(fs);
+		// stream.setFs(fs); TODO:
 		stream.setProperties(props);
 
 		stream.initialize();

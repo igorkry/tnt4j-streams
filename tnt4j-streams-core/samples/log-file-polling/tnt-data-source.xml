@@ -25,9 +25,10 @@
 
     </parser>
 
-    <stream name="SampleFilePolingStream" class="com.jkool.tnt4j.streams.inputs.FilePollingStream">
+    <stream name="SampleFilePollingStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName"
                   value="[PATH_TO_LOGS_REPOSITORY]/logs/localhost_access_log.*.txt"/>
+        <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="20"/>
         <property name="StartFromLatest" value="true"/>
         <parser-ref name="AccessLogParserCommon"/>

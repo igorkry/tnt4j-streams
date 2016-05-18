@@ -15,11 +15,11 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * inputs: i.e. file, socket, java input stream, etc.
+ * Provides the API (classes and interfaces) necessary for storing and restoring
+ * TNT4J-Streams state data.
  *
  * @author akausinis
  * @version 1.0
  */
 
-package com.jkool.tnt4j.streams.inputs;
+package com.jkool.tnt4j.streams.configure.state;

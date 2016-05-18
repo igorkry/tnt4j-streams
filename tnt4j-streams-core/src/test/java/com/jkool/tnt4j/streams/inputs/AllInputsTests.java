@@ -26,8 +26,8 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
-		FileLineStreamTest.class, FilePollingStreamTest.class, HttpStreamTest.class, StreamThreadTest.class,
-		TNTInputStreamTest.class, PipedStreamTest.class })
+		FileLineStreamTest.class, HttpStreamTest.class, StreamThreadTest.class, TNTInputStreamTest.class,
+		PipedStreamTest.class })
 public class AllInputsTests {
 
 }

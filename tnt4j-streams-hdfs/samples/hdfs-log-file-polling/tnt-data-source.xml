@@ -25,9 +25,10 @@
 
     </parser>
 
-    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFilePollingStream">
+    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
+        <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="30"/>
         <property name="StartFromLatest" value="true"/>
         <parser-ref name="AccessLogParserCommon"/>

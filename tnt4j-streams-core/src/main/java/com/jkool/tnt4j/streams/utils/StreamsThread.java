@@ -31,7 +31,7 @@ public class StreamsThread extends Thread {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsThread.class);
 
 	/**
-	 * Flag indicating that tread should stop running.
+	 * Flag indicating that thread should stop running.
 	 */
 	protected boolean stopRunning = false;
 

@@ -348,7 +348,11 @@ public final class Utils extends com.nastel.jkool.tnt4j.utils.Utils {
 		File last = null;
 
 		if (ArrayUtils.isNotEmpty(files)) {
-			for (File f : files) {
+			boolean changeDir = (files[0].lastModified() - files[files.length - 1].lastModified()) < 0;
+
+			for (int i = changeDir ? files.length - 1 : 0; changeDir ? i >= 0
+					: i < files.length; i = changeDir ? i - 1 : i + 1) {
+				File f = files[i];
 				if (f.canRead()) {
 					if (lastModif == null) {
 						last = f;

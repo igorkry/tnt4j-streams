@@ -104,7 +104,7 @@ public interface StreamProperties {
 	public static final String PROP_EXECUTOR_THREADS_QTY = "ExecutorThreadsQuantity"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in {@value} property. Value in seconds.
 	 */
 	public static final String PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT = "ExecutorRejectedTaskOfferTimeout"; // NON-NLS
 
@@ -172,4 +172,24 @@ public interface StreamProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	public static final String PROP_ARCH_TYPE = "ArchType"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_BUFFER_SIZE = "BufferSize"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property. Value in seconds.
+	 */
+	public static final String PROP_OFFER_TIMEOUT = "BufferOfferTimeout"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property. Value in seconds.
+	 */
+	public static final String PROP_FILE_POLLING = "FilePolling"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property. Value in seconds.
+	 */
+	public static final String PROP_RESTORE_STATE = "RestoreState"; // NON-NLS
 }

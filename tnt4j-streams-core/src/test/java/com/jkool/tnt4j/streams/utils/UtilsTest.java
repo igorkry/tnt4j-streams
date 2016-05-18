@@ -23,6 +23,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.parsers.MessageType;
@@ -120,14 +121,22 @@ public class UtilsTest {
 		Long date = null;
 		List<File> files = new ArrayList<File>();
 		for (int i = 0; i <= count; i++) {
-			File tempFile = File.createTempFile("TEST", "TST");
+			File tempFile = File.createTempFile("TEST", ".TST");
 			if (count / 2 >= i)
 				date = (new Date()).getTime();
 			files.add(tempFile);
-			Thread.sleep(1);
+			Thread.sleep(300);
 		}
-		File result = Utils.getFirstNewer(files.toArray(new File[files.size()]), null);
-		assertEquals(files.get(0), result);
+		File[] fArray = files.toArray(new File[files.size()]);
+		File result = Utils.getFirstNewer(fArray, null);
+		assertEquals(files.get(files.size() - 1), result);
+
+		result = Utils.getFirstNewer(fArray, files.get(3).lastModified());
+		assertEquals(files.get(4), result);
+
+		ArrayUtils.reverse(fArray);
+		File result2 = Utils.getFirstNewer(fArray, files.get(3).lastModified());
+		assertEquals(result, result2);
 
 		// result = Utils.getFirstNewer(files.toArray(new File[files.size()]),
 		// date);

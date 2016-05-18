@@ -16,10 +16,7 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
-import java.io.Reader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,8 +25,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.jkool.tnt4j.streams.configure.StreamProperties;
+import com.jkool.tnt4j.streams.inputs.AbstractFileLineStream.FileWatcher;
 import com.jkool.tnt4j.streams.utils.TestFileList;
-import com.jkool.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -50,14 +47,10 @@ public class FileLineStreamTest {
 
 		fls.setProperties(props);
 		fls.initialize();
+		final FileWatcher fileWatcher = fls.createFileWatcher();
+		// TODO assert smth
+		fileWatcher.shutdown();
 
-		for (int i = 0; i < count; i++) {
-			assertTrue(fls.isFileAvailable(i));
-			Reader fr = fls.getFileReader(i);
-			assertNotNull(fr);
-			Utils.close(fr);
-			assertEquals(files.get(i).getName(), fls.getFileName(i));
-		}
 		fls.cleanup();
 		files.cleanup();
 	}

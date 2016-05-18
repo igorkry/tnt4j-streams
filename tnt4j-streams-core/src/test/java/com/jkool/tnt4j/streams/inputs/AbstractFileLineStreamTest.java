@@ -33,7 +33,7 @@ import com.jkool.tnt4j.streams.configure.StreamProperties;
  */
 public class AbstractFileLineStreamTest {
 	boolean inputEnded = false;
-	AbstractFileLineStream afls = new FileLineStream();
+	FileLineStream afls = new FileLineStream();
 
 	@Test
 	public void setPropertiesTest() throws Exception {

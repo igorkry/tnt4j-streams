@@ -16,10 +16,13 @@
 
 package com.jkool.tnt4j.streams.inputs;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.jkool.tnt4j.streams.configure.StreamProperties;
 import com.jkool.tnt4j.streams.utils.StreamsResources;
 import com.nastel.jkool.tnt4j.core.OpLevel;
 import com.nastel.jkool.tnt4j.sink.EventSink;
@@ -29,6 +32,15 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * Base class for buffered input activity stream. RAW activity data retrieved
  * from input source is placed into blocking queue to be asynchronously
  * processed by consumer thread(s).
+ * <p>
+ * This activity stream supports the following properties:
+ * <ul>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - 512.
+ * (Optional)</li>
+ * <li>BufferOfferTimeout - how long to wait if necessary for space to become
+ * available when adding data item to buffer queue. Default value - 45sec.
+ * (Optional)</li>
+ * </ul>
  *
  * @param <T>
  *            the type of handled RAW activity data
@@ -39,14 +51,19 @@ import com.nastel.jkool.tnt4j.sink.EventSink;
  * @see BlockingQueue#offer(Object, long, TimeUnit)
  */
 public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
-	private static final int INPUT_BUFFER_SIZE = 1024 * 10;
-	private static final int INPUT_BUFFER_OFFER_TIMEOUT = 15; // NOTE: sec.
+	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
+	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE:
+																			// sec.
+	private static final Object DIE_MARKER = new Object();
+
+	private int bufferSize;
+	private int bufferOfferTimeout = DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT;
 
 	/**
 	 * RAW activity data items buffer queue. Items in this queue are processed
 	 * asynchronously by consumer thread(s).
 	 */
-	protected BlockingQueue<T> inputBuffer;
+	protected BlockingQueue<Object> inputBuffer;
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
@@ -55,15 +72,60 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 *            logger used by activity stream
 	 */
 	protected AbstractBufferedStream(EventSink logger) {
+		this(logger, DEFAULT_INPUT_BUFFER_SIZE);
+	}
+
+	/**
+	 * Constructs a new AbstractBufferedStream.
+	 *
+	 * @param logger
+	 *            logger used by activity stream
+	 * @param bufferSize
+	 *            default buffer size value. Actual value may be overridden by
+	 *            setting 'BufferSize' property.
+	 */
+	protected AbstractBufferedStream(EventSink logger, int bufferSize) {
 		super(logger);
+		this.bufferSize = bufferSize;
+	}
+
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		if (props == null) {
+			return;
+		}
+
+		super.setProperties(props);
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+			if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
+				bufferSize = Integer.parseInt(value);
+			} else if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+				bufferOfferTimeout = Integer.parseInt(value);
+			}
+		}
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
+			return bufferSize;
+		}
+		if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+			return bufferOfferTimeout;
+		}
+
+		return super.getProperty(name);
 	}
 
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		inputBuffer = new ArrayBlockingQueue<T>(INPUT_BUFFER_SIZE, true);
-		// inputBuffer = new SynchronousQueue<T>(true);
+		inputBuffer = new ArrayBlockingQueue<Object>(bufferSize, true);
+		// inputBuffer = new SynchronousQueue<Object>(true);
 	}
 
 	/**
@@ -77,17 +139,28 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	 *             if any errors occurred getting next item
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public T getNextItem() throws Exception {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
 					"AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 
+		// Buffer is empty and producer input is ended. No more items going to
+		// be available.
 		if (inputBuffer.isEmpty() && isInputEnded()) {
 			return null;
 		}
 
-		T activityInput = inputBuffer.take();
+		Object qe = inputBuffer.take();
+
+		// Producer input was slower than consumer, but was able to put "DIE"
+		// marker object to queue. No more items going to be available.
+		if (DIE_MARKER.equals(qe)) {
+			return null;
+		}
+
+		T activityInput = (T) qe;
 
 		addStreamedBytesCount(getActivityItemByteSize(activityInput));
 
@@ -122,18 +195,17 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 	protected boolean addInputToBuffer(T inputData) {
 		if (inputData != null && !isHalted()) {
 			try {
-				boolean added = inputBuffer.offer(inputData, INPUT_BUFFER_OFFER_TIMEOUT, TimeUnit.SECONDS);
+				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
 
 				if (!added) {
 					logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-							"AbstractBufferedStream.changes.buffer.limit"), inputData);
+							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
 				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_CORE,
-						"AbstractBufferedStream.offer.interrupted"), exc);
-				// halt();
+						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
 
@@ -200,7 +272,11 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 		 *             if fails to close opened resources due to internal error
 		 */
 		void close() throws Exception {
+			// mark input end (in case producer thread is faster than consumer).
 			markInputEnd();
+			// add "DIE" marker to buffer (in case producer thread is slower
+			// than waiting consumer).
+			inputBuffer.offer(DIE_MARKER);
 		}
 
 		/**
@@ -208,6 +284,11 @@ public abstract class AbstractBufferedStream<T> extends TNTInputStream<T> {
 		 * opened data input resources.
 		 */
 		protected void shutdown() {
+			if (interrupted && inputEnd) {
+				// shot down already.
+				return;
+			}
+
 			halt();
 			try {
 				close();

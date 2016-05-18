@@ -16,15 +16,17 @@
 
 package com.jkool.tnt4j.streams.configure;
 
-import com.jkool.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+
+import com.jkool.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
+import com.jkool.tnt4j.streams.configure.state.FileStreamStateHandlerTest;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class, StreamsConfigLoaderTest.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, StreamsConfigLoaderTest.class, FileStreamStateHandlerTest.class })
 public class AllConfigureTests {
 }
