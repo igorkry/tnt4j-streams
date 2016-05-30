@@ -3,6 +3,11 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# Eclipse project files
+.project
+.classpath
+/.settings/
+
 # Package Files #
 *.jar
 *.war
@@ -11,18 +16,14 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 /.svn
-/classes
-/.project
-/.classpath
-/.settings/
 /**/target
+/**/classes
 /**/logs
 /**/temp
-
-/plugins
 
 /**/*.iml
 
 /config/log4j__.xml__
 /tnt4j-streams-core/samples/apache-access-single-log/regexp.txt
 /tnt4j-streams-core/samples/apache-access-single-log/error.log
+/tnt4j-streams-core/samples/apache-access-single-log/nastel-apache.log
