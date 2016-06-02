@@ -58,7 +58,7 @@ public class PipedStreamTest {
 		pipedStream.cleanup();
 
 		assertNotNull("Next item line is null", line);
-		assertEquals("Expected next item line length does not match", 97, line.length());
+		assertEquals("Expected next item line length does not match", 89, line.length());
 	}
 
 	@Test(expected = IllegalStateException.class)
