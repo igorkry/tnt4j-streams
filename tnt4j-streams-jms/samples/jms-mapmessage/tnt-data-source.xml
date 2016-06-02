@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
@@ -23,7 +23,7 @@
         <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->

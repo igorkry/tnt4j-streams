@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="RESTResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="Event"/>
@@ -18,7 +18,7 @@
         <field name="Wind Speed" locator="$.wind.speed" locator-type="Label"/>
     </parser>
 
-    <stream name="RESTfulSampleJSONStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+    <stream name="RESTfulSampleJSONStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample REST stream scenario">

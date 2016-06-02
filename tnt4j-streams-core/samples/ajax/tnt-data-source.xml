@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
                units="Nanoseconds"/>
         <field name="ResourceName" locator="$.url" locator-type="Label"/>
@@ -28,14 +28,14 @@
         <field name="IsAborted" locator="$.abort" locator-type="Label"/>
     </parser>
 
-    <parser name="AjaxEventParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="AjaxEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="JSONPayloadParser"/>
         </field>
     </parser>
 
-    <stream name="AjaxEventStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="AjaxEventStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
         <parser-ref name="AjaxEventParser"/>

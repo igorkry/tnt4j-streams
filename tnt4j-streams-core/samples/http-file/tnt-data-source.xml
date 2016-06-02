@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -22,14 +22,14 @@
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="SampleHttpReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
     </parser>
 
-    <stream name="SampleHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="SampleHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="8080"/>
         <!--<property name="UseSSL" value="true"/>-->

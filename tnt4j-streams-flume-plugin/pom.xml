@@ -2,12 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>tnt4j-streams</artifactId>
-        <groupId>com.jkool.tnt4j</groupId>
+        <groupId>com.jkoolcloud.tnt4j.streams</groupId>
         <version>0.1-beta</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -76,7 +78,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.jkool.tnt4j</groupId>
+            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
             <artifactId>tnt4j-streams-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -100,7 +102,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.jkool.tnt4j</groupId>
+            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
             <artifactId>tnt4j-streams-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>

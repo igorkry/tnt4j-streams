@@ -4,10 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.jkool.tnt4j</groupId>
+    <groupId>com.jkoolcloud.tnt4j.streams</groupId>
     <artifactId>tnt4j-streams</artifactId>
-    <packaging>pom</packaging>
     <version>0.1-beta</version>
+    <packaging>pom</packaging>
+
+    <name>TNT4J-Streams</name>
+    <description>TNT4J Streams allows data streaming, parsing from various data sources into TNT4J event sinks.
+    </description>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -24,12 +28,26 @@
         <name>jKool, LLC</name>
         <url>https://www.jkoolcloud.com/</url>
     </organization>
+    <developers>
+        <developer>
+            <name>Albert Mavashev</name>
+            <email>amavashev@jkoolcloud.com</email>
+            <organization>${project.organization.name}</organization>
+            <organizationUrl>${project.organization.url}</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/Nastel/tnt4j-streams</connection>
+        <developerConnection>scm:git:git//github.com/Nastel/tnt4j-streams</developerConnection>
+        <url>https://github.com/Nastel/tnt4j-streams</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
         <java.compiler.debuglevel>source,lines,vars</java.compiler.debuglevel>
+        <java.compiler.verbose>false</java.compiler.verbose>
         <product.vendor>${project.organization.name}</product.vendor>
         <product.name>TNT4J-Streams</product.name>
         <product.name.hr>TNT4J Streams</product.name.hr>
@@ -46,6 +64,7 @@
             </activation>
             <properties>
                 <javadoc.opts>-Xdoclint:none</javadoc.opts>
+                <javadoc.failOnError>false</javadoc.failOnError>
             </properties>
         </profile>
     </profiles>
@@ -70,6 +89,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
+                    <verbose>${java.compiler.verbose}</verbose>
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>
                     <debuglevel>${java.compiler.debuglevel}</debuglevel>
@@ -95,8 +115,9 @@
                     <author>true</author>
                     <version>true</version>
                     <nodeprecatedlist>false</nodeprecatedlist>
-                    <nodeprecatedlist>false</nodeprecatedlist>
+                    <nodeprecated>false</nodeprecated>
                     <additionalparam>${javadoc.opts}</additionalparam>
+                    <failOnError>${javadoc.failOnError}</failOnError>
                 </configuration>
             </plugin>
             <plugin>
@@ -133,6 +154,20 @@
                             </descriptors>
                             <outputDirectory>${release.deploy.dir}</outputDirectory>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

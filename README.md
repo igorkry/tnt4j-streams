@@ -77,7 +77,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
 
 sample:
 ```xml
-    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+    <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
         ...
         <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
         <field name="ServerIp" locator="2"/>
@@ -122,7 +122,7 @@ sample:
 
     /**
      * Type of activity - Value must match values in
-     * {@link com.nastel.jkool.tnt4j.core.OpType} enumeration.
+     * {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
      */
     EventType(Enum.class),
 
@@ -153,7 +153,7 @@ sample:
 
     /**
      * Indicates completion status of the activity - Value must match values in
-     * {@link com.nastel.jkool.tnt4j.core.OpCompCode} enumeration.
+     * {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
      */
     CompCode(Enum.class),
 
@@ -169,7 +169,7 @@ sample:
 
     /**
      * Indicates completion status of the activity - Value can either be label
-     * from {@link com.nastel.jkool.tnt4j.core.OpLevel} enumeration or a numeric
+     * from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration or a numeric
      * value.
      */
     Severity(Enum.class),
@@ -269,11 +269,11 @@ sample:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         ...
     </parser>
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         ...
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -281,7 +281,7 @@ sample:
         ...
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         ...
         <parser-ref name="SampleJMSParser"/>
     </stream>
@@ -326,7 +326,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+    <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
         <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
         <field name="ServerIp" locator="2"/>
@@ -344,7 +344,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="8"/>
     </parser>
 
-    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
         <parser-ref name="TokenParser"/>
     </stream>
@@ -403,7 +403,7 @@ Sample parser configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+    <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
         <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
         <field name="ServerIp" locator="2"/>
@@ -440,7 +440,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -463,7 +463,7 @@ Sample stream configuration:
                locale="en-US" units="Seconds"/>
     </parser>
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -484,7 +484,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <stream name="SampleZipFileStream" class="com.jkool.tnt4j.streams.inputs.ZipLineStream">
+    <stream name="SampleZipFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.ZipLineStream">
         <property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip"/>
         <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt"/>-->
         <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz"/>-->
@@ -520,7 +520,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -543,7 +543,7 @@ Sample stream configuration:
                locale="en-US" units="Seconds"/>
     </parser>
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -575,7 +575,7 @@ Sample stream configuration:
             type="java.lang.String"/>
     </java-object-->
 
-    <stream name="SampleJavaInputStream" class="com.jkool.tnt4j.streams.inputs.JavaInputStream">
+    <stream name="SampleJavaInputStream" class="com.jkoolcloud.tnt4j.streams.inputs.JavaInputStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <reference name="SampleZipStream"/>
@@ -620,7 +620,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
         <!--property name="Pattern"
                   value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/-->
@@ -645,7 +645,7 @@ Sample stream configuration:
 
     </parser>
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -667,7 +667,7 @@ Sample stream configuration:
 
     </parser>
 
-    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value="access.log"/>
 
@@ -739,7 +739,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -760,7 +760,7 @@ Sample stream configuration:
 
     </parser>
 
-    <stream name="SampleFilePollingStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+    <stream name="SampleFilePollingStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName"
                   value="[PATH_TO_LOGS_REPOSITORY]/logs/localhost_access_log.*.txt"/>
         <property name="FilePolling" value="true"/>
@@ -801,7 +801,7 @@ These samples shows how to read or poll HDFS files contents. Samples are very si
 Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-file-stream` directory.
 
 ```xml
-    <stream name="SampleHdfsFileLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
+    <stream name="SampleHdfsFileLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
         ...
     </stream>
@@ -814,7 +814,7 @@ To stream HDFS file lines `HdfsFileLineStream` shall be used. `FileName` is defi
 Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-file-polling` directory.
 
 ```xml
-    <stream name="SampleHdfsFilePollingStream" class="com.jkool.tnt4j.streams.inputs.HdfsFileLineStream">
+    <stream name="SampleHdfsFilePollingStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
         <property name="FilePolling" value="true"/>
@@ -832,7 +832,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-zip-stream` directory.
 
 ```xml
-    <stream name="SampleHdfsZipLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsZipLineStream">
+    <stream name="SampleHdfsZipLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsZipLineStream">
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/sample.zip!2/*.txt"/>
         <property name="ArchType" value="ZIP"/>
@@ -859,7 +859,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -878,7 +878,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
         <field name="MsgBody" locator="$.body" locator-type="Label">
@@ -889,7 +889,7 @@ Sample stream configuration:
         <field name="headers" locator="$.headers" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+    <stream name="SampleFlumeStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
         <parser-ref name="JSONEnvelopeParser"/>
@@ -930,7 +930,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="FlumeJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="FlumeJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
         <field name="Location" locator="$.headers.clientip" locator-type="Label"/>
@@ -955,7 +955,7 @@ Sample stream configuration:
         </field>
     </parser>
 
-    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+    <stream name="SampleFlumeStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="Port" value="9595"/>
         <parser-ref name="FlumeJSONParser"/>
     </stream>
@@ -993,7 +993,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser"
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser"
             tags="Normal server,Delayed server">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
@@ -1013,7 +1013,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
         <field name="MsgBody" locator="$.message" locator-type="Label">
@@ -1024,7 +1024,7 @@ Sample stream configuration:
         <field name="host" locator="$.host" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+    <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="RestartOnInputClose" value="true"/>
         <property name="Port" value="9595"/>
@@ -1066,7 +1066,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="LogstashJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
         <field name="Location" locator="$.clientip" locator-type="Label"/>
@@ -1088,7 +1088,7 @@ Sample stream configuration:
         <field name="Tag" locator="$.tags" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleLogstashStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+    <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="Port" value="9595"/>
         <parser-ref name="LogstashJSONParser"/>
     </stream>
@@ -1121,7 +1121,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -1140,14 +1140,14 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="SampleHttpReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="SampleHttpReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
     </parser>
 
-    <stream name="SampleHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="SampleHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="8080"/>
         <!--<property name="UseSSL" value="true"/>-->
@@ -1190,7 +1190,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="SampleFormDataParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="SampleFormDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
         <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
@@ -1208,7 +1208,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="SampleHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="8080"/>
         <!--<property name="UseSSL" value="true"/>-->
@@ -1245,7 +1245,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -1264,7 +1264,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -1272,7 +1272,7 @@ Sample stream configuration:
         <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
@@ -1317,7 +1317,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
@@ -1337,7 +1337,7 @@ Sample stream configuration:
         <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
@@ -1376,7 +1376,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="SampleObjectParser" class="com.jkool.tnt4j.streams.parsers.ActivityJavaObjectParser">
+    <parser name="SampleObjectParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJavaObjectParser">
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
         <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
@@ -1394,7 +1394,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
     </parser>
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="SampleObjectParser"/>
@@ -1402,7 +1402,7 @@ Sample stream configuration:
         <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
@@ -1443,7 +1443,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -1462,7 +1462,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="KafkaMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
@@ -1470,7 +1470,7 @@ Sample stream configuration:
         </field>
     </parser>
 
-    <stream name="SampleKafkaStream" class="com.jkool.tnt4j.streams.inputs.KafkaStream">
+    <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Topic" value="TNT4JStreams"/>
         <property name="zookeeper.connect" value="127.0.0.1:2181"/>
@@ -1512,7 +1512,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -1531,7 +1531,7 @@ Sample stream configuration:
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="MqttMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
@@ -1539,7 +1539,7 @@ Sample stream configuration:
         </field>
     </parser>
 
-    <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
+    <stream name="SampleMQTTStream" class="com.jkoolcloud.tnt4j.streams.inputs.MqttStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:1883"/>
         <property name="TopicString" value="TNT4JStreams"/>
@@ -1584,7 +1584,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
@@ -1674,7 +1674,7 @@ Sample stream configuration:
         <!--field name="UserName" locator="/wmb:event/wmb:eventPointData/UserName" locator-type="Label"/-->
     </parser>
 
-    <stream name="EventStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
+    <stream name="EventStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="QMGR"/>
         <property name="Queue" value="EVENT.QUEUE"/>
         <parser-ref name="EventParser"/>
@@ -1713,7 +1713,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="JSONPayloadParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
         <field name="ResourceName" locator="$.url" locator-type="Label"/>
         <field name="Correlator" locator="$.sid" locator-type="Label"/>
@@ -1725,14 +1725,14 @@ Sample stream configuration:
         <field name="eventProperties" locator="$.properties" locator-type="Label"/>
     </parser>
 
-    <parser name="AngularticsReqParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="AngularticsReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="JSONPayloadParser"/>
         </field>
     </parser>
 
-    <stream name="AngularticsHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="AngularticsHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
         <parser-ref name="AngularticsReqParser"/>
@@ -1763,7 +1763,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="WsResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="WsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="s=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="a=http://schemas.datacontract.org/2004/07/"/>
         <property name="Namespace" value="i=http://www.w3.org/2001/XMLSchema-instance"/>
@@ -1790,7 +1790,7 @@ Sample stream configuration:
                locator-type="Label"/>
     </parser>
 
-    <stream name="WsSampleStream" class="com.jkool.tnt4j.streams.inputs.WsStream">
+    <stream name="WsSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample WS stream scenario">
@@ -1842,7 +1842,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="RESTResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="Event"/>
@@ -1857,7 +1857,7 @@ Sample stream configuration:
         <field name="Wind Speed" locator="$.wind.speed" locator-type="Label"/>
     </parser>
 
-    <stream name="RESTfulSampleJSONStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+    <stream name="RESTfulSampleJSONStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample REST stream scenario">
@@ -1910,7 +1910,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="RESTResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="RESTResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="EventType" value="Event"/>
         <field name="ApplName" value="weather"/>
         <field name="Location" locator="/current/city/@name" locator-type="Label"/>
@@ -1923,7 +1923,7 @@ Sample stream configuration:
         <field name="Wind Speed" locator="/current/wind/speed/@value" locator-type="Label"/>
     </parser>
 
-    <stream name="RESTfulSampleXMLStream" class="com.jkool.tnt4j.streams.inputs.RestStream">
+    <stream name="RESTfulSampleXMLStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample REST stream scenario">
@@ -1978,7 +1978,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="ResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityRegExParser">
+    <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
         <property name="Pattern"
                   value="(\s*)&quot;\((.*)\)&quot;,&quot;(.*)&quot; &quot;(.*)&quot;,&quot;(.*)&quot;(.*)"/>
 
@@ -1986,7 +1986,7 @@ Sample stream configuration:
         <field name="ProcessorTime" locator="5" locator-type="REGroupNum"/>
     </parser>
 
-    <stream name="WinCmdStream" class="com.jkool.tnt4j.streams.inputs.CmdStream">
+    <stream name="WinCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample Win Cmd stream scenario">
@@ -2027,14 +2027,14 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="ResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityRegExParser">
+    <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
         <property name="Pattern" value="(.*)"/>
 
         <field name="EventType" value="SNAPSHOT"/>
         <field name="TomcatActive" locator="1" locator-type="REGroupNum"/>
     </parser>
 
-    <stream name="UnixCmdStream" class="com.jkool.tnt4j.streams.inputs.CmdStream">
+    <stream name="UnixCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample *nix Cmd stream scenario">
@@ -2081,14 +2081,14 @@ See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or 
 #### TNT4J-log4j12
 
 * in `config/log4j.properties` file change log appender to
-`log4j.appender.tnt4j=com.nastel.jkool.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
+`log4j.appender.tnt4j=com.jkoolcloud.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
 `log4j.appender.tnt4j=` in this file, so please comment or remove all others if available.
 * in `pom.xml` file of `core` change dependencies - uncomment:
 ```xml
     <dependency>
-        <groupId>com.nastel.jkool.tnt4j</groupId>
-        <artifactId>tnt4j-log4j12</artifactId>
-        <version>1.0.0</version>
+        <groupId>com.jkoolcloud.tnt4j.logger</groupId>
+        <artifactId>log4j</artifactId>
+        <version>0.1</version>
         <scope>runtime</scope>
     </dependency>
 ```
@@ -2113,9 +2113,9 @@ java $LOGBACKOPTS $TNT4JOPTS
 * in `pom.xml` file of `core` change dependencies - uncomment:
 ```xml
     <dependency>
-        <groupId>com.nastel.jkool.tnt4j</groupId>
-        <artifactId>tnt4j-logback</artifactId>
-        <version>1.0.0</version>
+        <groupId>com.jkoolcloud.tnt4j.logger</groupId>
+        <artifactId>logback</artifactId>
+        <version>0.1</version>
         <scope>runtime</scope>
     </dependency>
     <!-- logback logger shall be used -->
@@ -2156,7 +2156,7 @@ sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="TokenParser" class="com.jkool.tnt4j.streams.parsers.ActivityTokenParser">
+    <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
         <property name="FieldDelim" value="|"/>
         <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
         <field name="ServerIp" locator="2"/>
@@ -2174,7 +2174,7 @@ sample stream configuration:
         <field name="MsgValue" locator="8"/>
     </parser>
 
-    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
         <parser-ref name="TokenParser"/>
     </stream>
@@ -2185,7 +2185,7 @@ As You can see from sample configuration there are two major configuration eleme
 Because streams configuration is read using SAX parser referenced entities should be initialized before it is used.
 Note that `stream` uses `parser` reference:
 ```xml
-    <stream name="FileStream" class="com.jkool.tnt4j.streams.inputs.FileLineStream">
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         ...
         <parser-ref name="TokenParser"/>
     </stream>
@@ -2606,24 +2606,6 @@ In this case we would recommend to download those dependencies manually into mod
 local maven repository by running `mvn install` command. See `tnt4j-streams/tnt4j-streams-core/lib/mvn-install.bat`
 how to do this.
 
-#### `Core` module
-
-What to download manually:
-* TNT4J
-* JESL
-* TNT4J-log4j12 - (optional) to use this logger see 'How to use TNT4J loggers' section for more details.
-* TNT4J-logback - (optional) to use this logger. See 'How to use TNT4J loggers' section for more details.
-
-Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-core/lib` directory like this:
-```
-    lib
-     |- jkool-jesl.jar
-     |- tnt4j-api.jar
-     |- tnt4j-log4j12.jar (O)
-     |- tnt4j-logback.jar (O)
-```
-(O) marked libraries are optional
-
 #### `WMQ` module
 
 What to download manually:
@@ -2639,6 +2621,7 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
          |- com.ibm.mq.jmqi.jar
          |- com.ibm.mq.pcf.jar
 ```
+(O) marked libraries are optional
 
 ## Building
    * to build project run maven goals `clean package`

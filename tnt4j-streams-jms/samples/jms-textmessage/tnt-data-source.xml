@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="REGroupNum"/>
@@ -22,7 +22,7 @@
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="SampleJMSParser" class="com.jkool.tnt4j.streams.parsers.ActivityJMSMessageParser">
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -30,7 +30,7 @@
         <field name="Correlator" locator="Correlator" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleJMStream" class="com.jkool.tnt4j.streams.inputs.JMSStream">
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:61616"/>
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->

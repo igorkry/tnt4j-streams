@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="DatapowerParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+    <parser name="DatapowerParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <field name="Message" locator="/tracking_event/MsgData" locator-type="Label" datatype="String" format="string"/>
         <field name="EventName" separator=":">
@@ -28,7 +28,7 @@
         <field name="Tag" locator="/tracking_event/Tag" locator-type="Label"/>
     </parser>
 
-    <stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="QMGR.NAME"/>
         <property name="Queue" value="QUEUE.NAME"/>
         <parser-ref name="DatapowerParser"/>

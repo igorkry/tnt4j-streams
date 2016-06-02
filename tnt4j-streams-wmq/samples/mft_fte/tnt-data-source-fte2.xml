@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="MQFTEParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+    <parser name="MQFTEParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <field name="EventName" locator="/transaction/action" locator-type="Label"/>
         <field name="ApplName" separator=":">
@@ -38,14 +38,14 @@
 
     </parser>
 
-    <stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="MB8QMGR"/>
         <property name="Queue" value="NASTEL.FTE.EVENTS"/>
         <parser-ref name="MQFTEParser"/>
     </stream>
 
-    <!--<stream name="WmqStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">-->
-    <!--<property name="FileName" value=".\tnt4j-streams-wmq\samples\mft_fte\message.xml"/>-->
-    <!--<parser-ref name="MQFTEParser"/>-->
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+        <!--<property name="FileName" value=".\tnt4j-streams-wmq\samples\mft_fte\message.xml"/>-->
+        <!--<parser-ref name="MQFTEParser"/>-->
     <!--</stream>-->
 </tnt-data-source>

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.jkool.tnt4j.streams.samples.custom;
+package com.jkoolcloud.tnt4j.streams.samples.custom;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -23,15 +23,15 @@ import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkool.tnt4j.streams.fields.ActivityFieldLocatorType;
-import com.jkool.tnt4j.streams.fields.ActivityInfo;
-import com.jkool.tnt4j.streams.fields.ParserProperties;
-import com.jkool.tnt4j.streams.inputs.TNTInputStream;
-import com.jkool.tnt4j.streams.parsers.GenericActivityParser;
-import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.fields.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
 
 /**
  * Sample custom parser.

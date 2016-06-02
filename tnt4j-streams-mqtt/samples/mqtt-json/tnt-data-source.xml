@@ -3,12 +3,12 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="JSONEnvelopeParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <field name="Temperature" locator="$.temperature" locator-type="Label"/>
         <field name="Room" locator="$.room" locator-type="Label"/>
     </parser>
 
-    <parser name="MqttMessageParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="MqttMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="ResourceName" locator="ActivityTopic" locator-type="Label"/>
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="Message" locator="ActivityData" locator-type="Label">
@@ -18,7 +18,7 @@
         <field name="CompCode" value="0"/>
     </parser>
 
-    <stream name="SampleMQTTStream" class="com.jkool.tnt4j.streams.inputs.MqttStream">
+    <stream name="SampleMQTTStream" class="com.jkoolcloud.tnt4j.streams.inputs.MqttStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="ServerURI" value="tcp://localhost:1883"/>
         <property name="TopicString" value="JSONTest"/>

@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="SampleFormDataParser" class="com.jkool.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="SampleFormDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
         <field name="StartTime" locator="timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
@@ -21,7 +21,7 @@
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
     </parser>
 
-    <stream name="SampleHttpStream" class="com.jkool.tnt4j.streams.inputs.HttpStream">
+    <stream name="SampleHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="8080"/>
         <!--<property name="UseSSL" value="true"/>-->

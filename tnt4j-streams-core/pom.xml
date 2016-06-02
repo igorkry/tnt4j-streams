@@ -2,12 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <groupId>com.jkool.tnt4j</groupId>
+        <groupId>com.jkoolcloud.tnt4j.streams</groupId>
         <artifactId>tnt4j-streams</artifactId>
         <version>0.1-beta</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -46,7 +48,7 @@
                             <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
                             <Implementation-Title>${product.name}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
-                            <Main-Class>com.jkool.tnt4j.streams.StreamsAgent</Main-Class>
+                            <Main-Class>com.jkoolcloud.tnt4j.streams.StreamsAgent</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -138,15 +140,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.nastel.jkool.tnt4j</groupId>
-            <artifactId>tnt4j-api</artifactId>
-            <version>1.0.0</version>
+            <groupId>com.jkoolcloud</groupId>
+            <artifactId>tnt4j</artifactId>
+            <version>2.2</version>
         </dependency>
         <dependency>
-            <groupId>com.nastel.jkool.tnt4j</groupId>
-            <artifactId>jkool-jesl</artifactId>
-            <version>1.0.0</version>
-            <scope>runtime</scope>
+            <groupId>com.jkoolcloud</groupId>
+            <artifactId>jesl</artifactId>
+            <version>0.1.5</version>
         </dependency>
 
         <!-- required by JESL anyway -->
@@ -178,9 +179,9 @@
 
         <!-- tnt4j-log4j12 logger shall be used -->
         <!--<dependency>-->
-        <!--<groupId>com.nastel.jkool.tnt4j</groupId>-->
-        <!--<artifactId>tnt4j-log4j12</artifactId>-->
-        <!--<version>1.0.0</version>-->
+        <!--<groupId>com.jkoolcloud.tnt4j.logger</groupId>-->
+        <!--<artifactId>log4j</artifactId>-->
+        <!--<version>0.1</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
         <!-- slf4j-log4j12 logger shall be used -->
@@ -197,11 +198,24 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- tnt4j-logback logger shall be used -->
         <!--<dependency>-->
-        <!--<groupId>com.nastel.jkool.tnt4j</groupId>-->
-        <!--<artifactId>tnt4j-logback</artifactId>-->
-        <!--<version>1.0.0</version>-->
+        <!--<groupId>com.jkoolcloud.tnt4j.logger</groupId>-->
+        <!--<artifactId>logback</artifactId>-->
+        <!--<version>0.1</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
         <!-- logback logger shall be used -->

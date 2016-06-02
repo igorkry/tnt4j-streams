@@ -22,7 +22,7 @@
                         <outputDirectory>lib_dep</outputDirectory>
                         <unpack>false</unpack>
                         <excludes>
-                            <exclude>com.jkool.tnt4j:tnt4j-streams*</exclude>
+                            <exclude>com.jkoolcloud.tnt4j.streams:tnt4j-streams*</exclude>
                         </excludes>
                     </dependencySet>
                 </dependencySets>

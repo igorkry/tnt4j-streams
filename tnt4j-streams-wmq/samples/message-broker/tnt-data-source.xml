@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="EventParser" class="com.jkool.tnt4j.streams.parsers.MessageActivityXmlParser">
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
@@ -93,7 +93,7 @@
         <!--field name="UserName" locator="/wmb:event/wmb:eventPointData/UserName" locator-type="Label"/-->
     </parser>
 
-    <stream name="EventStream" class="com.jkool.tnt4j.streams.inputs.WmqStream">
+    <stream name="EventStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="QMGR"/>
         <property name="Queue" value="EVENT.QUEUE"/>
         <parser-ref name="EventParser"/>

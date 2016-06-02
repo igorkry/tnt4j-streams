@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserExt" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -26,7 +26,7 @@
                locale="en-US" units="Seconds"/>
     </parser>
 
-    <parser name="AccessLogParserCommon" class="com.jkool.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
         <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+))?)|(-))"/>
         <property name="ConfRegexMapping" value="%*i=(.*?)"/>
@@ -47,7 +47,7 @@
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <stream name="SampleHdfsZipLineStream" class="com.jkool.tnt4j.streams.inputs.HdfsZipLineStream">
+    <stream name="SampleHdfsZipLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsZipLineStream">
         <property name="FileName" value="hdfs://[host]:[port]/[path]/sample.zip!2/*.txt"/>
 
         <parser-ref name="AccessLogParserExt"/>

@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-    <parser name="WsResponseParser" class="com.jkool.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="WsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="s=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="a=http://schemas.datacontract.org/2004/07/"/>
         <property name="Namespace" value="i=http://www.w3.org/2001/XMLSchema-instance"/>
@@ -30,7 +30,7 @@
                locator-type="Label"/>
     </parser>
 
-    <stream name="WsSampleStream" class="com.jkool.tnt4j.streams.inputs.WsStream">
+    <stream name="WsSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample WS stream scenario">

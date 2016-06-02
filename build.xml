@@ -30,19 +30,19 @@
 
     <target name="mvn_windows_init" if="isWindows">
         <exec dir="." executable="cmd">
-            <arg line="/c mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar"/>
+            <arg line="/c mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.jkoolcloud -DartifactId=tnt4j -Dversion=2.2 -Dpackaging=jar"/>
         </exec>
         <exec dir="." executable="cmd">
-            <arg line="/c mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=jkool-jesl -Dversion=1.0.0 -Dpackaging=jar"/>
+            <arg line="/c mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.jkoolcloud -DartifactId=jesl -Dversion=0.1.5 -Dpackaging=jar"/>
         </exec>
     </target>
 
     <target name="mvn_unix_init" if="isUnix">
         <exec dir="." executable="cmd">
-            <arg line="-c 'mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=tnt4j-api -Dversion=1.0.0 -Dpackaging=jar'"/>
+            <arg line="-c 'mvn install:install-file -Dfile=../build/tnt4j/tnt4j-api.jar -DgroupId=com.jkoolcloud -DartifactId=tnt4j -Dversion=2.2 -Dpackaging=jar'"/>
         </exec>
         <exec dir="." executable="cmd">
-            <arg line="-c 'mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.nastel.jkool.tnt4j -DartifactId=jkool-jesl -Dversion=1.0.0 -Dpackaging=jar'"/>
+            <arg line="-c 'mvn install:install-file -Dfile=../build/jesl/jkool-jesl.jar -DgroupId=com.jkoolcloud -DartifactId=jesl -Dversion=0.1.5 -Dpackaging=jar'"/>
         </exec>
     </target>
 

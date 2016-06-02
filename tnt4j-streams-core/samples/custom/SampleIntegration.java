@@ -14,18 +14,18 @@
  * the License.
  */
 
-package com.jkool.tnt4j.streams.samples.custom;
+package com.jkoolcloud.tnt4j.streams.samples.custom;
 
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkool.tnt4j.streams.configure.StreamsConfig;
-import com.jkool.tnt4j.streams.inputs.StreamThread;
-import com.jkool.tnt4j.streams.inputs.TNTInputStream;
-import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.StreamsConfig;
+import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
+import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
  * Sample integration of TNT4J-Streams into an application.

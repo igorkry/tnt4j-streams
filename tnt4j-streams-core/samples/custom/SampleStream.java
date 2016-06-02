@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.jkool.tnt4j.streams.samples.custom;
+package com.jkoolcloud.tnt4j.streams.samples.custom;
 
 import java.io.File;
 import java.io.FileReader;
@@ -22,19 +22,18 @@ import java.io.LineNumberReader;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jkool.tnt4j.streams.fields.StreamProperties;
-import com.jkool.tnt4j.streams.inputs.TNTInputStream;
-import com.jkool.tnt4j.streams.utils.Utils;
-import com.nastel.jkool.tnt4j.core.OpLevel;
-import com.nastel.jkool.tnt4j.sink.DefaultEventSinkFactory;
-import com.nastel.jkool.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Sample custom stream.
  *
  * @version $Revision: 1 $
  */
-public class SampleStream extends TNTInputStream<String> {
+public class SampleStream extends TNTParseableInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleStream.class);
 
 	private String fileName;

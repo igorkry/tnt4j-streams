@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <parser name="FlumeJSONParser" class="com.jkool.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="FlumeJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="true"/>
 
         <field name="Location" locator="$.headers.clientip" locator-type="Label"/>
@@ -28,7 +28,7 @@
         </field>
     </parser>
 
-    <stream name="SampleFlumeStream" class="com.jkool.tnt4j.streams.inputs.CharacterStream">
+    <stream name="SampleFlumeStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value=".\tnt4j-streams-flume-plugin\samples\apache-flume-parsed\messages.json"/>
         <!--<property name="Port" value="9595"/>-->
         <parser-ref name="FlumeJSONParser"/>
