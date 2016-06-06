@@ -156,7 +156,7 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 		JobDetail job = buildJob(scenario, step, jobAttrs);
 
-		ScheduleBuilder scheduleBuilder;
+		ScheduleBuilder<?> scheduleBuilder;
 
 		if (step.getSchedulerData() instanceof CronSchedulerData) {
 			CronSchedulerData csd = (CronSchedulerData) step.getSchedulerData();

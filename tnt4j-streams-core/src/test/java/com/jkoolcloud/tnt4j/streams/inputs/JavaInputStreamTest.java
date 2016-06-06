@@ -16,19 +16,29 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.assertEquals;
+
+import java.io.InputStream;
+
+import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
-		FileLineStreamTest.class, HttpStreamTest.class, JavaInputStreamTest.class, StreamThreadTest.class, 
-		TNTInputStreamTest.class, TNTBufferedInputStreamTest.class, PipedStreamTest.class, RedirectStreamTest.class,
-		ZipLineStreamTest.class })
-public class AllInputsTests {
+public class JavaInputStreamTest {
 
+	@Test
+	public void getActivityPositionTest() throws Exception {
+		JavaInputStream my = Mockito.mock(JavaInputStream.class, Mockito.CALLS_REAL_METHODS);
+		assertEquals(0, my.getActivityPosition());
+	}
+
+	@Test
+	public void addReferenceTest() throws Exception {
+		JavaInputStream my = Mockito.mock(JavaInputStream.class, Mockito.CALLS_REAL_METHODS);
+		InputStream reference;
+		// my.addReference(reference);
+	}
 }
