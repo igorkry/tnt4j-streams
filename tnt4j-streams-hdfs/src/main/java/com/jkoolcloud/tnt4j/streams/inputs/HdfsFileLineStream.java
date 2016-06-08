@@ -49,8 +49,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - concrete file name or file name pattern defined using
- * characters '*' and '?'</li>
+ * <li>FileName - URI of HDFS file or file URI pattern defined using wildcard
+ * characters '*' and '?'. (Required)</li>
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
  * should be polled for changes or not. If not, then files are read from oldest
  * to newest sequentially one single time. Default value - {@code false}.
@@ -182,7 +182,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 			fs = FileSystem.get(fileUri, new Configuration());
 			Path filePath = new Path(fileUri);
 
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				availableFiles = searchFiles(filePath, fs);
 			} else {
 				availableFiles = new Path[] { filePath };
@@ -357,7 +357,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean swapToPrevFile(FileSystem fs) throws Exception {
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				URI fileUri = new URI(fileName);
 				Path filePath = new Path(fileUri);
 
@@ -382,7 +382,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean swapToNextFile(FileSystem fs) throws Exception {
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				URI fileUri = new URI(fileName);
 				Path filePath = new Path(fileUri);
 

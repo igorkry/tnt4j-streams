@@ -24,6 +24,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * JAX-RS service (JSON/XML)
     * JAX-WS service
     * System command
+    * MS Excel document
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
@@ -2062,6 +2063,128 @@ containing field `TomcatActive`.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
+#### MS Excel document
+
+##### Rows
+
+This sample shows how to stream MS Excel workbook rows as activity events.
+
+Sample files can be found in `samples/xlsx-rows` directory.
+
+NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="ExcelRowParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityExcelRowParser">
+        <field name="StartTime" locator="A" locator-type="Label" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="B" locator-type="Label"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="C" locator-type="Label"/>
+        <field name="UserName" locator="D" locator-type="Label"/>
+        <field name="EventName" locator="E" locator-type="Label"/>
+        <field name="EventType" locator="E" locator-type="Label">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="H" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleExcelRowsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelRowStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+        <property name="FirstRowAsHeader" value="false"/>
+        <property name="SheetsToProcess" value="Sheet*"/>
+
+        <parser-ref name="ExcelRowParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `SampleExcelRowsStream` referencing `ExcelRowsParser` shall be used. Stream takes
+workbook sheet row and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable rows.
+
+`SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx` file.
+
+`FirstRowAsHeader` property indicates that there is no table header row in sheets.
+
+`SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
+`Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
+
+`ExcelRowParser` parser uses literal sheet column indicators as locators (i.e. `A`, `D`, `AB`).
+
+Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+field string mapping to TNT4J event field value.
+
+##### Sheets
+
+This sample shows how to stream MS Excel workbook sheets as activity events.
+
+Sample files can be found in `samples/xlsx-sheets` directory.
+
+NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKoolCloud
+please do not forget to just to dashboard time frame to that period!
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="ExcelSheetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityExcelSheetParser">
+        <field name="StartTime" locator="B2" locator-type="Label" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
+        <field name="ServerIp" locator="B3" locator-type="Label"/>
+        <field name="ApplName" value="orders"/>
+        <field name="Correlator" locator="B4" locator-type="Label"/>
+        <field name="UserName" locator="B5" locator-type="Label"/>
+        <field name="EventName" locator="B6" locator-type="Label"/>
+        <field name="EventType" locator="B6" locator-type="Label">
+            <field-map source="Order Placed" target="START"/>
+            <field-map source="Order Received" target="RECEIVE"/>
+            <field-map source="Order Processing" target="OPEN"/>
+            <field-map source="Order Processed" target="SEND"/>
+            <field-map source="Order Shipped" target="END"/>
+        </field>
+        <field name="MsgValue" locator="B9" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleExcelSheetsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelSheetStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-sheets\sample.xlsx"/>
+        <property name="SheetsToProcess" value="Sheet*"/>
+
+        <parser-ref name="ExcelSheetParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `SampleExcelSheetsStream` referencing `ExcelSheetParser` shall be used. Stream takes
+workbook sheet and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable sheets.
+
+`SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-sheets\sample.xlsx` file.
+
+`SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
+`Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
+
+`ExcelSheetParser` parser uses literal sheet cell indicators as locators (i.e. `A1`, `D5`, `AB12` where letters
+identifies column and number identifies row).
+
+Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+field string mapping to TNT4J event field value.
+
 #### Integrating TNT4J-Streams into custom API
 
 This sample shows how to integrate TNT4J-Streams into Your custom API.
@@ -2245,7 +2368,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
 
 #### File line stream parameters (and Hdfs):
 
- * FileName - concrete file name or file name pattern defined using characters `*` and `?`. (Required)
+ * FileName - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
  * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
  are read from oldest to newest sequentially one single time. Default value - `false`. (Optional)
     * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest file entry line. If
@@ -2271,7 +2394,7 @@ Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
 #### Character stream parameters:
 
- * FileName - concrete file name. (Required - just one `FileName` or `Port`)
+ * FileName - the system-dependent file name. (Required - just one `FileName` or `Port`)
  * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
  * RestartOnInputClose - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
 
@@ -2478,6 +2601,31 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
 
 Also see 'Generic streams parameters' and 'Buffered streams parameters'.
 
+#### Ms Excel Stream parameters
+
+ * FileName - the system-dependent file name of MS Excel document. (Required)
+ * SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
+ matches this mask. Default value - ''. (Optional)
+
+    sample:
+```xml
+    <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+    <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
+```
+
+Also see 'Generic streams parameters' and 'Parseable streams parameters'.
+
+##### Ms Excel Rows Stream parameters
+
+ * FirstRowAsHeader - flag `true/false` indicating whether first row in sheet is used to define table columns titles.
+ If `true` then first sheet row is skipped from streaming. Default value - `false`. (Optional)
+
+    sample:
+```xml
+    <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+    <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
+```
+
 ### Parsers configuration
 
 #### Activity Name-Value parser:
@@ -2583,6 +2731,7 @@ Modules list:
    * `Mqtt` (O)
    * `WMQ` (O)
    * `Ws` (O)
+   * `MsOffice` (O)
 
 (M) marked modules are mandatory, (O) marked modules - optional.
 
@@ -2601,10 +2750,10 @@ All other required dependencies are defined in project modules `pom.xml` files. 
 online mode it should download these defined dependencies automatically.
 
 ### Manually installed dependencies
-Some of required and optional dependencies may be not available in public Maven Repository (http://mvnrepository.com/).
-In this case we would recommend to download those dependencies manually into module `lib` directory and install into
-local maven repository by running `mvn install` command. See `tnt4j-streams/tnt4j-streams-core/lib/mvn-install.bat`
-how to do this.
+Some of required and optional dependencies may be not available in public Maven Repository
+(http://repo.maven.apache.org/maven2/). In this case we would recommend to download those dependencies manually into
+module's `lib` directory and install into local maven repository by running `mvn install` command. For example see
+`tnt4j-streams/tnt4j-streams-wmq/lib/mvn-install.bat` how to do this.
 
 #### `WMQ` module
 
@@ -2627,9 +2776,9 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
    * to build project run maven goals `clean package`
    * to make release assembly run maven goals `clean package javadoc:aggregate install`
 
-NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true` instead of
-using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test scope
-dependencies checking if UI checkbox 'Skip Tests' is used.
+NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true`
+instead of using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test
+scope dependencies checking if UI checkbox 'Skip Tests' is used.
 
 Release assembly is built to `../build/tnt4j-streams` directory.
 
@@ -2665,6 +2814,7 @@ dependencies checking if UI checkbox 'Skip Tests' is used.
 * in `mqtt` module run JUnit test suite named `AllMqttStreamTests`
 * in `wmq` module run JUnit test suite named `AllWmqStreamTests`
 * in `ws` module run JUnit test suite named `AllWsStreamTests`
+* in `msoffice` module run JUnit test suite named `AllMsOfficeStreamTests`
 
 Known Projects Using TNT4J
 ===============================================

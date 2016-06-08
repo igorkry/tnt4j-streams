@@ -39,9 +39,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
- * Implements default activity data parser that assumes each activity data item
- * is an JMS message data structure. Message payload data is put into map entry
- * using key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
+ * Implements an activity data parser that assumes each activity data item is an
+ * JMS message data structure. Message payload data is put into map entry using
+ * key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
  * supports JMS messages of those types:
  * <ul>
  * <li>TextMessage - activity data is message text</li>

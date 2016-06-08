@@ -106,7 +106,7 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 						}
 						if (zdp.length > 1) {
 							zipEntriesMask = StringUtils.isEmpty(zdp[1]) ? null
-									: zdp[1].replace("\\", "/").replace("?", ".?").replace("*", ".*?"); // NON-NLS
+									: Utils.wildcardToRegex2(zdp[1].replace("\\", "/")); // NON-NLS
 							if (zipEntriesMask != null) {
 								zipEntriesMask = '^' + zipEntriesMask + '$'; // NON-NLS
 							}

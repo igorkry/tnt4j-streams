@@ -16,16 +16,15 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -38,25 +37,36 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * plain java {@link Object} data structure, where each field is represented by
- * declared class field and the field name is used to map each field onto its
- * corresponding activity field.
- * <p>
- * If field is complex object, subfields can be accessed using '.' as naming
- * hierarchy separator: i.e. 'header.author.name'.
+ * Implements activity data parser that assumes each activity data item is an MS
+ * Excel {@link org.apache.poi.ss.usermodel.Workbook} {@link Sheet} data
+ * structure, where each field is represented by a sheet cell reference (i.e
+ * B12, H12, AA1 where letters identifies column and number identifies row) and
+ * the name is used to map each field onto its corresponding activity field.
  *
  * @version $Revision: 1 $
  */
-public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJavaObjectParser.class);
+public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelSheetParser.class);
 
 	/**
-	 * Constructs a new ActivityJavaObjectParser.
-	 *
+	 * Constructs a new ExcelSheetParser.
 	 */
-	public ActivityJavaObjectParser() {
+	public ActivityExcelSheetParser() {
 		super(LOGGER);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes
+	 * extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link org.apache.poi.ss.usermodel.Sheet}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return Sheet.class.isInstance(data);
 	}
 
 	@Override
@@ -73,30 +83,18 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		// }
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
-	 * <ul>
-	 * <li>{@link java.lang.Object}</li>
-	 * </ul>
-	 */
-	@Override
-	public boolean isDataClassSupported(Object data) {
-		return Object.class.isInstance(data);
-	}
-
 	@Override
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG,
+
+		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
-		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
-		return parsePreparedItem(stream, dataStr, data);
+		Sheet sheet = (Sheet) data;
+
+		return parsePreparedItem(stream, sheet.toString(), sheet);
 	}
 
 	/**
@@ -107,8 +105,9 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *            parent stream
 	 * @param locator
 	 *            activity field locator
-	 * @param dataObj
-	 *            activity data carrier object
+	 * @param sheet
+	 *            MS Excel document sheet representing activity object data
+	 *            fields
 	 *
 	 * @return value formatted based on locator definition or {@code null} if
 	 *         locator is not defined
@@ -120,7 +119,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Object dataObj)
+	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Sheet sheet)
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {
@@ -129,45 +128,18 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
 				} else {
-					String[] path = getNodePath(locStr);
-					val = getFieldValue(path, dataObj, 0);
+					CellReference ref = new CellReference(locStr);
+					Row row = sheet.getRow(ref.getRow());
+					if (row != null) {
+						Cell cell = row.getCell(ref.getCol());
+						if (cell != null) {
+							val = cell.toString();
+						}
+					}
 				}
 			}
 			val = locator.formatValue(val);
 		}
-
 		return val;
-	}
-
-	private static String[] getNodePath(String locStr) {
-		if (StringUtils.isNotEmpty(locStr)) {
-			return locStr.split(Pattern.quote(".")); // NON-NLS
-		}
-
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Object getFieldValue(String[] path, Object dataObj, int i) {
-		if (ArrayUtils.isEmpty(path) || dataObj == null) {
-			return null;
-		}
-
-		try {
-			Field f = dataObj.getClass().getDeclaredField(path[i]);
-			Object obj = f.get(dataObj);
-
-			if (i < path.length - 1 && !f.getType().isPrimitive()) {
-				obj = getFieldValue(path, obj, ++i);
-			}
-
-			return obj;
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityJavaObjectParser.could.not.get.declared.field"),
-					path[i], dataObj.getClass().getSimpleName(), exc);
-			return null;
-		}
 	}
 }

@@ -108,11 +108,11 @@ public class UtilsTest {
 		final String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*";
 		final String EMPTY = "";
 
-		assertFalse(Utils.isWildcardFileName(N_WILDC));
-		assertTrue(Utils.isWildcardFileName(WILDC));
-		assertTrue(Utils.isWildcardFileName(WILDC2));
-		assertTrue(Utils.isWildcardFileName(WILDC3));
-		assertFalse(Utils.isWildcardFileName(EMPTY));
+		assertFalse(Utils.isWildcardString(N_WILDC));
+		assertTrue(Utils.isWildcardString(WILDC));
+		assertTrue(Utils.isWildcardString(WILDC2));
+		assertTrue(Utils.isWildcardString(WILDC3));
+		assertFalse(Utils.isWildcardString(EMPTY));
 	}
 
 	@Test

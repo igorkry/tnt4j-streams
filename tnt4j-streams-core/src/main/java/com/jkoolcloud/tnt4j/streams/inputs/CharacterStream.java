@@ -58,8 +58,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - concrete file name. (Required - just one 'FileName' or 'Port')
- * </li>
+ * <li>FileName - the system-dependent file name. (Required - just one
+ * 'FileName' or 'Port')</li>
  * <li>Port - port number to accept character stream over TCP/IP. (Required -
  * just one 'FileName' or 'Port')</li>
  * <li>RestartOnInputClose - flag indicating to restart stream if input socked

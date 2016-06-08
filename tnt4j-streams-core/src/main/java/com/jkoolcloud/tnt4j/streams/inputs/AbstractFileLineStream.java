@@ -39,15 +39,15 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <p>
  * Base class for files lines activity stream, where each line of the file is
  * assumed to represent a single activity or event which should be recorded.
- * Stream reads changes from defined files every "FileReadDelay" property
- * defined seconds (default is 15sec.).
+ * Stream also can read changes from defined files every "FileReadDelay"
+ * property defined seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - concrete file name or file name pattern defined using
- * characters '*' and '?'. (Required)</li>
+ * <li>FileName - the system-dependent file name or file name pattern defined
+ * using wildcard characters '*' and '?'. (Required)</li>
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
  * should be polled for changes or not. If not, then files are read from oldest
  * to newest sequentially one single time. Default value - {@code false}.

@@ -24,6 +24,14 @@
         </license>
     </licenses>
 
+    <distributionManagement>
+        <repository>
+            <id>bintray-amavashev2-jkoolcloud</id>
+            <name>amavashev2-jkoolcloud</name>
+            <url>https://api.bintray.com/maven/amavashev2/jkoolcloud/streams-zorka/;publish=1;override=1</url>
+        </repository>
+    </distributionManagement>
+
     <organization>
         <name>jKool, LLC</name>
         <url>https://www.jkoolcloud.com/</url>
@@ -198,6 +206,7 @@
         <!--module>tnt4j-streams-wmq</module-->
         <!--module>tnt4j-streams-ws</module-->
         <!--module>tnt4j-streams-flume-plugin</module-->
+        <!--<module>tnt4j-streams-msoffice</module>-->
     </modules>
 
 </project>

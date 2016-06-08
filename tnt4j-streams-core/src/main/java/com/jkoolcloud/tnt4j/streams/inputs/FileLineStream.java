@@ -42,8 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - concrete file name or file name pattern defined using
- * characters '*' and '?'</li>
+ * <li>FileName - the system-dependent file name or file name pattern defined
+ * using wildcard characters '*' and '?'. (Required)</li>
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
  * should be polled for changes or not. If not, then files are read from oldest
  * to newest sequentially one single time. Default value - {@code false}.
@@ -159,7 +159,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		 */
 		@Override
 		protected void initialize() throws Exception {
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				availableFiles = searchFiles(fileName);
 			} else {
 				availableFiles = new File[] { new File(fileName) };
@@ -324,7 +324,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private boolean swapToPrevFile() {
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				availableFiles = searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
@@ -346,7 +346,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private boolean swapToNextFile() {
-			if (Utils.isWildcardFileName(fileName)) {
+			if (Utils.isWildcardString(fileName)) {
 				availableFiles = searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
