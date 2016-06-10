@@ -90,7 +90,15 @@
             <outputDirectory>samples</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>tnt4j-streams-msoffice/samples</directory>
+            <outputDirectory>samples</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>tnt4j-streams-wmq/samples</directory>
+            <outputDirectory>samples</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>tnt4j-streams-ws/samples</directory>
             <outputDirectory>samples</outputDirectory>
         </fileSet>
     </fileSets>
