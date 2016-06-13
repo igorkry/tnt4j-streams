@@ -30,6 +30,7 @@ import java.util.zip.ZipOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
 
@@ -37,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
  * @author akausinis
  * @version 1.0
  */
-public class ZipLineStreamTest extends InputTestBase {
+public class ZipLineStreamTest extends PropertiesTestBase {
 
 	ZipLineStream zs;
 

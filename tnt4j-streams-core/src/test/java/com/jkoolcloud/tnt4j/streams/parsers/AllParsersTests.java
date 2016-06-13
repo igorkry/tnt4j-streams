@@ -25,7 +25,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ ActivityMapParserTest.class, ActivityNameValueParserTest.class, ActivityRegExParserTest.class,
+@SuiteClasses({ AbstractActivityMapParserTest.class, ActivityJavaObjectParserTest.class, ActivityJsonParserTest.class,
+		ActivityMapParserTest.class, ActivityNameValueParserTest.class, ActivityRegExParserTest.class,
 		ActivityTokenParserTest.class, ActivityXmlParserTest.class, MessageTypeTest.class,
 		MessageActivityXmlParserTest.class })
 public class AllParsersTests {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.inputs;
+package com.jkoolcloud.tnt4j.streams;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -23,21 +23,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 
+import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+
 /**
  * @author akausinis
  * @version 1.0
  */
-public abstract class InputTestBase {
+public abstract class PropertiesTestBase {
 
 	@SuppressWarnings("serial")
 	public static class PropertyList extends ArrayList<AbstractMap.SimpleEntry<String, String>> {
-		PropertyList add(String key, String Value) {
+		public PropertyList add(String key, String Value) {
 			add(new AbstractMap.SimpleEntry<String, String>(key, Value));
 			return this;
 		}
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		Collection<Entry<String, String>> build() {
+		public Collection<Entry<String, String>> build() {
 			return (Collection) this;
 		}
 	}

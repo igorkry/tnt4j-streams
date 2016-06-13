@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +43,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	private static final String TEST_STRING = "TEST_STRING";
 	private static final String TEST_PATTERN = "(\\S+)";
+	private TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 
 	@Override
 	@Before
@@ -98,5 +100,126 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 		Pattern pattern = Pattern.compile(TEST_PATTERN);
 		Matcher matcher = pattern.matcher(TEST_STRING);
 		assertTrue(matcher.matches());
+	}
+
+	@Test
+	public void setPropertiesNotEqualsPropNameTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_SIG_DELIM, "test");
+	}
+
+	@Test
+	public void setPropertiesWhenPropValueIsEmptyTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_PATTERN, "");
+	}
+
+	@Test
+	public void addFieldWhenDataIsNullTest() {
+		ActivityField af = new ActivityField("Test");
+		parser.addField(af);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void addFieldExceptionTest() {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum");
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		parser.addField(af);
+		af.addLocator(locator2);
+		parser.addField(af);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void addFieldExceptionOtherTest() {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum");
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator2);
+		parser.addField(af);
+		af.addLocator(locator);
+		parser.addField(af);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void parseWhenPatternNullTest() throws Exception {
+		parser.parse(stream, "");
+	}
+
+	@Test
+	public void parseWhenWhenDataIsNullTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_PATTERN, "test");
+		assertNull(parser.parse(stream, null));
+	}
+
+	@Test
+	public void parseWhenWhenDataIsEmptyTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_PATTERN, "test");
+		assertNull(parser.parse(stream, ""));
+	}
+
+	@Test
+	public void parseWhenNoMatchesTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
+		assertNull(parser.parse(stream, "test"));
+	}
+
+	@Test(expected = ParseException.class)
+	public void parseWhenMatchMapExceptionTest() throws Exception {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		parser.addField(af);
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
+		parser.parse(stream, "1111");
+	}
+
+	@Test
+	public void parseWhenMatchMapIsEmptyTest() throws Exception {
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
+		parser.parse(stream, "1111");
+	}
+
+	@Test
+	public void parseMatchMapOneEntryTest() throws Exception {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, null);
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		parser.addField(af);
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
+		parser.parse(stream, "1111555999");
+	}
+
+	@Test
+	public void parseMatchMapTwoEntriesTest() throws Exception {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "0");
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "2");
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		af.addLocator(locator1);
+		parser.addField(af);
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
+		parser.parse(stream, "1111555999");
+	}
+
+	@Test
+	public void parseGroupMapOneEntryTest() throws Exception {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, null);
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		parser.addField(af);
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
+		parser.parse(stream, "1111555999");
+	}
+
+	@Test
+	public void parseGroupMapTwoEntriesTest() throws Exception {
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupNum, "0");
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "2");
+		ActivityField af = new ActivityField("test");
+		af.addLocator(locator);
+		af.addLocator(locator1);
+		parser.addField(af);
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
+		parser.parse(stream, "1111555999");
 	}
 }

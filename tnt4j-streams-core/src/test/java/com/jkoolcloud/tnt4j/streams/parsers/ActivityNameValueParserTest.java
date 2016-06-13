@@ -16,15 +16,18 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -32,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @author akausinis
  * @version 1.0
  */
-public class ActivityNameValueParserTest {
+public class ActivityNameValueParserTest extends PropertiesTestBase {
 
 	private static final String TEST = "TEST=TESTVALUE\nTEST2=TESTVALUE2";
 	private ActivityNameValueParser activityNameValueParser = new ActivityNameValueParser();
@@ -74,10 +77,59 @@ public class ActivityNameValueParserTest {
 		assertNull(activityNameValueParser.parse(stream, null));
 		activityNameValueParser.fieldDelim = null;
 		assertNull(activityNameValueParser.parse(stream, TEST));
-
-		activityNameValueParser.valueDelim = null;
-		assertNull(activityNameValueParser.parse(stream, TEST));
-
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void parseDelimExceptionTest() throws Exception {
+		activityNameValueParser.valueDelim = null;
+		activityNameValueParser.parse(stream, "Test");
+	}
+
+	@Test
+	public void parseEmptyDataTest() throws Exception {
+		assertNull(activityNameValueParser.parse(stream, ""));
+	}
+
+	@Test
+	public void parseWhenPatternNotNullTest() throws Exception {
+		Pattern pattern = Pattern.compile("\\d+");
+		activityNameValueParser.pattern = pattern;
+		assertNull(activityNameValueParser.parse(stream, "test"));
+	}
+
+	@Test
+	public void parseWhenPatternNotNullMatchesTest() throws Exception {
+		Pattern pattern = Pattern.compile("\\d+");
+		activityNameValueParser.pattern = pattern;
+		assertNotNull(activityNameValueParser.parse(stream, "14"));
+	}
+
+	@Test
+	public void setPropertiesWhenNullTest() throws Exception {
+		activityNameValueParser.setProperties(null);
+	}
+
+	@Test
+	public void setPropertiesWhenValueEmptyTest() throws Exception {
+		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_FLD_DELIM, "")
+				.build();
+		activityNameValueParser.setProperties(props);
+		assertNull(activityNameValueParser.fieldDelim);
+	}
+
+	@Test
+	public void setPropertiesWhenOtherValueEmptyTest() throws Exception {
+		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_PATTERN, "")
+				.build();
+		activityNameValueParser.setProperties(props);
+		assertNull(activityNameValueParser.pattern);
+	}
+
+	@Test
+	public void setPropertiesWhenNotEqualsNameTest() throws Exception {
+		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_NAMESPACE, "Test")
+				.build();
+		activityNameValueParser.setProperties(props);
+		assertTrue(activityNameValueParser.stripQuotes);
+	}
 }

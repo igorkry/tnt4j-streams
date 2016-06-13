@@ -29,13 +29,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-public class TNTBufferedInputStreamTest extends InputTestBase {
+public class TNTBufferedInputStreamTest extends PropertiesTestBase {
 	private EventSink logger;
 
 	@Before

@@ -23,13 +23,14 @@ import java.util.Map.Entry;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-public class RedirectStreamTest extends InputTestBase {
+public class RedirectStreamTest extends PropertiesTestBase {
 
 	RedirectStream rs;
 

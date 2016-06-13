@@ -17,7 +17,8 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.text.ParseException;
@@ -33,6 +34,7 @@ import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
@@ -43,7 +45,7 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  * @author akausinis
  * @version 1.0
  */
-public class TNTInputStreamTest extends InputTestBase {
+public class TNTInputStreamTest extends PropertiesTestBase {
 
 	private EventSink logger;
 	private ActivityParser parser;
@@ -91,16 +93,16 @@ public class TNTInputStreamTest extends InputTestBase {
 		}
 
 	}
-	
+
 	@Test
-	public void setPropertiesIfNullTest() throws Exception{
+	public void setPropertiesIfNullTest() throws Exception {
 		TNTInputStream my = Mockito.mock(TNTInputStream.class, Mockito.CALLS_REAL_METHODS);
 		my.setProperties(null);
 		assertNull(my.getProperty("PROP_EXECUTORS_BOUNDED"));
 	}
-	
+
 	@Test
-	public void getBoundedExecutorServiceTest() throws Exception{
+	public void getBoundedExecutorServiceTest() throws Exception {
 		final Collection<Entry<String, String>> props = getPropertyList()
 				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_HALT_ON_PARSER, "true")
 				.add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
@@ -112,9 +114,9 @@ public class TNTInputStreamTest extends InputTestBase {
 		ts.setProperties(props);
 		ts.initialize();
 	}
-	
+
 	@Test
-	public void getDefaultExecutorServiceTest() throws Exception{
+	public void getDefaultExecutorServiceTest() throws Exception {
 		final Collection<Entry<String, String>> props = getPropertyList()
 				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_HALT_ON_PARSER, "true")
 				.add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
@@ -127,12 +129,13 @@ public class TNTInputStreamTest extends InputTestBase {
 		ts.initialize();
 		ts.halt();
 	}
-	
-	@Test(expected=IllegalStateException.class)
-	public void runTest(){
+
+	@Test(expected = IllegalStateException.class)
+	public void runTest() {
 		ts.ownerThread = null;
 		ts.run();
 	}
+
 	@Test
 	public void testMakeActivityInfo() throws Exception {
 
@@ -195,33 +198,33 @@ public class TNTInputStreamTest extends InputTestBase {
 	}
 
 	@Test
-	public void addInputTaskListenerNullTest(){
+	public void addInputTaskListenerNullTest() {
 		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
 		final Runnable runnable = mock(Runnable.class);
 		ts.addStreamTasksListener(null);
 		ts.notifyStreamTaskRejected(runnable);
 		verify(streamTaskListenerMock, never()).onReject(eq(ts), any(Runnable.class));
 	}
-	
+
 	@Test
-	public void addStreamListenerNullTest(){
+	public void addStreamListenerNullTest() {
 		InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		ts.addStreamListener(null);
 		ts.notifyProgressUpdate(1, 10);
 		verify(inputStreamListenerMock, never()).onProgressUpdate(ts, 1, 10);
 	}
-	
+
 	@Test
-	public void removeStreamListenerTest(){
+	public void removeStreamListenerTest() {
 		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		ts.addStreamListener(inputStreamListenerMock);
 		ts.removeStreamListener(inputStreamListenerMock);
 		ts.notifyProgressUpdate(1, 10);
 		verify(inputStreamListenerMock, never()).onProgressUpdate(ts, 1, 10);
 	}
-	
+
 	@Test
-	public void removeStreamTasksListenerTest(){
+	public void removeStreamTasksListenerTest() {
 		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
 		final Runnable runnable = mock(Runnable.class);
 		ts.addStreamTasksListener(streamTaskListenerMock);
@@ -229,9 +232,9 @@ public class TNTInputStreamTest extends InputTestBase {
 		ts.notifyStreamTaskRejected(runnable);
 		verify(streamTaskListenerMock, never()).onReject(eq(ts), any(Runnable.class));
 	}
-	
+
 	@Test
-	public void streamStatsTest(){
+	public void streamStatsTest() {
 		assertEquals(ts.getTotalActivities(), ts.getStreamStatistics().getActivitiesTotal());
 		assertEquals(ts.getCurrentActivity(), ts.getStreamStatistics().getCurrActivity());
 		assertEquals(ts.getTotalBytes(), ts.getStreamStatistics().getTotalBytes());
@@ -239,9 +242,9 @@ public class TNTInputStreamTest extends InputTestBase {
 		assertEquals(ts.getElapsedTime(), ts.getStreamStatistics().getElapsedTime());
 		assertEquals(ts.getSkippedActivitiesCount(), ts.getStreamStatistics().getSkippedActivities());
 	}
-	
+
 	@Test
-	public void cleanUpTest(){
+	public void cleanUpTest() {
 		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
 		final Runnable runnable = mock(Runnable.class);
@@ -253,15 +256,15 @@ public class TNTInputStreamTest extends InputTestBase {
 		verify(streamTaskListenerMock, never()).onDropOff(ts, list);
 		ts.notifyProgressUpdate(1, 10);
 		verify(inputStreamListenerMock, never()).onProgressUpdate(ts, 1, 10);
-		
+
 	}
-	
+
 	@Test
-	public void getOwnerThreadTest(){
+	public void getOwnerThreadTest() {
 		ts.ownerThread.setName("TEST_STREAM");
 		assertEquals("TEST_STREAM", ts.getOwnerThread().getName());
 	}
-	
+
 	@Test
 	public void testInputTaskListener() {
 		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);

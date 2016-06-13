@@ -20,13 +20,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-public class AbstractFileLineStreamTest extends InputTestBase {
+public class AbstractFileLineStreamTest extends PropertiesTestBase {
 	boolean inputEnded = false;
 	FileLineStream afls = new FileLineStream();
 

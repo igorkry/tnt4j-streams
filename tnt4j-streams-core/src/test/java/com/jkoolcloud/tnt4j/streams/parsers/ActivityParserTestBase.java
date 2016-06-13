@@ -19,8 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.util.*;
 
 import org.junit.Test;
@@ -103,4 +102,16 @@ public abstract class ActivityParserTestBase {
 		assertNull(parser.getNextString(null));
 	}
 
+	@Test
+	public void getNextStringWhenBufferedReaderInstanceTest() {
+		InputStream textStream = new ByteArrayInputStream("test".getBytes());
+		BufferedReader br = new BufferedReader(new InputStreamReader(textStream));
+		assertEquals("test", parser.getNextString(br));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getNextStringWhenOtherInstanceTest() {
+		String stringToBeParsed = "Testing some tests";
+		parser.getNextString(555);
+	}
 }

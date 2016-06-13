@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractFileLineStream.FileWatcher;
 import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
@@ -34,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
  * @author akausinis
  * @version 1.0
  */
-public class FileLineStreamTest extends InputTestBase {
+public class FileLineStreamTest extends PropertiesTestBase {
 
 	FileLineStream fls;
 
