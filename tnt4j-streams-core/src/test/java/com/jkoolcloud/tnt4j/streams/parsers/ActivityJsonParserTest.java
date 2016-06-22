@@ -37,8 +37,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 import com.jkoolcloud.tnt4j.streams.inputs.CamelBufferedStream;
-import com.jkoolcloud.tnt4j.streams.inputs.TNTBufferedInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -80,7 +80,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void parseTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityField field = new ActivityField("test_name", ActivityFieldDataType.String);
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -91,7 +91,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void parseWhenStringIsEmptyTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		String jsonString = "";
 		assertNull(parser.parse(stream, jsonString));
 	}
@@ -99,7 +99,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "test");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -109,7 +109,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
 		assertNull(parser.getLocatorValue(stream, null, jsonContext));
@@ -118,7 +118,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueWhenLocatorEmptyTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -128,7 +128,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueWhenTypeExpectedTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		final Collection<Entry<String, String>> props = getPropertyList()
 				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
 				.build();
@@ -143,7 +143,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueStartsWithJsonPathTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.test");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -154,7 +154,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueJsonPathIsListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[4, 5, 6]}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -165,7 +165,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void getLocatorValueJsonPathIsEmptyListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		TNTBufferedInputStream stream = Mockito.mock(TNTBufferedInputStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[]}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
