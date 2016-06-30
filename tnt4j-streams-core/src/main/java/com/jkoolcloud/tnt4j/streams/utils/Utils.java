@@ -798,4 +798,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return sb == null ? sb : sb.delete(0, sb.length());
 	}
 
+	/**
+	 * Checks if number object is {@code null} or has value equal to {@code 0}.
+	 *
+	 * @param number
+	 *            number object to check
+	 * @return {@code true} if number is {@code null} or number value is
+	 *         {@code 0}, {@code false} - othervise
+	 */
+	public static boolean isZero(Number number) {
+		return number == null || number.intValue() == 0;
+	}
+
 }

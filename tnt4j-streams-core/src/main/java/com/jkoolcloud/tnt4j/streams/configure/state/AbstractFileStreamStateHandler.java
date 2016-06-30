@@ -127,7 +127,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 				file = findStreamingFile(fileAccessState, activityFiles);
 				if (file != null) {
 					fileAccessState.lineNumberRead = checkLine(file, fileAccessState);
-					if (linePolicy == LinePolicy.HALT_IF_CRC_MISMATCH && fileAccessState.lineNumberRead == 0) {
+					if (linePolicy == LinePolicy.HALT_IF_CRC_MISMATCH && Utils.isZero(fileAccessState.lineNumberRead)) {
 						throw new IllegalStateException(StreamsResources.getString(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "FileStreamStateHandler.location.not.found"));
 					}
@@ -190,8 +190,10 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			reader = new LineNumberReader(openFile(file));
 			// skip lines until reaching line with number: persisted line number
 			// - LINE_SHIFT_TOLERANCE
-			int startCompareLineIndex = fileAccessState.lineNumberRead - LINE_SHIFT_TOLERANCE;
-			int endCompareLineIndex = fileAccessState.lineNumberRead + LINE_SHIFT_TOLERANCE;
+			int lastAccessedLine = getLastReadLineNumber();
+
+			int startCompareLineIndex = lastAccessedLine - LINE_SHIFT_TOLERANCE;
+			int endCompareLineIndex = lastAccessedLine + LINE_SHIFT_TOLERANCE;
 			String line;
 			int li = 0;
 			while (((line = reader.readLine()) != null) && (li <= endCompareLineIndex)) {
@@ -394,7 +396,11 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 * @return line number to be streamed
 	 */
 	public int getLineNumber() {
-		return isStreamedFileAvailable() ? fileAccessState.lineNumberRead : 0;
+		return isStreamedFileAvailable() ? getLastReadLineNumber() : 0;
+	}
+
+	private int getLastReadLineNumber() {
+		return fileAccessState == null || fileAccessState.lineNumberRead == null ? 0 : fileAccessState.lineNumberRead;
 	}
 
 	/**
