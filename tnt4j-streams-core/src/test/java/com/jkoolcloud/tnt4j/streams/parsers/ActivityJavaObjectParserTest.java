@@ -17,7 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
-import com.jkoolcloud.tnt4j.streams.inputs.CamelBufferedStream;
 
 /**
  * @author akausinis
@@ -66,33 +64,38 @@ public class ActivityJavaObjectParserTest extends PropertiesTestBase {
 	@Test
 	public void parseTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		testParser.parse(mock(CamelBufferedStream.class), "test");
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		testParser.parse(stream, "test");
 	}
 
 	@Test
 	public void parseWhenDataNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		assertNull(testParser.parse(mock(CamelBufferedStream.class), null));
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		assertNull(testParser.parse(stream, null));
 	}
 
 	@Test
 	public void getLocatorValueExceptionTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "555");
-		assertNull(testParser.getLocatorValue(mock(CamelBufferedStream.class), fieldLocator, ""));
+		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		assertNull(testParser.getLocatorValue(mock(CamelBufferedStream.class), null, ""));
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		assertNull(testParser.getLocatorValue(stream, null, ""));
 	}
 
 	@Test
 	public void getLocatorValueWhenLocatorIsEmptyTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "");
-		assertNull(testParser.getLocatorValue(mock(CamelBufferedStream.class), fieldLocator, ""));
+		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
 	@Test
@@ -125,23 +128,27 @@ public class ActivityJavaObjectParserTest extends PropertiesTestBase {
 	}
 
 	@Test
+	@Ignore("Not finished")
 	public void getFieldValueTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index,
 				"testName.testNumber");
 		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
-		testParser.getLocatorValue(stream, fieldLocator, prop);
+		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
 	}
 
 	@Test
+	@Ignore("Not finished")
 	public void getFieldValueWhenTwoSameFieldsTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index,
 				"testNumber.isActive");
 		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
-		assertNotNull(testParser.getLocatorValue(stream, fieldLocator, prop));
+		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
+		assertNotNull(locValue);
+		assertEquals("Excpected value does not match", prop.isActive, locValue);
 	}
 
 	@Test
@@ -150,7 +157,9 @@ public class ActivityJavaObjectParserTest extends PropertiesTestBase {
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "testNumber");
 		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
-		assertNotNull(testParser.getLocatorValue(stream, fieldLocator, prop));
+		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
+		assertNotNull(locValue);
+		assertEquals("Excpected value does not match", prop.testNumber, locValue);
 	}
 
 	@Ignore("Not finished")

@@ -18,7 +18,6 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 import java.io.*;
 import java.text.ParseException;
@@ -38,7 +37,6 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
-import com.jkoolcloud.tnt4j.streams.inputs.CamelBufferedStream;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -66,14 +64,16 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 	@Test
 	public void parseWhenDataIsNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		assertNull(parser.parse(mock(CamelBufferedStream.class), null));
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		assertNull(parser.parse(stream, null));
 	}
 
 	@Test(expected = ParseException.class)
 	public void parseExceptionTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> myMap = new HashMap<String, String>();
-		parser.parse(mock(CamelBufferedStream.class), myMap);
+		parser.parse(stream, myMap);
 	}
 
 	@Ignore("Not finished")

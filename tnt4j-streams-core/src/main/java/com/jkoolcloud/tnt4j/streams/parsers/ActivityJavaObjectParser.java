@@ -166,7 +166,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityJavaObjectParser.could.not.get.declared.field"),
-					path[i], dataObj.getClass().getSimpleName(), exc);
+					path[i], dataObj.getClass().getSimpleName(), String.valueOf(dataObj));
 			return null;
 		}
 	}
