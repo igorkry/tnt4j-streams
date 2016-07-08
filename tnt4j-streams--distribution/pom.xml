@@ -60,7 +60,7 @@
                                 <descriptor>assemblies/deployAssembly.xml</descriptor>
                             </descriptors>
                             <outputDirectory>${release.deploy.dir}</outputDirectory>
-                            <attach>false</attach>
+                            <attach>true</attach>
                             <finalName>${release.deploy.finalName}</finalName>
                         </configuration>
                     </execution>
