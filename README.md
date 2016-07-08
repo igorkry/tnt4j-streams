@@ -2752,8 +2752,8 @@ online mode it should download these defined dependencies automatically.
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public Maven Repository
 (http://repo.maven.apache.org/maven2/). In this case we would recommend to download those dependencies manually into
-module's `lib` directory and install into local maven repository by running `mvn install` command. For example see
-`tnt4j-streams/tnt4j-streams-wmq/lib/mvn-install.bat` how to do this.
+module's `lib` directory and install into local maven repository by running maven script `lib/pom.xml` with `package`
+goal. For example see `tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml` how to do this.
 
 #### `WMQ` module
 
@@ -2773,8 +2773,8 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 (O) marked libraries are optional
 
 ## Building
-   * to build project run maven goals `clean package`
-   * to make release assembly run maven goals `clean package javadoc:aggregate install`
+   * to build project and make release assembly run maven goals `clean package`
+   * to build project, make release assembly and install to local repo run maven goals `clean install`
 
 NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true`
 instead of using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test
