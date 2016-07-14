@@ -301,7 +301,8 @@ After processing one JMS message TNT4J activity event will contain fields mapped
 ## Samples:
 
 ### Running samples
-When release assembly is built samples are located in `samples` directory i.e. `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
+When release assemblies are built, samples are located in `samples` directory i.e.
+`../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
 To run desired sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
@@ -2773,14 +2774,14 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 (O) marked libraries are optional
 
 ## Building
-   * to build project and make release assembly run maven goals `clean package`
-   * to build project, make release assembly and install to local repo run maven goals `clean install`
+   * to build project and make release assemblies run maven goals `clean package`
+   * to build project, make release assemblies and install to local repo run maven goals `clean install`
 
 NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true`
 instead of using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test
 scope dependencies checking if UI checkbox 'Skip Tests' is used.
 
-Release assembly is built to `../build/tnt4j-streams` directory.
+Release assemblies are built to `../build/tnt4j-streams` directory.
 
 NOTE: sometimes maven fails to correctly handle dependencies. If dependency configuration looks
 fine, but maven still complains about missing dependencies try to delete local maven repository
