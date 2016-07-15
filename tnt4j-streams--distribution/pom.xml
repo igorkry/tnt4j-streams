@@ -69,61 +69,13 @@
         </plugins>
     </build>
 
+    <!-- Just to make sure distribution assemblies are made after all modules have been built -->
+    <!-- It is enough to have dependency to single (mandatory) module to have modules correctly ordered by Maven -->
     <dependencies>
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>
             <artifactId>tnt4j-streams-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-flume-plugin</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-hdfs</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-jms</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-kafka</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-mqtt</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-msoffice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-wmq</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-            <artifactId>tnt4j-streams-ws</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--<dependency>-->
-        <!--<groupId>com.jkoolcloud.tnt4j.streams</groupId>-->
-        <!--<artifactId>tnt4j-streams-routing</artifactId>-->
-        <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>com.jkoolcloud.tnt4j.streams</groupId>-->
-        <!--<artifactId>tnt4j-streams-camel</artifactId>-->
-        <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
     </dependencies>
 </project>
