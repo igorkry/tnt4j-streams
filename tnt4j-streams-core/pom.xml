@@ -147,7 +147,7 @@
         <dependency>
             <groupId>com.jkoolcloud</groupId>
             <artifactId>jesl</artifactId>
-            <version>0.1.5</version>
+            <version>0.1.6-SNAPSHOT</version>
         </dependency>
 
         <!-- required by JESL anyway -->
