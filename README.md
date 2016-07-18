@@ -2245,14 +2245,14 @@ java $LOGBACKOPTS $TNT4JOPTS
     <!-- logback logger shall be used -->
     <dependency>
         <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.1.3</version>
+        <artifactId>logback-core</artifactId>
+        <version>1.1.7</version>
         <scope>runtime</scope>
     </dependency>
     <dependency>
         <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>1.1.3</version>
+        <artifactId>logback-classic</artifactId>
+        <version>1.1.7</version>
         <scope>runtime</scope>
     </dependency>
 ```
