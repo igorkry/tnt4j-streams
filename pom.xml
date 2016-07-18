@@ -63,6 +63,7 @@
         <product.name.hr>TNT4J Streams</product.name.hr>
         <product.copyright.html>
             <![CDATA[<font size="-1">Copyright &#169; 2015-2016 ${project.organization.name}. All Rights Reserved.</font>]]></product.copyright.html>
+        <skipTests>true</skipTests>
     </properties>
 
     <profiles>
@@ -157,6 +158,7 @@
                 <version>2.19.1</version>
                 <inherited>true</inherited>
                 <configuration>
+                    <skipTests>${skipTests}</skipTests>
                     <systemProperties>
                         <property>
                             <name>tnt4j.config</name>

@@ -2777,10 +2777,6 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
    * to build project and make release assemblies run maven goals `clean package`
    * to build project, make release assemblies and install to local repo run maven goals `clean install`
 
-NOTE: to skip test phase from build using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true`
-instead of using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test
-scope dependencies checking if UI checkbox 'Skip Tests' is used.
-
 Release assemblies are built to `../build/tnt4j-streams` directory.
 
 NOTE: sometimes maven fails to correctly handle dependencies. If dependency configuration looks
@@ -2799,12 +2795,8 @@ Testing of TNT4J-Streams
 * Mockito (http://mockito.org/)
 
 ## Testing using maven
-Maven runs tests automatically while building project. To skip test phase add Maven parameter `-Dmaven.test.skip=true`
-or select 'Skip tests' UI element in Your IDE  'Maven Run' configuration.
-
-NOTE: if You are using Eclipse it is recommended to set JRE VM argument `-Dmaven.test.skip=true` instead of
-using UI checkbox 'Skip Tests'. Turns out that those two are not quite same and Maven fails on modules test scope
-dependencies checking if UI checkbox 'Skip Tests' is used.
+Maven tests run is disabled by default. To enable Maven to run tests set Maven command line argument 
+`-DskipTests=false`.
 
 ## Running manually from IDE
 * in `core` module run JUnit test suite named `AllStreamsCoreTests`
