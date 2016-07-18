@@ -20,7 +20,7 @@
                     <dependencySet>
                         <useProjectArtifact>false</useProjectArtifact>
                         <useTransitiveDependencies>false</useTransitiveDependencies>
-                        <outputDirectory>libs</outputDirectory>
+                        <outputDirectory>lib</outputDirectory>
                         <unpack>false</unpack>
                         <excludes>
                             <exclude>${project.groupId}:*:*</exclude>
@@ -79,11 +79,11 @@
 
         <!-- JavaDocs -->
         <!--<fileSet>-->
-            <!--<directory>../${project.build.directory}</directory>-->
-            <!--<includes>-->
-                <!--<include>*-javadoc.*</include>-->
-            <!--</includes>-->
-            <!--<outputDirectory>docs</outputDirectory>-->
+        <!--<directory>../${project.build.directory}</directory>-->
+        <!--<includes>-->
+        <!--<include>*-javadoc.*</include>-->
+        <!--</includes>-->
+        <!--<outputDirectory>docs</outputDirectory>-->
         <!--</fileSet>-->
     </fileSets>
 </assembly>

@@ -63,7 +63,6 @@
         <product.name.hr>TNT4J Streams</product.name.hr>
         <product.copyright.html>
             <![CDATA[<font size="-1">Copyright &#169; 2015-2016 ${project.organization.name}. All Rights Reserved.</font>]]></product.copyright.html>
-        <gpg.skip.sign>true</gpg.skip.sign>
     </properties>
 
     <profiles>
@@ -76,6 +75,33 @@
                 <javadoc.opts>-Xdoclint:none</javadoc.opts>
                 <javadoc.failOnError>false</javadoc.failOnError>
             </properties>
+        </profile>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -122,23 +148,6 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${gpg.skip.sign}</skip>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
