@@ -14,6 +14,8 @@
 
     <target name="rebuild" depends="mvn_windows_build, mvn_unix_build"/>
 
+    <target name="install_libs" depends="mvn_windows_install_libs, mvn_unix_install_libs"/>
+
     <target name="all" depends="rebuild"/>
 
     <target name="mvn_windows_clean" if="isWindows">
@@ -30,13 +32,25 @@
 
     <target name="mvn_windows_build" if="isWindows">
         <exec dir="." executable="cmd">
-            <arg line="/c mvn clean package javadoc:aggregate install -DskipTests"/>
+            <arg line="/c mvn clean install -DskipTests"/>
         </exec>
     </target>
 
     <target name="mvn_unix_build" if="isUnix">
         <exec dir="." executable="sh">
-            <arg line="-c 'mvn clean package javadoc:aggregate install -DskipTests'"/>
+            <arg line="-c 'mvn clean install -DskipTests'"/>
+        </exec>
+    </target>
+
+    <target name="mvn_windows_install_libs" if="isWindows">
+        <exec dir="./tnt4j-streams-wmq/lib" executable="cmd">
+            <arg line="/c mvn clean package"/>
+        </exec>
+    </target>
+
+    <target name="mvn_unix_install_libs" if="isUnix">
+        <exec dir="./tnt4j-streams-wmq/lib" executable="sh">
+            <arg line="-c 'mvn clean package'"/>
         </exec>
     </target>
 
