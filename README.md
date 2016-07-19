@@ -2236,12 +2236,6 @@ java $LOGBACKOPTS $TNT4JOPTS
 
 * in `pom.xml` file of `core` change dependencies - uncomment:
 ```xml
-    <dependency>
-        <groupId>com.jkoolcloud.tnt4j.logger</groupId>
-        <artifactId>logback</artifactId>
-        <version>0.1</version>
-        <scope>runtime</scope>
-    </dependency>
     <!-- logback logger shall be used -->
     <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -2253,6 +2247,14 @@ java $LOGBACKOPTS $TNT4JOPTS
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>1.1.7</version>
+        <scope>runtime</scope>
+    </dependency>
+    
+    <!-- tnt4j-logback logger shall be used -->
+    <dependency>
+        <groupId>com.jkoolcloud.tnt4j.logger</groupId>
+        <artifactId>tnt4j-logback</artifactId>
+        <version>0.2-SNAPSHOT</version>
         <scope>runtime</scope>
     </dependency>
 ```
