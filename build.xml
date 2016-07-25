@@ -32,25 +32,25 @@
 
     <target name="mvn_windows_build" if="isWindows">
         <exec dir="." executable="cmd">
-            <arg line="/c mvn clean install"/>
+            <arg line="/c mvn clean install -P devBuild"/>
         </exec>
     </target>
 
     <target name="mvn_unix_build" if="isUnix">
         <exec dir="." executable="sh">
-            <arg line="-c 'mvn clean install'"/>
+            <arg line="-c 'mvn clean install -P devBuild'"/>
         </exec>
     </target>
 
     <target name="mvn_windows_install_libs" if="isWindows">
         <exec dir="./tnt4j-streams-wmq/lib" executable="cmd">
-            <arg line="/c mvn clean package"/>
+            <arg line="/c mvn clean package -P devBuild"/>
         </exec>
     </target>
 
     <target name="mvn_unix_install_libs" if="isUnix">
         <exec dir="./tnt4j-streams-wmq/lib" executable="sh">
-            <arg line="-c 'mvn clean package'"/>
+            <arg line="-c 'mvn clean package -P devBuild'"/>
         </exec>
     </target>
 
