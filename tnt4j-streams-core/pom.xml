@@ -17,6 +17,39 @@
 
     <artifactId>tnt4j-streams-core</artifactId>
 
+    <properties>
+        <commons.codec.version>1.9</commons.codec.version>
+        <commons.collections.version>4.1</commons.collections.version>
+        <commons.io.version>2.4</commons.io.version>
+        <commons.lang.version>3.3.2</commons.lang.version>
+        <gson.version>2.6.2</gson.version>
+        <guava.version>18.0</guava.version>
+        <json.path.version>2.2.0</json.path.version>
+
+        <tnt4j.version>2.2</tnt4j.version>
+        <jesl.version>0.1.5</jesl.version>
+
+        <httpcomponents.version>4.5.1</httpcomponents.version>
+        <httpcomponents.core.version>4.4.3</httpcomponents.core.version>
+
+        <org.slf4j.version>1.7.21</org.slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
+        <logback.version>1.1.7</logback.version>
+        <tnt4j.logger.version>0.1</tnt4j.logger.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>devBuild</id>
+
+            <properties>
+                <tnt4j.version>2.2.1-SNAPSHOT</tnt4j.version>
+                <jesl.version>0.1.6-SNAPSHOT</jesl.version>
+                <tnt4j.logger.version>0.2-SNAPSHOT</tnt4j.logger.version>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <resources>
             <resource>
@@ -81,37 +114,37 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.9</version>
+            <version>${commons.codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
+            <version>${commons.collections.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>${commons.io.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
+            <version>${commons.lang.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.6.2</version>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.2.0</version>
+            <version>${json.path.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -123,7 +156,7 @@
         <dependency>
             <groupId>com.jkoolcloud</groupId>
             <artifactId>tnt4j</artifactId>
-            <version>2.2.1-SNAPSHOT</version>
+            <version>${tnt4j.version}</version>
             <!-- streams uses slf4j-log4j as default -->
             <exclusions>
                 <exclusion>
@@ -135,7 +168,7 @@
         <dependency>
             <groupId>com.jkoolcloud</groupId>
             <artifactId>jesl</artifactId>
-            <version>0.1.6-SNAPSHOT</version>
+            <version>${jesl.version}</version>
             <!-- streams uses newer version of those -->
             <exclusions>
                 <exclusion>
@@ -153,12 +186,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.1</version>
+            <version>${httpcomponents.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.3</version>
+            <version>${httpcomponents.core.version}</version>
         </dependency>
 
         <!-- logging dependencies -->
@@ -166,7 +199,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.21</version>
+            <version>${org.slf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -174,7 +207,7 @@
         <!--<dependency>-->
         <!--<groupId>org.slf4j</groupId>-->
         <!--<artifactId>slf4j-simple</artifactId>-->
-        <!--<version>1.7.21</version>-->
+        <!--<version>${org.slf4j.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
@@ -182,7 +215,7 @@
         <!--<dependency>-->
         <!--<groupId>log4j</groupId>-->
         <!--<artifactId>log4j</artifactId>-->
-        <!--<version>1.2.17</version>-->
+        <!--<version>${log4j.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
@@ -190,7 +223,7 @@
         <!--<dependency>-->
         <!--<groupId>com.jkoolcloud.tnt4j.logger</groupId>-->
         <!--<artifactId>tnt4j-log4j</artifactId>-->
-        <!--<version>0.2-SNAPSHOT</version>-->
+        <!--<version>${tnt4j.logger.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
@@ -198,7 +231,7 @@
         <!--<dependency>-->
         <!--<groupId>ch.qos.logback</groupId>-->
         <!--<artifactId>logback-classic</artifactId>-->
-        <!--<version>1.1.7</version>-->
+        <!--<version>${logback.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
@@ -206,20 +239,20 @@
         <!--<dependency>-->
         <!--<groupId>com.jkoolcloud.tnt4j.logger</groupId>-->
         <!--<artifactId>tnt4j-logback</artifactId>-->
-        <!--<version>0.2-SNAPSHOT</version>-->
+        <!--<version>${tnt4j.logger.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5.1</version>
+            <version>${httpcomponents.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>fluent-hc</artifactId>
-            <version>4.5.1</version>
+            <version>${httpcomponents.version}</version>
             <scope>test</scope>
         </dependency>
 
