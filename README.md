@@ -2211,7 +2211,7 @@ See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or 
 ```xml
     <dependency>
         <groupId>com.jkoolcloud.tnt4j.logger</groupId>
-        <artifactId>log4j</artifactId>
+        <artifactId>tnt4j-log4j</artifactId>
         <version>0.1</version>
         <scope>runtime</scope>
     </dependency>
@@ -2236,25 +2236,10 @@ java $LOGBACKOPTS $TNT4JOPTS
 
 * in `pom.xml` file of `core` change dependencies - uncomment:
 ```xml
-    <!-- logback logger shall be used -->
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>1.1.7</version>
-        <scope>runtime</scope>
-    </dependency>
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.1.7</version>
-        <scope>runtime</scope>
-    </dependency>
-    
-    <!-- tnt4j-logback logger shall be used -->
     <dependency>
         <groupId>com.jkoolcloud.tnt4j.logger</groupId>
         <artifactId>tnt4j-logback</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.1</version>
         <scope>runtime</scope>
     </dependency>
 ```
