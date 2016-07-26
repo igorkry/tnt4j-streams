@@ -2202,7 +2202,7 @@ Sample files can be found in `samples/custom` directory.
 ### How to use TNT4J loggers
 See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
 
-#### TNT4J-log4j12
+#### tnt4j-log4j12
 
 * in `config/log4j.properties` file change log appender to
 `log4j.appender.tnt4j=com.jkoolcloud.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
@@ -2211,13 +2211,13 @@ See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or 
 ```xml
     <dependency>
         <groupId>com.jkoolcloud.tnt4j.logger</groupId>
-        <artifactId>tnt4j-log4j</artifactId>
+        <artifactId>tnt4j-log4j12</artifactId>
         <version>0.1</version>
         <scope>runtime</scope>
     </dependency>
 ```
 
-#### TNT4J-logback
+#### tnt4j-logback
 
 * make logback configuration file `config/logback.xml`.
 * change `bin/tnt-streams.bat` or `bin/tnt-streams.sh` file to pass logback configuration to Java:

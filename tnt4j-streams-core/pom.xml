@@ -222,7 +222,7 @@
         <!-- uncomment if tnt4j-log4j12 logger shall be used -->
         <!--<dependency>-->
         <!--<groupId>com.jkoolcloud.tnt4j.logger</groupId>-->
-        <!--<artifactId>tnt4j-log4j</artifactId>-->
+        <!--<artifactId>tnt4j-log4j12</artifactId>-->
         <!--<version>${tnt4j.logger.version}</version>-->
         <!--<scope>runtime</scope>-->
         <!--</dependency>-->
