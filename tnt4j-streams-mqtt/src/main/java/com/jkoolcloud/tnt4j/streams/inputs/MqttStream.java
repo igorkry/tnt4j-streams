@@ -46,25 +46,22 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
- * Implements a MQTT topics transmitted activity stream, where each message body
- * is assumed to represent a single activity or event which should be recorded.
- * Topic to listen is defined using "Topic" property in stream configuration.
+ * Implements a MQTT topics transmitted activity stream, where each message body is assumed to represent a single
+ * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
+ * configuration.
  * <p>
- * This activity stream requires parsers that can support {@link Map} data. On
- * message reception message data is packed into {@link Map} filling these
- * entries:
+ * This activity stream requires parsers that can support {@link Map} data. On message reception message data is packed
+ * into {@link Map} filling these entries:
  * <ul>
  * <li>ActivityTopic - topic name message with activity data was received.</li>
- * <li>ActivityData - raw activity data as {@code byte[]} retrieved from
- * message.</li>
+ * <li>ActivityData - raw activity data as {@code byte[]} retrieved from message.</li>
  * <li>ActivityTransport - activity transport definition: 'Mqtt'.</li>
  * </ul>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>ServerURI - Mqtt server URI. (Required)</li>
- * <li>TopicString - the topic to subscribe to, which can include wildcards.
- * (Required)</li>
+ * <li>TopicString - the topic to subscribe to, which can include wildcards. (Required)</li>
  * <li>UserName - authentication user name. (Optional)</li>
  * <li>Password - user password. (Optional)</li>
  * <li>UseSSL - flag identifying to use SSL. (Optional)</li>
@@ -97,8 +94,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	private MqttDataReceiver mqttDataReceiver;
 
 	/**
-	 * Constructs an empty MqttStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty MqttStream. Requires configuration settings to set input stream source.
 	 */
 	public MqttStream() {
 		super(LOGGER);
@@ -207,9 +203,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	/**
-	 * Mqtt messages receiver thread. It implements {@link MqttCallback}
-	 * interface and initiates Mqtt client to receive and handle Mqtt messages
-	 * data.
+	 * Mqtt messages receiver thread. It implements {@link MqttCallback} interface and initiates Mqtt client to receive
+	 * and handle Mqtt messages data.
 	 */
 	private class MqttDataReceiver extends InputProcessor implements MqttCallback {
 
@@ -296,18 +291,12 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		/**
 		 * {@inheritDoc}
 		 * <p>
-		 * This method buffers a map structured content of next raw activity
-		 * data item received over Mqtt callback. Buffered {@link Map} contains:
+		 * This method buffers a map structured content of next raw activity data item received over Mqtt callback.
+		 * Buffered {@link Map} contains:
 		 * <ul>
-		 * <li>
-		 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TOPIC_KEY}
-		 * </li>
-		 * <li>
-		 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#ACTIVITY_DATA_KEY}
-		 * </li>
-		 * <li>
-		 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TRANSPORT_KEY}
-		 * </li>
+		 * <li>{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TOPIC_KEY}</li>
+		 * <li>{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#ACTIVITY_DATA_KEY}</li>
+		 * <li>{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TRANSPORT_KEY}</li>
 		 * </ul>
 		 */
 		@Override
