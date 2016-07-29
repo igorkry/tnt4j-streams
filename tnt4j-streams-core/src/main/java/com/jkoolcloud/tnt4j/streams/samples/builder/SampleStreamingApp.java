@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.samples.custom;
+package com.jkoolcloud.tnt4j.streams.samples.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
