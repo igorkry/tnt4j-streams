@@ -17,10 +17,7 @@
 package com.jkoolcloud.tnt4j.streams;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -64,20 +61,17 @@ public final class StreamsAgent {
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;-f:&lt;cfg_file_name&gt;</td>
-	 *            <td>(optional) Load TNT4J Streams data source configuration
-	 *            from &lt;cfg_file_name&gt;</td>
+	 *            <td>(optional) Load TNT4J Streams data source configuration from &lt;cfg_file_name&gt;</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;-p:&lt;cfg_file_name&gt;</td>
-	 *            <td>(optional) Load parsers configuration from
-	 *            &lt;cfg_file_name&gt;</td>
+	 *            <td>(optional) Load parsers configuration from &lt;cfg_file_name&gt;</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;&nbsp;&nbsp;-s</td>
-	 *            <td>(optional) Skip unparsed activity data entries and
-	 *            continue streaming</td>
+	 *            <td>(optional) Skip unparsed activity data entries and continue streaming</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
@@ -152,6 +146,31 @@ public final class StreamsAgent {
 		loadConfigAndRun(cfgFile, streamListener, streamTasksListener);
 	}
 
+	/**
+	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 *
+	 * @param streams
+	 *            streams to run
+	 */
+	public static void runFromAPI(TNTInputStream<?, ?>... streams) {
+		runFromAPI(null, null, streams);
+	}
+
+	/**
+	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 *
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 * @param streams
+	 *            streams to run
+	 */
+	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener,
+			TNTInputStream<?, ?>... streams) {
+		run(Arrays.asList(streams), streamListener, streamTasksListener);
+	}
+
 	private static void loadConfigAndRun(String cfgFileName) {
 		loadConfigAndRun(cfgFileName, null, null);
 	}
@@ -208,6 +227,21 @@ public final class StreamsAgent {
 					"StreamsAgent.no.activity.streams"));
 		}
 
+		run(streams, streamListener, streamTasksListener);
+	}
+
+	/**
+	 * Adds listeners to provided streams and runs streams on separate threads.
+	 *
+	 * @param streams
+	 *            streams to run
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 */
+	private static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
+			StreamTasksListener streamTasksListener) {
 		ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
 		StreamThread ft;
 		for (TNTInputStream<?, ?> stream : streams) {
@@ -257,8 +291,7 @@ public final class StreamsAgent {
 	 * @param args
 	 *            command-line arguments.
 	 * 
-	 * @return {@code true} if command-line arguments where valid to interpret,
-	 *         {@code false} - otherwise
+	 * @return {@code true} if command-line arguments where valid to interpret, {@code false} - otherwise
 	 */
 	private static boolean processArgs(String... args) {
 		for (String arg : args) {

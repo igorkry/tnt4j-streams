@@ -26,8 +26,8 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * Represents a specific activity field, containing the necessary information on
- * how to extract its value from the raw activity data.
+ * Represents a specific activity field, containing the necessary information on how to extract its value from the raw
+ * activity data.
  *
  * @version $Revision: 1 $
  */
@@ -70,16 +70,15 @@ public class ActivityField {
 	public ActivityField(String fieldTypeName, ActivityFieldDataType dataType) {
 		this(fieldTypeName);
 		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0");
+		loc.setDataType(dataType);
 		locators = new ArrayList<ActivityFieldLocator>(1);
 		locators.add(loc);
 	}
 
 	/**
-	 * Indicates if the raw data value for this activity field must be converted
-	 * to a member or some enumeration type.
+	 * Indicates if the raw data value for this activity field must be converted to a member or some enumeration type.
 	 *
-	 * @return {@code true} if value must be converted to an enumeration member,
-	 *         {@code false} otherwise
+	 * @return {@code true} if value must be converted to an enumeration member, {@code false} otherwise
 	 */
 	public boolean isEnumeration() {
 		StreamFieldType sft = getFieldType();
@@ -125,17 +124,20 @@ public class ActivityField {
 	 *
 	 * @param locator
 	 *            the locator to add
+	 * @return instance of this activity field
 	 */
-	public void addLocator(ActivityFieldLocator locator) {
+	public ActivityField addLocator(ActivityFieldLocator locator) {
 		if (locators == null) {
 			locators = new ArrayList<ActivityFieldLocator>();
 		}
 		locators.add(locator);
+
+		return this;
 	}
 
 	/**
-	 * Gets the string to insert between values when concatenating multiple raw
-	 * activity values into the converted value for this field.
+	 * Gets the string to insert between values when concatenating multiple raw activity values into the converted value
+	 * for this field.
 	 *
 	 * @return the string being used to separate raw values
 	 */
@@ -144,23 +146,24 @@ public class ActivityField {
 	}
 
 	/**
-	 * Sets the string to insert between values when concatenating multiple raw
-	 * activity values into the converted value for this field.
+	 * Sets the string to insert between values when concatenating multiple raw activity values into the converted value
+	 * for this field.
 	 *
 	 * @param locatorSep
 	 *            the string to use to separate raw values
+	 * @return instance of this activity field
 	 */
-	public void setSeparator(String locatorSep) {
+	public ActivityField setSeparator(String locatorSep) {
 		this.separator = locatorSep;
+
+		return this;
 	}
 
 	/**
 	 * <p>
-	 * Gets the format string defining how to interpret the raw data field
-	 * value.
+	 * Gets the format string defining how to interpret the raw data field value.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @return the format string for interpreting raw data value
 	 */
@@ -170,25 +173,25 @@ public class ActivityField {
 
 	/**
 	 * <p>
-	 * Sets the format string defining how to interpret the raw data field
-	 * value.
+	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @param format
 	 *            the format string for interpreting raw data value
+	 * @return instance of this activity field
 	 */
-	public void setFormat(String format) {
+	public ActivityField setFormat(String format) {
 		this.format = format;
+
+		return this;
 	}
 
 	/**
 	 * <p>
 	 * Gets the locale representation string used by formatter.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @return the locale representation string used by formatter
 	 */
@@ -200,14 +203,16 @@ public class ActivityField {
 	 * <p>
 	 * Sets the locale representation string used by formatter.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @param locale
 	 *            the locale representation string used by formatter
+	 * @return instance of this activity field
 	 */
-	public void setLocale(String locale) {
+	public ActivityField setLocale(String locale) {
 		this.locale = locale;
+
+		return this;
 	}
 
 	/**
@@ -223,11 +228,13 @@ public class ActivityField {
 	 * Sets the required flag indicates where field is required or optional.
 	 *
 	 * @param reqValue
-	 *            {@code true}/{@code false} string to use to separate raw
-	 *            values
+	 *            {@code true}/{@code false} string to use to separate raw values
+	 * @return instance of this activity field
 	 */
-	public void setRequired(String reqValue) {
+	public ActivityField setRequired(String reqValue) {
 		this.reqValue = reqValue;
+
+		return this;
 	}
 
 	/**
@@ -236,8 +243,7 @@ public class ActivityField {
 	 * @param obj
 	 *            the reference object with which to compare.
 	 *
-	 * @return {@code true} if this field is the same as the obj argument,
-	 *         {@code false} otherwise
+	 * @return {@code true} if this field is the same as the obj argument, {@code false} otherwise
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -276,13 +282,16 @@ public class ActivityField {
 	 *
 	 * @param parser
 	 *            the stacked parser to add
+	 * @return instance of this activity field
 	 */
-	public void addStackedParser(ActivityParser parser) {
+	public ActivityField addStackedParser(ActivityParser parser) {
 		if (stackedParsers == null) {
 			stackedParsers = new ArrayList<ActivityParser>();
 		}
 
 		stackedParsers.add(parser);
+
+		return this;
 	}
 
 	/**

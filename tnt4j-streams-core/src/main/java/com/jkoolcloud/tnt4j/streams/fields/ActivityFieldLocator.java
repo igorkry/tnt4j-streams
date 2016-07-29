@@ -37,9 +37,8 @@ import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Represents the locator rules for a specific activity data item field,
- * defining how to locate a particular raw activity data item field for its
- * corresponding activity item value, as well as any transformations that are
+ * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw
+ * activity data item field for its corresponding activity item value, as well as any transformations that are
  * necessary.
  *
  * @version $Revision: 1 $
@@ -71,18 +70,15 @@ public class ActivityFieldLocator implements Cloneable {
 	private TimestampFormatter timeParser = null;
 
 	/**
-	 * Constructs a new activity field locator for either a built-in type or a
-	 * custom type.
+	 * Constructs a new activity field locator for either a built-in type or a custom type.
 	 *
 	 * @param type
-	 *            type of locator - can be one of predefined values from
-	 *            {@link ActivityFieldLocatorType} or a custom type
+	 *            type of locator - can be one of predefined values from {@link ActivityFieldLocatorType} or a custom
+	 *            type
 	 * @param locator
-	 *            key to use to locate raw data value - interpretation of this
-	 *            value depends on locator type
+	 *            key to use to locate raw data value - interpretation of this value depends on locator type
 	 * @throws IllegalArgumentException
-	 *             if locator type is a numeric value and is not a positive
-	 *             number
+	 *             if locator type is a numeric value and is not a positive number
 	 */
 	public ActivityFieldLocator(String type, String locator) {
 		this.type = type;
@@ -106,8 +102,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @param type
 	 *            type of locator
 	 * @param locator
-	 *            key to use to locate raw data value - interpretation of this
-	 *            value depends on locator type
+	 *            key to use to locate raw data value - interpretation of this value depends on locator type
 	 */
 	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator) {
 		this.type = type.toString();
@@ -116,8 +111,7 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Constructs a new activity field locator that simply uses the specified
-	 * value as the value for this locator.
+	 * Constructs a new activity field locator that simply uses the specified value as the value for this locator.
 	 *
 	 * @param value
 	 *            constant value for locator
@@ -128,12 +122,10 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the type of this locator that indicates how to interpret the locator
-	 * to find the value in the raw activity data. This value can be one of the
-	 * predefined types, or it can be a custom type.
+	 * Gets the type of this locator that indicates how to interpret the locator to find the value in the raw activity
+	 * data. This value can be one of the predefined types, or it can be a custom type.
 	 * <p>
-	 * Note: Some activity fields will ignore this and assume that the field
-	 * locator is always a specific type.
+	 * Note: Some activity fields will ignore this and assume that the field locator is always a specific type.
 	 *
 	 * @return the label representing the type of locator
 	 */
@@ -143,14 +135,11 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the enumeration value for this locator if it implements one of the
-	 * built-in locator types.
+	 * Gets the enumeration value for this locator if it implements one of the built-in locator types.
 	 * <p>
-	 * Note: Some activity fields will ignore this and assume that the field
-	 * locator is always a specific type.
+	 * Note: Some activity fields will ignore this and assume that the field locator is always a specific type.
 	 *
-	 * @return the builtInType built-in locator type, or {@code null} if this
-	 *         locator is a custom one.
+	 * @return the builtInType built-in locator type, or {@code null} if this locator is a custom one.
 	 */
 	public ActivityFieldLocatorType getBuiltInType() {
 		return builtInType;
@@ -158,8 +147,8 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the locator to find the value of this field in the raw activity
-	 * data. This is generally a numeric position or a string label.
+	 * Gets the locator to find the value of this field in the raw activity data. This is generally a numeric position
+	 * or a string label.
 	 *
 	 * @return the locator for data value
 	 */
@@ -169,9 +158,8 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Get the radix that raw data field values are interpreted in. Only
-	 * relevant for numeric fields and will be ignored by those fields to which
-	 * it does not apply.
+	 * Get the radix that raw data field values are interpreted in. Only relevant for numeric fields and will be ignored
+	 * by those fields to which it does not apply.
 	 *
 	 * @return radix for field values
 	 */
@@ -181,9 +169,8 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Set the radix used to interpret the raw data field values. Only relevant
-	 * for numeric fields and will be ignored by those fields to which it does
-	 * not apply.
+	 * Set the radix used to interpret the raw data field values. Only relevant for numeric fields and will be ignored
+	 * by those fields to which it does not apply.
 	 *
 	 * @param radix
 	 *            radix of field values
@@ -196,8 +183,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * <p>
 	 * Gets the data type indicating how to treat the raw data field value.
 	 * <p>
-	 * Note: Some activity fields will ignore this and assume that the field
-	 * value is always a specific data type.
+	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
 	 *
 	 * @return the data type for raw data field
 	 */
@@ -209,8 +195,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * <p>
 	 * Sets the data type indicating how to treat the raw data field value.
 	 * <p>
-	 * Note: Some activity fields will ignore this and assume that the field
-	 * value is always a specific data type.
+	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
 	 *
 	 * @param dataType
 	 *            the data type for raw data field
@@ -221,11 +206,10 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the units represented by the raw data field value. This value can be
-	 * one of the predefined units, or it can be a custom unit type.
+	 * Gets the units represented by the raw data field value. This value can be one of the predefined units, or it can
+	 * be a custom unit type.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields.
+	 * Note: This is not applicable for all fields and will be ignored by those fields.
 	 *
 	 * @return the units the raw data value represents
 	 */
@@ -235,14 +219,11 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the enumeration value for this locator's units if it implements one
-	 * of the built-in units types.
+	 * Gets the enumeration value for this locator's units if it implements one of the built-in units types.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
-	 * @return the builtInUnits built-in format type, or {@code null} if this
-	 *         units specification is a custom one.
+	 * @return the builtInUnits built-in format type, or {@code null} if this units specification is a custom one.
 	 */
 	public TimeUnit getBuiltInUnits() {
 		return builtInUnits;
@@ -250,11 +231,10 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Sets the units represented by the raw data field value. This value can be
-	 * one of the predefined units, or it can be a custom unit type.
+	 * Sets the units represented by the raw data field value. This value can be one of the predefined units, or it can
+	 * be a custom unit type.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @param units
 	 *            the units the raw data value represents
@@ -272,11 +252,9 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the format string defining how to interpret the raw data field
-	 * value.
+	 * Gets the format string defining how to interpret the raw data field value.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @return the format string for interpreting raw data value
 	 */
@@ -288,8 +266,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * <p>
 	 * Gets locale representation string used by formatter.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @return the locale representation string used by formatter.
 	 */
@@ -299,14 +276,12 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Gets the enumeration value for this locator's format if it implements one
-	 * of the built-in format types.
+	 * Gets the enumeration value for this locator's format if it implements one of the built-in format types.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
-	 * @return the builtInFormat built-in format type, or {@code null} if this
-	 *         format is either a format string, or a custom one.
+	 * @return the builtInFormat built-in format type, or {@code null} if this format is either a format string, or a
+	 *         custom one.
 	 */
 	public ActivityFieldFormatType getBuiltInFormat() {
 		return builtInFormat;
@@ -314,11 +289,9 @@ public class ActivityFieldLocator implements Cloneable {
 
 	/**
 	 * <p>
-	 * Sets the format string defining how to interpret the raw data field
-	 * value.
+	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those
-	 * fields to which it does not apply.
+	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @param format
 	 *            the format string for interpreting raw data value
@@ -336,8 +309,7 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Gets the time zone ID that the date/time string is assumed to be in when
-	 * parsed.
+	 * Gets the time zone ID that the date/time string is assumed to be in when parsed.
 	 *
 	 * @return time zone ID
 	 */
@@ -356,8 +328,7 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Gets the required option flag indicating whether locator is required or
-	 * optional.
+	 * Gets the required option flag indicating whether locator is required or optional.
 	 *
 	 * @return flag indicating whether locator is required or optional
 	 */
@@ -376,21 +347,20 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Adds a mapping to translate a raw data value to the corresponding
-	 * converted data value.
+	 * Adds a mapping to translate a raw data value to the corresponding converted data value.
 	 *
 	 * @param source
 	 *            raw data value
 	 * @param target
 	 *            value to translate raw value to
+	 * @return instance of this locator object
 	 */
-	public void addValueMap(String source, String target) {
-		addValueMap(source, target, null);
+	public ActivityFieldLocator addValueMap(String source, String target) {
+		return addValueMap(source, target, null);
 	}
 
 	/**
-	 * Adds a mapping to translate a raw data value to the corresponding
-	 * converted data value.
+	 * Adds a mapping to translate a raw data value to the corresponding converted data value.
 	 *
 	 * @param source
 	 *            raw data value
@@ -398,8 +368,9 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            value to translate raw value to
 	 * @param mapType
 	 *            type of values mapping
+	 * @return instance of this locator object
 	 */
-	public void addValueMap(String source, String target, ActivityFieldMappingType mapType) {
+	public ActivityFieldLocator addValueMap(String source, String target, ActivityFieldMappingType mapType) {
 		if (StringUtils.isEmpty(source)) {
 			mapCatchAll = target;
 		} else {
@@ -426,11 +397,12 @@ public class ActivityFieldLocator implements Cloneable {
 						"ActivityFieldLocator.mapping.add.error"), source, target, mapType);
 			}
 		}
+
+		return this;
 	}
 
 	/**
-	 * Translates the specified raw data value to its corresponding converted
-	 * data value.
+	 * Translates the specified raw data value to its corresponding converted data value.
 	 *
 	 * @param source
 	 *            raw data value
@@ -467,8 +439,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            value to format
 	 * @return value formatted based on locator definition
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 */
 	public Object formatValue(Object value) throws ParseException {
 		if (cfgValue != null) {
@@ -501,15 +472,14 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Formats the value for the specified numeric field based on the definition
-	 * of the field.
+	 * Formats the value for the specified numeric field based on the definition of the field.
 	 *
 	 * @param value
 	 *            raw value of field
 	 * @return formatted value of field in required internal data type
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined format, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
 	 */
 	protected Number formatNumericValue(Object value) throws ParseException {
 		if (numberParser == null) {
@@ -532,15 +502,14 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Formats the value for the specified date/time field based on the
-	 * definition of the field.
+	 * Formats the value for the specified date/time field based on the definition of the field.
 	 *
 	 * @param value
 	 *            raw value of field
 	 * @return formatted value of field in required internal data type
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined format, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
 	 */
 	protected UsecTimestamp formatDateValue(Object value) throws ParseException {
 		if (value instanceof UsecTimestamp) {
