@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.configure.StreamsConfig;
+import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -43,8 +43,8 @@ public final class SampleIntegration {
 	 */
 	public static void loadConfigAndRun(String cfgFileName) {
 		try {
-			StreamsConfig cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfig() : new StreamsConfig(cfgFileName);
-			Map<String, TNTInputStream> streamsMap = cfg.getStreams();
+			StreamsConfigLoader cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFileName);
+			Map<String, TNTInputStream> streamsMap = (Map<String, TNTInputStream>) cfg.getStreams();
 			if (streamsMap == null || streamsMap.isEmpty()) {
 				throw new IllegalStateException("No Activity Streams found in configuration");
 			}
@@ -71,7 +71,7 @@ public final class SampleIntegration {
 	 */
 	public static void simpleConfigAndRun(String cfgFileName) {
 		try {
-			StreamsConfig cfg = new StreamsConfig();
+			StreamsConfigLoader cfg = new StreamsConfigLoader();
 			TNTInputStream stream = cfg.getStream("StreamName");
 			StreamThread ft = new StreamThread(stream);
 			ft.start();

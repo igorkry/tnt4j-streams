@@ -25,7 +25,8 @@ import java.util.Map;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.fields.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.inputs.TNTParseableInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
