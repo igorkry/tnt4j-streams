@@ -195,16 +195,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute
 	 * {@value}.
 	 */
-	private static final String FIELD_REF_ATTR = "field-ref"; // NON-NLS
-	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
-	 */
-	private static final String COMPARATOR_ATTR = "comparator"; // NON-NLS
-	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
-	 */
 	private static final String TAGS_ATTR = "tags"; // NON-NLS
 
 	private static final String REQUIRED_VALUE = "required"; // NON-NLS

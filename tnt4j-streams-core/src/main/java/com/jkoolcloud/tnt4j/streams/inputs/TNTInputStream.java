@@ -723,7 +723,6 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * Notifies that activity items streaming process has completed
 	 * successfully.
 	 */
-	@SuppressWarnings("unchecked")
 	public void notifyStreamSuccess() {
 		notifyStatusChange(StreamStatus.SUCCESS);
 		if (streamListeners != null) {
@@ -996,7 +995,6 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		private long bytesStreamed;
 
 		private long skippedActivities;
-		private long streamedBytes;
 
 		private long elapsedTime;
 

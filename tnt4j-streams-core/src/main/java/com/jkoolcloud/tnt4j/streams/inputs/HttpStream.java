@@ -89,8 +89,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	private static final String HTML_MSG_PATTERN = "<html><body><h1>{0}</h1></body></html>"; // NON-NLS
 
-	private static final int DEFAULT_HTTP_PORT = 8080;
-	private static final int DEFAULT_HTTPS_PORT = 8443;
+	public static final int DEFAULT_HTTP_PORT = 8080;
+	public static final int DEFAULT_HTTPS_PORT = 8443;
 
 	private static final int SOCKET_TIMEOUT = 15000;
 	private static final boolean TCP_NO_DELAY = true;

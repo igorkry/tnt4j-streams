@@ -586,13 +586,12 @@ public class ActivityFieldLocator implements Cloneable {
 		String[] numStrs = new String[2];
 		int si = 0;
 		Matcher m = RANGE_PATTERN.matcher(cs);
-		int pos = 0;
 		while (m.find()) {
 			String g = m.group();
 			if (StringUtils.isNotEmpty(g)) {
 				numStrs[si++] = g;
 			}
-			pos = m.end();
+			m.end();
 		}
 
 		String fromStr = null;
@@ -708,6 +707,11 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	private class ValueMap<K, V> extends HashMap<K, V> {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		private ValueMap() {
 			super();
 		}
