@@ -186,7 +186,7 @@ public final class StreamsAgent {
 		}
 	}
 
-	private static void loadConfigAndRun(File cfgFile) {
+	protected static void loadConfigAndRun(File cfgFile) {
 		loadConfigAndRun(cfgFile, null, null);
 	}
 

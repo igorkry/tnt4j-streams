@@ -147,7 +147,6 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Object getFieldValue(String[] path, Object dataObj, int i) {
 		if (ArrayUtils.isEmpty(path) || dataObj == null) {
 			return null;

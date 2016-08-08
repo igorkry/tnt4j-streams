@@ -259,7 +259,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return OpType.OTHER;
 	}
 
-	private static OpType mapOpTypeTW(int opType) {
+	protected static OpType mapOpTypeTW(int opType) {
 		switch (opType) {
 		case 0:
 			return OpType.OTHER;

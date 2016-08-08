@@ -77,7 +77,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream stream, Object data) throws IllegalStateException, ParseException {
+	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
 			throw new IllegalStateException("SampleParser: field delimiter not specified or empty");
 		}
@@ -118,7 +118,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream stream, ActivityFieldLocator locator, String[] fields)
+	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, String[] fields)
 			throws ParseException {
 		Object val = null;
 		if (locator != null) {

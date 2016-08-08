@@ -215,7 +215,6 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void onSuccess(TNTInputStream<?, ?> stream) {
 			if (jobListeners != null) {
 				for (StreamingJobListener l : jobListeners) {
