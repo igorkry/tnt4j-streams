@@ -507,7 +507,6 @@ public class ConfigParserHandler extends DefaultHandler {
 			((DynamicNameActivityField) af).addLocators(locatorsCopy);
 			for (String nameLocatore : nameLocators) {
 				afl = new ActivityFieldLocator(ActivityFieldLocatorType.Label, nameLocatore != null ? nameLocatore : "default");
-				afl.setNameLocator(true);
 				((DynamicNameActivityField) af).addNameLocator(afl);
 			}
 		}
