@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+		<field name="EventType" value="SNAPSHOT"/>
+		<field name="EventName" locator="$[0].host" locator-type="Label"/>
+		
+		<field name="StartTime" locator="$[0].time" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+		
+        <field name="{1}_{2}_{3}_{4}_{5}_{6}" nameLocator="$[*].dsnames,$[*].dstypes,$[*].plugin,$[*].plugin_instance,$[*].type,$[*].type_instance"  locator="$[*].values" locator-type="Label" />
+		
+	
+        
+        
+    </parser>
+	
+<!--  	<parser name="CollectdStatsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+		<property name="ReadLines" value="false"/>
+		
+		<field name="MsgBody" locator="$" locator-type="Label">
+			<parser-ref name="CollectdStatsDataParser"/>
+		</field>
+	</parser> -->
+
+    <parser name="CollectdReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="CollectdStatsDataParser"/>
+        </field>
+    </parser>
+
+    <stream name="CollectD" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="CollectdReqParser"/>
+    </stream>
+</tnt-data-source>

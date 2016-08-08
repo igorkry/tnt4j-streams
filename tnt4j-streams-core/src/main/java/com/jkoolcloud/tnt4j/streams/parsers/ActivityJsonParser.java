@@ -59,7 +59,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
 
-	private static final String JSON_PATH_ROOT = "$.";// NON-NLS
+	private static final String JSON_PATH_ROOT = "$";// NON-NLS
+	private static final String JSON_PATH_SEPARATOR = ".";// NON-NLS
 
 	private boolean jsonAsLine = true;
 
@@ -196,7 +197,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 					val = stream.getProperty(locStr);
 				} else {
 					if (!locStr.startsWith(JSON_PATH_ROOT)) {
-						locStr = JSON_PATH_ROOT + locStr;
+						locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
 					}
 					Object jsonValue = data.read(locStr);
 

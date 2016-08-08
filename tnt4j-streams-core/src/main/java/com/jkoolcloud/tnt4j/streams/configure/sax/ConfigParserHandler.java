@@ -30,7 +30,9 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldMappingType;
+import com.jkoolcloud.tnt4j.streams.fields.DynamicNameActivityField;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -141,6 +143,12 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * {@value}.
 	 */
 	private static final String LOCATOR_ATTR = "locator"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute
+	 * {@value}.
+	 */
+	private static final String NAME_LOCATOR_ATTR = "nameLocator"; // NON-NLS
+	
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute
 	 * {@value}.
@@ -394,6 +402,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		ActivityFieldDataType dataType = null;
 		String locatorType = null;
 		String locator = null;
+		String nameLocator = null;
 		String separator = null;
 		String units = null;
 		String format = null;
@@ -413,6 +422,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				locatorType = attValue;
 			} else if (LOCATOR_ATTR.equals(attName)) {
 				locator = attValue;
+			} else if (NAME_LOCATOR_ATTR.equals(attName)) {
+				nameLocator = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
 				separator = attValue;
 			} else if (RADIX_ATTR.equals(attName)) {
@@ -487,6 +498,17 @@ public class ConfigParserHandler extends DefaultHandler {
 					}
 					af.addLocator(afl);
 				}
+			}
+		}
+		if (nameLocator != null) {
+			final String[] nameLocators = nameLocator.split(",");
+			List<ActivityFieldLocator> locatorsCopy = new ArrayList<ActivityFieldLocator>(af.getLocators());
+			af = new DynamicNameActivityField(field);
+			((DynamicNameActivityField) af).addLocators(locatorsCopy);
+			for (String nameLocatore : nameLocators) {
+				afl = new ActivityFieldLocator(ActivityFieldLocatorType.Label, nameLocatore != null ? nameLocatore : "default");
+				afl.setNameLocator(true);
+				((DynamicNameActivityField) af).addNameLocator(afl);
 			}
 		}
 		if (format != null) {

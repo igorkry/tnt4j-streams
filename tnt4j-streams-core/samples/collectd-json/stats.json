@@ -1,0 +1,338 @@
+[
+  {
+    "values": [
+      2756387
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "system"
+  },
+  {
+    "values": [
+      3814011275
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "idle"
+  },
+  {
+    "values": [
+      250
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "wait"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "interrupt"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "softirq"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "0",
+    "type": "cpu",
+    "type_instance": "steal"
+  },
+  {
+    "values": [
+      25487272
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "user"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "nice"
+  },
+  {
+    "values": [
+      4427246
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "system"
+  },
+  {
+    "values": [
+      3795503448
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "idle"
+  },
+  {
+    "values": [
+      69
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "wait"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "interrupt"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "softirq"
+  },
+  {
+    "values": [
+      0
+    ],
+    "dstypes": [
+      "derive"
+    ],
+    "dsnames": [
+      "value"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "cpu",
+    "plugin_instance": "1",
+    "type": "cpu",
+    "type_instance": "steal"
+  },
+  {
+    "values": [
+      43841987,
+      43841987
+    ],
+    "dstypes": [
+      "derive",
+      "derive"
+    ],
+    "dsnames": [
+      "rx",
+      "tx"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "interface",
+    "plugin_instance": "lo",
+    "type": "if_octets",
+    "type_instance": ""
+  },
+  {
+    "values": [
+      346988,
+      346988
+    ],
+    "dstypes": [
+      "derive",
+      "derive"
+    ],
+    "dsnames": [
+      "rx",
+      "tx"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "interface",
+    "plugin_instance": "lo",
+    "type": "if_packets",
+    "type_instance": ""
+  },
+  {
+    "values": [
+      0,
+      0
+    ],
+    "dstypes": [
+      "derive",
+      "derive"
+    ],
+    "dsnames": [
+      "rx",
+      "tx"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "interface",
+    "plugin_instance": "lo",
+    "type": "if_errors",
+    "type_instance": ""
+  },
+  {
+    "values": [
+      65001290178,
+      11336299283
+    ],
+    "dstypes": [
+      "derive",
+      "derive"
+    ],
+    "dsnames": [
+      "rx",
+      "tx"
+    ],
+    "time": 1469715537.366,
+    "interval": 10.000,
+    "host": "nagios.singleton-labs.lt",
+    "plugin": "interface",
+    "plugin_instance": "venet0",
+    "type": "if_octets",
+    "type_instance": ""
+  }
+]
