@@ -33,7 +33,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public class ActivityField {
 
-	private final String fieldTypeName;
+	protected String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String format = null;
 	private String locale = null;
