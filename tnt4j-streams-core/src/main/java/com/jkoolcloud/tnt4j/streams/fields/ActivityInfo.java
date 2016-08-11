@@ -698,7 +698,8 @@ public class ActivityInfo {
 	 * @return snapshot instance
 	 */
 	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
-		PropertySnapshot snapshot = (PropertySnapshot) tracker.newSnapshot(trackName);
+		
+		PropertySnapshot snapshot = category != null ? (PropertySnapshot) tracker.newSnapshot(category, trackName) : (PropertySnapshot) tracker.newSnapshot(trackName);
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
 		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);

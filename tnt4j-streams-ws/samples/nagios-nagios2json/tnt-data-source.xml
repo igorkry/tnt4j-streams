@@ -8,10 +8,10 @@
 
 		<field name="EventType" value="Snapshot" />
 		<field name="ApplName" value="Nagios" />
-		<field name="EventName" locator="plugin_output" locator-type="Label"/>
+		<field name="EventName" locator="service" locator-type="Label"/>
 		<field name="Status" locator="status" locator-type="Label" />
 		<field name="Message" locator="plugin_output" locator-type="Label" />
-		<field name="Resource" locator="hostname" locator-type="Label" />
+		<field name="Category" locator="hostname" locator-type="Label" />
 		<field name="Duration" locator="duration" locator-type="Label" />
 		<field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp"
                units="Seconds"/>
