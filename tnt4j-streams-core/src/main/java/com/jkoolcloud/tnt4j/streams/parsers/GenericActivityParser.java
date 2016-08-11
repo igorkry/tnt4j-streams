@@ -190,15 +190,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 
-	private DynamicNameActivityField createDinamicallyNamedField(ActivityField aField, int index, int depth) {
-		final DynamicNameActivityField dinamicallyNamedField = new DynamicNameActivityField(aField.getFieldTypeName());
-		dinamicallyNamedField.setCreated(true);
-		dinamicallyNamedField.index = index;
-		dinamicallyNamedField.dept = depth;
-		dinamicallyNamedField.addLocators(aField.getLocators());
-		fieldList.add(dinamicallyNamedField);
-		return dinamicallyNamedField;
-	}
 
 	/** Gets all name locators specified and return's single name for a field
 	 *  
@@ -232,7 +223,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			} else {
 				if (names == null) {
 					names = new ArrayList<DynamicNameActivityField>(1);
-					names.add(createDinamicallyNamedField(aField, 0,0));
+					final DynamicNameActivityField dinamicallyNamedField = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 0);
+					names.add(dinamicallyNamedField);
 				} else {
 					//append
 					names.get(0).appendName(nameLocatorValue.toString(), 0);
@@ -268,12 +260,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					//TODO recursive multiple levels
 					for (int j = 0; j < fieldNamePart2.length; j++) {
 						Object elementFieldNamePart = fieldNamePart2[j];
-						final DynamicNameActivityField field = createDinamicallyNamedField(aField, i,1);
+						final DynamicNameActivityField field = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 1);
 						field.appendName(elementFieldNamePart.toString(), 1);
 						names.add(field);
 					}
 				} else {
-					final DynamicNameActivityField field = createDinamicallyNamedField(aField, i,0);
+					final DynamicNameActivityField field = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 1);
 					field.appendName(fieldNamePart.toString(), 1);
 					names.add(field);
 				}

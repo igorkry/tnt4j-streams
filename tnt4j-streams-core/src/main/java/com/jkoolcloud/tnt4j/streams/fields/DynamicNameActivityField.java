@@ -43,6 +43,15 @@ public class DynamicNameActivityField extends ActivityField {
 		super(fieldTypeName, dataType);
 	}
 	
+	
+	public DynamicNameActivityField(String fieldTypeName, List<ActivityFieldLocator> locators, int index, int depth) {
+		super(fieldTypeName);
+		this.dept = depth;
+		this.index = index;
+		addLocators(locators);
+		setCreated(true);
+	}
+	
 	/**
 	 * Adding a multiple locators
 	 * 
