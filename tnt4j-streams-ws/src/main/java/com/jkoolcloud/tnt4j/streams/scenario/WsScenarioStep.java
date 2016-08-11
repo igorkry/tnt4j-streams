@@ -26,6 +26,8 @@ public class WsScenarioStep {
 	private String urlStr;
 	private String request;
 	private String method;
+	private String username;
+	private String password;
 	private SchedulerData schedulerData;
 
 	/**
@@ -131,5 +133,33 @@ public class WsScenarioStep {
 	 */
 	public void setSchedulerData(SchedulerData schedulerData) {
 		this.schedulerData = schedulerData;
+	}
+
+	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

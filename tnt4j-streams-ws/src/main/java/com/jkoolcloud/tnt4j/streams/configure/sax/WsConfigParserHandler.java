@@ -52,6 +52,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private static final String URL_ATTR = "url"; // NON-NLS
 	private static final String METHOD_ATTR = "method"; // NON-NLS
+	private static final String USERMAME_ATTR = "username"; // NON-NLS
+	private static final String PASSWORD_ATTR = "password"; // NON-NLS
 
 	private static final String EXPRESSION_ATTR = "expression"; // NON-NLS
 
@@ -119,6 +121,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		String name = null;
 		String url = null;
 		String method = null;
+		String username = null;
+		String password = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -128,6 +132,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				url = attValue;
 			} else if (METHOD_ATTR.equals(attName)) {
 				method = attValue;
+			} else if (USERMAME_ATTR.equals(attName)) {
+				username = attValue;
+			} else if (PASSWORD_ATTR.equals(attName)) {
+				password = attValue;
 			}
 		}
 		if (StringUtils.isEmpty(name)) {
@@ -138,6 +146,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		currStep = new WsScenarioStep(name);
 		currStep.setUrlStr(url);
 		currStep.setMethod(method);
+		currStep.setUsername(username);
+		currStep.setPassword(password);
 	}
 
 	private void processCronScheduler(Attributes attrs) throws SAXException {

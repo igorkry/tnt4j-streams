@@ -59,6 +59,14 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 * Constant for name of built-in scheduler job property {@value}.
 	 */
 	protected static final String JOB_PROP_REQ_KEY = "reqData"; // NON-NLS
+	/**
+	 * Constant for name of built-in scheduler job property {@value}.
+	 */
+	protected static final String JOB_PROP_USERNAME_KEY = "username"; // NON-NLS
+	/**
+	 * Constant for name of built-in scheduler job property {@value}.
+	 */
+	protected static final String JOB_PROP_PASSWORD_KEY = "password"; // NON-NLS
 
 	private List<WsScenario> scenarioList;
 

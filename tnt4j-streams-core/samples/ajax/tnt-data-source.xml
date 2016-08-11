@@ -4,6 +4,8 @@
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
         <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
                units="Nanoseconds"/>
         <field name="ResourceName" locator="$.url" locator-type="Label"/>

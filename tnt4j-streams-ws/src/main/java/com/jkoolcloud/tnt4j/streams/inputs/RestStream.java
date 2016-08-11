@@ -19,11 +19,16 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -77,6 +82,8 @@ public class RestStream extends AbstractWsStream {
 		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
 		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
 		jobAttrs.put(JOB_PROP_REQ_METHOD_KEY, step.getMethod());
+		jobAttrs.put(JOB_PROP_USERNAME_KEY, step.getUsername());
+		jobAttrs.put(JOB_PROP_PASSWORD_KEY, step.getPassword());
 
 		return JobBuilder.newJob(RestCallJob.class).withIdentity(scenario.getName() + ':' + step.getName()) // NON-NLS
 				.usingJobData(jobAttrs).build();
@@ -87,11 +94,13 @@ public class RestStream extends AbstractWsStream {
 	 *
 	 * @param uriStr
 	 *            JAX-RS service URI
+	 * @param password 
+	 * @param username 
 	 * @return service responce string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
 	 */
-	protected static String executeGET(String uriStr) throws Exception {
+	protected static String executeGET(String uriStr, String username, String password) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 					"RestStream.cant.execute.get.request"), uriStr);
@@ -104,10 +113,26 @@ public class RestStream extends AbstractWsStream {
 
 		String respStr = null;
 		CloseableHttpClient client = HttpClients.createDefault();
+		HttpResponse response;
 		try {
 			HttpGet get = new HttpGet(uriStr);
 
-			HttpResponse response = client.execute(get);
+			if (username != null && password != null) {
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider.setCredentials(new AuthScope(get.getURI().getAuthority(), 80),
+						new UsernamePasswordCredentials(username, password));
+
+				HttpClientContext context = HttpClientContext.create();
+				context.setCredentialsProvider(credsProvider);
+				// context.setAuthSchemeRegistry(authRegistry);
+				// context.setAuthCache(authCache);
+
+				response = client.execute(get, context);
+			} else {
+				response = client.execute(get);
+			}
+			
+			
 			int responseCode = response.getStatusLine().getStatusCode();
 			if (responseCode >= HttpStatus.SC_MULTIPLE_CHOICES) {
 				throw new HttpResponseException(responseCode, response.getStatusLine().getReasonPhrase());
@@ -140,7 +165,7 @@ public class RestStream extends AbstractWsStream {
 		}
 
 		if (StringUtils.isEmpty(reqData)) {
-			return executeGET(uriStr);
+			return executeGET(uriStr, null, null);
 		}
 
 		LOGGER.log(OpLevel.DEBUG,
@@ -265,6 +290,9 @@ public class RestStream extends AbstractWsStream {
 			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
 			String reqData = dataMap.getString(JOB_PROP_REQ_KEY);
 			String reqMethod = dataMap.getString(JOB_PROP_REQ_METHOD_KEY);
+			String username = dataMap.getString(JOB_PROP_USERNAME_KEY);
+			String password = dataMap.getString(JOB_PROP_PASSWORD_KEY);
+			
 			if (StringUtils.isEmpty(reqMethod)) {
 				reqMethod = ReqMethod.GET.name();
 			}
@@ -273,7 +301,7 @@ public class RestStream extends AbstractWsStream {
 				if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
 					respStr = executePOST(urlStr, reqData);
 				} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
-					respStr = executeGET(urlStr);
+					respStr = executeGET(urlStr, username, password);
 				}
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,

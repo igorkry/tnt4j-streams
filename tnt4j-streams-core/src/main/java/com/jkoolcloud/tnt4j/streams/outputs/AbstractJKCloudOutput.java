@@ -166,7 +166,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 *            thread on which stream is running
 	 * @return tracker instance for activity item
 	 */
-	protected Tracker getTracker(String aiSourceFQN, Thread t) {
+	public Tracker getTracker(String aiSourceFQN, Thread t) {
 		synchronized (trackersMap) {
 			Tracker tracker = trackersMap
 					.get(getTrackersMapKey(t, aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN));

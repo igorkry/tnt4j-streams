@@ -93,6 +93,7 @@ public class ActivityInfo {
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
 
 	private Map<String, Object> activityProperties;
+	private List<Snapshot> snapshots = new ArrayList<Snapshot>();
 
 	/**
 	 * Constructs a new ActivityInfo object.
@@ -601,6 +602,10 @@ public class ActivityInfo {
 			}
 		}
 
+/*		for (Snapshot snapshot : snapshots) {
+			event.addSnapshot(snapshot);
+		}*/
+		
 		return event;
 	}
 
@@ -673,7 +678,10 @@ public class ActivityInfo {
 				addTrackableProperty(activity, ape.getKey(), ape.getValue());
 			}
 		}
-
+		
+		for (Snapshot snapshot : snapshots) {
+			activity.addSnapshot(snapshot);
+		}
 		return activity;
 	}
 
@@ -689,7 +697,7 @@ public class ActivityInfo {
 	 *
 	 * @return snapshot instance
 	 */
-	private Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
+	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
 		PropertySnapshot snapshot = (PropertySnapshot) tracker.newSnapshot(trackName);
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
@@ -1249,5 +1257,32 @@ public class ActivityInfo {
 	 */
 	public void setFiltered(boolean filtered) {
 		this.filtered = filtered;
+	}
+
+	/**
+	 * @param parentId the parentId to set
+	 */
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
+	}
+
+	/**
+	 * @param trackingId the trackingId to set
+	 */
+	public void setTrackingId(String trackingId) {
+		this.trackingId = trackingId;
+	}
+
+	/**
+	 * @return the snapshots
+	 */
+	public List<Snapshot> getSnapshots() {
+		return snapshots;
+	}
+	
+	public void addSnapshot(ActivityInfo ai, Tracker tracker, String trackName) {
+		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
+		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
+		snapshots.add(ai.buildSnapshot(tracker, eventName == null ? ai.getEventName() : eventName, trackId));
 	}
 }

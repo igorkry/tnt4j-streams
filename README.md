@@ -2199,19 +2199,6 @@ Sample files can be found in `samples/custom` directory.
 
 `SampleStream.java` shows how to implement custom stream.
 
-#### Integrating TNT4J-Streams into your application using plain Java API (POJO)
-
-This sample shows how to integrate TNT4J-Streams into Your application using plain Java API (POJO) without using streams
-configuration XML file. It does all the same as `samples/single-log` sample, just without using stream XML configuration
-file.
-
-Sample files can be found in `samples/plain-api` directory.
-
-`SampleStreamingApp.java` shows how to make TNT4J-Streams integration into Your application. 
-In general integration is made using `StreamsAgent.runFromAPI(stream)` call.
-
-To run sample use `samples/plain-api/run.bat` or `samples/plain-api/run.sh` file. 
-
 ### How to use TNT4J loggers
 See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
 

@@ -192,4 +192,9 @@ public interface StreamProperties {
 	 * Constant for name of built-in {@value} property. Value in seconds.
 	 */
 	public static final String PROP_RESTORE_STATE = "RestoreState"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property. Value in seconds.
+	 */
+	public static final String PROP_START_SERVER = "StartServer"; // NON-NLS
 }

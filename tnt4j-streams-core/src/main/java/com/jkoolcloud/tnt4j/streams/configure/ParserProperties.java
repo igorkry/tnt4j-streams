@@ -71,5 +71,10 @@ public interface ParserProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	public static final String PROP_LOC_PATH_DELIM = "LocPathDelim"; // NON-NLS
+	
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	public static final String PROP_SPLIT_FIELD = "SplitField"; // NON-NLS
 
 }

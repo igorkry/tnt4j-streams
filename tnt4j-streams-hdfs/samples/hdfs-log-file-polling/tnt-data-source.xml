@@ -28,6 +28,7 @@
     <stream name="SampleHdfsFilePollingStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
+        <!--<property name="FileName" value="hdfs://172.16.6.53:19000/log*.txt"/>-->
         <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="30"/>
         <property name="StartFromLatest" value="true"/>
