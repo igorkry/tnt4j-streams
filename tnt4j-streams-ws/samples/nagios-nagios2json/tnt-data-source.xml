@@ -34,7 +34,7 @@
 
 		<scenario name="Nagios2JSON stream scenario">
 			<step name="Step 1"
-				url="http://172.16.6.223/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
+				url="http://[YOUR_NAGIOS_SERVER_IP]/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
 				method="GET"
 				username="nagiosadmin"
 				password="slabs">
