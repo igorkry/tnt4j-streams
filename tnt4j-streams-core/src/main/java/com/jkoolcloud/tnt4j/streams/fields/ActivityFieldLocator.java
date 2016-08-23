@@ -707,10 +707,7 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	private class ValueMap<K, V> extends HashMap<K, V> {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 2566002253449435488L;
 
 		private ValueMap() {
 			super();

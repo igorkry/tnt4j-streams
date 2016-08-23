@@ -51,28 +51,23 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Implements a Http requests transmitted activity stream, where each request
- * body is assumed to represent:
+ * Implements a Http requests transmitted activity stream, where each request body is assumed to represent:
  * <ul>
- * <li>a single activity event sent as form data (parameters keys/values set)
- * </li>
+ * <li>a single activity event sent as form data (parameters keys/values set)</li>
  * <li>a byte array as request payload data(i.e. log file contents)</li>
  * </ul>
  * Running this stream Http server is started on configuration defined port.
  * <p>
- * This activity stream requires parsers that can support {@link Map} data. On
- * message reception message data is packed into {@link Map} filling these
- * entries:
+ * This activity stream requires parsers that can support {@link Map} data. On message reception message data is packed
+ * into {@link Map} filling these entries:
  * <ul>
- * <li>ActivityData - raw activity data as {@code byte[]} retrieved from http
- * request.</li>
+ * <li>ActivityData - raw activity data as {@code byte[]} retrieved from http request.</li>
  * <li>ActivityTransport - activity transport definition: 'Http'.</li>
  * </ul>
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>Port - port number to run Http server. (Optional - default 8080 used if
- * not defined)</li>
+ * <li>Port - port number to run Http server. (Optional - default 8080 used if not defined)</li>
  * <li>UseSSL - flag identifying to use SSL. (Optional)</li>
  * <li>Keystore - keystore path. (Optional)</li>
  * <li>KeystorePass - keystore password. (Optional)</li>
@@ -89,8 +84,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	private static final String HTML_MSG_PATTERN = "<html><body><h1>{0}</h1></body></html>"; // NON-NLS
 
-	public static final int DEFAULT_HTTP_PORT = 8080;
-	public static final int DEFAULT_HTTPS_PORT = 8443;
+	private static final int DEFAULT_HTTP_PORT = 8080;
+	private static final int DEFAULT_HTTPS_PORT = 8443;
 
 	private static final int SOCKET_TIMEOUT = 15000;
 	private static final boolean TCP_NO_DELAY = true;
@@ -104,8 +99,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	private HttpStreamRequestHandler requestHandler;
 
 	/**
-	 * Constructs an empty HttpStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty HttpStream. Requires configuration settings to set input stream source.
 	 */
 	public HttpStream() {
 		super(LOGGER);
@@ -223,12 +217,9 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		 *             the exception
 		 */
 		void initialize() throws Exception {
-			int port = DEFAULT_HTTP_PORT;
-			if (serverPort != null) {
-				port = serverPort;
-			}
-
 			SSLContext sslcontext = null;
+			int port;
+
 			if (useSSL) {
 				// Initialize SSL context
 				URL url = new URL(keystore);
@@ -236,6 +227,13 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 						.loadKeyMaterial(url, (keystorePass == null ? "" : keystorePass).toCharArray(),
 								(keyPass == null ? "" : keyPass).toCharArray())
 						.build();
+				port = DEFAULT_HTTPS_PORT;
+			} else {
+				port = DEFAULT_HTTP_PORT;
+			}
+
+			if (serverPort != null) {
+				port = serverPort;
 			}
 
 			SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(SOCKET_TIMEOUT).setTcpNoDelay(TCP_NO_DELAY)
@@ -288,16 +286,12 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		/**
 		 * {@inheritDoc}
 		 * <p>
-		 * This method buffers a map structured content of next raw activity
-		 * data item received over Http request handler. Buffered {@link Map}
-		 * contains:
+		 * This method buffers a map structured content of next raw activity data item received over Http request
+		 * handler. Buffered {@link Map} contains:
 		 * <ul>
-		 * <li>
-		 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#ACTIVITY_DATA_KEY}
-		 * or all parameters from request if request id URL encoded</li>
-		 * <li>
-		 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TRANSPORT_KEY}
-		 * </li>
+		 * <li>{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#ACTIVITY_DATA_KEY} or all parameters from
+		 * request if request id URL encoded</li>
+		 * <li>{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#TRANSPORT_KEY}</li>
 		 * </ul>
 		 */
 		@Override

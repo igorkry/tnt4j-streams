@@ -43,13 +43,11 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
  * <p>
- * Implements a scheduled JAX-WS service call activity stream, where each call
- * responce is assumed to represent a single activity or event which should be
- * recorded.
+ * Implements a scheduled JAX-WS service call activity stream, where each call response is assumed to represent a single
+ * activity or event which should be recorded.
  * <p>
- * Service call is performed by invoking
- * {@link SOAPConnection#call(SOAPMessage, Object)}. Provided request XML data
- * is set as {@link SOAPMessage} body data.
+ * Service call is performed by invoking {@link SOAPConnection#call(SOAPMessage, Object)}. Provided request XML data is
+ * set as {@link SOAPMessage} body data.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  *
@@ -62,8 +60,7 @@ public class WsStream extends AbstractWsStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsStream.class);
 
 	/**
-	 * Constructs an empty WsStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty WsStream. Requires configuration settings to set input stream source.
 	 */
 	public WsStream() {
 		super(LOGGER);
@@ -85,7 +82,7 @@ public class WsStream extends AbstractWsStream {
 	 *            JAX-WS service URL
 	 * @param soapRequestData
 	 *            JAX-WS service request data: headers and body XML string
-	 * @return service responce string
+	 * @return service response string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-WS service call
 	 */

@@ -63,8 +63,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
 
 	/**
-	 * Default floating point numbers equality comparison difference tolerance
-	 * {@value}.
+	 * Default floating point numbers equality comparison difference tolerance {@value}.
 	 */
 	public static final double DEFAULT_EPSILON = 0.000001;
 
@@ -94,8 +93,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Converts an array of bytes into an array of characters representing the
-	 * hexadecimal values.
+	 * Converts an array of bytes into an array of characters representing the hexadecimal values.
 	 *
 	 * @param src
 	 *            byte sequence to encode
@@ -125,13 +123,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * <p>
-	 * Generates a new unique message signature. This signature is expected to
-	 * be used for creating a new message instance, and is intended to uniquely
-	 * identify the message regardless of which application is processing it.
+	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
+	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>
-	 * It is up to the individual stream to determine which of these attributes
-	 * is available/required to uniquely identify a message. In order to
-	 * identify a message within two different transports, the streams for each
+	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
+	 * identify a message. In order to identify a message within two different transports, the streams for each
 	 * transport must provide the same values.
 	 *
 	 * @param msgType
@@ -162,13 +158,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * <p>
-	 * Generates a new unique message signature. This signature is expected to
-	 * be used for creating a new message instance, and is intended to uniquely
-	 * identify the message regardless of which application is processing it.
+	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
+	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>
-	 * It is up to the individual stream to determine which of these attributes
-	 * is available/required to uniquely identify a message. In order to
-	 * identify a message within two different transports, the streams for each
+	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
+	 * identify a message. In order to identify a message within two different transports, the streams for each
 	 * transport must provide the same values.
 	 *
 	 * @param _msgDigest
@@ -259,37 +253,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return OpType.OTHER;
 	}
 
-	protected static OpType mapOpTypeTW(int opType) {
-		switch (opType) {
-		case 0:
-			return OpType.OTHER;
-		case 1:
-			return OpType.START;
-		case 2:
-			return OpType.OPEN;
-		case 3:
-			return OpType.SEND;
-		case 4:
-			return OpType.RECEIVE;
-		case 5:
-			return OpType.CLOSE;
-		case 6:
-			return OpType.STOP;
-		case 7:
-			return OpType.INQUIRE;
-		case 8:
-			return OpType.SET;
-		case 9:
-			return OpType.CALL;
-		case 10:// URL
-			return OpType.OTHER;
-		case 11:
-			return OpType.BROWSE;
-		default:
-			return OpType.OTHER;
-		}
-	}
-
 	/**
 	 * Checks if provided string contains wildcard characters.
 	 *
@@ -316,8 +279,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks if string is wildcard mask string and if {@code true} then
-	 * transforms it to regex ready string.
+	 * Checks if string is wildcard mask string and if {@code true} then transforms it to regex ready string.
 	 *
 	 * @param str
 	 *            string to check and transform
@@ -353,19 +315,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns first readable file from {@code files} array which has last
-	 * modification timestamp newer than {@code lastModif}. If {@code lastModif}
-	 * is {@code null}, then newest readable file is returned.
+	 * Returns first readable file from {@code files} array which has last modification timestamp newer than
+	 * {@code lastModif}. If {@code lastModif} is {@code null}, then newest readable file is returned.
 	 *
 	 * @param files
 	 *            last modification timestamp ordered files array
 	 * @param lastModif
-	 *            last modification time to compare. If {@code null} - then
-	 *            newest file is returned
-	 * @return first file from array which has modification time later than
-	 *         {@code lastModif}, or {@code null} if {@code files} is empty or
-	 *         does not contain readable file with last modification time later
-	 *         than {@code lastModif}
+	 *            last modification time to compare. If {@code null} - then newest file is returned
+	 * @return first file from array which has modification time later than {@code lastModif}, or {@code null} if
+	 *         {@code files} is empty or does not contain readable file with last modification time later than
+	 *         {@code lastModif}
 	 */
 	public static File getFirstNewer(File[] files, Long lastModif) {
 		File last = null;
@@ -395,8 +354,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Deserializes JSON data object ({@link String}, {@link Reader},
-	 * {@link InputStream}) into map structured data.
+	 * Deserializes JSON data object ({@link String}, {@link Reader}, {@link InputStream}) into map structured data.
 	 *
 	 * @param jsonData
 	 *            JSON format data object
@@ -438,8 +396,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns string line read from data source. Data source object can be
-	 * {@link String}, {@link Reader} or {@link InputStream}.
+	 * Returns string line read from data source. Data source object can be {@link String}, {@link Reader} or
+	 * {@link InputStream}.
 	 *
 	 * @param data
 	 *            data source object to read string line
@@ -481,9 +439,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns tag strings array retrieved from provided data object. Data
-	 * object an be string (tags delimiter ','), strings collection or strings
-	 * array.
+	 * Returns tag strings array retrieved from provided data object. Data object an be string (tags delimiter ','),
+	 * strings collection or strings array.
 	 *
 	 * @param tagsData
 	 *            tags data object
@@ -509,8 +466,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Cleans raw activity data. If activity data is string, removes 'new line'
-	 * symbols from it. Returns same object otherwise.
+	 * Cleans raw activity data. If activity data is string, removes 'new line' symbols from it. Returns same object
+	 * otherwise.
 	 *
 	 * @param <T>
 	 *            type of raw activity data
@@ -530,9 +487,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Makes a new {@link String} by decoding the specified array of bytes using
-	 * the UTF-8 charset. If {@link String} can't be constructed using UTF-8
-	 * charset, then the platform's default charset is used.
+	 * Makes a new {@link String} by decoding the specified array of bytes using the UTF-8 charset. If {@link String}
+	 * can't be constructed using UTF-8 charset, then the platform's default charset is used.
 	 *
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
@@ -577,8 +533,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            document to transform to string
 	 * @return XML string representation of document
 	 * @throws TransformerException
-	 *             If an exception occurs while transforming XML DOM document to
-	 *             string
+	 *             If an exception occurs while transforming XML DOM document to string
 	 */
 	public static String documentToString(Document doc) throws TransformerException {
 		StringWriter sw = new StringWriter();
@@ -597,23 +552,20 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks equality of two double numbers with difference tolerance
-	 * {@value #DEFAULT_EPSILON}.
+	 * Checks equality of two double numbers with difference tolerance {@value #DEFAULT_EPSILON}.
 	 *
 	 * @param d1
 	 *            first double to compare
 	 * @param d2
 	 *            second double to compare
-	 * @return {@code true} if difference is less than epsilon, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if difference is less than epsilon, {@code false} - otherwise
 	 */
 	public static boolean equals(double d1, double d2) {
 		return equals(d1, d2, DEFAULT_EPSILON);
 	}
 
 	/**
-	 * Checks equality of two double numbers with given difference tolerance
-	 * {@code epsilon}.
+	 * Checks equality of two double numbers with given difference tolerance {@code epsilon}.
 	 *
 	 * @param d1
 	 *            first double to compare
@@ -621,8 +573,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            second double to compare
 	 * @param epsilon
 	 *            value of difference tolerance
-	 * @return {@code true} if difference is less than epsilon, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if difference is less than epsilon, {@code false} - otherwise
 	 */
 	public static boolean equals(double d1, double d2, double epsilon) {
 		return Math.abs(d1 - d2) < epsilon;
@@ -665,13 +616,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns first non empty text string available to read from defined
-	 * reader.
+	 * Returns first non empty text string available to read from defined reader.
 	 *
 	 * @param reader
 	 *            reader to use for reading
-	 * @return non empty text string, or {@code null} if the end of the stream
-	 *         has been reached
+	 * @return non empty text string, or {@code null} if the end of the stream has been reached
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -732,8 +681,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Gets a string representation of specified object for use in debugging,
-	 * which includes the value of each object field.
+	 * Gets a string representation of specified object for use in debugging, which includes the value of each object
+	 * field.
 	 *
 	 * @param obj
 	 *            object to get debugging info
@@ -803,8 +752,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param number
 	 *            number object to check
-	 * @return {@code true} if number is {@code null} or number value is
-	 *         {@code 0}, {@code false} - othervise
+	 * @return {@code true} if number is {@code null} or number value is {@code 0}, {@code false} - othervise
 	 */
 	public static boolean isZero(Number number) {
 		return number == null || number.intValue() == 0;

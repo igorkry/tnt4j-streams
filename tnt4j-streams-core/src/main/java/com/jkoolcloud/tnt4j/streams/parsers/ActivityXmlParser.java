@@ -42,20 +42,17 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * XML string, with the value for each field being retrieved from a particular
- * XML element or attribute.
+ * Implements an activity data parser that assumes each activity data item is an XML string, with the value for each
+ * field being retrieved from a particular XML element or attribute.
  * <p>
- * This parser supports reading the activity data from several types of input
- * sources, and supports input streams containing multiple XML documents. If
- * there are multiple XML documents, each document must start with
+ * This parser supports reading the activity data from several types of input sources, and supports input streams
+ * containing multiple XML documents. If there are multiple XML documents, each document must start with
  * {@code "<?xml ...>"}, and be separated by a new line.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
- * <li>RequireDefault - indicates that all attributes are required by default.
- * (Optional)</li>
+ * <li>RequireDefault - indicates that all attributes are required by default. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -214,9 +211,9 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			String[] savedUnits = null;
 			String[] savedLocales = null;
 			// apply fields for parser
-			Object value;
+			Object[] values;
 			for (ActivityField aFieldList : fieldList) {
-				value = null;
+				values = null;
 				field = aFieldList;
 				List<ActivityFieldLocator> locations = field.getLocators();
 				if (locations != null) {
@@ -227,37 +224,22 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						savedUnits = new String[locations.size()];
 						savedLocales = new String[locations.size()];
 					}
-					if (locations.size() == 1) {
-						ActivityFieldLocator loc = locations.get(0);
-						savedFormats[0] = loc.getFormat();
-						savedUnits[0] = loc.getUnits();
-						savedLocales[0] = loc.getLocale();
-						value = getLocatorValue(stream, loc, xmlDoc);
-						if (value == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
+
+					values = new Object[locations.size()];
+					for (int li = 0; li < locations.size(); li++) {
+						ActivityFieldLocator loc = locations.get(li);
+						savedFormats[li] = loc.getFormat();
+						savedUnits[li] = loc.getUnits();
+						savedLocales[li] = loc.getLocale();
+						values[li] = getLocatorValue(stream, loc, xmlDoc);
+						if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
 							LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"ActivityXmlParser.required.locator.not.found"), field);
 							return null;
 						}
-					} else {
-						Object[] values = new Object[locations.size()];
-						for (int li = 0; li < locations.size(); li++) {
-							ActivityFieldLocator loc = locations.get(li);
-							savedFormats[li] = loc.getFormat();
-							savedUnits[li] = loc.getUnits();
-							savedLocales[li] = loc.getLocale();
-							values[li] = getLocatorValue(stream, loc, xmlDoc);
-							if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-								LOGGER.log(OpLevel.TRACE,
-										StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-												"ActivityXmlParser.required.locator.not.found"),
-										field);
-								return null;
-							}
-						}
-						value = values;
 					}
 				}
-				applyFieldValue(stream, ai, field, value);
+				applyFieldValue(stream, ai, field, wrapValue(values));
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
@@ -276,8 +258,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -286,12 +267,10 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * @param xmlDoc
 	 *            activity object XML DOM document
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
@@ -387,15 +366,13 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * Reads the next complete XML document string from the specified data input
-	 * source and returns it as a string. If the data input source contains
-	 * multiple XML documents, then each document must start with "&lt;?xml",
-	 * and be separated by a new line.
+	 * Reads the next complete XML document string from the specified data input source and returns it as a string. If
+	 * the data input source contains multiple XML documents, then each document must start with "&lt;?xml", and be
+	 * separated by a new line.
 	 *
 	 * @param data
 	 *            input source for activity data
-	 * @return XML document string, or {@code null} if end of input source has
-	 *         been reached
+	 * @return XML document string, or {@code null} if end of input source has been reached
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */

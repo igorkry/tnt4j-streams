@@ -47,8 +47,8 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 
 	private static final String DEFAULT_SOURCE_NAME = "com.jkoolcloud.tnt4j.streams"; // NON-NLS
 	/**
-	 * Delay between retries to submit data package to jKool Cloud Service if
-	 * some transmission failure occurs, in milliseconds.
+	 * Delay between retries to submit data package to jKool Cloud Service if some transmission failure occurs, in
+	 * milliseconds.
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
 
@@ -106,8 +106,8 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 *            property key
 	 * @param value
 	 *            property value
-	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
-	 *         if there was no mapping for <tt>key</tt>.
+	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if there was no mapping for
+	 *         <tt>key</tt>.
 	 */
 	public String addTNT4JProperty(String key, String value) {
 		if (tnt4jProperties == null) {
@@ -146,7 +146,6 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void setProperty(String name, Object value) {
 		if (OutputProperties.PROP_TNT4J_CONFIG_FILE.equalsIgnoreCase(name)) {
 			setTnt4jCfgFilePath((String) value);
@@ -157,8 +156,8 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	/**
-	 * Gets {@link Tracker} instance from {@link #trackersMap} matching provided
-	 * activity item source FQN and thread on which stream is running.
+	 * Gets {@link Tracker} instance from {@link #trackersMap} matching provided activity item source FQN and thread on
+	 * which stream is running.
 	 *
 	 * @param aiSourceFQN
 	 *            activity item source FQN
@@ -166,7 +165,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 *            thread on which stream is running
 	 * @return tracker instance for activity item
 	 */
-	public Tracker getTracker(String aiSourceFQN, Thread t) {
+	protected Tracker getTracker(String aiSourceFQN, Thread t) {
 		synchronized (trackersMap) {
 			Tracker tracker = trackersMap
 					.get(getTrackersMapKey(t, aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN));

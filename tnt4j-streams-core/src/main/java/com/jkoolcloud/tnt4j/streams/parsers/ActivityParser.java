@@ -34,8 +34,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Base class that all activity parsers must extend. It provides some base
- * functionality useful for all activity parsers.
+ * Base class that all activity parsers must extend. It provides some base functionality useful for all activity
+ * parsers.
  *
  * @version $Revision: 1 $
  */
@@ -65,12 +65,10 @@ public abstract class ActivityParser {
 	/**
 	 * Set properties for the parser.
 	 * <p>
-	 * This method is called during the parsing of the configuration when all
-	 * specified properties in the configuration have been loaded. In general,
-	 * parsers should ignore properties that they do not recognize, since they
-	 * may be valid for a subclass of the parser. If extending an existing
-	 * parser subclass, the method from the base class should be called so that
-	 * it can process any properties it requires.
+	 * This method is called during the parsing of the configuration when all specified properties in the configuration
+	 * have been loaded. In general, parsers should ignore properties that they do not recognize, since they may be
+	 * valid for a subclass of the parser. If extending an existing parser subclass, the method from the base class
+	 * should be called so that it can process any properties it requires.
 	 *
 	 * @param props
 	 *            properties to set
@@ -80,8 +78,7 @@ public abstract class ActivityParser {
 	public abstract void setProperties(Collection<Map.Entry<String, String>> props) throws Exception;
 
 	/**
-	 * Add an activity field definition to the set of fields supported by this
-	 * parser.
+	 * Add an activity field definition to the set of fields supported by this parser.
 	 *
 	 * @param field
 	 *            activity field to add
@@ -89,35 +86,31 @@ public abstract class ActivityParser {
 	public abstract void addField(ActivityField field);
 
 	/**
-	 * Parse the specified raw activity data, converting each field in raw data
-	 * to its corresponding value for passing to jKool Cloud Service.
+	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
+	 * to jKool Cloud Service.
 	 *
 	 * @param stream
 	 *            parent stream
 	 * @param data
 	 *            raw activity data to parse
-	 * @return converted activity info, or {@code null} if raw activity data
-	 *         does not match format for this parser
+	 * @return converted activity info, or {@code null} if raw activity data does not match format for this parser
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing raw data string
 	 * @see #isDataClassSupported(Object)
-	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String,
-	 *      Object)
+	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String, Object)
 	 */
 	public abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
 			throws IllegalStateException, ParseException;
 
 	/**
-	 * Returns whether this parser supports the given format of the activity
-	 * data. This is used by activity streams to determine if the parser can
-	 * parse the data in the format that the stream has it.
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 *
 	 * @param data
 	 *            data object whose class is to be verified
-	 * @return {@code true} if this parser can process data in the specified
-	 *         format, {@code false} - otherwise
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	public abstract boolean isDataClassSupported(Object data);
 
@@ -177,16 +170,38 @@ public abstract class ActivityParser {
 	 *            value to apply for this field
 	 * @throws ParseException
 	 *             if an error parsing the specified value
+	 * @see #applyFieldValue(ActivityInfo, ActivityField, Object, String)
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		ai.applyField(field, value);
+		applyFieldValue(ai, field, value, null);
 	}
 
 	/**
-	 * Sets the value for the field in the specified activity. If field has
-	 * stacked parser defined, then field value is parsed into separate activity
-	 * using stacked parser. If field can be parsed by stacked parser, produced
-	 * activity is merged into specified (parent) activity.
+	 * Sets the value for the field in the specified activity.
+	 *
+	 * @param ai
+	 *            activity object whose field is to be set
+	 * @param field
+	 *            field to apply value to
+	 * @param value
+	 *            value to apply for this field
+	 * @param valueType
+	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
+	 */
+	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value, String valueType)
+			throws ParseException {
+		if (!field.isTransparent()) {
+			ai.applyField(field, value, valueType);
+		}
+	}
+
+	/**
+	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
+	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
+	 * is merged into specified (parent) activity.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -200,12 +215,39 @@ public abstract class ActivityParser {
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing the specified value
+	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object, String)
 	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value)
 			throws IllegalStateException, ParseException {
+		applyFieldValue(stream, ai, field, value, null);
+	}
 
-		applyFieldValue(ai, field, value);
+	/**
+	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
+	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
+	 * is merged into specified (parent) activity.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param ai
+	 *            activity object whose field is to be set
+	 * @param field
+	 *            field to apply value to
+	 * @param value
+	 *            value to apply for this field
+	 * @param valueType
+	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
+	 * @throws IllegalStateException
+	 *             if parser has not been properly initialized
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 * @see #parse(TNTInputStream, Object)
+	 */
+	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value,
+			String valueType) throws IllegalStateException, ParseException {
+
+		applyFieldValue(ai, field, value, valueType);
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
@@ -262,14 +304,11 @@ public abstract class ActivityParser {
 	}
 
 	/**
-	 * Returns whether this parser supports delimited locators in parser fields
-	 * configuration. This allows user to define multiple locations for a field
-	 * using locators delimiter {@link ConfigParserHandler#LOC_DELIM} field
-	 * value.
+	 * Returns whether this parser supports delimited locators in parser fields configuration. This allows user to
+	 * define multiple locations for a field using locators delimiter {@link ConfigParserHandler#LOC_DELIM} field value.
 	 * <p>
-	 * But if locators are some complex expressions like XPath functions, it may
-	 * be better to deny this feature for a parser to correctly load locator
-	 * expression.
+	 * But if locators are some complex expressions like XPath functions, it may be better to deny this feature for a
+	 * parser to correctly load locator expression.
 	 *
 	 * @return flag indicating if parser supports delimited locators
 	 */

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.samples.builder;
+package com.jkoolcloud.tnt4j.streams.sample.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
@@ -40,11 +42,21 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser;
  */
 public class SampleStreamingApp {
 
+	private SampleStreamingApp() {
+	}
+
 	/**
 	 * Main entry point for running as a standalone application.
 	 *
 	 * @param args
-	 *            program command-line arguments. None is required
+	 *            program command-line arguments. Supported arguments:
+	 *            <table summary="TNT4J-Streams agent command line arguments">
+	 *            <tr>
+	 *            <td>&nbsp;&nbsp;</td>
+	 *            <td>&nbsp;&lt;orders_log_file_path&gt;</td>
+	 *            <td>(optional) path of "orders.log" file. Default value is working dir.</td>
+	 *            </tr>
+	 *            </table>
 	 * @throws Exception
 	 *             if any exception occurs while running application
 	 */
@@ -100,7 +112,8 @@ public class SampleStreamingApp {
 		atp.addField(f);
 
 		props = new ArrayList<Map.Entry<String, String>>();
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME, "orders.log"));
+		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME,
+				ArrayUtils.isEmpty(args) ? "orders.log" : args[0]));
 
 		FileLineStream fls = new FileLineStream();
 		fls.setName("FileStream");

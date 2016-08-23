@@ -39,6 +39,8 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * Apache Flume
     * Angulartics
+    * Collectd
+    * Nagios    
 
 just by applying configuration and without additional coding.
 
@@ -59,11 +61,11 @@ Running TNT4J-Streams
 
 ## TNT4J-Streams can be run:
 * As standalone application
-    * write streams configuration file. See 'Streams configuration' chapter for more details
+    * write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * configure Your loggers
     * use `bin/tnt4j-streams.bat` or `bin/tnt4j-streams.sh` to run standalone application
 * As API integrated into Your product
-    * Write streams configuration file. See 'Streams configuration' chapter for more details
+    * Write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in Your code
 
 ## TNT4J Events field mappings
@@ -255,6 +257,56 @@ sample:
     <field name="Topic" locator="TopicName" locator-type="Label"/>
 ```
 
+### Field locator types
+
+```java
+    /**
+     * Indicates that raw data value is the value of a named property of the
+     * current stream.
+     */
+    StreamProp,
+    
+    /**
+     * Indicates that raw data value is at a specified index location, offset,
+     * etc. This is a generic index/offset value whose interpretation is up to
+     * the specific parser applying the locator.
+     */
+    Index,
+    
+    /**
+     * Indicates that raw data value is the value of a particular key or label.
+     * Examples of this are XPath expressions for XML elements, and where each
+     * element of a raw activity data string is a name/value pair.
+     */
+    Label,
+    
+    /**
+     * Indicates that raw data value is the value of a specific regular
+     * expression group, for parsers that interpret the raw activity data using
+     * a regular expression pattern defined as a sequence of groups.
+     */
+    REGroupNum,
+    
+    /**
+     * Indicates that raw data value is the value of a specific regular
+     * expression match, for parsers that interpret the raw activity data using
+     * a regular expression pattern defined as a sequence of repeating match
+     * patterns.
+     */
+    REMatchNum
+```
+
+NOTE: `Index` is default value and may be suppressed in field/locator definition:
+
+this:
+```xml
+    <field name="UserName" locator="4"/>    
+```
+is same as:
+```xml
+    <field name="UserName" locator="4" locator-type="Index"/>
+```
+
 ### Stacked parsers
 
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
@@ -288,7 +340,7 @@ sample:
     </stream>
 </tnt-data-source>
 ```
-See 'JMS text message' sample for full configuration definition.
+See ['JMS text message'](#jms-text-message) sample for full configuration definition.
 
 In this sample stream named `SampleJMStream` has primary parser reference `SampleJMSParser`. It parses data received
 as JMS message (envelope). Field `MsgBody` carries JMS message payload data (message). In this sample consider we are
@@ -298,7 +350,7 @@ named `AccessLogParserCommon`.
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
 
-## Samples:
+## Samples
 
 ### Running samples
 When release assemblies are built, samples are located in `samples` directory i.e.
@@ -307,7 +359,7 @@ To run desired sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
 
-For more detailed explanation of streams and parsers configuration and usage see chapter 'Configuring TNT4J-Streams'
+For more detailed explanation of streams and parsers configuration and usage see chapter ['Configuring TNT4J-Streams'](#configuring-tnt4j-streams)
 and JavaDocs.
 
 #### Single Log file
@@ -425,7 +477,7 @@ Sample parser configuration:
 </tnt-data-source>
 ```
 
-For details on parser configuration see sample named 'Single Log file'.
+For details on parser configuration see sample named ['Single Log file'](#single-log-file).
 
 #### Zipped file lines
 
@@ -779,7 +831,7 @@ Stream configuration states that `FilePollingStream` referencing `AccessLogParse
 entries and don't stop if such situation occurs.
 
 `AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
-'Apache Access log single file' section.
+['Apache Access log single file'](#apache-access-log-single-file) section.
 
 `FileName` property defines that stream should watch for files matching `localhost_access_log.*.txt` wildcard pattern.
  This is needed to properly handle file rolling.
@@ -852,7 +904,7 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/apache-flume` directory.
 
-How to install plugin into Apache Flume and configure, see `samples/apache-flume/README.md`
+How to install plugin into Apache Flume and configure, see [`samples/apache-flume/README.md`](tnt4j-streams-flume-plugin/samples/apache-flume/README.md)
 
 Sample stream configuration:
 ```xml
@@ -920,10 +972,10 @@ configured to send parsed log entry data as JSON to `localhost:9595`.
 
 Sample files can be found in `samples/apache-flume-parsed` directory.
 
-How to install plugin into Apache Flume and configure, see `samples/apache-flume-parsed/README.md`
+How to install plugin into Apache Flume and configure, see [`samples/apache-flume-parsed/README.md`](tnt4j-streams-flume-plugin/samples/apache-flume-parsed/README.md)
 
 `messages.json` file contains sample Apache Flume output JSON data package prepared using configuration of this sample.
-This sample JSON is for you to see better understand parsers mappings. Do not use it as Apache Flume input!
+This sample JSON is for you to see and better understand parsers mappings. Do not use it as Apache Flume input!
 
 Sample stream configuration:
 ```xml
@@ -983,10 +1035,10 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
 
-How to configure Logstash see `samples/logstash/README.MD`
+How to configure Logstash see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
-sample JSON is for you to see better understand parsers mappings. Do not use it as Logstash input!
+sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
 
 Sample stream configuration:
 ```xml
@@ -1056,10 +1108,10 @@ send parsed Apache Access log entry data as JSON to `localhost:9595`.
 
 Sample files can be found in `samples/logstash-parsed` directory.
 
-How to configure Logstash see `samples/logstash-parsed/README.MD`
+How to configure Logstash see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
-sample JSON is for you to see better understand parsers mappings. Do not use it as Logstash input!
+sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
 
 Sample stream configuration:
 ```xml
@@ -1114,7 +1166,7 @@ Sample files can be found in `samples/http-file` directory.
 
 Over HTTP sent sample file is `log.txt` - snapshot of Apache access log depicting some HTTP server activity.
 
-How to send file data over HTTP see `samples/http-file/README.md`
+How to send file data over HTTP see [`samples/http-file/README.md`](tnt4j-streams-core/samples/http-file/README.md)
 
 Sample stream configuration:
 ```xml
@@ -1170,7 +1222,7 @@ should skip unparseable entries. Stream puts received request payload data as `b
 `AccessLogParserCommon` to parse format.
 
 `AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
-'Apache Access log single file' section.
+['Apache Access log single file'](#apache-access-log-single-file) section.
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
@@ -1183,7 +1235,7 @@ This sample shows how to stream activity events received over HTTP request as fo
 
 Sample files can be found in `samples/http-form` directory.
 
-How to send HTTP form data see `samples/http-form/README.md`
+How to send HTTP form data see [`samples/http-form/README.md`](tnt4j-streams-core/samples/http-form/README.md)
 
 Sample stream configuration:
 ```xml
@@ -1706,7 +1758,7 @@ trace data over HTTP request `http://localhost:9595`. Thus to process this we wi
 
 Sample files can be found in `samples/angular-js-tracing` directory.
 
-How to configure Angulartics see `samples/angular-js-tracing/readme.md`
+How to configure Angulartics see [`samples/angular-js-tracing/readme.md`](tnt4j-streams-core/samples/angular-js-tracing/readme.md)
 
 Sample stream configuration:
 ```xml
@@ -2188,19 +2240,9 @@ field string mapping to TNT4J event field value.
 
 #### Integrating TNT4J-Streams into custom API
 
-This sample shows how to integrate TNT4J-Streams into Your custom API.
-
-Sample files can be found in `samples/custom` directory.
-
-`SampleIntegration.java` shows how to make TNT4J-Streams integration into Your API. Also integration could be made using
-`StreamsAgent.runFromAPI(cfgFileName)` call.
-
-`SampleParder.java` shows how to implement custom parser.
-
-`SampleStream.java` shows how to implement custom stream.
+See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` module.
 
 ### How to use TNT4J loggers
-See chapter 'Manually installed dependencies' how to install `tnt4j-log4j12` or `tnt4j-logback` dependencies.
 
 #### tnt4j-log4j12
 
@@ -2292,7 +2334,7 @@ sample stream configuration:
 </tnt-data-source>
 ```
 
-As You can see from sample configuration there are two major configuration elements defined `parser` and `stream`.
+As You can see from sample configuration, there are two major configuration elements defined `parser` and `stream`.
 Because streams configuration is read using SAX parser referenced entities should be initialized before it is used.
 Note that `stream` uses `parser` reference:
 ```xml
@@ -2303,9 +2345,9 @@ Note that `stream` uses `parser` reference:
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
 
-#### Generic streams parameters:
+#### Generic streams parameters
 
-##### Stream executors related parameters:
+##### Stream executors related parameters
 
 These parameters are applicable to all types of streams.
 
@@ -2330,7 +2372,7 @@ These parameters are applicable to all types of streams.
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
 ```
 
-##### Parseable streams parameters:
+##### Parseable streams parameters
 
 These parameters are applicable to streams which uses parsers to parse input data.
 
@@ -2342,7 +2384,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
     <property name="HaltIfNoParser" value="false"/>
 ```
 
-##### Buffered streams parameters:
+##### Buffered streams parameters
 
  * BufferSize - maximal buffer queue capacity. Default value - `512`. (Optional)
  * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
@@ -2354,7 +2396,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
      <property name="BufferOfferTimeout" value="90"/>
  ```
 
-#### File line stream parameters (and Hdfs):
+#### File line stream parameters (and Hdfs)
 
  * FileName - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
  * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
@@ -2378,9 +2420,9 @@ These parameters are applicable to streams which uses parsers to parse input dat
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
-#### Character stream parameters:
+#### Character stream parameters
 
  * FileName - the system-dependent file name. (Required - just one `FileName` or `Port`)
  * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
@@ -2396,17 +2438,17 @@ or
     <property name="RestartOnInputClose" value="true"/>
 ```
 
-Also see 'Generic streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 NOTE: there can be ony one parser referenced to this stream.
 
-#### OS Piped stream parameters:
+#### OS Piped stream parameters
 
 This stream does not have any additional configuration parameters.
 
-Also see 'Generic streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Http stream parameters:
+#### Http stream parameters
 
  * Port - port number to run Http server. Default value - `8080`. (Optional)
  * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
@@ -2423,9 +2465,9 @@ Also see 'Generic streams parameters'.
     <property name="KeyPass" value="somePassword"/>
 ```
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
-#### JMS stream parameters:
+#### JMS stream parameters
 
  * ServerURI - JMS server URL. (Required)
  * Queue - queue destination name. (Required - just one of `Queue` or `Topic`)
@@ -2450,12 +2492,12 @@ or
     <parser-ref name="SampleJMSParser"/>
 ```
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
-#### Kafka stream parameters:
+#### Kafka stream parameters
 
  * Topic - regex of topic name to listen. (Required)
- * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` for more
+ * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
  details on Kafka consumer properties.
 
     sample:
@@ -2465,9 +2507,9 @@ Also see 'Generic streams parameters' and 'Buffered streams parameters'.
     <property name="group.id" value="TNT4JStreams"/>
 ```
 
-Also see 'Generic streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### MQTT stream parameters:
+#### MQTT stream parameters
 
  * ServerURI - Mqtt server URI. (Required)
  * TopicString - the topic to subscribe to, which can include wildcards. (Required)
@@ -2488,9 +2530,9 @@ Also see 'Generic streams parameters'.
     <property name="KeystorePass" value="somePassword"/>
 ```
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
-#### WMQ Stream parameters:
+#### WMQ Stream parameters
 
  * QueueManager - Queue manager name. (Optional)
  * Queue - Queue name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
@@ -2509,7 +2551,7 @@ Also see 'Generic streams parameters' and 'Buffered streams parameters'.
     <property name="Host" value="wmq.sample.com"/>
 ```
 
-Also see 'Generic streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 #### Zipped file line stream parameters (and Hdfs):
 
@@ -2527,9 +2569,9 @@ Also see 'Generic streams parameters'.
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Zip entry name may contain
 wildcards.
 
-Also see 'Generic streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Ws Stream parameters:
+#### Ws Stream parameters
 
 This kind of stream (Rest/WS/Cmd) has no additional configuration parameters.
 
@@ -2587,7 +2629,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
     </scenario>
 ```
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
 #### Ms Excel Stream parameters
 
@@ -2601,7 +2643,7 @@ Also see 'Generic streams parameters' and 'Buffered streams parameters'.
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
 ```
 
-Also see 'Generic streams parameters' and 'Parseable streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and 'Parseable streams parameters'.
 
 ##### Ms Excel Rows Stream parameters
 
@@ -2720,13 +2762,16 @@ Modules list:
    * `WMQ` (O)
    * `Ws` (O)
    * `MsOffice` (O)
+   * `Samples` (O)
 
 (M) marked modules are mandatory, (O) marked modules - optional.
 
-All optional modules (extentions) depends to `core` module and can't be build and run without it.
+All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
 If You want to build and use optional modules, uncomment those in root TNT4J-Streams `pom.xml` file. I.e. to use `WMQ`
 module uncomment `tnt4j-streams-wmq` module.
+
+NOTE: `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
 
 ## Requirements
 * JDK 1.6+
@@ -2741,7 +2786,7 @@ online mode it should download these defined dependencies automatically.
 Some of required and optional dependencies may be not available in public Maven Repository
 (http://repo.maven.apache.org/maven2/). In this case we would recommend to download those dependencies manually into
 module's `lib` directory and install into local maven repository by running maven script `lib/pom.xml` with `package`
-goal. For example see `tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml` how to do this.
+goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) how to do this.
 
 #### `WMQ` module
 
@@ -2772,7 +2817,7 @@ by hand: i.e. delete contents of `c:\Users\[username]\.m2\repository` directory.
 
 ## Running samples
 
-See 'Running TNT4J-Streams' chapter section 'Samples'.
+See 'Running TNT4J-Streams' chapter section ['Samples'](#samples).
 
 Testing of TNT4J-Streams
 =========================================

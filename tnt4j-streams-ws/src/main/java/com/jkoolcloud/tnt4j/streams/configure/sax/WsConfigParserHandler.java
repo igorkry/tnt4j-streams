@@ -34,8 +34,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * Extends default TNT4J-Streams configuration SAX parser handler and adds
- * additional TNT4J-Streams-WS configuration handling.
+ * Extends default TNT4J-Streams configuration SAX parser handler and adds additional TNT4J-Streams-WS configuration
+ * handling.
  *
  * @version $Revision: 1 $
  *
@@ -146,8 +146,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		currStep = new WsScenarioStep(name);
 		currStep.setUrlStr(url);
 		currStep.setMethod(method);
-		currStep.setUsername(username);
-		currStep.setPassword(password);
+		currStep.setCredentials(username, password);
 	}
 
 	private void processCronScheduler(Attributes attrs) throws SAXException {

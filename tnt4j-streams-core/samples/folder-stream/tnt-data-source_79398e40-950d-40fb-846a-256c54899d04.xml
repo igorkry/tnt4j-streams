@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tnt-data-source xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+    <parser name="CsvParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value=","/>
+        <field name="Tag" value="79398e40-950d-40fb-846a-256c54899d04"/>
+        <field name="EventType" value="SEND"/>
+        <field name="PAVARDÄ" locator="3" locator-type="index"/>
+        <field name="VARDAS" locator="2" locator-type="index"/>
+        <field name="&quot;KARO_PRIEVOLININKO_KODAS&quot;" locator="1" locator-type="index"/>
+        <field name="INFORMACIJA" locator="7" locator-type="index"/>
+        <field name="&quot;TERITORINIS_PADALINYS&quot;" locator="6" locator-type="index"/>
+        <field name="&quot;EIL._NR.&quot;" locator="5" locator-type="index"/>
+        <field name="&quot;GIMIMO_METAI&quot;" locator="4" locator-type="index"/>
+    </parser>
+    <stream name="CsvStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value=".\..\temp\79398e40-950d-40fb-846a-256c54899d04.txt"/>
+        <property name="RestoreState" value="false"/>
+        <parser-ref name="CsvParser"/>
+        <tnt4j-properties>
+            <!--<property name="event.sink.factory.Token" value="gqE52EU79toRcypXAVs7fTZVjbEze1sb"/>-->
+            <property name="event.sink.factory.Token" value="tester_token"/>
+            <property name="source.factory.GEOADDR" value="undefined"/>
+            <property name="source.factory.DATACENTER" value="undefined"/>
+            <property name="source.factory.APPL" value="undefined"/>
+            <property name="source.factory.RootFQN" value="RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?#APPL=?#USER=?"/>
+            <property name="source.factory.RootSSN" value="TNT4J-Streams-dir_stream"/>
+        </tnt4j-properties>
+    </stream>
+</tnt-data-source>

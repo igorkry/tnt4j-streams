@@ -37,9 +37,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * This class implements a default directory files streaming job. In general it
- * defines stream configuration attributes and initiates new stream thread when
- * job gets invoked by executor service.
+ * This class implements a default directory files streaming job. In general it defines stream configuration attributes
+ * and initiates new stream thread when job gets invoked by executor service.
  *
  * @version $Revision: 1 $
  */
@@ -82,8 +81,7 @@ public class DefaultStreamingJob implements StreamingJob {
 	}
 
 	/**
-	 * Initializes and starts configuration defined {@link TNTInputStream}s when
-	 * job gets invoked by executor service.
+	 * Initializes and starts configuration defined {@link TNTInputStream}s when job gets invoked by executor service.
 	 */
 	@Override
 	public void run() {
@@ -132,8 +130,7 @@ public class DefaultStreamingJob implements StreamingJob {
 	 * @param otherJob
 	 *            the reference job object to compare
 	 *
-	 * @return {@code true} if this job is the same as the otherJob argument,
-	 *         {@code false} - otherwise
+	 * @return {@code true} if this job is the same as the otherJob argument, {@code false} - otherwise
 	 */
 	@Override
 	public boolean equals(Object otherJob) {
@@ -172,8 +169,7 @@ public class DefaultStreamingJob implements StreamingJob {
 	}
 
 	/**
-	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners
-	 * list.
+	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamingJobListener} to be added
@@ -191,8 +187,7 @@ public class DefaultStreamingJob implements StreamingJob {
 	}
 
 	/**
-	 * Removes defined {@code StreamingJobListener} from streaming jobs
-	 * listeners list.
+	 * Removes defined {@code StreamingJobListener} from streaming jobs listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamingJobListener} to be removed

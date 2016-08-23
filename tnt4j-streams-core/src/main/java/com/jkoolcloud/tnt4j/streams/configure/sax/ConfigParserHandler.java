@@ -27,12 +27,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldMappingType;
-import com.jkoolcloud.tnt4j.streams.fields.DynamicNameActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -119,93 +114,87 @@ public class ConfigParserHandler extends DefaultHandler {
 	private static final String PARAM_ELMT = "param"; // NON-NLS
 
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	protected static final String NAME_ATTR = "name"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String CLASS_ATTR = "class"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String VALUE_ATTR = "value"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String LOC_TYPE_ATTR = "locator-type"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String LOCATOR_ATTR = "locator"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String NAME_LOCATOR_ATTR = "nameLocator"; // NON-NLS
-	
+	private static final String NAME_LOCATOR_ATTR = "name-locator"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String VALUE_TYPE_ATTR = "value-type"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String SEPARATOR_ATTR = "separator"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String DATA_TYPE_ATTR = "datatype"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String RADIX_ATTR = "radix"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	protected static final String UNITS_ATTR = "units"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String FORMAT_ATTR = "format"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String LOCALE_ATTR = "locale"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TIMEZONE_ATTR = "timezone"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String SOURCE_ATTR = "source";
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TARGET_ATTR = "target"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TYPE_ATTR = "type"; // NON-NLS
 	/**
-	 * Constant for name of TNT4J-Streams XML configuration tag attribute
-	 * {@value}.
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TAGS_ATTR = "tags"; // NON-NLS
 
-	private static final String REQUIRED_VALUE = "required"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String REQUIRED_ATTR = "required"; // NON-NLS
+
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String TRANSPARENT_ATTR = "transparent"; // NON-NLS
 
 	/**
 	 * Currently configured TNT input stream.
@@ -403,6 +392,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String locatorType = null;
 		String locator = null;
 		String nameLocator = null;
+		String valueType = null;
 		String separator = null;
 		String units = null;
 		String format = null;
@@ -411,6 +401,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String value = null;
 		int radix = 10;
 		String reqVal = "";
+		boolean transparent = false;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -424,6 +415,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				locator = attValue;
 			} else if (NAME_LOCATOR_ATTR.equals(attName)) {
 				nameLocator = attValue;
+			} else if (VALUE_TYPE_ATTR.equals(attName)) {
+				valueType = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
 				separator = attValue;
 			} else if (RADIX_ATTR.equals(attName)) {
@@ -438,8 +431,10 @@ public class ConfigParserHandler extends DefaultHandler {
 				timeZone = attValue;
 			} else if (VALUE_ATTR.equals(attName)) {
 				value = attValue;
-			} else if (REQUIRED_VALUE.equals(attName)) {
+			} else if (REQUIRED_ATTR.equals(attName)) {
 				reqVal = attValue;
+			} else if (TRANSPARENT_ATTR.equals(attName)) {
+				transparent = Boolean.parseBoolean(attValue);
 			}
 		}
 		if (locator != null && locator.isEmpty()) {
@@ -453,8 +448,25 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.missing.attribute", FIELD_ELMT, NAME_ATTR), currParseLocation);
 		}
-		ActivityField af = new ActivityField(field);
+
+		ActivityField af;
 		ActivityFieldLocator afl;
+
+		if (StringUtils.isNotEmpty(nameLocator)) {
+			DynamicActivityField daf = new DynamicActivityField(field);
+			String[] nameLocators = nameLocator.split(","); // NON-NLS
+			for (String nLocator : nameLocators) {
+				afl = new ActivityFieldLocator(ActivityFieldLocatorType.Label,
+						StringUtils.isEmpty(nLocator) ? "default" : nLocator); // NON-NLS
+				daf.addNameLocator(afl);
+			}
+			transparent = true;
+			af = daf;
+
+		} else {
+			af = new ActivityField(field);
+		}
+
 		if (value != null) {
 			currFieldHasLocValAttr = true;
 			afl = new ActivityFieldLocator(value);
@@ -500,16 +512,6 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			}
 		}
-		if (nameLocator != null) {
-			final String[] nameLocators = nameLocator.split(",");
-			List<ActivityFieldLocator> locatorsCopy = new ArrayList<ActivityFieldLocator>(af.getLocators());
-			af = new DynamicNameActivityField(field);
-			((DynamicNameActivityField) af).addLocators(locatorsCopy);
-			for (String nameLocatore : nameLocators) {
-				afl = new ActivityFieldLocator(ActivityFieldLocatorType.Label, nameLocatore != null ? nameLocatore : "default");
-				((DynamicNameActivityField) af).addNameLocator(afl);
-			}
-		}
 		if (format != null) {
 			af.setFormat(format);
 		}
@@ -519,7 +521,17 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (separator != null) {
 			af.setSeparator(separator);
 		}
+		ActivityFieldLocator vtLocator;
+		if (valueType != null) {
+			if (valueType.startsWith("#")) {
+				vtLocator = new ActivityFieldLocator(valueType.substring(1));
+			} else {
+				vtLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, valueType);
+			}
+			af.setValueTypeLocator(vtLocator);
+		}
 		af.setRequired(reqVal);
+		af.setTransparent(transparent);
 		currField = af;
 	}
 
@@ -580,7 +592,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFieldLocator.timeZone = attValue;
 			} else if (VALUE_ATTR.equals(attName)) {
 				currFieldLocator.value = attValue;
-			} else if (REQUIRED_VALUE.equals(attName)) {
+			} else if (REQUIRED_ATTR.equals(attName)) {
 				currFieldLocator.reqVal = attValue;
 			}
 		}
@@ -1034,11 +1046,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Returns string buffer contained string for current configuration element
-	 * (token).
+	 * Returns string buffer contained string for current configuration element (token).
 	 *
-	 * @return configuration element (token) data string value, or {@code null}
-	 *         if no element data
+	 * @return configuration element (token) data string value, or {@code null} if no element data
 	 */
 	protected String getElementData() {
 		return elementData == null ? null : elementData.toString().trim();
@@ -1193,8 +1203,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Gets a string representing the current line in the file being parsed.
-	 * Used for error messages.
+	 * Gets a string representing the current line in the file being parsed. Used for error messages.
 	 *
 	 * @return string representing current line number being parsed
 	 */

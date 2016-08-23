@@ -123,6 +123,20 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="username" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    User name used to perform request if service authentication is needed.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="password" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Password used to perform request if service authentication is needed.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Scenario definition -->

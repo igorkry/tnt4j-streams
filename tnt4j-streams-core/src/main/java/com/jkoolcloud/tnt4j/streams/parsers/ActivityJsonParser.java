@@ -41,17 +41,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * JSON format string. JSON parsing is performed using {@link JsonPath} API.
- * Activity fields locator values are treated as JsonPath expressions.
+ * Implements an activity data parser that assumes each activity data item is an JSON format string. JSON parsing is
+ * performed using {@link JsonPath} API. Activity fields locator values are treated as JsonPath expressions.
  * <p>
- * See <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more
- * details.
+ * See <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more details.
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>ReadLines - indicates that complete JSON data package is single line.
- * (Optional)</li>
+ * <li>ReadLines - indicates that complete JSON data package is single line. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -68,7 +65,17 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
-		super(LOGGER);
+		this(LOGGER);
+	}
+
+	/**
+	 * Constructs a new ActivityJsonParser.
+	 *
+	 * @param logger
+	 *            logger used by activity parser
+	 */
+	protected ActivityJsonParser(EventSink logger) {
+		super(logger);
 	}
 
 	@Override
@@ -128,16 +135,14 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	/**
-	 * Reads the next complete JSON document string from the specified data
-	 * input source and returns it as a string.
+	 * Reads the next complete JSON document string from the specified data input source and returns it as a string.
 	 *
 	 * @param data
 	 *            input source for activity data
 	 * @param jsonAsLine
-	 *            if {@code true} indicates complete JSON package is line, if
-	 *            {@code false} - whole data available to read
-	 * @return JSON document string, or {@code null} if end of input source has
-	 *         been reached
+	 *            if {@code true} indicates complete JSON package is line, if {@code false} - whole data available to
+	 *            read
+	 * @return JSON document string, or {@code null} if end of input source has been reached
 	 * @throws IllegalArgumentException
 	 *             if the class of input source supplied is not supported.
 	 */

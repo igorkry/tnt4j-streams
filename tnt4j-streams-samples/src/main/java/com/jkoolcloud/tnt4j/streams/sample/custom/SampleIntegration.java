@@ -1,20 +1,20 @@
 /*
  * Copyright 2014-2016 JKOOL, LLC.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.samples.builder;
+package com.jkoolcloud.tnt4j.streams.sample.custom;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,8 +44,8 @@ public final class SampleIntegration {
 	 */
 	public static void loadConfigAndRun(String cfgFileName) {
 		try {
-			StreamsConfigLoader cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader() : new StreamsConfigLoader(cfgFileName);
-			@SuppressWarnings("unchecked")
+			StreamsConfigLoader cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader()
+					: new StreamsConfigLoader(cfgFileName);
 			Map<String, TNTInputStream<?, ?>> streamsMap = (Map<String, TNTInputStream<?, ?>>) cfg.getStreams();
 			if (streamsMap == null || streamsMap.isEmpty()) {
 				throw new IllegalStateException("No Activity Streams found in configuration");
@@ -65,8 +65,7 @@ public final class SampleIntegration {
 	}
 
 	/**
-	 * The following can be used if using the default configuration file with a
-	 * single stream.
+	 * The following can be used if using the default configuration file with a single stream.
 	 *
 	 * @param cfgFileName
 	 *            configuration file name

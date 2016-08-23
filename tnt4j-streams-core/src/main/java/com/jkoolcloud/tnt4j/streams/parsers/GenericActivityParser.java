@@ -23,20 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.fields.DynamicNameActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * Generic class for common activity parsers. It provides some generic
- * functionality witch is common to most activity parsers.
+ * Generic class for common activity parsers. It provides some generic functionality witch is common to most activity
+ * parsers.
  *
  * @param <T>
  *            the type of handled activity data
@@ -50,8 +47,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected static final String DEFAULT_DELIM = ","; // NON-NLS
 
 	/**
-	 * List of supported activity fields used to extract values from RAW
-	 * activity data defined by field location(s).
+	 * List of supported activity fields used to extract values from RAW activity data defined by field location(s).
 	 */
 	protected final List<ActivityField> fieldList = new ArrayList<ActivityField>();
 
@@ -66,10 +62,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * {@inheritDoc} This parser supports the following class types (and all classes extending/implementing any of
+	 * these):
 	 * <ul>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
@@ -92,8 +86,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Parse the specified prepared activity data, converting each field in
-	 * prepared data to its corresponding value of activity info item.
+	 * Parse the specified prepared activity data, converting each field in prepared data to its corresponding value of
+	 * activity info item.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -101,11 +95,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            raw activity data string
 	 * @param data
 	 *            prepared activity data item to parse
-	 * @return converted activity info, or {@code null} if activity data is
-	 *         {@code null}
+	 * @return converted activity info, or {@code null} if activity data is {@code null}
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 */
 	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, T data)
 			throws ParseException {
@@ -121,63 +113,70 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				field = new ActivityField(StreamFieldType.Message.name());
 				applyFieldValue(stream, ai, field, dataStr);
 			}
-			// name locators handling 
-			final List<ActivityField> fieldListCopy = new ArrayList<ActivityField>(fieldList);
-			for (ActivityField aField : fieldListCopy) {
-				List<DynamicNameActivityField> names = null;
-				final List<ActivityFieldLocator> nameLocators;
-				if (aField instanceof DynamicNameActivityField) {
-					nameLocators = ((DynamicNameActivityField) aField).getNameLocators();
-					if (aField instanceof DynamicNameActivityField && ((DynamicNameActivityField) aField).isCreated() ) {
-						fieldList.remove(aField);
+			// name locators handling
+			List<ActivityField> fieldListCopy = new ArrayList<ActivityField>(fieldList);
+			// remove old first
+			for (ActivityField aField2 : fieldListCopy) {
+				if (aField2 instanceof DynamicActivityField) {
+					if (((DynamicActivityField) aField2).isSynthetic()) {
+						fieldList.remove(aField2);
+					} else {
+						continue;
 					}
-					if (nameLocators == null) continue;
-				} else continue;
-				
-				resolveFieldNames(stream, data, names, nameLocators, aField);
+				}
 			}
-			
+			fieldListCopy = new ArrayList<ActivityField>(fieldList);
+			// remove old first
+			for (ActivityField aField : fieldListCopy) {
+				List<DynamicActivityField> names = null;
+				final List<ActivityFieldLocator> nameLocators;
+				if (aField instanceof DynamicActivityField && !((DynamicActivityField) aField).isSynthetic()) {
+					nameLocators = ((DynamicActivityField) aField).getNameLocators();
+					if (nameLocators == null) {
+						continue;
+					}
+					resolveFieldNames(stream, data, names, nameLocators, aField);
+				}
+			}
+
 			// apply fields for parser
 			Object value;
 			for (ActivityField aFieldList : fieldList) {
 				value = null;
 				field = aFieldList;
+				String valueType = null;
 				List<ActivityFieldLocator> locations = field.getLocators();
+				if (field.getValueTypeLocator() != null) {
+					Object valueTypeValue = wrapValue(getLocatorValue(stream, field.getValueTypeLocator(), data));
+					if (valueTypeValue.getClass().isArray()) {
+						valueTypeValue = ((Object[]) valueTypeValue)[0];
+					}
+					valueType = valueTypeValue.toString();
+				}
 				if (locations != null) {
-					// For dynamic naming of activities field properties Originally used for collectD
-					if (aFieldList instanceof DynamicNameActivityField) {
-						value = getLocatorValue(stream, locations.get(0), data);
-						if (value.getClass().isArray()) {
+					// For dynamic naming of activities field properties
+					// Originally used for collectD
+					if (aFieldList instanceof DynamicActivityField) {
+						value = wrapValue(getLocatorValue(stream, locations.get(0), data));
+						if (value instanceof Object[]) {
 							Object[] values = (Object[]) value;
 							try {
-								value = wrapValue(values[((DynamicNameActivityField) aFieldList).index]);
-								if (value.getClass().isArray()) {
-									value = wrapValue((((Object[]) value)[((DynamicNameActivityField) aFieldList).dept]));
-								}
+								value = wrapValue(values[((DynamicActivityField) aFieldList).getIndex()]);
 							} catch (IndexOutOfBoundsException ex) {
 								throw new ParseException(StreamsResources.getStringFormatted(
 										StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.fields.failed"), 0);
 							}
 						}
-						applyFieldValue(stream, ai, field, value);
+						applyFieldValue(stream, ai, field, value, valueType);
 						continue;
 					}
-					if (locations.size() == 1) {
-						// field value is based on single raw data location, get
-						// the value of this location
-						value = getLocatorValue(stream, locations.get(0), data);
-					} else {
-						// field value is based on concatenation of several raw
-						// data locations, build array to hold data from each
-						// location
-						Object[] values = new Object[locations.size()];
-						for (int li = 0; li < locations.size(); li++) {
-							values[li] = getLocatorValue(stream, locations.get(li), data);
-						}
-						value = values;
+					Object[] values = new Object[locations.size()];
+					for (int li = 0; li < locations.size(); li++) {
+						values[li] = getLocatorValue(stream, locations.get(li), data);
 					}
+					value = values;
 				}
-				applyFieldValue(stream, ai, field, value);
+				applyFieldValue(stream, ai, field, wrapValue(value), valueType);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
@@ -189,104 +188,94 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return ai;
 	}
 
-
-
-	/** Gets all name locators specified and return's single name for a field
-	 *  
-	 * @param stream consumable stream
-	 * @param data 
-	 * 				parsable data
-	 * @param names	
-	 * 				List of fields to resolve
-	 * @param nameLocators 
-	 * 				name Locators
-	 * @param aField 
-	 * 				activity field
+	/**
+	 * Gets all name locators specified and return's single name for a field
+	 *
+	 * @param stream
+	 *            consumable stream
+	 * @param data
+	 *            parseable data
+	 * @param names
+	 *            List of fields to resolve
+	 * @param nameLocators
+	 *            name Locators
+	 * @param aField
+	 *            activity field
 	 * @return
 	 * @throws ParseException
 	 */
-	
-	private List<DynamicNameActivityField> resolveFieldNames(TNTInputStream<?, ?> stream, T data, List<DynamicNameActivityField> names,
-			final List<ActivityFieldLocator> nameLocators, ActivityField aField) throws ParseException {
-		
-		int index = 1;
+	private List<DynamicActivityField> resolveFieldNames(TNTInputStream<?, ?> stream, T data,
+			List<DynamicActivityField> names, final List<ActivityFieldLocator> nameLocators, ActivityField aField)
+			throws ParseException {
+
+		int nameLocatorIndex = 1;
 		for (ActivityFieldLocator locator : nameLocators) {
 			// get all field locators name values
-			final Object nameLocatorValue = getLocatorValue(stream, locator, data);
-			if (nameLocatorValue == null)
+			final Object nameLocatorValue = wrapValue(getLocatorValue(stream, locator, data));
+			if (nameLocatorValue == null) {
 				continue;
-			
-			if (nameLocatorValue.getClass().isArray()) {
+			}
+			if (nameLocatorValue instanceof Object[]) {
 				// If locator contains multiple fields, build names array
 				Object[] nameLocatorValues = (Object[]) nameLocatorValue;
-				names = createOrAppend(names, aField, index, nameLocatorValues, 0);
+				names = createOrAppend(names, aField, nameLocatorIndex, nameLocatorValues);
 			} else {
+				// Field contains single locator
 				if (names == null) {
-					names = new ArrayList<DynamicNameActivityField>(1);
-					final DynamicNameActivityField dinamicallyNamedField = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 0);
-					names.add(dinamicallyNamedField);
+					names = new ArrayList<DynamicActivityField>(1);
+					final DynamicActivityField dynamicallyNamedField = new DynamicActivityField(aField,
+							nameLocatorIndex);
+					dynamicallyNamedField.appendName(nameLocatorValue.toString(), 0);
+					names.add(dynamicallyNamedField);
+					fieldList.add(dynamicallyNamedField);
 				} else {
-					//append
+					// append
 					names.get(0).appendName(nameLocatorValue.toString(), 0);
 				}
 
 			}
-			index++;
+			nameLocatorIndex++;
 		}
 		return names;
 	}
 
 	/**
-	 * 	Creates or append activity field names. In case of multiple name locators - resolves activity name based on name template.
-	 * 
+	 * Creates or append activity field names. In case of multiple name locators - resolves activity name based on name
+	 * template.
+	 *
 	 * @param names
 	 * @param aField
-	 * @param index
+	 * @param nameLocatorIndex
 	 * @param namLocatorValues
-	 * @param depth
+	 *
 	 * @return
 	 * @throws ParseException
 	 */
-	
-	private List<DynamicNameActivityField> createOrAppend(List<DynamicNameActivityField> names, ActivityField aField,
-			int index, Object[] namLocatorValues, int depth) throws ParseException {
-		 if (names == null) {
-			// if its new create one
-			names = new ArrayList<DynamicNameActivityField>(namLocatorValues.length);
-			for (int i = 0; i < namLocatorValues.length ; i++) {
+
+	private List<DynamicActivityField> createOrAppend(List<DynamicActivityField> names, ActivityField aField,
+			int nameLocatorIndex, Object[] namLocatorValues) throws ParseException {
+		if (names == null) {
+			// if new, create one
+			names = new ArrayList<DynamicActivityField>(namLocatorValues.length);
+			for (int i = 0; i < namLocatorValues.length; i++) {
 				final Object fieldNamePart = wrapValue(namLocatorValues[i]);
-				if (fieldNamePart.getClass().isArray()) {
-					Object[] fieldNamePart2 = (Object[]) fieldNamePart;
-					//TODO recursive multiple levels
-					for (int j = 0; j < fieldNamePart2.length; j++) {
-						Object elementFieldNamePart = fieldNamePart2[j];
-						final DynamicNameActivityField field = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 1);
-						field.appendName(elementFieldNamePart.toString(), 1);
-						names.add(field);
-					}
-				} else {
-					final DynamicNameActivityField field = new DynamicNameActivityField(aField.getFieldTypeName(), aField.getLocators(), 0, 1);
-					field.appendName(fieldNamePart.toString(), 1);
-					names.add(field);
-				}
+				final DynamicActivityField field = new DynamicActivityField(aField, i);
+				field.appendName(fieldNamePart.toString(), i);
+				names.add(field);
+				fieldList.add(field);
 			}
 		} else {
-			// if its already building append
-			for (DynamicNameActivityField name : names) {
-				Object namePart = wrapValue(namLocatorValues[name.index]);
-				if (namePart.getClass().isArray()) {
-					Object[] namepart2 = (Object[]) namePart;
-					namePart = namepart2[name.dept];
-				}
-				name.appendName(namePart.toString() , index);
+			// if already available - append
+			for (DynamicActivityField name : names) {
+				Object namePart = wrapValue(namLocatorValues[name.getIndex()]);
+				name.appendName(namePart.toString(), nameLocatorIndex);
 			}
 		}
 		return names;
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -294,45 +283,46 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity field locator
 	 * @param data
 	 *            activity object data
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	protected abstract Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
 			throws ParseException;
 
 	/**
-	 * Wraps list of locator prepared values.
+	 * Wraps locator prepared value if it is list or array.
 	 *
-	 * @param valuesList
-	 *            list of values
-	 * @return extracts actual object if list contains single item, array of
-	 *         values if list contains more than one item, {@code null} if list
-	 *         is empty or {@code valuesList == null}.
+	 * @param value
+	 *            locator prepared value
+	 * @return extracts actual object if list/array contains single item, array of values if list/array contains more
+	 *         than one item, {@code null} if list/array is {@code null} or empty.
 	 */
-	protected static Object wrapValue(List<Object> valuesList) {
+	protected static Object wrapValue(Object value) {
+		if (value instanceof List) {
+			return wrapValue((List<?>) value);
+		}
+		if (value instanceof Object[]) {
+			return wrapValue((Object[]) value);
+		}
+
+		return value;
+	}
+
+	private static Object wrapValue(List<?> valuesList) {
 		if (CollectionUtils.isEmpty(valuesList)) {
 			return null;
 		}
 
 		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
 	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected static Object wrapValue(Object value) {
-		if (value instanceof List) {
-			return wrapValue((List<Object>) value);
-		}
-		if (!value.getClass().isArray())
-			return value;
-		Object[] valuesList = (Object[]) value; 
-		if (valuesList == null || valuesList.length ==0) {
+
+	private static Object wrapValue(Object[] valuesArray) {
+		if (ArrayUtils.isEmpty(valuesArray)) {
 			return null;
 		}
 
-		return valuesList.length == 1 ? valuesList[0] : valuesList;
+		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
 	}
 }

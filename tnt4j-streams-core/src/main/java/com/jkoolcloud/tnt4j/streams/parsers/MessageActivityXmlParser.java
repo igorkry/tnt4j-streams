@@ -37,16 +37,13 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
- * This class extends the basic activity XML parser for handling data specific
- * to messaging operations. It provides additional transformations of the raw
- * activity data collected for specific fields.
+ * This class extends the basic activity XML parser for handling data specific to messaging operations. It provides
+ * additional transformations of the raw activity data collected for specific fields.
  * <p>
- * In particular, this class will convert the signature and correlation field
- * values from a tokenized list of items into a value in the appropriate form
- * required by the jKool Cloud Service.
+ * In particular, this class will convert the signature and correlation field values from a tokenized list of items into
+ * a value in the appropriate form required by the jKool Cloud Service.
  * <p>
- * This parser supports the following properties (in addition to those supported
- * by {@link ActivityXmlParser}):
+ * This parser supports the following properties (in addition to those supported by {@link ActivityXmlParser}):
  * <ul>
  * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
  * </ul>
@@ -56,8 +53,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class MessageActivityXmlParser extends ActivityXmlParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MessageActivityXmlParser.class);
 	/**
-	 * Contains the field separator (set by {@code SignatureDelim} property) -
-	 * Default: ","
+	 * Contains the field separator (set by {@code SignatureDelim} property) - Default: ","
 	 */
 	protected String sigDelim = DEFAULT_DELIM;
 
@@ -90,11 +86,10 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method applies custom handling for setting field values. This method
-	 * will construct the signature to use for the message from the specified
-	 * value, which is assumed to be a string containing the inputs required for
-	 * the message signature calculation, with each input separated by the
-	 * delimiter specified in property {@code SignatureDelim}.
+	 * This method applies custom handling for setting field values. This method will construct the signature to use for
+	 * the message from the specified value, which is assumed to be a string containing the inputs required for the
+	 * message signature calculation, with each input separated by the delimiter specified in property
+	 * {@code SignatureDelim}.
 	 * <p>
 	 * The signature items MUST be specified in the following order:
 	 * <ol>
@@ -108,8 +103,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * <li>Message Time</li>
 	 * </ol>
 	 * <p>
-	 * Individual items can be omitted, but must contain a place holder (except
-	 * for trailing items).
+	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
 	 */
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {

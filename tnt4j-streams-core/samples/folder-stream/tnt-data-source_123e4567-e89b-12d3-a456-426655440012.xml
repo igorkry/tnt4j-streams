@@ -81,7 +81,7 @@
         <parser-ref name="AccessLogParserCommon"/>
 
         <tnt4j-properties>
-            <property name="event.sink.factory.Token" value="YOUR-TOKEN"/>
+            <property name="event.sink.factory.Token" value="ebb"/>
             <property name="event.sink.factory.Filename" value="logs/tnt4j-streams-activities_custom2.log"/>
             <property name="source.factory.GEOADDR" value="Marijampole"/>
             <property name="source.factory.DATACENTER" value="Huge DC"/>

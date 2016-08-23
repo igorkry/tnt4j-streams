@@ -43,8 +43,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
- * This class represents an activity (e.g. event or snapshot) to record to jKool
- * Cloud Service.
+ * This class represents an activity (e.g. event or snapshot) to record to jKool Cloud Service.
  *
  * @version $Revision: 1 $
  */
@@ -92,8 +91,8 @@ public class ActivityInfo {
 
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
 
-	private Map<String, Object> activityProperties;
-	private List<Snapshot> snapshots = new ArrayList<Snapshot>();
+	private Map<String, Property> activityProperties;
+	private List<ActivityInfo> children;
 
 	/**
 	 * Constructs a new ActivityInfo object.
@@ -103,19 +102,42 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Applies the given value(s) for the specified field to the appropriate
-	 * internal data field for reporting field to the jKool Cloud Service.
+	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
+	 * the jKool Cloud Service. Same as invoking {@link #applyField(ActivityField, Object, String)} setting value type
+	 * to {@code null}.
 	 *
 	 * @param field
 	 *            field to apply
 	 * @param value
-	 *            value to apply for this field, which could be an array of
-	 *            objects if value for field consists of multiple locations
+	 *            value to apply for this field, which could be an array of objects if value for field consists of
+	 *            multiple locations
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined format, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
+	 *
+	 * @see #applyField(ActivityField, Object, String)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
+		applyField(field, value, null);
+	}
+
+	/**
+	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
+	 * the jKool Cloud Service.
+	 *
+	 * @param field
+	 *            field to apply
+	 * @param value
+	 *            value to apply for this field, which could be an array of objects if value for field consists of
+	 *            multiple locations
+	 * @param valueType
+	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
+	 * @throws ParseException
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
+	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
+	 */
+	public void applyField(ActivityField field, Object value, String valueType) throws ParseException {
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field"), field,
 				value);
@@ -178,12 +200,12 @@ public class ActivityInfo {
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
 				field, fieldValue);
-		setFieldValue(field, fieldValue);
+		setFieldValue(field, fieldValue, valueType);
 	}
 
 	/**
-	 * Formats the value for the field based on the required internal data type
-	 * of the field and the definition of the field.
+	 * Formats the value for the field based on the required internal data type of the field and the definition of the
+	 * field.
 	 *
 	 * @param field
 	 *            field whose value is to be formatted
@@ -240,18 +262,20 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Sets field to specified value, handling any necessary conversions based
-	 * on internal data type for field.
+	 * Sets field to specified value, handling any necessary conversions based on internal data type for field.
 	 *
 	 * @param field
 	 *            field whose value is to be set
 	 * @param fieldValue
 	 *            formatted value based on locator definition for field
+	 * @param valueType
+	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
 	 *
 	 * @throws ParseException
 	 *             if there are any errors with conversion to internal format
+	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
-	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
+	private void setFieldValue(ActivityField field, Object fieldValue, String valueType) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null) {
 			switch (fieldType) {
@@ -351,7 +375,7 @@ public class ActivityInfo {
 						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.activity", field));
 			}
 		} else {
-			addActivityProperty(field.getFieldTypeName(), fieldValue);
+			addActivityProperty(field.getFieldTypeName(), fieldValue, valueType);
 		}
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
@@ -379,30 +403,51 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Adds activity item property to item properties map. Properties from map
-	 * are transferred as tracking event properties when
-	 * {@link #recordActivity(Tracker, long)} is invoked.
+	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
+	 * properties when {@link #recordActivity(Tracker, long)} is invoked. Same as invoking
+	 * {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
 	 *
 	 * @param propName
 	 *            activity item property key
 	 * @param propValue
 	 *            activity item property value
-	 * @return previous property value replaced by {@code propValue} or
-	 *         {@code null} if there was no such activity property set
+	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
+	 *         property set
 	 * @see Map#put(Object, Object)
 	 * @see #recordActivity(Tracker, long)
+	 * @see #addActivityProperty(String, Object, String)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
-		if (activityProperties == null) {
-			activityProperties = new HashMap<String, Object>();
-		}
-
-		return activityProperties.put(propName, propValue);
+		return addActivityProperty(propName, propValue, null);
 	}
 
 	/**
-	 * Appends activity item tags collection with provided tag strings array
-	 * contents.
+	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
+	 * properties when {@link #recordActivity(Tracker, long)} is invoked.
+	 *
+	 * @param propName
+	 *            activity item property key
+	 * @param propValue
+	 *            activity item property value
+	 * @param valueType
+	 *            activity item property value type from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
+	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
+	 *         property set
+	 * @see Map#put(Object, Object)
+	 * @see #recordActivity(Tracker, long)
+	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
+	 */
+	public Object addActivityProperty(String propName, Object propValue, String valueType) {
+		if (activityProperties == null) {
+			activityProperties = new HashMap<String, Property>();
+		}
+
+		return activityProperties.put(propName, StringUtils.isEmpty(valueType) ? new Property(propName, propValue)
+				: new Property(propName, propValue, valueType));
+	}
+
+	/**
+	 * Appends activity item tags collection with provided tag strings array contents.
 	 *
 	 * @param tags
 	 *            tag strings array
@@ -418,8 +463,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Appends activity item correlators collection with provided correlator
-	 * strings array contents.
+	 * Appends activity item correlators collection with provided correlator strings array contents.
 	 *
 	 * @param correlators
 	 *            correlator strings array
@@ -435,11 +479,10 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Makes fully qualified name of activity source. Name is made from stream
-	 * parsed data attributes.
+	 * Makes fully qualified name of activity source. Name is made from stream parsed data attributes.
 	 *
-	 * @return fully qualified name of this activity source, or {@code null} if
-	 *         no source defining attributes where parsed from stream.
+	 * @return fully qualified name of this activity source, or {@code null} if no source defining attributes where
+	 *         parsed from stream.
 	 */
 	public String getSourceFQN() {
 		resolveServer(false);
@@ -464,17 +507,15 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Creates the appropriate data message to send to jKool Cloud Service and
-	 * records the activity using the specified tracker.
+	 * Creates the appropriate data message to send to jKool Cloud Service and records the activity using the specified
+	 * tracker.
 	 *
 	 * @param tracker
 	 *            communication gateway to use to record activity
 	 * @param retryPeriod
-	 *            period in milliseconds between activity resubmission in case
-	 *            of failure
+	 *            period in milliseconds between activity resubmission in case of failure
 	 * @throws Exception
-	 *             indicates an error building data message or sending data to
-	 *             jKool Cloud Service
+	 *             indicates an error building data message or sending data to jKool Cloud Service
 	 */
 	public void recordActivity(Tracker tracker, long retryPeriod) throws Exception {
 		if (tracker == null) {
@@ -486,19 +527,23 @@ public class ActivityInfo {
 		resolveServer(false);
 		determineTimes();
 
+		send(tracker, retryPeriod, buildTrackable(tracker));
+	}
+
+	private Trackable buildTrackable(Tracker tracker) {
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
 
-		Trackable trackable;
-
 		if (eventType == OpType.ACTIVITY) {
-			trackable = buildActivity(tracker, eventName, trackId);
+			return buildActivity(tracker, eventName, trackId);
 		} else if (eventType == OpType.SNAPSHOT) {
-			trackable = buildSnapshot(tracker, eventName, trackId);
+			return buildSnapshot(tracker, eventName, trackId);
 		} else {
-			trackable = buildEvent(tracker, eventName, trackId);
+			return buildEvent(tracker, eventName, trackId);
 		}
+	}
 
+	private void send(Tracker tracker, long retryPeriod, Trackable trackable) throws Exception {
 		StreamsThread thread = null;
 		if (Thread.currentThread() instanceof StreamsThread) {
 			thread = (StreamsThread) Thread.currentThread();
@@ -597,15 +642,17 @@ public class ActivityInfo {
 		event.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
-				addTrackableProperty(event.getOperation(), ape.getKey(), ape.getValue());
+			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
+				event.getOperation().addProperty(ape.getValue());
 			}
 		}
 
-/*		for (Snapshot snapshot : snapshots) {
-			event.addSnapshot(snapshot);
-		}*/
-		
+		if (CollectionUtils.isNotEmpty(children)) {
+			for (ActivityInfo child : children) {
+				xxx(event.getOperation(), buildChild(tracker, child, trackId));
+			}
+		}
+
 		return event;
 	}
 
@@ -674,15 +721,37 @@ public class ActivityInfo {
 		activity.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
-				addTrackableProperty(activity, ape.getKey(), ape.getValue());
+			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
+				activity.addProperty(ape.getValue());
 			}
 		}
-		
-		for (Snapshot snapshot : snapshots) {
-			activity.addSnapshot(snapshot);
+
+		if (CollectionUtils.isNotEmpty(children)) {
+			for (ActivityInfo child : children) {
+				xxx(activity, buildChild(tracker, child, trackId));
+			}
 		}
+
 		return activity;
+	}
+
+	private static void xxx(Operation trackableOp, Trackable t) {
+		if (t instanceof Snapshot) {
+			trackableOp.addSnapshot((Snapshot) t);
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+					t == null ? null : t.getClass());
+		}
+	}
+
+	private static Trackable buildChild(Tracker tracker, ActivityInfo child, String parentId) {
+		child.parentId = parentId;
+
+		// child.resolveServer(false);
+		child.determineTimes();
+
+		return child.buildTrackable(tracker);
 	}
 
 	/**
@@ -698,8 +767,8 @@ public class ActivityInfo {
 	 * @return snapshot instance
 	 */
 	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
-		
-		PropertySnapshot snapshot = category != null ? (PropertySnapshot) tracker.newSnapshot(category, trackName) : (PropertySnapshot) tracker.newSnapshot(trackName);
+		PropertySnapshot snapshot = category != null ? (PropertySnapshot) tracker.newSnapshot(category, trackName)
+				: (PropertySnapshot) tracker.newSnapshot(trackName);
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
 		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);
@@ -747,26 +816,19 @@ public class ActivityInfo {
 		snapshot.add(JSONFormatter.JSON_PID_FIELD, processId == null ? Utils.getVMPID() : processId);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Object> ape : activityProperties.entrySet()) {
-				snapshot.add(ape.getKey(), ape.getValue());
+			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
+				snapshot.add(ape.getValue());
 			}
 		}
 
 		return snapshot;
 	}
 
-	private static void addTrackableProperty(Operation trackableOp, String key, Object value) {
-		if (trackableOp != null && value != null) {
-			trackableOp.addProperty(new Property(key, value));
-		}
-	}
-
 	/**
 	 * Resolves server name and/or IP Address based on values specified.
 	 *
 	 * @param resolveOverDNS
-	 *            flag indicating whether to use DNS to resolve server names and
-	 *            IP addresses
+	 *            flag indicating whether to use DNS to resolve server names and IP addresses
 	 */
 	private void resolveServer(boolean resolveOverDNS) {
 		if (StringUtils.isEmpty(serverName) && StringUtils.isEmpty(serverIp)) {
@@ -826,8 +888,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Computes the unspecified operation times and/or elapsed time based on the
-	 * specified ones.
+	 * Computes the unspecified operation times and/or elapsed time based on the specified ones.
 	 */
 	private void determineTimes() {
 		if (elapsedTime < 0L) {
@@ -873,8 +934,8 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Merges activity info data fields values. Values of fields are changed
-	 * only if they currently hold default (initial) value.
+	 * Merges activity info data fields values. Values of fields are changed only if they currently hold default
+	 * (initial) value.
 	 *
 	 * @param otherAi
 	 *            activity info object to merge into this one
@@ -980,10 +1041,18 @@ public class ActivityInfo {
 
 		if (otherAi.activityProperties != null) {
 			if (activityProperties == null) {
-				activityProperties = new HashMap<String, Object>();
+				activityProperties = new HashMap<String, Property>();
 			}
 
 			activityProperties.putAll(otherAi.activityProperties);
+		}
+
+		if (CollectionUtils.isNotEmpty(otherAi.children)) {
+			if (children == null) {
+				children = new ArrayList<ActivityInfo>();
+			}
+
+			children.addAll(otherAi.children);
 		}
 	}
 
@@ -1253,37 +1322,23 @@ public class ActivityInfo {
 	 * Sets activity filtering flag value.
 	 *
 	 * @param filtered
-	 *            {@code true} if activity is filtered out, {@code false}
-	 *            otherwise
+	 *            {@code true} if activity is filtered out, {@code false} otherwise
 	 */
 	public void setFiltered(boolean filtered) {
 		this.filtered = filtered;
 	}
 
 	/**
-	 * @param parentId the parentId to set
+	 * Adds child activity info data package.
+	 *
+	 * @param ai
+	 *            activity info object containing child data
 	 */
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
+	public void addChild(ActivityInfo ai) {
+		if (children == null) {
+			children = new ArrayList<ActivityInfo>();
+		}
 
-	/**
-	 * @param trackingId the trackingId to set
-	 */
-	public void setTrackingId(String trackingId) {
-		this.trackingId = trackingId;
-	}
-
-	/**
-	 * @return the snapshots
-	 */
-	public List<Snapshot> getSnapshots() {
-		return snapshots;
-	}
-	
-	public void addSnapshot(ActivityInfo ai, Tracker tracker, String trackName) {
-		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
-		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
-		snapshots.add(ai.buildSnapshot(tracker, eventName == null ? ai.getEventName() : eventName, trackId));
+		children.add(ai);
 	}
 }

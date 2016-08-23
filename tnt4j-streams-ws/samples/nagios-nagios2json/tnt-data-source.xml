@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tnt-data-source xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
 
-	<parser name="SnapshotParser"
-		class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-		<property name="ReadLines" value="false" />
+    <parser name="SnapshotParser"
+            class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <property name="ReadLines" value="false"/>
 
-		<field name="EventType" value="Snapshot" />
-		<field name="ApplName" value="Nagios" />
-		<field name="EventName" locator="service" locator-type="Label"/>
-		<field name="Status" locator="status" locator-type="Label" />
-		<field name="Message" locator="plugin_output" locator-type="Label" />
-		<field name="Category" locator="hostname" locator-type="Label" />
-		<field name="Duration" locator="duration" locator-type="Label" />
-		<field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp"
-               units="Seconds"/>
-	</parser>
+        <field name="EventType" value="Snapshot"/>
+        <field name="ApplName" value="Nagios"/>
+        <field name="EventName" locator="service" locator-type="Label"/>
+        <field name="Status" locator="status" locator-type="Label" value-type="#enum"/>
+        <field name="Message" locator="plugin_output" locator-type="Label"/>
+        <field name="Category" locator="hostname" locator-type="Label"/>
+        <field name="Duration" locator="duration" locator-type="Label" value-type="#age"/>
+        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+    </parser>
 
-	<parser name="ResponseParser"
-		class="com.jkoolcloud.tnt4j.streams.parsers.ChopingActivityJSONParser">
-		<property name="ReadLines" value="false" />
-		<property name="SplitField" value="MsgBody" />
-		
-		<field name="MsgBody" locator="$.data" locator-type="Label">
-			<parser-ref name="SnapshotParser" />
-		</field>
-		
-		<field name="EventType" value="Activity" />
-	</parser>
+    <parser name="ResponseParser"
+            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+        <property name="ReadLines" value="false"/>
+        <property name="ChildrenField" value="MsgBody"/>
 
-	<stream name="RESTfulSampleJSONStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
-		<property name="HaltIfNoParser" value="false" />
+        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true">
+            <parser-ref name="SnapshotParser"/>
+        </field>
 
-		<scenario name="Nagios2JSON stream scenario">
-			<step name="Step 1"
-				url="http://172.16.6.223/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
-				method="GET"
-				username="nagiosadmin"
-				password="slabs">
-				<schedule-cron expression="0/15 * * * * ? *" />
-			</step>
-		</scenario>
+        <field name="EventType" value="Activity"/>
+    </parser>
 
-		<parser-ref name="ResponseParser" />
-	</stream>
+    <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Nagios2JSON stream scenario">
+            <step name="Step 1"
+                  url="http://[YOUR_NAGIOS_SERVER_IP]/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
+                  method="GET"
+                  username="nagiosadmin"
+                  password="slabs">
+                <schedule-cron expression="0/15 * * * * ? *"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="ResponseParser"/>
+    </stream>
 </tnt-data-source>

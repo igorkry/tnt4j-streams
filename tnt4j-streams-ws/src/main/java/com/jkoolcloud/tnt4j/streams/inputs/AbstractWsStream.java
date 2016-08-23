@@ -35,9 +35,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
  * <p>
- * Base class for scheduled service or system command request/call produced
- * activity stream, where each call/request responce is assumed to represent a
- * single activity or event which should be recorded.
+ * Base class for scheduled service or system command request/call produced activity stream, where each call/request
+ * response is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  *
@@ -131,8 +130,7 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 * Loads scenario steps into scheduler.
 	 *
 	 * @throws Exception
-	 *             If any exception occurs while loading scenario steps to
-	 *             scheduler
+	 *             If any exception occurs while loading scenario steps to scheduler
 	 */
 	protected void loadScenarios() throws Exception {
 		boolean hasStepsDefined = false;

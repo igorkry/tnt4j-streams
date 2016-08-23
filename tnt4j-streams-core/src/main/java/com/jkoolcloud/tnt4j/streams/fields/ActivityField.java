@@ -33,13 +33,15 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public class ActivityField {
 
-	protected String fieldTypeName;
+	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String format = null;
 	private String locale = null;
 	private String separator = "";
 	private String reqValue = ""; /* string to allow no value */
+	private ActivityFieldLocator valueTypeLocator = null;
 	private Collection<ActivityParser> stackedParsers;
+	private boolean transparent = false;
 
 	/**
 	 * Constructs a new activity field entry.
@@ -108,6 +110,16 @@ public class ActivityField {
 	 */
 	public String getFieldTypeName() {
 		return fieldTypeName;
+	}
+
+	/**
+	 * Sets the type name of this activity field.
+	 *
+	 * @param fieldTypeName
+	 *            the activity field type name
+	 */
+	protected void setFieldTypeName(String fieldTypeName) {
+		this.fieldTypeName = fieldTypeName;
 	}
 
 	/**
@@ -228,7 +240,7 @@ public class ActivityField {
 	 * Sets the required flag indicates where field is required or optional.
 	 *
 	 * @param reqValue
-	 *            {@code true}/{@code false} string to use to separate raw values
+	 *            string representing flag value
 	 * @return instance of this activity field
 	 */
 	public ActivityField setRequired(String reqValue) {
@@ -302,4 +314,41 @@ public class ActivityField {
 	public Collection<ActivityParser> getStackedParsers() {
 		return stackedParsers;
 	}
+
+	/**
+	 * Gets the transparent flag indicating whether field value has to be added to activity info data package.
+	 *
+	 * @return flag indicating whether field value has to be added to activity info data package
+	 */
+	public boolean isTransparent() {
+		return transparent;
+	}
+
+	/**
+	 * Sets the transparent flag indicating whether field value has to be added to activity info data package.
+	 *
+	 * @param transparent
+	 *            flag indicating whether field value has to be added to activity info data package
+	 * @return instance of this activity field
+	 */
+	public ActivityField setTransparent(boolean transparent) {
+		this.transparent = transparent;
+
+		return this;
+	}
+
+	/**
+	 * @return the valueTypeLocator
+	 */
+	public ActivityFieldLocator getValueTypeLocator() {
+		return valueTypeLocator;
+	}
+
+	/**
+	 * @param valueTypeLocator the valueTypeLocator to set
+	 */
+	public void setValueTypeLocator(ActivityFieldLocator valueTypeLocator) {
+		this.valueTypeLocator = valueTypeLocator;
+	}
+
 }

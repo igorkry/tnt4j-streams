@@ -26,7 +26,7 @@
         <parser-ref name="TokenParser"/>
 
         <tnt4j-properties>
-            <property name="event.sink.factory.Token" value="YOUR-TOKEN"/>
+            <property name="event.sink.factory.Token" value="gqE52EU79toRcypXAVs7fTZVjbEze1sb"/>
             <property name="event.sink.factory.Filename" value="logs/tnt4j-streams-activities_custom.log"/>
             <property name="source.factory.GEOADDR" value="Marijampole"/>
             <property name="source.factory.DATACENTER" value="Kazkas"/>

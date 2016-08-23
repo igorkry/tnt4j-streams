@@ -136,30 +136,39 @@ public class WsScenarioStep {
 	}
 
 	/**
-	 * @return the username
+	 * Sets user credentials (user name and password) used to perform request if service authentication is needed.
+	 * <p>
+	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
+	 *
+	 * @param username
+	 *            user name used for authentication
+	 * @param password
+	 *            password used for authentication
+	 */
+	public void setCredentials(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+
+	/**
+	 * Returns user name used to perform request if service authentication is needed.
+	 * <p>
+	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
+	 *
+	 * @return user name used for authentication
 	 */
 	public String getUsername() {
 		return username;
 	}
 
 	/**
-	 * @param username the username to set
-	 */
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	/**
-	 * @return the password
+	 * Returns password used to perform request if service authentication is needed.
+	 * <p>
+	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
+	 * 
+	 * @return password used for authentication
 	 */
 	public String getPassword() {
 		return password;
-	}
-
-	/**
-	 * @param password the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
 	}
 }
