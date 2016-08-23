@@ -2353,7 +2353,7 @@ Note that `stream` uses `parser` reference:
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
 
-#### Generic streams parameters:
+#### Generic streams parameters
 
 ##### Stream executors related parameters:
 
@@ -2428,7 +2428,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
 
-Also see 'Generic streams parameters' and 'Buffered streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and 'Buffered streams parameters'.
 
 #### Character stream parameters:
 
