@@ -1033,7 +1033,7 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
 
-How to configure Logstash see `samples/logstash/README.MD`
+How to configure Logstash see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see better understand parsers mappings. Do not use it as Logstash input!
