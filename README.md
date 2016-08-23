@@ -255,6 +255,56 @@ sample:
     <field name="Topic" locator="TopicName" locator-type="Label"/>
 ```
 
+### Field locator types
+
+```java
+    /**
+     * Indicates that raw data value is the value of a named property of the
+     * current stream.
+     */
+    StreamProp,
+    
+    /**
+     * Indicates that raw data value is at a specified index location, offset,
+     * etc. This is a generic index/offset value whose interpretation is up to
+     * the specific parser applying the locator.
+     */
+    Index,
+    
+    /**
+     * Indicates that raw data value is the value of a particular key or label.
+     * Examples of this are XPath expressions for XML elements, and where each
+     * element of a raw activity data string is a name/value pair.
+     */
+    Label,
+    
+    /**
+     * Indicates that raw data value is the value of a specific regular
+     * expression group, for parsers that interpret the raw activity data using
+     * a regular expression pattern defined as a sequence of groups.
+     */
+    REGroupNum,
+    
+    /**
+     * Indicates that raw data value is the value of a specific regular
+     * expression match, for parsers that interpret the raw activity data using
+     * a regular expression pattern defined as a sequence of repeating match
+     * patterns.
+     */
+    REMatchNum
+```
+
+NOTE: `Index` is default value and may be suppressed in field/locator definition:
+
+this:
+```xml
+    <field name="UserName" locator="4"/>    
+```
+is same as:
+```xml
+    <field name="UserName" locator="4" locator-type="Index"/>
+```
+
 ### Stacked parsers
 
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
