@@ -4,7 +4,9 @@
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <property name="ReadLines" value="false"/>
+
+        <!--       <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/> -->
         <field name="ResourceName" separator=",">
             <field-locator locator="$.file" locator-type="Label"/>
             <field-locator locator="$.line" locator-type="Label"/>
@@ -13,7 +15,8 @@
         <field name="Method" locator="$.name" locator-type="Label"/>
 
         <field name="EventName" value="node.js Trace"/>
-        <field name="EventType" value="EVENT"/>
+        <field name="EventType" locator="$.method" locator-type="Label"/>
+        <field name="Correlator" locator="$.stack[*]" locator-type="Label" separator=","/>
 
         <field name="Exception" locator="$.exception" locator-type="Label"/>
 
