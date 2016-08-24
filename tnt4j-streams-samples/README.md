@@ -25,9 +25,11 @@ Sample files can be found in `com.jkoolcloud.tnt4j.streams.sample.builder` packa
 Application parameters:
  * path to `orders.log` file. If absent, then `orders.log` file must be in working directory.
 
-### Running
+Running application:
+ * build module and use `run.bat`/`run.sh` from `samples/stream-builder` directory.
 
- * use `run.bat`/`run.sh` from `samples/stream-builder` directory.
+or
+
  * set this IDE `run configuration`:
     * Main class: `com.jkoolcloud.tnt4j.streams.sample.builder.SampleStreamingApp`
     * VM Options: `-Dtnt4j.config=".\config\tnt4j.properties" -Dlog4j.configuration="file:.\config\log4j.properties"`
