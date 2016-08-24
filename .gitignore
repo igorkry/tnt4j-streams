@@ -22,8 +22,3 @@ hs_err_pid*
 /**/temp
 
 /**/*.iml
-
-/config/log4j__.xml__
-/tnt4j-streams-core/samples/apache-access-single-log/regexp.txt
-/tnt4j-streams-core/samples/apache-access-single-log/error.log
-/tnt4j-streams-core/samples/apache-access-single-log/nastel-apache.log
