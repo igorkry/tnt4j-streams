@@ -2294,8 +2294,8 @@ Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if ha
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
 
-For more information on TNT4J and `tnt4j.properties` see (https://github.com/Nastel/TNT4J/wiki/Getting-Started).
-Details on JESL related configuration can be found at (https://github.com/Nastel/JESL/blob/master/README.md).
+For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started).
+Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/blob/master/README.md).
 
 ## Streams configuration
 
