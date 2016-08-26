@@ -1768,15 +1768,17 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
         <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
         <field name="ResourceName" locator="$.url" locator-type="Label"/>
         <field name="Correlator" locator="$.sid" locator-type="Label"/>
         <field name="Correlator" locator="$.rid" locator-type="Label"/>
         <field name="EventName" locator="$.eventName" locator-type="Label"/>
         <field name="EventType" value="EVENT"/>
-        <field name="ElapsedTime" locator="$.pageLoad" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="browser" locator="$.browser" locator-type="Label"/>
-        <field name="eventProperties" locator="$.properties" locator-type="Label"/>
+        <field name="ElapsedTime" locator="$.pageLoad" locator-type="Label" datatype="Number" format="#####0"/>
+        <field name="Browser" locator="$.browser" locator-type="Label"/>
+        <field name="EventProperties" locator="$.properties" locator-type="Label"/>
     </parser>
 
     <parser name="AngularticsReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
