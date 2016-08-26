@@ -5,15 +5,14 @@
 
     <parser name="SnapshotParser"
             class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="Snapshot"/>
         <field name="ApplName" value="Nagios"/>
         <field name="EventName" locator="service" locator-type="Label"/>
-        <field name="Status" locator="status" locator-type="Label" value-type="#enum"/>
+        <field name="Status" locator="status" locator-type="Label" value-type="enum"/>
         <field name="Message" locator="plugin_output" locator-type="Label"/>
         <field name="Category" locator="hostname" locator-type="Label"/>
-        <field name="Duration" locator="duration" locator-type="Label" value-type="#age"/>
+        <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
         <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
@@ -36,8 +35,8 @@
             <step name="Step 1"
                   url="http://[YOUR_NAGIOS_SERVER_IP]/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
                   method="GET"
-                  username="nagiosadmin"
-                  password="slabs">
+                  username="myNagiosUserName"
+                  password="myNagiosUserSecretPassword">
                 <schedule-cron expression="0/15 * * * * ? *"/>
             </step>
         </scenario>

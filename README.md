@@ -2238,6 +2238,93 @@ identifies column and number identifies row).
 Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
+#### Collectd performance metrics streaming
+
+TODO
+
+#### Nagios reports streaming
+
+This sample shows how to stream Nagios monitoring reports data as activity events.
+
+Sample files can be found in `samples/nagios-nagios2json` directory (`tnt4j-streams-ws` module).
+
+NOTE: to use this sample Nagios should be running extension `nagios2json`. See [Sample README](tnt4j-streams-ws/samples/nagios-nagios2json/readme.md)
+for details. `nagios2json` extension works as `CGI` script, but can be handled as simple RESTful service.
+
+Sample report data is available in `report.json` file. 
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+
+    <parser name="SnapshotParser"
+            class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        
+        <field name="EventType" value="Snapshot"/>
+        <field name="ApplName" value="Nagios"/>
+        <field name="EventName" locator="service" locator-type="Label"/>
+        <field name="Status" locator="status" locator-type="Label" value-type="enum"/>
+        <field name="Message" locator="plugin_output" locator-type="Label"/>
+        <field name="Category" locator="hostname" locator-type="Label"/>
+        <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
+        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+    </parser>
+
+    <parser name="ResponseParser"
+            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+        <property name="ReadLines" value="false"/>
+        <property name="ChildrenField" value="MsgBody"/>
+
+        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true">
+            <parser-ref name="SnapshotParser"/>
+        </field>
+
+        <field name="EventType" value="Activity"/>
+    </parser>
+
+    <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Nagios2JSON stream scenario">
+            <step name="Step 1"
+                  url="http://[YOUR_NAGIOS_SERVER_IP]/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
+                  method="GET"
+                  username="myNagiosUserName"
+                  password="myNagiosUserSecretPassword">
+                <schedule-cron expression="0/15 * * * * ? *"/>
+            </step>
+        </scenario>
+
+        <parser-ref name="ResponseParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `RestStream` referencing `ResponseParser` shall be used. Stream takes response
+received JSON string and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+Streaming scenario step defines:
+ * Nagios service request URL and `nagios2json` parameters (i.e. `servicestatustypes=31`) 
+ * request method `GET` to comply `cgi`.
+ * Nagios service user credentials - user name and password
+ * Scheduler is set to `Cron` expression `every 15 seconds`.
+ 
+You may also add additional steps to retrieve different reports defining different `nagios2json` parameters.
+ 
+Nagios sends report as activity wrapping multiple metrics (snapshots).  
+
+`ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
+state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser because parent JSON parser already made map 
+data structures from RAW Nagios report JSON data).
+
+`SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
+`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.    
+
 #### Integrating TNT4J-Streams into custom API
 
 See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` module.
