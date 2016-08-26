@@ -2318,9 +2318,9 @@ You may also add additional steps to retrieve different reports defining differe
  
 Nagios sends report as activity wrapping multiple metrics (snapshots).  
 
-`ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
-state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser because parent JSON parser already made map 
-data structures from RAW Nagios report JSON data).
+`ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (property `ChildrenField` 
+referencing field `MsgBody`) carrying system state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser 
+because parent JSON parser already made map data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.    
