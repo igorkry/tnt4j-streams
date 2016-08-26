@@ -933,7 +933,7 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="true"/>
+        <!--<property name="ReadLines" value="false"/>-->
 
         <field name="MsgBody" locator="$.body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -985,7 +985,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="FlumeJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="true"/>
+        <!--<property name="ReadLines" value="false"/>-->
 
         <field name="Location" locator="$.headers.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.headers.auth" locator-type="Label"/>
@@ -1068,7 +1068,7 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="true"/>
+        <!--<property name="ReadLines" value="false"/>-->
 
         <field name="MsgBody" locator="$.message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -1121,7 +1121,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="true"/>
+        <!--<property name="ReadLines" value="false"/>-->
 
         <field name="Location" locator="$.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.auth" locator-type="Label"/>

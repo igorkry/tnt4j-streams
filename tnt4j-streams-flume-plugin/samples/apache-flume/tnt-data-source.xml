@@ -23,7 +23,7 @@
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="true"/>
+        <!--<property name="ReadLines" value="false"/>-->
 
         <field name="MsgBody" locator="$.body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
