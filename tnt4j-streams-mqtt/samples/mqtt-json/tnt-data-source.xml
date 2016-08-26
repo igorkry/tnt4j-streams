@@ -4,6 +4,8 @@
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <!--<property name="ReadLines" value="false"/>-->
+
         <field name="Temperature" locator="$.temperature" locator-type="Label"/>
         <field name="Room" locator="$.room" locator-type="Label"/>
     </parser>
