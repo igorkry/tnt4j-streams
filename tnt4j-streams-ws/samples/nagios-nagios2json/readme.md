@@ -1,6 +1,6 @@
 ## Nagios setup (Linux)
 
-Download plugin: https://github.com/macskas/nagios2json
+Download `nagios2json` [plugin](https://github.com/macskas/nagios2json).
 
 Build and install as described in documentation:
 

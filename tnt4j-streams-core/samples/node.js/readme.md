@@ -31,5 +31,5 @@ of data otherwise.
 
 In this example instrumentation happens on http-server. 
 Put everything you want to instrument in formatter argument;
-For more information read the `njstrace` documentation: (https://github.com/ValYouW/njsTrace)
+For more information read the `njstrace` [documentation](https://github.com/ValYouW/njsTrace).
 

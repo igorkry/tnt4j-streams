@@ -31,7 +31,7 @@ Angulartics - analytics for AngularJS applications.
 * NodeJS
 * Bower
 
-If you don't have these, you can simply fallow instructions on (https://docs.angularjs.org/tutorial#get-started)
+If you don't have these, you can simply fallow instructions on [AngularJS Tutorial](https://docs.angularjs.org/tutorial#get-started)
 	
 ## Step 1
 	
@@ -88,14 +88,13 @@ Allow CORS access:
 
 * Allow CORS in browser:
 
-    I.E. in Chrome add plugin (https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
+    i.e. in Chrome add [plugin](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
 	
 ## Step 9
 	
 Run included web-server 'npm start' and access `http://localhost:8000/app/`
 	
 Now all angular Routed pages are tracked.
-	
 	
 ## Step 10
 
