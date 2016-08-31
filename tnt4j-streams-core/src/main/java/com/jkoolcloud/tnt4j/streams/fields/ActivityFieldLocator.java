@@ -59,6 +59,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private String timeZone = null;
 	private Object cfgValue = null;
 	private String requiredVal = "";
+	private String id = null;
 
 	private ActivityFieldLocatorType builtInType = null;
 	private ActivityFieldFormatType builtInFormat = null;
@@ -347,6 +348,25 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
+	 * Gets field locator identifier.
+	 *
+	 * @return field locator identifier
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * Sets field locator identifier.
+	 *
+	 * @param id
+	 *            field locator identifier
+	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	/**
 	 * Adds a mapping to translate a raw data value to the corresponding converted data value.
 	 *
 	 * @param source
@@ -560,6 +580,7 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.cfgValue = cfgValue;
 			cafl.requiredVal = requiredVal;
 			cafl.timeZone = timeZone;
+			cafl.id = id;
 
 			cafl.builtInType = builtInType;
 			cafl.builtInFormat = builtInFormat;

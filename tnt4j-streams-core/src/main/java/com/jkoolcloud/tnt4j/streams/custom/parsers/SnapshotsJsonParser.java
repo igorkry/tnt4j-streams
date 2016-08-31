@@ -18,33 +18,32 @@ package com.jkoolcloud.tnt4j.streams.custom.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Implements an activity data parser that assumes each activity data item is an JSON format string. JSON parsing is
- * performed using {@link JsonPath} API. Activity fields locator values are treated as JsonPath expressions. See
- * <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more details.
- * <p>
- * This parser supports the following properties:
+ * Extends {@link ActivityJsonParser} to parse JSON data packages containing parent
+ * {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity}/{@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} and array of
+ * child {@link com.jkoolcloud.tnt4j.core.Snapshot} entities. Primary use of this parser is to parse performance metrics
+ * packages collected by system performance monitors like collectd or Nagios. If 'ChildrenField' property is not
+ * defined, acts like ordinary {@link ActivityJsonParser}. This parser supports the following properties:
  * <ul>
- * <li>ChildrenField - field name referencing JSON indicates that complete JSON data package is single line. (Optional)
- * </li>
+ * <li>ChildrenField - field name referencing JSON data structure containing child snapshot definitions. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -89,7 +88,7 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 			}
 
 			if (snapshotsField != null) {
-				fieldList.remove(snapshotsField);
+				removeField(snapshotsField);
 			}
 		}
 
@@ -106,28 +105,39 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 		ActivityInfo ai = super.parsePreparedItem(stream, dataStr, data);
 
 		if (snapshotsField != null) {
-			List<ActivityFieldLocator> locations = snapshotsField.getLocators();
-			Object value = null;
-			if (locations.size() == 1) {
-				value = getLocatorValue(stream, locations.get(0), data);
-			}
+			Object fValue = wrapValue(resolveLocatorValues(snapshotsField, stream, data));
 
-			if (!(value instanceof Object[])) {
-				throw new ParseException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"SnapshotsJsonParser.illegal.parsed.value", value == null ? value : value.getClass()),
-						0);
-			}
+			if (fValue == null) {
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"SnapshotsJsonParser.no.snapshots"), getName(), snapshotsFieldName);
+			} else {
+				Object[] snapshotsData = Utils.makeArray(fValue);
 
-			Object[] values = (Object[]) value;
-			for (Object resolvedValue : values) {
-				for (ActivityParser parser : snapshotsField.getStackedParsers()) {
-					ActivityInfo parsedItem = parser.parse(stream, resolvedValue);
-					ai.addChild(parsedItem);
+				for (Object snapshotData : snapshotsData) {
+					ActivityInfo parsedItem = applySnapshotParsers(stream, snapshotData);
+					if (parsedItem == null) {
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"SnapshotsJsonParser.no.snapshot.parser"), snapshotData);
+					} else {
+						ai.addChild(parsedItem);
+					}
 				}
 			}
 		}
 
 		return ai;
+	}
+
+	private ActivityInfo applySnapshotParsers(TNTInputStream<?, ?> stream, Object resolvedValue) throws ParseException {
+		if (CollectionUtils.isNotEmpty(snapshotsField.getStackedParsers())) {
+			for (ActivityParser parser : snapshotsField.getStackedParsers()) {
+				ActivityInfo parsedItem = parser.parse(stream, resolvedValue);
+				if (parsedItem != null) {
+					return parsedItem;
+				}
+			}
+		}
+
+		return null;
 	}
 }

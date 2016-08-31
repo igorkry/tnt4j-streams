@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.sample.custom;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,17 +45,16 @@ public final class SampleIntegration {
 		try {
 			StreamsConfigLoader cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader()
 					: new StreamsConfigLoader(cfgFileName);
-			Map<String, TNTInputStream<?, ?>> streamsMap = (Map<String, TNTInputStream<?, ?>>) cfg.getStreams();
-			if (streamsMap == null || streamsMap.isEmpty()) {
+			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
+			if (streams == null || streams.isEmpty()) {
 				throw new IllegalStateException("No Activity Streams found in configuration");
 			}
 
 			ThreadGroup streamThreads = new ThreadGroup("Streams");
 			StreamThread ft;
-			for (Entry<String, TNTInputStream<?, ?>> streamEntry : streamsMap.entrySet()) {
-				String streamName = streamEntry.getKey();
-				TNTInputStream<?, ?> stream = streamEntry.getValue();
-				ft = new StreamThread(streamThreads, stream, streamName);
+			for (TNTInputStream<?, ?> stream : streams) {
+				ft = new StreamThread(streamThreads, stream,
+						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName()));
 				ft.start();
 			}
 		} catch (Exception e) {

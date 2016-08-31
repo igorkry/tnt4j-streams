@@ -16,14 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Represents a specific activity field, containing the necessary information on how to extract its value from the raw
@@ -33,15 +33,23 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public class ActivityField {
 
+	/**
+	 * Activity field attribute dynamic value variable definition start token.
+	 */
+	public static final String FIELD_DYNAMIC_ATTR_START_TOKEN = "${"; // NON-NLS
+	private static final String FIELD_DYNAMIC_ATTR_END_TOKEN = "}"; // NON-NLS
+
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String format = null;
 	private String locale = null;
 	private String separator = "";
 	private String reqValue = ""; /* string to allow no value */
-	private ActivityFieldLocator valueTypeLocator = null;
 	private Collection<ActivityParser> stackedParsers;
 	private boolean transparent = false;
+	private boolean splitCollection = false;
+	private String valueType = null;
+	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
 
 	/**
 	 * Constructs a new activity field entry.
@@ -49,7 +57,7 @@ public class ActivityField {
 	 * @param fieldTypeName
 	 *            name of activity field type
 	 * @throws IllegalArgumentException
-	 *             if field name is {@code null} or empty
+	 *             if field type name is {@code null} or empty
 	 */
 	public ActivityField(String fieldTypeName) {
 		if (StringUtils.isEmpty(fieldTypeName)) {
@@ -95,8 +103,7 @@ public class ActivityField {
 	 */
 	public StreamFieldType getFieldType() {
 		try {
-			StreamFieldType sft = StreamFieldType._valueOfIgnoreCase(fieldTypeName);
-			return sft;
+			return StreamFieldType._valueOfIgnoreCase(fieldTypeName);
 		} catch (IllegalArgumentException exc) {
 		}
 
@@ -118,7 +125,7 @@ public class ActivityField {
 	 * @param fieldTypeName
 	 *            the activity field type name
 	 */
-	protected void setFieldTypeName(String fieldTypeName) {
+	public void setFieldTypeName(String fieldTypeName) {
 		this.fieldTypeName = fieldTypeName;
 	}
 
@@ -139,12 +146,40 @@ public class ActivityField {
 	 * @return instance of this activity field
 	 */
 	public ActivityField addLocator(ActivityFieldLocator locator) {
+		if (locator != null) {
+			boolean dynamic = false;
+			if (StringUtils.isNotEmpty(locator.getId())) {
+				String did = FIELD_DYNAMIC_ATTR_START_TOKEN + locator.getId() + FIELD_DYNAMIC_ATTR_END_TOKEN;
+
+				if (fieldTypeName.contains(did) || (valueType != null && valueType.contains(did))) {
+					addDynamicLocator(did, locator);
+					dynamic = true;
+				}
+			}
+
+			if (!dynamic) {
+				addStaticLocator(locator);
+			}
+		}
+
+		return this;
+	}
+
+	private void addDynamicLocator(String id, ActivityFieldLocator locator) {
+		if (dynamicAttrLocators == null) {
+			dynamicAttrLocators = new HashMap<String, ActivityFieldLocator>();
+		}
+
+		dynamicAttrLocators.put(id, locator);
+		transparent = true;
+	}
+
+	private void addStaticLocator(ActivityFieldLocator locator) {
 		if (locators == null) {
 			locators = new ArrayList<ActivityFieldLocator>();
 		}
-		locators.add(locator);
 
-		return this;
+		locators.add(locator);
 	}
 
 	/**
@@ -250,6 +285,28 @@ public class ActivityField {
 	}
 
 	/**
+	 * Gets field value type.
+	 * 
+	 * @return string representing field value type
+	 */
+	public String getValueType() {
+		return valueType;
+	}
+
+	/**
+	 * Sets field value type.
+	 *
+	 * @param valueType
+	 *            string representing field value type
+	 * @return instance of this activity field
+	 */
+	public ActivityField setValueType(String valueType) {
+		this.valueType = valueType;
+
+		return this;
+	}
+
+	/**
 	 * Indicates whether some other object is "equal to" this field.
 	 *
 	 * @param obj
@@ -297,11 +354,13 @@ public class ActivityField {
 	 * @return instance of this activity field
 	 */
 	public ActivityField addStackedParser(ActivityParser parser) {
-		if (stackedParsers == null) {
-			stackedParsers = new ArrayList<ActivityParser>();
-		}
+		if (parser != null) {
+			if (stackedParsers == null) {
+				stackedParsers = new ArrayList<ActivityParser>();
+			}
 
-		stackedParsers.add(parser);
+			stackedParsers.add(parser);
+		}
 
 		return this;
 	}
@@ -338,17 +397,113 @@ public class ActivityField {
 	}
 
 	/**
-	 * @return the valueTypeLocator
+	 * Gets the splitCollection flag indicating whether resolved field value collection (list/array) has to be split
+	 * into separate fields of activity info data package.
+	 * 
+	 * @return flag indicating whether resolved field value collection (list/array) has to be split into separate fields
+	 *         of activity info data package
 	 */
-	public ActivityFieldLocator getValueTypeLocator() {
-		return valueTypeLocator;
+	public boolean isSplitCollection() {
+		return splitCollection;
 	}
 
 	/**
-	 * @param valueTypeLocator the valueTypeLocator to set
+	 * Sets the splitCollection flag indicating whether resolved field value collection (list/array) has to be split
+	 * into separate fields of activity info data package.
+	 *
+	 * @param splitCollection
+	 *            flag indicating whether resolved field value collection (list/array) has to be split into separate
+	 *            fields of activity info data package
+	 * @return instance of this activity field
 	 */
-	public void setValueTypeLocator(ActivityFieldLocator valueTypeLocator) {
-		this.valueTypeLocator = valueTypeLocator;
+	public ActivityField setSplitCollection(boolean splitCollection) {
+		this.splitCollection = splitCollection;
+
+		return this;
 	}
 
+	/**
+	 * Gets activity field dynamic attribute values locators map.
+	 *
+	 * @return the dynamic attribute values locators map
+	 */
+	public Map<String, ActivityFieldLocator> getDynamicLocators() {
+		return dynamicAttrLocators;
+	}
+
+	/**
+	 * Checks if field has any dynamic locators defined.
+	 *
+	 * @return {@code true} if field has any dynamic locators defined, {@code false} - otherwise
+	 */
+	public boolean isDynamic() {
+		return MapUtils.isNotEmpty(dynamicAttrLocators);
+	}
+
+	/**
+	 * Checks if field attributes {@link #fieldTypeName} and {@link #valueType} values contains variable expressions.
+	 *
+	 * @return {@code true} if field attribute values contains variable expressions, {@code false} - otherwise
+	 */
+	public boolean hasDynamicAttrs() {
+		return hasDynamicAttrs(fieldTypeName, valueType);
+	}
+
+	/**
+	 * Checks if any of attribute values from set contains variable expression.
+	 * 
+	 * @param attrValues
+	 *            set of attribute values to check
+	 * @return {@code true} if value of any attribute from set contains variable expressions, {@code false} - otherwise
+	 */
+	public static boolean hasDynamicAttrs(String... attrValues) {
+		if (attrValues != null) {
+			for (String attrValue : attrValues) {
+				if (attrValue != null && attrValue.contains(FIELD_DYNAMIC_ATTR_START_TOKEN)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Creates temporary field taking this field as template and filling dynamic attributes values with ones from
+	 * dynamic locators resolved values map.
+	 *
+	 * @param dValues
+	 *            dynamic locators resolved values map
+	 * @param valueIndex
+	 *            index of value in collection
+	 * @return temporary field instance
+	 */
+	public ActivityField createTempField(Map<String, Object> dValues, int valueIndex) {
+		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
+		tField.locators = locators;
+		tField.format = format;
+		tField.locale = locale;
+		tField.separator = separator;
+		tField.reqValue = reqValue;
+		tField.stackedParsers = stackedParsers;
+		tField.valueType = fillDynamicAttr(valueType, dValues, valueIndex);
+
+		return tField;
+	}
+
+	private static String fillDynamicAttr(String dAttr, Map<String, Object> dValMap, int valueIndex) {
+		String tAttr = dAttr;
+
+		if (StringUtils.isNotEmpty(dAttr) && dAttr.contains(FIELD_DYNAMIC_ATTR_START_TOKEN)
+				&& MapUtils.isNotEmpty(dValMap)) {
+			List<String> vars = new ArrayList<String>();
+			Utils.resolveVariables(vars, dAttr);
+
+			for (String var : vars) {
+				tAttr = tAttr.replace(var, String.valueOf(Utils.getItem(dValMap.get(var), valueIndex)));
+			}
+		}
+
+		return tAttr;
+	}
 }

@@ -169,7 +169,7 @@ public class ActivityJsonParserTest extends PropertiesTestBase {
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[]}";
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
-		List<Object> testData = new ArrayList<Object>(Arrays.asList());
+		List<Object> testData = new ArrayList<Object>();
 		testData.equals(parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 

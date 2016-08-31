@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -27,7 +28,10 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
-import com.jkoolcloud.tnt4j.streams.fields.*;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldMappingType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -136,11 +140,11 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String NAME_LOCATOR_ATTR = "name-locator"; // NON-NLS
+	private static final String VALUE_TYPE_ATTR = "value-type"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String VALUE_TYPE_ATTR = "value-type"; // NON-NLS
+	private static final String SPLIT_ATTR = "split"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
@@ -185,16 +189,18 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TAGS_ATTR = "tags"; // NON-NLS
-
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String REQUIRED_ATTR = "required"; // NON-NLS
-
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String TRANSPARENT_ATTR = "transparent"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String ID_ATTR = "id"; // NON-NLS
 
 	/**
 	 * Currently configured TNT input stream.
@@ -391,7 +397,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		ActivityFieldDataType dataType = null;
 		String locatorType = null;
 		String locator = null;
-		String nameLocator = null;
 		String valueType = null;
 		String separator = null;
 		String units = null;
@@ -402,6 +407,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		int radix = 10;
 		String reqVal = "";
 		boolean transparent = false;
+		boolean split = false;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -413,8 +419,6 @@ public class ConfigParserHandler extends DefaultHandler {
 				locatorType = attValue;
 			} else if (LOCATOR_ATTR.equals(attName)) {
 				locator = attValue;
-			} else if (NAME_LOCATOR_ATTR.equals(attName)) {
-				nameLocator = attValue;
 			} else if (VALUE_TYPE_ATTR.equals(attName)) {
 				valueType = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
@@ -435,13 +439,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				reqVal = attValue;
 			} else if (TRANSPARENT_ATTR.equals(attName)) {
 				transparent = Boolean.parseBoolean(attValue);
+			} else if (SPLIT_ATTR.equals(attName)) {
+				split = Boolean.parseBoolean(attValue);
 			}
-		}
-		if (locator != null && locator.isEmpty()) {
-			locator = null;
-		}
-		if (value != null && value.isEmpty()) {
-			value = null;
 		}
 		// make sure required fields are present
 		if (StringUtils.isEmpty(field)) {
@@ -449,23 +449,8 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.missing.attribute", FIELD_ELMT, NAME_ATTR), currParseLocation);
 		}
 
-		ActivityField af;
 		ActivityFieldLocator afl;
-
-		if (StringUtils.isNotEmpty(nameLocator)) {
-			DynamicActivityField daf = new DynamicActivityField(field);
-			String[] nameLocators = nameLocator.split(","); // NON-NLS
-			for (String nLocator : nameLocators) {
-				afl = new ActivityFieldLocator(ActivityFieldLocatorType.Label,
-						StringUtils.isEmpty(nLocator) ? "default" : nLocator); // NON-NLS
-				daf.addNameLocator(afl);
-			}
-			transparent = true;
-			af = daf;
-
-		} else {
-			af = new ActivityField(field);
-		}
+		ActivityField af = new ActivityField(field);
 
 		if (value != null) {
 			currFieldHasLocValAttr = true;
@@ -475,63 +460,56 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (dataType != null) {
 				afl.setDataType(dataType);
 			}
-			if (units != null) {
+			if (StringUtils.isNotEmpty(units)) {
 				afl.setUnits(units);
 			}
-			if (format != null) {
+			if (StringUtils.isNotEmpty(format)) {
 				afl.setFormat(format, locale);
 			}
-			if (timeZone != null) {
+			if (StringUtils.isNotEmpty(timeZone)) {
 				afl.setTimeZone(timeZone);
 			}
 			af.addLocator(afl);
-		} else if (locator != null) {
+		} else if (StringUtils.isNotEmpty(locator)) {
 			currFieldHasLocValAttr = true;
 			String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM))
 					: new String[] { locator };
 			for (String loc : locators) {
-				if (StringUtils.isEmpty(loc)) {
-					af.addLocator(null);
-				} else {
+				if (StringUtils.isNotEmpty(loc)) {
 					afl = new ActivityFieldLocator(locatorType, loc);
 					afl.setRadix(radix);
 					afl.setRequired(reqVal);
 					if (dataType != null) {
 						afl.setDataType(dataType);
 					}
-					if (units != null) {
+					if (StringUtils.isNotEmpty(units)) {
 						afl.setUnits(units);
 					}
-					if (format != null) {
+					if (StringUtils.isNotEmpty(format)) {
 						afl.setFormat(format, locale);
 					}
-					if (timeZone != null) {
+					if (StringUtils.isNotEmpty(timeZone)) {
 						afl.setTimeZone(timeZone);
 					}
 					af.addLocator(afl);
 				}
 			}
 		}
-		if (format != null) {
+		if (StringUtils.isNotEmpty(format)) {
 			af.setFormat(format);
 		}
-		if (locale != null) {
+		if (StringUtils.isNotEmpty(locale)) {
 			af.setLocale(locale);
 		}
-		if (separator != null) {
+		if (StringUtils.isNotEmpty(separator)) {
 			af.setSeparator(separator);
 		}
-		ActivityFieldLocator vtLocator;
-		if (valueType != null) {
-			if (valueType.startsWith("#")) {
-				vtLocator = new ActivityFieldLocator(valueType.substring(1));
-			} else {
-				vtLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, valueType);
-			}
-			af.setValueTypeLocator(vtLocator);
+		if (StringUtils.isNotEmpty(valueType)) {
+			af.setValueType(valueType);
 		}
 		af.setRequired(reqVal);
 		af.setTransparent(transparent);
+		af.setSplitCollection(split);
 		currField = af;
 	}
 
@@ -555,7 +533,7 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration2", FIELD_LOC_ELMT, FIELD_ELMT),
 					currParseLocation);
 		}
-		if (currFieldHasLocValAttr) {
+		if (!currField.hasDynamicAttrs() && currFieldHasLocValAttr) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.has.both", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
 					getLocationInfo()));
@@ -594,6 +572,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFieldLocator.value = attValue;
 			} else if (REQUIRED_ATTR.equals(attName)) {
 				currFieldLocator.reqVal = attValue;
+			} else if (ID_ATTR.equals(attName)) {
+				currFieldLocator.id = attValue;
 			}
 		}
 
@@ -1070,11 +1050,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				currParser = null;
 				currProperties = null;
 			} else if (FIELD_ELMT.equals(qName)) {
-				if (CollectionUtils.isEmpty(currField.getLocators())) {
-					throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.element.must.have", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR,
-							FIELD_LOC_ELMT, getLocationInfo()));
-				}
+				validateActivityField(currField);
 				currParser.addField(currField);
 				currField = null;
 				currFieldHasLocValAttr = false;
@@ -1185,6 +1161,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				: new ActivityFieldLocator(currFieldLocator.locatorType, currFieldLocator.locator);
 		afl.setRadix(currFieldLocator.radix);
 		afl.setRequired(currFieldLocator.reqVal);
+		afl.setId(currFieldLocator.id);
 		if (currFieldLocator.format != null) {
 			afl.setFormat(currFieldLocator.format, currFieldLocator.locale);
 		}
@@ -1216,6 +1193,27 @@ public class ConfigParserHandler extends DefaultHandler {
 		return locInfo;
 	}
 
+	private void validateActivityField(ActivityField aField) throws SAXException {
+		if (CollectionUtils.isEmpty(aField.getLocators())) {
+			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.element.must.have", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
+					getLocationInfo()));
+		}
+
+		List<String> dAttrs = new ArrayList<String>();
+		Utils.resolveVariables(dAttrs, aField.getFieldTypeName(), aField.getValueType());
+
+		for (String fAttr : dAttrs) {
+			if (StringUtils.isNotEmpty(fAttr) && fAttr.contains(ActivityField.FIELD_DYNAMIC_ATTR_START_TOKEN)) {
+				if (MapUtils.isEmpty(aField.getDynamicLocators()) || !aField.getDynamicLocators().containsKey(fAttr)) {
+					throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.element.ref.missing", FIELD_ELMT, FIELD_LOC_ELMT, fAttr,
+							getLocationInfo()));
+				}
+			}
+		}
+	}
+
 	private static class Property {
 		private String name;
 		private String value;
@@ -1241,6 +1239,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String value;
 		int radix;
 		String reqVal;
+		String id;
 
 		private FieldLocator() {
 			reset();
@@ -1257,6 +1256,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			value = null;
 			radix = 10;
 			reqVal = ""; /* string to allow override */
+			id = null;
 		}
 	}
 

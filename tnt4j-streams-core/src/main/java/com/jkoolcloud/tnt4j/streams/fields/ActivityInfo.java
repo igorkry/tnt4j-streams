@@ -147,6 +147,9 @@ public class ActivityInfo {
 				value = values[0];
 			}
 		}
+		if (value instanceof Collection) {
+			value = ((Collection<?>) value).toArray();
+		}
 
 		Object fieldValue;
 		List<ActivityFieldLocator> locators = field.getLocators();
@@ -649,7 +652,7 @@ public class ActivityInfo {
 
 		if (CollectionUtils.isNotEmpty(children)) {
 			for (ActivityInfo child : children) {
-				xxx(event.getOperation(), buildChild(tracker, child, trackId));
+				addTrackableChild(event.getOperation(), buildChild(tracker, child, trackId));
 			}
 		}
 
@@ -728,14 +731,14 @@ public class ActivityInfo {
 
 		if (CollectionUtils.isNotEmpty(children)) {
 			for (ActivityInfo child : children) {
-				xxx(activity, buildChild(tracker, child, trackId));
+				addTrackableChild(activity, buildChild(tracker, child, trackId));
 			}
 		}
 
 		return activity;
 	}
 
-	private static void xxx(Operation trackableOp, Trackable t) {
+	private static void addTrackableChild(Operation trackableOp, Trackable t) {
 		if (t instanceof Snapshot) {
 			trackableOp.addSnapshot((Snapshot) t);
 		} else {

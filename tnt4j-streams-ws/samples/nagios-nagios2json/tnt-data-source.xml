@@ -13,7 +13,7 @@
         <field name="Message" locator="plugin_output" locator-type="Label"/>
         <field name="Category" locator="hostname" locator-type="Label"/>
         <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
-        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="SnapshotTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="ResponseParser"
@@ -26,6 +26,8 @@
         </field>
 
         <field name="EventType" value="Activity"/>
+        <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="ApplName" value="nagios2json"/>
     </parser>
 
     <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
@@ -43,4 +45,12 @@
 
         <parser-ref name="ResponseParser"/>
     </stream>
+
+    <!-- TO STREAM FROM SAMPLE REPORT JSON FILE-->
+    <!--<stream name="NagiosFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value=".\tnt4j-streams-ws\samples\nagios-nagios2json\report.json"/>-->
+    <!--&lt;!&ndash;<property name="Port" value="9595"/>&ndash;&gt;-->
+
+    <!--<parser-ref name="ResponseParser"/>-->
+    <!--</stream>-->
 </tnt-data-source>

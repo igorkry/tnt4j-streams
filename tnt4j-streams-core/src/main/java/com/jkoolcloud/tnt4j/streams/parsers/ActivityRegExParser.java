@@ -35,15 +35,13 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Implements an activity data parser that assumes each activity data item is a
- * string of fields as defined by the specified regular expression, with the
- * value for each field being retrieved from either of the 1-based group
+ * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
+ * specified regular expression, with the value for each field being retrieved from either of the 1-based group
  * position, or match position.
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>Pattern - contains the regular expression pattern that each data item is
- * assumed to match. (Required)</li>
+ * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -52,20 +50,20 @@ public class ActivityRegExParser extends ActivityParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
 
 	/**
-	 * Contains the regular expression pattern that each data item is assumed to
-	 * match (set by {@code Pattern} property).
+	 * Contains the regular expression pattern that each data item is assumed to match (set by {@code Pattern}
+	 * property).
 	 */
 	protected Pattern pattern = null;
 
 	/**
-	 * Defines the mapping of activity fields to the regular expression group
-	 * location(s) in the raw data from which to extract its value.
+	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data from which to
+	 * extract its value.
 	 */
 	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
 	/**
-	 * Defines the mapping of activity fields to the regular expression match
-	 * sequence(s) in the raw data from which to extract its value.
+	 * Defines the mapping of activity fields to the regular expression match sequence(s) in the raw data from which to
+	 * extract its value.
 	 */
 	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
 
@@ -139,8 +137,7 @@ public class ActivityRegExParser extends ActivityParser {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>

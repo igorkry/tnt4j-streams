@@ -79,11 +79,11 @@ public class ZipLineStreamTest extends PropertiesTestBase {
 		zs.setProperties(getPropertyList().add(StreamProperties.PROP_FILENAME, zipFile.getAbsolutePath())
 				.add(StreamProperties.PROP_ARCH_TYPE, "ZIP").build());
 		zs.initialize();
-		assertEquals("TEST0", zs.getNextItem().toString());
-		assertEquals("TEST1", zs.getNextItem().toString());
-		assertEquals("TEST2", zs.getNextItem().toString());
-		assertEquals("TEST3", zs.getNextItem().toString());
-		assertEquals("TEST4", zs.getNextItem().toString());
+		assertEquals("TEST0", zs.getNextItem());
+		assertEquals("TEST1", zs.getNextItem());
+		assertEquals("TEST2", zs.getNextItem());
+		assertEquals("TEST3", zs.getNextItem());
+		assertEquals("TEST4", zs.getNextItem());
 		zs.cleanup();
 	}
 

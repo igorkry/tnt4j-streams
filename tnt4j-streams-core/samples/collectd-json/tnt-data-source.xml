@@ -8,14 +8,14 @@
         <field name="EventType" value="SNAPSHOT"/>
         <field name="EventName" locator="type|type_instance" locator-type="Label" separator=" "/>
         <field name="Category" locator="plugin|plugin_instance" locator-type="Label" separator=" "/>
-        <!--   <field name="ValueTypes" locator="dstypes" locator-type="Label"/> -->
+        <field name="ServerName" locator="host" locator-type="Label"/>
 
-        <field name="{$ValueName}" locator="values" locator-type="Label" value-type="${ValueType}">
-            <field-locator name="ValueName" locator="dsnames" locator-type="Label" transparent="true"/>
-            <field-locator name="ValueType" locator="dstypes" locator-type="Label" transparent="true"/>
+        <field name="${FieldNameLoc}" locator="values" locator-type="Label" value-type="${ValueTypeLoc}" split="true">
+            <field-locator id="FieldNameLoc" locator="dsnames" locator-type="Label"/>
+            <field-locator id="ValueTypeLoc" locator="dstypes" locator-type="Label"/>
         </field>
 
-        <field name="StartTime" locator="time" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+        <field name="SnapshotTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="CollectdReqBodyParser"
@@ -27,6 +27,7 @@
             <parser-ref name="CollectdStatsDataParser"/>
         </field>
         <field name="EventType" value="Activity"/>
+        <field name="ApplName" value="collectd"/>
     </parser>
 
     <parser name="CollectdReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
@@ -42,4 +43,12 @@
 
         <parser-ref name="CollectdReqParser"/>
     </stream>
+
+    <!-- TO STREAM FROM SAMPLE STATS JSON FILE-->
+    <!--<stream name="CollectdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value=".\tnt4j-streams-core\samples\collectd-json\stats.json"/>-->
+    <!--&lt;!&ndash;<property name="Port" value="9595"/>&ndash;&gt;-->
+
+    <!--<parser-ref name="CollectdReqBodyParser"/>-->
+    <!--</stream>-->
 </tnt-data-source>

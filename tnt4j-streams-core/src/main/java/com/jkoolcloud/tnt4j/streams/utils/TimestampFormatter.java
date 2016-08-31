@@ -29,14 +29,11 @@ import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 
 /**
  * <p>
- * Provides methods for parsing objects into timestamps and for formatting
- * timestamps as strings.
+ * Provides methods for parsing objects into timestamps and for formatting timestamps as strings.
  * <p>
- * This is based on {@link SimpleDateFormat}, but extends its support to
- * recognize microsecond fractional seconds. If number of fractional second
- * characters is greater than 3, then it's assumed to be microseconds.
- * Otherwise, it's assumed to be milliseconds (as this is the behavior of
- * {@link SimpleDateFormat}.
+ * This is based on {@link SimpleDateFormat}, but extends its support to recognize microsecond fractional seconds. If
+ * number of fractional second characters is greater than 3, then it's assumed to be microseconds. Otherwise, it's
+ * assumed to be milliseconds (as this is the behavior of {@link SimpleDateFormat}.
  *
  * @version $Revision: 1 $
  *
@@ -52,8 +49,7 @@ public class TimestampFormatter {
 	private String locale = null;
 
 	/**
-	 * Creates a timestamp formatter/parser for numeric timestamps with the
-	 * specified resolution.
+	 * Creates a timestamp formatter/parser for numeric timestamps with the specified resolution.
 	 *
 	 * @param units
 	 *            resolution of timestamp values
@@ -63,14 +59,13 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Creates a timestamp formatter/parser for date/time expressions, using the
-	 * specified format pattern.
+	 * Creates a timestamp formatter/parser for date/time expressions, using the specified format pattern.
 	 *
 	 * @param pattern
 	 *            format pattern, or {@code null} to use the default format
 	 * @param timeZone
-	 *            time zone ID, or {@code null} to use the default time zone or
-	 *            to assume pattern contains time zone specification
+	 *            time zone ID, or {@code null} to use the default time zone or to assume pattern contains time zone
+	 *            specification
 	 * @param locale
 	 *            locale for date format to use.
 	 */
@@ -92,8 +87,7 @@ public class TimestampFormatter {
 	 * Sets the format pattern string for this formatter.
 	 *
 	 * @param pattern
-	 *            format pattern - can be set to {@code null} to use default
-	 *            format representation.
+	 *            format pattern - can be set to {@code null} to use default format representation.
 	 * @param locale
 	 *            locale for date format to use.
 	 */
@@ -101,9 +95,8 @@ public class TimestampFormatter {
 		this.pattern = pattern;
 		this.units = null;
 		this.locale = locale;
-		formatter = StringUtils.isEmpty(pattern) ? new SimpleDateFormat()
-				: StringUtils.isEmpty(locale) ? new SimpleDateFormat(pattern)
-						: new SimpleDateFormat(pattern, Utils.getLocale(locale));
+		formatter = StringUtils.isEmpty(pattern) ? new SimpleDateFormat() : StringUtils.isEmpty(locale)
+				? new SimpleDateFormat(pattern) : new SimpleDateFormat(pattern, Utils.getLocale(locale));
 	}
 
 	/**
@@ -131,9 +124,8 @@ public class TimestampFormatter {
 	/**
 	 * Gets the time zone ID that date/time strings are assumed to be in.
 	 *
-	 * @return time zone for date/time strings {@code null} indicates deriving
-	 *         from format string or default is being used if no time zone
-	 *         specification in string)
+	 * @return time zone for date/time strings {@code null} indicates deriving from format string or default is being
+	 *         used if no time zone specification in string)
 	 */
 	public String getTimeZone() {
 		return timeZone;
@@ -150,15 +142,14 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Parses the value into a timestamp with microsecond accuracy based on the
-	 * timestamp pattern supported by this parser.
+	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
+	 * parser.
 	 *
 	 * @param value
 	 *            value to convert
 	 * @return formatted value of timestamp
 	 * @throws ParseException
-	 *             if an error parsing the specified value based timestamp
-	 *             pattern supported by this parser;
+	 *             if an error parsing the specified value based timestamp pattern supported by this parser;
 	 */
 	public UsecTimestamp parse(Object value) throws ParseException {
 		if (value instanceof UsecTimestamp) {
@@ -194,8 +185,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Parses the value into a timestamp with microsecond accuracy based on the
-	 * specified units.
+	 * Parses the value into a timestamp with microsecond accuracy based on the specified units.
 	 *
 	 * @param units
 	 *            units that value is in
@@ -252,17 +242,16 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Parses the value into a timestamp with microsecond accuracy based on the
-	 * timestamp pattern supported by this parser.
+	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
+	 * parser.
 	 *
 	 * @param pattern
 	 *            pattern value is in
 	 * @param value
 	 *            value to convert
 	 * @param timeZoneId
-	 *            time zone that timeStampStr represents. This is only needed
-	 *            when formatStr does not include time zone specification and
-	 *            timeStampStr does not represent a string in local time zone.
+	 *            time zone that timeStampStr represents. This is only needed when formatStr does not include time zone
+	 *            specification and timeStampStr does not represent a string in local time zone.
 	 * @param locale
 	 *            locale for date format to use.
 	 * @return microsecond timestamp
@@ -277,8 +266,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Formats the given object representing a date/time as a string using the
-	 * specified pattern.
+	 * Formats the given object representing a date/time as a string using the specified pattern.
 	 *
 	 * @param pattern
 	 *            format pattern
@@ -302,8 +290,7 @@ public class TimestampFormatter {
 	 *            precision units timestamp is in
 	 * @param toUnits
 	 *            precision units to convert timestamp to
-	 * @return converted numeric timestamp in precision units specified by
-	 *         toUnits
+	 * @return converted numeric timestamp in precision units specified by toUnits
 	 */
 	public static long convert(Number timestamp, TimeUnit fromUnits, TimeUnit toUnits) {
 		return toUnits.convert(timestamp == null ? 0 : timestamp.longValue(), fromUnits);

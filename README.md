@@ -2242,7 +2242,83 @@ field string mapping to TNT4J event field value.
 
 #### Collectd performance metrics streaming
 
-TODO
+This sample shows how to stream `collectd` monitoring reports data as activity events.
+
+Sample files can be found in `samples/collectd-json` directory (`tnt4j-streams-core` module).
+
+NOTE: to use this sample `collectd` should be running `Write HTTP` plugin. See [Collectd Wiki](https://collectd.org/wiki/index.php/Plugin:Write_HTTP)
+for details.
+
+Sample report data is available in `stats.json` file. 
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <property name="ReadLines" value="false"/>
+        <field name="EventType" value="SNAPSHOT"/>
+        <field name="EventName" locator="type|type_instance" locator-type="Label" separator=" "/>
+        <field name="Category" locator="plugin|plugin_instance" locator-type="Label" separator=" "/>
+        <field name="ServerName" locator="host" locator-type="Label"/>
+
+        <field name="${FieldNameLoc}" locator="values" locator-type="Label" value-type="${ValueTypeLoc}" split="true">
+            <field-locator id="FieldNameLoc" locator="dsnames" locator-type="Label"/>
+            <field-locator id="ValueTypeLoc" locator="dstypes" locator-type="Label"/>
+        </field>
+
+        <field name="SnapshotTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+    </parser>
+
+    <parser name="CollectdReqBodyParser"
+            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+        <property name="ReadLines" value="false"/>
+        <property name="ChildrenField" value="MsgBody"/>
+
+        <field name="MsgBody" locator="$" locator-type="Label" transparent="true">
+            <parser-ref name="CollectdStatsDataParser"/>
+        </field>
+        <field name="EventType" value="Activity"/>
+        <field name="ApplName" value="collectd"/>
+    </parser>
+
+    <parser name="CollectdReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="CollectdReqBodyParser"/>
+        </field>
+    </parser>
+
+    <stream name="CollectdStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+
+        <parser-ref name="CollectdReqParser"/>
+    </stream>    
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `CollectdReqParser` shall be used. Stream takes HTTP request 
+received from `collectd` server and passes it to parser.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`CollectdReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
+`CollectdReqBodyParser` to parse HTTP request contained JSON format data.
+
+`CollectdReqBodyParser` maps `collectd` report JSON data to activity (field `EventType`) containing set of snapshots (property `ChildrenField` 
+referencing field `MsgBody`) carrying system metrics data. Each snapshot is parsed using stacked `CollectdStatsDataParser` parser (map parser 
+because parent JSON parser already made map data structures from RAW `collectd` report JSON data).
+
+`CollectdStatsDataParser` maps map entries to snapshot fields `EventName`, `Category`, `ServerName`, `SnapshotTime`. Also this parser uses 
+dynamic field named `${FieldNameLoc}`. Attribute values containing variable expressions `${}` indicates that these attributes can have 
+dynamic values resolved from streamed data. Such variable expressions has to reference locators identifiers (`field-locator` attribute `id`) 
+to resolve and fill actual data. Field attribute `split`, that if field value locator resolves collection (list or array) of values, values 
+of that collection should be split into separate fields of produced activity.     
 
 #### Nagios reports streaming
 
@@ -2264,7 +2340,7 @@ Sample stream configuration:
 
     <parser name="SnapshotParser"
             class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        
+
         <field name="EventType" value="Snapshot"/>
         <field name="ApplName" value="Nagios"/>
         <field name="EventName" locator="service" locator-type="Label"/>
@@ -2272,7 +2348,7 @@ Sample stream configuration:
         <field name="Message" locator="plugin_output" locator-type="Label"/>
         <field name="Category" locator="hostname" locator-type="Label"/>
         <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
-        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="SnapshotTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="ResponseParser"
@@ -2285,6 +2361,8 @@ Sample stream configuration:
         </field>
 
         <field name="EventType" value="Activity"/>
+        <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="ApplName" value="nagios2json"/>
     </parser>
 
     <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">

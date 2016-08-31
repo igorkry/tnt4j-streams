@@ -61,6 +61,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
+	private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
 
 	/**
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
@@ -428,9 +429,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		try {
-			String str = rdr == null ? null : rdr.readLine();
-
-			return str;
+			return rdr == null ? null : rdr.readLine();
 		} finally {
 			if (autoClose) {
 				close(rdr);
@@ -713,8 +712,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 					valueStr = String.valueOf(fieldValue);
 				}
 
-				sb.append(fieldName).append("='").append(valueStr).append('\'')
-						.append(i < valueObjFields.length - 1 ? ", " : "");
+				sb.append(fieldName).append("='").append(valueStr).append('\'') // NON-NLS
+						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
 			}
 		} catch (Exception exc) {
 			sb.append(exc.toString());
@@ -733,7 +732,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return empty string builder
 	 */
 	public static StringBuilder clear(StringBuilder sb) {
-		return sb == null ? sb : sb.delete(0, sb.length());
+		return sb == null ? null : sb.delete(0, sb.length());
 	}
 
 	/**
@@ -744,7 +743,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return empty string buffer
 	 */
 	public static StringBuffer clear(StringBuffer sb) {
-		return sb == null ? sb : sb.delete(0, sb.length());
+		return sb == null ? null : sb.delete(0, sb.length());
 	}
 
 	/**
@@ -752,10 +751,91 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param number
 	 *            number object to check
-	 * @return {@code true} if number is {@code null} or number value is {@code 0}, {@code false} - othervise
+	 * @return {@code true} if number is {@code null} or number value is {@code 0}, {@code false} - otherwise
 	 */
 	public static boolean isZero(Number number) {
 		return number == null || number.intValue() == 0;
+	}
+
+	/**
+	 * Finds variable expressions like '${varName}' in provided array of strings and puts into collection.
+	 *
+	 * @param vars
+	 *            collection to add resolved variable expression
+	 * @param attrs
+	 *            array of {@link String}s to find variable expressions
+	 */
+	public static void resolveVariables(Collection<String> vars, String... attrs) {
+		if (attrs != null) {
+			for (String attr : attrs) {
+				if (StringUtils.isNoneEmpty(attr)) {
+					Matcher m = VAR_PATTERN.matcher(attr);
+					while (m.find()) {
+						vars.add(m.group());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided object instance.
+	 * <p>
+	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link Collection}, then method
+	 * {@link Collection#toArray()} is invoked. In all other cases - new single item array is created.
+	 *
+	 * @param obj
+	 *            object instance to make an array
+	 * @return array made of provided object, or {@code null} if obj is {@code null}
+	 */
+	public static Object[] makeArray(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+
+		return obj instanceof Object[] ? (Object[]) obj
+				: obj instanceof Collection ? ((Collection<?>) obj).toArray() : new Object[] { obj };
+	}
+
+	/**
+	 * Checks if provided object is {@link Collection} or {@code Object[]}.
+	 *
+	 * @param obj
+	 *            object to check
+	 * @return {@code true} if obj is {@link Collection} or {@code Object[]}, {@code false} - otherwise.
+	 */
+	public static boolean isCollection(Object obj) {
+		return obj instanceof Object[] || obj instanceof Collection;
+	}
+
+	/**
+	 * Wraps provided object item seeking by index.
+	 * <p>
+	 * If obj is not {@link Collection} or {@code Object[]}, then same object is returned.
+	 * <p>
+	 * In case of {@link Collection} - it is transformed to {@code Object[]}.
+	 * <p>
+	 * When obj is {@code Object[]} - array item referenced by index is returned if {@code index < array.length}, first
+	 * array item if {@code array.length == 1} or {@code null} in all other cases.
+	 *
+	 * @param obj
+	 *            object instance containing item
+	 * @param index
+	 *            item index
+	 * @return item found, or {@code null} if obj is {@code null} or {@code index >= array.length}
+	 */
+	public static Object getItem(Object obj, int index) {
+		if (obj instanceof Collection) {
+			obj = ((Collection<?>) obj).toArray();
+		}
+
+		if (obj instanceof Object[]) {
+			Object[] array = (Object[]) obj;
+
+			return index < array.length ? array[index] : array.length == 1 ? array[0] : null;
+		}
+
+		return obj;
 	}
 
 }

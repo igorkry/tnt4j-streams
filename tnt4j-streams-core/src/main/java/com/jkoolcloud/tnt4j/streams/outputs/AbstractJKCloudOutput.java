@@ -146,6 +146,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setProperty(String name, Object value) {
 		if (OutputProperties.PROP_TNT4J_CONFIG_FILE.equalsIgnoreCase(name)) {
 			setTnt4jCfgFilePath((String) value);

@@ -34,24 +34,19 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
  * <p>
- * Base class that all activity streams must extend. It provides some base
- * functionality useful for all activity streams.
+ * Base class that all activity streams must extend. It provides some base functionality useful for all activity
+ * streams.
  * <p>
  * All activity streams should support the following properties:
  * <ul>
- * <li>DateTime - default date/time to associate with activities. (Optional)
- * </li>
- * <li>UseExecutors - identifies whether stream should use executor service to
- * process activities data items asynchronously or not. (Optional)</li>
- * <li>ExecutorThreadsQuantity - defines executor service thread pool size.
- * (Optional)</li>
- * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a
- * executor service to terminate. (Optional)</li>
- * <li>ExecutorsBoundedModel - identifies whether executor service should use
- * bounded tasks queue model. (Optional)</li>
- * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be
- * inserted into bounded queue if max. queue size is reached. (Optional, actual
- * only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
+ * <li>DateTime - default date/time to associate with activities. (Optional)</li>
+ * <li>UseExecutors - identifies whether stream should use executor service to process activities data items
+ * asynchronously or not. (Optional)</li>
+ * <li>ExecutorThreadsQuantity - defines executor service thread pool size. (Optional)</li>
+ * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a executor service to terminate. (Optional)</li>
+ * <li>ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. (Optional)</li>
+ * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
+ * queue size is reached. (Optional, actual only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
  * </ul>
  *
  * @param <T>
@@ -132,9 +127,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Sets default stream output handler. It may happen when stream
-	 * configuration does not define particular output handler reference (i.e.
-	 * from older TNT4J-Streams API versions).
+	 * Sets default stream output handler. It may happen when stream configuration does not define particular output
+	 * handler reference (i.e. from older TNT4J-Streams API versions).
 	 */
 	public abstract void setDefaultStreamOutput();
 
@@ -158,12 +152,10 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Set properties for activity stream. This method is invoked by the
-	 * configuration loader in response to the {@code property} configuration
-	 * elements. It is invoked once per stream definition, with all property
-	 * names and values specified for this stream. Subclasses should generally
-	 * override this method to process custom properties, and invoke the base
-	 * class method to handle any built-in properties.
+	 * Set properties for activity stream. This method is invoked by the configuration loader in response to the
+	 * {@code property} configuration elements. It is invoked once per stream definition, with all property names and
+	 * values specified for this stream. Subclasses should generally override this method to process custom properties,
+	 * and invoke the base class method to handle any built-in properties.
 	 *
 	 * @param props
 	 *            properties to set
@@ -193,10 +185,9 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Get value of specified property. If subclasses override
-	 * {@link #setProperties(Collection)}, they should generally override this
-	 * method as well to return the value of custom properties, and invoke the
-	 * base class method to handle any built-in properties.
+	 * Get value of specified property. If subclasses override {@link #setProperties(Collection)}, they should generally
+	 * override this method as well to return the value of custom properties, and invoke the base class method to handle
+	 * any built-in properties.
 	 *
 	 * @param name
 	 *            name of property whose value is to be retrieved
@@ -228,17 +219,13 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	/**
 	 * Initialize the stream.
 	 * <p>
-	 * This method is called by default {@link #run()} method to perform any
-	 * necessary initializations before the stream starts processing, including
-	 * verifying that all required properties are set. If subclasses override
-	 * this method to perform any custom initializations, they must call the
-	 * base class method. If subclass also overrides the {@link #run()} method,
-	 * it must call this at start of {@link #run()} method before entering into
-	 * processing loop.
+	 * This method is called by default {@link #run()} method to perform any necessary initializations before the stream
+	 * starts processing, including verifying that all required properties are set. If subclasses override this method
+	 * to perform any custom initializations, they must call the base class method. If subclass also overrides the
+	 * {@link #run()} method, it must call this at start of {@link #run()} method before entering into processing loop.
 	 *
 	 * @throws Exception
-	 *             indicates that stream is not configured properly and cannot
-	 *             continue.
+	 *             indicates that stream is not configured properly and cannot continue.
 	 */
 	protected void initialize() throws Exception {
 		if (out == null) {
@@ -262,17 +249,15 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Creates default thread pool executor service for a given number of
-	 * threads. Using this executor service tasks queue size is unbound. Thus
-	 * memory use may be high to store all producer thread created tasks.
+	 * Creates default thread pool executor service for a given number of threads. Using this executor service tasks
+	 * queue size is unbound. Thus memory use may be high to store all producer thread created tasks.
 	 *
 	 * @param threadsQty
 	 *            the number of threads in the pool
 	 *
 	 * @return the newly created thread pool executor
 	 *
-	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
-	 *      BlockingQueue, ThreadFactory)
+	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit, BlockingQueue, ThreadFactory)
 	 */
 	private ExecutorService getDefaultExecutorService(int threadsQty) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamDefaultExecutorThread-"); // NON-NLS
@@ -290,13 +275,11 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Creates thread pool executor service for a given number of threads with
-	 * bounded tasks queue - queue size is 2x{@code threadsQty}. When queue size
-	 * is reached, new tasks are offered to queue using defined offer timeout.
-	 * If task can't be put into queue over this time, task is skipped with
-	 * making warning log entry. Thus memory use does not grow drastically if
-	 * consumers can't keep up the pace of producers filling in the queue,
-	 * making producers synchronize with consumers.
+	 * Creates thread pool executor service for a given number of threads with bounded tasks queue - queue size is
+	 * 2x{@code threadsQty}. When queue size is reached, new tasks are offered to queue using defined offer timeout. If
+	 * task can't be put into queue over this time, task is skipped with making warning log entry. Thus memory use does
+	 * not grow drastically if consumers can't keep up the pace of producers filling in the queue, making producers
+	 * synchronize with consumers.
 	 * 
 	 * @param threadsQty
 	 *            the number of threads in the pool
@@ -305,8 +288,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 *
 	 * @return the newly created thread pool executor
 	 *
-	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit,
-	 *      BlockingQueue, ThreadFactory)
+	 * @see ThreadPoolExecutor#ThreadPoolExecutor(int, int, long, TimeUnit, BlockingQueue, ThreadFactory)
 	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamBoundedExecutorThread-"); // NON-NLS
@@ -356,16 +338,15 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 	/**
 	 * <p>
-	 * Get the position in the source activity data currently being processed.
-	 * For line-based data sources, this is generally the line number of
-	 * currently processed file or other text source. If activity items source
-	 * (i.e. file) changes - activity position gets reset.
+	 * Get the position in the source activity data currently being processed. For line-based data sources, this is
+	 * generally the line number of currently processed file or other text source. If activity items source (i.e. file)
+	 * changes - activity position gets reset.
 	 * <p>
-	 * Subclasses should override this to provide meaningful information, if
-	 * relevant. The default implementation just returns 0.
+	 * Subclasses should override this to provide meaningful information, if relevant. The default implementation just
+	 * returns 0.
 	 *
-	 * @return current position in activity data source being processed, or
-	 *         {@code 0} if activity position can't be determined
+	 * @return current position in activity data source being processed, or {@code 0} if activity position can't be
+	 *         determined
 	 * @see #getCurrentActivity()
 	 */
 	public int getActivityPosition() {
@@ -373,12 +354,11 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Returns currently streamed activity item index. Index is constantly
-	 * incremented when streaming begins and activity items gets available to
-	 * stream.
+	 * Returns currently streamed activity item index. Index is constantly incremented when streaming begins and
+	 * activity items gets available to stream.
 	 * <p>
-	 * It does not matter if activity item source changes (i.e. file). To get
-	 * actual source dependent position see {@link #getActivityPosition()}.
+	 * It does not matter if activity item source changes (i.e. file). To get actual source dependent position see
+	 * {@link #getActivityPosition()}.
 	 *
 	 * @return currently processed activity item index
 	 * @see #getActivityPosition()
@@ -400,8 +380,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	/**
 	 * Returns total number of activity items to be streamed.
 	 *
-	 * @return total number of activities available to stream, or {@code -1} if
-	 *         total number of activities is undetermined
+	 * @return total number of activities available to stream, or {@code -1} if total number of activities is
+	 *         undetermined
 	 * @see #getCurrentActivity()
 	 */
 	public int getTotalActivities() {
@@ -409,8 +389,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Returns size in bytes of activity data items available to stream. If
-	 * total size can't be determined, then {@code 0} is returned.
+	 * Returns size in bytes of activity data items available to stream. If total size can't be determined, then
+	 * {@code 0} is returned.
 	 *
 	 * @return total size in bytes of activity data items
 	 */
@@ -428,8 +408,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Returns number of activity data items skipped from streaming. Item may be
-	 * skipped if it can't be parsed or some non-critical exception occurs.
+	 * Returns number of activity data items skipped from streaming. Item may be skipped if it can't be parsed or some
+	 * non-critical exception occurs.
 	 *
 	 * @return number of skipped activities
 	 */
@@ -479,19 +459,17 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Get the next raw activity data item to be processed. All subclasses must
-	 * implement this.
+	 * Get the next raw activity data item to be processed. All subclasses must implement this.
 	 *
-	 * @return next raw activity data item, or {@code null} if there is no next
-	 *         item
+	 * @return next raw activity data item, or {@code null} if there is no next item
 	 * @throws Exception
 	 *             if any errors occurred getting next item
 	 */
 	public abstract T getNextItem() throws Exception;
 
 	/**
-	 * Gets the default date/time to use for activity entries that do not
-	 * contain a date. Default implementation returns the current date.
+	 * Gets the default date/time to use for activity entries that do not contain a date. Default implementation returns
+	 * the current date.
 	 *
 	 * @return default date/time to use for activity entries
 	 */
@@ -500,8 +478,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Signals that this stream should stop processing so that controlling
-	 * thread will terminate.
+	 * Signals that this stream should stop processing so that controlling thread will terminate.
 	 */
 	public void halt() {
 		shutdownExecutors();
@@ -512,8 +489,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	/**
 	 * Indicates whether this stream has stopped.
 	 *
-	 * @return {@code true} if stream has stopped processing, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if stream has stopped processing, {@code false} - otherwise
 	 */
 	public boolean isHalted() {
 		return ownerThread.isStopRunning();
@@ -522,12 +498,10 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	/**
 	 * Cleanup the stream.
 	 * <p>
-	 * This method is called by default {@link #run()} method to perform any
-	 * necessary cleanup before the stream stops processing, releasing any
-	 * resources created by {@link #initialize()} method. If subclasses override
-	 * this method to perform any custom cleanup, they must call the base class
-	 * method. If subclass also overrides the {@link #run()} method, it must
-	 * call this at end of {@link #run()} method before returning.
+	 * This method is called by default {@link #run()} method to perform any necessary cleanup before the stream stops
+	 * processing, releasing any resources created by {@link #initialize()} method. If subclasses override this method
+	 * to perform any custom cleanup, they must call the base class method. If subclass also overrides the
+	 * {@link #run()} method, it must call this at end of {@link #run()} method before returning.
 	 */
 	protected void cleanup() {
 		if (out != null) {
@@ -563,8 +537,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Starts input stream processing. Implementing {@link Runnable} interface
-	 * makes it possible to process each stream in separate thread.
+	 * Starts input stream processing. Implementing {@link Runnable} interface makes it possible to process each stream
+	 * in separate thread.
 	 */
 	@Override
 	public void run() {
@@ -720,8 +694,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Notifies that activity items streaming process has completed
-	 * successfully.
+	 * Notifies that activity items streaming process has completed successfully.
 	 */
 	public void notifyStreamSuccess() {
 		notifyStatusChange(StreamStatus.SUCCESS);
@@ -766,8 +739,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Notifies that activity items streaming process has finished independent
-	 * of completion state.
+	 * Notifies that activity items streaming process has finished independent of completion state.
 	 */
 	protected void notifyFinished() {
 		if (streamListeners != null) {
@@ -779,8 +751,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Notifies that activity items streaming process detects some notable
-	 * event.
+	 * Notifies that activity items streaming process detects some notable event.
 	 *
 	 * @param level
 	 *            event severity level
@@ -816,8 +787,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Removes defined {@code StreamTasksListener} from stream tasks listeners
-	 * list.
+	 * Removes defined {@code StreamTasksListener} from stream tasks listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamTasksListener} to be removed
@@ -829,8 +799,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Notifies that stream executor service has rejected offered activity items
-	 * streaming task to queue.
+	 * Notifies that stream executor service has rejected offered activity items streaming task to queue.
 	 *
 	 * @param task
 	 *            executor rejected task
@@ -844,8 +813,8 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * Notifies that stream executor service has been shot down and some of
-	 * unprocessed activity items streaming tasks has been dropped of the queue.
+	 * Notifies that stream executor service has been shot down and some of unprocessed activity items streaming tasks
+	 * has been dropped of the queue.
 	 *
 	 * @param tasks
 	 *            list of executor dropped of tasks
@@ -888,8 +857,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		}
 
 		/**
-		 * Return string representing class name of task object and wrapped
-		 * activity item data.
+		 * Return string representing class name of task object and wrapped activity item data.
 		 *
 		 * @return a string representing activity item processing task
 		 */
@@ -938,8 +906,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		}
 
 		/**
-		 * Adds defined {@code StreamsThreadFactoryListener} to thread factory
-		 * listeners list.
+		 * Adds defined {@code StreamsThreadFactoryListener} to thread factory listeners list.
 		 *
 		 * @param l
 		 *            the {@code StreamsThreadFactoryListener} to be added
@@ -957,8 +924,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		}
 
 		/**
-		 * Removes defined {@code StreamsThreadFactoryListener} from thread
-		 * factory listeners list.
+		 * Removes defined {@code StreamsThreadFactoryListener} from thread factory listeners list.
 		 *
 		 * @param l
 		 *            the {@code StreamsThreadFactoryListener} to be removed
@@ -974,8 +940,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		 */
 		public interface StreamsThreadFactoryListener {
 			/**
-			 * This method gets called when {@link StreamsThreadFactory} creates
-			 * new thread.
+			 * This method gets called when {@link StreamsThreadFactory} creates new thread.
 			 *
 			 * @param t
 			 *            factory created thread
@@ -1011,6 +976,10 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 			this.bytesStreamed = stream.getStreamedBytesCount();
 			this.skippedActivities = stream.getSkippedActivitiesCount();
 			this.elapsedTime = stream.getElapsedTime();
+
+			if (activitiesTotal == -1) {
+				activitiesTotal = currActivity;
+			}
 		}
 
 		/**
