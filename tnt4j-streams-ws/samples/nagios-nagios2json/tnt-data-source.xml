@@ -13,7 +13,7 @@
         <field name="Message" locator="plugin_output" locator-type="Label"/>
         <field name="Category" locator="hostname" locator-type="Label"/>
         <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
-        <field name="SnapshotTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="ResponseParser"

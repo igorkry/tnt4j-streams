@@ -2270,7 +2270,7 @@ Sample stream configuration:
             <field-locator id="ValueTypeLoc" locator="dstypes" locator-type="Label"/>
         </field>
 
-        <field name="SnapshotTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="StartTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="CollectdReqBodyParser"
@@ -2314,7 +2314,7 @@ should skip unparseable entries. Stream puts received request payload data as `b
 referencing field `MsgBody`) carrying system metrics data. Each snapshot is parsed using stacked `CollectdStatsDataParser` parser (map parser 
 because parent JSON parser already made map data structures from RAW `collectd` report JSON data).
 
-`CollectdStatsDataParser` maps map entries to snapshot fields `EventName`, `Category`, `ServerName`, `SnapshotTime`. Also this parser uses 
+`CollectdStatsDataParser` maps map entries to snapshot fields `EventName`, `Category`, `ServerName`, `StartTime`. Also this parser uses 
 dynamic field named `${FieldNameLoc}`. Attribute values containing variable expressions `${}` indicates that these attributes can have 
 dynamic values resolved from streamed data. Such variable expressions has to reference locators identifiers (`field-locator` attribute `id`) 
 to resolve and fill actual data. Field attribute `split`, that if field value locator resolves collection (list or array) of values, values 
@@ -2348,7 +2348,7 @@ Sample stream configuration:
         <field name="Message" locator="plugin_output" locator-type="Label"/>
         <field name="Category" locator="hostname" locator-type="Label"/>
         <field name="Duration" locator="duration" locator-type="Label" value-type="age"/>
-        <field name="SnapshotTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="ResponseParser"

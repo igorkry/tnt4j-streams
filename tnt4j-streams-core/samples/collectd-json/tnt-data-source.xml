@@ -15,7 +15,7 @@
             <field-locator id="ValueTypeLoc" locator="dstypes" locator-type="Label"/>
         </field>
 
-        <field name="SnapshotTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+        <field name="StartTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
     <parser name="CollectdReqBodyParser"

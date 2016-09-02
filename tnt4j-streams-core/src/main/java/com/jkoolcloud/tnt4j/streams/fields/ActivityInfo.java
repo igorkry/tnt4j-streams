@@ -445,8 +445,17 @@ public class ActivityInfo {
 			activityProperties = new HashMap<String, Property>();
 		}
 
-		return activityProperties.put(propName, StringUtils.isEmpty(valueType) ? new Property(propName, propValue)
-				: new Property(propName, propValue, valueType));
+		Object pVal = wrapPropertyValue(propValue);
+		return activityProperties.put(propName, StringUtils.isEmpty(valueType) ? new Property(propName, pVal)
+				: new Property(propName, pVal, valueType));
+	}
+
+	private Object wrapPropertyValue(Object propValue) {
+		if (propValue instanceof UsecTimestamp) {
+			return ((UsecTimestamp) propValue).getTimeUsec();
+		}
+
+		return propValue;
 	}
 
 	/**
@@ -817,6 +826,7 @@ public class ActivityInfo {
 				StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
 		snapshot.add(JSONFormatter.JSON_TID_FIELD, threadId == null ? Thread.currentThread().getId() : threadId);
 		snapshot.add(JSONFormatter.JSON_PID_FIELD, processId == null ? Utils.getVMPID() : processId);
+		snapshot.setTimeStamp(startTime == null ? (endTime == null ? UsecTimestamp.now() : endTime) : startTime);
 
 		if (activityProperties != null) {
 			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {

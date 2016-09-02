@@ -36,7 +36,7 @@ public class ActivityField {
 	/**
 	 * Activity field attribute dynamic value variable definition start token.
 	 */
-	public static final String FIELD_DYNAMIC_ATTR_START_TOKEN = "${"; // NON-NLS
+	private static final String FIELD_DYNAMIC_ATTR_START_TOKEN = "${"; // NON-NLS
 	private static final String FIELD_DYNAMIC_ATTR_END_TOKEN = "}"; // NON-NLS
 
 	private String fieldTypeName;
