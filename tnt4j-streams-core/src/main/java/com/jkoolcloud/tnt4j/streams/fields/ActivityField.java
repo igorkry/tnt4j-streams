@@ -171,7 +171,6 @@ public class ActivityField {
 		}
 
 		dynamicAttrLocators.put(id, locator);
-		transparent = true;
 	}
 
 	private void addStaticLocator(ActivityFieldLocator locator) {
@@ -454,18 +453,41 @@ public class ActivityField {
 	 * 
 	 * @param attrValues
 	 *            set of attribute values to check
-	 * @return {@code true} if value of any attribute from set contains variable expressions, {@code false} - otherwise
+	 * @return {@code true} if value of any attribute from set contains variable expression, {@code false} - otherwise
 	 */
 	public static boolean hasDynamicAttrs(String... attrValues) {
 		if (attrValues != null) {
 			for (String attrValue : attrValues) {
-				if (attrValue != null && attrValue.contains(FIELD_DYNAMIC_ATTR_START_TOKEN)) {
+				if (isDynamicAttr(attrValue)) {
 					return true;
 				}
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks if attribute value string contains variable expression.
+	 * 
+	 * @param attrValue
+	 *            attribute value
+	 * @return {@code true} if attribute value string contains variable expression, {@code false} - otherwise
+	 */
+	public static boolean isDynamicAttr(String attrValue) {
+		return attrValue != null && attrValue.contains(FIELD_DYNAMIC_ATTR_START_TOKEN);
+	}
+
+	/**
+	 * Checks if dynamic locators map contains entry keyed by identifier variable.
+	 * 
+	 * @param dLocIdVar
+	 *            dynamic locator identifier variable
+	 * @return {@code true} if dynamic locators map contains entry keyed by identifier variable, {@code false} -
+	 *         otherwise
+	 */
+	public boolean hasDynamicLocator(String dLocIdVar) {
+		return dynamicAttrLocators != null && dynamicAttrLocators.containsKey(dLocIdVar);
 	}
 
 	/**
@@ -494,8 +516,7 @@ public class ActivityField {
 	private static String fillDynamicAttr(String dAttr, Map<String, Object> dValMap, int valueIndex) {
 		String tAttr = dAttr;
 
-		if (StringUtils.isNotEmpty(dAttr) && dAttr.contains(FIELD_DYNAMIC_ATTR_START_TOKEN)
-				&& MapUtils.isNotEmpty(dValMap)) {
+		if (isDynamicAttr(dAttr) && MapUtils.isNotEmpty(dValMap)) {
 			List<String> vars = new ArrayList<String>();
 			Utils.resolveVariables(vars, dAttr);
 

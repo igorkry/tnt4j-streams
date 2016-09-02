@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -1200,16 +1199,14 @@ public class ConfigParserHandler extends DefaultHandler {
 					getLocationInfo()));
 		}
 
-		List<String> dAttrs = new ArrayList<String>();
-		Utils.resolveVariables(dAttrs, aField.getFieldTypeName(), aField.getValueType());
+		List<String> dynamicLocators = new ArrayList<String>();
+		Utils.resolveVariables(dynamicLocators, aField.getFieldTypeName(), aField.getValueType());
 
-		for (String fAttr : dAttrs) {
-			if (StringUtils.isNotEmpty(fAttr) && fAttr.contains(ActivityField.FIELD_DYNAMIC_ATTR_START_TOKEN)) {
-				if (MapUtils.isEmpty(aField.getDynamicLocators()) || !aField.getDynamicLocators().containsKey(fAttr)) {
-					throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.element.ref.missing", FIELD_ELMT, FIELD_LOC_ELMT, fAttr,
-							getLocationInfo()));
-				}
+		for (String dLoc : dynamicLocators) {
+			if (!aField.hasDynamicLocator(dLoc)) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.element.ref.missing", FIELD_ELMT, FIELD_LOC_ELMT, dLoc,
+						getLocationInfo()));
 			}
 		}
 	}

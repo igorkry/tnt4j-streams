@@ -169,8 +169,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private void handleDynamicValues(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
 			Object value) throws ParseException {
-		Map<String, ActivityFieldLocator> dynamicLocators = field.getDynamicLocators();
-		Map<String, Object> dValMap = resolveDynamicValues(stream, data, dynamicLocators);
+		Map<String, Object> dValMap = resolveDynamicValues(stream, data, field.getDynamicLocators());
 
 		Object[] fValues = Utils.makeArray(value);
 
