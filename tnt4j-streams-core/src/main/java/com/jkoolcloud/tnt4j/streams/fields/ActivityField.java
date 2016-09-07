@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -502,7 +503,7 @@ public class ActivityField {
 	 */
 	public ActivityField createTempField(Map<String, Object> dValues, int valueIndex) {
 		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
-		tField.locators = locators;
+		tField.locators = getTempFieldLocators(locators, valueIndex);
 		tField.format = format;
 		tField.locale = locale;
 		tField.separator = separator;
@@ -526,5 +527,18 @@ public class ActivityField {
 		}
 
 		return tAttr;
+	}
+
+	private static List<ActivityFieldLocator> getTempFieldLocators(List<ActivityFieldLocator> locators, int index) {
+		if (CollectionUtils.isEmpty(locators) || locators.size() == 1) {
+			return locators;
+		}
+
+		List<ActivityFieldLocator> fLocators = new ArrayList<ActivityFieldLocator>(1);
+		if (index >= 0 && index < locators.size()) {
+			fLocators.add(locators.get(index));
+		}
+
+		return fLocators;
 	}
 }

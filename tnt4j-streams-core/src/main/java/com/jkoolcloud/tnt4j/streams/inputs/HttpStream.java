@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * <p>
@@ -355,7 +355,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		}
 
 		private StringEntity createHtmlStringEntity(String msg) {
-			StringEntity entity = new StringEntity(MessageFormat.format(HTML_MSG_PATTERN, msg),
+			StringEntity entity = new StringEntity(Utils.format(HTML_MSG_PATTERN, msg),
 					ContentType.create("text/html", "UTF-8")); // NON-NLS
 
 			return entity;
