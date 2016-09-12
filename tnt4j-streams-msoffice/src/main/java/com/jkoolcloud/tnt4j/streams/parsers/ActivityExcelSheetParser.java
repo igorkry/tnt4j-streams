@@ -138,7 +138,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 						LOGGER.log(OpLevel.WARNING,
 								StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 										"AbstractExcelStream.cell.not.found"),
-								locStr);
+								locStr, sheet.getWorkbook().getMissingCellPolicy());
 					}
 				}
 			}
