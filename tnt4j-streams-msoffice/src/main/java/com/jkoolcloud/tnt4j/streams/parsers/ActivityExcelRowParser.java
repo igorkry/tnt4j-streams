@@ -36,11 +36,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Implements activity data parser that assumes each activity data item is an MS
- * Excel {@link org.apache.poi.ss.usermodel.Workbook} {@link Row} data
- * structure, where each field is represented by a row column reference (i.e B,
- * C, AB) and the name is used to map each field onto its corresponding activity
- * field.
+ * Implements activity data parser that assumes each activity data item is an MS Excel
+ * {@link org.apache.poi.ss.usermodel.Workbook} {@link Row} data structure, where each field is represented by a row
+ * column reference (i.e B, C, AB) and the name is used to map each field onto its corresponding activity field.
  */
 public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelRowParser.class);
@@ -55,8 +53,7 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link org.apache.poi.ss.usermodel.Row}</li>
 	 * </ul>
@@ -95,8 +92,7 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -105,12 +101,10 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	 * @param row
 	 *            MS Excel document row representing activity object data fields
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
@@ -126,7 +120,9 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 				} else {
 					int cellIndex = CellReference.convertColStringToIndex(locStr);
 					Cell cell = row.getCell(cellIndex);
-					val = cell.toString();
+					if (cell != null) {
+						val = cell.toString();
+					}
 				}
 			}
 			val = locator.formatValue(val);
