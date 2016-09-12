@@ -33,15 +33,15 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Implements activity data parser that assumes each activity data item is an MS
- * Excel {@link org.apache.poi.ss.usermodel.Workbook} {@link Sheet} data
- * structure, where each field is represented by a sheet cell reference (i.e
- * B12, H12, AA1 where letters identifies column and number identifies row) and
- * the name is used to map each field onto its corresponding activity field.
+ * Implements activity data parser that assumes each activity data item is an MS Excel
+ * {@link org.apache.poi.ss.usermodel.Workbook} {@link Sheet} data structure, where each field is represented by a sheet
+ * cell reference (i.e B12, H12, AA1 where letters identifies column and number identifies row) and the name is used to
+ * map each field onto its corresponding activity field.
  *
  * @version $Revision: 1 $
  */
@@ -58,8 +58,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link org.apache.poi.ss.usermodel.Sheet}</li>
 	 * </ul>
@@ -98,23 +97,19 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param sheet
-	 *            MS Excel document sheet representing activity object data
-	 *            fields
+	 *            MS Excel document sheet representing activity object data fields
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
@@ -129,12 +124,21 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 					val = stream.getProperty(locStr);
 				} else {
 					CellReference ref = new CellReference(locStr);
+					boolean cellFound = false;
 					Row row = sheet.getRow(ref.getRow());
 					if (row != null) {
 						Cell cell = row.getCell(ref.getCol());
 						if (cell != null) {
 							val = cell.toString();
+							cellFound = true;
 						}
+					}
+
+					if (!cellFound) {
+						LOGGER.log(OpLevel.WARNING,
+								StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+										"AbstractExcelStream.cell.not.found"),
+								locStr);
 					}
 				}
 			}

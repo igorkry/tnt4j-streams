@@ -32,6 +32,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -120,8 +121,17 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 				} else {
 					int cellIndex = CellReference.convertColStringToIndex(locStr);
 					Cell cell = row.getCell(cellIndex);
+					boolean cellFound = false;
 					if (cell != null) {
 						val = cell.toString();
+						cellFound = true;
+					}
+
+					if (!cellFound) {
+						LOGGER.log(OpLevel.WARNING,
+								StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+										"AbstractExcelStream.cell.not.found"),
+								locStr);
 					}
 				}
 			}
