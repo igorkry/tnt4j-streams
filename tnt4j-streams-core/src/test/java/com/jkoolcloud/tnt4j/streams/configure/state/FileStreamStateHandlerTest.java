@@ -91,8 +91,8 @@ public class FileStreamStateHandlerTest {
 				final int lineNumber = reader.getLineNumber();
 				System.out.println("for " + lineNumber + " line CRC is " + lineCRC);
 				if (count2 == 3) {
-					newFAS.lineNumberReadCrc = lineCRC;
-					newFAS.lineNumberRead = lineNumber;
+					newFAS.currentLineCrc = lineCRC;
+					newFAS.currentLineNumber = lineNumber;
 					lineLastRead = lineNumber;
 				}
 				line = reader.readLine();

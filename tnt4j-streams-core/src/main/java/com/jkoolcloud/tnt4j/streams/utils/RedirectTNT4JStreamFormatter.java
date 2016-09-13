@@ -19,29 +19,38 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.source.Source;
+import com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream;
 
 import net.minidev.json.JSONValue;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * JSON formatter extension used with {@link RedirectTNT4JStream} to redirect incoming trackable objects
+ * (activities/events/snapshots) produced by other TNT4J based sources like 'tnt4j-stream-jmx' to jKool Cloud service.
+ * <p>
+ * If object to be formatted is valid JSON, then no additional formatting is performed. JSON validity is determined by
+ * invoking {@link JSONValue#isValidJson(String)}.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see RedirectTNT4JStream
+ * @see JSONValue#isValidJson(String)
  */
-public class StreamRouteFormatter extends JSONFormatter {
+public class RedirectTNT4JStreamFormatter extends JSONFormatter {
 
 	/**
-	 * Creates a new StreamRouteFormatter without newlines during formatting
+	 * Creates a new RedirectTNT4JStreamFormatter without newlines during formatting
 	 */
-	public StreamRouteFormatter() {
+	public RedirectTNT4JStreamFormatter() {
 		super();
 	}
 
 	/**
-	 * Creates a new StreamRouteFormatter and conditionally format with newline
+	 * Creates a new RedirectTNT4JStreamFormatter and conditionally format with newline
 	 * 
 	 * @param newLine
 	 *            apply newline formatting to JSON
 	 */
-	public StreamRouteFormatter(boolean newLine) {
+	public RedirectTNT4JStreamFormatter(boolean newLine) {
 		super(newLine);
 	}
 

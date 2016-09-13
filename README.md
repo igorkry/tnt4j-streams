@@ -42,7 +42,9 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Collectd
     * Nagios    
 
-just by applying configuration and without additional coding.
+    just by applying configuration and without additional coding.
+
+* Can redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator. 
 
 Importing TNT4J-Streams project into IDE
 ======================================
@@ -2118,6 +2120,75 @@ containing field `TomcatActive`.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
+#### Redirecting TNT4J streams
+
+This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to jKool Cloud service 
+over single `TNT4J-Streams` stream instance.
+
+Sample files can be found in `samples/stream-jmx` directory.
+
+To redirect `tnt4j-stream-jmx` (or any other TNT4J based producer) produced trackables, producer configuration file `tnt4j.properties` 
+should contain such stanza:
+```properties
+    event.sink.factory.EventSinkFactory: com.jkoolcloud.tnt4j.sink.impl.SocketEventSinkFactory
+    event.sink.factory.EventSinkFactory.eventSinkFactory: com.jkoolcloud.tnt4j.sink.impl.NullEventSinkFactory
+    event.sink.factory.EventSinkFactory.Host: IP_OF_STREAMS_RUNNING_MACHINE
+    event.sink.factory.EventSinkFactory.Port: 9009
+    event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
+```
+NOTE: change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <java-object name="JMXRedirectOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput"/>
+
+    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
+        <property name="RestartOnInputClose" value="true"/>
+        <property name="Port" value="9009"/>
+
+        <reference name="JMXRedirectOutput"/>
+
+        <tnt4j-properties>
+            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
+        </tnt4j-properties>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `SampleJMXRoutingStream` referencing `JMXRedirectOutput` shall be used. Stream takes starts server socket 
+on port defined by stream property `Port`. Stream listens server socket for inbound connections (accepts multiple). When connection gets 
+accepted, stream reads incoming data from connection dedicated socket.
+
+`RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
+accept inbound connection.
+
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKoolCloud service.
+
+Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
+additional JSON reformatting in default TNT4J data flow.  
+
+NOTE: you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
+format. 
+
+To do re-streaming from file, change sample configuration by replacing `SampleJMXRoutingStream` stream property `Port` to `FileName` 
+referring file containing logged trackables in JSON format:
+```xml
+    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
+        <property name="FileName" value="tnt4j-stream-activities.log"/>    
+        
+        <reference name="JMXRedirectOutput"/>
+
+        <tnt4j-properties>
+            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
+        </tnt4j-properties>
+    </stream>
+``` 
+
 #### MS Excel document
 
 ##### Rows
@@ -2797,6 +2868,30 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
+
+#### Redirect TNT4J Stream parameters
+
+ * FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')
+ * Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')
+ * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
+ connection. (Optional)
+ * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
+ * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer queue. Default value - 
+ 45sec. (Optional)
+ 
+    sample:
+```xml
+    <property name="FileName" value="tnt4j-stream-activities.log"/>
+```
+or
+```xml
+    <property name="Port" value="9009"/>
+    <property name="RestartOnInputClose" value="true"/>
+    <property name="BufferSize" value="1024"/>
+    <property name="BufferOfferTimeout" value="65"/>
+```
+
+Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 #### Ms Excel Stream parameters
 

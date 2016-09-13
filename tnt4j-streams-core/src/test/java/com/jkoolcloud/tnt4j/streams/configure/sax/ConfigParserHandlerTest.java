@@ -480,7 +480,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs);
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs);
-		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectStream");
+		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "stream", attrs);
 		attrs.addAttribute("", "", "name", "", "");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "reference", attrs);
@@ -498,7 +498,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs);
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs);
-		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectStream");
+		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "stream", attrs);
 		test.getStreamsConfigData().getParsers().clear();
 		test.getStreamsConfigData().getStreams().clear();
@@ -517,7 +517,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs);
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs);
-		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectStream");
+		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "stream", attrs);
 		attrs.addAttribute("", "", "class", "", "");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "reference", attrs);
@@ -637,7 +637,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs);
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs);
-		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectStream");
+		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream");
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "stream", attrs);
 		test.currStream = null;
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "tnt4j-properties", attrs);

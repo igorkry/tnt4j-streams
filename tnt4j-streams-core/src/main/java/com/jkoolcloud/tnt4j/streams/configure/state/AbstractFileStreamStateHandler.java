@@ -38,8 +38,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * The class manages stream resuming from last file read line. It manages
- * streamed files access state persisting, and loading of persisted state.
+ * The class manages stream resuming from last file read line. It manages streamed files access state persisting, and
+ * loading of persisted state.
  *
  * @param <T>
  *            the type of streamed file descriptor
@@ -53,9 +53,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	private static final int LINE_SHIFT_TOLERANCE = 50;
 
 	/**
-	 * Enum for Error handling when line CRC is mismatched record saved, two
-	 * options - halt the stream or begin from found file first line, default -
-	 * halt;
+	 * Enum for Error handling when line CRC is mismatched record saved, two options - halt the stream or begin from
+	 * found file first line, default - halt;
 	 */
 	public enum LinePolicy {
 		/**
@@ -89,8 +88,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Constructs a new AbstractFileStreamStateHandler. Performs search of
-	 * persisted streaming state and loads it if such is available.
+	 * Constructs a new AbstractFileStreamStateHandler. Performs search of persisted streaming state and loads it if
+	 * such is available.
 	 *
 	 * @param activityFiles
 	 *            files, passed by stream to search in
@@ -103,8 +102,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Initiates streamed files access state handler. Load already persisted
-	 * stream accessed file state if such is available.
+	 * Initiates streamed files access state handler. Load already persisted stream accessed file state if such is
+	 * available.
 	 *
 	 * @param activityFiles
 	 *            streamed files set
@@ -126,8 +125,9 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			if (fileAccessState != null) {
 				file = findStreamingFile(fileAccessState, activityFiles);
 				if (file != null) {
-					fileAccessState.lineNumberRead = checkLine(file, fileAccessState);
-					if (linePolicy == LinePolicy.HALT_IF_CRC_MISMATCH && Utils.isZero(fileAccessState.lineNumberRead)) {
+					fileAccessState.currentLineNumber = checkLine(file, fileAccessState);
+					if (linePolicy == LinePolicy.HALT_IF_CRC_MISMATCH
+							&& Utils.isZero(fileAccessState.currentLineNumber)) {
 						throw new IllegalStateException(StreamsResources.getString(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "FileStreamStateHandler.location.not.found"));
 					}
@@ -147,8 +147,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	abstract String getParent(T[] activityFiles);
 
 	/**
-	 * Finds the file to stream matching file header CRC persisted in files
-	 * access state.
+	 * Finds the file to stream matching file header CRC persisted in files access state.
 	 *
 	 * @param fileAccessState
 	 *            persisted files access state
@@ -171,8 +170,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Check if file has persisted state defined line and returns corresponding
-	 * line number in file.
+	 * Check if file has persisted state defined line and returns corresponding line number in file.
 	 *
 	 * @param file
 	 *            file to find line matching CRC
@@ -200,7 +198,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 				li = reader.getLineNumber();
 
 				if (li >= startCompareLineIndex) {
-					if (checkCrc(line, fileAccessState.lineNumberReadCrc)) {
+					if (checkCrc(line, fileAccessState.currentLineCrc)) {
 						return li;
 					}
 				}
@@ -235,8 +233,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Loads persisted streamed files access state from streamed files directory
-	 * or system temp directory.
+	 * Loads persisted streamed files access state from streamed files directory or system temp directory.
 	 *
 	 * @param path
 	 *            to search in
@@ -255,8 +252,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Loads XML persisted streamed files access state from system temp
-	 * directory.
+	 * Loads XML persisted streamed files access state from system temp directory.
 	 *
 	 * @param streamName
 	 *            stream name
@@ -278,16 +274,15 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Loads XML persisted streamed files access state from directory defined by
-	 * path. If state files does not exists, then returns {@code null}.
+	 * Loads XML persisted streamed files access state from directory defined by path. If state files does not exists,
+	 * then returns {@code null}.
 	 *
 	 * @param path
 	 *            persisted state file location path
 	 * @param streamName
 	 *            stream name
 	 *
-	 * @return loaded streamed files access state, or {@code null} if file does
-	 *         not exists.
+	 * @return loaded streamed files access state, or {@code null} if file does not exists.
 	 *
 	 * @throws JAXBException
 	 *             if state unmarshaling fails
@@ -400,12 +395,12 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	private int getLastReadLineNumber() {
-		return fileAccessState == null || fileAccessState.lineNumberRead == null ? 0 : fileAccessState.lineNumberRead;
+		return fileAccessState == null || fileAccessState.currentLineNumber == null ? 0
+				: fileAccessState.currentLineNumber;
 	}
 
 	/**
-	 * Persists files streaming state in specified directory or system temp
-	 * directory.
+	 * Persists files streaming state in specified directory or system temp directory.
 	 *
 	 * @param fileDir
 	 *            directory to save file
@@ -422,8 +417,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Persists files streaming state in specified directory or system temp
-	 * directory.
+	 * Persists files streaming state in specified directory or system temp directory.
 	 *
 	 * @param fileAccessState
 	 *            streamed files access state
@@ -473,8 +467,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
-	 * Save current file access state. Actually takes the current streamed file
-	 * line, and calculates CRC of that line.
+	 * Save current file access state. Actually takes the current streamed file line, and calculates CRC of that line.
 	 *
 	 * @param line
 	 *            line currently streamed
@@ -492,12 +485,12 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		int lineNr = procLine.getLineNumber();
 
 		try {
-			fileAccessState.lineNumberRead = lineNr;
+			fileAccessState.currentLineNumber = lineNr;
 
 			CRC32 crc = new CRC32();
 			final byte[] bytes4Line = lineStr.getBytes("UTF-8"); // NON-NLS
 			crc.update(bytes4Line, 0, bytes4Line.length);
-			fileAccessState.lineNumberReadCrc = crc.getValue();
+			fileAccessState.currentLineCrc = crc.getValue();
 		} catch (IOException exc) {
 			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error"), exc);

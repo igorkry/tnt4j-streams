@@ -19,10 +19,11 @@ package com.jkoolcloud.tnt4j.streams.configure.state;
 import javax.xml.bind.annotation.*;
 
 /**
- * Persistable configuration of currently streaming file and line for the
- * purpose of continuation of stream after progress failed, uses file CRC to
- * point the file, instead of commonly used name, because the rolling file log
- * streams file name is changing. TODO
+ * Persistable state of currently streamed file data for the purpose of restoring streaming after streaming process
+ * stops/fails.
+ * <p>
+ * Uses file header CRC to point the file, instead of commonly used name, because name of streamed rolling log file is
+ * changing. Last read line pointer has two attributes: line number and line CRC.
  *
  * @version $Revision: 1 $
  */
@@ -39,12 +40,12 @@ public class FileAccessState {
 	 * Line number of file last read.
 	 */
 	@XmlElement(required = true)
-	public Integer lineNumberRead;
+	public Integer currentLineNumber;
 	/**
 	 * CRC value of line last read.
 	 */
 	@XmlElement(required = true)
-	public Long lineNumberReadCrc;
+	public Long currentLineCrc;
 
 	/**
 	 * Constructs a new ActivityJsonParser.

@@ -30,13 +30,13 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
  * @author akausinis
  * @version 1.0
  */
-public class RedirectStreamTest extends PropertiesTestBase {
+public class RedirectTNT4JStreamTest extends PropertiesTestBase {
 
-	RedirectStream rs;
+	RedirectTNT4JStream rs;
 
 	@Before
 	public void prepareTests() {
-		rs = new RedirectStream();
+		rs = new RedirectTNT4JStream();
 	}
 
 	@Test

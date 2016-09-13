@@ -36,6 +36,7 @@
         <log4j.version>1.2.17</log4j.version>
         <logback.version>1.1.7</logback.version>
         <tnt4j.logger.version>0.2-SNAPSHOT</tnt4j.logger.version>
+        <msgpack.version>0.8.9</msgpack.version>
     </properties>
 
     <profiles>
@@ -152,6 +153,27 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.msgpack</groupId>
+            <artifactId>msgpack-core</artifactId>
+            <version>${msgpack.version}</version>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.protobuf</groupId>-->
+        <!--<artifactId>protobuf-java</artifactId>-->
+        <!--<version>3.0.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>org.apache.thrift</groupId>-->
+        <!--<artifactId>libthrift</artifactId>-->
+        <!--<version>0.9.3</version>-->
+        <!--<type>pom</type>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>org.apache.avro</groupId>-->
+        <!--<artifactId>avro</artifactId>-->
+        <!--<version>1.8.1</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>com.jkoolcloud</groupId>
