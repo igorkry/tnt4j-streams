@@ -59,8 +59,6 @@ import kafka.server.KafkaServerStartable;
  * This activity stream supports the following properties:
  * <ul>
  * <li>Topic - regex of topic name to listen. (Required)</li>
- * <li>StartServer - flag indicating if stream has to start Kafka server on startup. Default value - {@code false}.
- * (Optional)</li>
  * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id. See {@link kafka.consumer.ConsumerConfig}
  * for more details on Kafka consumer properties. @see <a href="https://kafka.apache.org/08/configuration.html">Kafka
  * configuration reference</a></li>.
@@ -71,7 +69,6 @@ import kafka.server.KafkaServerStartable;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see ActivityMapParser
  * @see kafka.consumer.ConsumerConfig
- * @see kafka.server.KafkaServer
  */
 public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
@@ -81,9 +78,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private ConsumerConnector consumer;
 	private ConsumerConfig kafkaProperties;
 	private String topicNameRegex;
-
-	private KafkaServerStartable server;
-	private boolean startServer = false;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
 
@@ -107,8 +101,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			String value = prop.getValue();
 			if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				topicNameRegex = value;
-			} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
-				startServer = Boolean.parseBoolean(value);
 			} else {
 				Field[] propFields = StreamProperties.class.getDeclaredFields();
 
@@ -135,10 +127,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			return topicNameRegex;
 		}
 
-		if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
-			return startServer;
-		}
-
 		Object prop = super.getProperty(name);
 		if (prop == null) {
 			prop = kafkaProperties.props().getProperty(name);
@@ -155,73 +143,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
-		if (startServer) {
-			// TODO: properties should come from stream or separate config file.
-			Properties serverProps = new Properties();
-
-			Properties prop = new Properties();
-			prop.setProperty("log.dir", new File("kafka-logs").getAbsolutePath());
-			prop.setProperty("port", String.valueOf(9092));
-			prop.setProperty("broker.id", "1");
-			prop.setProperty("socket.send.buffer.bytes", "1048576");
-			prop.setProperty("socket.receive.buffer.bytes", "1048576");
-			prop.setProperty("socket.request.max.bytes", "104857600");
-			prop.setProperty("num.partitions", "1");
-			prop.setProperty("log.retention.hours", "24");
-			prop.setProperty("log.flush.interval.messages", "10000");
-			prop.setProperty("log.flush.interval.ms", "1000");
-			prop.setProperty("log.segment.bytes", "536870912");
-			prop.setProperty("zookeeper.connect", "127.0.0.1:2181/root");
-			// Set the connection timeout to relatively short time (3 seconds).
-			// It is only used by the org.I0Itec.zkclient.ZKClient inside KafkaServer
-			// to block and wait for ZK connection goes into SyncConnected state.
-			// However, due to race condition described in TWILL-139 in the ZK client library used by Kafka,
-			// when ZK authentication is enabled, the ZK client may hang until connection timeout.
-			// Setting it to lower value allow the AM to retry multiple times if race happens.
-			prop.setProperty("zookeeper.connection.timeout.ms", "3000");
-			prop.setProperty("default.replication.factor", "1");
-
-			serverProps.setProperty("broker.id", String.valueOf(1));
-			// serverProps.setProperty("host.name", InetAddress.getLocalHost().getHostName());
-			serverProps.setProperty("port", String.valueOf(9092));
-
-			serverProps.setProperty("advertised.host.name", "localhost");
-			serverProps.setProperty("advertised.port", String.valueOf(9092));
-
-			// serverProps.setProperty("log.dir", new File(".").getAbsolutePath());
-			serverProps.setProperty("log.flush.interval.messages", String.valueOf(1000));
-			serverProps.setProperty("log.flush.scheduler.interval.ms", String.valueOf(1000));
-			serverProps.setProperty("log.flush.interval.ms", String.valueOf(1000));
-
-			serverProps.setProperty("message.max.bytes", String.valueOf(50 * 1024 * 1024));
-			serverProps.setProperty("replica.fetch.max.bytes", String.valueOf(50 * 1024 * 1024));
-
-			serverProps.setProperty("zookeeper.connect", "127.0.0.1:2181");
-
-			// for CI stability, increase zookeeper session timeout
-			serverProps.setProperty("zookeeper.session.timeout.ms", String.valueOf(20000));
-
-			String KAFKA_DIR = "c:\\kafka\\";
-			System.out.println("Using kafka temp dir: " + KAFKA_DIR);
-			serverProps.setProperty("log.dir", KAFKA_DIR);
-
-			serverProps.setProperty("enable.zookeeper", "false");
-
-			// flush every message.
-			serverProps.setProperty("log.flush.interval", "1");
-
-			// flush every 1ms
-			serverProps.setProperty("log.default.flush.scheduler.interval.ms", "1");
-
-			server = new KafkaServerStartable(new KafkaConfig(prop));
-			server.startup();
-			// ZkClient zkClient = new ZkClient("localhost:2181", 10000, 10000, ZKStringSerializer$.MODULE$);
-			// AdminUtils.createTopic(server.cle.zkClient(), "TNT4JStreams", 10, 1, new Properties());
-			System.out.println("");
-
-		}
-
-		// TODO: if server has started then consumer should listen to it.
 		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.stream.ready"));
@@ -285,11 +206,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	@Override
 	protected void cleanup() {
-		if (server != null) {
-			server.shutdown();
-			server.awaitShutdown();
-		}
-
 		closed.set(true);
 		if (consumer != null) {
 			consumer.shutdown();
