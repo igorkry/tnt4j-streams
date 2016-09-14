@@ -18,7 +18,6 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -34,22 +33,19 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * <p>
- * Base class that all activity streams must extend. It provides some base
- * functionality useful for all activity streams. TODO
+ * Base class that all activity streams performing RAW activity data parsing must extend. It maps RAW activities data to
+ * related parsers and controls generic parsing process.
  * <p>
  * All activity streams should support the following properties:
  * <ul>
- * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the
- * parsers can parse activity object RAW data. If set to {@code false} - puts
- * log entry and continues. (Optional)</li>
+ * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the parsers can parse activity object RAW
+ * data. If set to {@code false} - puts log entry and continues. (Optional)</li>
  * </ul>
  *
  * @param <T>
  *            the type of handled RAW activity data
  *
  * @version $Revision: 1 $
- *
- * @see ExecutorService
  */
 public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, ActivityInfo> {
 
@@ -112,8 +108,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	/**
-	 * Adds the specified parser to the list of parsers being used by this
-	 * stream.
+	 * Adds the specified parser to the list of parsers being used by this stream.
 	 *
 	 * @param parser
 	 *            parser to add
@@ -144,14 +139,12 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	/**
-	 * Applies all defined parsers for this stream that support the format that
-	 * the raw activity data is in the order added until one successfully
-	 * matches the specified activity data item.
+	 * Applies all defined parsers for this stream that support the format that the raw activity data is in the order
+	 * added until one successfully matches the specified activity data item.
 	 *
 	 * @param data
 	 *            activity data item to process
-	 * @return processed activity data item, or {@code null} if activity data
-	 *         item does not match rules for any parsers
+	 * @return processed activity data item, or {@code null} if activity data item does not match rules for any parsers
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
@@ -162,17 +155,14 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	/**
-	 * Applies all defined parsers for this stream that support the format that
-	 * the raw activity data is in the order added until one successfully
-	 * matches the specified activity data item.
+	 * Applies all defined parsers for this stream that support the format that the raw activity data is in the order
+	 * added until one successfully matches the specified activity data item.
 	 *
 	 * @param tags
-	 *            array of tag strings to map activity data with parsers. Can be
-	 *            {@code null}.
+	 *            array of tag strings to map activity data with parsers. Can be {@code null}.
 	 * @param data
 	 *            activity data item to process
-	 * @return processed activity data item, or {@code null} if activity data
-	 *         item does not match rules for any parsers
+	 * @return processed activity data item, or {@code null} if activity data item does not match rules for any parsers
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
@@ -227,11 +217,9 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	/**
-	 * Makes activity information {@link ActivityInfo} object from raw activity
-	 * data item.
+	 * Makes activity information {@link ActivityInfo} object from raw activity data item.
 	 * <p>
-	 * Default implementation simply calls {@link #applyParsers(Object)} to
-	 * process raw activity data item.
+	 * Default implementation simply calls {@link #applyParsers(Object)} to process raw activity data item.
 	 *
 	 * @param data
 	 *            raw activity data item.
@@ -255,6 +243,12 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		return ai;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Performs parsing of raw activity data to {@link ActivityInfo} data package, which can be transformed to
+	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to jKoolCloud service using TNT4J and JESL APIs.
+	 */
 	@Override
 	protected void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {
 		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
@@ -276,7 +270,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			}
 		} else {
 			if (!ai.isFiltered()) {
-				getOutput().sendItem(ai);
+				getOutput().logItem(ai);
 			}
 		}
 	}

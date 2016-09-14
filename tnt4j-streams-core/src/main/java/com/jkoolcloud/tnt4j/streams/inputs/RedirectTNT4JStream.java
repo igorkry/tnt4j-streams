@@ -313,6 +313,11 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		return activityInput;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Redirects raw activity data (already JSON formatted by TNT4J based producers) from input to output.
+	 */
 	@Override
 	protected void processActivityItem(String item, AtomicBoolean failureFlag) throws Exception {
 		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
@@ -321,7 +326,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectTNT4JStream.sending.item"),
 				item);
 
-		getOutput().sendItem(item);
+		getOutput().logItem(item);
 	}
 
 	private boolean isInputEnded() {

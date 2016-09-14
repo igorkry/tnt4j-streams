@@ -2612,7 +2612,7 @@ These parameters are applicable to all types of streams.
 
 ##### Parseable streams parameters
 
-These parameters are applicable to streams which uses parsers to parse input data.
+These parameters are applicable to streams which uses parsers to parse incoming RAW activity data.
 
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `true`. (Optional)

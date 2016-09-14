@@ -36,33 +36,26 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Base class for files lines activity stream, where each line of the file is
- * assumed to represent a single activity or event which should be recorded.
- * Stream also can read changes from defined files every "FileReadDelay"
- * property defined seconds (default is 15sec.).
+ * Base class for files lines activity stream, where each line of the file is assumed to represent a single activity or
+ * event which should be recorded. Stream also can read changes from defined files every "FileReadDelay" property
+ * defined seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - the system-dependent file name or file name pattern defined
- * using wildcard characters '*' and '?'. (Required)</li>
- * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
- * should be polled for changes or not. If not, then files are read from oldest
- * to newest sequentially one single time. Default value - {@code false}.
+ * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.
+ * (Required)</li>
+ * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
+ * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
- * streaming should be performed from latest file entry line. If {@code false} -
- * then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}.
- * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual
- * just if 'FilePolling' property is set to {@code true}. Default value - 15sec.
- * (Optional)</li>
- * <li>RestoreState - flag {@code true}/{@code false} indicating whether files
- * read state should be stored and restored on stream restart. Default value -
- * {@code true}. (Optional)</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
+ * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual just if
+ * 'FilePolling' property is set to {@code true}. Default value - {@code true}. (Optional)</li>
+ * <li>FileReadDelay - delay is seconds between file reading iterations. Actual just if 'FilePolling' property is set to
+ * {@code true}. Default value - 15sec. (Optional)</li>
+ * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
+ * on stream restart. Default value - {@code true}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -78,9 +71,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	protected String fileName = null;
 
 	/**
-	 * Stream attribute defining if streaming should be performed from file
-	 * position found on stream initialization. If {@code false} - then
-	 * streaming is performed from beginning of the file.
+	 * Stream attribute defining if streaming should be performed from file position found on stream initialization. If
+	 * {@code false} - then streaming is performed from beginning of the file.
 	 */
 	protected boolean startFromLatestActivity = true;
 
@@ -95,8 +87,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	protected AbstractFileStreamStateHandler<T> stateHandler;
 
 	/**
-	 * Stream attribute defining whether file read state should be stored and
-	 * restored on stream restart.
+	 * Stream attribute defining whether file read state should be stored and restored on stream restart.
 	 */
 	protected boolean storeState = true;
 
@@ -275,21 +266,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 
 		/**
-		 * Initializes file watcher thread. Picks file matching user defined
-		 * file name to monitor. If user defined to start streaming from latest
-		 * file line then count of lines in file is calculated to mark latest
-		 * activity position.
+		 * Initializes file watcher thread. Picks file matching user defined file name to monitor. If user defined to
+		 * start streaming from latest file line then count of lines in file is calculated to mark latest activity
+		 * position.
 		 *
 		 * @throws Exception
-		 *             indicates that stream is not configured properly and
-		 *             files monitoring can't initialize and continue.
+		 *             indicates that stream is not configured properly and files monitoring can't initialize and
+		 *             continue.
 		 */
 		protected abstract void initialize() throws Exception;
 
 		/**
-		 * Performs continuous file monitoring until stream thread is halted or
-		 * monitoring is interrupted. File monitoring is performed with
-		 * {@link #fileWatcherDelay} defined delays between iterations.
+		 * Performs continuous file monitoring until stream thread is halted or monitoring is interrupted. File
+		 * monitoring is performed with {@link #fileWatcherDelay} defined delays between iterations.
 		 */
 		@Override
 		public void run() {

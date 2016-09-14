@@ -40,8 +40,12 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * Base class for This interface defines operations commonly used by TNT4J-Streams outputs .
+ *
+ * @param <T>
+ *            the type of handled activity data
+ *
+ * @version $Revision: 1 $
  */
 public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 
@@ -67,9 +71,10 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	private TNTInputStream<?, ?> stream;
 
 	/**
-	 * TODO
+	 * Constructs a new AbstractJKCloudOutput.
 	 *
 	 * @param logger
+	 *            logger used by stream output handler
 	 */
 	protected AbstractJKCloudOutput(EventSink logger) {
 		this.logger = logger;
@@ -201,9 +206,10 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	/**
-	 * TODO
+	 * Checks stream and provided {@link Tracker} states to allow data streaming and opens tracker if it is in not open.
 	 * 
 	 * @param tracker
+	 *            tracker instance to check state and to open if it is not open
 	 */
 	protected void ensureTrackerOpened(Tracker tracker) {
 		while (!stream.isHalted() && !tracker.isOpen()) {

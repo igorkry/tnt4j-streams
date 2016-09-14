@@ -50,7 +50,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements a Http requests transmitted activity stream, where each request body is assumed to represent:
  * <ul>
  * <li>a single activity event sent as form data (parameters keys/values set)</li>

@@ -22,21 +22,30 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * Implements TNT4J-Streams output logger for activities provided as {@link ActivityInfo} entities to be recorded to
+ * jKool Cloud service over TNT4J and JESL APIs.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see ActivityInfo#recordActivity(Tracker, long)
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
 
 	/**
-	 * TODO
+	 * Constructs a new JKCloudActivityOutput.
 	 */
 	public JKCloudActivityOutput() {
 		super(LOGGER);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see ActivityInfo#recordActivity(Tracker, long)
+	 */
 	@Override
-	public void sendItem(ActivityInfo ai) throws Exception {
+	public void logItem(ActivityInfo ai) throws Exception {
 		Tracker tracker = getTracker(ai.getSourceFQN(), Thread.currentThread());
 
 		ensureTrackerOpened(tracker);

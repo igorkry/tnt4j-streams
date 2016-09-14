@@ -56,7 +56,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  *
  * @version $Revision: 1 $
  *
- * @see ExecutorService
+ * @see java.util.concurrent.ExecutorService
+ * @see com.jkoolcloud.tnt4j.streams.outputs.TNTOutput
  */
 public abstract class TNTInputStream<T, K> implements Runnable {
 
@@ -225,7 +226,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * {@link #run()} method, it must call this at start of {@link #run()} method before entering into processing loop.
 	 *
 	 * @throws Exception
-	 *             indicates that stream is not configured properly and cannot continue.
+	 *             indicates that stream is not configured properly and cannot continue
 	 */
 	protected void initialize() throws Exception {
 		if (out == null) {
@@ -610,6 +611,16 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		}
 	}
 
+	/**
+	 * Performs processing of raw activity data item: it may be parsing, redirecting, etc.
+	 * 
+	 * @param item
+	 *            raw activity data item
+	 * @param failureFlag
+	 *            item processing failure flag instance
+	 * @throws Exception
+	 *             if any errors occurred while processing item
+	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
 	// /**

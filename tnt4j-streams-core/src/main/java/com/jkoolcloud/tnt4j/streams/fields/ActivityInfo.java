@@ -43,7 +43,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
- * This class represents an activity (e.g. event or snapshot) to record to jKool Cloud Service.
+ * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKool Cloud Service.
  *
  * @version $Revision: 1 $
  */
@@ -261,7 +261,7 @@ public class ActivityInfo {
 				break;
 			}
 		}
-		return value;
+		return value instanceof Object[] ? Arrays.toString((Object[]) value) : value;
 	}
 
 	/**
@@ -608,8 +608,7 @@ public class ActivityInfo {
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
 		event.setParentId(parentId);
-		// event.setCorrelator(CollectionUtils.isEmpty(correlator) ?
-		// Collections.singletonList(trackId) : correlator);
+		// event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
 		if (CollectionUtils.isNotEmpty(correlator)) {
 			event.setCorrelator(correlator);
 		}
@@ -684,8 +683,8 @@ public class ActivityInfo {
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
-		// activity.setCorrelator(CollectionUtils.isEmpty(correlator) ?
-		// Collections.singletonList(trackId) : correlator);
+		// activity.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) :
+		// correlator);
 		if (CollectionUtils.isNotEmpty(correlator)) {
 			activity.setCorrelator(correlator);
 		}
@@ -784,6 +783,8 @@ public class ActivityInfo {
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
 		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);
+		// snapshot.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) :
+		// correlator);
 		if (CollectionUtils.isNotEmpty(correlator)) {
 			snapshot.setCorrelator(correlator);
 		}
@@ -934,6 +935,9 @@ public class ActivityInfo {
 	private static String getStringValue(Object value) {
 		if (value instanceof byte[]) {
 			return Utils.getString((byte[]) value);
+		}
+		if (value instanceof Object[]) {
+			return Arrays.toString((Object[]) value);
 		}
 		return String.valueOf(value);
 	}
