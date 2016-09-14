@@ -36,21 +36,16 @@ import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
+ * Implements a JMS message transported activity stream, where each JMS message payload data carried data is assumed to
+ * represent a single activity or event which should be recorded.
  * <p>
- * Implements a JMS message transported activity stream, where each JMS message
- * payload data carried data is assumed to represent a single activity or event
- * which should be recorded.
- * <p>
- * This activity stream requires parsers that can support JMS {@link Message}
- * data.
+ * This activity stream requires parsers that can support JMS {@link Message} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>ServerURI - JMS server URL. (Required)</li>
- * <li>Queue - queue destination name. (Required - just one of 'Queue' or
- * 'Topic')</li>
- * <li>Topic - topic destination name. (Required - just one of 'Queue' or
- * 'Topic')</li>
+ * <li>Queue - queue destination name. (Required - just one of 'Queue' or 'Topic')</li>
+ * <li>Topic - topic destination name. (Required - just one of 'Queue' or 'Topic')</li>
  * <li>JNDIFactory - JNDI context factory name. (Required)</li>
  * <li>JMSConnFactory - JMS connection factory name. (Required)</li>
  * </ul>
@@ -72,8 +67,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	private JMSDataReceiver jmsDataReceiver;
 
 	/**
-	 * Constructs an empty JMSStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty JMSStream. Requires configuration settings to set input stream source.
 	 */
 	public JMSStream() {
 		super(LOGGER);

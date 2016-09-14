@@ -69,8 +69,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * {@inheritDoc} This parser supports the following class types (and all classes extending/implementing any of
-	 * these):
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>

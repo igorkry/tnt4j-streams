@@ -24,14 +24,11 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements piped activity stream, where each piped RAW data line is assumed
- * to represent a single activity or event which should be recorded. This class
- * wraps the RAW {@link InputStream} or {@link Reader} with a
+ * Implements piped activity stream, where each piped RAW data line is assumed to represent a single activity or event
+ * which should be recorded. This class wraps the RAW {@link InputStream} or {@link Reader} with a
  * {@link BufferedReader}. Default RAW input stream is {@link System#in}.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
- * <p>
  *
  * @version $Revision: 1 $
  *
@@ -53,8 +50,7 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	private int lineNumber = 0;
 
 	/**
-	 * Constructs an empty PipedStream. Default input stream is
-	 * {@link System#in}.
+	 * Constructs an empty PipedStream. Default input stream is {@link System#in}.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -65,16 +61,14 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	}
 
 	/**
-	 * Constructs an empty PipedStream. Default input stream is
-	 * {@link System#in}.
+	 * Constructs an empty PipedStream. Default input stream is {@link System#in}.
 	 */
 	public PipedStream() {
 		this(System.in);
 	}
 
 	/**
-	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * {@link InputStream}.
+	 * Constructs a new PipedStream to obtain activity data from the specified {@link InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -84,8 +78,7 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	}
 
 	/**
-	 * Constructs a new PipedStream to obtain activity data from the specified
-	 * {@link Reader}.
+	 * Constructs a new PipedStream to obtain activity data from the specified {@link Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -120,8 +113,7 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the piped RAW input.
+	 * This method returns a string containing the contents of the next line in the piped RAW input.
 	 */
 	@Override
 	public String getNextItem() throws Exception {

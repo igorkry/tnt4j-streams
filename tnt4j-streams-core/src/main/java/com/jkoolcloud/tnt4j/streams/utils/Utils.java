@@ -123,7 +123,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	private static final MessageDigest MSG_DIGEST = getMD5Digester();
 
 	/**
-	 * <p>
 	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
 	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>
@@ -158,7 +157,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * <p>
 	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
 	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>

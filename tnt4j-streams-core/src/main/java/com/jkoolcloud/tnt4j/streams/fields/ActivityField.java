@@ -207,7 +207,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * <p>
 	 * Gets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -219,7 +218,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * <p>
 	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -235,7 +233,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * <p>
 	 * Gets the locale representation string used by formatter.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -247,7 +244,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * <p>
 	 * Sets the locale representation string used by formatter.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.

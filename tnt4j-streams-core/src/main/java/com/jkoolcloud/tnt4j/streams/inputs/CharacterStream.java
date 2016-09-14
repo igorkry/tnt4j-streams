@@ -34,36 +34,27 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
+ * Implements a character arrays based activity stream, where activity data is read from the specified InputStream-based
+ * stream or Reader-based reader. This class wraps the raw {@link InputStream} or {@link Reader} with a
+ * {@link BufferedReader}. Input source also can be {@link File} descriptor or {@link ServerSocket} accepted
+ * {@link Socket} connection.
  * <p>
- * Implements a character arrays based activity stream, where activity data is
- * read from the specified InputStream-based stream or Reader-based reader. This
- * class wraps the raw {@link InputStream} or {@link Reader} with a
- * {@link BufferedReader}. Input source also can be {@link File} descriptor or
- * {@link ServerSocket} accepted {@link Socket} connection.
+ * In case input source is {@link ServerSocket} connection, stream allows only one {@link Socket} connection at a time.
+ * After accepting connection from {@link ServerSocket}, server socket gets closed and no more connections can be
+ * accepted. But there is stream property 'RestartOnInputClose' allowing to restart (reset) stream and open new server
+ * socket instance if already streamed connection socket gets closed.
  * <p>
- * In case input source is {@link ServerSocket} connection, stream allows only
- * one {@link Socket} connection at a time. After accepting connection from
- * {@link ServerSocket}, server socket gets closed and no more connections can
- * be accepted. But there is stream property 'RestartOnInputClose' allowing to
- * restart (reset) stream and open new server socket instance if already
- * streamed connection socket gets closed.
- * <p>
- * This activity stream requires parsers that can support {@link Reader}s as the
- * source for activity data.
+ * This activity stream requires parsers that can support {@link Reader}s as the source for activity data.
  *
- * NOTE: there can be only one parser referenced with this kind of stream!
- * Because next item returned by this stream is {@link BufferedReader} and
- * parseable value is retrieved inside parser there is no way to rewind reader
- * position if first parser fails to parse RAW activity data.
+ * NOTE: there can be only one parser referenced with this kind of stream! Because next item returned by this stream is
+ * {@link BufferedReader} and parseable value is retrieved inside parser there is no way to rewind reader position if
+ * first parser fails to parse RAW activity data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - the system-dependent file name. (Required - just one
- * 'FileName' or 'Port')</li>
- * <li>Port - port number to accept character stream over TCP/IP. (Required -
- * just one 'FileName' or 'Port')</li>
- * <li>RestartOnInputClose - flag indicating to restart stream if input socked
- * gets closed. (Optional)</li>
+ * <li>FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')</li>
+ * <li>Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')</li>
+ * <li>RestartOnInputClose - flag indicating to restart stream if input socked gets closed. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -90,15 +81,13 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	protected FeedReader dataReader = null;
 
 	/**
-	 * Indicates whether stream should restart listening for incoming data if
-	 * RAW data socket gets closed (set by {@code RestartOnInputClose} property)
-	 * - default: {@code false}
+	 * Indicates whether stream should restart listening for incoming data if RAW data socket gets closed (set by
+	 * {@code RestartOnInputClose} property) - default: {@code false}
 	 */
 	protected boolean restartOnInputClose = false;
 
 	/**
-	 * Constructs an empty CharacterStream. Requires configuration settings to
-	 * set input stream source.
+	 * Constructs an empty CharacterStream. Requires configuration settings to set input stream source.
 	 *
 	 * @param logger
 	 *            logger used by activity stream
@@ -108,16 +97,14 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Constructs an empty CharacterStream. Requires configuration settings to
-	 * set input stream source.
+	 * Constructs an empty CharacterStream. Requires configuration settings to set input stream source.
 	 */
 	public CharacterStream() {
 		super(LOGGER);
 	}
 
 	/**
-	 * Constructs a new CharacterStream to obtain activity data from the
-	 * specified {@link InputStream}.
+	 * Constructs a new CharacterStream to obtain activity data from the specified {@link InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
@@ -128,8 +115,7 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	}
 
 	/**
-	 * Constructs a new CharacterStream to obtain activity data from the
-	 * specified {@link Reader}.
+	 * Constructs a new CharacterStream to obtain activity data from the specified {@link Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
@@ -270,12 +256,10 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method does not actually return the next item, but the
-	 * {@link BufferedReader} from which the next item should be read. This is
-	 * useful for parsers that accept {@link Reader}s that are using underlying
-	 * classes to process the data from an input stream. The parser, or its
-	 * underlying data reader needs to handle all I/O, along with any associated
-	 * errors.
+	 * This method does not actually return the next item, but the {@link BufferedReader} from which the next item
+	 * should be read. This is useful for parsers that accept {@link Reader}s that are using underlying classes to
+	 * process the data from an input stream. The parser, or its underlying data reader needs to handle all I/O, along
+	 * with any associated errors.
 	 */
 	@Override
 	public BufferedReader getNextItem() throws Exception {

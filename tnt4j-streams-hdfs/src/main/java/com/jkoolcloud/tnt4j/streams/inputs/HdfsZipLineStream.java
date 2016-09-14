@@ -26,19 +26,16 @@ import org.apache.hadoop.fs.Path;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Extends {@link ZipLineStream} to allow loading Zip file from HDFS.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - defines URI of zip file and concrete zip file entry name or
- * entry name pattern defined using characters '*' and '?'. Definition pattern
- * is "zipFileURL!entryNameWildcard". I.e.:
+ * <li>FileName - defines URI of zip file and concrete zip file entry name or entry name pattern defined using
+ * characters '*' and '?'. Definition pattern is "zipFileURL!entryNameWildcard". I.e.:
  * "hdfs://[host]:[port]/[path]/sample.zip!2/*.txt". (Required)</li>
- * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default
- * value - ZIP. (Optional)</li>
+ * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default value - ZIP. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

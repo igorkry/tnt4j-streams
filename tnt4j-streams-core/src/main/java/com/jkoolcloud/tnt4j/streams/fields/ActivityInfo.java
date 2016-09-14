@@ -45,7 +45,7 @@ import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 /**
  * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKool Cloud Service.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
@@ -261,7 +261,7 @@ public class ActivityInfo {
 				break;
 			}
 		}
-		return value instanceof Object[] ? Arrays.toString((Object[]) value) : value;
+		return value;
 	}
 
 	/**
@@ -935,9 +935,6 @@ public class ActivityInfo {
 	private static String getStringValue(Object value) {
 		if (value instanceof byte[]) {
 			return Utils.getString((byte[]) value);
-		}
-		if (value instanceof Object[]) {
-			return Arrays.toString((Object[]) value);
 		}
 		return String.valueOf(value);
 	}

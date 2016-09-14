@@ -36,7 +36,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * This class extends the basic activity XML parser for handling data specific to messaging operations. It provides
  * additional transformations of the raw activity data collected for specific fields.
  * <p>

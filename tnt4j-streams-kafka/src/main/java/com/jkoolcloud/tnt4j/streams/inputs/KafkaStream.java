@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,11 +41,9 @@ import kafka.consumer.Whitelist;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.server.KafkaConfig;
-import kafka.server.KafkaServer;
-import kafka.utils.SystemTime$;
+import kafka.server.KafkaServerStartable;
 
 /**
- * <p>
  * Implements a Kafka topics transmitted activity stream, where each message body is assumed to represent a single
  * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
  * configuration.
@@ -83,7 +82,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private ConsumerConfig kafkaProperties;
 	private String topicNameRegex;
 
-	private KafkaServer server;
+	private KafkaServerStartable server;
 	private boolean startServer = false;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
@@ -160,14 +159,39 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			// TODO: properties should come from stream or separate config file.
 			Properties serverProps = new Properties();
 
-			serverProps.setProperty("broker.id", String.valueOf(969696));
+			Properties prop = new Properties();
+			prop.setProperty("log.dir", new File("kafka-logs").getAbsolutePath());
+			prop.setProperty("port", String.valueOf(9092));
+			prop.setProperty("broker.id", "1");
+			prop.setProperty("socket.send.buffer.bytes", "1048576");
+			prop.setProperty("socket.receive.buffer.bytes", "1048576");
+			prop.setProperty("socket.request.max.bytes", "104857600");
+			prop.setProperty("num.partitions", "1");
+			prop.setProperty("log.retention.hours", "24");
+			prop.setProperty("log.flush.interval.messages", "10000");
+			prop.setProperty("log.flush.interval.ms", "1000");
+			prop.setProperty("log.segment.bytes", "536870912");
+			prop.setProperty("zookeeper.connect", "127.0.0.1:2181/root");
+			// Set the connection timeout to relatively short time (3 seconds).
+			// It is only used by the org.I0Itec.zkclient.ZKClient inside KafkaServer
+			// to block and wait for ZK connection goes into SyncConnected state.
+			// However, due to race condition described in TWILL-139 in the ZK client library used by Kafka,
+			// when ZK authentication is enabled, the ZK client may hang until connection timeout.
+			// Setting it to lower value allow the AM to retry multiple times if race happens.
+			prop.setProperty("zookeeper.connection.timeout.ms", "3000");
+			prop.setProperty("default.replication.factor", "1");
+
+			serverProps.setProperty("broker.id", String.valueOf(1));
 			// serverProps.setProperty("host.name", InetAddress.getLocalHost().getHostName());
-			serverProps.setProperty("port", String.valueOf(6667));
+			serverProps.setProperty("port", String.valueOf(9092));
+
+			serverProps.setProperty("advertised.host.name", "localhost");
+			serverProps.setProperty("advertised.port", String.valueOf(9092));
 
 			// serverProps.setProperty("log.dir", new File(".").getAbsolutePath());
-			serverProps.setProperty("log.flush.interval.messages", String.valueOf(1));
-			serverProps.setProperty("log.flush.scheduler.interval.ms", String.valueOf(1));
-			serverProps.setProperty("log.flush.interval.ms", String.valueOf(1));
+			serverProps.setProperty("log.flush.interval.messages", String.valueOf(1000));
+			serverProps.setProperty("log.flush.scheduler.interval.ms", String.valueOf(1000));
+			serverProps.setProperty("log.flush.interval.ms", String.valueOf(1000));
 
 			serverProps.setProperty("message.max.bytes", String.valueOf(50 * 1024 * 1024));
 			serverProps.setProperty("replica.fetch.max.bytes", String.valueOf(50 * 1024 * 1024));
@@ -177,8 +201,24 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			// for CI stability, increase zookeeper session timeout
 			serverProps.setProperty("zookeeper.session.timeout.ms", String.valueOf(20000));
 
-			server = new KafkaServer(new KafkaConfig(serverProps), SystemTime$.MODULE$);
+			String KAFKA_DIR = "c:\\kafka\\";
+			System.out.println("Using kafka temp dir: " + KAFKA_DIR);
+			serverProps.setProperty("log.dir", KAFKA_DIR);
+
+			serverProps.setProperty("enable.zookeeper", "false");
+
+			// flush every message.
+			serverProps.setProperty("log.flush.interval", "1");
+
+			// flush every 1ms
+			serverProps.setProperty("log.default.flush.scheduler.interval.ms", "1");
+
+			server = new KafkaServerStartable(new KafkaConfig(prop));
 			server.startup();
+			// ZkClient zkClient = new ZkClient("localhost:2181", 10000, 10000, ZKStringSerializer$.MODULE$);
+			// AdminUtils.createTopic(server.cle.zkClient(), "TNT4JStreams", 10, 1, new Properties());
+			System.out.println("");
+
 		}
 
 		// TODO: if server has started then consumer should listen to it.

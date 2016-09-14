@@ -28,11 +28,9 @@ import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
  * Defines the set of item fields supported by jKool Database Access API.
  * <p>
- * Fields should be specified using the defined label instead of the enumeration
- * name.
+ * Fields should be specified using the defined label instead of the enumeration name.
  *
  * @version $Revision: 1 $
  */
@@ -53,14 +51,12 @@ public enum StreamFieldType {
 	ServerIp(String.class),
 
 	/**
-	 * Name to assign to activity entry. Examples are operation, method, API
-	 * call, event, etc.
+	 * Name to assign to activity entry. Examples are operation, method, API call, event, etc.
 	 */
 	EventName(String.class),
 
 	/**
-	 * Type of activity - Value must match values in
-	 * {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
+	 * Type of activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
 	 */
 	EventType(Enum.class),
 
@@ -106,9 +102,8 @@ public enum StreamFieldType {
 	Exception(String.class),
 
 	/**
-	 * Indicates completion status of the activity - Value can either be label
-	 * from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration or a numeric
-	 * value.
+	 * Indicates completion status of the activity - Value can either be label from
+	 * {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration or a numeric value.
 	 */
 	Severity(Enum.class),
 
@@ -118,14 +113,12 @@ public enum StreamFieldType {
 	Location(String.class),
 
 	/**
-	 * Identifier used to correlate/relate activity entries to group them into
-	 * logical entities.
+	 * Identifier used to correlate/relate activity entries to group them into logical entities.
 	 */
 	Correlator(String[].class),
 
 	/**
-	 * User-defined label to associate with the activity, generally for locating
-	 * activity.
+	 * User-defined label to associate with the activity, generally for locating activity.
 	 */
 	Tag(String[].class),
 
@@ -145,8 +138,7 @@ public enum StreamFieldType {
 	Message(String.class),
 
 	/**
-	 * Identifier used to uniquely identify the data associated with this
-	 * activity.
+	 * Identifier used to uniquely identify the data associated with this activity.
 	 */
 	TrackingId(String.class),
 
@@ -176,8 +168,7 @@ public enum StreamFieldType {
 	Category(String.class),
 
 	/**
-	 * Identifier used to uniquely identify parent activity associated with this
-	 * activity.
+	 * Identifier used to uniquely identify parent activity associated with this activity.
 	 */
 	ParentId(String.class);
 
@@ -197,11 +188,9 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * For fields that are {@link Enum}s, gets the enumeration class defining
-	 * the set of possible values for the field.
+	 * For fields that are {@link Enum}s, gets the enumeration class defining the set of possible values for the field.
 	 *
-	 * @return enumeration class for field, or {@code null} if this field is not
-	 *         an enumeration
+	 * @return enumeration class for field, or {@code null} if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -234,13 +223,11 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * For fields that are {@link Enum}s, gets the numeric value for the
-	 * enumeration constant with the specified name.
+	 * For fields that are {@link Enum}s, gets the numeric value for the enumeration constant with the specified name.
 	 *
 	 * @param enumLabel
 	 *            name of enumeration constant
-	 * @return ordinal value for enumeration with specified name, or {@code -1}
-	 *         if this field is not an enumeration
+	 * @return ordinal value for enumeration with specified name, or {@code -1} if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if enumLabel is not a valid enumeration label
 	 */
@@ -264,13 +251,11 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * For fields that are {@link Enum}s, gets the enumeration with the
-	 * specified name.
+	 * For fields that are {@link Enum}s, gets the enumeration with the specified name.
 	 *
 	 * @param enumLabel
 	 *            name of enumeration constant
-	 * @return enumeration constant, or {@code null} if this field is not an
-	 *         enumeration
+	 * @return enumeration constant, or {@code null} if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -294,13 +279,11 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * For fields that are {@link Enum}s, gets the name of the enumeration
-	 * constant with the specified ordinal value.
+	 * For fields that are {@link Enum}s, gets the name of the enumeration constant with the specified ordinal value.
 	 *
 	 * @param value
 	 *            value for enumeration
-	 * @return enumLabel name of enumeration constant, or {@code null} if this
-	 *         field is not an enumeration
+	 * @return enumLabel name of enumeration constant, or {@code null} if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -324,13 +307,11 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * For fields that are {@link Enum}s, gets the enumeration with the
-	 * specified ordinal value.
+	 * For fields that are {@link Enum}s, gets the enumeration with the specified ordinal value.
 	 *
 	 * @param value
 	 *            value for enumeration
-	 * @return enumeration constant, or {@code null} if this field is not an
-	 *         enumeration
+	 * @return enumeration constant, or {@code null} if this field is not an enumeration
 	 * @throws IllegalArgumentException
 	 *             if ordinal is not a valid enumeration value
 	 */
@@ -354,15 +335,13 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * Gets the field enumeration object based on the enumeration's ordinal
-	 * value.
+	 * Gets the field enumeration object based on the enumeration's ordinal value.
 	 *
 	 * @param ordinal
 	 *            enumeration ordinal value
 	 * @return field type enumeration object
 	 * @throws IndexOutOfBoundsException
-	 *             if ordinal value is outside the range of enumeration ordinal
-	 *             values
+	 *             if ordinal value is outside the range of enumeration ordinal values
 	 */
 	public static StreamFieldType getType(int ordinal) {
 		StreamFieldType[] enums = StreamFieldType.values();
@@ -375,8 +354,7 @@ public enum StreamFieldType {
 	}
 
 	/**
-	 * Gets the field enumeration object based on enumeration object name value
-	 * ignoring case.
+	 * Gets the field enumeration object based on enumeration object name value ignoring case.
 	 *
 	 * @param name
 	 *            name of field type
@@ -406,13 +384,11 @@ public enum StreamFieldType {
 	private static final Object NULL_VALUE = new Object();
 
 	/**
-	 * Gets the field enumeration object based on enumeration object name value
-	 * ignoring case.
+	 * Gets the field enumeration object based on enumeration object name value ignoring case.
 	 *
 	 * @param name
 	 *            name of field type
-	 * @return field type enumeration object, or {@code null} if name is empty
-	 *         or does not match any enumeration object
+	 * @return field type enumeration object, or {@code null} if name is empty or does not match any enumeration object
 	 */
 	static StreamFieldType _valueOfIgnoreCase(String name) {
 		if (StringUtils.isNotEmpty(name)) {

@@ -42,7 +42,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Implements a scheduled JAX-WS service call activity stream, where each call response is assumed to represent a single
  * activity or event which should be recorded.
  * <p>

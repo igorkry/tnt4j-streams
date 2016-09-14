@@ -74,8 +74,7 @@ public enum MessageType {
 	 *            enumeration value to convert
 	 * @return enumeration member
 	 * @throws IllegalArgumentException
-	 *             if there is no member of the enumeration with the specified
-	 *             value
+	 *             if there is no member of the enumeration with the specified value
 	 */
 	public static MessageType valueOf(int value) {
 		if (value == UNKNOWN.value()) {
@@ -109,8 +108,7 @@ public enum MessageType {
 	 *            object to convert
 	 * @return enumeration member
 	 * @throws IllegalArgumentException
-	 *             if value is {@code null} or object cannot be matched to a
-	 *             member of the enumeration
+	 *             if value is {@code null} or object cannot be matched to a member of the enumeration
 	 */
 	public static MessageType valueOf(Object value) {
 		if (value == null) {

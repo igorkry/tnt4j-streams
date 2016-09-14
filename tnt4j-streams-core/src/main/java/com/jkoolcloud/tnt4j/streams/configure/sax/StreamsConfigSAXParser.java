@@ -32,8 +32,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Utility class dedicated to load TNT4J-Streams configuration using SAX-based
- * parser.
+ * Utility class dedicated to load TNT4J-Streams configuration using SAX-based parser.
  *
  * @version $Revision: 1 $
  */
@@ -45,8 +44,7 @@ public final class StreamsConfigSAXParser {
 	}
 
 	/**
-	 * Reads the configuration and invokes the (SAX-based) parser to parse the
-	 * configuration file contents.
+	 * Reads the configuration and invokes the (SAX-based) parser to parse the configuration file contents.
 	 *
 	 * @param config
 	 *            Reader to get configuration data from

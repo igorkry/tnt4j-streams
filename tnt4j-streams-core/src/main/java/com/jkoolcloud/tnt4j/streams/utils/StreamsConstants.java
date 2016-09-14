@@ -32,8 +32,7 @@ public final class StreamsConstants {
 	 */
 	public static final String ACTIVITY_DATA_KEY = "ActivityData"; // NON-NLS
 	/**
-	 * The constant to indicate default map key for activity transport
-	 * definition.
+	 * The constant to indicate default map key for activity transport definition.
 	 */
 	public static final String TRANSPORT_KEY = "ActivityTransport"; // NON-NLS
 

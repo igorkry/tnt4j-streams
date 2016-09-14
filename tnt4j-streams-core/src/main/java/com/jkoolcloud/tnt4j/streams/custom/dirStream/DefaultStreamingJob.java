@@ -36,7 +36,6 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
  * This class implements a default directory files streaming job. In general it defines stream configuration attributes
  * and initiates new stream thread when job gets invoked by executor service.
  *

@@ -114,7 +114,6 @@
             <version>1.7</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>
             <artifactId>tnt4j-streams-core</artifactId>

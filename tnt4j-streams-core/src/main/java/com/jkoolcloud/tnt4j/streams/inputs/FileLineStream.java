@@ -32,33 +32,26 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements a files lines activity stream, where each line of the file is
- * assumed to represent a single activity or event which should be recorded.
- * Stream reads changes from defined files every "FileReadDelay" property
- * defined seconds (default is 15sec.).
+ * Implements a files lines activity stream, where each line of the file is assumed to represent a single activity or
+ * event which should be recorded. Stream reads changes from defined files every "FileReadDelay" property defined
+ * seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - the system-dependent file name or file name pattern defined
- * using wildcard characters '*' and '?'. (Required)</li>
- * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
- * should be polled for changes or not. If not, then files are read from oldest
- * to newest sequentially one single time. Default value - {@code false}.
+ * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.
+ * (Required)</li>
+ * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
+ * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
- * streaming should be performed from latest file entry line. If {@code false} -
- * then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}.
- * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual
- * just if 'FilePolling' property is set to {@code true}. Default value - 15sec.
- * (Optional)</li>
- * <li>RestoreState - flag {@code true}/{@code false} indicating whether files
- * read state should be stored and restored on stream restart. Default value -
- * {@code true}. (Optional)</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
+ * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual just if
+ * 'FilePolling' property is set to {@code true}. Default value - {@code true}. (Optional)</li>
+ * <li>FileReadDelay - delay is seconds between file reading iterations. Actual just if 'FilePolling' property is set to
+ * {@code true}. Default value - 15sec. (Optional)</li>
+ * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
+ * on stream restart. Default value - {@code true}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -82,11 +75,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 	}
 
 	/**
-	 * Searches for files matching name pattern. Name pattern also may contain
-	 * path of directory, where file search should be performed i.e.
-	 * C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just
-	 * file name pattern) then files are searched in
-	 * {@code System.getProperty("user.dir")}. Files array is ordered by file
+	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
+	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
 	 * modification timestamp in ascending order.
 	 *
 	 * @param namePattern
@@ -135,8 +126,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 	}
 
 	/**
-	 * Files changes watcher thread. It reads changes from defined files using
-	 * last modification timestamp of file.
+	 * Files changes watcher thread. It reads changes from defined files using last modification timestamp of file.
 	 */
 	private class CommonFileWatcher extends FileWatcher {
 
@@ -148,14 +138,13 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		/**
-		 * Initializes files watcher thread. Picks file matching user defined
-		 * file name to monitor. If user defined to start streaming from latest
-		 * file line, then count of lines in file is calculated to mark latest
-		 * activity position.
+		 * Initializes files watcher thread. Picks file matching user defined file name to monitor. If user defined to
+		 * start streaming from latest file line, then count of lines in file is calculated to mark latest activity
+		 * position.
 		 *
 		 * @throws Exception
-		 *             indicates that stream is not configured properly and
-		 *             files monitoring can't initialize and continue.
+		 *             indicates that stream is not configured properly and files monitoring can't initialize and
+		 *             continue.
 		 */
 		@Override
 		protected void initialize() throws Exception {
@@ -187,27 +176,22 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		/**
-		 * Reads defined file changes since last read iteration (or from stream
-		 * initialization if it is first monitor invocation).
+		 * Reads defined file changes since last read iteration (or from stream initialization if it is first monitor
+		 * invocation).
 		 * <p>
-		 * Monitor checks if it can read defined file. If not then tries to swap
-		 * to next available file. If swap can't be done (no newer readable
-		 * file) then file monitoring is interrupted.
+		 * Monitor checks if it can read defined file. If not then tries to swap to next available file. If swap can't
+		 * be done (no newer readable file) then file monitoring is interrupted.
 		 * <p>
-		 * If defined file is readable, then monitor checks modification
-		 * timestamp. If it is newer than {@link #lastModifTime} value, file
-		 * gets opened for reading. If not, monitor tries to swap to next
-		 * available file. If swap can'e be done (no newer readable file) then
-		 * file reading is skipped until next monitor invocation.
+		 * If defined file is readable, then monitor checks modification timestamp. If it is newer than
+		 * {@link #lastModifTime} value, file gets opened for reading. If not, monitor tries to swap to next available
+		 * file. If swap can'e be done (no newer readable file) then file reading is skipped until next monitor
+		 * invocation.
 		 * <p>
-		 * When file gets opened for reading reader is rolled to file marked by
-		 * {@link #lineNumber} attribute. If turns out that file got smaller in
-		 * lines count, then monitor tries to swap to previous file. If no
-		 * previous readable file is available, then reader is reset to first
-		 * file line.
+		 * When file gets opened for reading reader is rolled to file marked by {@link #lineNumber} attribute. If turns
+		 * out that file got smaller in lines count, then monitor tries to swap to previous file. If no previous
+		 * readable file is available, then reader is reset to first file line.
 		 * <p>
-		 * Reader reads all file lines until end of file and puts them to
-		 * changed lines buffer.
+		 * Reader reads all file lines until end of file and puts them to changed lines buffer.
 		 */
 		@Override
 		protected void readFileChanges() {

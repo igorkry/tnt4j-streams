@@ -23,10 +23,9 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
- * This class extends {@link BufferedReader}, wrapping the specified
- * {@link Reader} or {@link InputStream} (via {@link InputStreamReader}), and
- * adding the ability to detect if the underlying object has been closed or
- * reading input was erroneous.
+ * This class extends {@link BufferedReader}, wrapping the specified {@link Reader} or {@link InputStream} (via
+ * {@link InputStreamReader}), and adding the ability to detect if the underlying object has been closed or reading
+ * input was erroneous.
  *
  * @version $Revision: 1 $
  *
@@ -40,8 +39,7 @@ public abstract class FeedReader extends BufferedReader {
 	private boolean error = false;
 
 	/**
-	 * Constructs a new FeedReader, buffering the specified Reader, using an
-	 * internal buffer with the given size.
+	 * Constructs a new FeedReader, buffering the specified Reader, using an internal buffer with the given size.
 	 *
 	 * @param in
 	 *            Reader to buffer
@@ -65,8 +63,8 @@ public abstract class FeedReader extends BufferedReader {
 	}
 
 	/**
-	 * Constructs a new FeedReader, buffering the specified {@link InputStream},
-	 * using an internal buffer with the given size.
+	 * Constructs a new FeedReader, buffering the specified {@link InputStream}, using an internal buffer with the given
+	 * size.
 	 *
 	 * @param in
 	 *            InputStream to buffer

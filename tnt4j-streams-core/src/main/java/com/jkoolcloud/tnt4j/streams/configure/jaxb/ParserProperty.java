@@ -23,17 +23,14 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
- * Defines a parser configuration entity property - set of supported properties
- * is entity-specific.
+ * Defines a parser configuration entity property - set of supported properties is entity-specific.
  * 
  * 
  * <p>
  * Java class for ParserProperty complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ParserProperty">

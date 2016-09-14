@@ -41,7 +41,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements an activity data parser that assumes each activity data item is an XML string, with the value for each
  * field being retrieved from a particular XML element or attribute.
  * <p>

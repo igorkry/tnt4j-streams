@@ -154,8 +154,7 @@ public class AbstractActivityMapParserTest {
 		Map<String, Object> myMap = new HashMap<String, Object>();
 		myMap.put("333", Arrays.asList("test1", "test2", "test3"));
 		myMap.put("status", "TEST");
-		List<String> output = (List<String>) testParser.getLocatorValue(stream, fieldLocator,
-				myMap);
+		List<String> output = (List<String>) testParser.getLocatorValue(stream, fieldLocator, myMap);
 		assertEquals(myMap.get("333"), output);
 	}
 

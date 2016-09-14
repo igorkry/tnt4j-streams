@@ -15,8 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * plugins into third party products.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams plugins into third party products.
  *
  * @author akausinis
  * @version 1.0

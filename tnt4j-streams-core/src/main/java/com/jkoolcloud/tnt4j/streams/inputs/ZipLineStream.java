@@ -36,22 +36,18 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements a zipped content activity stream, where each line of the zipped
- * file entry is assumed to represent a single activity or event which should be
- * recorded. Zip file and entry names to stream are defined using "FileName"
+ * Implements a zipped content activity stream, where each line of the zipped file entry is assumed to represent a
+ * single activity or event which should be recorded. Zip file and entry names to stream are defined using "FileName"
  * property in stream configuration.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - defines zip file path and concrete zip file entry name or
- * entry name pattern defined using characters '*' and '?'. Definition pattern
- * is "zipFilePath!entryNameWildcard". I.e.:
+ * <li>FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters
+ * '*' and '?'. Definition pattern is "zipFilePath!entryNameWildcard". I.e.:
  * ".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt". (Required)</li>
- * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default
- * value - ZIP. (Optional)</li>
+ * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default value - ZIP. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -180,8 +176,7 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the zip file entry.
+	 * This method returns a string containing the contents of the next line in the zip file entry.
 	 */
 	@Override
 	public String getNextItem() throws Exception {

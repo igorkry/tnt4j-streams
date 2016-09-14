@@ -38,20 +38,16 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Implements an activity data parser that assumes each activity data item is a
- * token-separated string of fields, with the value for each field being
- * retrieved from a specific 1-based numeric token position. The field-separator
- * can be customized.
+ * Implements an activity data parser that assumes each activity data item is a token-separated string of fields, with
+ * the value for each field being retrieved from a specific 1-based numeric token position. The field-separator can be
+ * customized.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
- * <li>Pattern - pattern used to determine which types of activity data string
- * this parser supports. When {@code null}, all strings are assumed to match the
- * format supported by this parser. (Optional)</li>
- * <li>StripQuotes - whether surrounding double quotes should be stripped from
- * extracted data values. (Optional)</li>
+ * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},
+ * all strings are assumed to match the format supported by this parser. (Optional)</li>
+ * <li>StripQuotes - whether surrounding double quotes should be stripped from extracted data values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -60,23 +56,20 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityTokenParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code FieldDelim} property) -
-	 * default: ","
+	 * Contains the field separator (set by {@code FieldDelim} property) - default: ","
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
-	 * Indicates whether surrounding double quotes should be stripped from
-	 * extracted data values (set by {@code StripQuotes} property) - default:
-	 * {@code true}
+	 * Indicates whether surrounding double quotes should be stripped from extracted data values (set by
+	 * {@code StripQuotes} property) - default: {@code true}
 	 */
 	protected boolean stripQuotes = true;
 
 	/**
-	 * Contains the pattern used to determine which types of activity data
-	 * string this parser supports (set by {@code Pattern} property). When
-	 * {@code null}, all strings are assumed to match the format supported by
-	 * this parser.
+	 * Contains the pattern used to determine which types of activity data string this parser supports (set by
+	 * {@code Pattern} property). When {@code null}, all strings are assumed to match the format supported by this
+	 * parser.
 	 */
 	protected Pattern pattern = null;
 
@@ -157,8 +150,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -167,12 +159,10 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	 * @param fields
 	 *            activity object data fields array
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */

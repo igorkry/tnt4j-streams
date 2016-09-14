@@ -15,9 +15,8 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * custom streaming implementation of activity data files from watched
- * directory.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams custom streaming implementation of activity
+ * data files from watched directory.
  *
  * @author akausinis
  * @version 1.0

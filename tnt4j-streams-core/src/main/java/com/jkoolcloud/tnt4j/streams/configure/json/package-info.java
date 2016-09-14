@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for storing and
- * processing the TNT4J-Streams configuration as JSON format data.
+ * Provides the API (classes and interfaces) necessary for storing and processing the TNT4J-Streams configuration as
+ * JSON format data.
  *
  * @author akausinis
  * @version 1.0

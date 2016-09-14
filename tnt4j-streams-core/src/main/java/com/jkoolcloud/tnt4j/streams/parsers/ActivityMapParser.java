@@ -24,14 +24,11 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
+ * Implements default activity data parser that assumes each activity data item is an {@link Map} data structure, where
+ * each field is represented by a key/value pair and the name is used to map each field onto its corresponding activity
+ * field.
  * <p>
- * Implements default activity data parser that assumes each activity data item
- * is an {@link Map} data structure, where each field is represented by a
- * key/value pair and the name is used to map each field onto its corresponding
- * activity field.
- * <p>
- * Additionally this parser makes activity data transformation from
- * {@code byte[]} to {@link String}.
+ * Additionally this parser makes activity data transformation from {@code byte[]} to {@link String}.
  *
  * @version $Revision: 1 $
  */
@@ -48,8 +45,7 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.util.Map}</li>
 	 * </ul>
@@ -60,8 +56,8 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Casts specified data object to map and applies default activity data
-	 * transformation from {@code byte[]} to {@link String}.
+	 * Casts specified data object to map and applies default activity data transformation from {@code byte[]} to
+	 * {@link String}.
 	 *
 	 * @param data
 	 *            activity object data object

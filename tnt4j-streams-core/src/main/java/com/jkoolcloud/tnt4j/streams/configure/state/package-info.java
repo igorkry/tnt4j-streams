@@ -15,8 +15,7 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for storing and restoring
- * TNT4J-Streams state data.
+ * Provides the API (classes and interfaces) necessary for storing and restoring TNT4J-Streams state data.
  *
  * @author akausinis
  * @version 1.0

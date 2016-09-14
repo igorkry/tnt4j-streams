@@ -36,31 +36,24 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
+ * Implements a WebSphere MQ activity stream, where activity data is read from the specified WMQ Object (queue or topic)
+ * on the given (possibly remote) queue manager.
  * <p>
- * Implements a WebSphere MQ activity stream, where activity data is read from
- * the specified WMQ Object (queue or topic) on the given (possibly remote)
- * queue manager.
- * <p>
- * This activity stream requires parsers that can support {@link String} data.
- * It currently does not strip off any WMQ headers, assuming that the message
- * data only contains the actual input for the configured parsers.
+ * This activity stream requires parsers that can support {@link String} data. It currently does not strip off any WMQ
+ * headers, assuming that the message data only contains the actual input for the configured parsers.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
  * <li>QueueManager - Queue manager name. (Optional)</li>
- * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic',
- * 'Subscription', 'TopicString')</li>
- * <li>Topic - Topic name. (Required - at least one of 'Queue', 'Topic',
- * 'Subscription', 'TopicString')</li>
- * <li>Subscription - Subscription name. (Required - at least one of 'Queue',
- * 'Topic', 'Subscription', 'TopicString')</li>
- * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic',
- * 'Subscription', 'TopicString')</li>
+ * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
+ * <li>Topic - Topic name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
+ * <li>Subscription - Subscription name. (Required - at least one of 'Queue', 'Topic', 'Subscription',
+ * 'TopicString')</li>
+ * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Host - WMQ connection host name. (Optional)</li>
  * <li>Port - WMQ connection port number. (Optional)</li>
  * <li>Channel - Channel name. (Optional)</li>
- * <li>StripHeaders - identifies whether stream should strip WMQ message
- * headers. (Optional)</li>
+ * <li>StripHeaders - identifies whether stream should strip WMQ message headers. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -69,10 +62,8 @@ public class WmqStream extends TNTParseableInputStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);
 
 	/**
-	 * Limit on number of consecutive read failures. When limit is reached,
-	 * we're going to assume that there is an issue with the queue manager, or
-	 * some other unrecoverable condition, and therefore close and reopen the
-	 * connection.
+	 * Limit on number of consecutive read failures. When limit is reached, we're going to assume that there is an issue
+	 * with the queue manager, or some other unrecoverable condition, and therefore close and reopen the connection.
 	 */
 	protected static final int MAX_CONSECUTIVE_FAILURES = 5;
 
@@ -115,8 +106,7 @@ public class WmqStream extends TNTParseableInputStream<String> {
 	private boolean stripHeaders = true;
 
 	/**
-	 * Constructs an empty WmqStream. Requires configuration settings to set
-	 * input source.
+	 * Constructs an empty WmqStream. Requires configuration settings to set input source.
 	 */
 	public WmqStream() {
 		super(LOGGER);
@@ -234,12 +224,10 @@ public class WmqStream extends TNTParseableInputStream<String> {
 	}
 
 	/**
-	 * Establish connection to queue manager and open necessary objects for
-	 * retrieving messages
+	 * Establish connection to queue manager and open necessary objects for retrieving messages
 	 *
 	 * @throws Exception
-	 *             if error connecting to queue manager or opening required
-	 *             objects
+	 *             if error connecting to queue manager or opening required objects
 	 */
 	protected void connectToQmgr() throws Exception {
 		qmgr = null;
@@ -399,15 +387,13 @@ public class WmqStream extends TNTParseableInputStream<String> {
 	}
 
 	/**
-	 * <p>
 	 * Formats display string for WMQ Exceptions.
 	 * <p>
 	 * This implementation appends the {@code MQRC_} label for the reason code.
 	 *
 	 * @param mqe
 	 *            WMQ exception
-	 * @return string identifying exception, including {@code MQRC_} constant
-	 *         label
+	 * @return string identifying exception, including {@code MQRC_} constant label
 	 */
 	protected static String formatMqException(MQException mqe) {
 		return String.format("%s (%s)", mqe, MQConstants.lookupReasonCode(mqe.getReason())); // NON-NLS

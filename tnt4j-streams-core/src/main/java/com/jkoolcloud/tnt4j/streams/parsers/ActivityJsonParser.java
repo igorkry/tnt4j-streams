@@ -40,7 +40,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements an activity data parser that assumes each activity data item is an JSON format string. JSON parsing is
  * performed using {@link JsonPath} API. Activity fields locator values are treated as JsonPath expressions.
  * <p>

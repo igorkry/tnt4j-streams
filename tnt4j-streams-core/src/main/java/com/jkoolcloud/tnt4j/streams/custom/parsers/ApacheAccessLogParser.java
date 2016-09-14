@@ -31,20 +31,17 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
+ * Implements a custom Apache access log parser based on RegEx parsing. User can define RegEx string to parse log as for
+ * ordinary activity RegEx parser.
  * <p>
- * Implements a custom Apache access log parser based on RegEx parsing. User can
- * define RegEx string to parse log as for ordinary activity RegEx parser.
- * <p>
- * But it is also possible to use Apache access log configuration pattern over
- * LogPattern parameter. Then RegEx is generated from it. Additional config
- * pattern tokens may be mapped to RegEx'es using ConfRegexMapping parameters.
+ * But it is also possible to use Apache access log configuration pattern over LogPattern parameter. Then RegEx is
+ * generated from it. Additional config pattern tokens may be mapped to RegEx'es using ConfRegexMapping parameters.
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>LogPattern - access log pattern. (Optional, if RegEx {@link Pattern}
- * property is defined)</li>
- * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional,
- * actual only if {@code LogPattern} property is used)</li>
+ * <li>LogPattern - access log pattern. (Optional, if RegEx {@link Pattern} property is defined)</li>
+ * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if {@code LogPattern}
+ * property is used)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -87,13 +84,13 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	protected String apacheLogPattern = null;
 
 	/**
-	 * Pre configured mappings between Apache access log configuration pattern
-	 * token strings and RegEx strings used to parse log entries.
+	 * Pre configured mappings between Apache access log configuration pattern token strings and RegEx strings used to
+	 * parse log entries.
 	 */
 	protected final Map<String, String> configRegexMappings = new HashMap<String, String>();
 	/**
-	 * User defined mappings between Apache access log configuration pattern
-	 * token strings and RegEx strings used to parse log entries.
+	 * User defined mappings between Apache access log configuration pattern token strings and RegEx strings used to
+	 * parse log entries.
 	 */
 	protected final Map<String, String> userRegexMappings = new HashMap<String, String>();
 
@@ -192,15 +189,13 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	}
 
 	/**
-	 * Makes log entry parsing RegEx from defined Apache access log
-	 * configuration pattern string.
+	 * Makes log entry parsing RegEx from defined Apache access log configuration pattern string.
 	 *
 	 * @param apacheLogPattern
 	 *            Apache access log configuration pattern string
 	 *
-	 * @return regular expression string, or {@code null} if can't make RegEx
-	 *         string from defined Apache access log configuration pattern
-	 *         string
+	 * @return regular expression string, or {@code null} if can't make RegEx string from defined Apache access log
+	 *         configuration pattern string
 	 */
 	private String makeRegexPattern(String apacheLogPattern) {
 		Pattern pattern = Pattern.compile(APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX);
@@ -223,9 +218,8 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	}
 
 	/**
-	 * Maps Apache access log configuration pattern token to user defined RegEx
-	 * string. If no user defined mapping is found, then default mapping is
-	 * used.
+	 * Maps Apache access log configuration pattern token to user defined RegEx string. If no user defined mapping is
+	 * found, then default mapping is used.
 	 *
 	 * @param configToken
 	 *            Apache access log configuration pattern token string
@@ -242,8 +236,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	}
 
 	/**
-	 * Finds user defined mapping of Apache access log configuration pattern
-	 * token to RegEx string.
+	 * Finds user defined mapping of Apache access log configuration pattern token to RegEx string.
 	 *
 	 * @param configToken
 	 *            Apache access log configuration pattern token string
@@ -273,8 +266,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	}
 
 	/**
-	 * Returns default RegEx string for defined Apache access log configuration
-	 * token.
+	 * Returns default RegEx string for defined Apache access log configuration token.
 	 *
 	 * @param configToken
 	 *            Apache access log configuration token string
@@ -299,8 +291,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * @param pattern
 	 *            pattern string to match configuration token
 	 *
-	 * @return {@code true} if Apache access log configuration token matches
-	 *         defined pattern
+	 * @return {@code true} if Apache access log configuration token matches defined pattern
 	 */
 	private static boolean isMatchingPattern(String configToken, String pattern) {
 		String p = pattern.replace("*", "\\S*"); // NON-NLS

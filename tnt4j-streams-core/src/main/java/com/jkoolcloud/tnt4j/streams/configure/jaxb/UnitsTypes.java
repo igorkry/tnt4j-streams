@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for UnitsTypes.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -50,10 +48,14 @@ import javax.xml.bind.annotation.XmlType;
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
 public enum UnitsTypes {
 
-	@XmlEnumValue("Days") DAYS("Days"), @XmlEnumValue("Hours") HOURS("Hours"), @XmlEnumValue("Minutes") MINUTES(
-			"Minutes"), @XmlEnumValue("Seconds") SECONDS("Seconds"), @XmlEnumValue("Milliseconds") MILLISECONDS(
-					"Milliseconds"), @XmlEnumValue("Microseconds") MICROSECONDS(
-							"Microseconds"), @XmlEnumValue("Nanoseconds") NANOSECONDS("Nanoseconds");
+	@XmlEnumValue("Days")
+	DAYS("Days"), @XmlEnumValue("Hours")
+	HOURS("Hours"), @XmlEnumValue("Minutes")
+	MINUTES("Minutes"), @XmlEnumValue("Seconds")
+	SECONDS("Seconds"), @XmlEnumValue("Milliseconds")
+	MILLISECONDS("Milliseconds"), @XmlEnumValue("Microseconds")
+	MICROSECONDS("Microseconds"), @XmlEnumValue("Nanoseconds")
+	NANOSECONDS("Nanoseconds");
 	private final String value;
 
 	UnitsTypes(String v) {

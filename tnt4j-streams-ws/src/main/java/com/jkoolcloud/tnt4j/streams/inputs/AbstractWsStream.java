@@ -34,7 +34,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Base class for scheduled service or system command request/call produced activity stream, where each call/request
  * response is assumed to represent a single activity or event which should be recorded.
  * <p>
@@ -81,18 +80,12 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 		super(logger);
 	}
 
-	// /**
-	// * {@inheritDoc}
-	// */
 	// @Override
 	// public Object getProperty(String name) {
 	//
 	// return super.getProperty(name);
 	// }
 	//
-	// /**
-	// * {@inheritDoc}
-	// */
 	// @Override
 	// public void setProperties(Collection<Map.Entry<String, String>> props)
 	// throws Exception {

@@ -45,7 +45,8 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String> {
 
 	/**
 	 * {@inheritDoc}
-	 *
+	 * <p>
+	 * 
 	 * @see Tracker#log(OpLevel, String, Object...)
 	 */
 	@Override

@@ -21,12 +21,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for FieldLocator.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -53,7 +51,8 @@ public enum FieldLocator {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StreamProp") STREAM_PROP("StreamProp"),
+	@XmlEnumValue("StreamProp")
+	STREAM_PROP("StreamProp"),
 
 	/**
 	 * 
@@ -61,16 +60,17 @@ public enum FieldLocator {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Index") INDEX("Index"),
+	@XmlEnumValue("Index")
+	INDEX("Index"),
 
 	/**
 	 * 
-	 * Field value is the value for the specified label (e.g. name/value pairs
-	 * like label=value).
+	 * Field value is the value for the specified label (e.g. name/value pairs like label=value).
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Label") LABEL("Label"),
+	@XmlEnumValue("Label")
+	LABEL("Label"),
 
 	/**
 	 * 
@@ -78,16 +78,17 @@ public enum FieldLocator {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("REGroupNum") RE_GROUP_NUM("REGroupNum"),
+	@XmlEnumValue("REGroupNum")
+	RE_GROUP_NUM("REGroupNum"),
 
 	/**
 	 * 
-	 * Field value is the value for the specified regular expression match
-	 * sequence position.
+	 * Field value is the value for the specified regular expression match sequence position.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("REMatchNum") RE_MATCH_NUM("REMatchNum");
+	@XmlEnumValue("REMatchNum")
+	RE_MATCH_NUM("REMatchNum");
 	private final String value;
 
 	FieldLocator(String v) {

@@ -28,19 +28,16 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 
 /**
- * <p>
- * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored
- * activity stream, where each workbook sheet {@link Row} is assumed to
- * represent a single activity or event which should be recorded.
+ * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook sheet
+ * {@link Row} is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link Row} data.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FirstRowAsHeader - flag {@code true}/{@code false} indicating whether
- * first row in sheet is used to define table columns titles. If {@code true}
- * then first sheet row is skipped from streaming. Default value - {@code false}
- * . (Optional)</li>
+ * <li>FirstRowAsHeader - flag {@code true}/{@code false} indicating whether first row in sheet is used to define table
+ * columns titles. If {@code true} then first sheet row is skipped from streaming. Default value - {@code false} .
+ * (Optional)</li>
  * </ul>
  * 
  * @version $Revision: 1 $
@@ -56,8 +53,7 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	private Iterator<Row> rowIterator;
 
 	/**
-	 * Constructs a new ExcelRowStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs a new ExcelRowStream. Requires configuration settings to set input stream source.
 	 */
 	public ExcelRowStream() {
 		super(LOGGER);
@@ -91,8 +87,7 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a excel sheet {@link Row} containing the contents of
-	 * the next raw activity data item.
+	 * This method returns a excel sheet {@link Row} containing the contents of the next raw activity data item.
 	 */
 	@Override
 	public Row getNextItem() throws Exception {

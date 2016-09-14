@@ -20,9 +20,7 @@ import org.apache.flume.Event;
 import org.apache.flume.event.JSONEvent;
 
 /**
- * <p>
- * Extends Apache Flume {@link JSONEvent} to add additional attributes, required
- * by TNT4J-Streams.
+ * Extends Apache Flume {@link JSONEvent} to add additional attributes, required by TNT4J-Streams.
  *
  * @version $Revision: 1 $
  */
@@ -39,8 +37,8 @@ public class StreamsEvent extends JSONEvent {
 	}
 
 	/**
-	 * Constructs a new StreamEvent based on Apache Flume output event data.
-	 * Additionally sets event channel and sink names.
+	 * Constructs a new StreamEvent based on Apache Flume output event data. Additionally sets event channel and sink
+	 * names.
 	 *
 	 * @param event
 	 *            event to wrap

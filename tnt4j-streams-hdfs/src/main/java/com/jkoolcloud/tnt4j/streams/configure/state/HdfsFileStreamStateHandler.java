@@ -51,8 +51,8 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 	}
 
 	/**
-	 * Constructs a new HdfsFileStreamStateHandler. Performs search of persisted
-	 * streaming state and loads it if such is available.
+	 * Constructs a new HdfsFileStreamStateHandler. Performs search of persisted streaming state and loads it if such is
+	 * available.
 	 *
 	 * @param activityFiles
 	 *            files processed by stream

@@ -32,7 +32,6 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
  * Base class that all activity streams performing RAW activity data parsing must extend. It maps RAW activities data to
  * related parsers and controls generic parsing process.
  * <p>

@@ -28,18 +28,14 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Base class for buffered input activity stream. RAW activity data retrieved
- * from input source is placed into blocking queue to be asynchronously
- * processed by consumer thread(s).
+ * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
+ * queue to be asynchronously processed by consumer thread(s).
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>BufferSize - maximal buffer queue capacity. Default value - 512.
- * (Optional)</li>
- * <li>BufferOfferTimeout - how long to wait if necessary for space to become
- * available when adding data item to buffer queue. Default value - 45sec.
- * (Optional)</li>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
+ * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
+ * queue. Default value - 45sec. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -60,8 +56,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	private int bufferOfferTimeout = DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT;
 
 	/**
-	 * RAW activity data items buffer queue. Items in this queue are processed
-	 * asynchronously by consumer thread(s).
+	 * RAW activity data items buffer queue. Items in this queue are processed asynchronously by consumer thread(s).
 	 */
 	protected BlockingQueue<Object> inputBuffer;
 
@@ -81,8 +76,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * @param logger
 	 *            logger used by activity stream
 	 * @param bufferSize
-	 *            default buffer size value. Actual value may be overridden by
-	 *            setting 'BufferSize' property.
+	 *            default buffer size value. Actual value may be overridden by setting 'BufferSize' property.
 	 */
 	protected AbstractBufferedStream(EventSink logger, int bufferSize) {
 		super(logger);
@@ -129,9 +123,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	/**
-	 * Get the next activity data item to be processed. Method blocks and waits
-	 * for activity input data available in input buffer. Input buffer is filled
-	 * by {@link InputProcessor} thread.
+	 * Get the next activity data item to be processed. Method blocks and waits for activity input data available in
+	 * input buffer. Input buffer is filled by {@link InputProcessor} thread.
 	 *
 	 * @return next activity data item, or {@code null} if there is no next item
 	 *
@@ -183,13 +176,12 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	/**
-	 * Adds input data to buffer for asynchronous processing. Input data may not
-	 * be added if buffer size limit and offer timeout is exceeded.
+	 * Adds input data to buffer for asynchronous processing. Input data may not be added if buffer size limit and offer
+	 * timeout is exceeded.
 	 *
 	 * @param inputData
 	 *            input data to add to buffer
-	 * @return {@code true} if input data is added to buffer, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if input data is added to buffer, {@code false} - otherwise
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
@@ -226,8 +218,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	protected abstract class InputProcessor extends Thread {
 
 		/**
-		 * Input processor attribute identifying that input processing is
-		 * interrupted.
+		 * Input processor attribute identifying that input processing is interrupted.
 		 */
 		private boolean interrupted = false;
 
@@ -248,8 +239,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		/**
 		 * Checks if input processor should stop running.
 		 *
-		 * @return {@code true} input processor is interrupted or parent thread
-		 *         is halted
+		 * @return {@code true} input processor is interrupted or parent thread is halted
 		 */
 		protected boolean isStopping() {
 			return interrupted || isHalted();
@@ -265,8 +255,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		}
 
 		/**
-		 * Closes opened data input resources and marks stream data input as
-		 * ended.
+		 * Closes opened data input resources and marks stream data input as ended.
 		 *
 		 * @throws Exception
 		 *             if fails to close opened resources due to internal error
@@ -280,8 +269,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		}
 
 		/**
-		 * Shuts down stream input processor: interrupts thread and closes
-		 * opened data input resources.
+		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
 			if (interrupted && inputEnd) {

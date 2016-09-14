@@ -17,8 +17,8 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 /**
- * This interface defines stream status. It allows to define independent states
- * in different enum's by implementing this interface.
+ * This interface defines stream status. It allows to define independent states in different enum's by implementing this
+ * interface.
  *
  * @version $Revision: 1 $
  */

@@ -19,8 +19,7 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class defines TNT4J-Streams-WS configuration simple scheduler
- * configuration data.
+ * This class defines TNT4J-Streams-WS configuration simple scheduler configuration data.
  *
  * @version $Revision: 1 $
  */
@@ -30,8 +29,7 @@ public class SimpleSchedulerData implements SchedulerData {
 	private Integer repeatCount;
 
 	/**
-	 * Constructs a new SimpleSchedulerData. Defines invocations interval in
-	 * milliseconds.
+	 * Constructs a new SimpleSchedulerData. Defines invocations interval in milliseconds.
 	 *
 	 * @param interval
 	 *            request/call/command invocations interval.

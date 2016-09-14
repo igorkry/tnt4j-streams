@@ -33,7 +33,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
- * <p>
  * Base class that all activity streams must extend. It provides some base functionality useful for all activity
  * streams.
  * <p>
@@ -338,7 +337,6 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
-	 * <p>
 	 * Get the position in the source activity data currently being processed. For line-based data sources, this is
 	 * generally the line number of currently processed file or other text source. If activity items source (i.e. file)
 	 * changes - activity position gets reset.

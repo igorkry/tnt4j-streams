@@ -23,7 +23,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
  * Associates enclosing entity with other defined entity reference.
  * 
  * 
@@ -31,8 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  * Java class for Reference complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="Reference">

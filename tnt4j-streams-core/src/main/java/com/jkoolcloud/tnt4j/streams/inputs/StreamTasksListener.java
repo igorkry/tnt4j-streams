@@ -19,13 +19,10 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.util.List;
 
 /**
+ * A streaming executor tasks notifications listener interface. This interface can be implemented by classes that are
+ * interested in streaming tasks handling by stream executor.
  * <p>
- * A streaming executor tasks notifications listener interface. This interface
- * can be implemented by classes that are interested in streaming tasks handling
- * by stream executor.
- * <p>
- * Note, that {@code TNTInputStream} should use executors to get this listener
- * notified.
+ * Note, that {@code TNTInputStream} should use executors to get this listener notified.
  *
  * @version $Revision: 1 $
  *
@@ -34,8 +31,7 @@ import java.util.List;
 public interface StreamTasksListener {
 
 	/**
-	 * This method gets called when stream executor service has rejected offered
-	 * activity items streaming task to queue.
+	 * This method gets called when stream executor service has rejected offered activity items streaming task to queue.
 	 *
 	 * @param stream
 	 *            stream sending notification
@@ -45,9 +41,8 @@ public interface StreamTasksListener {
 	void onReject(TNTInputStream<?, ?> stream, Runnable task);
 
 	/**
-	 * This method gets called when stream executor service has been shot down
-	 * and some of unprocessed activity items streaming tasks has been dropped
-	 * of the queue.
+	 * This method gets called when stream executor service has been shot down and some of unprocessed activity items
+	 * streaming tasks has been dropped of the queue.
 	 *
 	 * @param stream
 	 *            stream sending notification

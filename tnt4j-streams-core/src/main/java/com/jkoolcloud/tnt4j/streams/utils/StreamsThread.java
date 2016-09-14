@@ -129,11 +129,10 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * <p>
 	 * Sets default name for a Streams thread.
 	 * <p>
-	 * Prefixes current (default) thread name with thread's ID and strips off
-	 * leading "com.jkoolcloud.tnt4j.streams." from thread name.
+	 * Prefixes current (default) thread name with thread's ID and strips off leading "com.jkoolcloud.tnt4j.streams."
+	 * from thread name.
 	 *
 	 * @param name
 	 *            user defined thread name or {@code null} if undefined
@@ -165,11 +164,9 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Causes the currently executing thread to sleep (temporarily cease
-	 * execution) for the specified number of milliseconds. This method differs
-	 * from {@link Thread#sleep(long)} (which it uses) in that it does not throw
-	 * any exceptions. If the sleep is interrupted, then this method will just
-	 * return.
+	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of
+	 * milliseconds. This method differs from {@link Thread#sleep(long)} (which it uses) in that it does not throw any
+	 * exceptions. If the sleep is interrupted, then this method will just return.
 	 *
 	 * @param millis
 	 *            the length of time to sleep in milliseconds
@@ -186,12 +183,10 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Causes the currently executing thread to sleep (temporarily cease
-	 * execution) for the specified number of milliseconds. This method differs
-	 * from {@link Thread#sleep(long)} (which it uses) in that it does not throw
-	 * any exceptions, and if the sleep is interrupted other than to signal
-	 * thread to terminate, this method will cause current thread to go
-	 * "back to sleep" for the remainder of the time.
+	 * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of
+	 * milliseconds. This method differs from {@link Thread#sleep(long)} (which it uses) in that it does not throw any
+	 * exceptions, and if the sleep is interrupted other than to signal thread to terminate, this method will cause
+	 * current thread to go "back to sleep" for the remainder of the time.
 	 *
 	 * @param millis
 	 *            the length of time to sleep in milliseconds
@@ -228,9 +223,8 @@ public class StreamsThread extends Thread {
 	}
 
 	/**
-	 * Waits at most millis milliseconds for this thread to die. A timeout of 0
-	 * means to wait forever. Differs from {@link java.lang.Thread#join()},
-	 * which it wraps, in that it does not throw an exception when interrupted.
+	 * Waits at most millis milliseconds for this thread to die. A timeout of 0 means to wait forever. Differs from
+	 * {@link java.lang.Thread#join()}, which it wraps, in that it does not throw an exception when interrupted.
 	 *
 	 * @param millis
 	 *            time to wait in milliseconds

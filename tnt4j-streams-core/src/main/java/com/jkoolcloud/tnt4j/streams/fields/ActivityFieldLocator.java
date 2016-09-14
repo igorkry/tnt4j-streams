@@ -122,7 +122,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the type of this locator that indicates how to interpret the locator to find the value in the raw activity
 	 * data. This value can be one of the predefined types, or it can be a custom type.
 	 * <p>
@@ -135,7 +134,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator if it implements one of the built-in locator types.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field locator is always a specific type.
@@ -147,7 +145,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the locator to find the value of this field in the raw activity data. This is generally a numeric position
 	 * or a string label.
 	 *
@@ -158,7 +155,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Get the radix that raw data field values are interpreted in. Only relevant for numeric fields and will be ignored
 	 * by those fields to which it does not apply.
 	 *
@@ -169,7 +165,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Set the radix used to interpret the raw data field values. Only relevant for numeric fields and will be ignored
 	 * by those fields to which it does not apply.
 	 *
@@ -181,7 +176,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the data type indicating how to treat the raw data field value.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
@@ -193,7 +187,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the data type indicating how to treat the raw data field value.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
@@ -206,7 +199,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the units represented by the raw data field value. This value can be one of the predefined units, or it can
 	 * be a custom unit type.
 	 * <p>
@@ -219,7 +211,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator's units if it implements one of the built-in units types.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -231,7 +222,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the units represented by the raw data field value. This value can be one of the predefined units, or it can
 	 * be a custom unit type.
 	 * <p>
@@ -252,7 +242,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -264,7 +253,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets locale representation string used by formatter.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -276,7 +264,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator's format if it implements one of the built-in format types.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -289,7 +276,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.

@@ -39,22 +39,17 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Implements an activity data parser that assumes each activity data item is a
- * token-separated string of fields, where each field is represented by a
- * name/value pair and the name is used to map each field onto its corresponding
- * activity field. The field-separator and the name/value separator can both be
- * customized.
+ * Implements an activity data parser that assumes each activity data item is a token-separated string of fields, where
+ * each field is represented by a name/value pair and the name is used to map each field onto its corresponding activity
+ * field. The field-separator and the name/value separator can both be customized.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>ValueDelim - value delimiter. (Optional)</li>
- * <li>Pattern - pattern used to determine which types of activity data string
- * this parser supports. When {@code null}, all strings are assumed to match the
- * format supported by this parser. (Optional)</li>
- * <li>StripQuotes - whether surrounding double quotes should be stripped from
- * extracted data values. (Optional)</li>
+ * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},
+ * all strings are assumed to match the format supported by this parser. (Optional)</li>
+ * <li>StripQuotes - whether surrounding double quotes should be stripped from extracted data values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -63,29 +58,25 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityNameValueParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code FieldDelim} property) -
-	 * Default: ","
+	 * Contains the field separator (set by {@code FieldDelim} property) - Default: ","
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
-	 * Contains the name/value separator (set by {@code ValueDelim} property) -
-	 * Default: "="
+	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "="
 	 */
 	protected String valueDelim = "="; // NON-NLS
 
 	/**
-	 * Contains the pattern used to determine which types of activity data
-	 * string this parser supports (set by {@code Pattern} property). When
-	 * {@code null}, all strings are assumed to match the format supported by
-	 * this parser.
+	 * Contains the pattern used to determine which types of activity data string this parser supports (set by
+	 * {@code Pattern} property). When {@code null}, all strings are assumed to match the format supported by this
+	 * parser.
 	 */
 	protected Pattern pattern = null;
 
 	/**
-	 * Indicates whether surrounding double quotes should be stripped from
-	 * extracted data values (set by {@code StripQuotes} property) - default:
-	 * {@code true}
+	 * Indicates whether surrounding double quotes should be stripped from extracted data values (set by
+	 * {@code StripQuotes} property) - default: {@code true}
 	 */
 	protected boolean stripQuotes = true;
 
@@ -187,8 +178,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -197,12 +187,10 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * @param nameValues
 	 *            activity object name/value pairs map
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */

@@ -45,7 +45,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements a MQTT topics transmitted activity stream, where each message body is assumed to represent a single
  * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
  * configuration.

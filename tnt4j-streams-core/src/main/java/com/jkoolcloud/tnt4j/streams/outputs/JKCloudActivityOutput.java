@@ -41,7 +41,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 
 	/**
 	 * {@inheritDoc}
-	 *
+	 * <p>
+	 * 
 	 * @see ActivityInfo#recordActivity(Tracker, long)
 	 */
 	@Override

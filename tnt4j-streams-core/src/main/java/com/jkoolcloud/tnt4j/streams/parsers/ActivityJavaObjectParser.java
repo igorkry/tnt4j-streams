@@ -37,14 +37,12 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
+ * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} data
+ * structure, where each field is represented by declared class field and the field name is used to map each field onto
+ * its corresponding activity field.
  * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * plain java {@link Object} data structure, where each field is represented by
- * declared class field and the field name is used to map each field onto its
- * corresponding activity field.
- * <p>
- * If field is complex object, subfields can be accessed using '.' as naming
- * hierarchy separator: i.e. 'header.author.name'.
+ * If field is complex object, subfields can be accessed using '.' as naming hierarchy separator: i.e.
+ * 'header.author.name'.
  *
  * @version $Revision: 1 $
  */
@@ -76,8 +74,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.lang.Object}</li>
 	 * </ul>
@@ -100,8 +97,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -110,12 +106,10 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * @param dataObj
 	 *            activity data carrier object
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */

@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the API (classes and interfaces) defining WS streams invocation
- * scenario data entities: scenario, scenario step and scheduler data.
+ * Provides the API (classes and interfaces) defining WS streams invocation scenario data entities: scenario, scenario
+ * step and scheduler data.
  *
  * @author akausinis
  * @version 1.0

@@ -36,21 +36,17 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
+ * Base class for abstract activity data parser that assumes each activity data item can be transformed into an
+ * {@link Map} data structure, where each field is represented by a key/value pair and the name is used to map each
+ * field onto its corresponding activity field.
  * <p>
- * Base class for abstract activity data parser that assumes each activity data
- * item can be transformed into an {@link Map} data structure, where each field
- * is represented by a key/value pair and the name is used to map each field
- * onto its corresponding activity field.
- * <p>
- * If map entry value is inner map, entries of that map can be accessed using
- * '.' as naming hierarchy delimiter: i.e. 'headers.auth.name'. Locator path
- * delimiter value can be configured over parser 'LocPathDelim' property.
+ * If map entry value is inner map, entries of that map can be accessed using '.' as naming hierarchy delimiter: i.e.
+ * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>LocPathDelim - locator path in map delimiter. Empty value means locator
- * value should not be delimited into path elements. Default value - '.'.
- * (Optional)</li>
+ * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
+ * elements. Default value - '.'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -115,8 +111,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	protected abstract Map<String, ?> getDataMap(Object data);
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field value from raw data location and formats it according locator definition.
 	 * 
 	 * @param stream
 	 *            parent stream
@@ -125,12 +120,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * @param dataMap
 	 *            activity object data map
 	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
+	 *             if error applying locator format properties to specified value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */

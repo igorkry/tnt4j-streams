@@ -34,7 +34,6 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
  * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
  * specified regular expression, with the value for each field being retrieved from either of the 1-based group
  * position, or match position.

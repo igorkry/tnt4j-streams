@@ -21,14 +21,11 @@ import com.jkoolcloud.tnt4j.streams.inputs.StreamingStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
+ * A streaming job progress/status notifications listener interface. This interface can be implemented by classes that
+ * are interested in streaming process progress and status changes.
  * <p>
- * A streaming job progress/status notifications listener interface. This
- * interface can be implemented by classes that are interested in streaming
- * process progress and status changes.
- * <p>
- * Mainly it covers
- * {@link com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener} functions
- * mapping stream instance to job definition.
+ * Mainly it covers {@link com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener} functions mapping stream instance to
+ * job definition.
  *
  * @version $Revision: 1 $
  *
@@ -80,8 +77,7 @@ public interface StreamingJobListener {
 	void onStatusChange(StreamingJob job, StreamingStatus status);
 
 	/**
-	 * This method gets called when streaming job has finished independent of
-	 * completion state.
+	 * This method gets called when streaming job has finished independent of completion state.
 	 *
 	 * @param job
 	 *            job sending notification

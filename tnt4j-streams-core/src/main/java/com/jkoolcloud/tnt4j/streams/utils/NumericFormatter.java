@@ -23,8 +23,7 @@ import java.text.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Provides methods for parsing objects into numeric values and for formatting
- * numeric values as strings.
+ * Provides methods for parsing objects into numeric values and for formatting numeric values as strings.
  *
  * @version $Revision: 1 $
  *
@@ -44,8 +43,7 @@ public class NumericFormatter {
 	}
 
 	/**
-	 * Creates a number formatter using the default numeric representation in
-	 * the specified radix.
+	 * Creates a number formatter using the default numeric representation in the specified radix.
 	 *
 	 * @param radix
 	 *            the radix to use while parsing numeric strings
@@ -55,8 +53,7 @@ public class NumericFormatter {
 	}
 
 	/**
-	 * Creates a number formatter/parser for numbers using the specified format
-	 * pattern.
+	 * Creates a number formatter/parser for numbers using the specified format pattern.
 	 *
 	 * @param pattern
 	 *            format pattern
@@ -99,36 +96,34 @@ public class NumericFormatter {
 	 * Sets the format pattern string for this formatter.
 	 *
 	 * @param pattern
-	 *            format pattern - can be set to {@code null} to use default
-	 *            representation.
+	 *            format pattern - can be set to {@code null} to use default representation.
 	 * @param locale
 	 *            locale for decimal format to use.
 	 */
 	public void setPattern(String pattern, String locale) {
 		this.pattern = pattern;
-		formatter = StringUtils.isEmpty(pattern) ? null
-				: StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
-						: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
+		formatter = StringUtils.isEmpty(pattern) ? null : StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
+				: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
 	}
 
 	/**
-	 * Formats the specified object using the defined pattern, or using the
-	 * default numeric formatting if no pattern was defined.
+	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
+	 * defined.
 	 *
 	 * @param value
 	 *            value to convert
 	 * @return formatted value of field in required internal data type
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined pattern, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             pattern, etc.)
 	 */
 	public Number parse(Object value) throws ParseException {
 		return parse(formatter, radix, value, 1.0);
 	}
 
 	/**
-	 * Formats the specified object using the defined pattern, or using the
-	 * default numeric formatting if no pattern was defined.
+	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
+	 * defined.
 	 *
 	 * @param value
 	 *            value to convert
@@ -136,16 +131,16 @@ public class NumericFormatter {
 	 *            value to multiply the formatted value by
 	 * @return formatted value of field in required internal data type
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined pattern, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             pattern, etc.)
 	 */
 	public Number parse(Object value, Number scale) throws ParseException {
 		return parse(formatter, radix, value, scale);
 	}
 
 	/**
-	 * Formats the specified object using the defined pattern, or using the
-	 * default numeric formatting if no pattern was defined.
+	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
+	 * defined.
 	 *
 	 * @param pattern
 	 *            number format pattern
@@ -155,8 +150,8 @@ public class NumericFormatter {
 	 *            value to multiply the formatted value by
 	 * @return formatted value of field in required internal data type
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined pattern, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             pattern, etc.)
 	 * @see DecimalFormat#DecimalFormat(String)
 	 */
 	public static Number parse(String pattern, Object value, Number scale) throws ParseException {
@@ -164,8 +159,8 @@ public class NumericFormatter {
 	}
 
 	/**
-	 * Formats the specified object using the defined pattern, or using the
-	 * default numeric formatting if no pattern was defined.
+	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
+	 * defined.
 	 *
 	 * @param formatter
 	 *            formatter object to apply to value
@@ -179,8 +174,8 @@ public class NumericFormatter {
 	 * @return formatted value of field in required internal data type
 	 *
 	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field
-	 *             definition (e.g. does not match defined pattern, etc.)
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             pattern, etc.)
 	 */
 	private static Number parse(DecimalFormat formatter, int radix, Object value, Number scale) throws ParseException {
 		if (value == null) {

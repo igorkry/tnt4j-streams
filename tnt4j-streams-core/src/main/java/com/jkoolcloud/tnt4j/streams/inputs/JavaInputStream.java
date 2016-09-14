@@ -25,11 +25,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements a Java {@link InputStream} or {@link Reader} carried activity
- * stream, where each line of input is assumed to represent a single activity or
- * event which should be recorded. {@link InputStream} or {@link Reader} is
- * defined over configuration element "reference".
+ * Implements a Java {@link InputStream} or {@link Reader} carried activity stream, where each line of input is assumed
+ * to represent a single activity or event which should be recorded. {@link InputStream} or {@link Reader} is defined
+ * over configuration element "reference".
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  *

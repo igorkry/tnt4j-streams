@@ -35,18 +35,14 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Base class for MS Excel workbook stored activity stream, where each workbook
- * sheet or row is assumed to represent a single activity or event which should
- * be recorded.
+ * Base class for MS Excel workbook stored activity stream, where each workbook sheet or row is assumed to represent a
+ * single activity or event which should be recorded.
  * <p>
  * This activity stream supports the following properties:
  * <ul>
- * <li>FileName - the system-dependent file name of MS Excel document.
- * (Required)</li>
- * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or
- * RegEx) to process only sheets which names matches this mask. Default value -
- * ''. (Optional)</li>
+ * <li>FileName - the system-dependent file name of MS Excel document. (Required)</li>
+ * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
+ * matches this mask. Default value - ''. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -133,13 +129,12 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	}
 
 	/**
-	 * Returns {@link Workbook} next {@link Sheet} which name matches
-	 * configuration defined (property 'SheetsToProcess') sheets name filtering
-	 * mask. If no more sheets matching name filter mask is available in
-	 * workbook, then {@code null} is returned.
+	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property 'SheetsToProcess')
+	 * sheets name filtering mask. If no more sheets matching name filter mask is available in workbook, then
+	 * {@code null} is returned.
 	 * 
-	 * @return next workbook sheet matching name filter mask, or {@code null} if
-	 *         no more sheets matching name mask available in this workbook.
+	 * @return next workbook sheet matching name filter mask, or {@code null} if no more sheets matching name mask
+	 *         available in this workbook.
 	 */
 	protected Sheet getNextNameMatchingSheet() {
 		if (sheetIterator == null || !sheetIterator.hasNext()) {

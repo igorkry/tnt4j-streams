@@ -56,7 +56,7 @@ public class RedirectTNT4JStreamFormatter extends JSONFormatter {
 
 	/**
 	 * {@inheritDoc}
-	 *
+	 * <p>
 	 * If {@code o} is valid JSON then no additional formatting is performed.
 	 */
 	@Override
@@ -70,7 +70,7 @@ public class RedirectTNT4JStreamFormatter extends JSONFormatter {
 
 	/**
 	 * {@inheritDoc}
-	 *
+	 * <p>
 	 * If {@code msg} is valid JSON then no additional formatting is performed.
 	 */
 	@Override

@@ -38,10 +38,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements an activity data parser that assumes each activity data item is an
- * JMS message data structure. Message payload data is put into map entry using
- * key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
+ * Implements an activity data parser that assumes each activity data item is an JMS message data structure. Message
+ * payload data is put into map entry using key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
  * supports JMS messages of those types:
  * <ul>
  * <li>TextMessage - activity data is message text</li>
@@ -70,8 +68,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This parser supports the following class types (and all classes
-	 * extending/implementing any of these):
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link javax.jms.Message}</li>
 	 * </ul>
@@ -82,8 +79,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Makes map object containing activity object data collected from JMS
-	 * message payload data.
+	 * Makes map object containing activity object data collected from JMS message payload data.
 	 *
 	 * @param data
 	 *            activity object data object - JMS message
@@ -171,8 +167,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link MapMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting map entries from
-	 *             message.
+	 *             if JMS exception occurs while getting map entries from message.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseMapMessage(MapMessage mapMessage, Map<String, Object> dataMap) throws JMSException {
@@ -228,8 +223,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link ObjectMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting {@link Serializable}
-	 *             object from message.
+	 *             if JMS exception occurs while getting {@link Serializable} object from message.
 	 */
 	protected void parseObjectMessage(ObjectMessage objMessage, Map<String, Object> dataMap) throws JMSException {
 		Serializable serializableObj = objMessage.getObject();

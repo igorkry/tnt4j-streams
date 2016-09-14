@@ -23,17 +23,14 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
- * Maps a raw value from the activity string to the required field value for
- * jKool Cloud Service.
+ * Maps a raw value from the activity string to the required field value for jKool Cloud Service.
  * 
  * 
  * <p>
  * Java class for FieldMap complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="FieldMap">

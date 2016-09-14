@@ -15,8 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * parsers.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams parsers.
  *
  * @author akausinis
  * @version 1.0
