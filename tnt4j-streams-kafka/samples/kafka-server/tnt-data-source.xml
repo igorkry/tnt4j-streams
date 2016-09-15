@@ -32,10 +32,26 @@
 
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
         <property name="HaltIfNoParser" value="false"/>
+        <property name="Topic" value="TNT4JKafkaTestTopic"/>
         <property name="StartServer" value="true"/>
-        <property name="Topic" value="TNT4JStreams"/>
-        <property name="zookeeper.connect" value="127.0.0.1:2181"/>
+
+        <!-- Kafka server and consumer properties -->
+        <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
         <property name="group.id" value="TNT4JStreams"/>
+
+        <property name="zookeeper.session.timeout.ms" value="4000"/>
+        <property name="port" value="9092"/>
+        <property name="broker.id" value="684231"/>
+        <property name="host.name" value="localhost"/>
+        <property name="advertised.host.name" value="localhost"/>
+        <property name="log.flush.interval.messages" value="1"/>
+        <property name="log.flush.interval.ms" value="1000"/>
+        <property name="zookeeper.connection.timeout.ms" value="3000"/>
+
+        <property name="zookeeper.sync.time.ms" value="200"/>
+        <property name="auto.commit.interval.ms" value="1000"/>
+        <property name="consumer.timeout.ms" value="1000"/>
+
         <parser-ref name="KafkaMessageParser"/>
     </stream>
 </tnt-data-source>

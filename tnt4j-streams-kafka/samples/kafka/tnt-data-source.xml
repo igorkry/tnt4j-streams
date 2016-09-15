@@ -33,8 +33,11 @@
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Topic" value="TNT4JStreams"/>
-        <property name="zookeeper.connect" value="127.0.0.1:2181"/>
+
+        <!-- Kafka consumer properties -->
+        <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
         <property name="group.id" value="TNT4JStreams"/>
+
         <parser-ref name="KafkaMessageParser"/>
     </stream>
 </tnt-data-source>
