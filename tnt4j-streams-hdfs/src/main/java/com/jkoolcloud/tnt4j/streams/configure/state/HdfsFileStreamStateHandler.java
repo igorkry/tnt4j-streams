@@ -46,8 +46,12 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 	 *            file system
 	 */
 	HdfsFileStreamStateHandler(FileSystem fs) {
-		super(LOGGER);
 		this.fs = fs;
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -82,7 +86,7 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 			FileStatus fStatus = file == null ? null : fs.getFileStatus(file);
 			return fStatus != null && fStatus.isFile();
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error"), exc);
 			return false;
 		}

@@ -43,7 +43,12 @@ public class SampleStream extends TNTParseableInputStream<String> {
 	private int lineNumber;
 
 	private SampleStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class SampleStream extends TNTParseableInputStream<String> {
 		if (fileName == null) {
 			throw new IllegalStateException("SampleStream: File name not defined");
 		}
-		LOGGER.log(OpLevel.DEBUG, "Opening file: {0}", fileName);
+		logger().log(OpLevel.DEBUG, "Opening file: {0}", fileName);
 		activityFile = new File(fileName);
 		lineReader = new LineNumberReader(new FileReader(activityFile));
 	}

@@ -29,12 +29,11 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  */
 public class AbstractBufferedStreamTest {
 	public boolean inputShouldEnd = false;
-	EventSink es = mock(EventSink.class);
-	AbstractBufferedStream<String> abs = new AbstractBufferedStreamTestStub(es);
+	AbstractBufferedStream<String> abs = new AbstractBufferedStreamTestStub();
 
 	@Test
 	public void getNextItemTest() throws Exception {
-		abs.initialize();
+		abs.startStream();
 		abs.setOwnerThread(mock(StreamThread.class));
 		abs.addInputToBuffer("TEST");
 		assertEquals("TEST", abs.getNextItem());
@@ -48,7 +47,7 @@ public class AbstractBufferedStreamTest {
 
 	@Test
 	public void getNextItemNullOnEmptyTest() throws Exception {
-		abs.initialize();
+		abs.startStream();
 		inputShouldEnd = true;
 		assertNull(abs.getNextItem());
 	}
@@ -59,7 +58,7 @@ public class AbstractBufferedStreamTest {
 			@Override
 			public void run() {
 				try {
-					abs.initialize();
+					abs.startStream();
 					abs.addInputToBuffer("TEST");
 					// abs.setProperties(ActivityParserTestBase.makeProperty(StreamProperties.PROP_HALT_ON_PARSER,
 					// "false"));
@@ -76,8 +75,15 @@ public class AbstractBufferedStreamTest {
 	}
 
 	private class AbstractBufferedStreamTestStub extends AbstractBufferedStream<String> {
-		protected AbstractBufferedStreamTestStub(EventSink logger) {
-			super(logger);
+		private EventSink es = mock(EventSink.class);
+
+		AbstractBufferedStreamTestStub() {
+			super();
+		}
+
+		@Override
+		protected EventSink logger() {
+			return es;
 		}
 
 		@Override
@@ -101,7 +107,7 @@ public class AbstractBufferedStreamTest {
 
 	@Test(timeout = 5000)
 	public void addInputToBufferOverflowTest() throws Exception {
-		abs.initialize();
+		abs.startStream();
 
 		Thread thread = new Thread(new Runnable() {
 			@Override

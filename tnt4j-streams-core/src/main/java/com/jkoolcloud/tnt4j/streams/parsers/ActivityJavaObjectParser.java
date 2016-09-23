@@ -54,7 +54,12 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *
 	 */
 	public ActivityJavaObjectParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -89,7 +94,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);

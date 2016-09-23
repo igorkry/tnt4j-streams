@@ -62,7 +62,12 @@ public class WsStream extends AbstractWsStream {
 	 * Constructs an empty WsStream. Requires configuration settings to set input stream source.
 	 */
 	public WsStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override

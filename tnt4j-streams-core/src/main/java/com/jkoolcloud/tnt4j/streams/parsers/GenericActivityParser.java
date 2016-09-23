@@ -29,7 +29,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
@@ -59,16 +58,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected final List<ActivityField> fieldList = new ArrayList<ActivityField>();
 
 	/**
-	 * Constructs a new GenericActivityParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
-	 */
-	protected GenericActivityParser(EventSink logger) {
-		super(logger);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
@@ -91,12 +80,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		logger.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
 				field); // Utils.getDebugString(field));
 
 		for (ActivityField aField : fieldList) {
-			if (aField.getFieldTypeName().equals(field.getFieldTypeName())) {
+			if (aField.getFieldTypeName().equals(field.getFieldTypeName())
+					&& !Utils.isCollectionType(aField.getFieldType().getDataType())) {
 				throw new IllegalArgumentException(
 						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityParser.duplicate.field", getName(), aField.getFieldTypeName()));
@@ -111,7 +101,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		logger.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.removing.field"),
 				field); // Utils.getDebugString(field));
 		fieldList.remove(field);

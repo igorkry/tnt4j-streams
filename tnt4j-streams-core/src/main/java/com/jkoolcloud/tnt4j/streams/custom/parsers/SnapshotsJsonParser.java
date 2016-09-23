@@ -60,7 +60,12 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 	 * Constructs a new SnapshotsJsonParser.
 	 */
 	public SnapshotsJsonParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -108,7 +113,7 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 			Object fValue = wrapValue(resolveLocatorValues(snapshotsField, stream, data));
 
 			if (fValue == null) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"SnapshotsJsonParser.no.snapshots"), getName(), snapshotsFieldName);
 			} else {
 				Object[] snapshotsData = Utils.makeArray(fValue);
@@ -116,7 +121,7 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 				for (Object snapshotData : snapshotsData) {
 					ActivityInfo parsedItem = applySnapshotParsers(stream, snapshotData);
 					if (parsedItem == null) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"SnapshotsJsonParser.no.snapshot.parser"), snapshotData);
 					} else {
 						ai.addChild(parsedItem);

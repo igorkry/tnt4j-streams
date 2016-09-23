@@ -69,8 +69,6 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 	private LinePolicy linePolicy = LinePolicy.READ_FROM_BEGINNING;
 
-	private final EventSink logger;
-
 	/**
 	 * Streamed file descriptor.
 	 */
@@ -83,8 +81,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	/**
 	 * Constructs a new AbstractFileStreamStateHandler.
 	 */
-	protected AbstractFileStreamStateHandler(EventSink logger) {
-		this.logger = logger;
+	protected AbstractFileStreamStateHandler() {
 	}
 
 	/**
@@ -96,10 +93,16 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 * @param streamName
 	 *            stream name
 	 */
-	protected AbstractFileStreamStateHandler(EventSink logger, T[] activityFiles, String streamName) {
-		this(logger);
+	protected AbstractFileStreamStateHandler(T[] activityFiles, String streamName) {
 		initialize(activityFiles, streamName);
 	}
+
+	/**
+	 * Returns logger used by this state handler.
+	 *
+	 * @return state handler logger
+	 */
+	protected abstract EventSink logger();
 
 	/**
 	 * Initiates streamed files access state handler. Load already persisted stream accessed file state if such is
@@ -136,10 +139,10 @@ public abstract class AbstractFileStreamStateHandler<T> {
 				fileAccessState = new FileAccessState();
 			}
 		} catch (IOException e) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error.load"), e);
 		} catch (JAXBException e) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.not.parsed"), e);
 		}
 	}
@@ -411,7 +414,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			writeState(fileAccessState, fileDir, streamName);
 		} catch (JAXBException exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error.save"), exc);
 		}
 	}
@@ -492,7 +495,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			crc.update(bytes4Line, 0, bytes4Line.length);
 			fileAccessState.currentLineCrc = crc.getValue();
 		} catch (IOException exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error"), exc);
 		}
 	}
@@ -517,7 +520,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			fileAccessState.currentFileCrc = getFileCrc(file);
 		} catch (IOException exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error"), exc);
 		}
 	}

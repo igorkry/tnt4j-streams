@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
  */
 // Current coverage 71,1%
 public class ActivityInfoTest {
-	OpType[] supportedEventTypes = { OpType.ACTIVITY, OpType.SNAPSHOT, OpType.EVENT };
+	private static OpType[] supportedEventTypes = { OpType.ACTIVITY, OpType.SNAPSHOT, OpType.EVENT };
 
 	@Test
 	public void testApplyField() throws Exception {
@@ -123,6 +123,7 @@ public class ActivityInfoTest {
 				any(Object[].class))).thenReturn(tEvent);
 		when(tracker.newActivity(any(OpLevel.class), any(String.class))).thenReturn(tActivity);
 		when(tracker.newSnapshot(any(String.class))).thenReturn(snapshot);
+		when(tracker.newSnapshot(any(String.class), any(String.class))).thenReturn(snapshot);
 
 		when(tConfig.getUUIDFactory()).thenReturn(uiFactory);
 		when(uiFactory.newUUID()).thenReturn("TEST");

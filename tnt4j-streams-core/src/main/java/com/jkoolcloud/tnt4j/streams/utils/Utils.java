@@ -807,6 +807,18 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Checks if provided class represents an array class or is implementation of {@link Collection}.
+	 *
+	 * @param cls
+	 *            class to check
+	 * @return {@code true} if cls is implementation of {@link Collection} or represents an array class, {@code false} -
+	 *         otherwise.
+	 */
+	public static boolean isCollectionType(Class<?> cls) {
+		return cls.isArray() || Collection.class.isAssignableFrom(cls);
+	}
+
+	/**
 	 * Wraps provided object item seeking by index.
 	 * <p>
 	 * If obj is not {@link Collection} or {@code Object[]}, then same object is returned.

@@ -59,6 +59,7 @@
 
     <stream name="MessageStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="Port" value="6450"/>
+
         <parser-ref name="WmqMsgOpXmlParser"/>
     </stream>
 </tnt-data-source>

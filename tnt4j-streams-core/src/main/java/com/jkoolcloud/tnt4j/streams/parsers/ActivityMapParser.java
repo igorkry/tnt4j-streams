@@ -39,7 +39,12 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	 * Constructs a new ActivityMapParser.
 	 */
 	public ActivityMapParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**

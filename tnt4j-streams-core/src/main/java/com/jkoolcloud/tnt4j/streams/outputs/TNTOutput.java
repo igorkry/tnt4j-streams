@@ -26,6 +26,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @version $Revision: 1 $
  *
+ * @see TNTInputStream#setOutput(TNTOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
  */
 public interface TNTOutput<T> {

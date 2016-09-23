@@ -101,6 +101,11 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		fillDefaultConfigRegexMappings();
 	}
 
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
 	/**
 	 * Fills default Apache access log configuration to RegEx mappings.
 	 */
@@ -152,7 +157,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					apacheLogPattern = value;
-					LOGGER.log(OpLevel.DEBUG,
+					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
@@ -164,14 +169,14 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 						String regex = value.substring(idx + 1);
 
 						String oldRegex = userRegexMappings.put(confKey, regex);
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityParser.setting"), name, value);
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ApacheAccessLogParser.setting.regex.mapping"), confKey, oldRegex, regex);
 					}
 				}
 			}
-			LOGGER.log(OpLevel.TRACE,
+			logger().log(OpLevel.TRACE,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 
@@ -179,10 +184,10 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			String regex = makeRegexPattern(apacheLogPattern);
 			if (regex != null) {
 				pattern = Pattern.compile(regex);
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ApacheAccessLogParser.regex.made"), getName(), regex);
 			} else {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ApacheAccessLogParser.could.not.make.regex"), getName(), apacheLogPattern);
 			}
 		}

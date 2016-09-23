@@ -16,12 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.Reader;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements piped activity stream, where each piped RAW data line is assumed to represent a single activity or event
@@ -29,36 +29,16 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link BufferedReader}. Default RAW input stream is {@link System#in}.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * NOTE: this stream just pipe input from RAW input source (i.e. System.in) and does not open it. This way when closing
+ * this stream, RAW {@link InputStream} or {@link Reader} is not closed and left to be closed by opener.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public class PipedStream extends TNTParseableInputStream<String> {
+public class PipedStream extends JavaInputStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(PipedStream.class);
-
-	/**
-	 * {@link Reader} from which activity data is read
-	 */
-	protected Reader rawReader = null;
-
-	/**
-	 * BufferedReader that wraps {@link #rawReader}
-	 */
-	protected LineNumberReader dataReader = null;
-
-	private int lineNumber = 0;
-
-	/**
-	 * Constructs an empty PipedStream. Default input stream is {@link System#in}.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected PipedStream(EventSink logger) {
-		super(logger);
-		setReader(new InputStreamReader(System.in));
-	}
 
 	/**
 	 * Constructs an empty PipedStream. Default input stream is {@link System#in}.
@@ -74,7 +54,8 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	 *            input stream to read data from
 	 */
 	public PipedStream(InputStream stream) {
-		this(new InputStreamReader(stream));
+		super(stream);
+		inputCloseable = false;
 	}
 
 	/**
@@ -84,76 +65,12 @@ public class PipedStream extends TNTParseableInputStream<String> {
 	 *            reader to read data from
 	 */
 	public PipedStream(Reader reader) {
-		super(LOGGER);
-		setReader(reader);
-	}
-
-	/**
-	 * Sets {@link Reader} from which activity data should be read.
-	 *
-	 * @param reader
-	 *            reader to read data from
-	 */
-	public void setReader(Reader reader) {
-		rawReader = reader;
+		super(reader);
+		inputCloseable = false;
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
-
-		if (rawReader == null) {
-			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"CharacterStream.no.stream.reader"));
-		}
-
-		dataReader = new LineNumberReader(new BufferedReader(rawReader));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This method returns a string containing the contents of the next line in the piped RAW input.
-	 */
-	@Override
-	public String getNextItem() throws Exception {
-		if (dataReader == null) {
-			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"PipedStream.raw.stream.not.opened"));
-		}
-
-		String line = Utils.getNonEmptyLine(dataReader);
-		lineNumber = dataReader.getLineNumber();
-
-		if (line != null) {
-			addStreamedBytesCount(line.getBytes().length);
-		}
-
-		return line;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This method returns line number last read from pipe.
-	 */
-	@Override
-	public int getActivityPosition() {
-		return lineNumber;
-	}
-
-	@Override
-	protected void cleanup() {
-		// NOTE: we just pipe input and did not open System.in or other RAW
-		// input source enforcing the rule that who opens it, closes it - leave
-		// the closing to opener.
-
-		// Utils.close(rawReader);
-		// Utils.close(dataReader);
-
-		rawReader = null;
-		dataReader = null;
-
-		super.cleanup();
+	protected EventSink logger() {
+		return LOGGER;
 	}
 }

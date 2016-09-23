@@ -21,20 +21,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw
@@ -45,9 +39,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class ActivityFieldLocator implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
-
-	private static final Pattern RANGE_PATTERN = Pattern.compile("(-?(\\d+)*(\\.\\d*)?)");
-	private static final String RANGE_SEPARATOR = ":"; // NON-NLS
 
 	private String type = null;
 	private String locator = null;
@@ -390,7 +381,7 @@ public class ActivityFieldLocator implements Cloneable {
 
 				switch (mapType) {
 				case Range:
-					valueMap.put(getRangeKey(source), target);
+					valueMap.put(DoubleRange.getRange(source), target);
 					break;
 				case Calc:
 					valueMap.put(getCalcKey(source), target);
@@ -582,95 +573,8 @@ public class ActivityFieldLocator implements Cloneable {
 		return null;
 	}
 
-	private static Range getRangeKey(String source) throws Exception {
-		String cs = StringUtils.trimToNull(source);
-		if (StringUtils.isEmpty(cs)) {
-			throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityFieldLocator.range.string.empty"));
-		}
-		int rCharIdx = cs.indexOf(RANGE_SEPARATOR);
-
-		String[] numStrs = new String[2];
-		int si = 0;
-		Matcher m = RANGE_PATTERN.matcher(cs);
-		while (m.find()) {
-			String g = m.group();
-			if (StringUtils.isNotEmpty(g)) {
-				numStrs[si++] = g;
-			}
-			m.end();
-		}
-
-		String fromStr = null;
-		String toStr = null;
-
-		if (rCharIdx == -1) { // no range separator symbol found - unary range
-			fromStr = numStrs.length > 0 ? numStrs[0] : null;
-			toStr = fromStr;
-		} else {
-			if (rCharIdx == 0) { // unbound low range
-				toStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else if (rCharIdx == cs.length()) { // unbound high range
-				fromStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else { // bounded range
-				fromStr = numStrs.length > 0 ? numStrs[0] : null;
-				toStr = numStrs.length > 1 ? numStrs[1] : null;
-			}
-		}
-
-		Double from = StringUtils.isEmpty(fromStr) ? -Double.MAX_VALUE : NumberUtils.createDouble(fromStr);
-		Double to = StringUtils.isEmpty(toStr) ? Double.MAX_VALUE : NumberUtils.createDouble(toStr);
-
-		return new Range(from, to);
-	}
-
 	private static Calc getCalcKey(String source) throws IllegalArgumentException {
 		return new Calc(ActivityFieldMappingCalc.valueOf(source.toUpperCase()));
-	}
-
-	private static class Range {
-		private Double from;
-		private Double to;
-
-		private Range(Double from, Double to) {
-			this.from = from;
-			this.to = to;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof Number) {
-				return inRange(((Number) obj).doubleValue());
-			}
-
-			if (obj instanceof String) {
-				try {
-					return inRange(NumberUtils.createDouble((String) obj));
-				} catch (NumberFormatException exc) {
-				}
-			}
-
-			return super.equals(obj);
-		}
-
-		private boolean inRange(Double num) {
-			int compareMin = from.compareTo(num);
-			int compareMax = to.compareTo(num);
-
-			return compareMin <= 0 && compareMax >= 0;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(from) + RANGE_SEPARATOR + String.valueOf(to);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = from.hashCode();
-			result = 31 * result + to.hashCode();
-			return result;
-		}
 	}
 
 	private static class Calc {
@@ -688,7 +592,7 @@ public class ActivityFieldLocator implements Cloneable {
 
 			if (obj instanceof String) {
 				try {
-					return match(NumberUtils.createDouble((String) obj));
+					return match(Double.parseDouble((String) obj));
 				} catch (NumberFormatException exc) {
 				}
 			}

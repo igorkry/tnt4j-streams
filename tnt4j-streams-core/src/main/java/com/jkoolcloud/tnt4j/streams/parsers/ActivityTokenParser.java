@@ -77,7 +77,12 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	 * Constructs a new ActivityTokenParser.
 	 */
 	public ActivityTokenParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -90,19 +95,19 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 			String value = prop.getValue();
 			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				LOGGER.log(OpLevel.DEBUG,
+				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, fieldDelim);
 			} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG,
+					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
 			} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
-				LOGGER.log(OpLevel.TRACE,
+				logger().log(OpLevel.TRACE,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
 			}
@@ -123,12 +128,12 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.input.not.match"), getName());
 				return null;
 			}
@@ -138,11 +143,11 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
 				fields.length);
 

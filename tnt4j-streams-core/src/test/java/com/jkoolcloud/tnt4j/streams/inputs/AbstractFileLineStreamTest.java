@@ -18,23 +18,27 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-public class AbstractFileLineStreamTest extends PropertiesTestBase {
-	boolean inputEnded = false;
-	FileLineStream afls = new FileLineStream();
+public class AbstractFileLineStreamTest {
+	private boolean inputEnded = false;
+	private FileLineStream afls = new FileLineStream();
 
 	@Test
 	public void setPropertiesTest() throws Exception {
-		final String fileName = "c:/Windows/schemas/TSWorkSpace/tswcx.xml";
-		afls.setProperties(getPropertyList().add(StreamProperties.PROP_FILENAME, fileName).build());
+		final String fileName = "c:/Windows/schemas/TSWorkSpace/tswcx.xml"; // NON-NLS
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(StreamProperties.PROP_FILENAME, fileName);
+		afls.setProperties(props.entrySet());
 		final Object property = afls.getProperty(StreamProperties.PROP_FILENAME);
 		assertTrue(fileName.equals(property));
 	}

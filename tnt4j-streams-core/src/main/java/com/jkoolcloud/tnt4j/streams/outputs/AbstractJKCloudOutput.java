@@ -40,7 +40,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * Base class for This interface defines operations commonly used by TNT4J-Streams outputs .
+ * Base class for TNT4J-Streams output handler. Handles {@link Tracker} initialization, configuration and caching. Picks
+ * tracker to use according streamed data source FQN and stream running {@link Thread}.
  *
  * @param <T>
  *            the type of handled activity data
@@ -56,8 +57,6 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
 
-	private final EventSink logger;
-
 	/**
 	 * Used to deliver processed activity data to destination.
 	 */
@@ -72,13 +71,16 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
-	 *
-	 * @param logger
-	 *            logger used by stream output handler
 	 */
-	protected AbstractJKCloudOutput(EventSink logger) {
-		this.logger = logger;
+	protected AbstractJKCloudOutput() {
 	}
+
+	/**
+	 * Returns logger used by this stream output handler.
+	 *
+	 * @return parser logger
+	 */
+	protected abstract EventSink logger();
 
 	@Override
 	public void setStream(TNTInputStream<?, ?> inputStream) {
@@ -145,7 +147,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	public void handleConsumerThread(Thread t) {
 		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
 		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
-		logger.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.default.tracker"),
 				(t == null ? "null" : t.getName()), defaultSource.getFQName());
 	}
@@ -181,7 +183,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 				streamConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(streamConfig.build());
 				trackersMap.put(getTrackersMapKey(t, aiSource.getFQName()), tracker);
-				logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.build.new.tracker"), aiSource.getFQName());
 			}
 
@@ -216,10 +218,10 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 			try {
 				tracker.open();
 			} catch (IOException ioe) {
-				logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.failed.to.connect"), tracker, ioe);
 				Utils.close(tracker);
-				logger.log(OpLevel.INFO,
+				logger().log(OpLevel.INFO,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.will.retry"),
 						TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL));
 				if (!stream.isHalted()) {

@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -86,9 +88,9 @@ public class HdfsFileLineStreamTest {
 		final String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix()
 				+ "*.TST").replace("\\", "/");
 
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME, fileName));
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_RESTORE_STATE, "false"));
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_FILENAME, fileName);
+		props.put(StreamProperties.PROP_RESTORE_STATE, "false");
 
 		when(fs.open(any(Path.class))).thenReturn(new FSDataInputStream(new TestInputStreamStub()));
 		final FileStatus fileStatusMock = mock(FileStatus.class);
@@ -108,8 +110,8 @@ public class HdfsFileLineStreamTest {
 		st.setName("HdfsFileLineStreamTestThreadName");
 		stream.setOwnerThread(st);
 
-		stream.setProperties(props);
-		stream.initialize();
+		stream.setProperties(props.entrySet());
+		stream.startStream();
 
 		verify(fileStatusMock, atLeastOnce()).getModificationTime();
 		verify(fileStatusMock, atLeastOnce()).getPath();

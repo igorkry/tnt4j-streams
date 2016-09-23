@@ -24,7 +24,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput;
@@ -54,16 +53,6 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<String, List<ActivityParser>>();
 
 	private boolean haltIfNoParser = true;
-
-	/**
-	 * Constructs a new TNTParseableInputStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected TNTParseableInputStream(EventSink logger) {
-		super(logger);
-	}
 
 	@Override
 	public void setDefaultStreamOutput() {
@@ -254,7 +243,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
-			logger.log(OpLevel.WARNING,
+			logger().log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.no.parser"),
 					item);
 			incrementSkippedActivitiesCount();

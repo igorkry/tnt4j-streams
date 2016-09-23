@@ -28,7 +28,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -60,16 +59,6 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	private Workbook workbook;
 	private Iterator<Sheet> sheetIterator;
-
-	/**
-	 * Constructs a new AbstractExcelStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected AbstractExcelStream(EventSink logger) {
-		super(logger);
-	}
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -106,6 +95,11 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	}
 
 	@Override
+	public int getTotalActivities() {
+		return workbook == null ? super.getTotalActivities() : workbook.getNumberOfSheets();
+	}
+
+	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
 
@@ -116,9 +110,6 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 		workbook = new XSSFWorkbook(new FileInputStream(fileName));
 		sheetIterator = workbook.sheetIterator();
-
-		logger.log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-				"AbstractExcelStream.stream.initialized"), getName());
 	}
 
 	@Override
@@ -129,16 +120,19 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	}
 
 	/**
-	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property 'SheetsToProcess')
-	 * sheets name filtering mask. If no more sheets matching name filter mask is available in workbook, then
-	 * {@code null} is returned.
+	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property
+	 * '{@value MsOfficeStreamConstants#PROP_SHEETS}') sheets name filtering mask. If no more sheets matching name
+	 * filter mask is available in workbook, then {@code null} is returned.
+	 *
+	 * @param contSkips
+	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count
 	 * 
 	 * @return next workbook sheet matching name filter mask, or {@code null} if no more sheets matching name mask
 	 *         available in this workbook.
 	 */
-	protected Sheet getNextNameMatchingSheet() {
+	protected Sheet getNextNameMatchingSheet(boolean contSkips) {
 		if (sheetIterator == null || !sheetIterator.hasNext()) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 					"AbstractExcelStream.no.more.sheets"));
 
 			return null;
@@ -148,13 +142,15 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
 
 		if (!match) {
-			return getNextNameMatchingSheet();
+			if (contSkips) {
+				skipFilteredActivities();
+			}
+			return getNextNameMatchingSheet(contSkips);
 		}
 
-		logger.log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+		logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 				"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
 
 		return sheet;
 	}
-
 }

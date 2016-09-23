@@ -16,8 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -38,22 +42,24 @@ public class WmqStreamTest {
 
 	@Test
 	public void propertiesSetTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QUEUE_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_SUB_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_STRING, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_HOST, "localhost");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_PORT, 8080);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_CHANNEL_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_STRIP_HEADERS, false);
+		Map<String, String> props = new HashMap<String, String>(9);
+		props.put(StreamProperties.PROP_QMGR_NAME, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_QUEUE_NAME, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_TOPIC_NAME, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_SUB_NAME, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_TOPIC_STRING, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_HOST, "localhost"); // NON-NLS
+		props.put(StreamProperties.PROP_PORT, String.valueOf(8080));
+		props.put(StreamProperties.PROP_CHANNEL_NAME, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_STRIP_HEADERS, String.valueOf(false));
+		wmqStream.setProperties(props.entrySet());
+		testPropertyList(wmqStream, props.entrySet());
 	}
 
 	@Test
 	public void testInitialize() throws Exception {
 		propertiesSetTest();
-		wmqStream.initialize();
+		wmqStream.startStream();
 		assertNotNull(wmqStream.gmo);
 	}
 

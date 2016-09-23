@@ -51,7 +51,12 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 * Constructs a new ExcelSheetParser.
 	 */
 	public ActivityExcelSheetParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -87,7 +92,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		Sheet sheet = (Sheet) data;
@@ -134,7 +139,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 					}
 
 					if (!cellFound) {
-						LOGGER.log(OpLevel.WARNING,
+						logger().log(OpLevel.WARNING,
 								StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 										"AbstractExcelStream.cell.not.found"),
 								locStr, sheet.getWorkbook().getMissingCellPolicy());

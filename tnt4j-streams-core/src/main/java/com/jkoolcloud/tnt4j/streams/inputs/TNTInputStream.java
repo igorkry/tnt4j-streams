@@ -65,11 +65,6 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	private static final int DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT = 20;
 
 	/**
-	 * Stream logger.
-	 */
-	protected final EventSink logger;
-
-	/**
 	 * StreamThread running this stream.
 	 */
 	protected StreamThread ownerThread = null;
@@ -97,14 +92,11 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	private TNTOutput<K> out;
 
 	/**
-	 * Constructs a new TNTInputStream.
+	 * Returns logger used by this stream.
 	 *
-	 * @param logger
-	 *            logger used by activity stream
+	 * @return stream logger
 	 */
-	protected TNTInputStream(EventSink logger) {
-		this.logger = logger;
-	}
+	protected abstract EventSink logger();
 
 	/**
 	 * Gets stream output handler.
@@ -233,7 +225,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 			// throw new
 			// IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 			// "TNTInputStream.output.undefined"));
-			logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.output.undefined"));
 		}
 
@@ -246,6 +238,32 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		} else {
 			out.handleConsumerThread(ownerThread == null ? Thread.currentThread() : ownerThread);
 		}
+	}
+
+	/**
+	 * Starts stream data input.
+	 *
+	 * @throws Exception
+	 *             indicates that stream was unable to start and cannot continue
+	 */
+	protected void start() throws Exception {
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.ready"),
+				getClass().getSimpleName(), getName());
+
+		startTime = System.currentTimeMillis();
+		notifyStatusChange(StreamStatus.STARTED);
+	}
+
+	/**
+	 * Initializes stream and starts data input.
+	 *
+	 * @throws Exception
+	 *             indicates that stream is not configured properly or was unable to start and cannot continue
+	 */
+	public void startStream() throws Exception {
+		initialize();
+		start();
 	}
 
 	/**
@@ -308,7 +326,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 				try {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
-						logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.tasks.buffer.limit"), offerTimeout);
 						notifyStreamTaskRejected(r);
 					}
@@ -423,6 +441,15 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 */
 	protected int incrementSkippedActivitiesCount() {
 		return skippedActivitiesCount.incrementAndGet();
+	}
+
+	/**
+	 * Updates activities skipped and total counts and fires progress update notification when activity data gets
+	 * filtered out by streaming settings (i.e. file lines range).
+	 */
+	protected void skipFilteredActivities() {
+		incrementSkippedActivitiesCount();
+		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
 	}
 
 	/**
@@ -543,7 +570,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	public void run() {
 		notifyStatusChange(StreamStatus.NEW);
 
-		logger.log(OpLevel.INFO,
+		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.starting"), name);
 		if (ownerThread == null) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
@@ -555,14 +582,13 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 		AtomicBoolean failureFlag = new AtomicBoolean(false);
 		try {
-			initialize();
-			startTime = System.currentTimeMillis();
-			notifyStatusChange(StreamStatus.STARTED);
+			startStream();
+
 			while (!isHalted()) {
 				try {
 					T item = getNextItem();
 					if (item == null) {
-						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.data.stream.ended"), name);
 						halt(); // no more data items to process
 					} else {
@@ -573,7 +599,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger.log(OpLevel.ERROR,
+					logger().log(OpLevel.ERROR,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"TNTInputStream.failed.record.activity.at"),
 							getActivityPosition(), ise.getLocalizedMessage(), ise);
@@ -581,14 +607,14 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 					notifyFailed(null, ise, null);
 					halt();
 				} catch (Exception exc) {
-					logger.log(OpLevel.ERROR,
+					logger().log(OpLevel.ERROR,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"TNTInputStream.failed.record.activity.at"),
 							getActivityPosition(), exc.getLocalizedMessage(), exc);
 				}
 			}
 		} catch (Exception e) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
@@ -601,10 +627,10 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 			cleanup();
 
-			logger.log(OpLevel.INFO,
+			logger().log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
 					Thread.currentThread().getName());
-			logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.stream.statistics"), name, getStreamStatistics());
 		}
 	}
@@ -858,7 +884,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 			try {
 				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
-				logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 				failureFlag.set(true);
 				notifyFailed(null, e, null);

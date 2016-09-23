@@ -25,6 +25,8 @@
 
     <stream name="SampleHdfsFileLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName" value="hdfs://[host]:[port]/[path]/log.txt*"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+
         <parser-ref name="AccessLogParserCommon"/>
     </stream>
 </tnt-data-source>

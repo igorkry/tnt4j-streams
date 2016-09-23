@@ -48,7 +48,12 @@ public class CmdStream extends AbstractWsStream {
 	 * Constructs an empty CmdStream. Requires configuration settings to set input stream source.
 	 */
 	public CmdStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override

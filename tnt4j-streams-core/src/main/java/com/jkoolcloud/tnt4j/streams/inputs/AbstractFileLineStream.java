@@ -28,11 +28,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.state.AbstractFileStreamStateHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -56,6 +56,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * {@code true}. Default value - 15sec. (Optional)</li>
  * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
  * on stream restart. Default value - {@code true}. (Optional)</li>
+ * <li>RangeToStream - defines streamed data lines index range. Default value - {@code 1:}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -91,14 +92,14 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	 */
 	protected boolean storeState = true;
 
+	private String rangeValue = "1:"; // NON-NLS
+	private IntRange lineRange = null;
+
 	/**
 	 * Constructs a new AbstractFileLineStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 */
-	protected AbstractFileLineStream(EventSink logger) {
-		super(logger, 1);
+	protected AbstractFileLineStream() {
+		super(1);
 	}
 
 	@Override
@@ -122,6 +123,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 				pollingOn = Boolean.parseBoolean(value);
 			} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
 				storeState = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+				rangeValue = value;
 			}
 		}
 	}
@@ -143,6 +146,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
 			return storeState;
 		}
+		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			return rangeValue;
+		}
 		return super.getProperty(name);
 	}
 
@@ -159,13 +165,25 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			startFromLatestActivity = false;
 		}
 
-		logger.log(OpLevel.DEBUG,
+		lineRange = IntRange.getRange(rangeValue);
+
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.initializing.stream"),
 				fileName);
 
 		fileWatcher = createFileWatcher();
 		fileWatcher.initialize();
+	}
+
+	@Override
+	protected void start() throws Exception {
+		super.start();
+
 		fileWatcher.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	/**
@@ -290,8 +308,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 						shutdown();
 					} else {
 						try {
-							logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"FileLineStream.waiting"), fileWatcherDelay / 1000.0);
+							logger().log(OpLevel.DEBUG, StreamsResources
+									.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.waiting"),
+									fileWatcherDelay / 1000.0);
 							Thread.sleep(fileWatcherDelay);
 						} catch (InterruptedException exc) {
 						}
@@ -322,8 +341,10 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			String line;
 			while ((line = lnr.readLine()) != null && !isInputEnded()) {
 				lineNumber = lnr.getLineNumber();
-				if (StringUtils.isNotEmpty(line)) {
+				if (StringUtils.isNotEmpty(line) && lineRange.inRange(lineNumber)) {
 					addInputToBuffer(new Line(line, lineNumber));
+				} else {
+					skipFilteredActivities();
 				}
 			}
 		}

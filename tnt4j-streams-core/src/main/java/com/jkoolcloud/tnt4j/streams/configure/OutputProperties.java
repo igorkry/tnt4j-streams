@@ -25,10 +25,10 @@ public interface OutputProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_TNT4J_CONFIG_FILE = "TNT4JConfigFile"; // NON-NLS
+	String PROP_TNT4J_CONFIG_FILE = "TNT4JConfigFile"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_TNT4J_PROPERTY = "TNT4JProperty"; // NON-NLS
+	String PROP_TNT4J_PROPERTY = "TNT4JProperty"; // NON-NLS
 }

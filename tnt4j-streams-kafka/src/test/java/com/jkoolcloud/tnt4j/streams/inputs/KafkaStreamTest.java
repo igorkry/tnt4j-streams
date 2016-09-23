@@ -16,11 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -48,27 +51,23 @@ public class KafkaStreamTest {
 	public void testProperties() throws Exception {
 		input = new KafkaStream();
 
-		final Collection<Entry<String, String>> properties = InputPropertiesTestUtils
-				.makeTestPropertiesSet(StreamProperties.PROP_TOPIC_NAME, DEFAULT_TEST_TOPIC);
-		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("Topic", DEFAULT_TEST_TOPIC));
-		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("zookeeper.connect", "127.0.0.1:2181"));
-		properties.addAll(InputPropertiesTestUtils.makeTestPropertiesSet("group.id", "TEST"));
-		input.setProperties(properties);
-		for (Map.Entry<String, String> property : properties) {
-			assertEquals("Fail for property: " + property.getKey(), property.getValue(),
-					input.getProperty(property.getKey()));
-		}
+		Map<String, String> props = new HashMap<String, String>(3);
+		props.put(StreamProperties.PROP_TOPIC_NAME, DEFAULT_TEST_TOPIC);
+		props.put("zookeeper.connect", "127.0.0.1:2181");// NON-NLS
+		props.put("group.id", "TEST"); // NON-NLS
+		input.setProperties(props.entrySet());
+		testPropertyList(input, props.entrySet());
 	}
 
 	@Test(expected = ZkTimeoutException.class)
 	public void testInitialize() throws Exception {
 		testProperties();
-		input.initialize();
+		input.startStream();
 	}
 
 	@Test
 	public void testRB() {
-		String keyModule = "KafkaStream.stream.ready";
+		String keyModule = "KafkaStream.empty.messages.buffer";
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);

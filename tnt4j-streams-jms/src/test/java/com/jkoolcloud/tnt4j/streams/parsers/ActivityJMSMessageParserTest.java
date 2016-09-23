@@ -72,7 +72,7 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 
 	@Test
 	public void testRB() {
-		String keyModule = "JMSStream.stream.ready";
+		String keyModule = "ActivityJMSMessageParser.payload.data.error";
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);

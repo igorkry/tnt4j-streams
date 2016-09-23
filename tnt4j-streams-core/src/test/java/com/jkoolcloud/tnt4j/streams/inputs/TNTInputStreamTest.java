@@ -16,16 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.junit.Before;
@@ -34,7 +32,6 @@ import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
@@ -45,9 +42,8 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  * @author akausinis
  * @version 1.0
  */
-public class TNTInputStreamTest extends PropertiesTestBase {
-
-	private EventSink logger;
+public class TNTInputStreamTest {
+	EventSink LOGGER = mock(EventSink.class);
 	private ActivityParser parser;
 	private TestStream ts;
 	private StreamThread streamThread;
@@ -55,10 +51,9 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 
 	@Before
 	public void initTest() {
-		logger = mock(EventSink.class);
-		parser = new TestActivityParser(logger);
+		parser = new TestActivityParser();
 		ai = mock(ActivityInfo.class);
-		ts = new TestStream(logger);
+		ts = new TestStream();
 		streamThread = new StreamThread(ts);
 	}
 
@@ -77,21 +72,16 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 
 	@Test
 	public void setPropertiesTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList()
-				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_HALT_ON_PARSER, "true")
-				.add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
-				.add(StreamProperties.PROP_USE_EXECUTOR_SERVICE, "true")
-				.add(StreamProperties.PROP_DATETIME, new Date().toString())
-				.add(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_BOUNDED, "true").build();
-		ts.setProperties(props);
-		for (Map.Entry<String, String> property : props) {
-			String name = property.getKey();
-			String expectedValue = property.getValue();
-			assertEquals("Property not set as expected", expectedValue, ts.getProperty(name).toString());
-		}
-
+		Map<String, String> props = new HashMap<String, String>(8);
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
+		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
+		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));
+		props.put(StreamProperties.PROP_DATETIME, new Date().toString());
+		props.put(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_BOUNDED, String.valueOf(true));
+		ts.setProperties(props.entrySet());
+		testPropertyList(ts, props.entrySet());
 	}
 
 	@Test
@@ -103,30 +93,30 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 
 	@Test
 	public void getBoundedExecutorServiceTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList()
-				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_HALT_ON_PARSER, "true")
-				.add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
-				.add(StreamProperties.PROP_USE_EXECUTOR_SERVICE, "true")
-				.add(StreamProperties.PROP_DATETIME, new Date().toString())
-				.add(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_BOUNDED, "true").build();
-		ts.setProperties(props);
-		ts.initialize();
+		Map<String, String> props = new HashMap<String, String>(8);
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
+		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
+		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));
+		props.put(StreamProperties.PROP_DATETIME, new Date().toString());
+		props.put(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_BOUNDED, String.valueOf(true));
+		ts.setProperties(props.entrySet());
+		ts.startStream();
 	}
 
 	@Test
 	public void getDefaultExecutorServiceTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList()
-				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_HALT_ON_PARSER, "true")
-				.add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
-				.add(StreamProperties.PROP_USE_EXECUTOR_SERVICE, "true")
-				.add(StreamProperties.PROP_DATETIME, new Date().toString())
-				.add(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, "500")
-				.add(StreamProperties.PROP_EXECUTORS_BOUNDED, "false").build();
-		ts.setProperties(props);
-		ts.initialize();
+		Map<String, String> props = new HashMap<String, String>(8);
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
+		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
+		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));
+		props.put(StreamProperties.PROP_DATETIME, new Date().toString());
+		props.put(StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT, String.valueOf(500));
+		props.put(StreamProperties.PROP_EXECUTORS_BOUNDED, String.valueOf(false));
+		ts.setProperties(props.entrySet());
+		ts.startStream();
 		ts.halt();
 	}
 
@@ -235,7 +225,8 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 
 	@Test
 	public void streamStatsTest() {
-		assertEquals(ts.getTotalActivities(), ts.getStreamStatistics().getActivitiesTotal());
+		assertEquals(ts.getTotalActivities() == -1 ? ts.getCurrentActivity() : ts.getTotalActivities(),
+				ts.getStreamStatistics().getActivitiesTotal());
 		assertEquals(ts.getCurrentActivity(), ts.getStreamStatistics().getCurrActivity());
 		assertEquals(ts.getTotalBytes(), ts.getStreamStatistics().getTotalBytes());
 		assertEquals(ts.getStreamedBytesCount(), ts.getStreamStatistics().getBytesStreamed());
@@ -283,10 +274,15 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 		// BlockingQueue<String> buffer = new ArrayBlockingQueue<String>(5);
 		boolean used = false;
 
-		protected TestStream(EventSink logger) {
-			super(logger);
+		protected TestStream() {
+			super();
 			// buffer.offer("TEST");
 
+		}
+
+		@Override
+		protected EventSink logger() {
+			return LOGGER;
 		}
 
 		@Override
@@ -301,8 +297,13 @@ public class TNTInputStreamTest extends PropertiesTestBase {
 
 	private class TestActivityParser extends ActivityParser {
 
-		protected TestActivityParser(EventSink logger) {
-			super(logger);
+		protected TestActivityParser() {
+			super();
+		}
+
+		@Override
+		protected EventSink logger() {
+			return LOGGER;
 		}
 
 		@Override

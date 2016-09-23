@@ -21,13 +21,11 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
@@ -38,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
  * @author akausinis
  * @version 1.0
  */
-public class ActivityJavaObjectParserTest extends PropertiesTestBase {
+public class ActivityJavaObjectParserTest {
 
 	@Test
 	public void setPropertiesTest() throws Exception {
@@ -104,10 +102,10 @@ public class ActivityJavaObjectParserTest extends PropertiesTestBase {
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp,
 				"ExecutorThreadsQuantity");
 		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		final Collection<Entry<String, String>> props = getPropertyList()
-				.add(StreamProperties.PROP_HALT_ON_PARSER, "true").add(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5")
-				.build();
-		stream.setProperties(props);
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
+		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5");
+		stream.setProperties(props.entrySet());
 		assertEquals(5, testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 

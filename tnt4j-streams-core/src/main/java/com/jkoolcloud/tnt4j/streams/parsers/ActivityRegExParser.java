@@ -70,7 +70,12 @@ public class ActivityRegExParser extends ActivityParser {
 	 * Constructs a new ActivityRegExParser.
 	 */
 	public ActivityRegExParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -84,12 +89,12 @@ public class ActivityRegExParser extends ActivityParser {
 			if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (!StringUtils.isEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG,
+					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
 			}
-			LOGGER.log(OpLevel.TRACE,
+			logger().log(OpLevel.TRACE,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 	}
@@ -108,7 +113,7 @@ public class ActivityRegExParser extends ActivityParser {
 				locType = ActivityFieldLocatorType.valueOf(locator.getType());
 			} catch (Exception e) {
 			}
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
 					field); // Utils.getDebugString(field));
 			if (locType == ActivityFieldLocatorType.REMatchNum) {
@@ -163,11 +168,11 @@ public class ActivityRegExParser extends ActivityParser {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
 		Matcher matcher = pattern.matcher(dataStr);
 		if (matcher == null || !matcher.matches()) {
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.input.not.match"),
 					getName());
 			return null;
@@ -179,7 +184,7 @@ public class ActivityRegExParser extends ActivityParser {
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.applying.regex"), matchMap.size());
 				ArrayList<String> matches = new ArrayList<String>();
 				matches.add(""); // dummy entry to index array with match
@@ -187,10 +192,10 @@ public class ActivityRegExParser extends ActivityParser {
 				while (matcher.find()) {
 					String matchStr = matcher.group().trim();
 					matches.add(matchStr);
-					LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.match"), matches.size(), matchStr);
 				}
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.found.matches"), matches.size());
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
@@ -198,7 +203,7 @@ public class ActivityRegExParser extends ActivityParser {
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 					value = null;
 					if (locations != null) {
-						LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityRegExParser.setting.field"), field);
 						if (locations.size() == 1) {
 							value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REMatchNum,
@@ -228,7 +233,7 @@ public class ActivityRegExParser extends ActivityParser {
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 				value = null;
 				if (locations != null) {
-					LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.setting.group.field"), field);
 					if (locations.size() == 1) {
 						value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REGroupNum, matcher,

@@ -14,7 +14,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * MQTT
     * HTTP
     * JMS
-    * Apache Kafka
+    * Apache Kafka (as Consumer and as Server/Consumer)
     * Apache Flume
     * Logstash
     * WMQ
@@ -402,6 +402,8 @@ Sample stream configuration:
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+        
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -726,6 +728,7 @@ Sample stream configuration:
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value="access.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
 
         <parser-ref name="AccessLogParserExt"/>
         <parser-ref name="AccessLogParserCommon"/>
@@ -2315,7 +2318,7 @@ Sample stream configuration:
     <stream name="SampleExcelRowsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelRowStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
-        <property name="FirstRowAsHeader" value="false"/>
+        <property name="RangeToStream" value="1:"/>
         <property name="SheetsToProcess" value="Sheet*"/>
 
         <parser-ref name="ExcelRowParser"/>
@@ -2330,7 +2333,7 @@ workbook sheet row and passes it to parser.
 
 `SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx` file.
 
-`FirstRowAsHeader` property indicates that there is no table header row in sheets.
+`RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`. 
 
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
@@ -2562,8 +2565,8 @@ referencing field `MsgBody`) carrying system state/metrics data. Each snapshot i
 because parent JSON parser already made map data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
-`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.    
-
+`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.   
+ 
 #### Integrating TNT4J-Streams into custom API
 
 See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` module.
@@ -2655,6 +2658,8 @@ sample stream configuration:
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+        
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -2734,6 +2739,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
     `true`. Default value - 15sec. (Optional)
  * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart.
  Default value - `true`. (Optional)
+ * RangeToStream - defines streamed data lines index range. Default value - `1:`. (Optional)
 
     sample:
  ```xml
@@ -2742,6 +2748,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
     <property name="StartFromLatest" value="true"/>
     <property name="FilePolling" value="true"/>
     <property name="RestoreState" value="false"/>
+    <property name="RangeToStream" value="12:125"/>
  ```
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
@@ -2768,16 +2775,27 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 NOTE: there can be ony one parser referenced to this stream.
 
+#### Standard Java input stream parameters
+
+ * InputCloseable - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
+ 
+    sample:
+```xml
+    <property name="InputCloseable" value="false"/>    
+``` 
+
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
+
 #### OS Piped stream parameters
 
 This stream does not have any additional configuration parameters.
 
-Also see ['Generic streams parameters'](#generic-streams-parameters).
+Also see ['Standard Java input stream parameters'](#standard-java-input-stream parameters).
 
 #### Http stream parameters
 
  * Port - port number to run Http server. Default value - `8080`. (Optional)
- * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
+ * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
     * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeyPass - key password. (Optional) Actual only if `UseSSL` is set to `true`.
@@ -2843,7 +2861,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
  * TopicString - the topic to subscribe to, which can include wildcards. (Required)
  * UserName - authentication user name. (Optional)
  * Password - user password. (Optional)
- * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
+ * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
     * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
 
@@ -2999,13 +3017,13 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 ##### Ms Excel Rows Stream parameters
 
- * FirstRowAsHeader - flag `true/false` indicating whether first row in sheet is used to define table columns titles.
- If `true` then first sheet row is skipped from streaming. Default value - `false`. (Optional)
+ * RangeToStream - defines streamed data rows index range. Default value - `1:`. (Optional)
 
     sample:
 ```xml
     <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
+    <property name="RangeToStream" value="5:30"/>
 ```
 
 ### Parsers configuration

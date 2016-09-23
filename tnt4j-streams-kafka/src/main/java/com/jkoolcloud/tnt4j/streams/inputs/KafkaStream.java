@@ -95,7 +95,12 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	 * Constructs a new KafkaStream.
 	 */
 	public KafkaStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -153,29 +158,28 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
+
 		if (StringUtils.isEmpty(topicName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
 		if (startServer) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 					"KafkaStream.server.starting"));
 
 			Properties srvProp = getServerProperties(userKafkaProps);
 			server = new KafkaServer(new KafkaConfig(srvProp), SystemTime$.MODULE$);
 			server.startup();
 
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 					"KafkaStream.server.started"));
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.consumer.starting"));
 
 		consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(userKafkaProps));
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.stream.ready"));
 	}
 
 	private static Properties getServerProperties(Properties userDefinedProps) throws IOException {
@@ -230,7 +234,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		while (!closed.get()) {
 			try {
 				if (messageBuffer == null || !messageBuffer.hasNext()) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 							"KafkaStream.empty.messages.buffer"));
 					Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
 					topicCountMap.put(topicName, 1);
@@ -241,11 +245,13 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					if (MapUtils.isNotEmpty(streams)) {
 						kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(topicName).get(0);
 						messageBuffer = stream.iterator();
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-								"KafkaStream.retrieved.new.messages"), stream.size());
+						logger().log(OpLevel.DEBUG,
+								StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+										"KafkaStream.retrieved.new.messages"),
+								stream.size());
 					} else {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-								"KafkaStream.retrieved.no.new.messages"));
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(
+								KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.retrieved.no.new.messages"));
 					}
 				}
 
@@ -254,7 +260,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					byte[] msgPayload = msg.message();
 					String msgData = Utils.getString(msgPayload);
 
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 							"KafkaStream.next.message"), msgData);
 
 					Map<String, Object> msgDataMap = new HashMap<String, Object>();
@@ -270,11 +276,11 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					return msgDataMap;
 				}
 			} catch (ConsumerTimeoutException e) {
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.INFO, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 						"KafkaStream.retrieving.messages.timeout"));
 			}
 		}
-		LOGGER.log(OpLevel.ERROR,
+		logger().log(OpLevel.ERROR,
 				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.failed.consumer"));
 		return null;
 	}

@@ -76,7 +76,7 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	protected Reader rawReader = null;
 
 	/**
-	 * BufferedReader that wraps {@link #rawReader}
+	 * {@link BufferedReader} that wraps {@link #rawReader}
 	 */
 	protected FeedReader dataReader = null;
 
@@ -88,19 +88,9 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 
 	/**
 	 * Constructs an empty CharacterStream. Requires configuration settings to set input stream source.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected CharacterStream(EventSink logger) {
-		super(logger);
-	}
-
-	/**
-	 * Constructs an empty CharacterStream. Requires configuration settings to set input stream source.
 	 */
 	public CharacterStream() {
-		super(LOGGER);
+		super();
 	}
 
 	/**
@@ -110,7 +100,7 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	 *            input stream to read data from
 	 */
 	public CharacterStream(InputStream stream) {
-		super(LOGGER);
+		this();
 		setStream(stream);
 	}
 
@@ -121,8 +111,13 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	 *            reader to read data from
 	 */
 	public CharacterStream(Reader reader) {
-		super(LOGGER);
+		this();
 		setReader(reader);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -235,11 +230,11 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 	protected void startDataStream() throws IOException {
 		if (rawReader == null) {
 			if (svrSocket != null) {
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"CharacterStream.waiting.for.connection"), socketPort);
 				socket = svrSocket.accept();
 				setStream(socket.getInputStream());
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"CharacterStream.accepted.connection"), socket);
 				// only accept one connection, close down server socket
 				Utils.close(svrSocket);
@@ -267,7 +262,7 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 			startDataStream();
 		}
 		if (dataReader.isClosed() || dataReader.hasError()) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"CharacterStream.reader.terminated"));
 			if (restartOnInputClose && socketPort != null) {
 				resetDataStream();
@@ -276,13 +271,13 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 				return null;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE,
+		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.stream.still.open"));
 		return dataReader;
 	}
 
 	private void resetDataStream() throws Exception {
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.resetting.stream"),
 				socket);
 
@@ -290,7 +285,7 @@ public class CharacterStream extends TNTParseableInputStream<BufferedReader> {
 
 		initializeStreamInternals();
 
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.stream.reset"),
 				socketPort);
 	}

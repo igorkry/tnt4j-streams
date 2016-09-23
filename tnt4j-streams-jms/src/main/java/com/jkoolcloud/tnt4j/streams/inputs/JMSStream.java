@@ -70,7 +70,12 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	 * Constructs an empty JMSStream. Requires configuration settings to set input stream source.
 	 */
 	public JMSStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -152,11 +157,17 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		Context ic = new InitialContext(env);
 
 		jmsDataReceiver.initialize(ic, StringUtils.isEmpty(queueName) ? topicName : queueName, jmsConnFactory);
+	}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, "JMSStream.stream.ready"));
+	@Override
+	protected void start() throws Exception {
+		super.start();
 
 		jmsDataReceiver.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	@Override

@@ -41,11 +41,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public abstract class ActivityParser {
 	/**
-	 * Parser logger.
-	 */
-	protected final EventSink logger;
-
-	/**
 	 * Name of activity parser
 	 */
 	private String name;
@@ -54,13 +49,16 @@ public abstract class ActivityParser {
 
 	/**
 	 * Constructs a new ActivityParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
 	 */
-	protected ActivityParser(EventSink logger) {
-		this.logger = logger;
+	protected ActivityParser() {
 	}
+
+	/**
+	 * Returns logger used by this parser.
+	 *
+	 * @return parser logger
+	 */
+	protected abstract EventSink logger();
 
 	/**
 	 * Set properties for the parser.
@@ -148,10 +146,10 @@ public abstract class ActivityParser {
 		try {
 			str = Utils.getNonEmptyLine(rdr);
 		} catch (EOFException eof) {
-			logger.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"), eof);
 		} catch (IOException ioe) {
-			logger.log(OpLevel.WARNING,
+			logger().log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
 					ioe);
 		}

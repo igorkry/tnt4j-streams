@@ -38,7 +38,12 @@ public class ExcelSheetStream extends AbstractExcelStream<Sheet> {
 	 * Constructs a new ExcelSheetStream. Requires configuration settings to set input stream source.
 	 */
 	public ExcelSheetStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -48,6 +53,6 @@ public class ExcelSheetStream extends AbstractExcelStream<Sheet> {
 	 */
 	@Override
 	public Sheet getNextItem() throws Exception {
-		return getNextNameMatchingSheet();
+		return getNextNameMatchingSheet(true);
 	}
 }

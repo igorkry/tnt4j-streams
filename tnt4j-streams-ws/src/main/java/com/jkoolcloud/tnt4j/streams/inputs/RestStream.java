@@ -74,7 +74,12 @@ public class RestStream extends AbstractWsStream {
 	 * Constructs an empty RestStream. Requires configuration settings to set input stream source.
 	 */
 	public RestStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override

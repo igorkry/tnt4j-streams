@@ -40,7 +40,12 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String> {
 	 * Constructs a new JKCloudJsonOutput.
 	 */
 	public JKCloudJsonOutput() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**

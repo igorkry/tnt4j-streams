@@ -66,6 +66,11 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	}
 
 	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
+	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
@@ -166,7 +171,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 					}
 					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
 							msgPutDate, msgPutTime);
-					LOGGER.log(OpLevel.TRACE,
+					logger().log(OpLevel.TRACE,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"MessageActivityXmlParser.msg.signature"),
 							value, msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),

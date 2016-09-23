@@ -75,8 +75,12 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	 * Constructs a new ZipLineStream.
 	 */
 	public ZipLineStream() {
-		super(LOGGER);
 		archType = ArchiveTypes.ZIP.name();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -129,11 +133,12 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
+
 		if (StringUtils.isEmpty(zipFileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZipLineStream.initializing.stream"),
 				zipFileName);
 
@@ -245,7 +250,7 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 					lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zis)));
 					lineNumber = 0;
 
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ZipLineStream.opening.entry"), entryName);
 
 					return true;

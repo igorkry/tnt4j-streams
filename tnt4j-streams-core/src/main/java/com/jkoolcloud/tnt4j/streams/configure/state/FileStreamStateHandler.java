@@ -38,7 +38,7 @@ public class FileStreamStateHandler extends AbstractFileStreamStateHandler<File>
 	 * Constructs a new FileStreamStateHandler.
 	 */
 	FileStreamStateHandler() {
-		super(LOGGER);
+		super();
 	}
 
 	/**
@@ -51,7 +51,12 @@ public class FileStreamStateHandler extends AbstractFileStreamStateHandler<File>
 	 *            stream name
 	 */
 	public FileStreamStateHandler(File[] activityFiles, String streamName) {
-		super(LOGGER, activityFiles, streamName);
+		super(activityFiles, streamName);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override

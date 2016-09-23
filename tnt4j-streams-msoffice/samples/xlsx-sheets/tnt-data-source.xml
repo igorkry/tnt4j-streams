@@ -24,6 +24,7 @@
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-sheets\sample.xlsx"/>
         <property name="SheetsToProcess" value="Sheet*"/>
+        <!--<property name="SheetsToProcess" value="Sheet(1|2|7)"/>-->
 
         <parser-ref name="ExcelSheetParser"/>
     </stream>

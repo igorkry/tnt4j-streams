@@ -16,21 +16,21 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
 
@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
  * @author akausinis
  * @version 1.0
  */
-public class ZipLineStreamTest extends PropertiesTestBase {
+public class ZipLineStreamTest {
 
 	ZipLineStream zs;
 
@@ -49,10 +49,11 @@ public class ZipLineStreamTest extends PropertiesTestBase {
 
 	@Test
 	public void testProperties() throws Exception {
-		final Collection<Entry<String, String>> properties = getPropertyList()
-				.add(StreamProperties.PROP_FILENAME, "test.zip").add(StreamProperties.PROP_ARCH_TYPE, "ZIP").build();
-		zs.setProperties(properties);
-		testPropertyList(zs, properties);
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_FILENAME, "test.zip"); // NON-NLS
+		props.put(StreamProperties.PROP_ARCH_TYPE, "ZIP"); // NON-NLS
+		zs.setProperties(props.entrySet());
+		testPropertyList(zs, props.entrySet());
 	}
 
 	@Test
@@ -76,9 +77,11 @@ public class ZipLineStreamTest extends PropertiesTestBase {
 			fis.close();
 		}
 		zos.close();
-		zs.setProperties(getPropertyList().add(StreamProperties.PROP_FILENAME, zipFile.getAbsolutePath())
-				.add(StreamProperties.PROP_ARCH_TYPE, "ZIP").build());
-		zs.initialize();
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_FILENAME, zipFile.getAbsolutePath());
+		props.put(StreamProperties.PROP_ARCH_TYPE, "ZIP"); // NON-NLS
+		zs.setProperties(props.entrySet());
+		zs.startStream();
 		assertEquals("TEST0", zs.getNextItem());
 		assertEquals("TEST1", zs.getNextItem());
 		assertEquals("TEST2", zs.getNextItem());

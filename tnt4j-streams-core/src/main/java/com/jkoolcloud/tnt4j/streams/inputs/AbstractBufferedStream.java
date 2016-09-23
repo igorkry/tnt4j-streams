@@ -23,7 +23,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
@@ -62,24 +61,18 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 */
-	protected AbstractBufferedStream(EventSink logger) {
-		this(logger, DEFAULT_INPUT_BUFFER_SIZE);
+	protected AbstractBufferedStream() {
+		this(DEFAULT_INPUT_BUFFER_SIZE);
 	}
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
 	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 * @param bufferSize
 	 *            default buffer size value. Actual value may be overridden by setting 'BufferSize' property.
 	 */
-	protected AbstractBufferedStream(EventSink logger, int bufferSize) {
-		super(logger);
+	protected AbstractBufferedStream(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
 
@@ -190,13 +183,13 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
 
 				if (!added) {
-					logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
@@ -281,7 +274,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				close();
 			} catch (Exception exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.input.close.error"), exc);
 			}
 		}

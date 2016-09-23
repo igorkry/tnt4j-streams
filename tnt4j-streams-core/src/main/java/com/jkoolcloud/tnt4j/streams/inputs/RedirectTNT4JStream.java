@@ -89,19 +89,9 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 
 	/**
 	 * Constructs an empty RedirectTNT4JStream. Requires configuration settings to set input stream source.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected RedirectTNT4JStream(EventSink logger) {
-		super(logger);
-	}
-
-	/**
-	 * Constructs an empty RedirectTNT4JStream. Requires configuration settings to set input stream source.
 	 */
 	public RedirectTNT4JStream() {
-		super(LOGGER);
+		super();
 	}
 
 	/**
@@ -111,7 +101,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	 *            input stream to read data from
 	 */
 	public RedirectTNT4JStream(InputStream stream) {
-		super(LOGGER);
+		this();
 		setStream(stream);
 	}
 
@@ -122,8 +112,13 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	 *            reader to read data from
 	 */
 	public RedirectTNT4JStream(Reader reader) {
-		super(LOGGER);
+		this();
 		setReader(reader);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -216,6 +211,17 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		initializeStreamInternals();
 	}
 
+	@Override
+	protected void start() throws Exception {
+		super.start();
+
+		startDataStream();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
+	}
+
 	private void initializeStreamInternals() throws Exception {
 		if (rawReader == null) {
 			if (StringUtils.isEmpty(fileName) && socketPort == null) {
@@ -233,8 +239,6 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 						"CharacterStream.no.stream.source"));
 			}
 		}
-
-		startDataStream();
 	}
 
 	/**
@@ -262,13 +266,13 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
 
 				if (!added) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
@@ -321,7 +325,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	protected void processActivityItem(String item, AtomicBoolean failureFlag) throws Exception {
 		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
 
-		LOGGER.log(OpLevel.TRACE,
+		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectTNT4JStream.sending.item"),
 				item);
 
@@ -400,13 +404,13 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 			while (!isStopRunning() && !srvSocket.isClosed()) {
 				Socket connSocket = null;
 				try {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"CharacterStream.waiting.for.connection"), srvSocketPort);
 					connSocket = srvSocket.accept();
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"CharacterStream.accepted.connection"), connSocket);
 				} catch (Exception e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"RedirectTNT4JStream.failed.accept.connection"), e.getLocalizedMessage(), e);
 
 					boolean recovered = restartOnInputClose && resetDataStream();
@@ -422,7 +426,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 						activeFeedersList.add(feeder);
 						feeder.start();
 					} catch (Exception e) {
-						LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"RedirectTNT4JStream.socket.initialization"), e.getLocalizedMessage(), e);
 					}
 				}
@@ -432,7 +436,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		}
 
 		private boolean resetDataStream() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"RedirectTNT4JStream.resetting.stream"), getName());
 
 			Utils.close(srvSocket);
@@ -440,10 +444,10 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 			try {
 				srvSocket = new ServerSocket(srvSocketPort);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"CharacterStream.stream.reset"), srvSocketPort);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"RedirectTNT4JStream.resetting.failed"), getName(), exc);
 
 				return false;
@@ -496,12 +500,12 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 					String line = dataReader.readLine();
 
 					if (line == null) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"RedirectTNT4JStream.feeder.data.ended"));
 						halt(); // no more data items to process
 					} else {
 						if (line.isEmpty()) {
-							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
+							logger().log(OpLevel.WARNING, StreamsResources.getString(
 									StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectTNT4JStream.redirect.empty.input"));
 							incrementSkippedActivitiesCount();
 							notifyStreamEvent(OpLevel.WARNING,
@@ -513,11 +517,11 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 						}
 					}
 				} catch (IOException ioe) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"RedirectTNT4JStream.feeder.failure"), ioe.getLocalizedMessage());
 					halt();
 				} catch (Exception e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"RedirectTNT4JStream.feeder.failure"), e.getLocalizedMessage(), e);
 				}
 			}
@@ -530,7 +534,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 			dataReader = null;
 
 			if (socket != null) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"CharacterStream.closing.stream.connection"), socket);
 
 				Utils.close(socket);

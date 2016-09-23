@@ -64,17 +64,12 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
-		this(LOGGER);
+		super();
 	}
 
-	/**
-	 * Constructs a new ActivityJsonParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
-	 */
-	protected ActivityJsonParser(EventSink logger) {
-		super(logger);
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -103,7 +98,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		DocumentContext jsonDoc = null;
@@ -177,11 +172,11 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				}
 			}
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.data.end"),
 					eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityJsonParser.error.reading"), ioe);
 		}
 

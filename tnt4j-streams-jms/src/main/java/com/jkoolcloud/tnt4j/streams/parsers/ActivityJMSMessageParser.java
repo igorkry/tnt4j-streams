@@ -62,7 +62,12 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * Constructs a new ActivityJMSMessageParser.
 	 */
 	public ActivityJMSMessageParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -112,7 +117,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 
 			dataMap.put(StreamFieldType.Correlator.toString(), message.getJMSCorrelationID());
 		} catch (JMSException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
 					"ActivityJMSMessageParser.payload.data.error"), exc);
 		}
 
@@ -203,7 +208,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				baos.write(buffer);
 			} while (bytesRead != 0);
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
 					"ActivityJMSMessageParser.bytes.buffer.error"), exc);
 		}
 
@@ -243,7 +248,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *             if any JMS exception occurs while parsing message.
 	 */
 	protected void parseCustomMessage(Message message, Map<String, Object> dataMap) throws JMSException {
-		LOGGER.log(OpLevel.WARNING, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
+		logger().log(OpLevel.WARNING, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
 				"ActivityJMSMessageParser.parsing.custom.jms.message"));
 	}
 }

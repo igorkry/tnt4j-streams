@@ -50,7 +50,12 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 * Constructs an SampleParser.
 	 */
 	public SampleParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -69,7 +74,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			LOGGER.log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
+			logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
 			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = value;
 			}
@@ -89,13 +94,13 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		logger().log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
 		String[] fields = dataStr.split(fieldDelim);
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG, "Did not find any fields in input string");
+			logger().log(OpLevel.DEBUG, "Did not find any fields in input string");
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
 
 		return parsePreparedItem(stream, dataStr, fields);
 	}

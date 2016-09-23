@@ -41,10 +41,10 @@ public abstract class ActivityParserTestBase {
 
 	public static Collection<Map.Entry<String, String>> makeProperty(final String propertyName,
 			final String testValue) {
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>(1);
-		props.add(new AbstractMap.SimpleEntry<String, String>(propertyName, String.valueOf(testValue)));
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(propertyName, String.valueOf(testValue));
 
-		return props;
+		return props.entrySet();
 	}
 
 	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) throws Exception {

@@ -27,7 +27,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
@@ -57,16 +56,6 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	private String nodePathDelim = DEFAULT_NODE_PATH_DELIM;
 
-	/**
-	 * Constructs a new AbstractActivityMapParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
-	 */
-	protected AbstractActivityMapParser(EventSink logger) {
-		super(logger);
-	}
-
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -88,12 +77,12 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (data == null) {
 			return null;
 		}
-		logger.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
-			logger.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
 			return null;
 		}
