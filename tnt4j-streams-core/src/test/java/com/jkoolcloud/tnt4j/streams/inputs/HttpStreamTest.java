@@ -89,7 +89,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpFilePostTest() throws Exception {
+	public void httpFilePostTest() throws Exception {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
 
@@ -102,7 +102,7 @@ public class HttpStreamTest {
 		entityBuilder.setContentType(ContentType.TEXT_PLAIN);
 
 		MultipartEntityBuilder builder2 = MultipartEntityBuilder.create();
-		builder2.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, "file.ext");
+		builder2.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, "file.ext"); // NON-NLS
 		HttpEntity multipart = builder2.build();
 
 		post.setEntity(multipart);
@@ -113,7 +113,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpFormPostTest() throws Exception {
+	public void httpFormPostTest() throws Exception {
 
 		FileReader fileReader = new FileReader(new File(samplesDir, "/http-form/form-data.json"));
 		Map<String, ?> jsonMap = Utils.fromJsonToMap(fileReader, false);
@@ -135,19 +135,19 @@ public class HttpStreamTest {
 		}
 		HttpResponse resp = Request.Post(makeURI()).version(HttpVersion.HTTP_1_1).bodyForm(form.build()).execute()
 				.returnResponse();
-		assertEquals(resp.getStatusLine().getStatusCode(), 200);
+		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
 	private URI makeURI() throws URISyntaxException {
-		URIBuilder uriBuilder = new URIBuilder("http://localhost");
-		uriBuilder.setHost("localhost");
+		URIBuilder uriBuilder = new URIBuilder("http://localhost"); // NON-NLS
+		uriBuilder.setHost("localhost"); // NON-NLS
 		uriBuilder.setPort(TEST_PORT);
 		URI url = uriBuilder.build();
 		return url;
 	}
 
 	@Test
-	public void HttpHtmlGetTest() throws Exception {
+	public void httpHtmlGetTest() throws Exception {
 		HttpResponse response = Request.Get(makeURI()).execute().returnResponse();
 		assertNotNull(response);
 	}

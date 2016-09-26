@@ -42,7 +42,7 @@ public class AbstractBufferedStreamTest {
 	@Test(expected = IllegalStateException.class)
 	public void getNextItemFailOnNullTest() throws Exception {
 		abs.addInputToBuffer(null);
-		assertEquals(null, abs.getNextItem());
+		assertNull(abs.getNextItem());
 	}
 
 	@Test

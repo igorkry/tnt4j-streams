@@ -16,7 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class AbstractFileLineStreamTest {
 		props.put(StreamProperties.PROP_FILENAME, fileName);
 		afls.setProperties(props.entrySet());
 		final Object property = afls.getProperty(StreamProperties.PROP_FILENAME);
-		assertTrue(fileName.equals(property));
+		assertEquals(fileName, property);
 	}
 
 }

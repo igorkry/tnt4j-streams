@@ -23,7 +23,10 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import org.apache.flume.*;
+import org.apache.flume.Channel;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.Transaction;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.utils.FlumeConstants;
@@ -89,7 +92,7 @@ public class TNT4JStreamsEventSinkTest {
 	}
 
 	@Test
-	public void testProcess() throws EventDeliveryException, IOException {
+	public void testProcess() throws Exception {
 		TNT4JStreamsEventSink flumeSink = new TNT4JStreamsEventSink();
 
 		Context context = new Context() {
@@ -132,13 +135,13 @@ public class TNT4JStreamsEventSinkTest {
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME, keyModule);
-		assertNotEquals("Flume resource bundle entry not found", rbs1, keyModule);
+		assertNotEquals("Flume resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
-		assertEquals("Flume resource bundle entry found in core", rbs1, keyModule);
+		assertEquals("Flume resource bundle entry found in core", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
 		rbs1 = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in flume", rbs1, keyCore);
+		assertEquals("Core resource bundle entry found in flume", keyCore, rbs1);
 	}
 
 }

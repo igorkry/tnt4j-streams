@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.*;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +31,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -69,20 +67,20 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	}
 
 	@Test
-	public void simpleStringParseTest() throws IllegalStateException, ParseException {
+	public void simpleStringParseTest() throws Exception {
 
 		ActivityInfo ai = parser.parse(is, simpleString);
 		assertNotNull(ai);
 	}
 
 	@Test
-	public void simpleByteArrayParseTest() throws IllegalStateException, ParseException {
+	public void simpleByteArrayParseTest() throws Exception {
 		ActivityInfo ai = parser.parse(is, simpleString.toString().getBytes());
 		assertNotNull(ai);
 	}
 
 	@Test
-	public void simpleBufferedReaderParseTest() throws IllegalStateException, ParseException {
+	public void simpleBufferedReaderParseTest() throws Exception {
 
 		BufferedReader reader = new BufferedReader(new StringReader(simpleString.toString()));
 		ActivityInfo ai = parser.parse(is, reader);
@@ -90,7 +88,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	}
 
 	@Test
-	public void simpleReaderParseTest() throws IllegalStateException, ParseException {
+	public void simpleReaderParseTest() throws Exception {
 
 		Reader reader = new StringReader(simpleString.toString());
 		ActivityInfo ai = parser.parse(is, reader);
@@ -98,7 +96,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	}
 
 	@Test
-	public void simpleInputStreamParseTest() throws IllegalStateException, ParseException {
+	public void simpleInputStreamParseTest() throws Exception {
 
 		InputStream reader = new ByteArrayInputStream(simpleString.toString().getBytes());
 		ActivityInfo ai = parser.parse(is, reader);
@@ -113,7 +111,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	}
 
 	@Test
-	public void getLocatorValue() throws ParseException, ParserConfigurationException, SAXException, IOException {
+	public void getLocatorValue() throws Exception {
 		TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 		ActivityFieldLocator locator = new ActivityFieldLocator("Label", "MsgData/@value");
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

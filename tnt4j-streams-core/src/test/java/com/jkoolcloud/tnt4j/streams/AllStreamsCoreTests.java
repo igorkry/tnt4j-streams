@@ -30,7 +30,7 @@ import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ StreamsAgentTests.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
+@Suite.SuiteClasses({ StreamsAgentTest.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
 		AllParsersTests.class, AllUtilsTests.class })
 public class AllStreamsCoreTests {
 }

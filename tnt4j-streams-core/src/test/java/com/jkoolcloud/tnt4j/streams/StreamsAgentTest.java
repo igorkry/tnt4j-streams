@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @author akausinis
  * @version 1.0
  */
-public class StreamsAgentTests {
+public class StreamsAgentTest {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 

@@ -116,7 +116,7 @@ public class UtilsTest {
 	}
 
 	@Test
-	public void testGetFirstNewer() throws IOException, InterruptedException {
+	public void testGetFirstNewer() throws Exception {
 		final int count = 5;
 		Long date = null;
 		List<File> files = new ArrayList<File>();
@@ -162,13 +162,13 @@ public class UtilsTest {
 		// Gson gson = new Gson();
 		// final String json = gson.toJson(testMap);
 		Map<String, ?> result = Utils.fromJsonToMap(testString, false);
-		assertTrue(testMap.equals(result));
+		assertEquals(testMap, result);
 		result = Utils.fromJsonToMap(testString.getBytes(), false);
-		assertTrue(testMap.equals(result));
+		assertEquals(testMap, result);
 		result = Utils.fromJsonToMap(toReader(testString), false);
-		assertTrue(testMap.equals(result));
+		assertEquals(testMap, result);
 		result = Utils.fromJsonToMap(toInputStream(testString), false);
-		assertTrue(testMap.equals(result));
+		assertEquals(testMap, result);
 
 	}
 

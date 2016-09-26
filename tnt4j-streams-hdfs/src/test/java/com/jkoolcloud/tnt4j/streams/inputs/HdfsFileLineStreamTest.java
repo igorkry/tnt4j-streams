@@ -136,9 +136,9 @@ public class HdfsFileLineStreamTest {
 		// assertEquals("Hdfs resource bundle entry found in core", rbs1,
 		// keyModule);
 		String rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
 		rbs1 = StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in hdfs", rbs1, keyCore);
+		assertEquals("Core resource bundle entry found in hdfs", keyCore, rbs1);
 	}
 
 }

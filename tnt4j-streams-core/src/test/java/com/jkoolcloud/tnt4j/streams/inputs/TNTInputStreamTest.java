@@ -140,7 +140,7 @@ public class TNTInputStreamTest {
 
 	//
 	@Test
-	public void testApplyParsers() throws IllegalStateException, ParseException {
+	public void testApplyParsers() throws Exception {
 		final ActivityParser parser = mock(ActivityParser.class);
 		String[] tags = { "TestTag" };
 		String[] falseTags = { "TestTagNot" };

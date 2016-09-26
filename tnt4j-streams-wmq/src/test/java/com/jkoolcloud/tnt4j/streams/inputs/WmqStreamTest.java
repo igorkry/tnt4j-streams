@@ -60,7 +60,7 @@ public class WmqStreamTest {
 	public void testInitialize() throws Exception {
 		propertiesSetTest();
 		wmqStream.startStream();
-		assertNotNull(wmqStream.gmo);
+		assertNotNull("Message GET options is null", wmqStream.gmo);
 	}
 
 	@Test(expected = MQException.class)
@@ -83,11 +83,11 @@ public class WmqStreamTest {
 				MQConstants.MQRC_Q_MGR_QUIESCING, MQConstants.MQRC_Q_MGR_STOPPING,
 				MQConstants.MQRC_CONNECTION_QUIESCING, MQConstants.MQRC_CONNECTION_STOPPING);
 		for (int i = 1; i <= 8; i++) {
-			assertFalse(wmqStream.isConnectedToQmgr(mqe));
+			assertFalse("Shall not be connected to QM", wmqStream.isConnectedToQmgr(mqe));
 		}
 
 		when(mqe.getReason()).thenReturn(MQConstants.MQRC_AIR_ERROR);
-		assertTrue(wmqStream.isConnectedToQmgr(mqe));
+		assertTrue("Shall be connected to QM", wmqStream.isConnectedToQmgr(mqe));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class WmqStreamTest {
 	}
 
 	@Test
-	public void testcloseQmgrConnectionException() throws MQException {
+	public void testCloseQmgrConnectionException() throws MQException {
 		final MQQueueManager mqqManager = mock(MQQueueManager.class);
 		final MQDestination mqDestination = mock(MQDestination.class);
 
@@ -126,12 +126,12 @@ public class WmqStreamTest {
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
-		assertNotEquals("Wmq resource bundle entry not found", rbs1, keyModule);
+		assertNotEquals("Wmq resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
-		assertEquals("Wmq resource bundle entry found in core", rbs1, keyModule);
+		assertEquals("Wmq resource bundle entry found in core", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
 		rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in wmq", rbs1, keyCore);
+		assertEquals("Core resource bundle entry found in wmq", keyCore, rbs1);
 	}
 }
