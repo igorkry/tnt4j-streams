@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +33,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -99,7 +99,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, fieldDelim);
 			} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -157,13 +157,12 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param fields
 	 *            activity object data fields array
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -172,23 +171,15 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, String[] fields)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					int loc = Integer.parseInt(locStr);
-					if (loc >= 0 && loc <= fields.length) {
-						val = fields[loc - 1].trim();
-					}
-				}
-			}
-			val = locator.formatValue(val);
+		String locStr = locator.getLocator();
+		int loc = Integer.parseInt(locStr);
+		if (loc > 0 && loc <= fields.length) {
+			val = fields[loc - 1].trim();
 		}
+
 		return val;
 	}
 }

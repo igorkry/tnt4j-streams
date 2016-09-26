@@ -766,7 +766,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static void resolveVariables(Collection<String> vars, String... attrs) {
 		if (attrs != null) {
 			for (String attr : attrs) {
-				if (StringUtils.isNoneEmpty(attr)) {
+				if (StringUtils.isNotEmpty(attr)) {
 					Matcher m = VAR_PATTERN.matcher(attr);
 					while (m.find()) {
 						vars.add(m.group());

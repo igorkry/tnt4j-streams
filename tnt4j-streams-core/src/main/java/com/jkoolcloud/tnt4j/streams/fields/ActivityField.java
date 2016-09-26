@@ -259,15 +259,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * Gets the required flag indicating whether field is required or optional.
-	 *
-	 * @return flag indicating whether field is required or optional
-	 */
-	public String getRequired() {
-		return reqValue;
-	}
-
-	/**
 	 * Sets the required flag indicates where field is required or optional.
 	 *
 	 * @param reqValue
@@ -278,6 +269,15 @@ public class ActivityField {
 		this.reqValue = reqValue;
 
 		return this;
+	}
+
+	/**
+	 * Determines whether field value is optional for activity.
+	 *
+	 * @return flag indicating field value is optional for activity.
+	 */
+	public boolean isOptional() {
+		return "false".equalsIgnoreCase(reqValue); // NON-NLS
 	}
 
 	/**

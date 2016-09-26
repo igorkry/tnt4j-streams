@@ -80,7 +80,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					sigDelim = value;
 				}
 			}

@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.MapUtils;
@@ -29,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -102,13 +102,12 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 * 
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param dataMap
 	 *            activity object data map
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -117,21 +116,12 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Map<String, ?> dataMap)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, ?> dataMap,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					String[] path = getNodePath(locStr, nodePathDelim);
-					val = getNode(path, dataMap, 0);
-				}
-			}
-			val = locator.formatValue(val);
-		}
+		String locStr = locator.getLocator();
+		String[] path = getNodePath(locStr, nodePathDelim);
+		val = getNode(path, dataMap, 0);
 
 		return val;
 	}

@@ -49,7 +49,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private String locale = null;
 	private String timeZone = null;
 	private Object cfgValue = null;
-	private String requiredVal = "";
+	private String requiredVal = ""; /* string to allow no value */
 	private String id = null;
 
 	private ActivityFieldLocatorType builtInType = null;
@@ -306,15 +306,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Gets the required option flag indicating whether locator is required or optional.
-	 *
-	 * @return flag indicating whether locator is required or optional
-	 */
-	public String getRequired() {
-		return requiredVal;
-	}
-
-	/**
 	 * Sets the required option flag to indicator if locator is optional
 	 *
 	 * @param requiredVal
@@ -322,6 +313,34 @@ public class ActivityFieldLocator implements Cloneable {
 	 */
 	public void setRequired(String requiredVal) {
 		this.requiredVal = requiredVal;
+	}
+
+	/**
+	 * Determines whether value resolution by locator is optional.
+	 *
+	 * @return flag indicating value resolution by locator is optional
+	 */
+	public boolean isOptional() {
+		return "false".equalsIgnoreCase(requiredVal); // NON-NLS
+	}
+
+	/**
+	 * Determines whether value resolution by locator is required.
+	 *
+	 * @return flag indicating value resolution by locator is required
+	 */
+	public boolean isRequired() {
+		return "true".equalsIgnoreCase(requiredVal); // NON-NLS
+	}
+
+	/**
+	 * Determines whether value resolution by locator is required depending on stream context. For example XML/JSON
+	 * parser context may require all locators to resolve non {@code null} values by default.
+	 *
+	 * @return flag indicating value resolution by locator is required depending on stream context
+	 */
+	public boolean isDefaultRequire() {
+		return StringUtils.isEmpty(requiredVal); // NON-NLS
 	}
 
 	/**

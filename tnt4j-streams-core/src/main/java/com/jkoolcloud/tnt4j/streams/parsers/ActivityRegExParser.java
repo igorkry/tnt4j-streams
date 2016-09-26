@@ -16,10 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  *
  * @version $Revision: 1 $
  */
-public class ActivityRegExParser extends ActivityParser {
+public class ActivityRegExParser extends GenericActivityParser<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
 
 	/**
@@ -87,7 +86,7 @@ public class ActivityRegExParser extends ActivityParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -138,23 +137,6 @@ public class ActivityRegExParser extends ActivityParser {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * This parser supports the following class types (and all classes extending/implementing any of these):
-	 * <ul>
-	 * <li>{@link java.lang.String}</li>
-	 * <li>{@code byte[]}</li>
-	 * <li>{@link java.io.Reader}</li>
-	 * <li>{@link java.io.InputStream}</li>
-	 * </ul>
-	 */
-	@Override
-	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
-				|| InputStream.class.isInstance(data);
-	}
-
 	@Override
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {
@@ -201,23 +183,15 @@ public class ActivityRegExParser extends ActivityParser {
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
-					value = null;
-					if (locations != null) {
+
+					value = wrapValue(resolveLocatorValues(locations, stream, matches));
+
+					if (value != null) {
 						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityRegExParser.setting.field"), field);
-						if (locations.size() == 1) {
-							value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REMatchNum,
-									matcher, matches);
-						} else {
-							Object[] values = new Object[locations.size()];
-							for (int li = 0; li < locations.size(); li++) {
-								values[li] = getLocatorValue(stream, locations.get(li),
-										ActivityFieldLocatorType.REMatchNum, matcher, matches);
-							}
-							value = values;
-						}
 					}
-					applyFieldValue(stream, ai, field, value);
+
+					applyFieldValue(stream, ai, field, value, field.getValueType());
 				}
 			}
 		} catch (Exception e) {
@@ -231,23 +205,15 @@ public class ActivityRegExParser extends ActivityParser {
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
 				field = fieldMapEntry.getKey();
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
-				value = null;
-				if (locations != null) {
+
+				value = wrapValue(resolveLocatorValues(locations, stream, matcher));
+
+				if (value != null) {
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.setting.group.field"), field);
-					if (locations.size() == 1) {
-						value = getLocatorValue(stream, locations.get(0), ActivityFieldLocatorType.REGroupNum, matcher,
-								null);
-					} else {
-						Object[] values = new Object[locations.size()];
-						for (int li = 0; li < locations.size(); li++) {
-							values[li] = getLocatorValue(stream, locations.get(li), ActivityFieldLocatorType.REGroupNum,
-									matcher, null);
-						}
-						value = values;
-					}
 				}
-				applyFieldValue(stream, ai, field, value);
+
+				applyFieldValue(stream, ai, field, value, field.getValueType());
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
@@ -258,29 +224,44 @@ public class ActivityRegExParser extends ActivityParser {
 		return ai;
 	}
 
-	private static Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator,
-			ActivityFieldLocatorType locType, Matcher matcher, List<String> matches) throws ParseException {
+	/**
+	 * Gets field value from raw data location and formats it according locator definition.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param regexData
+	 *            RegEx data package - {@link Matcher} or {@link ArrayList} of matches
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
+	 *
+	 * @throws ParseException
+	 *             if error applying locator format properties to specified value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object regexData, AtomicBoolean formattingNeeded)
+			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					int loc = Integer.parseInt(locStr);
-					if (locType == ActivityFieldLocatorType.REMatchNum) {
-						if (loc <= matches.size()) {
-							val = matches.get(loc);
-						}
-					} else {
-						if (loc <= matcher.groupCount()) {
-							val = matcher.group(loc);
-						}
-					}
-				}
+		String locStr = locator.getLocator();
+		int loc = Integer.parseInt(locStr);
+
+		if (regexData instanceof Matcher) {
+			Matcher matcher = (Matcher) regexData;
+
+			if (loc >= 0 && loc < matcher.groupCount()) {
+				val = matcher.group(loc);
 			}
-			val = locator.formatValue(val);
+		} else {
+			ArrayList<String> matches = (ArrayList<String>) regexData;
+
+			if (loc >= 0 && loc < matches.size()) {
+				val = matches.get(loc);
+			}
 		}
+
 		return val;
 	}
 }

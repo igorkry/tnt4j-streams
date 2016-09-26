@@ -23,16 +23,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -222,7 +220,24 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected Object[] resolveLocatorValues(ActivityField field, TNTInputStream<?, ?> stream, T data)
 			throws ParseException {
-		List<ActivityFieldLocator> locations = field.getLocators();
+		return resolveLocatorValues(field.getLocators(), stream, data);
+	}
+
+	/**
+	 * Resolves field values from prepared activity data item using field bound locators.
+	 *
+	 * @param locations
+	 *            value locators list
+	 * @param stream
+	 *            stream providing activity data
+	 * @param data
+	 *            prepared activity data item to parse
+	 * @return resolved values array
+	 * @throws ParseException
+	 *             if error applying locator format properties to specified value
+	 */
+	protected Object[] resolveLocatorValues(List<ActivityFieldLocator> locations, TNTInputStream<?, ?> stream, T data)
+			throws ParseException {
 		if (locations != null) {
 			Object[] values = new Object[locations.size()];
 			for (int li = 0; li < locations.size(); li++) {
@@ -263,8 +278,31 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *             if error applying locator format properties to specified value
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
-	protected abstract Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
-			throws ParseException;
+	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
+			throws ParseException {
+		Object val = null;
+		if (locator != null) {
+			String locStr = locator.getLocator();
+			AtomicBoolean formattingNeeded = new AtomicBoolean(true);
+			if (StringUtils.isNotEmpty(locStr)) {
+				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
+					val = stream.getProperty(locStr);
+				} else {
+					val = resolveLocatorValue(locator, data, formattingNeeded);
+
+					logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityParser.locator.resolved"),
+							locStr, String.valueOf(val));
+				}
+			}
+
+			if (formattingNeeded.get()) {
+				val = locator.formatValue(val);
+			}
+		}
+		return val;
+	}
 
 	/**
 	 * Wraps locator prepared value if it is list or array.
@@ -300,4 +338,23 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
 	}
+
+	/**
+	 * Gets field raw data value resolved by locator.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param data
+	 *            activity object data
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 *
+	 * @throws ParseException
+	 *             if error appears while resolving raw data value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
+	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, T data, AtomicBoolean formattingNeeded)
+			throws ParseException;
 }

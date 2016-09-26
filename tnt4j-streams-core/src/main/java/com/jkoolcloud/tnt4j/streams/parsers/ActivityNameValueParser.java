@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +34,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -111,7 +111,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
 			} else if (ParserProperties.PROP_PATTERN.equals(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -185,13 +185,12 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param nameValues
 	 *            activity object name/value pairs map
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -200,17 +199,12 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator,
-			Map<String, String> nameValues) throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, String> nameValues,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				val = locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp ? stream.getProperty(locStr)
-						: nameValues.get(locStr);
-			}
-			val = locator.formatValue(val);
-		}
+		String locStr = locator.getLocator();
+		val = nameValues.get(locStr);
+
 		return val;
 	}
 }

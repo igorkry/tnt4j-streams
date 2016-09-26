@@ -155,14 +155,14 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					apacheLogPattern = value;
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
 			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					int idx = value.indexOf('=');
 					if (idx > 0) {
 						String confKey = value.substring(0, idx);

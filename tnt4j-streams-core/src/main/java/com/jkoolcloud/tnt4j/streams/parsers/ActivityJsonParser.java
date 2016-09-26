@@ -22,18 +22,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -183,45 +184,59 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		return jsonStringBuilder.toString();
 	}
 
+	/**
+	 * Gets field value from raw data location and formats it according locator definition.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param jsonDocContext
+	 *            {@link JsonPath} document context to read
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
+	 *
+	 * @throws ParseException
+	 *             if error applying locator format properties to specified value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, DocumentContext data)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, DocumentContext jsonDocContext,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			boolean format = true;
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					if (!locStr.startsWith(JSON_PATH_ROOT)) {
-						locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
-					}
-					Object jsonValue = data.read(locStr);
+		String locStr = locator.getLocator();
+		if (!locStr.startsWith(JSON_PATH_ROOT)) {
+			locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
+		}
 
-					List<Object> jsonValuesList;
-					if (jsonValue instanceof List) {
-						jsonValuesList = (List<Object>) jsonValue;
-					} else {
-						jsonValuesList = new ArrayList<Object>(1);
-						jsonValuesList.add(jsonValue);
-					}
+		Object jsonValue = null;
+		try {
+			jsonValue = jsonDocContext.read(locStr);
+		} catch (JsonPathException exc) {
+			logger().log(
+					!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources
+							.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.path.exception"),
+					locStr, exc.getLocalizedMessage());
+		}
 
-					if (CollectionUtils.isNotEmpty(jsonValuesList)) {
-						List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
-						for (Object jsonValues : jsonValuesList) {
-							valuesList.add(locator.formatValue(jsonValues));
-						}
-
-						val = wrapValue(valuesList);
-						format = false;
-					}
-				}
+		if (jsonValue != null) {
+			List<Object> jsonValuesList;
+			if (jsonValue instanceof List) {
+				jsonValuesList = (List<Object>) jsonValue;
+			} else {
+				jsonValuesList = new ArrayList<Object>(1);
+				jsonValuesList.add(jsonValue);
 			}
 
-			if (format) {
-				val = locator.formatValue(val);
+			if (CollectionUtils.isNotEmpty(jsonValuesList)) {
+				List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
+				for (Object jsonValues : jsonValuesList) {
+					valuesList.add(locator.formatValue(jsonValues));
+				}
+
+				val = wrapValue(valuesList);
+				formattingNeeded.set(false);
 			}
 		}
 

@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -31,7 +32,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -104,13 +104,12 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param dataObj
 	 *            activity data carrier object
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -119,21 +118,12 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Object dataObj)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object dataObj, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					String[] path = getNodePath(locStr);
-					val = getFieldValue(path, dataObj, 0);
-				}
-			}
-			val = locator.formatValue(val);
-		}
+		String locStr = locator.getLocator();
+		String[] path = getNodePath(locStr);
+		val = getFieldValue(path, dataObj, 0);
 
 		return val;
 	}

@@ -240,7 +240,7 @@ public class WmqStream extends TNTParseableInputStream<String> {
 		dest = null;
 		Hashtable<String, Object> props = new Hashtable<String, Object>();
 		props.put(CMQC.CONNECT_OPTIONS_PROPERTY, CMQC.MQCNO_HANDLE_SHARE_NONE);
-		if (!StringUtils.isEmpty(qmgrHostName)) {
+		if (StringUtils.isNotEmpty(qmgrHostName)) {
 			props.put(CMQC.HOST_NAME_PROPERTY, qmgrHostName);
 			props.put(CMQC.PORT_PROPERTY, qmgrPort);
 			props.put(CMQC.CHANNEL_PROPERTY, qmgrChannelName);
@@ -256,10 +256,11 @@ public class WmqStream extends TNTParseableInputStream<String> {
 		}
 		qmgr = new MQQueueManager(qmgrName, props);
 		int openOptions;
-		if (!StringUtils.isEmpty(topicString) || !StringUtils.isEmpty(topicName) || !StringUtils.isEmpty(subName)) {
+		if (StringUtils.isNotEmpty(topicString) || StringUtils.isNotEmpty(topicName)
+				|| StringUtils.isNotEmpty(subName)) {
 			openOptions = CMQC.MQSO_FAIL_IF_QUIESCING | CMQC.MQSO_CREATE
 					| (StringUtils.isEmpty(subName) ? CMQC.MQSO_MANAGED : CMQC.MQSO_RESUME);
-			if (!StringUtils.isEmpty(subName)) {
+			if (StringUtils.isNotEmpty(subName)) {
 				logger().log(OpLevel.INFO,
 						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 								"WmqStream.subscribing.to.topic1"),

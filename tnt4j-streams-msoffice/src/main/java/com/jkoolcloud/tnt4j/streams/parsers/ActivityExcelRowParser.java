@@ -19,8 +19,8 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
@@ -29,7 +29,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
@@ -99,13 +98,12 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param row
 	 *            MS Excel document row representing activity object data fields
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -114,33 +112,23 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Row row)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Row row, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					int cellIndex = CellReference.convertColStringToIndex(locStr);
-					Cell cell = row.getCell(cellIndex);
-					boolean cellFound = false;
-					if (cell != null) {
-						val = cell.toString();
-						cellFound = true;
-					}
-
-					if (!cellFound) {
-						logger().log(OpLevel.WARNING,
-								StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-										"AbstractExcelStream.cell.not.found"),
-								locStr, row.getSheet().getWorkbook().getMissingCellPolicy());
-					}
-				}
-			}
-			val = locator.formatValue(val);
+		String locStr = locator.getLocator();
+		int cellIndex = CellReference.convertColStringToIndex(locStr);
+		Cell cell = row.getCell(cellIndex);
+		boolean cellFound = false;
+		if (cell != null) {
+			val = cell.toString();
+			cellFound = true;
 		}
+
+		logger().log(OpLevel.TRACE,
+				StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+						"AbstractExcelStream.cell.not.found"),
+				locStr, row.getSheet().getWorkbook().getMissingCellPolicy(), String.valueOf(val));
+
 		return val;
 	}
 }

@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.io.*;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -125,14 +126,14 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
 					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityXmlParser.adding.mapping"), name, value);
 				}
 			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -234,16 +235,16 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
 						values[li] = getLocatorValue(stream, loc, xmlDoc);
-						if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-							logger().log(OpLevel.TRACE,
+						if (values[li] == null && requireAll && !loc.isOptional()) { // NON-NLS
+							logger().log(OpLevel.WARNING,
 									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 											"ActivityXmlParser.required.locator.not.found"),
-									field);
+									loc, field);
 							return null;
 						}
 					}
 				}
-				applyFieldValue(stream, ai, field, wrapValue(values));
+				applyFieldValue(stream, ai, field, wrapValue(values), field.getValueType());
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
@@ -264,13 +265,12 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	/**
 	 * Gets field value from raw data location and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param xmlDoc
 	 *            activity object XML DOM document
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
@@ -279,91 +279,76 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Document xmlDoc)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Document xmlDoc, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			boolean format = true;
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					// get value for locator (element)
-					try {
-						XPathExpression expr = xPath.compile(locStr);
-						NodeList nodes = null;
-						try {
-							nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
-						} catch (XPathException exc) {
-							val = expr.evaluate(xmlDoc);
-						}
-						int length = nodes == null ? 0 : nodes.getLength();
+		String locStr = locator.getLocator();
+		try {
+			XPathExpression expr = xPath.compile(locStr);
+			NodeList nodes = null;
+			try {
+				nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+			} catch (XPathException exc) {
+				val = expr.evaluate(xmlDoc);
+			}
+			int length = nodes == null ? 0 : nodes.getLength();
 
-						if (length > 0) {
-							List<Object> valuesList = new ArrayList<Object>(length);
-							for (int i = 0; i < length; i++) {
-								Node node = nodes.item(i);
+			if (length > 0) {
+				List<Object> valuesList = new ArrayList<Object>(length);
+				for (int i = 0; i < length; i++) {
+					Node node = nodes.item(i);
 
-								String strValue = node.getTextContent();
-								Node attrsNode = node;
+					String strValue = node.getTextContent();
+					Node attrsNode = node;
 
-								if (node instanceof Attr) {
-									Attr attr = (Attr) node;
+					if (node instanceof Attr) {
+						Attr attr = (Attr) node;
 
-									attrsNode = attr.getOwnerElement();
-								}
-
-								// Get list of attributes and their values for
-								// current element
-								NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
-
-								Node attr;
-								String attrVal;
-								ActivityFieldLocator locCopy = locator.clone();
-								if (attrsMap != null && attrsMap.getLength() > 0) {
-									attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
-									}
-
-									attr = attrsMap.getNamedItem(FORMAT_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										attr = attrsMap.getNamedItem(LOCALE_ATTR);
-										String attrLVal = attr == null ? null : attr.getTextContent();
-
-										locCopy.setFormat(attrVal,
-												StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
-									}
-
-									attr = attrsMap.getNamedItem(UNITS_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										locCopy.setUnits(attrVal);
-									}
-								}
-
-								valuesList.add(locCopy.formatValue(strValue.trim()));
-							}
-
-							val = wrapValue(valuesList);
-							format = false;
-						}
-					} catch (XPathExpressionException exc) {
-						ParseException pe = new ParseException(StreamsResources.getString(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityXMLParser.xPath.exception"), 0);
-						pe.initCause(exc);
-
-						throw pe;
+						attrsNode = attr.getOwnerElement();
 					}
-				}
-			}
 
-			if (format) {
-				val = locator.formatValue(val);
+					// Get list of attributes and their values for
+					// current element
+					NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
+
+					Node attr;
+					String attrVal;
+					ActivityFieldLocator locCopy = locator.clone();
+					if (attrsMap != null && attrsMap.getLength() > 0) {
+						attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+						attrVal = attr == null ? null : attr.getTextContent();
+						if (StringUtils.isNotEmpty(attrVal)) {
+							locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
+						}
+
+						attr = attrsMap.getNamedItem(FORMAT_ATTR);
+						attrVal = attr == null ? null : attr.getTextContent();
+						if (StringUtils.isNotEmpty(attrVal)) {
+							attr = attrsMap.getNamedItem(LOCALE_ATTR);
+							String attrLVal = attr == null ? null : attr.getTextContent();
+
+							locCopy.setFormat(attrVal, StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
+						}
+
+						attr = attrsMap.getNamedItem(UNITS_ATTR);
+						attrVal = attr == null ? null : attr.getTextContent();
+						if (StringUtils.isNotEmpty(attrVal)) {
+							locCopy.setUnits(attrVal);
+						}
+					}
+
+					valuesList.add(locCopy.formatValue(strValue.trim()));
+				}
+
+				val = wrapValue(valuesList);
+				formattingNeeded.set(false);
 			}
+		} catch (XPathExpressionException exc) {
+			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityXMLParser.xPath.exception"), 0);
+			pe.initCause(exc);
+
+			throw pe;
 		}
 
 		return val;
