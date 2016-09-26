@@ -2780,7 +2780,7 @@ Default location of `tnt4j.properties` file is in project `config` directory. At
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
 
 For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started).
-Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/README.md).
+Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/blob/master/README.md).
 
 ## Streams configuration
 
