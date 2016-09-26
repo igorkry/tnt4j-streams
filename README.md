@@ -39,8 +39,11 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * Apache Flume
     * Angulartics
+    * AJAX
+    * Node.js
     * Collectd
     * Nagios    
+    * Fluentd
 
     just by applying configuration and without additional coding.
 
@@ -1040,7 +1043,7 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
 
-How to configure Logstash see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
+How to setup sample environment see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -1113,7 +1116,7 @@ send parsed Apache Access log entry data as JSON to `localhost:9595`.
 
 Sample files can be found in `samples/logstash-parsed` directory.
 
-How to configure Logstash see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
+How to setup sample environment see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -1845,13 +1848,14 @@ string and passes it to parser.
 
 #### Angulartics (AngularJS tracing)
 
-This sample shows how to stream JavaScript events traces from Angulartics. TNT4J-Angulartics-plugin sends
-trace data over HTTP request `http://localhost:9595`. Thus to process this we will need `HttpStream` running on port
-`9595`.
+This sample shows how to stream JavaScript events traces from Angulartics. TNT4J-Angulartics-plugin sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
 
 Sample files can be found in `samples/angular-js-tracing` directory.
 
-How to configure Angulartics see [`samples/angular-js-tracing/readme.md`](tnt4j-streams-core/samples/angular-js-tracing/readme.md)
+How to setup sample environment see [`samples/angular-js-tracing/readme.md`](tnt4j-streams-core/samples/angular-js-tracing/readme.md)
+
+Sample trace data is available in `messages.json` file.
 
 Sample stream configuration:
 ```xml
@@ -1898,6 +1902,154 @@ should skip unparseable entries. Stream puts received request payload data as `b
 parser named `JSONPayloadParser` to parse it.
 
 `JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### AJAX
+
+This sample shows how to stream JavaScript events traces from AJAX. TNT4J-AJAX-interceptor sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
+
+Sample files can be found in `samples/ajax` directory.
+
+How to setup sample environment see [`samples/ajax/readme.md`](tnt4j-streams-core/samples/ajax/readme.md)
+
+Sample trace data is available in `messages.json` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
+               units="Nanoseconds"/>
+        <field name="ResourceName" locator="$.url" locator-type="Label"/>
+        <field name="EventName" locator="$.eventType" locator-type="Label"/>
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Tag" locator="$.eventType" locator-type="Label"/>
+
+        <field name="CompCode" locator="$.statuss" locator-type="Label">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="$.statuss" locator-type="Label"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EndTime" locator="$.endOfLoading" locator-type="Label" datatype="Timestamp"
+               units="Milliseconds"/>
+        <field name="ElapsedTime" locator="$.elapsedTime" locator-type="Label" datatype="Number" format="#####0"/>
+        <field name="ContentSize" locator="$.contentSize" locator-type="Label"/>
+        <field name="IsError" locator="$.error" locator-type="Label"/>
+        <field name="IsAborted" locator="$.abort" locator-type="Label"/>
+    </parser>
+
+    <parser name="AjaxEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="AjaxEventStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="AjaxEventParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `AjaxEventParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`AjaxEventParser` by default converts `byte[]` for entry `ActivityData` to JSON format string and uses stacked
+parser named `JSONPayloadParser` to parse it.
+
+`JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### Node.js
+
+This sample shows how to stream JavaScript events traces from Node.js. TNT4J-njsTrace-plugin sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
+
+Sample files can be found in `samples/node.js` directory.
+
+How to setup sample environment see [`samples/node.js/readme.md`](tnt4j-streams-core/samples/node.js/readme.md)
+
+Sample trace data is available in `messages.json` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="ElapsedTime" locator="$.span" locator-type="Label" datatype="Number" units="Milliseconds" required="false"/>
+        <field name="ResourceName" separator=",">
+            <field-locator locator="$.file" locator-type="Label"/>
+            <field-locator locator="$.line" locator-type="Label"/>
+        </field>
+
+        <field name="Method" locator="$.name" locator-type="Label"/>
+        <field name="Message" locator="$.returnValue" locator-type="Label" required="false"/>
+        <field name="EventName" value="node.js Trace"/>
+        <field name="EventType" locator="$.method" locator-type="Label"/>
+        <field name="Correlator" locator="$.stack[*]" locator-type="Label" separator=","/>
+
+        <field name="Exception" locator="$.exception" locator-type="Label"/>
+
+        <field name="CompCode" locator="$.exception" locator-type="Label">
+            <field-map source="false" target="SUCCESS"/>
+            <field-map source="true" target="ERROR"/>
+            <field-map source="Function timed out" target="ERROR"/>
+        </field>
+
+    </parser>
+
+    <parser name="njstraceParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="njstraceHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9596"/>
+        <parser-ref name="njstraceParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `njstraceParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`njstraceParser` by default converts `byte[]` for entry `ActivityData` to JSON format string and uses stacked
+parser named `JSONPayloadParser` to parse it.
+
+`JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### Node.js blocking event loop
+
+This extended ['Node.js'](#node.js) sample shows how to trace blocking event loop occurrences.
+
+Sample files can be found in `samples/node.js-blocking-event-loop` directory.
+
+How to setup sample environment see [`samples/node.js-blocking-event-loop/readme.md`](tnt4j-streams-core/samples/node.js-blocking-event-loop/readme.md)
+
+Sample stream configuration is same as in ['Node.js'](#node.js) sample.
 
 #### JAX-WS
 
@@ -2567,6 +2719,10 @@ because parent JSON parser already made map data structures from RAW Nagios repo
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.   
  
+#### Fluentd logs streaming
+ 
+TODO 
+
 #### Integrating TNT4J-Streams into custom API
 
 See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` module.

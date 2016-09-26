@@ -1,11 +1,11 @@
 {
-    "name": "tnt4j-njstrace-plugin",
-    "version": "1.0.0",
-    "description": "njstrace formatter for TNT4J-Streams",
-    "main": "njsTraceFormatter-tnt4j.js",
+    "name": "njstrace-timed-process",
+    "version": "0.0.1",
+    "description": "njstrace add-on for blocked event loop detecting",
+    "main": "jsTimedProcess.js",
     "dependencies": {
-        "njstrace": "^0.0.2",
-        "request": "^2.74.0"
+        "idgen": "^2.0",
+        "njstrace": "^0.0.3"
     },
     "devDependencies": {},
     "scripts": {

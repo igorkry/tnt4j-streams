@@ -1,10 +1,10 @@
 {
-    "name": "tnt4j-njstrace-plugin",
+    "name": "njstrace-tnt4j-formatter",
     "version": "1.0.0",
     "description": "njstrace formatter for TNT4J-Streams",
     "main": "njsTraceFormatter-tnt4j.js",
     "dependencies": {
-        "njstrace": "^0.0.2",
+        "njstrace": "^0.0.3",
         "request": "^2.74.0"
     },
     "devDependencies": {},
