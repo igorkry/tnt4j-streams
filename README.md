@@ -2043,13 +2043,13 @@ parser named `JSONPayloadParser` to parse it.
 
 #### Node.js blocking event loop
 
-This extended ['Node.js'](#node.js) sample shows how to trace blocking event loop occurrences.
+This extended ['Node.js'](#nodejs) sample shows how to trace blocking event loop occurrences.
 
 Sample files can be found in `samples/node.js-blocking-event-loop` directory.
 
 How to setup sample environment see [`samples/node.js-blocking-event-loop/readme.md`](tnt4j-streams-core/samples/node.js-blocking-event-loop/readme.md)
 
-Sample stream configuration is same as in ['Node.js'](#node.js) sample.
+Sample stream configuration is same as in ['Node.js'](#nodejs) sample.
 
 #### JAX-WS
 
@@ -2780,7 +2780,7 @@ Default location of `tnt4j.properties` file is in project `config` directory. At
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
 
 For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started).
-Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/blob/master/README.md).
+Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/README.md).
 
 ## Streams configuration
 
