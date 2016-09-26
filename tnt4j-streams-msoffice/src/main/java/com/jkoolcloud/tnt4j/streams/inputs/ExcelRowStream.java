@@ -109,8 +109,9 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	 * <p>
 	 * This method returns a excel sheet {@link Row} containing the contents of the next raw activity data item.
 	 * <p>
-	 * If row index is not within user defined property {@value StreamProperties#PROP_RANGE_TO_STREAM} range, such rows
-	 * are skipped.
+	 * If row index is not within user defined property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamProperties#PROP_RANGE_TO_STREAM} range, such rows are
+	 * skipped.
 	 */
 	@Override
 	public Row getNextItem() throws Exception {
