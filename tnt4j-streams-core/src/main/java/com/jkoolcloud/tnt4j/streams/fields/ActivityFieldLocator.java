@@ -575,7 +575,6 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.timeZone = timeZone;
 			cafl.cfgValue = cfgValue;
 			cafl.requiredVal = requiredVal;
-			cafl.timeZone = timeZone;
 			cafl.id = id;
 
 			cafl.builtInType = builtInType;

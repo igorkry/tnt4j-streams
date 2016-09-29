@@ -68,7 +68,8 @@ public class SampleStreamingApp {
 
 		ActivityField f = new ActivityField(StreamFieldType.StartTime.name());
 		ActivityFieldLocator afl = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1");
-		f.addLocator(afl).setFormat("dd MMM yyyy HH:mm:ss").setLocale("en-US");
+		afl.setFormat("dd MMM yyyy HH:mm:ss", "en-US");
+		f.addLocator(afl);
 		atp.addField(f);
 
 		f = new ActivityField(StreamFieldType.ServerIp.name());

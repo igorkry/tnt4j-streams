@@ -492,12 +492,6 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			}
 		}
-		if (StringUtils.isNotEmpty(format)) {
-			af.setFormat(format);
-		}
-		if (StringUtils.isNotEmpty(locale)) {
-			af.setLocale(locale);
-		}
 		if (separator != null) {
 			af.setSeparator(separator);
 		}

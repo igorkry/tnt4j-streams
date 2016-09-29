@@ -232,8 +232,7 @@ public class ActivityInfo {
 				eventName = substitute(eventName, getStringValue(fieldValue, field));
 				break;
 			case EventType:
-				OpType ot = Utils.mapOpType(fieldValue);
-				eventType = substitute(eventType, ot, OpType.class);
+				eventType = substitute(eventType, Utils.mapOpType(fieldValue), OpType.class);
 				break;
 			case ApplName:
 				applName = substitute(applName, getStringValue(fieldValue, field));
@@ -245,9 +244,7 @@ public class ActivityInfo {
 				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue), Long.class);
 				break;
 			case EndTime:
-				UsecTimestamp et = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
-				endTime = substitute(endTime, et, UsecTimestamp.class);
+				endTime = substitute(endTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
 				break;
 			case Exception:
 				exception = substitute(exception, getStringValue(fieldValue, field));
@@ -276,9 +273,7 @@ public class ActivityInfo {
 				trackingId = substitute(trackingId, getStringValue(fieldValue, field));
 				break;
 			case StartTime:
-				UsecTimestamp st = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
-				startTime = substitute(startTime, st, UsecTimestamp.class);
+				startTime = substitute(startTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
 				break;
 			case CompCode:
 				OpCompCode cc = fieldValue instanceof Number ? OpCompCode.valueOf(((Number) fieldValue).intValue())
@@ -328,6 +323,14 @@ public class ActivityInfo {
 					fieldValue instanceof Object[] ? getStringValue(fieldValue, field) : fieldValue,
 					field.getValueType());
 		}
+	}
+
+	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
+		ActivityFieldLocator locator = CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
+
+		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
+				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(), fieldValue,
+						locator == null ? null : locator.getTimeZone(), locator == null ? null : locator.getLocale());
 	}
 
 	private static String substitute(String value, String newValue) {

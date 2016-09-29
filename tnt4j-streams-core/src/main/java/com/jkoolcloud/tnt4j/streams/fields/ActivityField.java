@@ -47,8 +47,6 @@ public class ActivityField {
 
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
-	private String format = null;
-	private String locale = null;
 	private String separator = DEFAULT_FIELD_VALUES_DELIM;
 	private String reqValue = ""; /* string to allow no value */
 	private Collection<ActivityParser> stackedParsers;
@@ -211,56 +209,6 @@ public class ActivityField {
 	 */
 	public ActivityField setSeparator(String locatorSep) {
 		this.separator = locatorSep;
-
-		return this;
-	}
-
-	/**
-	 * Gets the format string defining how to interpret the raw data field value. Note: This is not applicable for all
-	 * fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @return the format string for interpreting raw data value
-	 */
-	public String getFormat() {
-		return format;
-	}
-
-	/**
-	 * Sets the format string defining how to interpret the raw data field value. Note: This is not applicable for all
-	 * fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @param format
-	 *            the format string for interpreting raw data value
-	 *
-	 * @return instance of this activity field
-	 */
-	public ActivityField setFormat(String format) {
-		this.format = format;
-
-		return this;
-	}
-
-	/**
-	 * Gets the locale representation string used by formatter. Note: This is not applicable for all fields and will be
-	 * ignored by those fields to which it does not apply.
-	 *
-	 * @return the locale representation string used by formatter
-	 */
-	public String getLocale() {
-		return locale;
-	}
-
-	/**
-	 * Sets the locale representation string used by formatter. Note: This is not applicable for all fields and will be
-	 * ignored by those fields to which it does not apply.
-	 *
-	 * @param locale
-	 *            the locale representation string used by formatter
-	 *
-	 * @return instance of this activity field
-	 */
-	public ActivityField setLocale(String locale) {
-		this.locale = locale;
 
 		return this;
 	}
@@ -518,8 +466,6 @@ public class ActivityField {
 	public ActivityField createTempField(Map<String, Object> dValues, int valueIndex) {
 		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
 		tField.locators = getTempFieldLocators(locators, valueIndex);
-		tField.format = format;
-		tField.locale = locale;
 		tField.separator = separator;
 		tField.reqValue = reqValue;
 		tField.stackedParsers = stackedParsers;
