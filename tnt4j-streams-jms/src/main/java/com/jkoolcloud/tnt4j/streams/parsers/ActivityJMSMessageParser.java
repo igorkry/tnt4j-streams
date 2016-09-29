@@ -115,7 +115,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				parseCustomMessage(message, dataMap);
 			}
 
-			dataMap.put(StreamFieldType.Correlator.toString(), message.getJMSCorrelationID());
+			dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
 		} catch (JMSException exc) {
 			logger().log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
 					"ActivityJMSMessageParser.payload.data.error"), exc);

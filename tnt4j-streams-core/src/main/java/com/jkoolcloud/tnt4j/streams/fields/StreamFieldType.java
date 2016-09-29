@@ -294,11 +294,11 @@ public enum StreamFieldType {
 
 		switch (this) {
 		case Severity:
-			return OpLevel.valueOf(value).toString();
+			return OpLevel.valueOf(value).name();
 		case EventType:
-			return OpType.valueOf(value).toString();
+			return OpType.valueOf(value).name();
 		case CompCode:
-			return OpCompCode.valueOf(value).toString();
+			return OpCompCode.valueOf(value).name();
 
 		default:
 			throw new IllegalArgumentException(StreamsResources

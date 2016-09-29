@@ -110,7 +110,7 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 		ActivityInfo ai = super.parsePreparedItem(stream, dataStr, data);
 
 		if (snapshotsField != null) {
-			Object fValue = wrapValue(resolveLocatorValues(snapshotsField, stream, data));
+			Object fValue = Utils.simplifyValue(parseLocatorValues(snapshotsField, stream, data));
 
 			if (fValue == null) {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

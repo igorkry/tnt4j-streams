@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -138,12 +136,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			Object value;
 			for (int fi = 0; fi < fieldList.size(); fi++) {
 				field = fieldList.get(fi);
-				value = wrapValue(resolveLocatorValues(field, stream, data));
+				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
 
 				if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
-					handleDynamicValues(stream, data, ai, field, value);
+					applyDynamicValue(stream, data, ai, field, value);
 				} else {
-					applyFieldValue(stream, ai, field, value, field.getValueType());
+					applyFieldValue(stream, ai, field, value);
 				}
 			}
 		} catch (Exception e) {
@@ -156,9 +154,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return ai;
 	}
 
-	private void handleDynamicValues(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
+	private void applyDynamicValue(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
 			Object value) throws ParseException {
-		Map<String, Object> dValMap = resolveDynamicValues(stream, data, field.getDynamicLocators());
+		Map<String, Object> dValMap = parseDynamicValues(stream, data, field.getDynamicLocators());
 
 		Object[] fValues = Utils.makeArray(value);
 
@@ -174,7 +172,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			ActivityField tField = tFieldsList.get(tfi);
 			Object fValue = fValues[tfi];
 
-			applyFieldValue(stream, ai, tField, wrapValue(fValue), tField.getValueType());
+			applyFieldValue(stream, ai, tField, Utils.simplifyValue(fValue));
 		}
 	}
 
@@ -206,25 +204,26 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Resolves field values from prepared activity data item using field bound locators.
+	 * Parses values array from prepared activity data item using field bound locators.
 	 *
 	 * @param field
-	 *            field instance to resolve values
+	 *            field instance to get locators
 	 * @param stream
 	 *            stream providing activity data
 	 * @param data
 	 *            prepared activity data item to parse
-	 * @return resolved values array
+	 * @return field locators parsed values array
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified value
+	 * @see #parseLocatorValues(List, TNTInputStream, Object)
 	 */
-	protected Object[] resolveLocatorValues(ActivityField field, TNTInputStream<?, ?> stream, T data)
+	protected Object[] parseLocatorValues(ActivityField field, TNTInputStream<?, ?> stream, T data)
 			throws ParseException {
-		return resolveLocatorValues(field.getLocators(), stream, data);
+		return parseLocatorValues(field.getLocators(), stream, data);
 	}
 
 	/**
-	 * Resolves field values from prepared activity data item using field bound locators.
+	 * Parses values array from prepared activity data item using provided locators list.
 	 *
 	 * @param locations
 	 *            value locators list
@@ -232,11 +231,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            stream providing activity data
 	 * @param data
 	 *            prepared activity data item to parse
-	 * @return resolved values array
+	 * @return locators parsed values array
 	 * @throws ParseException
 	 *             if error applying locator format properties to specified value
 	 */
-	protected Object[] resolveLocatorValues(List<ActivityFieldLocator> locations, TNTInputStream<?, ?> stream, T data)
+	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locations, TNTInputStream<?, ?> stream, T data)
 			throws ParseException {
 		if (locations != null) {
 			Object[] values = new Object[locations.size()];
@@ -249,12 +248,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return null;
 	}
 
-	private Map<String, Object> resolveDynamicValues(TNTInputStream<?, ?> stream, T data,
+	private Map<String, Object> parseDynamicValues(TNTInputStream<?, ?> stream, T data,
 			Map<String, ActivityFieldLocator> dynamicLocators) throws ParseException {
 		Map<String, Object> dynamicValuesMap = new HashMap<String, Object>();
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
-				final Object dynamicLocatorValue = wrapValue(getLocatorValue(stream, dLocator.getValue(), data));
+				final Object dynamicLocatorValue = Utils
+						.simplifyValue(getLocatorValue(stream, dLocator.getValue(), data));
 				if (dynamicLocatorValue != null) {
 					dynamicValuesMap.put(dLocator.getKey(), dynamicLocatorValue);
 				}
@@ -302,41 +302,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 		}
 		return val;
-	}
-
-	/**
-	 * Wraps locator prepared value if it is list or array.
-	 *
-	 * @param value
-	 *            locator prepared value
-	 * @return extracts actual object if list/array contains single item, array of values if list/array contains more
-	 *         than one item, {@code null} if list/array is {@code null} or empty.
-	 */
-	protected static Object wrapValue(Object value) {
-		if (value instanceof List) {
-			return wrapValue((List<?>) value);
-		}
-		if (value instanceof Object[]) {
-			return wrapValue((Object[]) value);
-		}
-
-		return value;
-	}
-
-	private static Object wrapValue(List<?> valuesList) {
-		if (CollectionUtils.isEmpty(valuesList)) {
-			return null;
-		}
-
-		return valuesList.size() == 1 ? valuesList.get(0) : valuesList.toArray();
-	}
-
-	private static Object wrapValue(Object[] valuesArray) {
-		if (ArrayUtils.isEmpty(valuesArray)) {
-			return null;
-		}
-
-		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
 	}
 
 	/**

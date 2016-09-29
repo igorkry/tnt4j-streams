@@ -97,7 +97,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            key to use to locate raw data value - interpretation of this value depends on locator type
 	 */
 	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator) {
-		this.type = type.toString();
+		this.type = type.name();
 		this.locator = locator;
 		this.builtInType = type;
 	}

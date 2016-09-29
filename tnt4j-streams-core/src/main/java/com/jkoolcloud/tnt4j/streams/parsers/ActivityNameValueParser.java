@@ -58,12 +58,13 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityNameValueParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code FieldDelim} property) - Default: ","
+	 * Contains the field separator (set by {@code FieldDelim} property) - Default:
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
-	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "="
+	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "{@value}"
 	 */
 	protected String valueDelim = "="; // NON-NLS
 

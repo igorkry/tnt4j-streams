@@ -244,7 +244,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						}
 					}
 				}
-				applyFieldValue(stream, ai, field, wrapValue(values), field.getValueType());
+				applyFieldValue(stream, ai, field, Utils.simplifyValue(values));
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
@@ -340,7 +340,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					valuesList.add(locCopy.formatValue(strValue.trim()));
 				}
 
-				val = wrapValue(valuesList);
+				val = Utils.simplifyValue(valuesList);
 				formattingNeeded.set(false);
 			}
 		} catch (XPathExpressionException exc) {

@@ -103,26 +103,6 @@ public class ActivityInfo {
 
 	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
-	 * the jKool Cloud Service. Same as invoking {@link #applyField(ActivityField, Object, String)} setting value type
-	 * to {@code null}.
-	 *
-	 * @param field
-	 *            field to apply
-	 * @param value
-	 *            value to apply for this field, which could be an array of objects if value for field consists of
-	 *            multiple locations
-	 * @throws ParseException
-	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
-	 *             format, etc.)
-	 *
-	 * @see #applyField(ActivityField, Object, String)
-	 */
-	public void applyField(ActivityField field, Object value) throws ParseException {
-		applyField(field, value, null);
-	}
-
-	/**
-	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
 	 * the jKool Cloud Service.
 	 *
 	 * @param field
@@ -130,69 +110,34 @@ public class ActivityInfo {
 	 * @param value
 	 *            value to apply for this field, which could be an array of objects if value for field consists of
 	 *            multiple locations
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             format, etc.)
-	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
-	public void applyField(ActivityField field, Object value, String valueType) throws ParseException {
+	public void applyField(ActivityField field, Object value) throws ParseException {
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field"), field,
 				value);
-		if (value instanceof Object[]) {
-			Object[] values = (Object[]) value;
-			if (values.length == 1) {
-				value = values[0];
+		Object[] values = Utils.makeArray(Utils.simplifyValue(value));
+
+		List<ActivityFieldLocator> locators = field.getLocators();
+		if (values != null && CollectionUtils.isNotEmpty(locators)) {
+			if (locators.size() > 1 && field.isEnumeration()) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityInfo.multiple.locators", field), 0);
 			}
-		}
-		if (value instanceof Collection) {
-			value = ((Collection<?>) value).toArray();
+			if (locators.size() > 1 && locators.size() != values.length) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityInfo.failed.parsing", field), 0);
+			}
+			ActivityFieldLocator locator;
+			for (int v = 0; v < values.length; v++) {
+				locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
+				values[v] = formatValue(field, locator, values[v]);
+			}
 		}
 
-		Object fieldValue;
-		List<ActivityFieldLocator> locators = field.getLocators();
-		if (CollectionUtils.isEmpty(locators)) {
-			if (value instanceof Object[]) {
-				// TODO: better array value handling
-				fieldValue = Arrays.toString((Object[]) value);
-			} else {
-				fieldValue = value;
-			}
-		} else {
-			if (value instanceof Object[]) {
-				Object[] values = (Object[]) value;
-				if (field.isEnumeration()) {
-					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.multiple.locators", field), 0);
-				}
-				if (locators.size() > 1 && locators.size() != values.length) {
-					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.failed.parsing", field), 0);
-				}
-				StringBuilder sb = new StringBuilder();
-				ActivityFieldLocator locator;
-				for (int v = 0; v < values.length; v++) {
-					locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
-					String format = locator.getFormat();
-					Object fmtValue = formatValue(field, locator, values[v]);
-					if (v > 0) {
-						sb.append(field.getSeparator());
-					}
-					if (fmtValue != null) {
-						if (fmtValue instanceof UsecTimestamp && !StringUtils.isEmpty(format)) {
-							sb.append(((UsecTimestamp) fmtValue).toString(format));
-						} else {
-							sb.append(getStringValue(fmtValue));
-						}
-					}
-				}
-				fieldValue = sb.toString();
-			} else {
-				fieldValue = locators.size() > 1 ? value : formatValue(field, locators.get(0), value);
-			}
-		}
+		Object fieldValue = Utils.simplifyValue(values);
 
 		if (fieldValue == null) {
 			LOGGER.log(OpLevel.TRACE,
@@ -203,7 +148,8 @@ public class ActivityInfo {
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
 				field, fieldValue);
-		setFieldValue(field, fieldValue, valueType);
+
+		setFieldValue(field, fieldValue);
 	}
 
 	/**
@@ -238,14 +184,14 @@ public class ActivityInfo {
 					TimeUnit units = StringUtils.isEmpty(locator.getUnits()) ? TimeUnit.MICROSECONDS
 							: TimeUnit.valueOf(locator.getUnits().toUpperCase());
 					if (!(value instanceof Number)) {
-						value = Long.valueOf(getStringValue(value));
+						value = Long.valueOf(Utils.toString(value));
 					}
 					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
 				} catch (Exception e) {
 				}
 				break;
 			case ResourceName:
-				value = getStringValue(value);
+				value = getStringValue(value, field);
 				break;
 			case ServerIp:
 				if (value instanceof InetAddress) {
@@ -271,138 +217,152 @@ public class ActivityInfo {
 	 *            field whose value is to be set
 	 * @param fieldValue
 	 *            formatted value based on locator definition for field
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
 	 *
 	 * @throws ParseException
 	 *             if there are any errors with conversion to internal format
-	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
-	private void setFieldValue(ActivityField field, Object fieldValue, String valueType) throws ParseException {
+	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null) {
 			switch (fieldType) {
 			case Message:
-				message = substitute(message, fieldValue);
+				message = substitute(message, fieldValue, Object.class);
 				break;
 			case EventName:
-				eventName = substitute(eventName, getStringValue(fieldValue));
+				eventName = substitute(eventName, getStringValue(fieldValue, field));
 				break;
 			case EventType:
-				eventType = Utils.mapOpType(fieldValue);
+				OpType ot = Utils.mapOpType(fieldValue);
+				eventType = substitute(eventType, ot, OpType.class);
 				break;
 			case ApplName:
-				applName = substitute(applName, getStringValue(fieldValue));
+				applName = substitute(applName, getStringValue(fieldValue, field));
 				break;
 			case Correlator:
 				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
-				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue));
+				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue), Long.class);
 				break;
 			case EndTime:
-				endTime = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
+				UsecTimestamp et = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
 						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
+				endTime = substitute(endTime, et, UsecTimestamp.class);
 				break;
 			case Exception:
-				exception = substitute(exception, getStringValue(fieldValue));
+				exception = substitute(exception, getStringValue(fieldValue, field));
 				break;
 			case Location:
-				location = substitute(location, getStringValue(fieldValue));
+				location = substitute(location, getStringValue(fieldValue, field));
 				break;
 			case ReasonCode:
-				reasonCode = substitute(reasonCode, getIntValue(fieldValue));
+				reasonCode = substitute(reasonCode, getIntValue(fieldValue), Integer.class);
 				break;
 			case ResourceName:
-				resourceName = substitute(resourceName, getStringValue(fieldValue));
+				resourceName = substitute(resourceName, getStringValue(fieldValue, field));
 				break;
 			case ServerIp:
-				serverIp = substitute(serverIp, getStringValue(fieldValue));
+				serverIp = substitute(serverIp, getStringValue(fieldValue, field));
 				break;
 			case ServerName:
-				serverName = substitute(serverName, getStringValue(fieldValue));
+				serverName = substitute(serverName, getStringValue(fieldValue, field));
 				break;
 			case Severity:
-				if (fieldValue instanceof Number) {
-					severity = OpLevel.valueOf(((Number) fieldValue).intValue());
-				} else {
-					severity = OpLevel.valueOf(fieldValue);
-				}
+				OpLevel sev = fieldValue instanceof Number ? OpLevel.valueOf(((Number) fieldValue).intValue())
+						: OpLevel.valueOf(fieldValue);
+				severity = substitute(severity, sev, OpLevel.class);
 				break;
 			case TrackingId:
-				trackingId = substitute(trackingId, getStringValue(fieldValue));
+				trackingId = substitute(trackingId, getStringValue(fieldValue, field));
 				break;
 			case StartTime:
-				startTime = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
+				UsecTimestamp st = fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
 						: TimestampFormatter.parse(field.getFormat(), fieldValue, null, field.getLocale());
+				startTime = substitute(startTime, st, UsecTimestamp.class);
 				break;
 			case CompCode:
-				if (fieldValue instanceof Number) {
-					compCode = OpCompCode.valueOf(((Number) fieldValue).intValue());
-				} else {
-					compCode = OpCompCode.valueOf(fieldValue);
-				}
+				OpCompCode cc = fieldValue instanceof Number ? OpCompCode.valueOf(((Number) fieldValue).intValue())
+						: OpCompCode.valueOf(fieldValue);
+				compCode = substitute(compCode, cc, OpCompCode.class);
 				break;
 			case Tag:
 				addTag(Utils.getTags(fieldValue));
 				break;
 			case UserName:
-				userName = substitute(userName, getStringValue(fieldValue));
+				userName = substitute(userName, getStringValue(fieldValue, field));
 				break;
 			case MsgCharSet:
-				msgCharSet = substitute(msgCharSet, getStringValue(fieldValue));
+				msgCharSet = substitute(msgCharSet, getStringValue(fieldValue, field));
 				break;
 			case MsgEncoding:
-				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue));
+				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue, field));
 				break;
 			case MsgLength:
-				msgLength = substitute(msgLength, getIntValue(fieldValue));
+				msgLength = substitute(msgLength, getIntValue(fieldValue), Integer.class);
 				break;
 			case MsgMimeType:
-				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue));
+				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
 			case ProcessId:
-				processId = substitute(processId, getIntValue(fieldValue));
+				processId = substitute(processId, getIntValue(fieldValue), Integer.class);
 				break;
 			case ThreadId:
-				threadId = substitute(threadId, getIntValue(fieldValue));
+				threadId = substitute(threadId, getIntValue(fieldValue), Integer.class);
 				break;
 			case Category:
-				category = substitute(category, getStringValue(fieldValue));
+				category = substitute(category, getStringValue(fieldValue, field));
 				break;
 			case ParentId:
-				parentId = substitute(parentId, getStringValue(fieldValue));
+				parentId = substitute(parentId, getStringValue(fieldValue, field));
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.activity", field));
 			}
+
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
+					fieldValue);
 		} else {
-			addActivityProperty(field.getFieldTypeName(), fieldValue, valueType);
+			addActivityProperty(field.getFieldTypeName(),
+					fieldValue instanceof Object[] ? getStringValue(fieldValue, field) : fieldValue,
+					field.getValueType());
 		}
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
-				fieldValue);
 	}
 
 	private static String substitute(String value, String newValue) {
 		return StringUtils.isEmpty(newValue) ? value : newValue;
 	}
 
-	private static Integer substitute(Integer value, Integer newValue) {
-		return substitute(value, newValue, Integer.class);
-	}
-
-	private static Long substitute(Long value, Long newValue) {
-		return substitute(value, newValue, Long.class);
-	}
-
-	private static Object substitute(Object value, Object newValue) {
-		return substitute(value, newValue, Object.class);
-	}
-
 	private static <T> T substitute(T value, T newValue, Class<T> clazz) {
 		return newValue == null ? value : newValue;
+	}
+
+	private static String getStringValue(Object value, ActivityField field) {
+		if (value instanceof Object[]) {
+			Object[] vArray = (Object[]) value;
+			StringBuilder sb = new StringBuilder();
+			ActivityFieldLocator locator;
+			for (int v = 0; v < vArray.length; v++) {
+				locator = field.getLocators().size() == 1 ? field.getLocators().get(0)
+						: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null;
+				String format = locator == null ? null : locator.getFormat();
+
+				if (v > 0) {
+					sb.append(field.getSeparator());
+				}
+
+				if (vArray[v] instanceof UsecTimestamp && StringUtils.isNotEmpty(format)) {
+					sb.append(((UsecTimestamp) vArray[v]).toString(format));
+				} else {
+					sb.append(Utils.toString(vArray[v]));
+				}
+			}
+
+			return sb.toString();
+		}
+
+		return Utils.toString(value);
 	}
 
 	/**
@@ -445,12 +405,18 @@ public class ActivityInfo {
 			activityProperties = new HashMap<String, Property>();
 		}
 
-		Object pVal = wrapPropertyValue(propValue);
-		return activityProperties.put(propName, StringUtils.isEmpty(valueType) ? new Property(propName, pVal)
-				: new Property(propName, pVal, valueType));
+		Property p = new Property(propName, wrapPropertyValue(propValue),
+				StringUtils.isEmpty(valueType) ? ValueTypes.VALUE_TYPE_NONE : valueType);
+		Object prevValue = activityProperties.put(propName, p);
+
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
+				propName, Utils.toString(p.getValue()), p.getValueType(), prevValue);
+
+		return prevValue;
 	}
 
-	private Object wrapPropertyValue(Object propValue) {
+	private static Object wrapPropertyValue(Object propValue) {
 		if (propValue instanceof UsecTimestamp) {
 			return ((UsecTimestamp) propValue).getTimeUsec();
 		}
@@ -465,13 +431,7 @@ public class ActivityInfo {
 	 *            tag strings array
 	 */
 	public void addTag(String... tags) {
-		if (ArrayUtils.isNotEmpty(tags)) {
-			if (this.tag == null) {
-				this.tag = new ArrayList<String>();
-			}
-
-			Collections.addAll(this.tag, tags);
-		}
+		this.tag = addStrings(this.tag, tags);
 	}
 
 	/**
@@ -481,13 +441,21 @@ public class ActivityInfo {
 	 *            correlator strings array
 	 */
 	public void addCorrelator(String... correlators) {
-		if (ArrayUtils.isNotEmpty(correlators)) {
-			if (this.correlator == null) {
-				this.correlator = new ArrayList<String>();
+		this.correlator = addStrings(this.correlator, correlators);
+	}
+
+	private static Collection<String> addStrings(Collection<String> collection, String... strings) {
+		if (ArrayUtils.isNotEmpty(strings)) {
+			if (collection == null) {
+				collection = new ArrayList<String>();
 			}
 
-			Collections.addAll(this.correlator, correlators);
+			for (String str : strings) {
+				collection.add(str.trim());
+			}
 		}
+
+		return collection;
 	}
 
 	/**
@@ -621,7 +589,7 @@ public class ActivityInfo {
 				event.setMessage(binData, (Object[]) null);
 				event.setSize(msgLength == null ? binData.length : msgLength);
 			} else {
-				String strData = String.valueOf(message);
+				String strData = Utils.toString(message);
 				event.setMessage(strData, (Object[]) null);
 				event.setSize(msgLength == null ? strData.length() : msgLength);
 			}
@@ -699,7 +667,7 @@ public class ActivityInfo {
 				msgEncoding = "base64"; // NON-NLS
 				msgMimeType = "application/octet-stream"; // NON-NLS
 			} else {
-				strData = String.valueOf(message);
+				strData = Utils.toString(message);
 			}
 
 			addActivityProperty(JSONFormatter.JSON_MSG_TEXT_FIELD, strData);
@@ -799,7 +767,7 @@ public class ActivityInfo {
 				msgEncoding = "base64"; // NON-NLS
 				msgMimeType = "application/octet-stream"; // NON-NLS
 			} else {
-				strData = String.valueOf(message);
+				strData = Utils.toString(message);
 			}
 
 			addActivityProperty(JSONFormatter.JSON_MSG_TEXT_FIELD, strData);
@@ -924,27 +892,12 @@ public class ActivityInfo {
 		}
 	}
 
-	/**
-	 * Returns the appropriate string representation for the specified value.
-	 *
-	 * @param value
-	 *            value to convert to string representation
-	 *
-	 * @return string representation of value
-	 */
-	private static String getStringValue(Object value) {
-		if (value instanceof byte[]) {
-			return Utils.getString((byte[]) value);
-		}
-		return String.valueOf(value);
-	}
-
 	private static Integer getIntValue(Object value) {
-		return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(getStringValue(value));
+		return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(Utils.toString(value));
 	}
 
 	private static Long getLongValue(Object value) {
-		return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(getStringValue(value));
+		return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(Utils.toString(value));
 	}
 
 	/**

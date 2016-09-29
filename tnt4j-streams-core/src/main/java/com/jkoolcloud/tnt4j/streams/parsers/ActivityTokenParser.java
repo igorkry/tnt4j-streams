@@ -56,7 +56,8 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityTokenParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code FieldDelim} property) - default: ","
+	 * Contains the field separator (set by {@code FieldDelim} property) - default:
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 

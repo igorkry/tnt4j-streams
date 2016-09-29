@@ -123,7 +123,7 @@ public final class StreamsResources {
 		try {
 			return getBundle(bundleName).getString(String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
 		} catch (MissingResourceException mre) {
-			return key.toString();
+			return key.name();
 		}
 	}
 

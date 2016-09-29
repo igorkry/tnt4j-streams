@@ -498,7 +498,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (StringUtils.isNotEmpty(locale)) {
 			af.setLocale(locale);
 		}
-		if (StringUtils.isNotEmpty(separator)) {
+		if (separator != null) {
 			af.setSeparator(separator);
 		}
 		if (StringUtils.isNotEmpty(valueType)) {

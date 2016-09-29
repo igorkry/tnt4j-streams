@@ -168,31 +168,10 @@ public abstract class ActivityParser {
 	 *            value to apply for this field
 	 * @throws ParseException
 	 *             if an error parsing the specified value
-	 * @see #applyFieldValue(ActivityInfo, ActivityField, Object, String)
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		applyFieldValue(ai, field, value, null);
-	}
-
-	/**
-	 * Sets the value for the field in the specified activity.
-	 *
-	 * @param ai
-	 *            activity object whose field is to be set
-	 * @param field
-	 *            field to apply value to
-	 * @param value
-	 *            value to apply for this field
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
-	 * @throws ParseException
-	 *             if an error parsing the specified value
-	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
-	 */
-	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value, String valueType)
-			throws ParseException {
 		if (!field.isTransparent()) {
-			ai.applyField(field, value, valueType);
+			ai.applyField(field, value);
 		}
 	}
 
@@ -213,39 +192,12 @@ public abstract class ActivityParser {
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing the specified value
-	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object, String)
 	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value)
 			throws IllegalStateException, ParseException {
-		applyFieldValue(stream, ai, field, value, null);
-	}
 
-	/**
-	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
-	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
-	 * is merged into specified (parent) activity.
-	 *
-	 * @param stream
-	 *            parent stream
-	 * @param ai
-	 *            activity object whose field is to be set
-	 * @param field
-	 *            field to apply value to
-	 * @param value
-	 *            value to apply for this field
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
-	 * @throws IllegalStateException
-	 *             if parser has not been properly initialized
-	 * @throws ParseException
-	 *             if an error parsing the specified value
-	 * @see #parse(TNTInputStream, Object)
-	 */
-	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value,
-			String valueType) throws IllegalStateException, ParseException {
-
-		applyFieldValue(ai, field, value, valueType);
+		applyFieldValue(ai, field, value);
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
@@ -292,7 +244,8 @@ public abstract class ActivityParser {
 	}
 
 	/**
-	 * Sets activity parser tags string. Tags are separated using ",".
+	 * Sets activity parser tags string. Tags are separated using
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}".
 	 *
 	 * @param tags
 	 *            tags string

@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
@@ -184,14 +185,14 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 					field = fieldMapEntry.getKey();
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-					value = wrapValue(resolveLocatorValues(locations, stream, matches));
+					value = Utils.simplifyValue(parseLocatorValues(locations, stream, matches));
 
 					if (value != null) {
 						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityRegExParser.setting.field"), field);
 					}
 
-					applyFieldValue(stream, ai, field, value, field.getValueType());
+					applyFieldValue(stream, ai, field, value);
 				}
 			}
 		} catch (Exception e) {
@@ -206,14 +207,14 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				field = fieldMapEntry.getKey();
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-				value = wrapValue(resolveLocatorValues(locations, stream, matcher));
+				value = Utils.simplifyValue(parseLocatorValues(locations, stream, matcher));
 
 				if (value != null) {
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.setting.group.field"), field);
 				}
 
-				applyFieldValue(stream, ai, field, value, field.getValueType());
+				applyFieldValue(stream, ai, field, value);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(

@@ -235,7 +235,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 					valuesList.add(locator.formatValue(jsonValues));
 				}
 
-				val = wrapValue(valuesList);
+				val = Utils.simplifyValue(valuesList);
 				formattingNeeded.set(false);
 			}
 		}

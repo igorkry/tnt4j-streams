@@ -23,7 +23,6 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +39,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -228,7 +228,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (opType instanceof Number) {
 			return mapOpType(((Number) opType).intValue());
 		}
-		return mapOpType(opType.toString());
+		return mapOpType(String.valueOf(opType));
 	}
 
 	private static OpType mapOpType(String opType) {
@@ -701,14 +701,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				String fieldName = valueObjFields[i].getName();
 				valueObjFields[i].setAccessible(true);
 
-				Object fieldValue = valueObjFields[i].get(obj);
-
-				String valueStr;
-				if (fieldValue instanceof Object[]) {
-					valueStr = Arrays.toString((Object[]) fieldValue);
-				} else {
-					valueStr = String.valueOf(fieldValue);
-				}
+				String valueStr = toString(valueObjFields[i].get(obj));
 
 				sb.append(fieldName).append("='").append(valueStr).append('\'') // NON-NLS
 						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
@@ -848,4 +841,86 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return obj;
 	}
 
+	/**
+	 * Returns the appropriate string representation for the specified object.
+	 *
+	 * @param value
+	 *            object to convert to string representation
+	 *
+	 * @return string representation of object
+	 */
+	public static String toString(Object value) {
+		if (value instanceof byte[]) {
+			return getString((byte[]) value);
+		}
+		if (value instanceof char[]) {
+			return new String((char[]) value);
+		}
+		if (value instanceof Object[]) {
+			return toStringDeep((Object[]) value);
+		}
+		return String.valueOf(value);
+	}
+
+	/**
+	 * Returns single object (first item) if list/array contains single item, makes an array from {@link Collection}, or
+	 * returns same value as parameter in all other cases.
+	 *
+	 * @param value
+	 *            object value to simplify
+	 * @return same value as parameter if it is not array or collection; first item of list/array if it contains single
+	 *         item; array of values if list/array contains more than one item; {@code null} if parameter object is
+	 *         {@code null} or list/array is empty
+	 */
+	public static Object simplifyValue(Object value) {
+		if (value instanceof Collection) {
+			return simplifyValue((Collection<?>) value);
+		}
+		if (value instanceof Object[]) {
+			return simplifyValue((Object[]) value);
+		}
+
+		return value;
+	}
+
+	private static Object simplifyValue(Collection<?> valuesList) {
+		if (CollectionUtils.isEmpty(valuesList)) {
+			return null;
+		}
+
+		return valuesList.size() == 1 ? valuesList.iterator().next() : valuesList.toArray();
+	}
+
+	private static Object simplifyValue(Object[] valuesArray) {
+		if (ArrayUtils.isEmpty(valuesArray)) {
+			return null;
+		}
+
+		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
+	}
+
+	/**
+	 * Returns the appropriate string representation for the specified array.
+	 *
+	 * @param a
+	 *            array to convert to string representation
+	 * @return string representation of array
+	 */
+	public static String toStringDeep(Object[] a) {
+		if (a == null)
+			return "null"; // NON-NLS
+
+		int iMax = a.length - 1;
+		if (iMax == -1)
+			return "[]"; // NON-NLS
+
+		StringBuilder b = new StringBuilder();
+		b.append('[');
+		for (int i = 0;; i++) {
+			b.append(toString(a[i]));
+			if (i == iMax)
+				return b.append(']').toString();
+			b.append(", "); // NON-NLS
+		}
+	}
 }
