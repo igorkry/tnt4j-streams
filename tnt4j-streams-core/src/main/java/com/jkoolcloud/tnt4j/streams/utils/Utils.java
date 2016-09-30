@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +41,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.HexDump;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -67,6 +69,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
 	 */
 	public static final double DEFAULT_EPSILON = 0.000001;
+
+	/**
+	 * Constant for system dependent line separator symbol.
+	 */
+	public static final String NEW_LINE = System.getProperty("line.separator");
 
 	private Utils() {
 	}
@@ -671,7 +678,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			builder.append(line);
-			builder.append(separateLines ? System.getProperty("line.separator") : " ");
+			builder.append(separateLines ? NEW_LINE : " ");
 		}
 
 		return builder.toString();
@@ -922,5 +929,55 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				return b.append(']').toString();
 			b.append(", "); // NON-NLS
 		}
+	}
+
+	/**
+	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
+	 * {@link #toHex(byte[], int, int)} setting {@code len} parameter to {@code 0}.
+	 * 
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @param offset
+	 *            offset at which to start dumping bytes
+	 * @return returns HEX dump representation of provided bytes array
+	 *
+	 * @see #toHex(byte[], int, int)
+	 */
+	public static String toHex(byte[] b, int offset) {
+		return toHex(b, offset, 0);
+	}
+
+	/**
+	 * Makes a HEX dump string representation of provided bytes array.
+	 *
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @param offset
+	 *            offset at which to start dumping bytes
+	 * @param len
+	 *            maximum number of bytes to dump
+	 * @return returns HEX dump representation of provided bytes array
+	 */
+	public static String toHex(byte[] b, int offset, int len) {
+		if (b == null) {
+			return "<EMPTY>"; // NON-NLS
+		}
+
+		String hexStr;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(b.length * 2);
+		try {
+			if (len > 0 && len < b.length) {
+				byte[] bc = Arrays.copyOfRange(b, offset, offset + len);
+				HexDump.dump(bc, 0, bos, offset);
+			} else {
+				HexDump.dump(b, 0, bos, offset);
+			}
+			hexStr = NEW_LINE + bos.toString("UTF-8"); // NON-NLS
+			bos.close();
+		} catch (Exception exc) {
+			hexStr = "HEX FAIL: " + exc.getLocalizedMessage(); // NON-NLS
+		}
+
+		return hexStr;
 	}
 }

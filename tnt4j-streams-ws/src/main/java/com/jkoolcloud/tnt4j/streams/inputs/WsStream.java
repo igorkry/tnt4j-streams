@@ -110,7 +110,7 @@ public class WsStream extends AbstractWsStream {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.trim().startsWith("<")) { // NON-NLS
-					sb.append(line).append('\n'); // NON-NLS
+					sb.append(line).append(Utils.NEW_LINE);
 				} else {
 					int bi = line.indexOf(':'); // NON-NLS
 					if (bi >= 0) {
@@ -118,7 +118,7 @@ public class WsStream extends AbstractWsStream {
 						String hValue = line.substring(bi + 1).trim();
 						headers.put(hKey, hValue);
 					} else {
-						sb.append(line).append('\n'); // NON-NLS
+						sb.append(line).append(Utils.NEW_LINE);
 					}
 				}
 			}
