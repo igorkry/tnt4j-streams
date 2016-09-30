@@ -24,11 +24,12 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 
 /**
- * <p>
  * Provides methods for parsing objects into timestamps and for formatting timestamps as strings.
  * <p>
  * This is based on {@link SimpleDateFormat}, but extends its support to recognize microsecond fractional seconds. If
@@ -150,6 +151,7 @@ public class TimestampFormatter {
 	 * @return formatted value of timestamp
 	 * @throws ParseException
 	 *             if an error parsing the specified value based timestamp pattern supported by this parser;
+	 * @see #parse(TimeUnit, Object)
 	 */
 	public UsecTimestamp parse(Object value) throws ParseException {
 		if (value instanceof UsecTimestamp) {
@@ -186,6 +188,10 @@ public class TimestampFormatter {
 
 	/**
 	 * Parses the value into a timestamp with microsecond accuracy based on the specified units.
+	 * <p>
+	 * If {@code value} represents decimal number (as {@link Number} or {@link String}, fraction gets preserved by
+	 * scaling down {@code value} in {@code units} until numeric value expression gets with low (epsilon is
+	 * {@code 0.001}) or without fraction or {@code units} gets set to {@link TimeUnit#NANOSECONDS}.
 	 *
 	 * @param units
 	 *            units that value is in
@@ -194,6 +200,8 @@ public class TimestampFormatter {
 	 * @return microsecond timestamp
 	 * @throws ParseException
 	 *             if an error parsing the specified value
+	 *
+	 * @see #scale(double, TimeUnit)
 	 */
 	public static UsecTimestamp parse(TimeUnit units, Object value) throws ParseException {
 		UsecTimestamp ts;
@@ -206,11 +214,18 @@ public class TimestampFormatter {
 				time = ((Calendar) value).getTimeInMillis();
 				units = TimeUnit.MILLISECONDS;
 			} else {
-				time = value instanceof Number ? ((Number) value).longValue() : Long.parseLong(value.toString());
-			}
+				if (units == null) {
+					units = TimeUnit.MILLISECONDS;
+				}
 
-			if (units == null) {
-				units = TimeUnit.MILLISECONDS;
+				double dTime = value instanceof Number ? ((Number) value).doubleValue()
+						: Double.parseDouble(value.toString());
+
+				Pair<Double, TimeUnit> sTimePair = scale(dTime, units);
+				dTime = sTimePair.getLeft();
+				units = sTimePair.getRight();
+
+				time = (long) dTime;
 			}
 
 			switch (units) {
@@ -242,6 +257,77 @@ public class TimestampFormatter {
 	}
 
 	/**
+	 * Scales decimal timestamp value and value units to preserve fractional part of the value.
+	 * <p>
+	 * Scaling is performed until numeric value expression gets with low (epsilon is {@code 0.001}) or without fraction
+	 * or {@code units} gets set to {@link TimeUnit#NANOSECONDS}.
+	 *
+	 * @param dTime
+	 *            numeric timestamp value to scale
+	 * @param units
+	 *            timestamp value units
+	 * @return pair of scaled timestamp value and units
+	 */
+	public static Pair<Double, TimeUnit> scale(double dTime, TimeUnit units) {
+		double fraction = dTime % 1;
+
+		if (!Utils.equals(fraction, 0.0, 0.001)) {
+			switch (units) {
+			case DAYS:
+				dTime = dTime * 24L;
+				break;
+			case HOURS:
+			case MINUTES:
+				dTime = dTime * 60L;
+				break;
+			case SECONDS:
+			case MILLISECONDS:
+			case MICROSECONDS:
+				dTime = dTime * 1000L;
+				break;
+			case NANOSECONDS:
+			default:
+				dTime = Math.round(dTime);
+				break;
+			}
+
+			units = shiftDown(units);
+
+			return scale(dTime, units);
+		}
+
+		return new ImmutablePair<Double, TimeUnit>(dTime, units);
+	}
+
+	/**
+	 * Shifts {@link TimeUnit} enum value to next lower scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * {@link TimeUnit#MILLISECONDS}.
+	 * 
+	 * @param units
+	 *            units to shift down
+	 * @return scale down shifted time units value
+	 */
+	public static TimeUnit shiftDown(TimeUnit units) {
+		int nui = units.ordinal() - 1;
+
+		return nui >= 0 ? TimeUnit.values()[nui] : units;
+	}
+
+	/**
+	 * Shifts {@link TimeUnit} enum value to next upper scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * {@link TimeUnit#MINUTES}.
+	 * 
+	 * @param units
+	 *            units to shift up
+	 * @return scaled up shifted time units value
+	 */
+	public static TimeUnit shiftUp(TimeUnit units) {
+		int nui = units.ordinal() + 1;
+
+		return nui < TimeUnit.values().length ? TimeUnit.values()[nui] : units;
+	}
+
+	/**
 	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
 	 * parser.
 	 *
@@ -261,7 +347,7 @@ public class TimestampFormatter {
 	 */
 	public static UsecTimestamp parse(String pattern, Object value, String timeZoneId, String locale)
 			throws ParseException {
-		String dateStr = value.toString();
+		String dateStr = String.valueOf(value);
 		return new UsecTimestamp(dateStr, pattern, timeZoneId, locale);
 	}
 
