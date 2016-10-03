@@ -107,6 +107,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		try {
 			if (data instanceof DocumentContext) {
 				jsonDoc = (DocumentContext) data;
+			} else if (data instanceof InputStream) {
+				jsonDoc = JsonPath.parse((InputStream) data);
 			} else {
 				jsonString = getNextJSONString(data, jsonAsLine);
 				if (StringUtils.isEmpty(jsonString)) {

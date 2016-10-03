@@ -64,7 +64,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
-	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "{@value}"
+	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "="
 	 */
 	protected String valueDelim = "="; // NON-NLS
 

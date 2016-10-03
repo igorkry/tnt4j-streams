@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * This class implements directory files streaming manager. Manager monitors directory (and subdirectories) for stream
  * configuration files (i.e. tnt-data-source*.xml) and invokes streaming actions on stream configuration files changes.
- * Stream configuration file name must also contain job identifier (@link UUID) set by job producer (i.e.
+ * Stream configuration file name must also contain job identifier {@link UUID} set by job producer (i.e.
  * tnt-data-source_123e4567-e89b-12d3-a456-426655440000.xml) to make events/actions correlations between all
  * participating pats: job producer, TNT4J-Streams API and JKoolCloud. Without identifier, stream job configurations
  * won't be processed.
