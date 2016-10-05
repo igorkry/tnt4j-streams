@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  *
  * @param <T>
  *            the type of handled RAW activity data
- * @param <K>
+ * @param <O>
  *            the type of handled output data
  *
  * @version $Revision: 1 $
@@ -58,7 +58,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @see java.util.concurrent.ExecutorService
  * @see com.jkoolcloud.tnt4j.streams.outputs.TNTOutput
  */
-public abstract class TNTInputStream<T, K> implements Runnable {
+public abstract class TNTInputStream<T, O> implements Runnable {
 
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
@@ -89,7 +89,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 	private String name;
 
-	private TNTOutput<K> out;
+	private TNTOutput<O> out;
 
 	/**
 	 * Returns logger used by this stream.
@@ -103,7 +103,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * 
 	 * @return stream output handler
 	 */
-	public TNTOutput<K> getOutput() {
+	public TNTOutput<O> getOutput() {
 		return out;
 	}
 
@@ -113,7 +113,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * @param out
 	 *            stream output handler
 	 */
-	protected void setOutput(TNTOutput<K> out) {
+	protected void setOutput(TNTOutput<O> out) {
 		this.out = out;
 		out.setStream(this);
 	}
@@ -350,7 +350,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	@SuppressWarnings("unchecked")
 	public void addReference(Object refObject) throws IllegalStateException {
 		if (refObject instanceof TNTOutput) {
-			setOutput((TNTOutput<K>) refObject);
+			setOutput((TNTOutput<O>) refObject);
 		}
 	}
 
