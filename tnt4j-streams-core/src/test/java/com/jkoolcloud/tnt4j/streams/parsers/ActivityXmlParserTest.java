@@ -48,9 +48,9 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	private final static Object simpleString = "<MsgData format=\"string\" value=\"Message Body\"/>";
 	private TNTInputStream<String, ActivityInfo> is;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	@Before
+	@SuppressWarnings("unchecked")
 	public void prepare() {
 		try {
 			parser = new ActivityXmlParser();

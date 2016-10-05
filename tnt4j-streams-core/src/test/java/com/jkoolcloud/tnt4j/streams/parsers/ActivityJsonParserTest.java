@@ -147,7 +147,6 @@ public class ActivityJsonParserTest {
 		assertEquals("OK", parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void getLocatorValueJsonPathIsListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);

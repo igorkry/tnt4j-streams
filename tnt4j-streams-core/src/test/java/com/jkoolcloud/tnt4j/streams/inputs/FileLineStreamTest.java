@@ -49,11 +49,10 @@ public class FileLineStreamTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "serial", "unchecked" })
 	public void searchFilesTest() throws Exception {
 		TestFileList files = new TestFileList(false);
 
-		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST";
+		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST"; // NON-NLS
 
 		Map<String, String> props = new HashMap<String, String>(2);
 		props.put(StreamProperties.PROP_FILENAME, fileName);
