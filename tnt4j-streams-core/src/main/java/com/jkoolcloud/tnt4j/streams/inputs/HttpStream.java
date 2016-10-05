@@ -366,7 +366,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		private StringEntity createHtmlStringEntity(String msg) {
 			StringEntity entity = new StringEntity(Utils.format(HTML_MSG_PATTERN, msg),
-					ContentType.create("text/html", "UTF-8")); // NON-NLS
+					ContentType.create("text/html", Utils.UTF8));
 
 			return entity;
 		}

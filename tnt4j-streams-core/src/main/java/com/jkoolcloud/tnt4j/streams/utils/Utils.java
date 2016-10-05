@@ -53,7 +53,7 @@ import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 
 /**
- * General utility methods.
+ * General utility methods used by TNT4J-Streams.
  *
  * @version $Revision: 1 $
  */
@@ -503,10 +503,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static String getString(byte[] strBytes) {
 		try {
-			return new String(strBytes, Charset.forName("UTF-8"));
+			return new String(strBytes, Charset.forName(UTF8));
 		} catch (UnsupportedCharsetException uce) {
 			try {
-				return new String(strBytes, "UTF-8");
+				return new String(strBytes, UTF8);
 			} catch (UnsupportedEncodingException uee) {
 				return new String(strBytes);
 			}
@@ -546,7 +546,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // NON-NLS
+		transformer.setOutputProperty(OutputKeys.ENCODING, Utils.UTF8);
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
@@ -972,7 +972,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			} else {
 				HexDump.dump(b, 0, bos, offset);
 			}
-			hexStr = NEW_LINE + bos.toString("UTF-8"); // NON-NLS
+			hexStr = NEW_LINE + bos.toString(UTF8);
 			bos.close();
 		} catch (Exception exc) {
 			hexStr = "HEX FAIL: " + exc.getLocalizedMessage(); // NON-NLS

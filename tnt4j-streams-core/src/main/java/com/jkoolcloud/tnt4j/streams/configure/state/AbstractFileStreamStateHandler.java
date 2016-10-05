@@ -365,7 +365,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 		if (readLen > 0) {
 			String str = new String(buff, 0, readLen);
-			final byte[] bytes = str.getBytes("UTF-8");
+			final byte[] bytes = str.getBytes(Utils.UTF8);
 			crc.update(bytes, 0, bytes.length);
 		}
 
@@ -491,7 +491,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			fileAccessState.currentLineNumber = lineNr;
 
 			CRC32 crc = new CRC32();
-			final byte[] bytes4Line = lineStr.getBytes("UTF-8"); // NON-NLS
+			final byte[] bytes4Line = lineStr.getBytes(Utils.UTF8);
 			crc.update(bytes4Line, 0, bytes4Line.length);
 			fileAccessState.currentLineCrc = crc.getValue();
 		} catch (IOException exc) {

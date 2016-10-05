@@ -86,9 +86,9 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void setPropertiesIfNullTest() throws Exception {
-		TNTInputStream my = Mockito.mock(TNTInputStream.class, Mockito.CALLS_REAL_METHODS);
+		TNTInputStream<?, ?> my = Mockito.mock(TNTInputStream.class, Mockito.CALLS_REAL_METHODS);
 		my.setProperties(null);
-		assertNull(my.getProperty("PROP_EXECUTORS_BOUNDED"));
+		assertNull(my.getProperty("PROP_EXECUTORS_BOUNDED")); // NON-NLS
 	}
 
 	@Test
@@ -129,21 +129,21 @@ public class TNTInputStreamTest {
 	@Test
 	public void testMakeActivityInfo() throws Exception {
 
-		assertNull(ts.makeActivityInfo("TEST"));
+		assertNull(ts.makeActivityInfo("TEST")); // NON-NLS
 	}
 
 	@Test(expected = ParseException.class)
 	public void testMakeActivityInfoFails() throws Exception {
 		ts.addParser(parser);
-		assertNotNull(ts.makeActivityInfo("TESTPARSEEXCEPTION"));
+		assertNotNull(ts.makeActivityInfo("TESTPARSEEXCEPTION")); // NON-NLS
 	}
 
 	//
 	@Test
 	public void testApplyParsers() throws Exception {
 		final ActivityParser parser = mock(ActivityParser.class);
-		String[] tags = { "TestTag" };
-		String[] falseTags = { "TestTagNot" };
+		String[] tags = { "TestTag" }; // NON-NLS
+		String[] falseTags = { "TestTagNot" }; // NON-NLS
 		when(parser.getTags()).thenReturn(tags);
 		when(parser.parse(any(TNTInputStream.class), any())).thenReturn(new ActivityInfo());
 
@@ -151,17 +151,17 @@ public class TNTInputStreamTest {
 		ts.addParser(parser);
 
 		// Data class nor supported
-		assertNull(ts.applyParsers("TEST"));
+		assertNull(ts.applyParsers("TEST")); // NON-NLS
 
 		when(parser.isDataClassSupported(any())).thenReturn(true);
 
-		ActivityInfo ai = ts.applyParsers("TEST");
+		ActivityInfo ai = ts.applyParsers("TEST"); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(tags, "TEST");
+		ts.applyParsers(tags, "TEST"); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(falseTags, "TEST");
+		ts.applyParsers(falseTags, "TEST"); // NON-NLS
 
 		verify(parser, times(3)).parse(any(TNTInputStream.class), any());
 
@@ -252,7 +252,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void getOwnerThreadTest() {
-		ts.ownerThread.setName("TEST_STREAM");
+		ts.ownerThread.setName("TEST_STREAM"); // NON-NLS
 		assertEquals("TEST_STREAM", ts.getOwnerThread().getName());
 	}
 
@@ -290,7 +290,7 @@ public class TNTInputStreamTest {
 			if (used)
 				return null;
 			used = true;
-			return "TEST";
+			return "TEST"; // NON-NLS
 		}
 
 	}
@@ -317,8 +317,8 @@ public class TNTInputStreamTest {
 		@Override
 		public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
 				throws IllegalStateException, ParseException {
-			if (data.equals("TESTPARSEEXCEPTION"))
-				throw new ParseException("TESTPARSEEXCEPTION", 0);
+			if (data.equals("TESTPARSEEXCEPTION")) // NON-NLS
+				throw new ParseException("TESTPARSEEXCEPTION", 0); // NON-NLS
 			return ai;
 		}
 

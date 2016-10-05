@@ -115,7 +115,7 @@ public class StreamsAgentTest {
 
 	private void interceptConsole() throws InterruptedException {
 		console = new StringWriter();
-		final WriterOutputStream writerOutputStream = new WriterOutputStream(console);
+		final WriterOutputStream writerOutputStream = new WriterOutputStream(console, Utils.UTF8);
 		final PrintStream out = new PrintStream(writerOutputStream);
 		System.setOut(out);
 		Thread.sleep(50);

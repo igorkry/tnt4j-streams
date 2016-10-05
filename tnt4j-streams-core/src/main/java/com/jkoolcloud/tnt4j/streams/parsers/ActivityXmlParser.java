@@ -172,7 +172,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString));
+				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

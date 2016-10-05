@@ -61,14 +61,14 @@ public class ActivityJsonParserTest {
 	@Test
 	public void parseWhenDataIsNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		assertNull(parser.parse(stream, null));
 	}
 
 	@Test(expected = ParseException.class)
 	public void parseExceptionTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> myMap = new HashMap<String, String>();
 		parser.parse(stream, myMap);
 	}
@@ -77,7 +77,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void parseTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityField field = new ActivityField("test_name", ActivityFieldDataType.String); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -88,7 +88,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void parseWhenStringIsEmptyTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		String jsonString = "";
 		assertNull(parser.parse(stream, jsonString));
 	}
@@ -96,7 +96,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "test"); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -106,7 +106,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
 		assertNull(parser.getLocatorValue(stream, null, jsonContext));
@@ -115,7 +115,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueWhenLocatorEmptyTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "");
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -125,7 +125,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueWhenTypeExpectedTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> props = new HashMap<String, String>(2);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
@@ -140,7 +140,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueStartsWithJsonPathTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.test"); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\"}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -151,7 +151,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueJsonPathIsListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values"); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[4, 5, 6]}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
@@ -162,7 +162,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getLocatorValueJsonPathIsEmptyListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		AbstractBufferedStream stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values"); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[]}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);

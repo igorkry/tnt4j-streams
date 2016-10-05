@@ -246,7 +246,7 @@ public class RestStream extends AbstractWsStream {
 			throw new HttpResponseException(responseCode, response.getStatusLine().getReasonPhrase());
 		}
 
-		String respStr = EntityUtils.toString(response.getEntity(), "UTF-8"); // NON-NLS
+		String respStr = EntityUtils.toString(response.getEntity(), Utils.UTF8);
 
 		return respStr;
 	}
