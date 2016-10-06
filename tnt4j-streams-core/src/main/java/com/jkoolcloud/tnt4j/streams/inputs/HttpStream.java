@@ -64,7 +64,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>ActivityTransport - activity transport definition: 'Http'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
  * <li>Port - port number to run Http server. (Optional - default 8080 used if not defined)</li>
  * <li>UseSSL - flag indicating to use SSL. (Optional)</li>

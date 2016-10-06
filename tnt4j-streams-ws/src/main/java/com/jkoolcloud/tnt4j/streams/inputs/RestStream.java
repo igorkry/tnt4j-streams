@@ -54,6 +54,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * POST method request depending on scenario step configuration parameter 'method'. Default method is GET.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *

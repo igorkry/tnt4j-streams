@@ -37,6 +37,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * response is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractBufferedStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *

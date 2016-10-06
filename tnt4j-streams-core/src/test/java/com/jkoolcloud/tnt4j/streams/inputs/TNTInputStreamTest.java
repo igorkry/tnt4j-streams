@@ -61,7 +61,7 @@ public class TNTInputStreamTest {
 	public void recordActivityTest() throws Exception {
 		ts.addParser(parser);
 		streamThread.start();
-		when(ai.isFiltered()).thenReturn(false);
+		when(ai.isFilteredOut()).thenReturn(false);
 
 		Thread.sleep(500);
 		verify(ai).recordActivity(any(Tracker.class), any(Long.class));

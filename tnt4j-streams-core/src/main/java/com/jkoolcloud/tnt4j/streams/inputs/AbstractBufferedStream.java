@@ -30,7 +30,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
  * queue to be asynchronously processed by consumer thread(s).
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
  * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
  * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
@@ -47,8 +48,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<T> {
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
-	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE:
-																			// sec.
+	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE: sec.
 	private static final Object DIE_MARKER = new Object();
 
 	private int bufferSize;

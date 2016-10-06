@@ -87,7 +87,7 @@ public class ActivityInfo {
 
 	private String category = null;
 
-	private boolean filtered = false;
+	private boolean filteredOut = false;
 
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
 
@@ -1007,7 +1007,7 @@ public class ActivityInfo {
 			parentId = otherAi.parentId;
 		}
 
-		filtered |= otherAi.filtered;
+		filteredOut |= otherAi.filteredOut;
 
 		if (otherAi.activityProperties != null) {
 			if (activityProperties == null) {
@@ -1280,22 +1280,22 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Returns activity filtering flag value.
+	 * Returns activity filtered out flag value.
 	 *
-	 * @return activity filtering flag value
+	 * @return activity filtered out flag value
 	 */
-	public boolean isFiltered() {
-		return filtered;
+	public boolean isFilteredOut() {
+		return filteredOut;
 	}
 
 	/**
-	 * Sets activity filtering flag value.
+	 * Sets activity filtered out flag value.
 	 *
-	 * @param filtered
+	 * @param filteredOut
 	 *            {@code true} if activity is filtered out, {@code false} otherwise
 	 */
-	public void setFiltered(boolean filtered) {
-		this.filtered = filtered;
+	public void setFiltered(boolean filteredOut) {
+		this.filteredOut = filteredOut;
 	}
 
 	/**

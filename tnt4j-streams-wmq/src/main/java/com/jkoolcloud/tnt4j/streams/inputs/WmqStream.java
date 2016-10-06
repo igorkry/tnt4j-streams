@@ -42,7 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * This activity stream requires parsers that can support {@link String} data. It currently does not strip off any WMQ
  * headers, assuming that the message data only contains the actual input for the configured parsers.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
  * <li>QueueManager - Queue manager name. (Optional)</li>
  * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>

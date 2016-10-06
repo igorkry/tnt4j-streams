@@ -41,7 +41,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity}/{@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} and array of
  * child {@link com.jkoolcloud.tnt4j.core.Snapshot} entities. Primary use of this parser is to parse performance metrics
  * packages collected by system performance monitors like collectd or Nagios. If 'ChildrenField' property is not
- * defined, acts like ordinary {@link ActivityJsonParser}. This parser supports the following properties:
+ * defined, acts like ordinary {@link ActivityJsonParser}.
+ * <p>
+ * This parser supports the following properties (in addition to those supported by {@link ActivityJsonParser}):
  * <ul>
  * <li>ChildrenField - field name referencing JSON data structure containing child snapshot definitions. (Optional)</li>
  * </ul>

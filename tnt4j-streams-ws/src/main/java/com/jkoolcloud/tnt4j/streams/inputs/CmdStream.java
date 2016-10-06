@@ -35,6 +35,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * System command call is performed by invoking {@link Runtime#exec(String)}.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *

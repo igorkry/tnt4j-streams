@@ -26,6 +26,8 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * {@link Sheet} is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link Sheet} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractExcelStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *

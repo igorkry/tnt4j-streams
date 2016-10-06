@@ -42,7 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
  * <li>FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters
  * '*' and '?'. Definition pattern is "zipFilePath!entryNameWildcard". I.e.:

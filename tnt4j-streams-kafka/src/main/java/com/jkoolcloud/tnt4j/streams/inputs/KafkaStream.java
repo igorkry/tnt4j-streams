@@ -59,7 +59,8 @@ import kafka.utils.SystemTime$;
  * <li>ActivityTransport - activity transport definition: 'Kafka'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
  * <li>Topic - topic name to listen. (Required)</li>
  * <li>StartServer - flag indicating if stream has to start Kafka server on startup. Default value - {@code false}.

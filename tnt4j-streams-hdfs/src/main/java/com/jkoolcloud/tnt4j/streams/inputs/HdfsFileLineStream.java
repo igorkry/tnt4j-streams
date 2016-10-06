@@ -45,20 +45,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties:
- * <ul>
- * <li>FileName - URI of HDFS file or file URI pattern defined using wildcard characters '*' and '?'. (Required)</li>
- * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
- * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
- * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
- * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}. (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual just if 'FilePolling' property is set to
- * {@code true}. Default value - 15sec. (Optional)</li>
- * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
- * on stream restart. Default value - {@code true}. (Optional)</li>
- * </ul>
+ * This activity stream supports properties from {@link AbstractFileLineStream} (and higher hierarchy streams).
  *
  * @version $Revision: 2 $
  *
