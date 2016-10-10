@@ -2,6 +2,8 @@
 
     <echo message="Processing ${ant.project.name}${line.separator}" level="info"/>
 
+	<property name="modules" value="tnt4j-streams-core,tnt4j-streams-msoffice,tnt4j-streams--distribution"/>
+	
     <condition property="isWindows">
         <os family="windows"/>
     </condition>
@@ -20,25 +22,25 @@
 
     <target name="mvn_windows_clean" if="isWindows">
         <exec dir="." executable="cmd">
-            <arg line="/c mvn clean"/>
+            <arg line="/c mvn clean --projects ${modules}"/>
         </exec>
     </target>
 
     <target name="mvn_unix_clean" if="isUnix">
         <exec dir="." executable="sh">
-            <arg line="-c 'mvn clean'"/>
+            <arg line="-c 'mvn clean --projects ${modules}'"/>
         </exec>
     </target>
 
     <target name="mvn_windows_build" if="isWindows">
         <exec dir="." executable="cmd">
-            <arg line="/c mvn clean install -P devBuild"/>
+            <arg line="/c mvn clean install --projects ${modules} -am -P devBuild"/>
         </exec>
     </target>
 
     <target name="mvn_unix_build" if="isUnix">
         <exec dir="." executable="sh">
-            <arg line="-c 'mvn clean install -P devBuild'"/>
+            <arg line="-c 'mvn install --projects ${modules} -am -P devBuild'"/>
         </exec>
     </target>
 
