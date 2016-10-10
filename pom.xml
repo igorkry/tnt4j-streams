@@ -53,6 +53,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.resources.encoding>UTF-8</project.resources.encoding>
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
         <java.compiler.version>1.6</java.compiler.version>
@@ -107,7 +108,8 @@
     </profiles>
 
     <build>
-        <defaultGoal>clean install</defaultGoal>
+        <defaultGoal>--projects tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution --also-make clean install
+        </defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -119,6 +121,14 @@
                     <source>${java.source.version}</source>
                     <target>${java.target.version}</target>
                     <debuglevel>${java.compiler.debuglevel}</debuglevel>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <encoding>${project.resources.encoding}</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -204,14 +214,15 @@
 
     <modules>
         <module>tnt4j-streams-core</module>
-        <!--module>tnt4j-streams-hdfs</module-->
-        <!--module>tnt4j-streams-jms</module-->
-        <!--module>tnt4j-streams-kafka</module-->
-        <!--module>tnt4j-streams-mqtt</module-->
-        <!--module>tnt4j-streams-wmq</module-->
-        <!--module>tnt4j-streams-ws</module-->
-        <!--module>tnt4j-streams-flume-plugin</module-->
-        <!--<module>tnt4j-streams-msoffice</module>-->
+        <module>tnt4j-streams-hdfs</module>
+        <module>tnt4j-streams-jms</module>
+        <module>tnt4j-streams-kafka</module>
+        <module>tnt4j-streams-mqtt</module>
+        <module>tnt4j-streams-wmq</module>
+        <module>tnt4j-streams-ws</module>
+        <module>tnt4j-streams-flume-plugin</module>
+        <module>tnt4j-streams-msoffice</module>
+        <!--<module>tnt4j-streams-camel</module>-->
         <module>tnt4j-streams-samples</module>
         <module>tnt4j-streams--distribution</module>
     </modules>
