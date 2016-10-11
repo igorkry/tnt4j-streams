@@ -251,4 +251,13 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		logger().log(OpLevel.WARNING, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
 				"ActivityJMSMessageParser.parsing.custom.jms.message"));
 	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - JMS MESSAGE
+	 */
+	protected String getActivityDataType() {
+		return "JMS MESSAGE";
+	}
 }

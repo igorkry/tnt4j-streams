@@ -41,7 +41,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <p>
  * This activity stream requires parsers that can support JMS {@link Message} data.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
  * <li>ServerURI - JMS server URL. (Required)</li>
  * <li>Queue - queue destination name. (Required - just one of 'Queue' or 'Topic')</li>
@@ -115,14 +116,14 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 			} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(topicName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				queueName = value;
 			} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(queueName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				topicName = value;

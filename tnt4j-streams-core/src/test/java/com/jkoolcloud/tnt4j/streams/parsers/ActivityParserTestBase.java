@@ -17,14 +17,12 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
-
-import com.jkoolcloud.tnt4j.streams.utils.UtilsTest;
 
 /**
  * @author akausinis
@@ -78,40 +76,5 @@ public abstract class ActivityParserTestBase {
 		final String tag = "Test";
 		parser.setTags(tag);
 		assertEquals(tag, parser.getTags()[0]);
-	}
-
-	@Test
-	public void getNextString() throws Exception {
-
-		final String testString = "Test\n";
-		final String expectedString = "Test";
-		final StringReader reader = UtilsTest.toReader(testString);
-		final ByteArrayInputStream inputStream = UtilsTest.toInputStream(testString);
-		List<Object> testCases = new ArrayList<Object>() {
-			{
-				add(expectedString);
-				add(expectedString.getBytes());
-				add(reader);
-				add(inputStream);
-			}
-		};
-		for (Object data : testCases) {
-			System.out.println(data.getClass());
-			assertEquals(expectedString, parser.getNextString(data));
-		}
-		assertNull(parser.getNextString(null));
-	}
-
-	@Test
-	public void getNextStringWhenBufferedReaderInstanceTest() {
-		InputStream textStream = new ByteArrayInputStream("test".getBytes());
-		BufferedReader br = new BufferedReader(new InputStreamReader(textStream));
-		assertEquals("test", parser.getNextString(br));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void getNextStringWhenOtherInstanceTest() {
-		String stringToBeParsed = "Testing some tests";
-		parser.getNextString(555);
 	}
 }

@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 
 import javax.jms.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
@@ -34,18 +35,23 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 
+	@Override
+	@Before
+	public void prepare() {
+		parser = new ActivityJMSMessageParser();
+	}
+
 	@Test
 	@Override
 	public void isDataClassSupportedTest() {
-		parser = new ActivityJMSMessageParser();
 		assertTrue("javax.jms.Message.class shall be supported ",
 				parser.isDataClassSupported(mock(javax.jms.Message.class)));
 		assertFalse("ActivityJMSMessageParser does not support Strings", parser.isDataClassSupported(String.class));
 	}
 
 	@Test
-	public void testDataMap() throws JMSException {
-		parser = new ActivityJMSMessageParser();
+	@Override
+	public void getDataMapTest() throws JMSException {
 		final TextMessage message = mock(TextMessage.class);
 		final String string = "TEST"; // NON-NLS
 		when(message.getText()).thenReturn(string);

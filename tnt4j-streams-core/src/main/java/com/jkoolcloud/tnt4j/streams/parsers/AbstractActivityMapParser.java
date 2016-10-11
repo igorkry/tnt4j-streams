@@ -56,6 +56,19 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	private String nodePathDelim = DEFAULT_NODE_PATH_DELIM;
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link java.util.Map}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return Map.class.isInstance(data);
+	}
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -158,5 +171,14 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	private static String getItemIndexStr(String indexToken) {
 		return indexToken.replaceAll("\\D+", ""); // NON-NLS
+	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - MAP
+	 */
+	protected String getActivityDataType() {
+		return "MAP";
 	}
 }

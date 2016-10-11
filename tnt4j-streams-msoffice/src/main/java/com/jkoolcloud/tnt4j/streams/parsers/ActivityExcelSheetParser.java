@@ -138,4 +138,13 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 
 		return val;
 	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - EXCEL SHEET
+	 */
+	protected String getActivityDataType() {
+		return "EXCEL SHEET";
+	}
 }

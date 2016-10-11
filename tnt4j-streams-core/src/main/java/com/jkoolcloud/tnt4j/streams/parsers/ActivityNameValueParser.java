@@ -142,7 +142,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (data == null) {
 			return null;
 		}
-		String dataStr = getNextString(data);
+		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}

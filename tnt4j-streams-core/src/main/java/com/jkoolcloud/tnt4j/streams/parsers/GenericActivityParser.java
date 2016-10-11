@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,6 +100,73 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.removing.field"),
 				field); // Utils.getDebugString(field));
 		fieldList.remove(field);
+	}
+
+	/**
+	 * Reads the next RAW activity data string (line) from the specified data input source.
+	 *
+	 * @param data
+	 *            input source for activity data
+	 * @return string, or {@code null} if end of input source has been reached
+	 * @throws IllegalArgumentException
+	 *             if the class of input source supplied is not supported.
+	 */
+	protected String getNextActivityString(Object data) {
+		if (data == null) {
+			return null;
+		}
+		if (data instanceof String) {
+			return (String) data;
+		} else if (data instanceof byte[]) {
+			return Utils.getString((byte[]) data);
+		}
+		BufferedReader rdr;
+		if (data instanceof BufferedReader) {
+			rdr = (BufferedReader) data;
+		} else if (data instanceof Reader) {
+			rdr = new BufferedReader((Reader) data);
+		} else if (data instanceof InputStream) {
+			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
+		} else {
+			throw new IllegalArgumentException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.data.unsupported", data.getClass().getName()));
+		}
+
+		return readNextActivity(rdr);
+	}
+
+	/**
+	 * Reads RAW activity data string (line) from {@link BufferedReader}.
+	 *
+	 * @param rdr
+	 *            reader to use for reading
+	 * @return non empty RAW activity data text string, or {@code null} if the end of the stream has been reached
+	 */
+	protected String readNextActivity(BufferedReader rdr) {
+		String str = null;
+		try {
+			str = Utils.getNonEmptyLine(rdr);
+		} catch (EOFException eof) {
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+					getActivityDataType(), eof);
+		} catch (IOException ioe) {
+			logger().log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
+					getActivityDataType(), ioe);
+		}
+
+		return str;
+	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - TEXT
+	 */
+	protected String getActivityDataType() {
+		return "TEXT";
 	}
 
 	/**

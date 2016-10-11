@@ -170,48 +170,66 @@ public class ActivityJsonParserTest {
 	}
 
 	@Test
-	public void getNextJSONStringWhenNullTest() {
+	public void getNextJSONStringWhenNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		assertNull(parser.getNextJSONString(null, false));
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(false));
+		parser.setProperties(props.entrySet());
+		assertNull(parser.getNextActivityString(null));
 	}
 
 	@Test
-	public void getNextJSONStringWhenByteArrayTest() {
+	public void getNextJSONStringWhenByteArrayTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(false));
+		parser.setProperties(props.entrySet());
 		byte[] myVar = "testing some data".getBytes(); // NON-NLS
-		assertEquals(Utils.getString(myVar), parser.getNextJSONString(myVar, false));
+		assertEquals(Utils.getString(myVar), parser.getNextActivityString(myVar));
 	}
 
 	@Test
-	public void getNextJSONStringWhenBufferedReaderTest() {
+	public void getNextJSONStringWhenBufferedReaderTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(false));
+		parser.setProperties(props.entrySet());
 		InputStream textStream = new ByteArrayInputStream("testing some data".getBytes()); // NON-NLS
 		BufferedReader br = new BufferedReader(new InputStreamReader(textStream));
-		assertEquals("testing some data", parser.getNextJSONString(br, false));
+		assertEquals("testing some data", parser.getNextActivityString(br));
 	}
 
 	@Test
-	public void getNextJSONStringWhenBufferedReaderTrueTest() {
+	public void getNextJSONStringWhenBufferedReaderTrueTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(true));
+		parser.setProperties(props.entrySet());
 		InputStream textStream = new ByteArrayInputStream("testing some data".getBytes()); // NON-NLS
 		BufferedReader br = new BufferedReader(new InputStreamReader(textStream));
-		assertEquals("testing some data", parser.getNextJSONString(br, true));
+		assertEquals("testing some data", parser.getNextActivityString(br));
 	}
 
 	@Test
-	public void getNextJSONStringWhenReaderTest() {
+	public void getNextJSONStringWhenReaderTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(false));
+		parser.setProperties(props.entrySet());
 		String stringToBeParsed = "Testing some tests"; // NON-NLS
 		StringReader reader = new StringReader(stringToBeParsed);
-		assertEquals(stringToBeParsed, parser.getNextJSONString(reader, false));
+		assertEquals(stringToBeParsed, parser.getNextActivityString(reader));
 	}
 
 	@Test
-	public void getNextJSONStringWhenInputStreamTest() {
+	public void getNextJSONStringWhenInputStreamTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put("ReadLines", String.valueOf(false));
+		parser.setProperties(props.entrySet());
 		String stringToBeParsed = "Testing"; // NON-NLS
 		InputStream inputStream = new ByteArrayInputStream(stringToBeParsed.getBytes());
-		assertEquals(stringToBeParsed, parser.getNextJSONString(inputStream, false));
+		assertEquals(stringToBeParsed, parser.getNextActivityString(inputStream));
 	}
 
 }

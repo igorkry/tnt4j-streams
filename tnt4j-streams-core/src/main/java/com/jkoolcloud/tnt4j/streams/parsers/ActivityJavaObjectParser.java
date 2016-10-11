@@ -158,4 +158,13 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			return null;
 		}
 	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - OBJECT
+	 */
+	protected String getActivityDataType() {
+		return "OBJECT";
+	}
 }

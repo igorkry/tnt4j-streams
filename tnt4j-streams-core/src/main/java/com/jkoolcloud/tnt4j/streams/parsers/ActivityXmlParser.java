@@ -16,7 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -149,6 +151,23 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link org.w3c.dom.Document}</li>
+	 * <li>{@link java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.io.Reader}</li>
+	 * <li>{@link java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return Document.class.isInstance(data) || super.isDataClassSupported(data);
+	}
+
 	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
@@ -168,7 +187,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
 			} else {
-				xmlString = getNextXmlString(data);
+				xmlString = getNextActivityString(data);
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
@@ -355,37 +374,15 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * Reads the next complete XML document string from the specified data input source and returns it as a string. If
-	 * the data input source contains multiple XML documents, then each document must start with "&lt;?xml", and be
-	 * separated by a new line.
+	 * Reads RAW activity data XML package string from {@link BufferedReader}. If the data input source contains
+	 * multiple XML documents, then each document must start with "&lt;?xml", and be separated by a new line.
 	 *
-	 * @param data
-	 *            input source for activity data
-	 * @return XML document string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
+	 * @param rdr
+	 *            reader to use for reading
+	 * @return non empty RAW activity data XML package string, or {@code null} if the end of the stream has been reached
 	 */
-	protected String getNextXmlString(Object data) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
+	@Override
+	protected String readNextActivity(BufferedReader rdr) {
 		String xmlString = null;
 		try {
 			for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
@@ -399,17 +396,30 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			}
 		} catch (EOFException eof) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityXmlParser.data.end"),
-					eof);
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+					getActivityDataType(), eof);
 		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityXmlParser.error.reading"), ioe);
+			logger().log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
+					getActivityDataType(), ioe);
 		}
+
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();
 			xmlBuffer.setLength(0);
 		}
+
 		return xmlString;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return type of RAW activity data entries - XML
+	 */
+	@Override
+	protected String getActivityDataType() {
+		return "XML";
 	}
 
 	private static final class NamespaceMap implements NamespaceContext {

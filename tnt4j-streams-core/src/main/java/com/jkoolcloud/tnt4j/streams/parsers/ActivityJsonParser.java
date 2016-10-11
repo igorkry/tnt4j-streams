@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,6 +92,23 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link com.jayway.jsonpath.DocumentContext}</li>
+	 * <li>{@link java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.io.Reader}</li>
+	 * <li>{@link java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return DocumentContext.class.isInstance(data) || super.isDataClassSupported(data);
+	}
+
 	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
@@ -110,7 +130,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			} else if (data instanceof InputStream) {
 				jsonDoc = JsonPath.parse((InputStream) data);
 			} else {
-				jsonString = getNextJSONString(data, jsonAsLine);
+				jsonString = getNextActivityString(data);
 				if (StringUtils.isEmpty(jsonString)) {
 					return null;
 				}
@@ -132,38 +152,15 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	/**
-	 * Reads the next complete JSON document string from the specified data input source and returns it as a string.
+	 * Reads RAW activity data JSON package string from {@link BufferedReader}.
 	 *
-	 * @param data
-	 *            input source for activity data
-	 * @param jsonAsLine
-	 *            if {@code true} indicates complete JSON package is line, if {@code false} - whole data available to
-	 *            read
-	 * @return JSON document string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
+	 * @param rdr
+	 *            reader to use for reading
+	 * @return non empty RAW activity data JSON package string, or {@code null} if the end of the stream has been
+	 *         reached
 	 */
-	protected String getNextJSONString(Object data, boolean jsonAsLine) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
+	@Override
+	protected String readNextActivity(BufferedReader rdr) {
 		StringBuilder jsonStringBuilder = new StringBuilder();
 		String line;
 
@@ -176,14 +173,25 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			}
 		} catch (EOFException eof) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.data.end"),
-					eof);
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+					getActivityDataType(), eof);
 		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityJsonParser.error.reading"), ioe);
+			logger().log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
+					getActivityDataType(), ioe);
 		}
 
 		return jsonStringBuilder.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return type of RAW activity data entries - JSON
+	 */
+	@Override
+	protected String getActivityDataType() {
+		return "JSON";
 	}
 
 	/**

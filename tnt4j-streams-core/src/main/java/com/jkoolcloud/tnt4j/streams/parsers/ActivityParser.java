@@ -16,7 +16,6 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,13 +23,11 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -111,51 +108,6 @@ public abstract class ActivityParser {
 	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	public abstract boolean isDataClassSupported(Object data);
-
-	/**
-	 * Reads the next string (line) from the specified data input source.
-	 *
-	 * @param data
-	 *            input source for activity data
-	 * @return string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
-	 */
-	protected String getNextString(Object data) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
-		String str = null;
-		try {
-			str = Utils.getNonEmptyLine(rdr);
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					ioe);
-		}
-
-		return str;
-	}
 
 	/**
 	 * Sets the value for the field in the specified activity.

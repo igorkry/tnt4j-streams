@@ -131,4 +131,13 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 
 		return val;
 	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - EXCEL ROW
+	 */
+	protected String getActivityDataType() {
+		return "EXCEL ROW";
+	}
 }

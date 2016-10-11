@@ -147,7 +147,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (data == null) {
 			return null;
 		}
-		String dataStr = getNextString(data);
+		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}

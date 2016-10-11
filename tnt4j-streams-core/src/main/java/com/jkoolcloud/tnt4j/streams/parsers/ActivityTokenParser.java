@@ -125,7 +125,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 			return null;
 		}
 		// Get next string to parse
-		String dataStr = getNextString(data);
+		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
