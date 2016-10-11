@@ -3339,7 +3339,7 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
 
 If You do not want to build some of optional modules, comment those out. Or You can define maven to build your preferred set of modules 
-using `-pl or --projects` argument (comma separated modules list) together with `-am or --also-make` argument, i.e.:
+using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, i.e.:
 
 ```cmd
 mvn -pl tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution -am clean install
