@@ -3278,6 +3278,10 @@ How to Build TNT4J-Streams
 =========================================
 ## Modules
 
+* (M) marked modules are mandatory 
+* (O) marked modules are optional 
+* (U) marked modules are utility modules (i.e. performs compiled assemblies packaging)
+
 Modules list:
    * `Core` (M)
    * `Flume-Plugin` (O)
@@ -3289,15 +3293,12 @@ Modules list:
    * `Ws` (O)
    * `MsOffice` (O)
    * `Samples` (O)
-
-(M) marked modules are mandatory, (O) marked modules - optional.
+   * `Distribution` (OU)
 
 All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
-If You want to build and use optional modules, uncomment those in root TNT4J-Streams `pom.xml` file. I.e. to use `WMQ`
-module uncomment `tnt4j-streams-wmq` module.
-
 NOTE: `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
+NOTE: `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
 
 ## Requirements
 * JDK 1.6+
@@ -3334,6 +3335,23 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 ## Building
    * to build project and make release assemblies run maven goals `clean package`
    * to build project, make release assemblies and install to local repo run maven goals `clean install`
+   
+By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
+
+If You do not want to build some of optional modules, comment those out. Or You can define maven to build your preferred set of modules 
+using `-pl or --projects` argument (comma separated modules list) together with `-am or --also-make` argument, i.e.:
+
+```cmd
+mvn -pl tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution -am clean install
+``` 
+or
+```cmd
+mvn --projects tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution --also-make clean install
+```
+
+NOTE: modules list should be without spaces after comma!
+
+Issuing these commands, maven will build only `tnt4j-streams-core`, `tnt4j-streams-samples` and `tnt4j-streams--distribution` modules.
 
 Release assemblies are built to `../build/tnt4j-streams` directory.
 

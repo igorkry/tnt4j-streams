@@ -108,8 +108,7 @@
     </profiles>
 
     <build>
-        <defaultGoal>--projects tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution --also-make clean install
-        </defaultGoal>
+        <defaultGoal>clean install</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
