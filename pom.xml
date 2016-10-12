@@ -217,11 +217,10 @@
         <module>tnt4j-streams-jms</module>
         <module>tnt4j-streams-kafka</module>
         <module>tnt4j-streams-mqtt</module>
-        <module>tnt4j-streams-wmq</module>
+        <!--module>tnt4j-streams-wmq</module-->
         <module>tnt4j-streams-ws</module>
         <module>tnt4j-streams-flume-plugin</module>
         <module>tnt4j-streams-msoffice</module>
-        <!--<module>tnt4j-streams-camel</module>-->
         <module>tnt4j-streams-samples</module>
         <module>tnt4j-streams--distribution</module>
     </modules>
