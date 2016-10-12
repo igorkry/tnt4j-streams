@@ -3317,6 +3317,10 @@ how to do this.
 
 #### `WMQ` module
 
+NOTE: Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
+default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
+libraries will be installed to local maven repository.    
+
 What to download manually:
 * IBM MQ 7.5
 
@@ -3338,8 +3342,8 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
    
 By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
 
-If You do not want to build some of optional modules, comment those out. Or You can define maven to build your preferred set of modules 
-using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, i.e.:
+If You do not want to build some of optional modules, comment those out like `WMQ` module is. Or You can define maven to build your 
+preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, i.e.:
 
 ```cmd
 mvn -pl tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution -am clean install
