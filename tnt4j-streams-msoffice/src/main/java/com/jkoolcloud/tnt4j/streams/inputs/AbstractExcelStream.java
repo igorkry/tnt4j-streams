@@ -61,6 +61,11 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	private Workbook workbook;
 	private Iterator<Sheet> sheetIterator;
 
+	/**
+	 * Attribute storing sheet/row position marker of streamed file.
+	 */
+	protected int activityPosition = -1;
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -98,6 +103,11 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	@Override
 	public int getTotalActivities() {
 		return workbook == null ? super.getTotalActivities() : workbook.getNumberOfSheets();
+	}
+
+	@Override
+	public int getActivityPosition() {
+		return activityPosition;
 	}
 
 	@Override
@@ -148,6 +158,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 			}
 			return getNextNameMatchingSheet(contSkips);
 		}
+
+		activityPosition = workbook.getSheetIndex(sheet);
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 				"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());

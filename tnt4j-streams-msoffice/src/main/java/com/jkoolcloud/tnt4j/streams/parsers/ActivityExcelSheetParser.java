@@ -122,6 +122,12 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 		String locStr = locator.getLocator();
 		CellReference ref = new CellReference(locStr);
 		boolean cellFound = false;
+		if (ref.getRow() < 0 || ref.getCol() < 0) {
+			throw new ParseException(
+					StreamsResources.getStringFormatted(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+							"ActivityExcelRowParser.unresolved.cell.reference", locStr),
+					sheet.getWorkbook().getSheetIndex(sheet));
+		}
 		Row row = sheet.getRow(ref.getRow());
 		if (row != null) {
 			Cell cell = row.getCell(ref.getCol());
@@ -133,7 +139,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 
 		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-						"AbstractExcelStream.cell.not.found"),
+						"ActivityExcelRowParser.resolved.cell.value"),
 				locStr, sheet.getWorkbook().getMissingCellPolicy(), String.valueOf(val));
 
 		return val;

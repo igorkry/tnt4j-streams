@@ -49,7 +49,6 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 
 	private String rangeValue = "1:"; // NON-NLS
 	private IntRange rowRange = null;
-	private int rowIndex = 0;
 
 	private int totalRows = 0;
 
@@ -117,7 +116,7 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	@Override
 	public Row getNextItem() throws Exception {
 		if (currSheet == null || !rowIterator.hasNext()) {
-			rowIndex = 0;
+			activityPosition = 0;
 			currSheet = getNextNameMatchingSheet(false);
 
 			if (currSheet == null) {
@@ -132,8 +131,8 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 			return getNextItem();
 		}
 
-		rowIndex++;
-		if (!rowRange.inRange(rowIndex)) {
+		activityPosition++;
+		if (!rowRange.inRange(activityPosition)) {
 			// skip row if it is not in range
 			skipFilteredActivities();
 			rowIterator.next();
