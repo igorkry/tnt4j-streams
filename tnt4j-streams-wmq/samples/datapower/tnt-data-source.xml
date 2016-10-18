@@ -5,6 +5,7 @@
 
     <parser name="DatapowerParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
+
         <field name="Message" locator="/tracking_event/MsgData" locator-type="Label" datatype="String" format="string"/>
         <field name="EventName" separator=":">
             <field-locator locator="/tracking_event/ResponseMode" locator-type="Label"/>
@@ -31,6 +32,7 @@
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="QMGR.NAME"/>
         <property name="Queue" value="QUEUE.NAME"/>
+
         <parser-ref name="DatapowerParser"/>
     </stream>
 </tnt-data-source>
