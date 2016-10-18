@@ -85,7 +85,7 @@ public class CharacterStreamTest {
 
 		Thread.sleep(50);
 
-		cStream.halt();
+		cStream.halt(true);
 
 		Thread.sleep(50);
 

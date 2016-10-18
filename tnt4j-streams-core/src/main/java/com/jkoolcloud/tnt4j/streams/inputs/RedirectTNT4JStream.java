@@ -357,13 +357,14 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		inputBuffer.clear();
 	}
 
-	private abstract class FeedersProducer extends StreamsThread {
+	private abstract class FeedersProducer extends StreamsThread implements Closeable {
 		List<ActivitiesFeeder> activeFeedersList = new ArrayList<ActivitiesFeeder>();
 
 		void removeInactiveFeeder(ActivitiesFeeder conn) {
 			activeFeedersList.remove(conn);
 		}
 
+		@Override
 		public void close() {
 			for (ActivitiesFeeder f : activeFeedersList) {
 				f.halt();
@@ -375,8 +376,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		}
 
 		@Override
-		public void halt() {
-			super.halt();
+		public void halt(boolean interrupt) {
+			super.halt(interrupt);
 			close();
 		}
 	}
@@ -407,7 +408,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 					boolean recovered = restartOnInputClose && resetDataStream();
 
 					if (!recovered) {
-						halt();
+						halt(false);
 					}
 				}
 
@@ -450,6 +451,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		@Override
 		public void close() {
 			Utils.close(srvSocket);
+
+			super.close();
 		}
 	}
 
@@ -467,7 +470,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		}
 	}
 
-	private class ActivitiesFeeder extends StreamsThread {
+	private class ActivitiesFeeder extends StreamsThread implements Closeable {
 		private Socket socket = null;
 
 		/**
@@ -522,6 +525,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 			close();
 		}
 
+		@Override
 		public void close() {
 			Utils.close(dataReader);
 			dataReader = null;
@@ -540,8 +544,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		}
 
 		@Override
-		public void halt() {
-			super.halt();
+		public void halt(boolean interrupt) {
+			super.halt(interrupt);
 			close();
 		}
 	}

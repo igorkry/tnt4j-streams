@@ -65,9 +65,8 @@ public class TNTInputStreamTest {
 
 		Thread.sleep(500);
 		verify(ai).recordActivity(any(Tracker.class), any(Long.class));
-		ts.halt();
+		ts.halt(true);
 		ts.cleanup();
-
 	}
 
 	@Test
@@ -117,7 +116,7 @@ public class TNTInputStreamTest {
 		props.put(StreamProperties.PROP_EXECUTORS_BOUNDED, String.valueOf(false));
 		ts.setProperties(props.entrySet());
 		ts.startStream();
-		ts.halt();
+		ts.halt(true);
 	}
 
 	@Test(expected = IllegalStateException.class)

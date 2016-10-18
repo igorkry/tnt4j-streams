@@ -251,7 +251,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 				failureFlag.set(true);
 				notifyFailed(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.no.parser", item), null, null);
-				halt();
+				halt(false);
 			} else {
 				notifyStreamEvent(OpLevel.WARNING, StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.could.not.parse.activity", item), item);

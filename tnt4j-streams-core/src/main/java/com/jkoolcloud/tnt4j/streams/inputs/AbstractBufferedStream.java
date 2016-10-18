@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
  * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
@@ -208,12 +209,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	/**
 	 * Base class containing common features for stream input processor thread.
 	 */
-	protected abstract class InputProcessor extends Thread {
-
-		/**
-		 * Input processor attribute identifying that input processing is interrupted.
-		 */
-		private boolean interrupted = false;
+	protected abstract class InputProcessor extends StreamsThread {
 
 		private boolean inputEnd = false;
 
@@ -235,16 +231,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * @return {@code true} input processor is interrupted or parent thread is halted
 		 */
 		protected boolean isStopping() {
-			return interrupted || isHalted();
-		}
-
-		/**
-		 * Stops this thread.
-		 */
-		void halt() {
-			interrupted = true;
-			interrupt();
-			// join();
+			return isStopRunning() || isHalted();
 		}
 
 		/**
@@ -265,7 +252,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
-			if (interrupted && inputEnd) {
+			if (isStopRunning() && inputEnd) {
 				// shot down already.
 				return;
 			}

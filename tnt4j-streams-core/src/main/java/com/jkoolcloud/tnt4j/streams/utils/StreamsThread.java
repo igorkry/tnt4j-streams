@@ -157,10 +157,24 @@ public class StreamsThread extends Thread {
 	 * Stops this thread.
 	 */
 	public void halt() {
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsThread.halt"), getName());
+		halt(true);
+	}
+
+	/**
+	 * Stops this thread.
+	 *
+	 * @param interrupt
+	 *            flag indicating whether to interrupt this thread
+	 * @see Thread#interrupt()
+	 */
+	public void halt(boolean interrupt) {
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				interrupt ? "StreamsThread.halt" : "StreamsThread.stop"), getName());
 		stopRunning = true;
-		interrupt();
+
+		if (interrupt) {
+			interrupt();
+		}
 	}
 
 	/**

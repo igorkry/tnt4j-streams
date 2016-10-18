@@ -331,7 +331,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 						notifyStreamTaskRejected(r);
 					}
 				} catch (InterruptedException exc) {
-					halt();
+					halt(true);
 				}
 			}
 		});
@@ -505,11 +505,26 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Signals that this stream should stop processing so that controlling thread will terminate.
+	 *
+	 * @deprecated this method has bean replaced by {@link #halt(boolean)}
+	 * @see #halt(boolean)
 	 */
+	@Deprecated
 	public void halt() {
+		halt(true);
+	}
+
+	/**
+	 * Signals that this stream has finished processing so controlling thread will set to stopping state and will
+	 * terminate if {@code halt} is set to {@code true}.
+	 *
+	 * @param terminate
+	 *            flag indicating controlling thread to terminate
+	 */
+	public void halt(boolean terminate) {
 		shutdownExecutors();
 
-		ownerThread.halt();
+		ownerThread.halt(terminate);
 	}
 
 	/**
@@ -552,7 +567,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		try {
 			streamExecutorService.awaitTermination(executorsTerminationTimeout, TimeUnit.SECONDS);
 		} catch (InterruptedException exc) {
-			halt();
+			halt(true);
 		} finally {
 			List<Runnable> droppedTasks = streamExecutorService.shutdownNow();
 
@@ -590,7 +605,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					if (item == null) {
 						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.data.stream.ended"), name);
-						halt(); // no more data items to process
+						halt(false); // no more data items to process
 					} else {
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
@@ -605,7 +620,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 							getActivityPosition(), ise.getLocalizedMessage(), ise);
 					failureFlag.set(true);
 					notifyFailed(null, ise, null);
-					halt();
+					halt(false);
 				} catch (Exception exc) {
 					logger().log(OpLevel.ERROR,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
