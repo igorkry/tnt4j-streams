@@ -279,17 +279,25 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	private ExecutorService getDefaultExecutorService(int threadsQty) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamDefaultExecutorThread-"); // NON-NLS
-		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
-			@Override
-			public void newThreadCreated(Thread t) {
-				out.handleConsumerThread(t);
-			}
-		});
+		stf.addThreadFactoryListener(new StreamsThreadFactoryListener());
 
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(), stf);
 
 		return tpe;
+	}
+
+	private class StreamsThreadFactoryListener implements StreamsThreadFactory.StreamsThreadFactoryListener {
+		@Override
+		public void newThreadCreated(Thread t) {
+			try {
+				out.handleConsumerThread(t);
+			} catch (IllegalStateException exc) {
+				logger().log(OpLevel.FAILURE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTInputStream.tracker.check.state.failed"));
+				halt(true);
+			}
+		}
 	}
 
 	/**
@@ -310,12 +318,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamBoundedExecutorThread-"); // NON-NLS
-		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
-			@Override
-			public void newThreadCreated(Thread t) {
-				out.handleConsumerThread(t);
-			}
-		});
+		stf.addThreadFactoryListener(new StreamsThreadFactoryListener());
 
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(threadsQty * 2), stf);
@@ -1029,6 +1032,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 			if (activitiesTotal == -1) {
 				activitiesTotal = currActivity;
+			}
+
+			if (elapsedTime == -1) {
+				elapsedTime = 0;
 			}
 		}
 

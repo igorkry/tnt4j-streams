@@ -354,7 +354,9 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 			feedsProducer.halt();
 		}
 
-		inputBuffer.clear();
+		if (inputBuffer != null) {
+			inputBuffer.clear();
+		}
 	}
 
 	private abstract class FeedersProducer extends StreamsThread implements Closeable {

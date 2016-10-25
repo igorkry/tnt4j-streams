@@ -194,17 +194,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	 */
 	@Override
 	public int getTotalActivities() {
-		return fileWatcher.totalLinesCount;
+		return fileWatcher == null ? super.getTotalActivities() : fileWatcher.totalLinesCount;
 	}
 
 	@Override
 	public long getTotalBytes() {
-		return fileWatcher.totalBytesCount;
+		return fileWatcher == null ? super.getTotalBytes() : fileWatcher.totalBytesCount;
 	}
 
 	@Override
 	protected void cleanup() {
-		fileWatcher.shutdown();
+		if (fileWatcher != null) {
+			fileWatcher.shutdown();
+		}
 
 		super.cleanup();
 	}
@@ -336,7 +338,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 * @param lnr
 		 *            line number reader
 		 * @throws IOException
-		 *             if error occurs when reading file line
+		 *             if exception occurs when reading file line
 		 */
 		protected void readNewFileLines(LineNumberReader lnr) throws IOException {
 			String line;

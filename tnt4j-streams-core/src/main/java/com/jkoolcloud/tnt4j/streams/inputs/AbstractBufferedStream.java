@@ -165,7 +165,10 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 	@Override
 	protected void cleanup() {
-		inputBuffer.clear();
+		if (inputBuffer != null) {
+			inputBuffer.clear();
+		}
+
 		super.cleanup();
 	}
 

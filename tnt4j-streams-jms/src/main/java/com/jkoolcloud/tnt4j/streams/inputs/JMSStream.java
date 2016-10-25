@@ -173,7 +173,9 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	protected void cleanup() {
-		jmsDataReceiver.shutdown();
+		if (jmsDataReceiver != null) {
+			jmsDataReceiver.shutdown();
+		}
 
 		super.cleanup();
 	}

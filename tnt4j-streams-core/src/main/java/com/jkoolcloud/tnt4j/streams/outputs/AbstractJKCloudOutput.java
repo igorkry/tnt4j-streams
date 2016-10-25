@@ -144,12 +144,26 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	@Override
-	public void handleConsumerThread(Thread t) {
-		Tracker tracker = TrackingLogger.getInstance(streamConfig.build());
+	public void handleConsumerThread(Thread t) throws IllegalStateException {
+		TrackingLogger tracker = TrackingLogger.getInstance(streamConfig.build());
+		checkTrackerState(tracker);
 		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.default.tracker"),
 				(t == null ? "null" : t.getName()), defaultSource.getFQName());
+	}
+
+	private void checkTrackerState(TrackingLogger tracker) throws IllegalStateException {
+		boolean tOpen = tracker == null ? false : tracker.isOpen();
+		Tracker logger = tracker == null ? null : tracker.getTracker();
+		boolean lOpen = logger == null ? false : logger.isOpen();
+		EventSink eSink = logger == null ? null : logger.getEventSink();
+		boolean esOpen = eSink == null ? false : eSink.isOpen();
+
+		if (!tOpen || !lOpen || !esOpen) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.tracker.not.opened"));
+		}
 	}
 
 	@Override
@@ -165,15 +179,18 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 
 	/**
 	 * Gets {@link Tracker} instance from {@link #trackersMap} matching provided activity item source FQN and thread on
-	 * which stream is running.
+	 * which stream is running. If no tracker found in trackers map - new one is created.
 	 *
 	 * @param aiSourceFQN
 	 *            activity item source FQN
 	 * @param t
 	 *            thread on which stream is running
 	 * @return tracker instance for activity item
+	 *
+	 * @throws IllegalStateException
+	 *             indicates that created tracker is not opened and can not record activity data
 	 */
-	protected Tracker getTracker(String aiSourceFQN, Thread t) {
+	protected Tracker getTracker(String aiSourceFQN, Thread t) throws IllegalStateException {
 		synchronized (trackersMap) {
 			Tracker tracker = trackersMap
 					.get(getTrackersMapKey(t, aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN));
@@ -182,6 +199,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 				aiSource.setSSN(defaultSource.getSSN());
 				streamConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(streamConfig.build());
+				checkTrackerState((TrackingLogger) tracker);
 				trackersMap.put(getTrackersMapKey(t, aiSource.getFQName()), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.build.new.tracker"), aiSource.getFQName());

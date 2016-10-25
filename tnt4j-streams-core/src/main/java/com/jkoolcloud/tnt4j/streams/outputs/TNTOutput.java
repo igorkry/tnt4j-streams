@@ -63,8 +63,10 @@ public interface TNTOutput<T> {
 	 * 
 	 * @param t
 	 *            thread to handle
+	 * @throws IllegalStateException
+	 *             indicates that tracker created for the thread is not opened and can not record activity data
 	 */
-	void handleConsumerThread(Thread t);
+	void handleConsumerThread(Thread t) throws IllegalStateException;
 
 	/**
 	 * Sets output configuration property.

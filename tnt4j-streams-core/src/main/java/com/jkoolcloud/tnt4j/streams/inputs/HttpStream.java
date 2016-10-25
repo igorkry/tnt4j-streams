@@ -176,7 +176,9 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	@Override
 	protected void cleanup() {
-		requestHandler.shutdown();
+		if (requestHandler != null) {
+			requestHandler.shutdown();
+		}
 
 		super.cleanup();
 	}

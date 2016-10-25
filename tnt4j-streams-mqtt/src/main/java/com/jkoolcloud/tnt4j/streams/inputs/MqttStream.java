@@ -197,7 +197,9 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	@Override
 	protected void cleanup() {
-		mqttDataReceiver.shutdown();
+		if (mqttDataReceiver != null) {
+			mqttDataReceiver.shutdown();
+		}
 
 		super.cleanup();
 	}
