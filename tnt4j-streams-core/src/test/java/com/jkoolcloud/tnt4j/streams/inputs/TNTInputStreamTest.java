@@ -229,7 +229,7 @@ public class TNTInputStreamTest {
 		assertEquals(ts.getCurrentActivity(), ts.getStreamStatistics().getCurrActivity());
 		assertEquals(ts.getTotalBytes(), ts.getStreamStatistics().getTotalBytes());
 		assertEquals(ts.getStreamedBytesCount(), ts.getStreamStatistics().getBytesStreamed());
-		assertEquals(ts.getElapsedTime(), ts.getStreamStatistics().getElapsedTime());
+		assertEquals(ts.getElapsedTime() == -1 ? 0 : ts.getElapsedTime(), ts.getStreamStatistics().getElapsedTime());
 		assertEquals(ts.getSkippedActivitiesCount(), ts.getStreamStatistics().getSkippedActivities());
 	}
 
