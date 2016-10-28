@@ -21,40 +21,39 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for abstract activity data parser that assumes each activity data item can be transformed into an
  * {@link Map} data structure, where each field is represented by a key/value pair and the name is used to map each
  * field onto its corresponding activity field.
  * <p>
- * If map entry value is inner map, entries of that map can be accessed using '.' as naming hierarchy delimiter: i.e.
- * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
+ * If map entry value is inner map, entries of that map can be accessed using
+ * '{@value StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e. 'headers.auth.name'. Locator path
+ * delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
- * elements. Default value - '.'. (Optional)</li>
+ * elements. Default value - '{@value StreamsConstants#DEFAULT_PATH_DELIM}'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
 
-	private static final String DEFAULT_NODE_PATH_DELIM = "."; // NON-NLS
-
-	private String nodePathDelim = DEFAULT_NODE_PATH_DELIM;
+	private String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	/**
 	 * {@inheritDoc}
@@ -81,6 +80,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 			if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
 				nodePathDelim = value;
+
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
 			}
 		}
 	}
@@ -91,7 +94,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
 
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
@@ -113,7 +117,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	protected abstract Map<String, ?> getDataMap(Object data);
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 * 
 	 * @param locator
 	 *            activity field locator
@@ -121,31 +125,17 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *            activity object data map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, ?> dataMap,
-			AtomicBoolean formattingNeeded) throws ParseException {
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		String[] path = getNodePath(locStr, nodePathDelim);
+		String[] path = Utils.getNodePath(locStr, nodePathDelim);
 		val = getNode(path, dataMap, 0);
 
 		return val;
-	}
-
-	private static String[] getNodePath(String locStr, String nps) {
-		if (StringUtils.isNotEmpty(locStr)) {
-			// Pattern.quote(nps);
-			return StringUtils.isEmpty(nps) ? new String[] { locStr } : locStr.split(Pattern.quote(nps));
-		}
-
-		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -178,7 +168,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *
 	 * @return type of RAW activity data entries - MAP
 	 */
+	@Override
 	protected String getActivityDataType() {
-		return "MAP";
+		return "MAP"; // NON-NLS
 	}
 }

@@ -46,11 +46,6 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_QMGR_NAME = "QueueManager"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_QUEUE_NAME = "Queue"; // NON-NLS
 
 	/**
@@ -61,22 +56,7 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_SUB_NAME = "Subscription"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_TOPIC_STRING = "TopicString"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	String PROP_CHANNEL_NAME = "Channel"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	String PROP_STRIP_HEADERS = "StripHeaders"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
@@ -136,7 +116,7 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_JNDI_FACTORY = "JNDIFactory"; // NON-NLS
+	String PROP_JNDI_FACTORY = "JNDIFactory"; // NON-NLS //used only by JMS
 
 	/**
 	 * Constant for name of built-in {@value} property.
@@ -196,7 +176,7 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property. Value in seconds.
 	 */
-	String PROP_START_SERVER = "StartServer"; // NON-NLS
+	String PROP_START_SERVER = "StartServer"; // NON-NLS //used only by Kafka
 
 	/**
 	 * Constant for name of built-in {@value} property. Value in seconds.

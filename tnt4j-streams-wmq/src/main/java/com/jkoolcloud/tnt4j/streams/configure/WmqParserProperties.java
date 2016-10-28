@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.fields;
+package com.jkoolcloud.tnt4j.streams.configure;
 
 /**
- * Defines the supported raw activity data formats.
+ * Lists predefined property names used by TNT4-Streams WMQ RAW data parsers.
  *
  * @version $Revision: 1 $
  */
-public enum ActivityFieldFormatType {
-	/**
-	 * Field value is base64-encoded.
-	 */
-	base64Binary,
+public interface WmqParserProperties extends ParserProperties {
 
 	/**
-	 * Field value is represented as a string of hexadecimal codes.
+	 * Constant for name of built-in {@value} property.
 	 */
-	hexBinary,
-
-	/**
-	 * Field value is a character string.
-	 */
-	string,
-
-	/**
-	 * Field value is a byte array
-	 */
-	bytes
+	String PROP_TRANSLATE_NUM_VALUES = "TranslateNumValues"; // NON-NLS
 }

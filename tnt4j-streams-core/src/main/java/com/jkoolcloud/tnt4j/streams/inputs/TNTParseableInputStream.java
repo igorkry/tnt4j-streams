@@ -213,7 +213,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *            raw activity data item.
 	 * @return activity information object
 	 * @throws Exception
-	 *             if error occurs while parsing raw activity data item
+	 *             if exception occurs while parsing raw activity data item
 	 */
 	protected ActivityInfo makeActivityInfo(T data) throws Exception {
 		ActivityInfo ai = null;

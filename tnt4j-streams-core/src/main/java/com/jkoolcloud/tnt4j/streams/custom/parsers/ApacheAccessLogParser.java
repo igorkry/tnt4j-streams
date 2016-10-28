@@ -147,10 +147,12 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
-		super.setProperties(props);
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -176,8 +178,6 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 					}
 				}
 			}
-			logger().log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 
 		if (pattern == null && StringUtils.isNotEmpty(apacheLogPattern)) {

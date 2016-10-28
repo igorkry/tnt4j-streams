@@ -29,7 +29,7 @@ import com.ibm.mq.MQDestination;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
-import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
@@ -43,15 +43,15 @@ public class WmqStreamTest {
 	@Test
 	public void propertiesSetTest() throws Exception {
 		Map<String, String> props = new HashMap<String, String>(9);
-		props.put(StreamProperties.PROP_QMGR_NAME, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_QUEUE_NAME, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_TOPIC_NAME, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_SUB_NAME, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_TOPIC_STRING, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_HOST, "localhost"); // NON-NLS
-		props.put(StreamProperties.PROP_PORT, String.valueOf(8080));
-		props.put(StreamProperties.PROP_CHANNEL_NAME, "TEST"); // NON-NLS
-		props.put(StreamProperties.PROP_STRIP_HEADERS, String.valueOf(false));
+		props.put(WmqStreamProperties.PROP_QMGR_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_QUEUE_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_TOPIC_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_SUB_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_TOPIC_STRING, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_HOST, "localhost"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_PORT, String.valueOf(8080));
+		props.put(WmqStreamProperties.PROP_CHANNEL_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_STRIP_HEADERS, String.valueOf(false));
 		wmqStream.setProperties(props.entrySet());
 		testPropertyList(wmqStream, props.entrySet());
 	}

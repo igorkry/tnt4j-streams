@@ -98,6 +98,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (props == null) {
 			return;
 		}
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -105,7 +106,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, fieldDelim);
+						name, value);
 			} else if (ParserProperties.PROP_VAL_DELIM.equals(name)) {
 				valueDelim = value;
 				logger().log(OpLevel.DEBUG,
@@ -124,8 +125,6 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
 			}
-			logger().log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -184,7 +183,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -192,19 +191,14 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 *            activity object name/value pairs map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, String> nameValues,
-			AtomicBoolean formattingNeeded) throws ParseException {
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		val = nameValues.get(locStr);
+		val = nameValues.get(locStr); // NOTE: locStr == null?
 
 		return val;
 	}

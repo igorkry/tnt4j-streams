@@ -46,8 +46,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * </ul>
  *
  * @version $Revision: 1 $
- *
- * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> {
 	/**
@@ -135,13 +133,13 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	 * '{@value com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants#PROP_SHEETS}') sheets name filtering mask. If
 	 * no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
 	 *
-	 * @param contSkips
+	 * @param countSkips
 	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count
 	 * 
 	 * @return next workbook sheet matching name filter mask, or {@code null} if no more sheets matching name mask
 	 *         available in this workbook.
 	 */
-	protected Sheet getNextNameMatchingSheet(boolean contSkips) {
+	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
 		if (sheetIterator == null || !sheetIterator.hasNext()) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 					"AbstractExcelStream.no.more.sheets"));
@@ -153,10 +151,10 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
 
 		if (!match) {
-			if (contSkips) {
+			if (countSkips) {
 				skipFilteredActivities();
 			}
-			return getNextNameMatchingSheet(contSkips);
+			return getNextNameMatchingSheet(countSkips);
 		}
 
 		activityPosition = workbook.getSheetIndex(sheet);

@@ -21,24 +21,25 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
- * Implements a WebSphere MQ activity stream, where activity data is {@link String} made from {@link MQMessage} payload.
+ * Implements a WebSphere MQ activity stream, where activity data is {@link MQMessage} payload bytes ({@code byte[]}).
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@code byte[]} data.
  * <p>
  * This activity stream supports properties from {@link AbstractWmqStream} (and higher hierarchy streams).
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
-public class WmqStream extends AbstractWmqStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);
+public class WmqStreamB extends AbstractWmqStream<byte[]> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamB.class);
 
 	/**
-	 * Constructs an empty WmqStream. Requires configuration settings to set input source.
+	 * Constructs an empty WmqStreamB. Requires configuration settings to set input source.
 	 */
-	public WmqStream() {
+	public WmqStreamB() {
 		super();
 	}
 
@@ -48,11 +49,12 @@ public class WmqStream extends AbstractWmqStream<String> {
 	}
 
 	@Override
-	protected String getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
-		String msgData = mqMsg.readStringOfByteLength(mqMsg.getDataLength());
+	protected byte[] getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
+		byte[] msgData = new byte[mqMsg.getDataLength()];
+		mqMsg.readFully(msgData);
 		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.message.data"),
-				msgData.length(), msgData);
+				msgData.length, Utils.toHex(msgData));
 		return msgData;
 	}
 }

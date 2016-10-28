@@ -326,11 +326,13 @@ public class ActivityInfo {
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
+		ActivityFieldLocator locator = field.getGroupLocator() != null ? field.getGroupLocator()
+				: CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
 
 		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(), fieldValue,
-						locator == null ? null : locator.getTimeZone(), locator == null ? null : locator.getLocale());
+				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(),
+						getStringValue(fieldValue, field), locator == null ? null : locator.getTimeZone(),
+						locator == null ? null : locator.getLocale());
 	}
 
 	private static String substitute(String value, String newValue) {

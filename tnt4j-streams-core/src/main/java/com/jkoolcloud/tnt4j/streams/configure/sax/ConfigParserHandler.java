@@ -315,7 +315,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processParser(Attributes attrs) throws SAXException {
 		if (currParser != null) {
@@ -374,7 +374,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processField(Attributes attrs) throws SAXException {
 		if (currField != null) {
@@ -491,7 +491,10 @@ public class ConfigParserHandler extends DefaultHandler {
 					af.addLocator(afl);
 				}
 			}
+		} else if (StringUtils.isEmpty(locator)) {
+			af.setGroupLocator(radix, reqVal, dataType, units, format, locale, timeZone);
 		}
+
 		if (separator != null) {
 			af.setSeparator(separator);
 		}
@@ -511,7 +514,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processFieldLocator(Attributes attrs) throws SAXException {
 		if (currLocatorData != null) {
@@ -600,7 +603,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processFieldMap(Attributes attrs) throws SAXException {
 		if (currField == null) {
@@ -662,7 +665,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processStream(Attributes attrs) throws SAXException {
 		if (currStream != null) {
@@ -720,7 +723,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processProperty(Attributes attrs) throws SAXException {
 		if (currStream == null && currParser == null) {
@@ -759,7 +762,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs element
 	 */
 	private void processParserRef(Attributes attrs) throws SAXException {
 		if (currField == null && currStream == null) {
@@ -807,7 +810,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processReference(Attributes attrs) throws SAXException {
 		if (currStream == null) {
@@ -861,7 +864,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processJavaObject(Attributes attrs) throws SAXException {
 		if (javaObjectData == null) {
@@ -900,7 +903,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processParam(Attributes attrs) throws SAXException {
 		if (javaObjectData == null) {
@@ -961,7 +964,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processFilter(Attributes attrs) throws SAXException {
 
@@ -974,7 +977,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *            List of element attributes
 	 *
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processRule(Attributes attrs) throws SAXException {
 
@@ -986,7 +989,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * @param attrs
 	 *            List of element attributes
 	 * @throws SAXException
-	 *             if error parsing element
+	 *             if error occurs parsing element
 	 */
 	private void processStep(Attributes attrs) throws SAXException {
 

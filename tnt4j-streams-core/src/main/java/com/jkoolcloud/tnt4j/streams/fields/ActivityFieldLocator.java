@@ -113,6 +113,13 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
+	 * Constructs a new "hidden" activity field locator that is used to format final field value made from multiple
+	 * locators values.
+	 */
+	ActivityFieldLocator() {
+	}
+
+	/**
 	 * Gets the type of this locator that indicates how to interpret the locator to find the value in the raw activity
 	 * data. This value can be one of the predefined types, or it can be a custom type.
 	 * <p>
@@ -455,7 +462,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            value to format
 	 * @return value formatted based on locator definition
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 */
 	public Object formatValue(Object value) throws ParseException {
 		if (cfgValue != null) {
@@ -472,9 +479,10 @@ public class ActivityFieldLocator implements Cloneable {
 		case Binary:
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
 				value = Utils.base64Decode(value.toString().getBytes());
-			} else {
-				value = builtInFormat == ActivityFieldFormatType.hexBinary ? Utils.decodeHex(value.toString())
-						: value.toString();
+			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
+				value = Utils.decodeHex(value.toString());
+			} else if (builtInFormat == ActivityFieldFormatType.string) {
+				value = value.toString().getBytes();
 			}
 			break;
 		case DateTime:

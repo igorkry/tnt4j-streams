@@ -76,13 +76,18 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		if (props == null) {
 			return;
 		}
+
 		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
 					sigDelim = value;
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
 				}
 			}
 		}

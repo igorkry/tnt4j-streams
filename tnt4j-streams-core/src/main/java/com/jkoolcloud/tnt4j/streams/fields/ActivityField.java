@@ -55,6 +55,8 @@ public class ActivityField {
 	private String valueType = null;
 	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
 
+	private ActivityFieldLocator groupLocator;
+
 	/**
 	 * Constructs a new activity field entry.
 	 *
@@ -186,6 +188,45 @@ public class ActivityField {
 		}
 
 		locators.add(locator);
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param radix
+	 * @param reqVal
+	 * @param dataType
+	 * @param units
+	 * @param format
+	 * @param locale
+	 * @param timeZone
+	 */
+	public void setGroupLocator(int radix, String reqVal, ActivityFieldDataType dataType, String units, String format,
+			String locale, String timeZone) {
+		groupLocator = new ActivityFieldLocator();
+		groupLocator.setRadix(radix);
+		groupLocator.setRequired(reqVal);
+		if (dataType != null) {
+			groupLocator.setDataType(dataType);
+		}
+		if (StringUtils.isNotEmpty(units)) {
+			groupLocator.setUnits(units);
+		}
+		if (StringUtils.isNotEmpty(format)) {
+			groupLocator.setFormat(format, locale);
+		}
+		if (StringUtils.isNotEmpty(timeZone)) {
+			groupLocator.setTimeZone(timeZone);
+		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public ActivityFieldLocator getGroupLocator() {
+		return groupLocator;
 	}
 
 	/**

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-wmq_pcf.xsd">
+
+    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
+        <property name="TranslateNumValues" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <!-- header fields -->
+        <field name="Command" locator="MQCFH.Command" locator-type="Label"/>
+        <field name="MsgSeqNumber" locator="MQCFH.MsgSeqNumber" locator-type="Label"/>
+        <field name="Control" locator="MQCFH.Control" locator-type="Label"/>
+        <field name="CompCode" locator="MQCFH.CompCode" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="WARNING"/>
+            <field-map source="MQCC_OK" target="SUCCESS"/>
+            <field-map source="MQCC_WARNING" target="WARNING"/>
+            <field-map source="" target="ERROR"/>
+        </field>
+        <field name="Reason" locator="MQCFH.Reason" locator-type="Label"/>
+        <field name="ParameterCount" locator="MQCFH.ParameterCount" locator-type="Label"/>
+
+        <!-- message fields -->
+        <field name="MQCA_Q_MGR_NAME" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="MQCACF_HOST_NAME" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_START_TIME" locator-type="Label"/>
+        </field>
+        <field name="EndTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_END_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_END_TIME" locator-type="Label"/>
+        </field>
+        <field name="MQIA_COMMAND_LEVEL" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="MQIACF_SEQUENCE_NUMBER" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
+        <field name="MQCACF_APPL_NAME" locator="MQCACF_APPL_NAME" locator-type="Label"/>
+        <field name="MQIA_APPL_TYPE" locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
+        <field name="MQCACF_USER_IDENTIFIER" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="MQIACF_API_CALLER_TYPE" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
+        <field name="MQIACF_API_ENVIRONMENT" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="MQCACF_APPL_FUNCTION" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
+        <field name="MQIACF_APPL_FUNCTION_TYPE" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
+        <field name="MQIACF_TRACE_DETAIL" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
+        <field name="MQIACF_TRACE_DATA_LENGTH" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
+        <field name="MQIACF_POINTER_SIZE" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="MQIA_PLATFORM" locator="MQIA_PLATFORM" locator-type="Label"/>
+        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" format="bytes"/>
+    </parser>
+
+    <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
+        <property name="Host" value="172.16.6.54"/>
+        <property name="Port" value="1420"/>
+        <property name="QueueManager" value="TT1"/>
+        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+        <property name="StripHeaders" value="false"/>
+
+        <parser-ref name="TraceEventsParser"/>
+    </stream>
+</tnt-data-source>

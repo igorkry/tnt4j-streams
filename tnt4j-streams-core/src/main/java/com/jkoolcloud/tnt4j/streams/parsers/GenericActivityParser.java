@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,14 +60,32 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * <ul>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.nio.ByteBuffer}</li>
 	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@link java.io.InputStream}</li>
 	 * </ul>
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || byte[].class.isInstance(data) || Reader.class.isInstance(data)
-				|| InputStream.class.isInstance(data);
+		return String.class.isInstance(data) || byte[].class.isInstance(data) || ByteBuffer.class.isInstance(data)
+				|| Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+	}
+
+	/**
+	 * Returns the appropriate string representation for the specified object.
+	 * <p>
+	 * If {@code data} is byte array, HEX dump representation is returned.
+	 * 
+	 * @param data
+	 *            object to convert to string representation
+	 * @return string representation of object
+	 */
+	protected static String toString(Object data) {
+		if (data instanceof byte[]) {
+			return Utils.toHex((byte[]) data);
+		}
+
+		return String.valueOf(data);
 	}
 
 	@Override
@@ -80,8 +99,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				field); // Utils.getDebugString(field));
 
 		for (ActivityField aField : fieldList) {
+			StreamFieldType fieldType = aField.getFieldType();
 			if (aField.getFieldTypeName().equals(field.getFieldTypeName())
-					&& !Utils.isCollectionType(aField.getFieldType().getDataType())) {
+					&& !Utils.isCollectionType(fieldType == null ? null : fieldType.getDataType())) {
 				throw new IllegalArgumentException(
 						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityParser.duplicate.field", getName(), aField.getFieldTypeName()));
@@ -119,6 +139,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return (String) data;
 		} else if (data instanceof byte[]) {
 			return Utils.getString((byte[]) data);
+		} else if (data instanceof ByteBuffer) {
+			return Utils.getString(((ByteBuffer) data).array());// Utils.getStringLine(data);
 		}
 		BufferedReader rdr;
 		if (data instanceof BufferedReader) {
@@ -166,7 +188,23 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return type of RAW activity data entries - TEXT
 	 */
 	protected String getActivityDataType() {
-		return "TEXT";
+		return "TEXT"; // NON-NLS
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
+		if (data == null) {
+			return null;
+		}
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
+
+		T aData = (T) data;
+
+		return parsePreparedItem(stream, aData.toString(), aData);
 	}
 
 	/**
@@ -181,7 +219,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            prepared activity data item to parse
 	 * @return converted activity info, or {@code null} if activity data is {@code null}
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 */
 	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, T data)
 			throws ParseException {
@@ -280,7 +318,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            prepared activity data item to parse
 	 * @return field locators parsed values array
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 * @see #parseLocatorValues(List, TNTInputStream, Object)
 	 */
 	protected Object[] parseLocatorValues(ActivityField field, TNTInputStream<?, ?> stream, T data)
@@ -299,7 +337,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            prepared activity data item to parse
 	 * @return locators parsed values array
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 */
 	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locations, TNTInputStream<?, ?> stream, T data)
 			throws ParseException {
@@ -341,7 +379,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity object data
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
@@ -356,10 +394,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				} else {
 					val = resolveLocatorValue(locator, data, formattingNeeded);
 
-					logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"ActivityParser.locator.resolved"),
-							locStr, String.valueOf(val));
+					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
+					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.locator.resolved"), locStr, toString(val));
 				}
 			}
 
@@ -382,9 +419,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 *
 	 * @throws ParseException
-	 *             if error appears while resolving raw data value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 *             if exception occurs while resolving raw data value
 	 */
 	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, T data, AtomicBoolean formattingNeeded)
 			throws ParseException;

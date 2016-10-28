@@ -20,6 +20,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
@@ -425,6 +426,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		} else if (data instanceof byte[]) {
 			rdr = new BufferedReader(new StringReader(getString((byte[]) data)));
 			autoClose = true;
+		} else if (data instanceof ByteBuffer) {
+			ByteBuffer bb = (ByteBuffer) data;
+			rdr = new BufferedReader(new StringReader(getString(bb.array())));
+			autoClose = true;
 		} else if (data instanceof BufferedReader) {
 			rdr = (BufferedReader) data;
 		} else if (data instanceof Reader) {
@@ -452,7 +457,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
-		if (tagsData instanceof String) {
+		if (tagsData instanceof byte[]) {
+			return new String[] { "0x" + Hex.encodeHexString((byte[]) tagsData) };
+		} else if (tagsData instanceof String) {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
@@ -815,7 +822,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *         otherwise.
 	 */
 	public static boolean isCollectionType(Class<?> cls) {
-		return cls.isArray() || Collection.class.isAssignableFrom(cls);
+		return cls != null && (cls.isArray() || Collection.class.isAssignableFrom(cls));
 	}
 
 	/**
@@ -932,6 +939,20 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Makes a HEX dump string representation of provided bytes array. Does all the same as {@link #toHex(byte[], int)}
+	 * setting {@code offset} parameter to {@code 0}.
+	 *
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @return returns HEX dump representation of provided bytes array
+	 *
+	 * @see #toHex(byte[], int, int)
+	 */
+	public static String toHex(byte[] b) {
+		return toHex(b, 0);
+	}
+
+	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
 	 * {@link #toHex(byte[], int, int)} setting {@code len} parameter to {@code 0}.
 	 * 
@@ -979,5 +1000,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return hexStr;
+	}
+
+	/**
+	 * Splits object identification path expression into path nodes array.
+	 *
+	 * @param path
+	 *            object identification path
+	 * @param nps
+	 *            path nodes separator
+	 * @return array of path nodes or {@code null} if path is empty
+	 */
+	public static String[] getNodePath(String path, String nps) {
+		if (StringUtils.isNotEmpty(path)) {
+			return StringUtils.isEmpty(nps) ? new String[] { path } : path.split(Pattern.quote(nps));
+		}
+
+		return null;
 	}
 }

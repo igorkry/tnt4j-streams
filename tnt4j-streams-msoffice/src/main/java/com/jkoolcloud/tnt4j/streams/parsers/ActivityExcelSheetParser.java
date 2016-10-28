@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -30,8 +31,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
@@ -82,25 +81,16 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 		// String value = prop.getValue();
 		//
 		// // no any additional properties are required yet.
+		// if (false) {
+		// logger().log(OpLevel.DEBUG,
+		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+		// name, value);
+		// }
 		// }
 	}
 
-	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
-
-		Sheet sheet = (Sheet) data;
-
-		return parsePreparedItem(stream, sheet.toString(), sheet);
-	}
-
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -108,39 +98,40 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *            MS Excel document sheet representing activity object data fields
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, Sheet sheet, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		CellReference ref = new CellReference(locStr);
-		boolean cellFound = false;
-		if (ref.getRow() < 0 || ref.getCol() < 0) {
-			throw new ParseException(
-					StreamsResources.getStringFormatted(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-							"ActivityExcelRowParser.unresolved.cell.reference", locStr),
-					sheet.getWorkbook().getSheetIndex(sheet));
-		}
-		Row row = sheet.getRow(ref.getRow());
-		if (row != null) {
-			Cell cell = row.getCell(ref.getCol());
-			if (cell != null) {
-				val = cell.toString();
-				cellFound = true;
-			}
-		}
 
-		logger().log(OpLevel.TRACE,
-				StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-						"ActivityExcelRowParser.resolved.cell.value"),
-				locStr, sheet.getWorkbook().getMissingCellPolicy(), String.valueOf(val));
+		if (StringUtils.isNotEmpty(locStr)) {
+			CellReference ref = new CellReference(locStr);
+			boolean cellFound = false;
+			if (ref.getRow() < 0 || ref.getCol() < 0) {
+				throw new ParseException(
+						StreamsResources.getStringFormatted(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+								"ActivityExcelRowParser.unresolved.cell.reference", locStr),
+						sheet.getWorkbook().getSheetIndex(sheet));
+			}
+			Row row = sheet.getRow(ref.getRow());
+			if (row != null) {
+				Cell cell = row.getCell(ref.getCol());
+				if (cell != null) {
+					val = cell.toString();
+					cellFound = true;
+				}
+			}
+
+			logger().log(OpLevel.TRACE,
+					StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+							"ActivityExcelRowParser.resolved.cell.value"),
+					locStr, sheet.getWorkbook().getMissingCellPolicy(), toString(val));
+		}
 
 		return val;
 	}
@@ -150,7 +141,8 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *
 	 * @return type of RAW activity data entries - EXCEL SHEET
 	 */
+	@Override
 	protected String getActivityDataType() {
-		return "EXCEL SHEET";
+		return "EXCEL SHEET"; // NON-NLS
 	}
 }

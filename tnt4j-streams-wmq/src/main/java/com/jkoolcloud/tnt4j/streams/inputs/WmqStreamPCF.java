@@ -17,6 +17,8 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import com.ibm.mq.MQMessage;
+import com.ibm.mq.constants.MQConstants;
+import com.ibm.mq.pcf.PCFMessage;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -24,21 +26,22 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
- * Implements a WebSphere MQ activity stream, where activity data is {@link String} made from {@link MQMessage} payload.
+ * Implements a WebSphere MQ activity stream, where activity data is {@link MQMessage} transformed to
+ * {@link PCFMessage}.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link PCFMessage} data.
  * <p>
  * This activity stream supports properties from {@link AbstractWmqStream} (and higher hierarchy streams).
  *
- * @version $Revision: 2 $
+ * @version $Revision: 1 $
  */
-public class WmqStream extends AbstractWmqStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);
+public class WmqStreamPCF extends AbstractWmqStream<PCFMessage> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamPCF.class);
 
 	/**
-	 * Constructs an empty WmqStream. Requires configuration settings to set input source.
+	 * Constructs an empty WmqStreamPCF. Requires configuration settings to set input source.
 	 */
-	public WmqStream() {
+	public WmqStreamPCF() {
 		super();
 	}
 
@@ -48,11 +51,13 @@ public class WmqStream extends AbstractWmqStream<String> {
 	}
 
 	@Override
-	protected String getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
-		String msgData = mqMsg.readStringOfByteLength(mqMsg.getDataLength());
+	protected PCFMessage getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
+		PCFMessage msgData = new PCFMessage(mqMsg);
+		msgData.addParameter(MQConstants.MQBACF_CORREL_ID, mqMsg.correlationId);
 		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.message.data"),
-				msgData.length(), msgData);
+				msgData.size(), msgData.toString());
+
 		return msgData;
 	}
 }

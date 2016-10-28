@@ -3043,7 +3043,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * TopicString - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
  * Host - WMQ connection host name. (Optional)
  * Port - WMQ connection port number. Default value - `1414`. (Optional)
- * Channel - Channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
+ * Channel - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
  * StripHeaders - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
 
     sample:

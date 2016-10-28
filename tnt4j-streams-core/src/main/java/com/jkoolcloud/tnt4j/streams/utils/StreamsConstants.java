@@ -41,6 +41,11 @@ public final class StreamsConstants {
 	 */
 	public static final String TRANSPORT_HTTP = "Http"; // NON-NLS
 
+	/**
+	 * Default object identification path delimiter used by streams parsers.
+	 */
+	public static final String DEFAULT_PATH_DELIM = "."; // NON-NLS
+
 	private StreamsConstants() {
 
 	}

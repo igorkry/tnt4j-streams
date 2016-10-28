@@ -40,6 +40,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -60,7 +61,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
 
 	private static final String JSON_PATH_ROOT = "$";// NON-NLS
-	private static final String JSON_PATH_SEPARATOR = ".";// NON-NLS
+	private static final String JSON_PATH_SEPARATOR = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	private boolean jsonAsLine = true;
 
@@ -88,6 +89,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
 				jsonAsLine = Boolean.parseBoolean(value);
+
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
 			}
 		}
 	}
@@ -119,8 +124,6 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		if (data == null) {
 			return null;
 		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		DocumentContext jsonDoc = null;
 		String jsonString = null;
@@ -147,6 +150,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		if (jsonString == null) {
 			jsonString = jsonDoc.jsonString();
 		}
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				jsonString);
 
 		return parsePreparedItem(stream, jsonString, jsonDoc);
 	}
@@ -185,17 +192,17 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns type of RAW activity data entries.
 	 *
 	 * @return type of RAW activity data entries - JSON
 	 */
 	@Override
 	protected String getActivityDataType() {
-		return "JSON";
+		return "JSON"; // NON-NLS
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator and formats it according locator definition.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -206,7 +213,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs while resolving raw data value or applying locator format properties to specified
+	 *             value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
@@ -216,37 +224,40 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		if (!locStr.startsWith(JSON_PATH_ROOT)) {
-			locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
-		}
 
-		Object jsonValue = null;
-		try {
-			jsonValue = jsonDocContext.read(locStr);
-		} catch (JsonPathException exc) {
-			logger().log(
-					!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources
-							.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.path.exception"),
-					locStr, exc.getLocalizedMessage());
-		}
-
-		if (jsonValue != null) {
-			List<Object> jsonValuesList;
-			if (jsonValue instanceof List) {
-				jsonValuesList = (List<Object>) jsonValue;
-			} else {
-				jsonValuesList = new ArrayList<Object>(1);
-				jsonValuesList.add(jsonValue);
+		if (StringUtils.isNotEmpty(locStr)) {
+			if (!locStr.startsWith(JSON_PATH_ROOT)) {
+				locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
 			}
 
-			if (CollectionUtils.isNotEmpty(jsonValuesList)) {
-				List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
-				for (Object jsonValues : jsonValuesList) {
-					valuesList.add(locator.formatValue(jsonValues));
+			Object jsonValue = null;
+			try {
+				jsonValue = jsonDocContext.read(locStr);
+			} catch (JsonPathException exc) {
+				logger().log(
+						!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources
+								.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.path.exception"),
+						locStr, exc.getLocalizedMessage());
+			}
+
+			if (jsonValue != null) {
+				List<Object> jsonValuesList;
+				if (jsonValue instanceof List) {
+					jsonValuesList = (List<Object>) jsonValue;
+				} else {
+					jsonValuesList = new ArrayList<Object>(1);
+					jsonValuesList.add(jsonValue);
 				}
 
-				val = Utils.simplifyValue(valuesList);
-				formattingNeeded.set(false);
+				if (CollectionUtils.isNotEmpty(jsonValuesList)) {
+					List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
+					for (Object jsonValues : jsonValuesList) {
+						valuesList.add(locator.formatValue(jsonValues));
+					}
+
+					val = Utils.simplifyValue(valuesList);
+					formattingNeeded.set(false);
+				}
 			}
 		}
 

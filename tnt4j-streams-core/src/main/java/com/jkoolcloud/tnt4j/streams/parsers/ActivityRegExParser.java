@@ -83,9 +83,11 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (props == null) {
 			return;
 		}
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
+
 			if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
@@ -94,8 +96,6 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 							name, value);
 				}
 			}
-			logger().log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -226,7 +226,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -234,32 +234,30 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 *            RegEx data package - {@link Matcher} or {@link ArrayList} of matches
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object regexData, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object regexData,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		int loc = Integer.parseInt(locStr);
 
-		if (regexData instanceof Matcher) {
-			Matcher matcher = (Matcher) regexData;
+		if (StringUtils.isNotEmpty(locStr)) {
+			int loc = Integer.parseInt(locStr);
 
-			if (loc >= 0 && loc < matcher.groupCount()) {
-				val = matcher.group(loc);
-			}
-		} else {
-			ArrayList<String> matches = (ArrayList<String>) regexData;
+			if (regexData instanceof Matcher) {
+				Matcher matcher = (Matcher) regexData;
 
-			if (loc >= 0 && loc < matches.size()) {
-				val = matches.get(loc);
+				if (loc >= 0 && loc < matcher.groupCount()) {
+					val = matcher.group(loc);
+				}
+			} else {
+				ArrayList<String> matches = (ArrayList<String>) regexData;
+
+				if (loc >= 0 && loc < matches.size()) {
+					val = matches.get(loc);
+				}
 			}
 		}
 

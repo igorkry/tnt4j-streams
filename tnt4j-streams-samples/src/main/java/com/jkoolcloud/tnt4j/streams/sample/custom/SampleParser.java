@@ -106,7 +106,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -114,20 +114,20 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 *            activity object data fields array
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		int loc = Integer.parseInt(locStr);
 
-		if (loc > 0 && loc <= fields.length) {
-			val = fields[loc - 1].trim();
+		if (StringUtils.isNotEmpty(locStr)) {
+			int loc = Integer.parseInt(locStr);
+
+			if (loc > 0 && loc <= fields.length) {
+				val = fields[loc - 1].trim();
+			}
 		}
 
 		return val;

@@ -21,10 +21,8 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -34,15 +32,17 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} data
  * structure, where each field is represented by declared class field and the field name is used to map each field onto
  * its corresponding activity field.
  * <p>
- * If field is complex object, subfields can be accessed using '.' as naming hierarchy separator: i.e.
- * 'header.author.name'.
+ * If field is complex object, subfields can be accessed using '{@value StreamsConstants#DEFAULT_PATH_DELIM}' as naming
+ * hierarchy separator: i.e. 'header.author.name'.
  *
  * @version $Revision: 1 $
  */
@@ -73,6 +73,11 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		// String value = prop.getValue();
 		//
 		// // no any additional properties are required yet.
+		// if (false) {
+		// logger().log(OpLevel.DEBUG,
+		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+		// name, value);
+		// }
 		// }
 	}
 
@@ -95,14 +100,15 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
 
 		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 		return parsePreparedItem(stream, dataStr, data);
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
 	 * @param locator
 	 *            activity field locator
@@ -110,30 +116,16 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *            activity data carrier object
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object dataObj, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object dataObj, AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		String[] path = getNodePath(locStr);
+		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
 		val = getFieldValue(path, dataObj, 0);
 
 		return val;
-	}
-
-	private static String[] getNodePath(String locStr) {
-		if (StringUtils.isNotEmpty(locStr)) {
-			return locStr.split(Pattern.quote(".")); // NON-NLS
-		}
-
-		return null;
 	}
 
 	private static Object getFieldValue(String[] path, Object dataObj, int i) {
@@ -154,7 +146,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityJavaObjectParser.could.not.get.declared.field"),
-					path[i], dataObj.getClass().getSimpleName(), String.valueOf(dataObj));
+					path[i], dataObj.getClass().getSimpleName(), toString(dataObj));
 			return null;
 		}
 	}
@@ -164,7 +156,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *
 	 * @return type of RAW activity data entries - OBJECT
 	 */
+	@Override
 	protected String getActivityDataType() {
-		return "OBJECT";
+		return "OBJECT"; // NON-NLS
 	}
 }

@@ -46,9 +46,9 @@ public interface Feed<T> extends Closeable {
 	boolean isClosed();
 
 	/**
-	 * Returns whether or not an error occurred on the input stream.
+	 * Returns whether or not an error/exception occurred on the input stream.
 	 *
-	 * @return {@code true} if error occurred, {@code false} if not
+	 * @return {@code true} if error/exception occurred, {@code false} if not
 	 */
 	boolean hasError();
 
