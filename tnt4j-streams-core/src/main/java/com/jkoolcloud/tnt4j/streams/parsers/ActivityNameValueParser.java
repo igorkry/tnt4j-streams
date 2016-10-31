@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,28 +34,22 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Implements an activity data parser that assumes each activity data item is a
- * token-separated string of fields, where each field is represented by a
- * name/value pair and the name is used to map each field onto its corresponding
- * activity field. The field-separator and the name/value separator can both be
- * customized.
+ * Implements an activity data parser that assumes each activity data item is a token-separated string of fields, where
+ * each field is represented by a name/value pair and the name is used to map each field onto its corresponding activity
+ * field. The field-separator and the name/value separator can both be customized.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>ValueDelim - value delimiter. (Optional)</li>
- * <li>Pattern - pattern used to determine which types of activity data string
- * this parser supports. When {@code null}, all strings are assumed to match the
- * format supported by this parser. (Optional)</li>
- * <li>StripQuotes - whether surrounding double quotes should be stripped from
- * extracted data values. (Optional)</li>
+ * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},
+ * all strings are assumed to match the format supported by this parser. (Optional)</li>
+ * <li>StripQuotes - whether surrounding double quotes should be stripped from extracted data values. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -63,29 +58,26 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityNameValueParser.class);
 
 	/**
-	 * Contains the field separator (set by {@code FieldDelim} property) -
-	 * Default: ","
+	 * Contains the field separator (set by {@code FieldDelim} property) - Default:
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 
 	/**
-	 * Contains the name/value separator (set by {@code ValueDelim} property) -
-	 * Default: "="
+	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "="
 	 */
 	protected String valueDelim = "="; // NON-NLS
 
 	/**
-	 * Contains the pattern used to determine which types of activity data
-	 * string this parser supports (set by {@code Pattern} property). When
-	 * {@code null}, all strings are assumed to match the format supported by
-	 * this parser.
+	 * Contains the pattern used to determine which types of activity data string this parser supports (set by
+	 * {@code Pattern} property). When {@code null}, all strings are assumed to match the format supported by this
+	 * parser.
 	 */
 	protected Pattern pattern = null;
 
 	/**
-	 * Indicates whether surrounding double quotes should be stripped from
-	 * extracted data values (set by {@code StripQuotes} property) - default:
-	 * {@code true}
+	 * Indicates whether surrounding double quotes should be stripped from extracted data values (set by
+	 * {@code StripQuotes} property) - default: {@code true}
 	 */
 	protected boolean stripQuotes = true;
 
@@ -93,7 +85,12 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * Constructs a new ActivityNameValueParser.
 	 */
 	public ActivityNameValueParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -101,34 +98,33 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (props == null) {
 			return;
 		}
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_FLD_DELIM.equals(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				LOGGER.log(OpLevel.DEBUG,
+				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, fieldDelim);
+						name, value);
 			} else if (ParserProperties.PROP_VAL_DELIM.equals(name)) {
 				valueDelim = value;
-				LOGGER.log(OpLevel.DEBUG,
+				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
 			} else if (ParserProperties.PROP_PATTERN.equals(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
-					LOGGER.log(OpLevel.DEBUG,
+					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
 			} else if (ParserProperties.PROP_STRIP_QUOTES.equals(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
-				LOGGER.log(OpLevel.DEBUG,
+				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
 			}
-			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 	}
 
@@ -145,16 +141,16 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (data == null) {
 			return null;
 		}
-		String dataStr = getNextString(data);
+		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.input.not.match"), getName());
 				return null;
 			}
@@ -164,11 +160,11 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
 				fields.length);
 		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
@@ -178,7 +174,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityNameValueParser.found"), field);
 			}
 		}
@@ -187,37 +183,23 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator
-	 * definition.
+	 * Gets field raw data value resolved by locator.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param nameValues
 	 *            activity object name/value pairs map
-	 *
-	 * @return value formatted based on locator definition or {@code null} if
-	 *         locator is not defined
-	 *
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified
-	 *             value
-	 *
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator,
-			Map<String, String> nameValues) throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, String> nameValues,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				val = locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp ? stream.getProperty(locStr)
-						: nameValues.get(locStr);
-			}
-			val = locator.formatValue(val);
-		}
+		String locStr = locator.getLocator();
+		val = nameValues.get(locStr); // NOTE: locStr == null?
+
 		return val;
 	}
 }

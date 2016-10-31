@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for FieldMapType.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -52,7 +50,8 @@ public enum FieldMapType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Value") VALUE("Value"),
+	@XmlEnumValue("Value")
+	VALUE("Value"),
 
 	/**
 	 * 
@@ -60,7 +59,8 @@ public enum FieldMapType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Range") RANGE("Range"),
+	@XmlEnumValue("Range")
+	RANGE("Range"),
 
 	/**
 	 * 
@@ -68,7 +68,8 @@ public enum FieldMapType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Calc") CALC("Calc");
+	@XmlEnumValue("Calc")
+	CALC("Calc");
 	private final String value;
 
 	FieldMapType(String v) {

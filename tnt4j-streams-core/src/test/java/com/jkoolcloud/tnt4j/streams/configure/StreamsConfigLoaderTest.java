@@ -23,12 +23,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -65,7 +62,7 @@ public class StreamsConfigLoaderTest {
 	}
 
 	@Test
-	public void testStreamsConfig() throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfig() throws Exception {
 		StreamsConfigLoader streamsConfig = new StreamsConfigLoader();
 		assertNotNull(streamsConfig);
 		isStreamsAndParsersLoaded(streamsConfig);
@@ -79,14 +76,14 @@ public class StreamsConfigLoaderTest {
 	}
 
 	@Test
-	public void testStreamsConfigConfigWithFileName() throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfigConfigWithFileName() throws Exception {
 		StreamsConfigLoader streamsConfig = new StreamsConfigLoader(TEST_FILE_NAME);
 		assertNotNull(streamsConfig);
 		isStreamsAndParsersLoaded(streamsConfig);
 	}
 
 	@Test
-	public void testStreamsConfigSAXException() throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfigSAXException() throws Exception {
 		final File tempFile = File.createTempFile("testStreams", null);
 		File configFile = new File(TEST_FILE_NAME);
 		FileWriter fw = new FileWriter(tempFile);
@@ -102,13 +99,12 @@ public class StreamsConfigLoaderTest {
 	}
 
 	@Test(expected = IOException.class)
-	public void testStreamsConfigConfigWithFileNameNotFound()
-			throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfigConfigWithFileNameNotFound() throws Exception {
 		new StreamsConfigLoader(TEST_FILE_NAME + "ERROR");
 	}
 
 	@Test
-	public void testStreamsConfigFile() throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfigFile() throws Exception {
 		File configFile = new File(TEST_FILE_NAME);
 		StreamsConfigLoader streamsConfig = new StreamsConfigLoader(configFile);
 		assertNotNull(streamsConfig);
@@ -116,7 +112,7 @@ public class StreamsConfigLoaderTest {
 	}
 
 	@Test
-	public void testStreamsConfigReader() throws SAXException, ParserConfigurationException, IOException {
+	public void testStreamsConfigReader() throws Exception {
 		File configFile = new File(TEST_FILE_NAME);
 		FileReader fileReader = new FileReader(configFile);
 		StreamsConfigLoader streamsConfig = new StreamsConfigLoader(fileReader);

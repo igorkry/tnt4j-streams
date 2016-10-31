@@ -31,6 +31,7 @@
     <stream name="SampleFlumeStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value=".\tnt4j-streams-flume-plugin\samples\apache-flume-parsed\messages.json"/>
         <!--<property name="Port" value="9595"/>-->
+
         <parser-ref name="FlumeJSONParser"/>
     </stream>
 </tnt-data-source>

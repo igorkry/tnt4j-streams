@@ -29,13 +29,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Implements a scheduled system command call activity stream, where each call response is assumed to represent a single
  * activity or event which should be recorded.
  * <p>
  * System command call is performed by invoking {@link Runtime#exec(String)}.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -49,7 +50,12 @@ public class CmdStream extends AbstractWsStream {
 	 * Constructs an empty CmdStream. Requires configuration settings to set input stream source.
 	 */
 	public CmdStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override

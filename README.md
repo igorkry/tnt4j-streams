@@ -14,7 +14,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * MQTT
     * HTTP
     * JMS
-    * Apache Kafka
+    * Apache Kafka (as Consumer and as Server/Consumer)
     * Apache Flume
     * Logstash
     * WMQ
@@ -39,10 +39,15 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * Apache Flume
     * Angulartics
+    * AJAX
+    * Node.js
     * Collectd
     * Nagios    
+    * Fluentd
 
-just by applying configuration and without additional coding.
+    just by applying configuration and without additional coding.
+
+* Can redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator. 
 
 Importing TNT4J-Streams project into IDE
 ======================================
@@ -400,6 +405,8 @@ Sample stream configuration:
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+        
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -724,6 +731,7 @@ Sample stream configuration:
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value="access.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
 
         <parser-ref name="AccessLogParserExt"/>
         <parser-ref name="AccessLogParserCommon"/>
@@ -1035,7 +1043,7 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
 
-How to configure Logstash see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
+How to setup sample environment see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -1108,7 +1116,7 @@ send parsed Apache Access log entry data as JSON to `localhost:9595`.
 
 Sample files can be found in `samples/logstash-parsed` directory.
 
-How to configure Logstash see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
+How to setup sample environment see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -1483,10 +1491,12 @@ names as labels.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
-#### Kafka
+#### Kafka client stream
 
 This sample shows how to stream activity events received over Apache Kafka transport as messages. Sample also shows
 how to use stacked parsers technique to extract message payload data.
+
+Stream runs as Apache Kafka consumer.
 
 Sample files can be found in `samples/kafka` directory.
 
@@ -1525,12 +1535,15 @@ Sample stream configuration:
     </parser>
 
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
-        <property name="HaltIfNoParser" value="false"/>
-        <property name="Topic" value="TNT4JStreams"/>
-        <property name="zookeeper.connect" value="127.0.0.1:2181"/>
-        <property name="group.id" value="TNT4JStreams"/>
-        <parser-ref name="KafkaMessageParser"/>
-    </stream>
+            <property name="HaltIfNoParser" value="false"/>
+            <property name="Topic" value="TNT4JStreams"/>
+    
+            <!-- Kafka consumer properties -->
+            <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
+            <property name="group.id" value="TNT4JStreams"/>
+    
+            <parser-ref name="KafkaMessageParser"/>
+        </stream>
 </tnt-data-source>
 
 ```
@@ -1541,6 +1554,8 @@ Stream configuration states that `KafkaStream` referencing `KafkaMessageParser` 
 `Topic` property. `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 Stream puts received message data to map and passes it to parser.
 
+Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html).
+
 `KafkaMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
 
@@ -1549,6 +1564,87 @@ Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can b
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
+
+NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+
+#### Kafka server stream
+
+This sample shows how to stream activity events received over Apache Kafka transport as messages. Sample also shows
+how to use stacked parsers technique to extract message payload data.
+
+Stream starts Apache Kafka server and binds consumer to it to receive and process messages.
+
+Sample files can be found in `samples/kafka-server` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+
+        <field name="Location" locator="1" locator-type="REGroupNum"/>
+        <field name="UserName" locator="3" locator-type="REGroupNum"/>
+        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="7" locator-type="REGroupNum"/>
+        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
+        <field name="CompCode" locator="12" locator-type="REGroupNum">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+    </parser>
+
+    <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon"/>
+        </field>
+    </parser>
+
+    <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Topic" value="TNT4JKafkaTestTopic"/>
+        <property name="StartServer" value="true"/>
+
+        <!-- Kafka server and consumer properties -->
+        <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
+        <property name="group.id" value="TNT4JStreams"/>
+
+        <property name="zookeeper.session.timeout.ms" value="4000"/>
+        <property name="port" value="9092"/>
+        <property name="broker.id" value="684231"/>
+        <property name="host.name" value="localhost"/>
+        <property name="advertised.host.name" value="localhost"/>
+        <property name="log.flush.interval.messages" value="1"/>
+        <property name="log.flush.interval.ms" value="1000"/>
+        <property name="zookeeper.connection.timeout.ms" value="3000"/>
+
+        <property name="zookeeper.sync.time.ms" value="200"/>
+        <property name="auto.commit.interval.ms" value="1000"/>
+        <property name="consumer.timeout.ms" value="1000"/>
+
+        <parser-ref name="KafkaMessageParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration in general is mostly same as for ['Kafka client stream'](#kafka-client-stream). 
+
+Difference is `StartServer` stream property set to `true` stating that Apache Kafka server should be started by stream and messages consumer 
+has to bind to it.
+
+Also there is extended set of Apache Kafka configuration properties used by server and consumer.  
+
+Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html). 
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -1752,13 +1848,14 @@ string and passes it to parser.
 
 #### Angulartics (AngularJS tracing)
 
-This sample shows how to stream JavaScript events traces from Angulartics. TNT4J-Angulartics-plugin sends
-trace data over HTTP request `http://localhost:9595`. Thus to process this we will need `HttpStream` running on port
-`9595`.
+This sample shows how to stream JavaScript events traces from Angulartics. TNT4J-Angulartics-plugin sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
 
 Sample files can be found in `samples/angular-js-tracing` directory.
 
-How to configure Angulartics see [`samples/angular-js-tracing/readme.md`](tnt4j-streams-core/samples/angular-js-tracing/readme.md)
+How to setup sample environment see [`samples/angular-js-tracing/readme.md`](tnt4j-streams-core/samples/angular-js-tracing/readme.md)
+
+Sample trace data is available in `messages.json` file.
 
 Sample stream configuration:
 ```xml
@@ -1805,6 +1902,154 @@ should skip unparseable entries. Stream puts received request payload data as `b
 parser named `JSONPayloadParser` to parse it.
 
 `JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### AJAX
+
+This sample shows how to stream JavaScript events traces from AJAX. TNT4J-AJAX-interceptor sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
+
+Sample files can be found in `samples/ajax` directory.
+
+How to setup sample environment see [`samples/ajax/readme.md`](tnt4j-streams-core/samples/ajax/readme.md)
+
+Sample trace data is available in `messages.json` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
+               units="Nanoseconds"/>
+        <field name="ResourceName" locator="$.url" locator-type="Label"/>
+        <field name="EventName" locator="$.eventType" locator-type="Label"/>
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Tag" locator="$.eventType" locator-type="Label"/>
+
+        <field name="CompCode" locator="$.statuss" locator-type="Label">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="$.statuss" locator-type="Label"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EndTime" locator="$.endOfLoading" locator-type="Label" datatype="Timestamp"
+               units="Milliseconds"/>
+        <field name="ElapsedTime" locator="$.elapsedTime" locator-type="Label" datatype="Number" format="#####0"/>
+        <field name="ContentSize" locator="$.contentSize" locator-type="Label"/>
+        <field name="IsError" locator="$.error" locator-type="Label"/>
+        <field name="IsAborted" locator="$.abort" locator-type="Label"/>
+    </parser>
+
+    <parser name="AjaxEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="AjaxEventStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9595"/>
+        <parser-ref name="AjaxEventParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `AjaxEventParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`AjaxEventParser` by default converts `byte[]` for entry `ActivityData` to JSON format string and uses stacked
+parser named `JSONPayloadParser` to parse it.
+
+`JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### Node.js
+
+This sample shows how to stream JavaScript events traces from Node.js. TNT4J-njsTrace-plugin sends trace data over HTTP request 
+`http://localhost:9595`. Thus to process this we will need `HttpStream` running on port `9595`.
+
+Sample files can be found in `samples/node.js` directory.
+
+How to setup sample environment see [`samples/node.js/readme.md`](tnt4j-streams-core/samples/node.js/readme.md)
+
+Sample trace data is available in `messages.json` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="ElapsedTime" locator="$.span" locator-type="Label" datatype="Number" units="Milliseconds" required="false"/>
+        <field name="ResourceName" separator=",">
+            <field-locator locator="$.file" locator-type="Label"/>
+            <field-locator locator="$.line" locator-type="Label"/>
+        </field>
+
+        <field name="Method" locator="$.name" locator-type="Label"/>
+        <field name="Message" locator="$.returnValue" locator-type="Label" required="false"/>
+        <field name="EventName" value="node.js Trace"/>
+        <field name="EventType" locator="$.method" locator-type="Label"/>
+        <field name="Correlator" locator="$.stack[*]" locator-type="Label" separator=","/>
+
+        <field name="Exception" locator="$.exception" locator-type="Label"/>
+
+        <field name="CompCode" locator="$.exception" locator-type="Label">
+            <field-map source="false" target="SUCCESS"/>
+            <field-map source="true" target="ERROR"/>
+            <field-map source="Function timed out" target="ERROR"/>
+        </field>
+
+    </parser>
+
+    <parser name="njstraceParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+            <parser-ref name="JSONPayloadParser"/>
+        </field>
+    </parser>
+
+    <stream name="njstraceHttpStream" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Port" value="9596"/>
+        <parser-ref name="njstraceParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `HttpStream` referencing `njstraceParser` shall be used.
+
+`HttpStream` starts HTTP server on port defined using `Port` property. `HaltIfNoParser` property indicates that stream
+should skip unparseable entries. Stream puts received request payload data as `byte[]` to map using key `ActivityData`.
+
+`njstraceParser` by default converts `byte[]` for entry `ActivityData` to JSON format string and uses stacked
+parser named `JSONPayloadParser` to parse it.
+
+`JSONPayloadParser` transforms received JSON data string to Map and fills in activity event fields values from that map.
+
+#### Node.js blocking event loop
+
+This extended ['Node.js'](#nodejs) sample shows how to trace blocking event loop occurrences.
+
+Sample files can be found in `samples/node.js-blocking-event-loop` directory.
+
+How to setup sample environment see [`samples/node.js-blocking-event-loop/readme.md`](tnt4j-streams-core/samples/node.js-blocking-event-loop/readme.md)
+
+Sample stream configuration is same as in ['Node.js'](#nodejs) sample.
 
 #### JAX-WS
 
@@ -2118,6 +2363,75 @@ containing field `TomcatActive`.
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
+#### Redirecting TNT4J streams
+
+This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to jKool Cloud service 
+over single `TNT4J-Streams` stream instance.
+
+Sample files can be found in `samples/stream-jmx` directory.
+
+To redirect `tnt4j-stream-jmx` (or any other TNT4J based producer) produced trackables, producer configuration file `tnt4j.properties` 
+should contain such stanza:
+```properties
+    event.sink.factory.EventSinkFactory: com.jkoolcloud.tnt4j.sink.impl.SocketEventSinkFactory
+    event.sink.factory.EventSinkFactory.eventSinkFactory: com.jkoolcloud.tnt4j.sink.impl.NullEventSinkFactory
+    event.sink.factory.EventSinkFactory.Host: IP_OF_STREAMS_RUNNING_MACHINE
+    event.sink.factory.EventSinkFactory.Port: 9009
+    event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
+```
+NOTE: change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
+
+    <java-object name="JMXRedirectOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput"/>
+
+    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
+        <property name="RestartOnInputClose" value="true"/>
+        <property name="Port" value="9009"/>
+
+        <reference name="JMXRedirectOutput"/>
+
+        <tnt4j-properties>
+            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
+        </tnt4j-properties>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `SampleJMXRoutingStream` referencing `JMXRedirectOutput` shall be used. Stream takes starts server socket 
+on port defined by stream property `Port`. Stream listens server socket for inbound connections (accepts multiple). When connection gets 
+accepted, stream reads incoming data from connection dedicated socket.
+
+`RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
+accept inbound connection.
+
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKoolCloud service.
+
+Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
+additional JSON reformatting in default TNT4J data flow.  
+
+NOTE: you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
+format. 
+
+To do re-streaming from file, change sample configuration by replacing `SampleJMXRoutingStream` stream property `Port` to `FileName` 
+referring file containing logged trackables in JSON format:
+```xml
+    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
+        <property name="FileName" value="tnt4j-stream-activities.log"/>    
+        
+        <reference name="JMXRedirectOutput"/>
+
+        <tnt4j-properties>
+            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
+        </tnt4j-properties>
+    </stream>
+``` 
+
 #### MS Excel document
 
 ##### Rows
@@ -2156,7 +2470,7 @@ Sample stream configuration:
     <stream name="SampleExcelRowsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelRowStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
-        <property name="FirstRowAsHeader" value="false"/>
+        <property name="RangeToStream" value="1:"/>
         <property name="SheetsToProcess" value="Sheet*"/>
 
         <parser-ref name="ExcelRowParser"/>
@@ -2171,7 +2485,7 @@ workbook sheet row and passes it to parser.
 
 `SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx` file.
 
-`FirstRowAsHeader` property indicates that there is no table header row in sheets.
+`RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`. 
 
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
@@ -2403,7 +2717,11 @@ referencing field `MsgBody`) carrying system state/metrics data. Each snapshot i
 because parent JSON parser already made map data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
-`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.    
+`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.   
+ 
+#### Fluentd logs streaming
+ 
+TODO 
 
 #### Integrating TNT4J-Streams into custom API
 
@@ -2496,6 +2814,8 @@ sample stream configuration:
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+        
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -2541,7 +2861,7 @@ These parameters are applicable to all types of streams.
 
 ##### Parseable streams parameters
 
-These parameters are applicable to streams which uses parsers to parse input data.
+These parameters are applicable to streams which uses parsers to parse incoming RAW activity data.
 
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
@@ -2575,6 +2895,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
     `true`. Default value - 15sec. (Optional)
  * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart.
  Default value - `true`. (Optional)
+ * RangeToStream - defines streamed data lines index range. Default value - `1:`. (Optional)
 
     sample:
  ```xml
@@ -2583,6 +2904,7 @@ These parameters are applicable to streams which uses parsers to parse input dat
     <property name="StartFromLatest" value="true"/>
     <property name="FilePolling" value="true"/>
     <property name="RestoreState" value="false"/>
+    <property name="RangeToStream" value="12:125"/>
  ```
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.
@@ -2609,16 +2931,27 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 NOTE: there can be ony one parser referenced to this stream.
 
+#### Standard Java input stream parameters
+
+ * InputCloseable - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
+ 
+    sample:
+```xml
+    <property name="InputCloseable" value="false"/>    
+``` 
+
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
+
 #### OS Piped stream parameters
 
 This stream does not have any additional configuration parameters.
 
-Also see ['Generic streams parameters'](#generic-streams-parameters).
+Also see ['Standard Java input stream parameters'](#standard-java-input-stream parameters).
 
 #### Http stream parameters
 
  * Port - port number to run Http server. Default value - `8080`. (Optional)
- * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
+ * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
     * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeyPass - key password. (Optional) Actual only if `UseSSL` is set to `true`.
@@ -2663,18 +2996,20 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Kafka stream parameters
 
- * Topic - regex of topic name to listen. (Required)
+ * Topic - topic name to listen. (Required)
+ * StartServer - flag indicating if stream has to start Kafka server on startup. Default value - `false`. (Optional)
  * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
  details on Kafka consumer properties.
 
     sample:
 ```xml
-    <property name="Topic" value="TNT4JStreams"/>
-    <property name="zookeeper.connect" value="127.0.0.1:2181"/>
+    <property name="Topic" value="TNT4JKafkaTestTopic"/>
+    <property name="StartServer" value="false"/>
+    <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
     <property name="group.id" value="TNT4JStreams"/>
 ```
 
-Also see ['Generic streams parameters'](#generic-streams-parameters).
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
 
 #### MQTT stream parameters
 
@@ -2682,7 +3017,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
  * TopicString - the topic to subscribe to, which can include wildcards. (Required)
  * UserName - authentication user name. (Optional)
  * Password - user password. (Optional)
- * UseSSL - flag identifying to use SSL. Default value - `false`. (Optional)
+ * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
     * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
     * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
 
@@ -2708,7 +3043,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * TopicString - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
  * Host - WMQ connection host name. (Optional)
  * Port - WMQ connection port number. Default value - `1414`. (Optional)
- * Channel - Channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
+ * Channel - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
  * StripHeaders - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
 
     sample:
@@ -2798,6 +3133,30 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
+#### Redirect TNT4J Stream parameters
+
+ * FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')
+ * Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')
+ * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
+ connection. (Optional)
+ * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
+ * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer queue. Default value - 
+ 45sec. (Optional)
+ 
+    sample:
+```xml
+    <property name="FileName" value="tnt4j-stream-activities.log"/>
+```
+or
+```xml
+    <property name="Port" value="9009"/>
+    <property name="RestartOnInputClose" value="true"/>
+    <property name="BufferSize" value="1024"/>
+    <property name="BufferOfferTimeout" value="65"/>
+```
+
+Also see ['Generic streams parameters'](#generic-streams-parameters).
+
 #### Ms Excel Stream parameters
 
  * FileName - the system-dependent file name of MS Excel document. (Required)
@@ -2810,17 +3169,17 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
 ```
 
-Also see ['Generic streams parameters'](#generic-streams-parameters) and 'Parseable streams parameters'.
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
 
 ##### Ms Excel Rows Stream parameters
 
- * FirstRowAsHeader - flag `true/false` indicating whether first row in sheet is used to define table columns titles.
- If `true` then first sheet row is skipped from streaming. Default value - `false`. (Optional)
+ * RangeToStream - defines streamed data rows index range. Default value - `1:`. (Optional)
 
     sample:
 ```xml
     <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
+    <property name="RangeToStream" value="5:30"/>
 ```
 
 ### Parsers configuration
@@ -2919,6 +3278,10 @@ How to Build TNT4J-Streams
 =========================================
 ## Modules
 
+* (M) marked modules are mandatory 
+* (O) marked modules are optional 
+* (U) marked modules are utility modules (i.e. performs compiled assemblies packaging)
+
 Modules list:
    * `Core` (M)
    * `Flume-Plugin` (O)
@@ -2930,15 +3293,12 @@ Modules list:
    * `Ws` (O)
    * `MsOffice` (O)
    * `Samples` (O)
-
-(M) marked modules are mandatory, (O) marked modules - optional.
+   * `Distribution` (OU)
 
 All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
-If You want to build and use optional modules, uncomment those in root TNT4J-Streams `pom.xml` file. I.e. to use `WMQ`
-module uncomment `tnt4j-streams-wmq` module.
-
 NOTE: `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
+NOTE: `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
 
 ## Requirements
 * JDK 1.6+
@@ -2956,6 +3316,10 @@ running maven script `lib/pom.xml` with `package` goal. For example see [`tnt4j-
 how to do this.
 
 #### `WMQ` module
+
+NOTE: Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
+default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
+libraries will be installed to local maven repository.    
 
 What to download manually:
 * IBM MQ 7.5
@@ -2975,6 +3339,23 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 ## Building
    * to build project and make release assemblies run maven goals `clean package`
    * to build project, make release assemblies and install to local repo run maven goals `clean install`
+   
+By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
+
+If You do not want to build some of optional modules, comment those out like `WMQ` module is. Or You can define maven to build your 
+preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, i.e.:
+
+```cmd
+mvn -pl tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution -am clean install
+``` 
+or
+```cmd
+mvn --projects tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution --also-make clean install
+```
+
+NOTE: modules list should be without spaces after comma!
+
+Issuing these commands, maven will build only `tnt4j-streams-core`, `tnt4j-streams-samples` and `tnt4j-streams--distribution` modules.
 
 Release assemblies are built to `../build/tnt4j-streams` directory.
 

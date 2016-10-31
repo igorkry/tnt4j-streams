@@ -35,5 +35,10 @@ public enum ActivityFieldFormatType {
 	/**
 	 * Field value is a character string.
 	 */
-	string
+	string,
+
+	/**
+	 * Field value is a byte array
+	 */
+	bytes
 }

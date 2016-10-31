@@ -16,11 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.Whitelist;
+import kafka.consumer.ConsumerTimeoutException;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.server.KafkaConfig;
@@ -44,7 +47,6 @@ import kafka.server.KafkaServer;
 import kafka.utils.SystemTime$;
 
 /**
- * <p>
  * Implements a Kafka topics transmitted activity stream, where each message body is assumed to represent a single
  * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
  * configuration.
@@ -57,9 +59,10 @@ import kafka.utils.SystemTime$;
  * <li>ActivityTransport - activity transport definition: 'Kafka'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
- * <li>Topic - regex of topic name to listen. (Required)</li>
+ * <li>Topic - topic name to listen. (Required)</li>
  * <li>StartServer - flag indicating if stream has to start Kafka server on startup. Default value - {@code false}.
  * (Optional)</li>
  * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id. See {@link kafka.consumer.ConsumerConfig}
@@ -80,19 +83,25 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private final AtomicBoolean closed = new AtomicBoolean(false);
 
 	private ConsumerConnector consumer;
-	private ConsumerConfig kafkaProperties;
-	private String topicNameRegex;
+	private String topicName;
 
 	private KafkaServer server;
 	private boolean startServer = false;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
 
+	private Properties userKafkaProps;
+
 	/**
 	 * Constructs a new KafkaStream.
 	 */
 	public KafkaStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -100,14 +109,14 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		if (props == null) {
 			return;
 		}
-		Properties properties = new Properties();
+		userKafkaProps = new Properties();
 		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				topicNameRegex = value;
+				topicName = value;
 			} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
 				startServer = Boolean.parseBoolean(value);
 			} else {
@@ -123,17 +132,16 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				}
 
 				if (!streamsProperty) {
-					properties.put(name, value);
+					userKafkaProps.put(name, value);
 				}
 			}
 		}
-		kafkaProperties = new ConsumerConfig(properties);
 	}
 
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-			return topicNameRegex;
+			return topicName;
 		}
 
 		if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
@@ -142,7 +150,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 		Object prop = super.getProperty(name);
 		if (prop == null) {
-			prop = kafkaProperties.props().getProperty(name);
+			prop = userKafkaProps.getProperty(name);
 		}
 
 		return prop;
@@ -151,40 +159,64 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
-		if (StringUtils.isEmpty(topicNameRegex)) {
+
+		if (StringUtils.isEmpty(topicName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
 		if (startServer) {
-			// TODO: properties should come from stream or separate config file.
-			Properties serverProps = new Properties();
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+					"KafkaStream.server.starting"));
 
-			serverProps.setProperty("broker.id", String.valueOf(969696));
-			// serverProps.setProperty("host.name", InetAddress.getLocalHost().getHostName());
-			serverProps.setProperty("port", String.valueOf(6667));
-
-			// serverProps.setProperty("log.dir", new File(".").getAbsolutePath());
-			serverProps.setProperty("log.flush.interval.messages", String.valueOf(1));
-			serverProps.setProperty("log.flush.scheduler.interval.ms", String.valueOf(1));
-			serverProps.setProperty("log.flush.interval.ms", String.valueOf(1));
-
-			serverProps.setProperty("message.max.bytes", String.valueOf(50 * 1024 * 1024));
-			serverProps.setProperty("replica.fetch.max.bytes", String.valueOf(50 * 1024 * 1024));
-
-			serverProps.setProperty("zookeeper.connect", "127.0.0.1:2181");
-
-			// for CI stability, increase zookeeper session timeout
-			serverProps.setProperty("zookeeper.session.timeout.ms", String.valueOf(20000));
-
-			server = new KafkaServer(new KafkaConfig(serverProps), SystemTime$.MODULE$);
+			Properties srvProp = getServerProperties(userKafkaProps);
+			server = new KafkaServer(new KafkaConfig(srvProp), SystemTime$.MODULE$);
 			server.startup();
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+					"KafkaStream.server.started"));
 		}
 
-		// TODO: if server has started then consumer should listen to it.
-		consumer = Consumer.createJavaConsumerConnector(kafkaProperties);
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.stream.ready"));
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.consumer.starting"));
+
+		consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(userKafkaProps));
+	}
+
+	private static Properties getServerProperties(Properties userDefinedProps) throws IOException {
+		File kafkaLogDir = new File("kafka-logs");
+		FileUtils.deleteDirectory(kafkaLogDir);
+
+		Properties prop = userDefinedProps;
+		putIfAbsent(prop, "log.dir", kafkaLogDir.getAbsolutePath()); // NON-NLS
+		putIfAbsent(prop, "port", String.valueOf(9092)); // NON-NLS
+		putIfAbsent(prop, "broker.id", String.valueOf(684231)); // NON-NLS
+		putIfAbsent(prop, "host.name", "localhost"); // NON-NLS
+		putIfAbsent(prop, "log.retention.hours", String.valueOf(24)); // NON-NLS
+		putIfAbsent(prop, "log.flush.interval.messages", String.valueOf(1)); // NON-NLS
+		putIfAbsent(prop, "log.flush.interval.ms", String.valueOf(1000)); // NON-NLS
+		putIfAbsent(prop, "zookeeper.connect", "localhost:2181/tnt4j_kafka"); // NON-NLS
+		putIfAbsent(prop, "advertised.host.name", "localhost"); // NON-NLS
+		// Set the connection timeout to relatively short time (3 seconds).
+		// It is only used by the org.I0Itec.zkclient.ZKClient inside KafkaServer
+		// to block and wait for ZK connection goes into SyncConnected state.
+		//
+		// However, due to race condition described in TWILL-139 in the ZK client library used by Kafka,
+		// when ZK authentication is enabled, the ZK client may hang until connection timeout.
+		// Setting it to lower value allow the AM to retry multiple times if race happens.
+		putIfAbsent(prop, "zookeeper.connection.timeout.ms", String.valueOf(3000)); // NON-NLS
+
+		return prop;
+	}
+
+	private static boolean putIfAbsent(Properties props, String key, Object value) {
+		if (StringUtils.isEmpty(props.getProperty(key))) {
+			props.put(key, value);
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -201,44 +233,55 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	@Override
 	public Map<String, ?> getNextItem() throws Exception {
 		while (!closed.get()) {
-			if (messageBuffer == null || !messageBuffer.hasNext()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-						"KafkaStream.empty.messages.buffer"));
-				final List<kafka.consumer.KafkaStream<byte[], byte[]>> streams = consumer
-						.createMessageStreamsByFilter(new Whitelist(topicNameRegex));
-				if (CollectionUtils.isNotEmpty(streams)) {
-					kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(0);
-					messageBuffer = stream.iterator();
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-							"KafkaStream.retrieved.new.messages"), stream.size());
-				} else {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-							"KafkaStream.retrieved.no.new.messages"));
-				}
-			}
+			try {
+				if (messageBuffer == null || !messageBuffer.hasNext()) {
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+							"KafkaStream.empty.messages.buffer"));
+					Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+					topicCountMap.put(topicName, 1);
 
-			if (messageBuffer != null && messageBuffer.hasNext()) {
-				MessageAndMetadata<byte[], byte[]> msg = messageBuffer.next();
-				byte[] msgPayload = msg.message();
-				String msgData = Utils.getString(msgPayload);
+					Map<String, List<kafka.consumer.KafkaStream<byte[], byte[]>>> streams = consumer
+							.createMessageStreams(topicCountMap);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-						"KafkaStream.next.message"), msgData);
-
-				Map<String, Object> msgDataMap = new HashMap<String, Object>();
-
-				if (ArrayUtils.isNotEmpty(msgPayload)) {
-					msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
-					msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
-					msgDataMap.put(StreamsConstants.TRANSPORT_KEY, KafkaStreamConstants.TRANSPORT_KAFKA);
-
-					addStreamedBytesCount(msgPayload.length);
+					if (MapUtils.isNotEmpty(streams)) {
+						kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(topicName).get(0);
+						messageBuffer = stream.iterator();
+						logger().log(OpLevel.DEBUG,
+								StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+										"KafkaStream.retrieved.new.messages"),
+								stream.size());
+					} else {
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(
+								KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.retrieved.no.new.messages"));
+					}
 				}
 
-				return msgDataMap;
+				if (messageBuffer != null && messageBuffer.hasNext()) {
+					MessageAndMetadata<byte[], byte[]> msg = messageBuffer.next();
+					byte[] msgPayload = msg.message();
+					String msgData = Utils.getString(msgPayload);
+
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+							"KafkaStream.next.message"), msgData);
+
+					Map<String, Object> msgDataMap = new HashMap<String, Object>();
+
+					if (ArrayUtils.isNotEmpty(msgPayload)) {
+						msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());
+						msgDataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, msgPayload);
+						msgDataMap.put(StreamsConstants.TRANSPORT_KEY, KafkaStreamConstants.TRANSPORT_KAFKA);
+
+						addStreamedBytesCount(msgPayload.length);
+					}
+
+					return msgDataMap;
+				}
+			} catch (ConsumerTimeoutException e) {
+				logger().log(OpLevel.INFO, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+						"KafkaStream.retrieving.messages.timeout"));
 			}
 		}
-		LOGGER.log(OpLevel.ERROR,
+		logger().log(OpLevel.ERROR,
 				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.failed.consumer"));
 		return null;
 	}

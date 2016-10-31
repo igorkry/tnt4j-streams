@@ -50,9 +50,8 @@ public class StreamsConfigLoader {
 	private StreamsConfigData streamsCfgData;
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader, using the default
-	 * configuration file ({@value #DFLT_CFG_FILE_NAME}), which is assumed to be
-	 * in the classpath.
+	 * Constructs a new TNT4J-Streams Configuration loader, using the default configuration file
+	 * ({@value #DFLT_CFG_FILE_NAME}), which is assumed to be in the classpath.
 	 *
 	 * @throws SAXException
 	 *             if there was an error parsing the file
@@ -89,8 +88,7 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader for the file with the
-	 * specified file name.
+	 * Constructs a new TNT4J-Streams Configuration loader for the file with the specified file name.
 	 *
 	 * @param configFileName
 	 *            name of configuration file
@@ -106,8 +104,7 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader for the specified
-	 * file.
+	 * Constructs a new TNT4J-Streams Configuration loader for the specified file.
 	 *
 	 * @param configFile
 	 *            configuration file
@@ -123,8 +120,7 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader, using the specified
-	 * Reader to obtain the configuration data.
+	 * Constructs a new TNT4J-Streams Configuration loader, using the specified Reader to obtain the configuration data.
 	 *
 	 * @param configReader
 	 *            Reader to get configuration data from

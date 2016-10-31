@@ -28,41 +28,36 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.state.AbstractFileStreamStateHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * <p>
- * Base class for files lines activity stream, where each line of the file is
- * assumed to represent a single activity or event which should be recorded.
- * Stream also can read changes from defined files every "FileReadDelay"
- * property defined seconds (default is 15sec.).
+ * Base class for files lines activity stream, where each line of the file is assumed to represent a single activity or
+ * event which should be recorded. Stream also can read changes from defined files every "FileReadDelay" property
+ * defined seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
- * <li>FileName - the system-dependent file name or file name pattern defined
- * using wildcard characters '*' and '?'. (Required)</li>
- * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
- * should be polled for changes or not. If not, then files are read from oldest
- * to newest sequentially one single time. Default value - {@code false}.
+ * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.
+ * (Required)</li>
+ * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
+ * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
- * streaming should be performed from latest file entry line. If {@code false} -
- * then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}.
- * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual
- * just if 'FilePolling' property is set to {@code true}. Default value - 15sec.
- * (Optional)</li>
- * <li>RestoreState - flag {@code true}/{@code false} indicating whether files
- * read state should be stored and restored on stream restart. Default value -
- * {@code true}. (Optional)</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
+ * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual just if
+ * 'FilePolling' property is set to {@code true}. Default value - {@code true}. (Optional)</li>
+ * <li>FileReadDelay - delay is seconds between file reading iterations. Actual just if 'FilePolling' property is set to
+ * {@code true}. Default value - 15sec. (Optional)</li>
+ * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
+ * on stream restart. Default value - {@code true}. (Optional)</li>
+ * <li>RangeToStream - defines streamed data lines index range. Default value - {@code 1:}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -78,9 +73,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	protected String fileName = null;
 
 	/**
-	 * Stream attribute defining if streaming should be performed from file
-	 * position found on stream initialization. If {@code false} - then
-	 * streaming is performed from beginning of the file.
+	 * Stream attribute defining if streaming should be performed from file position found on stream initialization. If
+	 * {@code false} - then streaming is performed from beginning of the file.
 	 */
 	protected boolean startFromLatestActivity = true;
 
@@ -95,19 +89,18 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	protected AbstractFileStreamStateHandler<T> stateHandler;
 
 	/**
-	 * Stream attribute defining whether file read state should be stored and
-	 * restored on stream restart.
+	 * Stream attribute defining whether file read state should be stored and restored on stream restart.
 	 */
 	protected boolean storeState = true;
 
+	private String rangeValue = "1:"; // NON-NLS
+	private IntRange lineRange = null;
+
 	/**
 	 * Constructs a new AbstractFileLineStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 */
-	protected AbstractFileLineStream(EventSink logger) {
-		super(logger, 1);
+	protected AbstractFileLineStream() {
+		super(1);
 	}
 
 	@Override
@@ -131,6 +124,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 				pollingOn = Boolean.parseBoolean(value);
 			} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
 				storeState = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+				rangeValue = value;
 			}
 		}
 	}
@@ -152,6 +147,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
 			return storeState;
 		}
+		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			return rangeValue;
+		}
 		return super.getProperty(name);
 	}
 
@@ -168,13 +166,25 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			startFromLatestActivity = false;
 		}
 
-		logger.log(OpLevel.DEBUG,
+		lineRange = IntRange.getRange(rangeValue);
+
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.initializing.stream"),
 				fileName);
 
 		fileWatcher = createFileWatcher();
 		fileWatcher.initialize();
+	}
+
+	@Override
+	protected void start() throws Exception {
+		super.start();
+
 		fileWatcher.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	/**
@@ -184,17 +194,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	 */
 	@Override
 	public int getTotalActivities() {
-		return fileWatcher.totalLinesCount;
+		return fileWatcher == null ? super.getTotalActivities() : fileWatcher.totalLinesCount;
 	}
 
 	@Override
 	public long getTotalBytes() {
-		return fileWatcher.totalBytesCount;
+		return fileWatcher == null ? super.getTotalBytes() : fileWatcher.totalBytesCount;
 	}
 
 	@Override
 	protected void cleanup() {
-		fileWatcher.shutdown();
+		if (fileWatcher != null) {
+			fileWatcher.shutdown();
+		}
 
 		super.cleanup();
 	}
@@ -275,21 +287,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 
 		/**
-		 * Initializes file watcher thread. Picks file matching user defined
-		 * file name to monitor. If user defined to start streaming from latest
-		 * file line then count of lines in file is calculated to mark latest
-		 * activity position.
+		 * Initializes file watcher thread. Picks file matching user defined file name to monitor. If user defined to
+		 * start streaming from latest file line then count of lines in file is calculated to mark latest activity
+		 * position.
 		 *
 		 * @throws Exception
-		 *             indicates that stream is not configured properly and
-		 *             files monitoring can't initialize and continue.
+		 *             indicates that stream is not configured properly and files monitoring can't initialize and
+		 *             continue.
 		 */
 		protected abstract void initialize() throws Exception;
 
 		/**
-		 * Performs continuous file monitoring until stream thread is halted or
-		 * monitoring is interrupted. File monitoring is performed with
-		 * {@link #fileWatcherDelay} defined delays between iterations.
+		 * Performs continuous file monitoring until stream thread is halted or monitoring is interrupted. File
+		 * monitoring is performed with {@link #fileWatcherDelay} defined delays between iterations.
 		 */
 		@Override
 		public void run() {
@@ -301,8 +311,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 						shutdown();
 					} else {
 						try {
-							logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"FileLineStream.waiting"), fileWatcherDelay / 1000.0);
+							logger().log(OpLevel.DEBUG, StreamsResources
+									.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.waiting"),
+									fileWatcherDelay / 1000.0);
 							Thread.sleep(fileWatcherDelay);
 						} catch (InterruptedException exc) {
 						}
@@ -327,14 +338,16 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 * @param lnr
 		 *            line number reader
 		 * @throws IOException
-		 *             if error occurs when reading file line
+		 *             if exception occurs when reading file line
 		 */
 		protected void readNewFileLines(LineNumberReader lnr) throws IOException {
 			String line;
 			while ((line = lnr.readLine()) != null && !isInputEnded()) {
 				lineNumber = lnr.getLineNumber();
-				if (StringUtils.isNotEmpty(line)) {
+				if (StringUtils.isNotEmpty(line) && lineRange.inRange(lineNumber)) {
 					addInputToBuffer(new Line(line, lineNumber));
+				} else {
+					skipFilteredActivities();
 				}
 			}
 		}

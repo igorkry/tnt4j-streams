@@ -41,7 +41,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity}/{@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} and array of
  * child {@link com.jkoolcloud.tnt4j.core.Snapshot} entities. Primary use of this parser is to parse performance metrics
  * packages collected by system performance monitors like collectd or Nagios. If 'ChildrenField' property is not
- * defined, acts like ordinary {@link ActivityJsonParser}. This parser supports the following properties:
+ * defined, acts like ordinary {@link ActivityJsonParser}.
+ * <p>
+ * This parser supports the following properties (in addition to those supported by {@link ActivityJsonParser}):
  * <ul>
  * <li>ChildrenField - field name referencing JSON data structure containing child snapshot definitions. (Optional)</li>
  * </ul>
@@ -60,7 +62,12 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 	 * Constructs a new SnapshotsJsonParser.
 	 */
 	public SnapshotsJsonParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -68,13 +75,18 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 		if (props == null) {
 			return;
 		}
+
 		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 
 			if (ParserProperties.PROP_CHILDREN_FIELD.equalsIgnoreCase(name)) {
 				snapshotsFieldName = value;
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
 			}
 		}
 	}
@@ -105,10 +117,10 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 		ActivityInfo ai = super.parsePreparedItem(stream, dataStr, data);
 
 		if (snapshotsField != null) {
-			Object fValue = wrapValue(resolveLocatorValues(snapshotsField, stream, data));
+			Object fValue = Utils.simplifyValue(parseLocatorValues(snapshotsField, stream, data));
 
 			if (fValue == null) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"SnapshotsJsonParser.no.snapshots"), getName(), snapshotsFieldName);
 			} else {
 				Object[] snapshotsData = Utils.makeArray(fValue);
@@ -116,7 +128,7 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 				for (Object snapshotData : snapshotsData) {
 					ActivityInfo parsedItem = applySnapshotParsers(stream, snapshotData);
 					if (parsedItem == null) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"SnapshotsJsonParser.no.snapshot.parser"), snapshotData);
 					} else {
 						ai.addChild(parsedItem);

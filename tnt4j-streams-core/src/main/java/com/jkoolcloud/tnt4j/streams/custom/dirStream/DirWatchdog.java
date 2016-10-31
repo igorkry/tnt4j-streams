@@ -34,14 +34,12 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 /**
  * This class implements directory watchdog.
  * <p>
- * Monitoring is performed with defined refresh interval. Default refresh
- * interval value is 5sec, but can be overridden defining new value in
- * milliseconds scale.
+ * Monitoring is performed with defined refresh interval. Default refresh interval value is 5sec, but can be overridden
+ * defining new value in milliseconds scale.
  * <p>
  * Monitored files can be filtered defining file filter.
  * <p>
- * Notifications about file or file state changes are published over added file
- * alteration listeners.
+ * Notifications about file or file state changes are published over added file alteration listeners.
  *
  * @version $Revision: 1 $
  */
@@ -56,8 +54,8 @@ public class DirWatchdog {
 	private FileAlterationMonitor monitor = null;
 
 	/**
-	 * Constructs a new DirWatchdog. Monitoring is performed on all files
-	 * without filtering with refresh interval every 5sec.
+	 * Constructs a new DirWatchdog. Monitoring is performed on all files without filtering with refresh interval every
+	 * 5sec.
 	 *
 	 * @param dirPath
 	 *            watched directory path string
@@ -67,8 +65,7 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * Constructs a new DirWatchdog. Monitoring is performed on all files
-	 * without filtering.
+	 * Constructs a new DirWatchdog. Monitoring is performed on all files without filtering.
 	 *
 	 * @param dirPath
 	 *            watched directory path string
@@ -122,8 +119,7 @@ public class DirWatchdog {
 	}
 
 	/**
-	 * Adds defined {@link FileAlterationListener} to directory observer file
-	 * alteration listeners list.
+	 * Adds defined {@link FileAlterationListener} to directory observer file alteration listeners list.
 	 *
 	 * @param l
 	 *            {@link FileAlterationListener} to be added

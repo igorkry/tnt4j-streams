@@ -20,6 +20,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
@@ -40,6 +41,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.HexDump;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -51,7 +54,7 @@ import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 
 /**
- * General utility methods.
+ * General utility methods used by TNT4J-Streams.
  *
  * @version $Revision: 1 $
  */
@@ -67,6 +70,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
 	 */
 	public static final double DEFAULT_EPSILON = 0.000001;
+
+	/**
+	 * Constant for system dependent line separator symbol.
+	 */
+	public static final String NEW_LINE = System.getProperty("line.separator");
 
 	private Utils() {
 	}
@@ -123,7 +131,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	private static final MessageDigest MSG_DIGEST = getMD5Digester();
 
 	/**
-	 * <p>
 	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
 	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>
@@ -158,7 +165,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * <p>
 	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
 	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
 	 * <p>
@@ -230,7 +236,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (opType instanceof Number) {
 			return mapOpType(((Number) opType).intValue());
 		}
-		return mapOpType(opType.toString());
+		return mapOpType(String.valueOf(opType));
 	}
 
 	private static OpType mapOpType(String opType) {
@@ -420,6 +426,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		} else if (data instanceof byte[]) {
 			rdr = new BufferedReader(new StringReader(getString((byte[]) data)));
 			autoClose = true;
+		} else if (data instanceof ByteBuffer) {
+			ByteBuffer bb = (ByteBuffer) data;
+			rdr = new BufferedReader(new StringReader(getString(bb.array())));
+			autoClose = true;
 		} else if (data instanceof BufferedReader) {
 			rdr = (BufferedReader) data;
 		} else if (data instanceof Reader) {
@@ -447,7 +457,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
-		if (tagsData instanceof String) {
+		if (tagsData instanceof byte[]) {
+			return new String[] { "0x" + Hex.encodeHexString((byte[]) tagsData) };
+		} else if (tagsData instanceof String) {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
@@ -498,10 +510,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static String getString(byte[] strBytes) {
 		try {
-			return new String(strBytes, Charset.forName("UTF-8"));
+			return new String(strBytes, Charset.forName(UTF8));
 		} catch (UnsupportedCharsetException uce) {
 			try {
-				return new String(strBytes, "UTF-8");
+				return new String(strBytes, UTF8);
 			} catch (UnsupportedEncodingException uee) {
 				return new String(strBytes);
 			}
@@ -541,7 +553,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); // NON-NLS
+		transformer.setOutputProperty(OutputKeys.ENCODING, Utils.UTF8);
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
@@ -673,7 +685,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			builder.append(line);
-			builder.append(separateLines ? System.getProperty("line.separator") : " ");
+			builder.append(separateLines ? NEW_LINE : " ");
 		}
 
 		return builder.toString();
@@ -703,14 +715,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				String fieldName = valueObjFields[i].getName();
 				valueObjFields[i].setAccessible(true);
 
-				Object fieldValue = valueObjFields[i].get(obj);
-
-				String valueStr;
-				if (fieldValue instanceof Object[]) {
-					valueStr = Arrays.toString((Object[]) fieldValue);
-				} else {
-					valueStr = String.valueOf(fieldValue);
-				}
+				String valueStr = toString(valueObjFields[i].get(obj));
 
 				sb.append(fieldName).append("='").append(valueStr).append('\'') // NON-NLS
 						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
@@ -768,7 +773,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static void resolveVariables(Collection<String> vars, String... attrs) {
 		if (attrs != null) {
 			for (String attr : attrs) {
-				if (StringUtils.isNoneEmpty(attr)) {
+				if (StringUtils.isNotEmpty(attr)) {
 					Matcher m = VAR_PATTERN.matcher(attr);
 					while (m.find()) {
 						vars.add(m.group());
@@ -809,6 +814,18 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Checks if provided class represents an array class or is implementation of {@link Collection}.
+	 *
+	 * @param cls
+	 *            class to check
+	 * @return {@code true} if cls is implementation of {@link Collection} or represents an array class, {@code false} -
+	 *         otherwise.
+	 */
+	public static boolean isCollectionType(Class<?> cls) {
+		return cls != null && (cls.isArray() || Collection.class.isAssignableFrom(cls));
+	}
+
+	/**
 	 * Wraps provided object item seeking by index.
 	 * <p>
 	 * If obj is not {@link Collection} or {@code Object[]}, then same object is returned.
@@ -838,4 +855,167 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return obj;
 	}
 
+	/**
+	 * Returns the appropriate string representation for the specified object.
+	 *
+	 * @param value
+	 *            object to convert to string representation
+	 *
+	 * @return string representation of object
+	 */
+	public static String toString(Object value) {
+		if (value instanceof byte[]) {
+			return getString((byte[]) value);
+		}
+		if (value instanceof char[]) {
+			return new String((char[]) value);
+		}
+		if (value instanceof Object[]) {
+			return toStringDeep((Object[]) value);
+		}
+		return String.valueOf(value);
+	}
+
+	/**
+	 * Returns single object (first item) if list/array contains single item, makes an array from {@link Collection}, or
+	 * returns same value as parameter in all other cases.
+	 *
+	 * @param value
+	 *            object value to simplify
+	 * @return same value as parameter if it is not array or collection; first item of list/array if it contains single
+	 *         item; array of values if list/array contains more than one item; {@code null} if parameter object is
+	 *         {@code null} or list/array is empty
+	 */
+	public static Object simplifyValue(Object value) {
+		if (value instanceof Collection) {
+			return simplifyValue((Collection<?>) value);
+		}
+		if (value instanceof Object[]) {
+			return simplifyValue((Object[]) value);
+		}
+
+		return value;
+	}
+
+	private static Object simplifyValue(Collection<?> valuesList) {
+		if (CollectionUtils.isEmpty(valuesList)) {
+			return null;
+		}
+
+		return valuesList.size() == 1 ? valuesList.iterator().next() : valuesList.toArray();
+	}
+
+	private static Object simplifyValue(Object[] valuesArray) {
+		if (ArrayUtils.isEmpty(valuesArray)) {
+			return null;
+		}
+
+		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
+	}
+
+	/**
+	 * Returns the appropriate string representation for the specified array.
+	 *
+	 * @param a
+	 *            array to convert to string representation
+	 * @return string representation of array
+	 */
+	public static String toStringDeep(Object[] a) {
+		if (a == null)
+			return "null"; // NON-NLS
+
+		int iMax = a.length - 1;
+		if (iMax == -1)
+			return "[]"; // NON-NLS
+
+		StringBuilder b = new StringBuilder();
+		b.append('[');
+		for (int i = 0;; i++) {
+			b.append(toString(a[i]));
+			if (i == iMax)
+				return b.append(']').toString();
+			b.append(", "); // NON-NLS
+		}
+	}
+
+	/**
+	 * Makes a HEX dump string representation of provided bytes array. Does all the same as {@link #toHex(byte[], int)}
+	 * setting {@code offset} parameter to {@code 0}.
+	 *
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @return returns HEX dump representation of provided bytes array
+	 *
+	 * @see #toHex(byte[], int, int)
+	 */
+	public static String toHex(byte[] b) {
+		return toHex(b, 0);
+	}
+
+	/**
+	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
+	 * {@link #toHex(byte[], int, int)} setting {@code len} parameter to {@code 0}.
+	 * 
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @param offset
+	 *            offset at which to start dumping bytes
+	 * @return returns HEX dump representation of provided bytes array
+	 *
+	 * @see #toHex(byte[], int, int)
+	 */
+	public static String toHex(byte[] b, int offset) {
+		return toHex(b, offset, 0);
+	}
+
+	/**
+	 * Makes a HEX dump string representation of provided bytes array.
+	 *
+	 * @param b
+	 *            bytes array make HEX dump
+	 * @param offset
+	 *            offset at which to start dumping bytes
+	 * @param len
+	 *            maximum number of bytes to dump
+	 * @return returns HEX dump representation of provided bytes array
+	 */
+	public static String toHex(byte[] b, int offset, int len) {
+		if (b == null) {
+			return "<EMPTY>"; // NON-NLS
+		}
+
+		String hexStr;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(b.length * 2);
+		try {
+			if (len > 0 && len < b.length) {
+				byte[] bc = Arrays.copyOfRange(b, offset, offset + len);
+				HexDump.dump(bc, 0, bos, offset);
+			} else {
+				HexDump.dump(b, 0, bos, offset);
+			}
+			hexStr = NEW_LINE + bos.toString(UTF8);
+			bos.close();
+		} catch (Exception exc) {
+			hexStr = "HEX FAIL: " + exc.getLocalizedMessage(); // NON-NLS
+		}
+
+		return hexStr;
+	}
+
+	/**
+	 * Splits object identification path expression into path nodes array.
+	 *
+	 * @param path
+	 *            object identification path
+	 * @param nps
+	 *            path nodes separator
+	 * @return array of path nodes or {@code null} if path is empty
+	 */
+	public static String[] getNodePath(String path, String nps) {
+		if (StringUtils.isNotEmpty(path)) {
+			return StringUtils.isEmpty(nps) ? new String[] { path } : path.split(Pattern.quote(nps));
+		}
+
+		return null;
+	}
 }

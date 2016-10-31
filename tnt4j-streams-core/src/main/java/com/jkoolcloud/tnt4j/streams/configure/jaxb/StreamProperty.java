@@ -23,17 +23,14 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
- * Defines a stream configuration entity property - set of supported properties
- * is entity-specific.
+ * Defines a stream configuration entity property - set of supported properties is entity-specific.
  * 
  * 
  * <p>
  * Java class for StreamProperty complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="StreamProperty">

@@ -16,10 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
 
@@ -29,32 +28,15 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @author akausinis
  * @version 1.0
  */
-public abstract class PropertiesTestBase {
-
-	@SuppressWarnings("serial")
-	public static class PropertyList extends ArrayList<AbstractMap.SimpleEntry<String, String>> {
-		public PropertyList add(String key, String Value) {
-			add(new AbstractMap.SimpleEntry<String, String>(key, Value));
-			return this;
-		}
-
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public Collection<Entry<String, String>> build() {
-			return (Collection) this;
-		}
-	}
-
-	public static PropertyList getPropertyList() {
-		return new PropertyList();
-	}
+public final class TestUtils {
 
 	public static void testPropertyList(TNTInputStream<?, ?> stream,
 			Collection<Entry<String, String>> propertiesToTest) {
 		for (Entry<String, String> property : propertiesToTest) {
-			Object result = stream.getProperty(property.getKey());
-			assertNotNull("Property " + property.getKey() + " was NULL", result);
-
+			String name = property.getKey();
+			Object result = stream.getProperty(name);
+			assertNotNull("Property " + name + " is null", result); // NON-NLS
+			assertEquals("Property not set as expected", property.getValue(), String.valueOf(result));
 		}
 	}
-
 }

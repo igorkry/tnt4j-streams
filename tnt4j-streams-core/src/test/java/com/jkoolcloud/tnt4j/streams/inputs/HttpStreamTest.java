@@ -16,12 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
@@ -42,7 +44,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.parsers.ActivityParserTestBase;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -74,10 +75,10 @@ public class HttpStreamTest {
 
 	private static void initHttpStream() throws Exception {
 		htStream = new HttpStream();
-		htStream.setProperties(
-				ActivityParserTestBase.makeProperty(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false)));
-		htStream.setProperties(
-				ActivityParserTestBase.makeProperty(StreamProperties.PROP_PORT, String.valueOf(TEST_PORT)));
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
+		props.put(StreamProperties.PROP_PORT, String.valueOf(TEST_PORT));
+		htStream.setProperties(props.entrySet());
 		StreamThread thread = new StreamThread(htStream);
 		thread.start();
 	}
@@ -88,7 +89,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpFilePostTest() throws Exception {
+	public void httpFilePostTest() throws Exception {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		HttpClient client = builder.build();
 
@@ -101,7 +102,7 @@ public class HttpStreamTest {
 		entityBuilder.setContentType(ContentType.TEXT_PLAIN);
 
 		MultipartEntityBuilder builder2 = MultipartEntityBuilder.create();
-		builder2.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, "file.ext");
+		builder2.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, "file.ext"); // NON-NLS
 		HttpEntity multipart = builder2.build();
 
 		post.setEntity(multipart);
@@ -112,7 +113,7 @@ public class HttpStreamTest {
 	}
 
 	@Test
-	public void HttpFormPostTest() throws Exception {
+	public void httpFormPostTest() throws Exception {
 
 		FileReader fileReader = new FileReader(new File(samplesDir, "/http-form/form-data.json"));
 		Map<String, ?> jsonMap = Utils.fromJsonToMap(fileReader, false);
@@ -134,30 +135,32 @@ public class HttpStreamTest {
 		}
 		HttpResponse resp = Request.Post(makeURI()).version(HttpVersion.HTTP_1_1).bodyForm(form.build()).execute()
 				.returnResponse();
-		assertEquals(resp.getStatusLine().getStatusCode(), 200);
+		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
 	private URI makeURI() throws URISyntaxException {
-		URIBuilder uriBuilder = new URIBuilder("http://localhost");
-		uriBuilder.setHost("localhost");
+		URIBuilder uriBuilder = new URIBuilder("http://localhost"); // NON-NLS
+		uriBuilder.setHost("localhost"); // NON-NLS
 		uriBuilder.setPort(TEST_PORT);
 		URI url = uriBuilder.build();
 		return url;
 	}
 
 	@Test
-	public void HttpHtmlGetTest() throws Exception {
+	public void httpHtmlGetTest() throws Exception {
 		HttpResponse response = Request.Get(makeURI()).execute().returnResponse();
 		assertNotNull(response);
 	}
 
 	@Test
 	public void propertiesTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_PORT, TEST_PORT);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEYSTORE, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEYSTORE_PASS, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(htStream, StreamProperties.PROP_KEY_PASS, "TEST");
-
+		Map<String, String> props = new HashMap<String, String>(4);
+		props.put(StreamProperties.PROP_PORT, String.valueOf(TEST_PORT));
+		props.put(StreamProperties.PROP_KEYSTORE, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_KEYSTORE_PASS, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_KEY_PASS, "TEST"); // NON-NLS
+		htStream.setProperties(props.entrySet());
+		testPropertyList(htStream, props.entrySet());
 	}
 
 }

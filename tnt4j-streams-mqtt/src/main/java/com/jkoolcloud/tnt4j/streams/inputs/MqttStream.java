@@ -45,7 +45,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements a MQTT topics transmitted activity stream, where each message body is assumed to represent a single
  * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
  * configuration.
@@ -58,13 +57,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>ActivityTransport - activity transport definition: 'Mqtt'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
  * <li>ServerURI - Mqtt server URI. (Required)</li>
  * <li>TopicString - the topic to subscribe to, which can include wildcards. (Required)</li>
  * <li>UserName - authentication user name. (Optional)</li>
  * <li>Password - user password. (Optional)</li>
- * <li>UseSSL - flag identifying to use SSL. (Optional)</li>
+ * <li>UseSSL - flag indicating to use SSL. (Optional)</li>
  * <li>Keystore - keystore path. (Optional)</li>
  * <li>KeystorePass - keystore password. (Optional)</li>
  * </ul>
@@ -97,7 +97,12 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	 * Constructs an empty MqttStream. Requires configuration settings to set input stream source.
 	 */
 	public MqttStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -165,6 +170,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
+
 		if (StringUtils.isEmpty(serverURI)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_SERVER_URI));
@@ -176,16 +182,24 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		mqttDataReceiver = new MqttDataReceiver();
 		mqttDataReceiver.initialize();
+	}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.stream.ready"));
+	@Override
+	protected void start() throws Exception {
+		super.start();
 
 		mqttDataReceiver.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	@Override
 	protected void cleanup() {
-		mqttDataReceiver.shutdown();
+		if (mqttDataReceiver != null) {
+			mqttDataReceiver.shutdown();
+		}
 
 		super.cleanup();
 	}
@@ -269,21 +283,21 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			LOGGER.log(OpLevel.ERROR,
+			logger().log(OpLevel.ERROR,
 					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.connection.lost"),
 					cause);
 
 			try {
 				closeConnection();
 			} catch (MqttException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
 						"MqttStream.error.closing.receiver"), exc);
 			}
 
 			try {
 				initialize();
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
 						"MqttStream.error.reconnecting.receiver"), exc);
 			}
 		}
@@ -307,7 +321,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			String msgData = Utils.getString(message.getPayload());
 
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.message.received"),
 					msgData);
 

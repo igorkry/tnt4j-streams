@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 import java.util.UUID;
 
 /**
- * <p>
  * This interface defines streaming job providing unique identification.
  *
  * @version $Revision: 1 $

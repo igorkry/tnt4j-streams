@@ -36,22 +36,19 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements a zipped content activity stream, where each line of the zipped
- * file entry is assumed to represent a single activity or event which should be
- * recorded. Zip file and entry names to stream are defined using "FileName"
+ * Implements a zipped content activity stream, where each line of the zipped file entry is assumed to represent a
+ * single activity or event which should be recorded. Zip file and entry names to stream are defined using "FileName"
  * property in stream configuration.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
- * <li>FileName - defines zip file path and concrete zip file entry name or
- * entry name pattern defined using characters '*' and '?'. Definition pattern
- * is "zipFilePath!entryNameWildcard". I.e.:
+ * <li>FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters
+ * '*' and '?'. Definition pattern is "zipFilePath!entryNameWildcard". I.e.:
  * ".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt". (Required)</li>
- * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default
- * value - ZIP. (Optional)</li>
+ * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default value - ZIP. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -79,8 +76,12 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	 * Constructs a new ZipLineStream.
 	 */
 	public ZipLineStream() {
-		super(LOGGER);
 		archType = ArchiveTypes.ZIP.name();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -133,11 +134,12 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
+
 		if (StringUtils.isEmpty(zipFileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
-		LOGGER.log(OpLevel.DEBUG,
+		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZipLineStream.initializing.stream"),
 				zipFileName);
 
@@ -180,8 +182,7 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a string containing the contents of the next line in
-	 * the zip file entry.
+	 * This method returns a string containing the contents of the next line in the zip file entry.
 	 */
 	@Override
 	public String getNextItem() throws Exception {
@@ -250,7 +251,7 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 					lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zis)));
 					lineNumber = 0;
 
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ZipLineStream.opening.entry"), entryName);
 
 					return true;

@@ -23,12 +23,10 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * <p>
  * Java class for StreamType complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="StreamType">
@@ -92,10 +90,9 @@ public class StreamType {
 	 * Gets the value of the property property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the property property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the property property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -106,8 +103,7 @@ public class StreamType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link StreamProperty }
+	 * Objects of the following type(s) are allowed in the list {@link StreamProperty }
 	 * 
 	 * 
 	 */
@@ -131,10 +127,9 @@ public class StreamType {
 	 * Gets the value of the parserRef property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the parserRef property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the parserRef property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -145,8 +140,7 @@ public class StreamType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link Reference
-	 * }
+	 * Objects of the following type(s) are allowed in the list {@link Reference }
 	 * 
 	 * 
 	 */
@@ -170,10 +164,9 @@ public class StreamType {
 	 * Gets the value of the reference property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the reference property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the reference property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -184,8 +177,7 @@ public class StreamType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link Reference
-	 * }
+	 * Objects of the following type(s) are allowed in the list {@link Reference }
 	 * 
 	 * 
 	 */
@@ -275,12 +267,10 @@ public class StreamType {
 	}
 
 	/**
-	 * <p>
 	 * Java class for anonymous complex type.
 	 * 
 	 * <p>
-	 * The following schema fragment specifies the expected content contained
-	 * within this class.
+	 * The following schema fragment specifies the expected content contained within this class.
 	 * 
 	 * <pre>
 	 * &lt;complexType>
@@ -309,10 +299,9 @@ public class StreamType {
 		 * Gets the value of the property property.
 		 * 
 		 * <p>
-		 * This accessor method returns a reference to the live list, not a
-		 * snapshot. Therefore any modification you make to the returned list
-		 * will be present inside the JAXB object. This is why there is not a
-		 * <CODE>set</CODE> method for the property property.
+		 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you
+		 * make to the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE>
+		 * method for the property property.
 		 * 
 		 * <p>
 		 * For example, to add a new item, do as follows:
@@ -323,8 +312,7 @@ public class StreamType {
 		 * 
 		 * 
 		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link Property }
+		 * Objects of the following type(s) are allowed in the list {@link Property }
 		 * 
 		 * 
 		 */

@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for StreamFieldType.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -76,7 +74,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ApplName") APPL_NAME("ApplName"),
+	@XmlEnumValue("ApplName")
+	APPL_NAME("ApplName"),
 
 	/**
 	 * 
@@ -84,7 +83,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ServerName") SERVER_NAME("ServerName"),
+	@XmlEnumValue("ServerName")
+	SERVER_NAME("ServerName"),
 
 	/**
 	 * 
@@ -92,7 +92,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ServerIp") SERVER_IP("ServerIp"),
+	@XmlEnumValue("ServerIp")
+	SERVER_IP("ServerIp"),
 
 	/**
 	 * 
@@ -100,7 +101,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("EventName") EVENT_NAME("EventName"),
+	@XmlEnumValue("EventName")
+	EVENT_NAME("EventName"),
 
 	/**
 	 * 
@@ -108,7 +110,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("EventType") EVENT_TYPE("EventType"),
+	@XmlEnumValue("EventType")
+	EVENT_TYPE("EventType"),
 
 	/**
 	 * 
@@ -116,7 +119,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StartTime") START_TIME("StartTime"),
+	@XmlEnumValue("StartTime")
+	START_TIME("StartTime"),
 
 	/**
 	 * 
@@ -124,16 +128,17 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("EndTime") END_TIME("EndTime"),
+	@XmlEnumValue("EndTime")
+	END_TIME("EndTime"),
 
 	/**
 	 * 
-	 * Elapsed time of the activity in the specified units - default:
-	 * Microseconds.
+	 * Elapsed time of the activity in the specified units - default: Microseconds.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ElapsedTime") ELAPSED_TIME("ElapsedTime"),
+	@XmlEnumValue("ElapsedTime")
+	ELAPSED_TIME("ElapsedTime"),
 
 	/**
 	 * 
@@ -141,7 +146,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ProcessId") PROCESS_ID("ProcessId"),
+	@XmlEnumValue("ProcessId")
+	PROCESS_ID("ProcessId"),
 
 	/**
 	 * 
@@ -149,16 +155,17 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ThreadId") THREAD_ID("ThreadId"),
+	@XmlEnumValue("ThreadId")
+	THREAD_ID("ThreadId"),
 
 	/**
 	 * 
-	 * Indicates completion status of the activity - Value must match values in
-	 * OpCompCode enumeration.
+	 * Indicates completion status of the activity - Value must match values in OpCompCode enumeration.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("CompCode") COMP_CODE("CompCode"),
+	@XmlEnumValue("CompCode")
+	COMP_CODE("CompCode"),
 
 	/**
 	 * 
@@ -166,7 +173,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ReasonCode") REASON_CODE("ReasonCode"),
+	@XmlEnumValue("ReasonCode")
+	REASON_CODE("ReasonCode"),
 
 	/**
 	 * 
@@ -174,43 +182,45 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Exception") EXCEPTION("Exception"),
+	@XmlEnumValue("Exception")
+	EXCEPTION("Exception"),
 
 	/**
 	 * 
-	 * Indicates severity of the activity - Value can either be a label in
-	 * OperationSeverity enumeration or a numeric value.
+	 * Indicates severity of the activity - Value can either be a label in OperationSeverity enumeration or a numeric
+	 * value.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Severity") SEVERITY("Severity"),
+	@XmlEnumValue("Severity")
+	SEVERITY("Severity"),
 
 	/**
 	 * 
-	 * String defining location activity occurred at - e.g. GPS location, source
-	 * file line, etc.
+	 * String defining location activity occurred at - e.g. GPS location, source file line, etc.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Location") LOCATION("Location"),
+	@XmlEnumValue("Location")
+	LOCATION("Location"),
 
 	/**
 	 * 
-	 * Identifier used to correlate/relate activity entries to group them into
-	 * logical entities.
+	 * Identifier used to correlate/relate activity entries to group them into logical entities.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Correlator") CORRELATOR("Correlator"),
+	@XmlEnumValue("Correlator")
+	CORRELATOR("Correlator"),
 
 	/**
 	 * 
-	 * User-defined label to associate with the activity, generally for locating
-	 * activity.
+	 * User-defined label to associate with the activity, generally for locating activity.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Tag") TAG("Tag"),
+	@XmlEnumValue("Tag")
+	TAG("Tag"),
 
 	/**
 	 * 
@@ -218,7 +228,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("UserName") USER_NAME("UserName"),
+	@XmlEnumValue("UserName")
+	USER_NAME("UserName"),
 
 	/**
 	 * 
@@ -226,7 +237,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ResourceName") RESOURCE_NAME("ResourceName"),
+	@XmlEnumValue("ResourceName")
+	RESOURCE_NAME("ResourceName"),
 
 	/**
 	 * 
@@ -234,16 +246,17 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Message") MESSAGE("Message"),
+	@XmlEnumValue("Message")
+	MESSAGE("Message"),
 
 	/**
 	 * 
-	 * Identifier used to uniquely identify the data associated with this
-	 * activity.
+	 * Identifier used to uniquely identify the data associated with this activity.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("TrackingId") TRACKING_ID("TrackingId"),
+	@XmlEnumValue("TrackingId")
+	TRACKING_ID("TrackingId"),
 
 	/**
 	 * 
@@ -251,7 +264,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("MsgLength") MSG_LENGTH("MsgLength"),
+	@XmlEnumValue("MsgLength")
+	MSG_LENGTH("MsgLength"),
 
 	/**
 	 * 
@@ -259,7 +273,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("MsgMimeType") MSG_MIME_TYPE("MsgMimeType"),
+	@XmlEnumValue("MsgMimeType")
+	MSG_MIME_TYPE("MsgMimeType"),
 
 	/**
 	 * 
@@ -267,7 +282,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("MsgEncoding") MSG_ENCODING("MsgEncoding"),
+	@XmlEnumValue("MsgEncoding")
+	MSG_ENCODING("MsgEncoding"),
 
 	/**
 	 * 
@@ -275,7 +291,8 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("MsgCharSet") MSG_CHAR_SET("MsgCharSet"),
+	@XmlEnumValue("MsgCharSet")
+	MSG_CHAR_SET("MsgCharSet"),
 
 	/**
 	 * 
@@ -283,16 +300,17 @@ public enum StreamFieldType {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Category") CATEGORY("Category"),
+	@XmlEnumValue("Category")
+	CATEGORY("Category"),
 
 	/**
 	 * 
-	 * Identifier used to uniquely identify parent activity associated with this
-	 * activity.
+	 * Identifier used to uniquely identify parent activity associated with this activity.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ParentId") PARENT_ID("ParentId");
+	@XmlEnumValue("ParentId")
+	PARENT_ID("ParentId");
 	private final String value;
 
 	StreamFieldType(String v) {

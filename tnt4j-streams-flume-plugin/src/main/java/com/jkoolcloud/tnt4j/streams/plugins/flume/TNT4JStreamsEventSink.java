@@ -37,9 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Extends Apache Flume {@link AbstractSink} to deliver output events to JKool
- * Cloud service.
+ * Extends Apache Flume {@link AbstractSink} to deliver output events to JKool Cloud service.
  *
  * @version $Revision: 1 $
  */

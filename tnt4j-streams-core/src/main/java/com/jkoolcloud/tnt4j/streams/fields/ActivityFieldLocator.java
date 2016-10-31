@@ -21,20 +21,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw
@@ -46,9 +40,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class ActivityFieldLocator implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
 
-	private static final Pattern RANGE_PATTERN = Pattern.compile("(-?(\\d+)*(\\.\\d*)?)");
-	private static final String RANGE_SEPARATOR = ":"; // NON-NLS
-
 	private String type = null;
 	private String locator = null;
 	private ActivityFieldDataType dataType = ActivityFieldDataType.String;
@@ -58,7 +49,7 @@ public class ActivityFieldLocator implements Cloneable {
 	private String locale = null;
 	private String timeZone = null;
 	private Object cfgValue = null;
-	private String requiredVal = "";
+	private String requiredVal = ""; /* string to allow no value */
 	private String id = null;
 
 	private ActivityFieldLocatorType builtInType = null;
@@ -106,7 +97,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            key to use to locate raw data value - interpretation of this value depends on locator type
 	 */
 	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator) {
-		this.type = type.toString();
+		this.type = type.name();
 		this.locator = locator;
 		this.builtInType = type;
 	}
@@ -122,7 +113,13 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
+	 * Constructs a new "hidden" activity field locator that is used to format final field value made from multiple
+	 * locators values.
+	 */
+	ActivityFieldLocator() {
+	}
+
+	/**
 	 * Gets the type of this locator that indicates how to interpret the locator to find the value in the raw activity
 	 * data. This value can be one of the predefined types, or it can be a custom type.
 	 * <p>
@@ -135,7 +132,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator if it implements one of the built-in locator types.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field locator is always a specific type.
@@ -147,7 +143,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the locator to find the value of this field in the raw activity data. This is generally a numeric position
 	 * or a string label.
 	 *
@@ -158,7 +153,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Get the radix that raw data field values are interpreted in. Only relevant for numeric fields and will be ignored
 	 * by those fields to which it does not apply.
 	 *
@@ -169,7 +163,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Set the radix used to interpret the raw data field values. Only relevant for numeric fields and will be ignored
 	 * by those fields to which it does not apply.
 	 *
@@ -181,7 +174,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the data type indicating how to treat the raw data field value.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
@@ -193,7 +185,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the data type indicating how to treat the raw data field value.
 	 * <p>
 	 * Note: Some activity fields will ignore this and assume that the field value is always a specific data type.
@@ -206,7 +197,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the units represented by the raw data field value. This value can be one of the predefined units, or it can
 	 * be a custom unit type.
 	 * <p>
@@ -219,7 +209,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator's units if it implements one of the built-in units types.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -231,7 +220,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the units represented by the raw data field value. This value can be one of the predefined units, or it can
 	 * be a custom unit type.
 	 * <p>
@@ -252,7 +240,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -264,7 +251,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets locale representation string used by formatter.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -276,7 +262,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Gets the enumeration value for this locator's format if it implements one of the built-in format types.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -289,7 +274,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * <p>
 	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
@@ -329,15 +313,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Gets the required option flag indicating whether locator is required or optional.
-	 *
-	 * @return flag indicating whether locator is required or optional
-	 */
-	public String getRequired() {
-		return requiredVal;
-	}
-
-	/**
 	 * Sets the required option flag to indicator if locator is optional
 	 *
 	 * @param requiredVal
@@ -345,6 +320,34 @@ public class ActivityFieldLocator implements Cloneable {
 	 */
 	public void setRequired(String requiredVal) {
 		this.requiredVal = requiredVal;
+	}
+
+	/**
+	 * Determines whether value resolution by locator is optional.
+	 *
+	 * @return flag indicating value resolution by locator is optional
+	 */
+	public boolean isOptional() {
+		return "false".equalsIgnoreCase(requiredVal); // NON-NLS
+	}
+
+	/**
+	 * Determines whether value resolution by locator is required.
+	 *
+	 * @return flag indicating value resolution by locator is required
+	 */
+	public boolean isRequired() {
+		return "true".equalsIgnoreCase(requiredVal); // NON-NLS
+	}
+
+	/**
+	 * Determines whether value resolution by locator is required depending on stream context. For example XML/JSON
+	 * parser context may require all locators to resolve non {@code null} values by default.
+	 *
+	 * @return flag indicating value resolution by locator is required depending on stream context
+	 */
+	public boolean isDefaultRequire() {
+		return StringUtils.isEmpty(requiredVal); // NON-NLS
 	}
 
 	/**
@@ -404,7 +407,7 @@ public class ActivityFieldLocator implements Cloneable {
 
 				switch (mapType) {
 				case Range:
-					valueMap.put(getRangeKey(source), target);
+					valueMap.put(DoubleRange.getRange(source), target);
 					break;
 				case Calc:
 					valueMap.put(getCalcKey(source), target);
@@ -459,7 +462,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 *            value to format
 	 * @return value formatted based on locator definition
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs applying locator format properties to specified value
 	 */
 	public Object formatValue(Object value) throws ParseException {
 		if (cfgValue != null) {
@@ -476,9 +479,10 @@ public class ActivityFieldLocator implements Cloneable {
 		case Binary:
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
 				value = Utils.base64Decode(value.toString().getBytes());
-			} else {
-				value = builtInFormat == ActivityFieldFormatType.hexBinary ? Utils.decodeHex(value.toString())
-						: value.toString();
+			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
+				value = Utils.decodeHex(value.toString());
+			} else if (builtInFormat == ActivityFieldFormatType.string) {
+				value = value.toString().getBytes();
 			}
 			break;
 		case DateTime:
@@ -579,7 +583,6 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.timeZone = timeZone;
 			cafl.cfgValue = cfgValue;
 			cafl.requiredVal = requiredVal;
-			cafl.timeZone = timeZone;
 			cafl.id = id;
 
 			cafl.builtInType = builtInType;
@@ -596,95 +599,8 @@ public class ActivityFieldLocator implements Cloneable {
 		return null;
 	}
 
-	private static Range getRangeKey(String source) throws Exception {
-		String cs = StringUtils.trimToNull(source);
-		if (StringUtils.isEmpty(cs)) {
-			throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityFieldLocator.range.string.empty"));
-		}
-		int rCharIdx = cs.indexOf(RANGE_SEPARATOR);
-
-		String[] numStrs = new String[2];
-		int si = 0;
-		Matcher m = RANGE_PATTERN.matcher(cs);
-		while (m.find()) {
-			String g = m.group();
-			if (StringUtils.isNotEmpty(g)) {
-				numStrs[si++] = g;
-			}
-			m.end();
-		}
-
-		String fromStr = null;
-		String toStr = null;
-
-		if (rCharIdx == -1) { // no range separator symbol found - unary range
-			fromStr = numStrs.length > 0 ? numStrs[0] : null;
-			toStr = fromStr;
-		} else {
-			if (rCharIdx == 0) { // unbound low range
-				toStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else if (rCharIdx == cs.length()) { // unbound high range
-				fromStr = numStrs.length > 0 ? numStrs[0] : null;
-			} else { // bounded range
-				fromStr = numStrs.length > 0 ? numStrs[0] : null;
-				toStr = numStrs.length > 1 ? numStrs[1] : null;
-			}
-		}
-
-		Double from = StringUtils.isEmpty(fromStr) ? -Double.MAX_VALUE : NumberUtils.createDouble(fromStr);
-		Double to = StringUtils.isEmpty(toStr) ? Double.MAX_VALUE : NumberUtils.createDouble(toStr);
-
-		return new Range(from, to);
-	}
-
 	private static Calc getCalcKey(String source) throws IllegalArgumentException {
 		return new Calc(ActivityFieldMappingCalc.valueOf(source.toUpperCase()));
-	}
-
-	private static class Range {
-		private Double from;
-		private Double to;
-
-		private Range(Double from, Double to) {
-			this.from = from;
-			this.to = to;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof Number) {
-				return inRange(((Number) obj).doubleValue());
-			}
-
-			if (obj instanceof String) {
-				try {
-					return inRange(NumberUtils.createDouble((String) obj));
-				} catch (NumberFormatException exc) {
-				}
-			}
-
-			return super.equals(obj);
-		}
-
-		private boolean inRange(Double num) {
-			int compareMin = from.compareTo(num);
-			int compareMax = to.compareTo(num);
-
-			return compareMin <= 0 && compareMax >= 0;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(from) + RANGE_SEPARATOR + String.valueOf(to);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = from.hashCode();
-			result = 31 * result + to.hashCode();
-			return result;
-		}
 	}
 
 	private static class Calc {
@@ -702,7 +618,7 @@ public class ActivityFieldLocator implements Cloneable {
 
 			if (obj instanceof String) {
 				try {
-					return match(NumberUtils.createDouble((String) obj));
+					return match(Double.parseDouble((String) obj));
 				} catch (NumberFormatException exc) {
 				}
 			}

@@ -36,7 +36,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * This class extends the basic activity XML parser for handling data specific to messaging operations. It provides
  * additional transformations of the raw activity data collected for specific fields.
  * <p>
@@ -53,7 +52,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class MessageActivityXmlParser extends ActivityXmlParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MessageActivityXmlParser.class);
 	/**
-	 * Contains the field separator (set by {@code SignatureDelim} property) - Default: ","
+	 * Contains the field separator (set by {@code SignatureDelim} property) - Default:
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
 	 */
 	protected String sigDelim = DEFAULT_DELIM;
 
@@ -67,17 +67,27 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	}
 
 	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
+	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
+
 		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					sigDelim = value;
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
 				}
 			}
 		}
@@ -167,7 +177,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 					}
 					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
 							msgPutDate, msgPutTime);
-					LOGGER.log(OpLevel.TRACE,
+					logger().log(OpLevel.TRACE,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"MessageActivityXmlParser.msg.signature"),
 							value, msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),

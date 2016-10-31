@@ -1,0 +1,26 @@
+{
+    "name": "tnt4j-njstrace-plugin_blocked_event_loop_sample",
+    "version": "1.0.0",
+    "description": "njstrace blocked event loop sample for TNT4J-Streams",
+    "main": "index.js",
+    "dependencies": {
+        "njstrace": "file:./njstrace",
+        "njstrace-timed-process": "file:./njstrace-timed-process",
+        "njstrace-tnt4j-formatter": "file:./njstrace-tnt4j-formatter"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nastel/tnt4j-streams.git"
+    },
+    "author": "JKool LLC",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Nastel/tnt4j-streams/issues"
+    },
+    "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
+}

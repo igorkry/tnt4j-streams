@@ -24,7 +24,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
@@ -39,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  *
  * @version $Revision: 1 $
  *
- * @see StreamsConfigLoader
+ * @see com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class WsConfigParserHandler extends ConfigParserHandler {

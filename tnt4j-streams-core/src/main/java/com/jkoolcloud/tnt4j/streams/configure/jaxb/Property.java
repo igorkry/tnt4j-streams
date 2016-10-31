@@ -23,7 +23,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
  * Defines a generic configuration entity property.
  * 
  * 
@@ -31,8 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  * Java class for Property complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="Property">

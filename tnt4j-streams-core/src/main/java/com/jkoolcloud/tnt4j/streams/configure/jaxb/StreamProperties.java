@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for StreamProperties.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -75,12 +73,12 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property value represents an initial, base, or default date, time, or
-	 * date/time.
+	 * Property value represents an initial, base, or default date, time, or date/time.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("DateTime") DATE_TIME("DateTime"),
+	@XmlEnumValue("DateTime")
+	DATE_TIME("DateTime"),
 
 	/**
 	 * 
@@ -88,7 +86,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("FileName") FILE_NAME("FileName"),
+	@XmlEnumValue("FileName")
+	FILE_NAME("FileName"),
 
 	/**
 	 * 
@@ -96,16 +95,17 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Host") HOST("Host"),
+	@XmlEnumValue("Host")
+	HOST("Host"),
 
 	/**
 	 * 
-	 * Property value is a connection port number, interpreted based on the
-	 * context in which it is used.
+	 * Property value is a connection port number, interpreted based on the context in which it is used.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Port") PORT("Port"),
+	@XmlEnumValue("Port")
+	PORT("Port"),
 
 	/**
 	 * 
@@ -113,7 +113,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("QueueManager") QUEUE_MANAGER("QueueManager"),
+	@XmlEnumValue("QueueManager")
+	QUEUE_MANAGER("QueueManager"),
 
 	/**
 	 * 
@@ -121,7 +122,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Queue") QUEUE("Queue"),
+	@XmlEnumValue("Queue")
+	QUEUE("Queue"),
 
 	/**
 	 * 
@@ -129,7 +131,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Topic") TOPIC("Topic"),
+	@XmlEnumValue("Topic")
+	TOPIC("Topic"),
 
 	/**
 	 * 
@@ -137,7 +140,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Subscription") SUBSCRIPTION("Subscription"),
+	@XmlEnumValue("Subscription")
+	SUBSCRIPTION("Subscription"),
 
 	/**
 	 * 
@@ -145,7 +149,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("TopicString") TOPIC_STRING("TopicString"),
+	@XmlEnumValue("TopicString")
+	TOPIC_STRING("TopicString"),
 
 	/**
 	 * 
@@ -153,25 +158,27 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Channel") CHANNEL("Channel"),
+	@XmlEnumValue("Channel")
+	CHANNEL("Channel"),
 
 	/**
 	 * 
-	 * Property identifies whether stream should strip RAW activity data (i.e.
-	 * WMQ message) headers.
+	 * Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StripHeaders") STRIP_HEADERS("StripHeaders"),
+	@XmlEnumValue("StripHeaders")
+	STRIP_HEADERS("StripHeaders"),
 
 	/**
 	 * 
-	 * Property identifies that streaming should be performed from latest log
-	 * entry. If 'false' - then latest log file is streamed from beginning.
+	 * Property identifies that streaming should be performed from latest log entry. If 'false' - then latest log file
+	 * is streamed from beginning.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StartFromLatest") START_FROM_LATEST("StartFromLatest"),
+	@XmlEnumValue("StartFromLatest")
+	START_FROM_LATEST("StartFromLatest"),
 
 	/**
 	 * 
@@ -179,26 +186,28 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("FileReadDelay") FILE_READ_DELAY("FileReadDelay"),
+	@XmlEnumValue("FileReadDelay")
+	FILE_READ_DELAY("FileReadDelay"),
 
 	/**
 	 * 
-	 * Property identifies whether stream should halt if none of the parsers can
-	 * parse activity RAW data. If set to 'false' - puts log entry and
-	 * continues.
+	 * Property identifies whether stream should halt if none of the parsers can parse activity RAW data. If set to
+	 * 'false' - puts log entry and continues.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("HaltIfNoParser") HALT_IF_NO_PARSER("HaltIfNoParser"),
+	@XmlEnumValue("HaltIfNoParser")
+	HALT_IF_NO_PARSER("HaltIfNoParser"),
 
 	/**
 	 * 
-	 * Property identifies identifies whether stream should use executor service
-	 * to process activities data items asynchronously or not.
+	 * Property identifies identifies whether stream should use executor service to process activities data items
+	 * asynchronously or not.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("UseExecutors") USE_EXECUTORS("UseExecutors"),
+	@XmlEnumValue("UseExecutors")
+	USE_EXECUTORS("UseExecutors"),
 
 	/**
 	 * 
@@ -206,34 +215,36 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ExecutorThreadsQuantity") EXECUTOR_THREADS_QUANTITY("ExecutorThreadsQuantity"),
+	@XmlEnumValue("ExecutorThreadsQuantity")
+	EXECUTOR_THREADS_QUANTITY("ExecutorThreadsQuantity"),
 
 	/**
 	 * 
-	 * Property defines time to wait (in seconds) for a executor service to
-	 * terminate.
+	 * Property defines time to wait (in seconds) for a executor service to terminate.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ExecutorRejectedTaskOfferTimeout") EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT("ExecutorRejectedTaskOfferTimeout"),
+	@XmlEnumValue("ExecutorRejectedTaskOfferTimeout")
+	EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT("ExecutorRejectedTaskOfferTimeout"),
 
 	/**
 	 * 
-	 * Property defines time to wait (in seconds) for a task to be inserted into
-	 * bounded queue if max. queue size is reached.
+	 * Property defines time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is
+	 * reached.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ExecutorsTerminationTimeout") EXECUTORS_TERMINATION_TIMEOUT("ExecutorsTerminationTimeout"),
+	@XmlEnumValue("ExecutorsTerminationTimeout")
+	EXECUTORS_TERMINATION_TIMEOUT("ExecutorsTerminationTimeout"),
 
 	/**
 	 * 
-	 * Property identifies whether executor service should use bounded tasks
-	 * queue model.
+	 * Property identifies whether executor service should use bounded tasks queue model.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ExecutorsBoundedModel") EXECUTORS_BOUNDED_MODEL("ExecutorsBoundedModel"),
+	@XmlEnumValue("ExecutorsBoundedModel")
+	EXECUTORS_BOUNDED_MODEL("ExecutorsBoundedModel"),
 
 	/**
 	 * 
@@ -241,7 +252,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Keystore") KEYSTORE("Keystore"),
+	@XmlEnumValue("Keystore")
+	KEYSTORE("Keystore"),
 
 	/**
 	 * 
@@ -249,7 +261,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("KeystorePass") KEYSTORE_PASS("KeystorePass"),
+	@XmlEnumValue("KeystorePass")
+	KEYSTORE_PASS("KeystorePass"),
 
 	/**
 	 * 
@@ -257,7 +270,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("KeyPass") KEY_PASS("KeyPass"),
+	@XmlEnumValue("KeyPass")
+	KEY_PASS("KeyPass"),
 
 	/**
 	 * 
@@ -265,7 +279,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("JNDIFactory") JNDI_FACTORY("JNDIFactory"),
+	@XmlEnumValue("JNDIFactory")
+	JNDI_FACTORY("JNDIFactory"),
 
 	/**
 	 * 
@@ -273,7 +288,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("JMSConnFactory") JMS_CONN_FACTORY("JMSConnFactory"),
+	@XmlEnumValue("JMSConnFactory")
+	JMS_CONN_FACTORY("JMSConnFactory"),
 
 	/**
 	 * 
@@ -281,7 +297,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ServerURI") SERVER_URI("ServerURI"),
+	@XmlEnumValue("ServerURI")
+	SERVER_URI("ServerURI"),
 
 	/**
 	 * 
@@ -289,7 +306,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("UserName") USER_NAME("UserName"),
+	@XmlEnumValue("UserName")
+	USER_NAME("UserName"),
 
 	/**
 	 * 
@@ -297,7 +315,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Password") PASSWORD("Password"),
+	@XmlEnumValue("Password")
+	PASSWORD("Password"),
 
 	/**
 	 * 
@@ -305,16 +324,17 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("UseSSL") USE_SSL("UseSSL"),
+	@XmlEnumValue("UseSSL")
+	USE_SSL("UseSSL"),
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (i.e. JSON) package is
-	 * single line.
+	 * Property indicates that complete activity RAW data (i.e. JSON) package is single line.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ReadLines") READ_LINES("ReadLines"),
+	@XmlEnumValue("ReadLines")
+	READ_LINES("ReadLines"),
 
 	/**
 	 * 
@@ -322,7 +342,8 @@ public enum StreamProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("RestartOnInputClose") RESTART_ON_INPUT_CLOSE("RestartOnInputClose");
+	@XmlEnumValue("RestartOnInputClose")
+	RESTART_ON_INPUT_CLOSE("RestartOnInputClose");
 	private final String value;
 
 	StreamProperties(String v) {

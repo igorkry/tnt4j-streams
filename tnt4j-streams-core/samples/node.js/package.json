@@ -1,23 +1,24 @@
 {
-  "name": "tnt4j-njstrace-plugin",
-  "version": "1.0.0",
-  "description": "njstrace formatter for TNT4J-Streams",
-  "main": "njsTraceFormatter-tnt4j.js",
-  "dependencies": {
-    "njstrace": "0.0.2"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Nastel/tnt4j-streams.git"
-  },
-  "author": "JKool LLC",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/Nastel/tnt4j-streams/issues"
-  },
-  "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
+    "name": "tnt4j-njstrace-plugin",
+    "version": "1.0.0",
+    "description": "njstrace formatter for TNT4J-Streams",
+    "main": "njsTraceFormatter-tnt4j.js",
+    "dependencies": {
+        "njstrace": "^0.0.2",
+        "request": "^2.74.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nastel/tnt4j-streams.git"
+    },
+    "author": "JKool LLC",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Nastel/tnt4j-streams/issues"
+    },
+    "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
 }

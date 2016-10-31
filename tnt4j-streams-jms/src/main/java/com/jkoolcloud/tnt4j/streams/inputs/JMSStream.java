@@ -36,21 +36,17 @@ import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
+ * Implements a JMS message transported activity stream, where each JMS message payload data carried data is assumed to
+ * represent a single activity or event which should be recorded.
  * <p>
- * Implements a JMS message transported activity stream, where each JMS message
- * payload data carried data is assumed to represent a single activity or event
- * which should be recorded.
+ * This activity stream requires parsers that can support JMS {@link Message} data.
  * <p>
- * This activity stream requires parsers that can support JMS {@link Message}
- * data.
- * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
  * <li>ServerURI - JMS server URL. (Required)</li>
- * <li>Queue - queue destination name. (Required - just one of 'Queue' or
- * 'Topic')</li>
- * <li>Topic - topic destination name. (Required - just one of 'Queue' or
- * 'Topic')</li>
+ * <li>Queue - queue destination name. (Required - just one of 'Queue' or 'Topic')</li>
+ * <li>Topic - topic destination name. (Required - just one of 'Queue' or 'Topic')</li>
  * <li>JNDIFactory - JNDI context factory name. (Required)</li>
  * <li>JMSConnFactory - JMS connection factory name. (Required)</li>
  * </ul>
@@ -72,11 +68,15 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	private JMSDataReceiver jmsDataReceiver;
 
 	/**
-	 * Constructs an empty JMSStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs an empty JMSStream. Requires configuration settings to set input stream source.
 	 */
 	public JMSStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -116,14 +116,14 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 			} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(topicName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				queueName = value;
 			} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(queueName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 				}
 				topicName = value;
@@ -158,16 +158,24 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		Context ic = new InitialContext(env);
 
 		jmsDataReceiver.initialize(ic, StringUtils.isEmpty(queueName) ? topicName : queueName, jmsConnFactory);
+	}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, "JMSStream.stream.ready"));
+	@Override
+	protected void start() throws Exception {
+		super.start();
 
 		jmsDataReceiver.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	@Override
 	protected void cleanup() {
-		jmsDataReceiver.shutdown();
+		if (jmsDataReceiver != null) {
+			jmsDataReceiver.shutdown();
+		}
 
 		super.cleanup();
 	}

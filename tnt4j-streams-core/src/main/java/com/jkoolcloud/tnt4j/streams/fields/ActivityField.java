@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -39,11 +40,14 @@ public class ActivityField {
 	private static final String FIELD_DYNAMIC_ATTR_START_TOKEN = "${"; // NON-NLS
 	private static final String FIELD_DYNAMIC_ATTR_END_TOKEN = "}"; // NON-NLS
 
+	/**
+	 * Constant for default delimiter symbol used to delimit multiple field values.
+	 */
+	public static final String DEFAULT_FIELD_VALUES_DELIM = ",";
+
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
-	private String format = null;
-	private String locale = null;
-	private String separator = "";
+	private String separator = DEFAULT_FIELD_VALUES_DELIM;
 	private String reqValue = ""; /* string to allow no value */
 	private Collection<ActivityParser> stackedParsers;
 	private boolean transparent = false;
@@ -51,11 +55,14 @@ public class ActivityField {
 	private String valueType = null;
 	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
 
+	private ActivityFieldLocator groupLocator;
+
 	/**
 	 * Constructs a new activity field entry.
 	 *
 	 * @param fieldTypeName
 	 *            name of activity field type
+	 *
 	 * @throws IllegalArgumentException
 	 *             if field type name is {@code null} or empty
 	 */
@@ -74,6 +81,7 @@ public class ActivityField {
 	 *            name of activity field type
 	 * @param dataType
 	 *            type of field data type
+	 *
 	 * @throws NullPointerException
 	 *             if field type is {@code null}
 	 */
@@ -143,6 +151,7 @@ public class ActivityField {
 	 *
 	 * @param locator
 	 *            the locator to add
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField addLocator(ActivityFieldLocator locator) {
@@ -182,6 +191,45 @@ public class ActivityField {
 	}
 
 	/**
+	 * TODO
+	 *
+	 * @param radix
+	 * @param reqVal
+	 * @param dataType
+	 * @param units
+	 * @param format
+	 * @param locale
+	 * @param timeZone
+	 */
+	public void setGroupLocator(int radix, String reqVal, ActivityFieldDataType dataType, String units, String format,
+			String locale, String timeZone) {
+		groupLocator = new ActivityFieldLocator();
+		groupLocator.setRadix(radix);
+		groupLocator.setRequired(reqVal);
+		if (dataType != null) {
+			groupLocator.setDataType(dataType);
+		}
+		if (StringUtils.isNotEmpty(units)) {
+			groupLocator.setUnits(units);
+		}
+		if (StringUtils.isNotEmpty(format)) {
+			groupLocator.setFormat(format, locale);
+		}
+		if (StringUtils.isNotEmpty(timeZone)) {
+			groupLocator.setTimeZone(timeZone);
+		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public ActivityFieldLocator getGroupLocator() {
+		return groupLocator;
+	}
+
+	/**
 	 * Gets the string to insert between values when concatenating multiple raw activity values into the converted value
 	 * for this field.
 	 *
@@ -197,6 +245,7 @@ public class ActivityField {
 	 *
 	 * @param locatorSep
 	 *            the string to use to separate raw values
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField setSeparator(String locatorSep) {
@@ -206,75 +255,11 @@ public class ActivityField {
 	}
 
 	/**
-	 * <p>
-	 * Gets the format string defining how to interpret the raw data field value.
-	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @return the format string for interpreting raw data value
-	 */
-	public String getFormat() {
-		return format;
-	}
-
-	/**
-	 * <p>
-	 * Sets the format string defining how to interpret the raw data field value.
-	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @param format
-	 *            the format string for interpreting raw data value
-	 * @return instance of this activity field
-	 */
-	public ActivityField setFormat(String format) {
-		this.format = format;
-
-		return this;
-	}
-
-	/**
-	 * <p>
-	 * Gets the locale representation string used by formatter.
-	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @return the locale representation string used by formatter
-	 */
-	public String getLocale() {
-		return locale;
-	}
-
-	/**
-	 * <p>
-	 * Sets the locale representation string used by formatter.
-	 * <p>
-	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
-	 *
-	 * @param locale
-	 *            the locale representation string used by formatter
-	 * @return instance of this activity field
-	 */
-	public ActivityField setLocale(String locale) {
-		this.locale = locale;
-
-		return this;
-	}
-
-	/**
-	 * Gets the required flag indicating whether field is required or optional.
-	 *
-	 * @return flag indicating whether field is required or optional
-	 */
-	public String getRequired() {
-		return reqValue;
-	}
-
-	/**
 	 * Sets the required flag indicates where field is required or optional.
 	 *
 	 * @param reqValue
 	 *            string representing flag value
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField setRequired(String reqValue) {
@@ -284,8 +269,17 @@ public class ActivityField {
 	}
 
 	/**
+	 * Determines whether field value is optional for activity.
+	 *
+	 * @return flag indicating field value is optional for activity.
+	 */
+	public boolean isOptional() {
+		return "false".equalsIgnoreCase(reqValue); // NON-NLS
+	}
+
+	/**
 	 * Gets field value type.
-	 * 
+	 *
 	 * @return string representing field value type
 	 */
 	public String getValueType() {
@@ -297,6 +291,7 @@ public class ActivityField {
 	 *
 	 * @param valueType
 	 *            string representing field value type
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField setValueType(String valueType) {
@@ -315,10 +310,12 @@ public class ActivityField {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null || getClass() != obj.getClass())
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
+		}
 
 		ActivityField that = (ActivityField) obj;
 
@@ -350,6 +347,7 @@ public class ActivityField {
 	 *
 	 * @param parser
 	 *            the stacked parser to add
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField addStackedParser(ActivityParser parser) {
@@ -387,6 +385,7 @@ public class ActivityField {
 	 *
 	 * @param transparent
 	 *            flag indicating whether field value has to be added to activity info data package
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField setTransparent(boolean transparent) {
@@ -398,7 +397,7 @@ public class ActivityField {
 	/**
 	 * Gets the splitCollection flag indicating whether resolved field value collection (list/array) has to be split
 	 * into separate fields of activity info data package.
-	 * 
+	 *
 	 * @return flag indicating whether resolved field value collection (list/array) has to be split into separate fields
 	 *         of activity info data package
 	 */
@@ -413,6 +412,7 @@ public class ActivityField {
 	 * @param splitCollection
 	 *            flag indicating whether resolved field value collection (list/array) has to be split into separate
 	 *            fields of activity info data package
+	 *
 	 * @return instance of this activity field
 	 */
 	public ActivityField setSplitCollection(boolean splitCollection) {
@@ -450,9 +450,10 @@ public class ActivityField {
 
 	/**
 	 * Checks if any of attribute values from set contains variable expression.
-	 * 
+	 *
 	 * @param attrValues
 	 *            set of attribute values to check
+	 *
 	 * @return {@code true} if value of any attribute from set contains variable expression, {@code false} - otherwise
 	 */
 	public static boolean hasDynamicAttrs(String... attrValues) {
@@ -469,9 +470,10 @@ public class ActivityField {
 
 	/**
 	 * Checks if attribute value string contains variable expression.
-	 * 
+	 *
 	 * @param attrValue
 	 *            attribute value
+	 *
 	 * @return {@code true} if attribute value string contains variable expression, {@code false} - otherwise
 	 */
 	public static boolean isDynamicAttr(String attrValue) {
@@ -480,9 +482,10 @@ public class ActivityField {
 
 	/**
 	 * Checks if dynamic locators map contains entry keyed by identifier variable.
-	 * 
+	 *
 	 * @param dLocIdVar
 	 *            dynamic locator identifier variable
+	 *
 	 * @return {@code true} if dynamic locators map contains entry keyed by identifier variable, {@code false} -
 	 *         otherwise
 	 */
@@ -498,13 +501,12 @@ public class ActivityField {
 	 *            dynamic locators resolved values map
 	 * @param valueIndex
 	 *            index of value in collection
+	 *
 	 * @return temporary field instance
 	 */
 	public ActivityField createTempField(Map<String, Object> dValues, int valueIndex) {
 		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
-		tField.locators = locators;
-		tField.format = format;
-		tField.locale = locale;
+		tField.locators = getTempFieldLocators(locators, valueIndex);
 		tField.separator = separator;
 		tField.reqValue = reqValue;
 		tField.stackedParsers = stackedParsers;
@@ -526,5 +528,18 @@ public class ActivityField {
 		}
 
 		return tAttr;
+	}
+
+	private static List<ActivityFieldLocator> getTempFieldLocators(List<ActivityFieldLocator> locators, int index) {
+		if (CollectionUtils.isEmpty(locators) || locators.size() == 1) {
+			return locators;
+		}
+
+		List<ActivityFieldLocator> fLocators = new ArrayList<ActivityFieldLocator>(1);
+		if (index >= 0 && index < locators.size()) {
+			fLocators.add(locators.get(index));
+		}
+
+		return fLocators;
 	}
 }

@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +47,9 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements a Http requests transmitted activity stream, where each request body is assumed to represent:
  * <ul>
  * <li>a single activity event sent as form data (parameters keys/values set)</li>
@@ -65,10 +64,11 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>ActivityTransport - activity transport definition: 'Http'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
  * <ul>
  * <li>Port - port number to run Http server. (Optional - default 8080 used if not defined)</li>
- * <li>UseSSL - flag identifying to use SSL. (Optional)</li>
+ * <li>UseSSL - flag indicating to use SSL. (Optional)</li>
  * <li>Keystore - keystore path. (Optional)</li>
  * <li>KeystorePass - keystore password. (Optional)</li>
  * <li>KeyPass - key password. (Optional)</li>
@@ -102,7 +102,12 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	 * Constructs an empty HttpStream. Requires configuration settings to set input stream source.
 	 */
 	public HttpStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -156,16 +161,24 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		requestHandler = new HttpStreamRequestHandler();
 		requestHandler.initialize();
+	}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "HttpStream.stream.ready"));
+	@Override
+	protected void start() throws Exception {
+		super.start();
 
 		requestHandler.start();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
 	}
 
 	@Override
 	protected void cleanup() {
-		requestHandler.shutdown();
+		if (requestHandler != null) {
+			requestHandler.shutdown();
+		}
 
 		super.cleanup();
 	}
@@ -249,7 +262,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				try {
 					server.start();
 				} catch (IOException exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"HttpStream.could.not.receive.data"), exc);
 					shutdown();
 				}
@@ -303,7 +316,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"HttpStream.bad.http.request");
 				response.setEntity(createHtmlStringEntity(msg));
-				LOGGER.log(OpLevel.DEBUG, msg);
+				logger().log(OpLevel.DEBUG, msg);
 			} else {
 				HttpEntity reqEntity = ((HttpEntityEnclosingRequest) request).getEntity();
 				boolean activityAvailable = false;
@@ -337,26 +350,26 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"HttpStream.no.activity");
 					response.setEntity(createHtmlStringEntity(msg));
-					LOGGER.log(OpLevel.DEBUG, msg);
+					logger().log(OpLevel.DEBUG, msg);
 				} else if (!added) {
 					response.setStatusCode(HttpStatus.SC_INSUFFICIENT_STORAGE);
 					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"HttpStream.activities.buffer.size.limit");
 					response.setEntity(createHtmlStringEntity(msg));
-					LOGGER.log(OpLevel.WARNING, msg);
+					logger().log(OpLevel.WARNING, msg);
 				} else {
 					response.setStatusCode(HttpStatus.SC_OK);
 					String msg = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "HttpStream.ok");
 					response.setEntity(createHtmlStringEntity(msg));
-					LOGGER.log(OpLevel.DEBUG, msg);
+					logger().log(OpLevel.DEBUG, msg);
 				}
 
 			}
 		}
 
 		private StringEntity createHtmlStringEntity(String msg) {
-			StringEntity entity = new StringEntity(MessageFormat.format(HTML_MSG_PATTERN, msg),
-					ContentType.create("text/html", "UTF-8")); // NON-NLS
+			StringEntity entity = new StringEntity(Utils.format(HTML_MSG_PATTERN, msg),
+					ContentType.create("text/html", Utils.UTF8));
 
 			return entity;
 		}

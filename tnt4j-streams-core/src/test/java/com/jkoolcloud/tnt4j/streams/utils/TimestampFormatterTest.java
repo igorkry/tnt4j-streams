@@ -57,6 +57,13 @@ public class TimestampFormatterTest {
 		assertNotNull(formatter.parse(date.getTime()));
 		// formatter.setPattern("# ", Locale.FRENCH.toString()); TODO
 		// assertNotNull(formatter.parse(String.valueOf(date.getTime())));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.DAYS, 4.70));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.HOURS, 14.25));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.MINUTES, 37.35));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.SECONDS, 1469715537.366));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.MILLISECONDS, 1469715537366.751));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.MICROSECONDS, 15537366751.124));
+		assertNotNull(TimestampFormatter.parse(TimeUnit.NANOSECONDS, 377366751124.642));
 	}
 
 	@Test(expected = ParseException.class)
@@ -76,5 +83,38 @@ public class TimestampFormatterTest {
 		final String timezone = TimeZone.getDefault().toString();
 		formatter.setTimeZone(timezone);
 		assertEquals(timezone, formatter.getTimeZone());
+	}
+
+	@Test
+	public void testTimeUnitsShift() {
+		TimeUnit tu = TimestampFormatter.shiftDown(TimeUnit.DAYS);
+		assertEquals(TimeUnit.HOURS, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.MINUTES, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.SECONDS, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.MILLISECONDS, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.MICROSECONDS, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.NANOSECONDS, tu);
+		tu = TimestampFormatter.shiftDown(tu);
+		assertEquals(TimeUnit.NANOSECONDS, tu);
+
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.MICROSECONDS, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.MILLISECONDS, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.SECONDS, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.MINUTES, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.HOURS, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.DAYS, tu);
+		tu = TimestampFormatter.shiftUp(tu);
+		assertEquals(TimeUnit.DAYS, tu);
 	}
 }

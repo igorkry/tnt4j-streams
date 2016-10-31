@@ -46,13 +46,17 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 	 *            file system
 	 */
 	HdfsFileStreamStateHandler(FileSystem fs) {
-		super(LOGGER);
 		this.fs = fs;
 	}
 
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
 	/**
-	 * Constructs a new HdfsFileStreamStateHandler. Performs search of persisted
-	 * streaming state and loads it if such is available.
+	 * Constructs a new HdfsFileStreamStateHandler. Performs search of persisted streaming state and loads it if such is
+	 * available.
 	 *
 	 * @param activityFiles
 	 *            files processed by stream
@@ -82,7 +86,7 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 			FileStatus fStatus = file == null ? null : fs.getFileStatus(file);
 			return fStatus != null && fStatus.isFile();
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.error"), exc);
 			return false;
 		}

@@ -52,7 +52,7 @@ public class ActivityFieldLocatorTest {
 			locator = new ActivityFieldLocator(type, "1");
 			assertNotNull(locator);
 			assertEquals(type, locator.getBuiltInType());
-			assertEquals(locator.getLocator(), "1");
+			assertEquals("1", locator.getLocator());
 		}
 	}
 

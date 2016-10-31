@@ -16,57 +16,60 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
+
 import java.io.File;
-import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-public class RedirectStreamTest extends PropertiesTestBase {
+public class RedirectTNT4JStreamTest {
 
-	RedirectStream rs;
+	RedirectTNT4JStream rs;
 
 	@Before
 	public void prepareTests() {
-		rs = new RedirectStream();
+		rs = new RedirectTNT4JStream();
 	}
 
 	@Test
 	public void setPropertiesFileTest() throws Exception {
 		final File tempFile = File.createTempFile("Test", ".test");
 		tempFile.deleteOnExit();
-		final Collection<Entry<String, String>> properties = getPropertyList()
-				.add(StreamProperties.PROP_FILENAME, tempFile.getAbsolutePath())
-				.add(StreamProperties.PROP_BUFFER_SIZE, "55").add(StreamProperties.PROP_OFFER_TIMEOUT, "10").build();
-		rs.setProperties(properties);
-		testPropertyList(rs, properties);
-		rs.initialize();
+		Map<String, String> props = new HashMap<String, String>(3);
+		props.put(StreamProperties.PROP_FILENAME, tempFile.getAbsolutePath());
+		props.put(StreamProperties.PROP_BUFFER_SIZE, String.valueOf(55));
+		props.put(StreamProperties.PROP_OFFER_TIMEOUT, String.valueOf(10));
+		rs.setProperties(props.entrySet());
+		testPropertyList(rs, props.entrySet());
+		rs.startStream();
 	}
 
 	@Test
 	public void setPropertiesSocketTest() throws Exception {
-
-		final Collection<Entry<String, String>> properties = getPropertyList().add(StreamProperties.PROP_PORT, "9010")
-				.build();
-		rs.setProperties(properties);
-		testPropertyList(rs, properties);
-		rs.initialize();
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(StreamProperties.PROP_PORT, String.valueOf(9010));
+		rs.setProperties(props.entrySet());
+		testPropertyList(rs, props.entrySet());
+		rs.startStream();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void setPropertiesSetShouldFailTest() throws Exception {
-		final Collection<Entry<String, String>> properties = getPropertyList()
-				.add(StreamProperties.PROP_FILENAME, "TestFile").add(StreamProperties.PROP_RESTART_ON_CLOSE, "true")
-				.add(StreamProperties.PROP_PORT, "9009").build();
-		rs.setProperties(properties);
+		Map<String, String> props = new HashMap<String, String>(3);
+		props.put(StreamProperties.PROP_FILENAME, "TestFile"); // NON-NLS
+		props.put(StreamProperties.PROP_RESTART_ON_CLOSE, String.valueOf(true));
+		props.put(StreamProperties.PROP_PORT, String.valueOf(9009));
+
+		rs.setProperties(props.entrySet());
 	}
 
 }

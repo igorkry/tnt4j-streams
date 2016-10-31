@@ -23,7 +23,6 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * 
  * Defines TNT4J-Streams data source configuration.
  * 
  * 
@@ -31,8 +30,7 @@ import javax.xml.bind.annotation.*;
  * Java class for anonymous complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -70,10 +68,9 @@ public class TntDataSource {
 	 * Gets the value of the parser property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the parser property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the parser property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -84,8 +81,7 @@ public class TntDataSource {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link ParserType }
+	 * Objects of the following type(s) are allowed in the list {@link ParserType }
 	 * 
 	 * 
 	 */
@@ -105,10 +101,9 @@ public class TntDataSource {
 	 * Gets the value of the stream property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the stream property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the stream property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -119,8 +114,7 @@ public class TntDataSource {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link StreamType }
+	 * Objects of the following type(s) are allowed in the list {@link StreamType }
 	 * 
 	 * 
 	 */
@@ -140,10 +134,9 @@ public class TntDataSource {
 	 * Gets the value of the javaObject property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the javaObject property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the javaObject property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -154,8 +147,7 @@ public class TntDataSource {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link JavaObjectType }
+	 * Objects of the following type(s) are allowed in the list {@link JavaObjectType }
 	 * 
 	 * 
 	 */

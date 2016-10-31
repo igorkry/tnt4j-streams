@@ -22,12 +22,12 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
- * <p>
- * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored
- * activity stream, where each workbook {@link Sheet} is assumed to represent a
- * single activity or event which should be recorded.
+ * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook
+ * {@link Sheet} is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link Sheet} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractExcelStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -37,21 +37,24 @@ public class ExcelSheetStream extends AbstractExcelStream<Sheet> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelSheetStream.class);
 
 	/**
-	 * Constructs a new ExcelSheetStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs a new ExcelSheetStream. Requires configuration settings to set input stream source.
 	 */
 	public ExcelSheetStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a excel workbook {@link Sheet} containing the
-	 * contents of the next raw activity data item.
+	 * This method returns a excel workbook {@link Sheet} containing the contents of the next raw activity data item.
 	 */
 	@Override
 	public Sheet getNextItem() throws Exception {
-		return getNextNameMatchingSheet();
+		return getNextNameMatchingSheet(true);
 	}
 }

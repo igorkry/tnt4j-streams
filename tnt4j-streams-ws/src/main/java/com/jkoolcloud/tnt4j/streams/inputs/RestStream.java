@@ -47,7 +47,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Implements a scheduled JAX-RS service call activity stream, where each call response is assumed to represent a single
  * activity or event which should be recorded.
  * <p>
@@ -55,6 +54,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * POST method request depending on scenario step configuration parameter 'method'. Default method is GET.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -75,7 +76,12 @@ public class RestStream extends AbstractWsStream {
 	 * Constructs an empty RestStream. Requires configuration settings to set input stream source.
 	 */
 	public RestStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -242,7 +248,7 @@ public class RestStream extends AbstractWsStream {
 			throw new HttpResponseException(responseCode, response.getStatusLine().getReasonPhrase());
 		}
 
-		String respStr = EntityUtils.toString(response.getEntity(), "UTF-8"); // NON-NLS
+		String respStr = EntityUtils.toString(response.getEntity(), Utils.UTF8);
 
 		return respStr;
 	}

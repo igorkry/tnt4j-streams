@@ -42,7 +42,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Implements a scheduled JAX-WS service call activity stream, where each call response is assumed to represent a single
  * activity or event which should be recorded.
  * <p>
@@ -50,6 +49,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * set as {@link SOAPMessage} body data.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -63,7 +64,12 @@ public class WsStream extends AbstractWsStream {
 	 * Constructs an empty WsStream. Requires configuration settings to set input stream source.
 	 */
 	public WsStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -106,7 +112,7 @@ public class WsStream extends AbstractWsStream {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.trim().startsWith("<")) { // NON-NLS
-					sb.append(line).append('\n'); // NON-NLS
+					sb.append(line).append(Utils.NEW_LINE);
 				} else {
 					int bi = line.indexOf(':'); // NON-NLS
 					if (bi >= 0) {
@@ -114,7 +120,7 @@ public class WsStream extends AbstractWsStream {
 						String hValue = line.substring(bi + 1).trim();
 						headers.put(hKey, hValue);
 					} else {
-						sb.append(line).append('\n'); // NON-NLS
+						sb.append(line).append(Utils.NEW_LINE);
 					}
 				}
 			}

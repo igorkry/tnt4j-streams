@@ -46,9 +46,9 @@ public class ActivityMapParserTest extends ActivityParserTestBase {
 	}
 
 	@Test
-	public void getDataMapTest() {
+	public void getDataMapTest() throws Exception {
 		Map<String, byte[]> data = new HashMap<String, byte[]>();
-		data.put(StreamsConstants.ACTIVITY_DATA_KEY, "TEST".getBytes());
+		data.put(StreamsConstants.ACTIVITY_DATA_KEY, "TEST".getBytes()); // NON-NLS
 		assertNotNull(((ActivityMapParser) parser).getDataMap(data));
 	}
 

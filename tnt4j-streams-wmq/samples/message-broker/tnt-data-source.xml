@@ -7,6 +7,7 @@
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
+
         <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
         <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
         <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
@@ -96,6 +97,7 @@
     <stream name="EventStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="QueueManager" value="QMGR"/>
         <property name="Queue" value="EVENT.QUEUE"/>
+
         <parser-ref name="EventParser"/>
     </stream>
 </tnt-data-source>

@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for DataFormats.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -54,7 +52,8 @@ public enum DataFormats {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("base64Binary") BASE_64_BINARY("base64Binary"),
+	@XmlEnumValue("base64Binary")
+	BASE_64_BINARY("base64Binary"),
 
 	/**
 	 * 
@@ -62,7 +61,8 @@ public enum DataFormats {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("hexBinary") HEX_BINARY("hexBinary"),
+	@XmlEnumValue("hexBinary")
+	HEX_BINARY("hexBinary"),
 
 	/**
 	 * 
@@ -70,25 +70,26 @@ public enum DataFormats {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("string") STRING("string"),
+	@XmlEnumValue("string")
+	STRING("string"),
 
 	/**
 	 * 
-	 * Data is a date/time expression in the specified format (see
-	 * java.text.SimpleDateFormat)
+	 * Data is a date/time expression in the specified format (see java.text.SimpleDateFormat)
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("[DateTime-specification]") DATE_TIME_SPECIFICATION("[DateTime-specification]"),
+	@XmlEnumValue("[DateTime-specification]")
+	DATE_TIME_SPECIFICATION("[DateTime-specification]"),
 
 	/**
 	 * 
-	 * Data is a numeric expression in the specified format (see
-	 * java.text.DecimalFormat)
+	 * Data is a numeric expression in the specified format (see java.text.DecimalFormat)
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("[Decimal-specification]") DECIMAL_SPECIFICATION("[Decimal-specification]");
+	@XmlEnumValue("[Decimal-specification]")
+	DECIMAL_SPECIFICATION("[Decimal-specification]");
 	private final String value;
 
 	DataFormats(String v) {

@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the API (classes and interfaces) defining data entities (fields)
- * which can be parsed from data stream by the jKool LLC TNT4J-Streams.
+ * Provides the API (classes and interfaces) defining data entities (fields) which can be parsed from data stream by the
+ * jKool LLC TNT4J-Streams.
  *
  * @author akausinis
  * @version 1.0

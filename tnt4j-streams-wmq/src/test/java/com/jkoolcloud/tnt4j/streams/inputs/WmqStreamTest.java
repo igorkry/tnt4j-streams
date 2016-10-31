@@ -16,8 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -25,7 +29,7 @@ import com.ibm.mq.MQDestination;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
-import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
@@ -38,23 +42,25 @@ public class WmqStreamTest {
 
 	@Test
 	public void propertiesSetTest() throws Exception {
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QUEUE_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_SUB_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_TOPIC_STRING, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_QMGR_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_HOST, "localhost");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_PORT, 8080);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_CHANNEL_NAME, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(wmqStream, StreamProperties.PROP_STRIP_HEADERS, false);
+		Map<String, String> props = new HashMap<String, String>(9);
+		props.put(WmqStreamProperties.PROP_QMGR_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_QUEUE_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_TOPIC_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_SUB_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_TOPIC_STRING, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_HOST, "localhost"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_PORT, String.valueOf(8080));
+		props.put(WmqStreamProperties.PROP_CHANNEL_NAME, "TEST"); // NON-NLS
+		props.put(WmqStreamProperties.PROP_STRIP_HEADERS, String.valueOf(false));
+		wmqStream.setProperties(props.entrySet());
+		testPropertyList(wmqStream, props.entrySet());
 	}
 
 	@Test
 	public void testInitialize() throws Exception {
 		propertiesSetTest();
-		wmqStream.initialize();
-		assertNotNull(wmqStream.gmo);
+		wmqStream.startStream();
+		assertNotNull("Message GET options is null", wmqStream.gmo);
 	}
 
 	@Test(expected = MQException.class)
@@ -77,11 +83,11 @@ public class WmqStreamTest {
 				MQConstants.MQRC_Q_MGR_QUIESCING, MQConstants.MQRC_Q_MGR_STOPPING,
 				MQConstants.MQRC_CONNECTION_QUIESCING, MQConstants.MQRC_CONNECTION_STOPPING);
 		for (int i = 1; i <= 8; i++) {
-			assertFalse(wmqStream.isConnectedToQmgr(mqe));
+			assertFalse("Shall not be connected to QM", wmqStream.isConnectedToQmgr(mqe));
 		}
 
 		when(mqe.getReason()).thenReturn(MQConstants.MQRC_AIR_ERROR);
-		assertTrue(wmqStream.isConnectedToQmgr(mqe));
+		assertTrue("Shall be connected to QM", wmqStream.isConnectedToQmgr(mqe));
 	}
 
 	@Test
@@ -99,7 +105,7 @@ public class WmqStreamTest {
 	}
 
 	@Test
-	public void testcloseQmgrConnectionException() throws MQException {
+	public void testCloseQmgrConnectionException() throws MQException {
 		final MQQueueManager mqqManager = mock(MQQueueManager.class);
 		final MQDestination mqDestination = mock(MQDestination.class);
 
@@ -120,12 +126,12 @@ public class WmqStreamTest {
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
-		assertNotEquals("Wmq resource bundle entry not found", rbs1, keyModule);
+		assertNotEquals("Wmq resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
-		assertEquals("Wmq resource bundle entry found in core", rbs1, keyModule);
+		assertEquals("Wmq resource bundle entry found in core", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
 		rbs1 = StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in wmq", rbs1, keyCore);
+		assertEquals("Core resource bundle entry found in wmq", keyCore, rbs1);
 	}
 }

@@ -30,11 +30,6 @@ public final class MsOfficeStreamConstants {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_FIRST_ROW_HEADER = "FirstRowAsHeader"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	public static final String PROP_SHEETS = "SheetsToProcess"; // NON-NLS
 
 	private MsOfficeStreamConstants() {

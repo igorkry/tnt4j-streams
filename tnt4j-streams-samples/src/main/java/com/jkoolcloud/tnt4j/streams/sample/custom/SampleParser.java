@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.sample.custom;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
@@ -50,7 +50,12 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 * Constructs an SampleParser.
 	 */
 	public SampleParser() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -69,7 +74,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			LOGGER.log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
+			logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
 			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = value;
 			}
@@ -85,53 +90,46 @@ public class SampleParser extends GenericActivityParser<String[]> {
 			return null;
 		}
 		// Get next string to parse
-		String dataStr = getNextString(data);
+		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		logger().log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
 		String[] fields = dataStr.split(fieldDelim);
 		if (ArrayUtils.isEmpty(fields)) {
-			LOGGER.log(OpLevel.DEBUG, "Did not find any fields in input string");
+			logger().log(OpLevel.DEBUG, "Did not find any fields in input string");
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
 
 		return parsePreparedItem(stream, dataStr, fields);
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param fields
 	 *            activity object data fields array
-	 * @return value formatted based on locator definition or {@code null} if locator is not defined
-	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, String[] fields)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
-		if (locator != null) {
-			String locStr = locator.getLocator();
-			if (locStr != null && locStr.length() > 0) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					int loc = Integer.parseInt(locStr);
-					if (loc <= fields.length) {
-						val = fields[loc - 1].trim();
-					}
-				}
+		String locStr = locator.getLocator();
+
+		if (StringUtils.isNotEmpty(locStr)) {
+			int loc = Integer.parseInt(locStr);
+
+			if (loc > 0 && loc <= fields.length) {
+				val = fields[loc - 1].trim();
 			}
-			val = locator.formatValue(val);
 		}
+
 		return val;
 	}
 }

@@ -15,8 +15,12 @@
  */
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
@@ -35,48 +39,51 @@ public class MqttStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new MqttStream();
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_SERVER_URI,
-				"tcp://localhost:1883");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_USERNAME, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_PASSWORD, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_TOPIC_STRING, "TEST");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_USE_SSL, false);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_KEYSTORE, "");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_KEYSTORE_PASS, "");
+		Map<String, String> props = new HashMap<String, String>(7);
+		props.put(StreamProperties.PROP_SERVER_URI, "tcp://localhost:1883"); // NON-NLS
+		props.put(StreamProperties.PROP_USERNAME, ""); // NON-NLS
+		props.put(StreamProperties.PROP_PASSWORD, ""); // NON-NLS
+		props.put(StreamProperties.PROP_TOPIC_STRING, "TEST"); // NON-NLS
+		props.put(StreamProperties.PROP_USE_SSL, String.valueOf(false));
+		props.put(StreamProperties.PROP_KEYSTORE, ""); // NON-NLS
+		props.put(StreamProperties.PROP_KEYSTORE_PASS, ""); // NON-NLS
+		input.setProperties(props.entrySet());
+		testPropertyList(input, props.entrySet());
 	}
 
 	@Test(expected = MqttException.class)
 	public void testInitialize() throws Exception {
 		testProperties();
-		input.initialize();
+		input.startStream();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testInitializeFailDueToNotAllPropertiesSet() throws Exception {
 		input = new MqttStream();
-		input.initialize();
+		input.startStream();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testInitializeFailDueToNotAllPropertiesSet2() throws Exception {
 		input = new MqttStream();
-		input.setProperties(InputPropertiesTestUtils.makeTestPropertiesSet(StreamProperties.PROP_SERVER_URI,
-				"tcp://localhost:1883"));
-		input.initialize();
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(StreamProperties.PROP_SERVER_URI, "tcp://localhost:1883"); // NON-NLS
+		input.setProperties(props.entrySet());
+		input.startStream();
 	}
 
 	@Test
 	public void testRB() {
-		String keyModule = "MqttStream.stream.ready";
+		String keyModule = "MqttStream.error.closing.receiver";
 		String keyCore = "ActivityField.field.type.name.empty";
 
 		String rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
-		assertNotEquals("Mqtt resource bundle entry not found", rbs1, keyModule);
+		assertNotEquals("Mqtt resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
-		assertEquals("Mqtt resource bundle entry found in core", rbs1, keyModule);
+		assertEquals("Mqtt resource bundle entry found in core", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", rbs1, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
 		rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in mqtt", rbs1, keyCore);
+		assertEquals("Core resource bundle entry found in mqtt", keyCore, rbs1);
 	}
 }

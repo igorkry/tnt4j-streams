@@ -16,7 +16,6 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,13 +23,11 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -41,11 +38,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public abstract class ActivityParser {
 	/**
-	 * Parser logger.
-	 */
-	protected final EventSink logger;
-
-	/**
 	 * Name of activity parser
 	 */
 	private String name;
@@ -54,13 +46,16 @@ public abstract class ActivityParser {
 
 	/**
 	 * Constructs a new ActivityParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
 	 */
-	protected ActivityParser(EventSink logger) {
-		this.logger = logger;
+	protected ActivityParser() {
 	}
+
+	/**
+	 * Returns logger used by this parser.
+	 *
+	 * @return parser logger
+	 */
+	protected abstract EventSink logger();
 
 	/**
 	 * Set properties for the parser.
@@ -115,51 +110,6 @@ public abstract class ActivityParser {
 	public abstract boolean isDataClassSupported(Object data);
 
 	/**
-	 * Reads the next string (line) from the specified data input source.
-	 *
-	 * @param data
-	 *            input source for activity data
-	 * @return string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
-	 */
-	protected String getNextString(Object data) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
-		String str = null;
-		try {
-			str = Utils.getNonEmptyLine(rdr);
-		} catch (EOFException eof) {
-			logger.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"), eof);
-		} catch (IOException ioe) {
-			logger.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					ioe);
-		}
-
-		return str;
-	}
-
-	/**
 	 * Sets the value for the field in the specified activity.
 	 *
 	 * @param ai
@@ -170,31 +120,10 @@ public abstract class ActivityParser {
 	 *            value to apply for this field
 	 * @throws ParseException
 	 *             if an error parsing the specified value
-	 * @see #applyFieldValue(ActivityInfo, ActivityField, Object, String)
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		applyFieldValue(ai, field, value, null);
-	}
-
-	/**
-	 * Sets the value for the field in the specified activity.
-	 *
-	 * @param ai
-	 *            activity object whose field is to be set
-	 * @param field
-	 *            field to apply value to
-	 * @param value
-	 *            value to apply for this field
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
-	 * @throws ParseException
-	 *             if an error parsing the specified value
-	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
-	 */
-	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value, String valueType)
-			throws ParseException {
 		if (!field.isTransparent()) {
-			ai.applyField(field, value, valueType);
+			ai.applyField(field, value);
 		}
 	}
 
@@ -215,39 +144,12 @@ public abstract class ActivityParser {
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing the specified value
-	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object, String)
 	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value)
 			throws IllegalStateException, ParseException {
-		applyFieldValue(stream, ai, field, value, null);
-	}
 
-	/**
-	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
-	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
-	 * is merged into specified (parent) activity.
-	 *
-	 * @param stream
-	 *            parent stream
-	 * @param ai
-	 *            activity object whose field is to be set
-	 * @param field
-	 *            field to apply value to
-	 * @param value
-	 *            value to apply for this field
-	 * @param valueType
-	 *            value type name from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
-	 * @throws IllegalStateException
-	 *             if parser has not been properly initialized
-	 * @throws ParseException
-	 *             if an error parsing the specified value
-	 * @see #parse(TNTInputStream, Object)
-	 */
-	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value,
-			String valueType) throws IllegalStateException, ParseException {
-
-		applyFieldValue(ai, field, value, valueType);
+		applyFieldValue(ai, field, value);
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
@@ -294,7 +196,8 @@ public abstract class ActivityParser {
 	}
 
 	/**
-	 * Sets activity parser tags string. Tags are separated using ",".
+	 * Sets activity parser tags string. Tags are separated using
+	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}".
 	 *
 	 * @param tags
 	 *            tags string

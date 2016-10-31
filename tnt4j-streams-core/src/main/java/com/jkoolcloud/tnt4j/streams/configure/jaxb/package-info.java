@@ -15,9 +15,8 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for storing and
- * processing the TNT4J-Streams configuration using {@link javax.xml.bind.JAXB}
- * framework.
+ * Provides the API (classes and interfaces) necessary for storing and processing the TNT4J-Streams configuration using
+ * {@link javax.xml.bind.JAXB} framework.
  *
  * @author akausinis
  * @version 1.0

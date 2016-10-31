@@ -16,9 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -41,7 +44,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements an activity data parser that assumes each activity data item is an XML string, with the value for each
  * field being retrieved from a particular XML element or attribute.
  * <p>
@@ -98,8 +100,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 *             if any errors configuring the parser
 	 */
 	public ActivityXmlParser() throws ParserConfigurationException {
-		super(LOGGER);
-
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(true);
 		builder = domFactory.newDocumentBuilder();
@@ -115,35 +115,55 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
+	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
 		}
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
 			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					String[] nsFields = value.split("="); // NON-NLS
 					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityXmlParser.adding.mapping"), name, value);
 				}
 			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
-				if (!StringUtils.isEmpty(value)) {
+				if (StringUtils.isNotEmpty(value)) {
 					requireAll = Boolean.parseBoolean(value);
-					LOGGER.log(OpLevel.DEBUG,
+					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
 			}
-
-			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.ignoring"), name);
 		}
 		if (namespaces != null) {
 			xPath.setNamespaceContext(namespaces);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link org.w3c.dom.Document}</li>
+	 * <li>{@link java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.io.Reader}</li>
+	 * <li>{@link java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return Document.class.isInstance(data) || super.isDataClassSupported(data);
 	}
 
 	@Override
@@ -156,8 +176,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		Document xmlDoc = null;
 		String xmlString = null;
@@ -165,11 +183,11 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
 			} else {
-				xmlString = getNextXmlString(data);
+				xmlString = getNextActivityString(data);
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString));
+				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -183,10 +201,13 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			try {
 				xmlString = Utils.documentToString(xmlDoc);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityXmlParser.xmlDocument.toString.error"), exc);
 			}
 		}
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), xmlString);
 
 		return parsePreparedItem(stream, xmlString, xmlDoc);
 	}
@@ -232,14 +253,16 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
 						values[li] = getLocatorValue(stream, loc, xmlDoc);
-						if (values[li] == null && requireAll && !"false".equalsIgnoreCase(loc.getRequired())) { // NON-NLS
-							LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"ActivityXmlParser.required.locator.not.found"), field);
+						if (values[li] == null && requireAll && !loc.isOptional()) { // NON-NLS
+							logger().log(OpLevel.WARNING,
+									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+											"ActivityXmlParser.required.locator.not.found"),
+									loc, field);
 							return null;
 						}
 					}
 				}
-				applyFieldValue(stream, ai, field, wrapValue(values));
+				applyFieldValue(stream, ai, field, Utils.simplifyValue(values));
 				if (locations != null && savedFormats != null) {
 					for (int li = 0; li < locations.size(); li++) {
 						ActivityFieldLocator loc = locations.get(li);
@@ -258,107 +281,96 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * Gets field value from raw data location and formats it according locator definition.
+	 * Gets field raw data value resolved by locator and formats it according locator definition.
 	 *
-	 * @param stream
-	 *            parent stream
 	 * @param locator
 	 *            activity field locator
 	 * @param xmlDoc
 	 *            activity object XML DOM document
-	 *
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 *
 	 * @throws ParseException
-	 *             if error applying locator format properties to specified value
+	 *             if exception occurs while resolving raw data value or applying locator format properties to specified
+	 *             value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, Document xmlDoc)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Document xmlDoc, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			boolean format = true;
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					// get value for locator (element)
-					try {
-						XPathExpression expr = xPath.compile(locStr);
-						NodeList nodes = null;
-						try {
-							nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
-						} catch (XPathException exc) {
-							val = expr.evaluate(xmlDoc);
+		String locStr = locator.getLocator();
+
+		if (StringUtils.isNotEmpty(locStr)) {
+			try {
+				XPathExpression expr = xPath.compile(locStr);
+				NodeList nodes = null;
+				try {
+					nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+				} catch (XPathException exc) {
+					val = expr.evaluate(xmlDoc);
+				}
+				int length = nodes == null ? 0 : nodes.getLength();
+
+				if (length > 0) {
+					List<Object> valuesList = new ArrayList<Object>(length);
+					for (int i = 0; i < length; i++) {
+						Node node = nodes.item(i);
+
+						String strValue = node.getTextContent();
+						Node attrsNode = node;
+
+						if (node instanceof Attr) {
+							Attr attr = (Attr) node;
+
+							attrsNode = attr.getOwnerElement();
 						}
-						int length = nodes == null ? 0 : nodes.getLength();
 
-						if (length > 0) {
-							List<Object> valuesList = new ArrayList<Object>(length);
-							for (int i = 0; i < length; i++) {
-								Node node = nodes.item(i);
+						// Get list of attributes and their values for
+						// current element
+						NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
 
-								String strValue = node.getTextContent();
-								Node attrsNode = node;
-
-								if (node instanceof Attr) {
-									Attr attr = (Attr) node;
-
-									attrsNode = attr.getOwnerElement();
-								}
-
-								// Get list of attributes and their values for
-								// current element
-								NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
-
-								Node attr;
-								String attrVal;
-								ActivityFieldLocator locCopy = locator.clone();
-								if (attrsMap != null && attrsMap.getLength() > 0) {
-									attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
-									}
-
-									attr = attrsMap.getNamedItem(FORMAT_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										attr = attrsMap.getNamedItem(LOCALE_ATTR);
-										String attrLVal = attr == null ? null : attr.getTextContent();
-
-										locCopy.setFormat(attrVal,
-												StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
-									}
-
-									attr = attrsMap.getNamedItem(UNITS_ATTR);
-									attrVal = attr == null ? null : attr.getTextContent();
-									if (StringUtils.isNotEmpty(attrVal)) {
-										locCopy.setUnits(attrVal);
-									}
-								}
-
-								valuesList.add(locCopy.formatValue(strValue.trim()));
+						Node attr;
+						String attrVal;
+						ActivityFieldLocator locCopy = locator.clone();
+						if (attrsMap != null && attrsMap.getLength() > 0) {
+							attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+							attrVal = attr == null ? null : attr.getTextContent();
+							if (StringUtils.isNotEmpty(attrVal)) {
+								locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
 							}
 
-							val = wrapValue(valuesList);
-							format = false;
+							attr = attrsMap.getNamedItem(FORMAT_ATTR);
+							attrVal = attr == null ? null : attr.getTextContent();
+							if (StringUtils.isNotEmpty(attrVal)) {
+								attr = attrsMap.getNamedItem(LOCALE_ATTR);
+								String attrLVal = attr == null ? null : attr.getTextContent();
+
+								locCopy.setFormat(attrVal,
+										StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
+							}
+
+							attr = attrsMap.getNamedItem(UNITS_ATTR);
+							attrVal = attr == null ? null : attr.getTextContent();
+							if (StringUtils.isNotEmpty(attrVal)) {
+								locCopy.setUnits(attrVal);
+							}
 						}
-					} catch (XPathExpressionException exc) {
-						ParseException pe = new ParseException(StreamsResources.getString(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityXMLParser.xPath.exception"), 0);
-						pe.initCause(exc);
 
-						throw pe;
+						valuesList.add(locCopy.formatValue(strValue.trim()));
 					}
-				}
-			}
 
-			if (format) {
-				val = locator.formatValue(val);
+					val = Utils.simplifyValue(valuesList);
+					formattingNeeded.set(false);
+				}
+			} catch (XPathExpressionException exc) {
+				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityXMLParser.xPath.exception"), 0);
+				pe.initCause(exc);
+
+				throw pe;
 			}
 		}
 
@@ -366,37 +378,15 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * Reads the next complete XML document string from the specified data input source and returns it as a string. If
-	 * the data input source contains multiple XML documents, then each document must start with "&lt;?xml", and be
-	 * separated by a new line.
+	 * Reads RAW activity data XML package string from {@link BufferedReader}. If the data input source contains
+	 * multiple XML documents, then each document must start with "&lt;?xml", and be separated by a new line.
 	 *
-	 * @param data
-	 *            input source for activity data
-	 * @return XML document string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
+	 * @param rdr
+	 *            reader to use for reading
+	 * @return non empty RAW activity data XML package string, or {@code null} if the end of the stream has been reached
 	 */
-	protected String getNextXmlString(Object data) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
+	@Override
+	protected String readNextActivity(BufferedReader rdr) {
 		String xmlString = null;
 		try {
 			for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
@@ -409,18 +399,31 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				xmlBuffer.append(line);
 			}
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityXmlParser.data.end"),
-					eof);
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+					getActivityDataType(), eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityXmlParser.error.reading"), ioe);
+			logger().log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
+					getActivityDataType(), ioe);
 		}
+
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();
 			xmlBuffer.setLength(0);
 		}
+
 		return xmlString;
+	}
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - XML
+	 */
+	@Override
+	protected String getActivityDataType() {
+		return "XML"; // NON-NLS
 	}
 
 	private static final class NamespaceMap implements NamespaceContext {

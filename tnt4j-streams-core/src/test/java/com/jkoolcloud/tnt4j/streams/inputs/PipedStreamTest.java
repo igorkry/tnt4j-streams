@@ -53,7 +53,7 @@ public class PipedStreamTest {
 		System.setIn(new FileInputStream(new File(samplesDir, "/piping-stream/orders.log")));
 
 		PipedStream pipedStream = new PipedStream();
-		pipedStream.initialize();
+		pipedStream.startStream();
 		String line = pipedStream.getNextItem();
 		pipedStream.cleanup();
 
@@ -64,14 +64,14 @@ public class PipedStreamTest {
 	@Test(expected = IllegalStateException.class)
 	public void testNullRawInput() throws Exception {
 		PipedStream pipedStream = new PipedStream((Reader) null);
-		pipedStream.initialize();
+		pipedStream.startStream();
 		pipedStream.cleanup();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void testNextItemAfterCleanup() throws Exception {
 		PipedStream pipedStream = new PipedStream();
-		pipedStream.initialize();
+		pipedStream.startStream();
 		pipedStream.cleanup();
 		String line = pipedStream.getNextItem();
 	}

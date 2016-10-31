@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for DataTypes.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -54,7 +52,8 @@ public enum DataTypes {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("String") STRING("String"),
+	@XmlEnumValue("String")
+	STRING("String"),
 
 	/**
 	 * 
@@ -62,7 +61,8 @@ public enum DataTypes {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Binary") BINARY("Binary"),
+	@XmlEnumValue("Binary")
+	BINARY("Binary"),
 
 	/**
 	 * 
@@ -70,25 +70,26 @@ public enum DataTypes {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Number") NUMBER("Number"),
+	@XmlEnumValue("Number")
+	NUMBER("Number"),
 
 	/**
 	 * 
-	 * Field value is a date, time, or date/time expression with a specific
-	 * format.
+	 * Field value is a date, time, or date/time expression with a specific format.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("DateTime") DATE_TIME("DateTime"),
+	@XmlEnumValue("DateTime")
+	DATE_TIME("DateTime"),
 
 	/**
 	 * 
-	 * Field value is a numeric value representing a date/time in the specified
-	 * resolution.
+	 * Field value is a numeric value representing a date/time in the specified resolution.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Timestamp") TIMESTAMP("Timestamp");
+	@XmlEnumValue("Timestamp")
+	TIMESTAMP("Timestamp");
 	private final String value;
 
 	DataTypes(String v) {

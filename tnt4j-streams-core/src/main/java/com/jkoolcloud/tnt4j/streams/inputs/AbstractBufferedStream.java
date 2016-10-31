@@ -23,23 +23,20 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
+ * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
+ * queue to be asynchronously processed by consumer thread(s).
  * <p>
- * Base class for buffered input activity stream. RAW activity data retrieved
- * from input source is placed into blocking queue to be asynchronously
- * processed by consumer thread(s).
- * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
  * <ul>
- * <li>BufferSize - maximal buffer queue capacity. Default value - 512.
- * (Optional)</li>
- * <li>BufferOfferTimeout - how long to wait if necessary for space to become
- * available when adding data item to buffer queue. Default value - 45sec.
- * (Optional)</li>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
+ * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
+ * queue. Default value - 45sec. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -52,40 +49,31 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<T> {
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
-	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE:
-																			// sec.
+	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE: sec.
 	private static final Object DIE_MARKER = new Object();
 
 	private int bufferSize;
 	private int bufferOfferTimeout = DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT;
 
 	/**
-	 * RAW activity data items buffer queue. Items in this queue are processed
-	 * asynchronously by consumer thread(s).
+	 * RAW activity data items buffer queue. Items in this queue are processed asynchronously by consumer thread(s).
 	 */
 	protected BlockingQueue<Object> inputBuffer;
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 */
-	protected AbstractBufferedStream(EventSink logger) {
-		this(logger, DEFAULT_INPUT_BUFFER_SIZE);
+	protected AbstractBufferedStream() {
+		this(DEFAULT_INPUT_BUFFER_SIZE);
 	}
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
 	 *
-	 * @param logger
-	 *            logger used by activity stream
 	 * @param bufferSize
-	 *            default buffer size value. Actual value may be overridden by
-	 *            setting 'BufferSize' property.
+	 *            default buffer size value. Actual value may be overridden by setting 'BufferSize' property.
 	 */
-	protected AbstractBufferedStream(EventSink logger, int bufferSize) {
-		super(logger);
+	protected AbstractBufferedStream(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
 
@@ -129,9 +117,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	/**
-	 * Get the next activity data item to be processed. Method blocks and waits
-	 * for activity input data available in input buffer. Input buffer is filled
-	 * by {@link InputProcessor} thread.
+	 * Get the next activity data item to be processed. Method blocks and waits for activity input data available in
+	 * input buffer. Input buffer is filled by {@link InputProcessor} thread.
 	 *
 	 * @return next activity data item, or {@code null} if there is no next item
 	 *
@@ -178,18 +165,20 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 	@Override
 	protected void cleanup() {
-		inputBuffer.clear();
+		if (inputBuffer != null) {
+			inputBuffer.clear();
+		}
+
 		super.cleanup();
 	}
 
 	/**
-	 * Adds input data to buffer for asynchronous processing. Input data may not
-	 * be added if buffer size limit and offer timeout is exceeded.
+	 * Adds input data to buffer for asynchronous processing. Input data may not be added if buffer size limit and offer
+	 * timeout is exceeded.
 	 *
 	 * @param inputData
 	 *            input data to add to buffer
-	 * @return {@code true} if input data is added to buffer, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if input data is added to buffer, {@code false} - otherwise
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
@@ -198,13 +187,13 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
 
 				if (!added) {
-					logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
@@ -223,13 +212,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	/**
 	 * Base class containing common features for stream input processor thread.
 	 */
-	protected abstract class InputProcessor extends Thread {
-
-		/**
-		 * Input processor attribute identifying that input processing is
-		 * interrupted.
-		 */
-		private boolean interrupted = false;
+	protected abstract class InputProcessor extends StreamsThread {
 
 		private boolean inputEnd = false;
 
@@ -248,25 +231,14 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		/**
 		 * Checks if input processor should stop running.
 		 *
-		 * @return {@code true} input processor is interrupted or parent thread
-		 *         is halted
+		 * @return {@code true} input processor is interrupted or parent thread is halted
 		 */
 		protected boolean isStopping() {
-			return interrupted || isHalted();
+			return isStopRunning() || isHalted();
 		}
 
 		/**
-		 * Stops this thread.
-		 */
-		void halt() {
-			interrupted = true;
-			interrupt();
-			// join();
-		}
-
-		/**
-		 * Closes opened data input resources and marks stream data input as
-		 * ended.
+		 * Closes opened data input resources and marks stream data input as ended.
 		 *
 		 * @throws Exception
 		 *             if fails to close opened resources due to internal error
@@ -280,11 +252,10 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		}
 
 		/**
-		 * Shuts down stream input processor: interrupts thread and closes
-		 * opened data input resources.
+		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
-			if (interrupted && inputEnd) {
+			if (isStopRunning() && inputEnd) {
 				// shot down already.
 				return;
 			}
@@ -293,7 +264,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				close();
 			} catch (Exception exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.input.close.error"), exc);
 			}
 		}

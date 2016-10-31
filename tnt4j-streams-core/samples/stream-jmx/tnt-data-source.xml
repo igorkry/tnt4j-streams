@@ -3,17 +3,17 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../config/tnt-data-source.xsd">
 
-    <java-object name="SampleJMXOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput">
-    </java-object>
+    <java-object name="JMXRedirectOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput"/>
 
-    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectStream">
+    <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
         <property name="RestartOnInputClose" value="true"/>
         <property name="Port" value="9009"/>
+        <!--<property name="FileName" value="tnt4j-stream-activities.log"/>-->
 
-        <reference name="SampleJMXOutput"/>
+        <reference name="JMXRedirectOutput"/>
 
         <tnt4j-properties>
-            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.StreamRouteFormatter"/>
+            <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
         </tnt4j-properties>
     </stream>
 </tnt-data-source>

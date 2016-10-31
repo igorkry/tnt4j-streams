@@ -16,6 +16,11 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -31,16 +36,19 @@ public class JMSStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new JMSStream();
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_SERVER_URI, "localhost");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_QUEUE_NAME, "test");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, StreamProperties.PROP_JNDI_FACTORY, "JNDI");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(input, JMSStreamConstants.PROP_JMS_CONN_FACTORY, "JMS");
+		Map<String, String> props = new HashMap<String, String>(4);
+		props.put(StreamProperties.PROP_SERVER_URI, "localhost"); // NON-NLS
+		props.put(StreamProperties.PROP_QUEUE_NAME, "test"); // NON-NLS
+		props.put(StreamProperties.PROP_JNDI_FACTORY, "JNDI"); // NON-NLS
+		props.put(JMSStreamConstants.PROP_JMS_CONN_FACTORY, "JMS"); // NON-NLS
+		input.setProperties(props.entrySet());
+		testPropertyList(input, props.entrySet());
 	}
 
 	// @Test
 	// public void testInitialize() throws Exception {
 	// testProperties();
-	// input.initialize();
+	// input.startStream();
 	// assertTrue(input.jmsDataReceiver.isAlive());
 	// }
 }

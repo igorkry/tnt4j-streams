@@ -25,7 +25,6 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
@@ -34,11 +33,12 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
- * <p>
  * Base class for scheduled service or system command request/call produced activity stream, where each call/request
  * response is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
+ * <p>
+ * This activity stream supports properties from {@link AbstractBufferedStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -71,28 +71,12 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	private Scheduler scheduler;
 
-	/**
-	 * Constructs a new AbstractWsStream.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
-	 */
-	protected AbstractWsStream(EventSink logger) {
-		super(logger);
-	}
-
-	// /**
-	// * {@inheritDoc}
-	// */
 	// @Override
 	// public Object getProperty(String name) {
 	//
 	// return super.getProperty(name);
 	// }
 	//
-	// /**
-	// * {@inheritDoc}
-	// */
 	// @Override
 	// public void setProperties(Collection<Map.Entry<String, String>> props)
 	// throws Exception {
@@ -116,14 +100,10 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 		scheduler = StdSchedulerFactory.getDefaultScheduler();
 		scheduler.start();
 
-		logger.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-				"AbstractWsStream.stream.initialized"), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+				"AbstractWsStream.scheduler.started"), getName());
 
 		loadScenarios();
-
-		logger.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractWsStream.stream.ready"),
-				getName());
 	}
 
 	/**
@@ -132,22 +112,25 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 * @throws Exception
 	 *             If any exception occurs while loading scenario steps to scheduler
 	 */
-	protected void loadScenarios() throws Exception {
-		boolean hasStepsDefined = false;
+	private void loadScenarios() throws Exception {
+		int scenariosCount = 0;
 		if (CollectionUtils.isNotEmpty(scenarioList)) {
 			for (WsScenario scenario : scenarioList) {
 				if (!scenario.isEmpty()) {
 					for (WsScenarioStep step : scenario.getStepsList()) {
 						scheduleScenarioStep(scenario, step);
-						hasStepsDefined = true;
 					}
+					scenariosCount++;
 				}
 			}
 		}
 
-		if (!hasStepsDefined) {
+		if (scenariosCount == 0) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 					"AbstractWsStream.no.scenarios.defined", getName()));
+		} else {
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+					"AbstractWsStream.stream.scenarios.loaded"), getName(), scenariosCount);
 		}
 	}
 
@@ -233,7 +216,7 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			try {
 				scheduler.shutdown(true);
 			} catch (SchedulerException exc) {
-				logger.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 						"AbstractWsStream.error.closing.scheduler"), exc);
 			}
 			scheduler = null;

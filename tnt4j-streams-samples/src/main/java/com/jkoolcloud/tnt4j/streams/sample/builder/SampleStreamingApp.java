@@ -16,9 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.sample.builder;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -61,16 +59,17 @@ public class SampleStreamingApp {
 	 *             if any exception occurs while running application
 	 */
 	public static void main(String... args) throws Exception {
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>();
-		props.add(new AbstractMap.SimpleEntry<String, String>(ParserProperties.PROP_FLD_DELIM, "|"));
+		Map<String, String> props = new HashMap<String, String>();
+		props.put(ParserProperties.PROP_FLD_DELIM, "|");
 
 		ActivityTokenParser atp = new ActivityTokenParser();
 		atp.setName("TokenParser");
-		atp.setProperties(props);
+		atp.setProperties(props.entrySet());
 
 		ActivityField f = new ActivityField(StreamFieldType.StartTime.name());
 		ActivityFieldLocator afl = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1");
-		f.addLocator(afl).setFormat("dd MMM yyyy HH:mm:ss").setLocale("en-US");
+		afl.setFormat("dd MMM yyyy HH:mm:ss", "en-US");
+		f.addLocator(afl);
 		atp.addField(f);
 
 		f = new ActivityField(StreamFieldType.ServerIp.name());
@@ -111,13 +110,12 @@ public class SampleStreamingApp {
 		f.addLocator(afl);
 		atp.addField(f);
 
-		props = new ArrayList<Map.Entry<String, String>>();
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_FILENAME,
-				ArrayUtils.isEmpty(args) ? "orders.log" : args[0]));
+		props = new HashMap<String, String>();
+		props.put(StreamProperties.PROP_FILENAME, ArrayUtils.isEmpty(args) ? "orders.log" : args[0]);
 
 		FileLineStream fls = new FileLineStream();
 		fls.setName("FileStream");
-		fls.setProperties(props);
+		fls.setProperties(props.entrySet());
 		fls.addParser(atp);
 		// if (fls.getOutput() == null) {
 		// fls.setDefaultStreamOutput();

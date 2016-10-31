@@ -17,8 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.scenario;
 
 /**
- * This interface defines request/call/command execution scheduler configuration
- * data.
+ * This interface defines request/call/command execution scheduler configuration data.
  *
  * @version $Revision: 1 $
  */

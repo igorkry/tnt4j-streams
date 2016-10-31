@@ -16,6 +16,11 @@
         <maven>3.0.0</maven>
     </prerequisites>
 
+    <properties>
+        <ibm.mq.version>7.5</ibm.mq.version>
+        <ibm.mq.libs.path>ibm.mq</ibm.mq.libs.path>
+    </properties>
+
     <build>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
@@ -33,9 +38,9 @@
                         <configuration>
                             <groupId>com.ibm</groupId>
                             <artifactId>com.ibm.mq</artifactId>
-                            <version>7.5</version>
+                            <version>${ibm.mq.version}</version>
                             <packaging>jar</packaging>
-                            <file>ibm.mq/com.ibm.mq.jar</file>
+                            <file>${ibm.mq.libs.path}/com.ibm.mq.jar</file>
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>
@@ -48,9 +53,9 @@
                         <configuration>
                             <groupId>com.ibm</groupId>
                             <artifactId>com.ibm.mq.commonservices</artifactId>
-                            <version>7.5</version>
+                            <version>${ibm.mq.version}</version>
                             <packaging>jar</packaging>
-                            <file>ibm.mq/com.ibm.mq.commonservices.jar</file>
+                            <file>${ibm.mq.libs.path}/com.ibm.mq.commonservices.jar</file>
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>
@@ -63,9 +68,9 @@
                         <configuration>
                             <groupId>com.ibm</groupId>
                             <artifactId>com.ibm.mq.headers</artifactId>
-                            <version>7.5</version>
+                            <version>${ibm.mq.version}</version>
                             <packaging>jar</packaging>
-                            <file>ibm.mq/com.ibm.mq.headers.jar</file>
+                            <file>${ibm.mq.libs.path}/com.ibm.mq.headers.jar</file>
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>
@@ -78,9 +83,9 @@
                         <configuration>
                             <groupId>com.ibm</groupId>
                             <artifactId>com.ibm.mq.jmqi</artifactId>
-                            <version>7.5</version>
+                            <version>${ibm.mq.version}</version>
                             <packaging>jar</packaging>
-                            <file>ibm.mq/com.ibm.mq.jmqi.jar</file>
+                            <file>${ibm.mq.libs.path}/com.ibm.mq.jmqi.jar</file>
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>
@@ -93,9 +98,9 @@
                         <configuration>
                             <groupId>com.ibm</groupId>
                             <artifactId>com.ibm.mq.pcf</artifactId>
-                            <version>7.5</version>
+                            <version>${ibm.mq.version}</version>
                             <packaging>jar</packaging>
-                            <file>ibm.mq/com.ibm.mq.pcf.jar</file>
+                            <file>${ibm.mq.libs.path}/com.ibm.mq.pcf.jar</file>
                             <generatePom>true</generatePom>
                         </configuration>
                     </execution>

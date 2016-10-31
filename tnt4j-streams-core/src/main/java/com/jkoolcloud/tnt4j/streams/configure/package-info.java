@@ -15,8 +15,7 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for processing the jKool
- * LLC TNT4J-Streams configuration.
+ * Provides the API (classes and interfaces) necessary for processing the jKool LLC TNT4J-Streams configuration.
  *
  * @author akausinis
  * @version 1.0

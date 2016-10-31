@@ -35,9 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @author akausinis
  * @version 1.0
  */
-public class StreamsAgentTests {
-
-	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+public class StreamsAgentTest {
 
 	private StringWriter console;
 
@@ -48,7 +46,7 @@ public class StreamsAgentTests {
 		System.out.flush();
 		final String string = console.getBuffer().toString();
 		final String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help")
-				+ LINE_SEPARATOR;
+				+ Utils.NEW_LINE;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
 	}
@@ -62,9 +60,9 @@ public class StreamsAgentTests {
 		final String string = console.getBuffer().toString();
 		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"StreamsAgent.invalid.argument", argument);
-		expected += LINE_SEPARATOR;
+		expected += Utils.NEW_LINE;
 		expected += StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help");
-		expected += LINE_SEPARATOR;
+		expected += Utils.NEW_LINE;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
 	}
@@ -78,9 +76,9 @@ public class StreamsAgentTests {
 		final String string = console.getBuffer().toString();
 		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"StreamsAgent.missing.cfg.file", argument);
-		expected += LINE_SEPARATOR;
+		expected += Utils.NEW_LINE;
 		expected += StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help");
-		expected += LINE_SEPARATOR;
+		expected += Utils.NEW_LINE;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
 	}
@@ -90,13 +88,13 @@ public class StreamsAgentTests {
 		final String testStreamName = "TestStream";
 		final File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
 		FileWriter fw = new FileWriter(tempConfFile);
-		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + LINE_SEPARATOR + "<tnt-data-source" + LINE_SEPARATOR
-				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + LINE_SEPARATOR
-				+ "        xsi:noNamespaceSchemaLocation=\"../../../config/tnt-data-source.xsd\">" + LINE_SEPARATOR
+		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Utils.NEW_LINE + "<tnt-data-source" + Utils.NEW_LINE
+				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + Utils.NEW_LINE
+				+ "        xsi:noNamespaceSchemaLocation=\"../../../config/tnt-data-source.xsd\">" + Utils.NEW_LINE
 				+ "    <stream name=\"" + testStreamName
-				+ "\" class=\"com.jkoolcloud.tnt4j.streams.inputs.CharacterStream\">" + LINE_SEPARATOR
-				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + LINE_SEPARATOR
-				+ "        <property name=\"Port\" value=\"9595\"/>" + LINE_SEPARATOR + "    </stream>" + LINE_SEPARATOR
+				+ "\" class=\"com.jkoolcloud.tnt4j.streams.inputs.CharacterStream\">" + Utils.NEW_LINE
+				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + Utils.NEW_LINE
+				+ "        <property name=\"Port\" value=\"9595\"/>" + Utils.NEW_LINE + "    </stream>" + Utils.NEW_LINE
 				+ "</tnt-data-source>";
 		fw.write(sb);
 		fw.flush();
@@ -117,7 +115,7 @@ public class StreamsAgentTests {
 
 	private void interceptConsole() throws InterruptedException {
 		console = new StringWriter();
-		final WriterOutputStream writerOutputStream = new WriterOutputStream(console);
+		final WriterOutputStream writerOutputStream = new WriterOutputStream(console, Utils.UTF8);
 		final PrintStream out = new PrintStream(writerOutputStream);
 		System.setOut(out);
 		Thread.sleep(50);

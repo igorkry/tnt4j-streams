@@ -25,22 +25,19 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
+import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
 
 /**
- * <p>
- * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored
- * activity stream, where each workbook sheet {@link Row} is assumed to
- * represent a single activity or event which should be recorded.
+ * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook sheet
+ * {@link Row} is assumed to represent a single activity or event which should be recorded.
  * <p>
  * This activity stream requires parsers that can support {@link Row} data.
  * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by
+ * {@link AbstractExcelStream}):
  * <ul>
- * <li>FirstRowAsHeader - flag {@code true}/{@code false} indicating whether
- * first row in sheet is used to define table columns titles. If {@code true}
- * then first sheet row is skipped from streaming. Default value - {@code false}
- * . (Optional)</li>
+ * <li>RangeToStream - defines streamed data rows index range. Default value - {@code 1:}. (Optional)</li>
  * </ul>
  * 
  * @version $Revision: 1 $
@@ -50,17 +47,24 @@ import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 public class ExcelRowStream extends AbstractExcelStream<Row> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelRowStream.class);
 
-	private boolean firstRowAsHeader = false;
+	private String rangeValue = "1:"; // NON-NLS
+	private IntRange rowRange = null;
+
+	private int totalRows = 0;
 
 	private Sheet currSheet;
 	private Iterator<Row> rowIterator;
 
 	/**
-	 * Constructs a new ExcelRowStream. Requires configuration settings to set
-	 * input stream source.
+	 * Constructs a new ExcelRowStream. Requires configuration settings to set input stream source.
 	 */
 	public ExcelRowStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -73,45 +77,66 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (MsOfficeStreamConstants.PROP_FIRST_ROW_HEADER.equalsIgnoreCase(name)) {
-				firstRowAsHeader = Boolean.parseBoolean(value);
+			if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+				rangeValue = value;
 			}
 		}
 	}
 
 	@Override
 	public Object getProperty(String name) {
-		if (MsOfficeStreamConstants.PROP_FIRST_ROW_HEADER.equalsIgnoreCase(name)) {
-			return firstRowAsHeader;
+		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			return rangeValue;
 		}
 
 		return super.getProperty(name);
 	}
 
+	@Override
+	public int getTotalActivities() {
+		return totalRows;
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
+
+		rowRange = IntRange.getRange(rangeValue);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method returns a excel sheet {@link Row} containing the contents of
-	 * the next raw activity data item.
+	 * This method returns a excel sheet {@link Row} containing the contents of the next raw activity data item.
+	 * <p>
+	 * If row index is not within user defined property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamProperties#PROP_RANGE_TO_STREAM} range, such rows are
+	 * skipped.
 	 */
 	@Override
 	public Row getNextItem() throws Exception {
 		if (currSheet == null || !rowIterator.hasNext()) {
-			currSheet = getNextNameMatchingSheet();
+			activityPosition = 0;
+			currSheet = getNextNameMatchingSheet(false);
 
 			if (currSheet == null) {
 				return null;
 			} else {
 				rowIterator = currSheet.rowIterator();
-
-				if (firstRowAsHeader) {
-					// skip header row from parsing
-					rowIterator.next();
-				}
+				totalRows += currSheet.getPhysicalNumberOfRows();
 			}
 		}
 
 		if (!rowIterator.hasNext()) {
+			return getNextItem();
+		}
+
+		activityPosition++;
+		if (!rowRange.inRange(activityPosition)) {
+			// skip row if it is not in range
+			skipFilteredActivities();
+			rowIterator.next();
+
 			return getNextItem();
 		}
 

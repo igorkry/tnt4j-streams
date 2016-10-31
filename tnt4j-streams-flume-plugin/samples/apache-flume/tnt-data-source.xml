@@ -36,6 +36,7 @@
     <stream name="SampleFlumeStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Port" value="9595"/>
+
         <parser-ref name="JSONEnvelopeParser"/>
     </stream>
 </tnt-data-source>

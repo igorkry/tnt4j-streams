@@ -53,6 +53,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.resources.encoding>UTF-8</project.resources.encoding>
         <java.source.version>1.6</java.source.version>
         <java.target.version>1.6</java.target.version>
         <java.compiler.version>1.6</java.compiler.version>
@@ -123,6 +124,14 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <encoding>${project.resources.encoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
@@ -187,18 +196,31 @@
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
+        <!-- may be used instead of mockito -->
+        <!--<dependency>-->
+        <!--<groupId>org.jmockit</groupId>-->
+        <!--<artifactId>jmockit</artifactId>-->
+        <!--<version>1.27</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>org.jmockit</groupId>-->
+        <!--<artifactId>jmockit-coverage</artifactId>-->
+        <!--<version>1.23</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
     </dependencies>
 
     <modules>
         <module>tnt4j-streams-core</module>
-        <!--module>tnt4j-streams-hdfs</module-->
-        <!--module>tnt4j-streams-jms</module-->
-        <!--module>tnt4j-streams-kafka</module-->
-        <!--module>tnt4j-streams-mqtt</module-->
+        <module>tnt4j-streams-hdfs</module>
+        <module>tnt4j-streams-jms</module>
+        <module>tnt4j-streams-kafka</module>
+        <module>tnt4j-streams-mqtt</module>
         <!--module>tnt4j-streams-wmq</module-->
-        <!--module>tnt4j-streams-ws</module-->
-        <!--module>tnt4j-streams-flume-plugin</module-->
-        <!--<module>tnt4j-streams-msoffice</module>-->
+        <module>tnt4j-streams-ws</module>
+        <module>tnt4j-streams-flume-plugin</module>
+        <module>tnt4j-streams-msoffice</module>
         <module>tnt4j-streams-samples</module>
         <module>tnt4j-streams--distribution</module>
     </modules>

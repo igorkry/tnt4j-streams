@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the API (classes and interfaces) necessary for processing the
- * TNT4J-Streams configuration using SAX-based parser.
+ * Provides the API (classes and interfaces) necessary for processing the TNT4J-Streams configuration using SAX-based
+ * parser.
  *
  * @author akausinis
  * @version 1.0

@@ -25,56 +25,56 @@ public interface ParserProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_PATTERN = "Pattern"; // NON-NLS
+	String PROP_PATTERN = "Pattern"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_FLD_DELIM = "FieldDelim"; // NON-NLS
+	String PROP_FLD_DELIM = "FieldDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_VAL_DELIM = "ValueDelim"; // NON-NLS
+	String PROP_VAL_DELIM = "ValueDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_STRIP_QUOTES = "StripQuotes"; // NON-NLS
+	String PROP_STRIP_QUOTES = "StripQuotes"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_SIG_DELIM = "SignatureDelim"; // NON-NLS
+	String PROP_SIG_DELIM = "SignatureDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_REQUIRE_ALL = "RequireDefault"; // NON-NLS
+	String PROP_REQUIRE_ALL = "RequireDefault"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_STRIP_HEADERS = "StripHeaders"; // NON-NLS
+	String PROP_STRIP_HEADERS = "StripHeaders"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_NAMESPACE = "Namespace"; // NON-NLS
+	String PROP_NAMESPACE = "Namespace"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_READ_LINES = "ReadLines"; // NON-NLS
+	String PROP_READ_LINES = "ReadLines"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_LOC_PATH_DELIM = "LocPathDelim"; // NON-NLS
+	String PROP_LOC_PATH_DELIM = "LocPathDelim"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_CHILDREN_FIELD = "ChildrenField"; // NON-NLS
+	String PROP_CHILDREN_FIELD = "ChildrenField"; // NON-NLS
 
 }

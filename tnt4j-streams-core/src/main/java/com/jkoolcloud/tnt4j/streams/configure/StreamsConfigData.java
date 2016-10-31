@@ -43,8 +43,7 @@ public class StreamsConfigData {
 	/**
 	 * Returns the collection of streams found in the configuration.
 	 *
-	 * @return collection of configuration defined streams or {@code null} if
-	 *         there is no streams defined
+	 * @return collection of configuration defined streams or {@code null} if there is no streams defined
 	 */
 	public Collection<TNTInputStream<?, ?>> getStreams() {
 		return streams == null ? null : streams.values();
@@ -53,8 +52,7 @@ public class StreamsConfigData {
 	/**
 	 * Returns the collection of parsers found in the configuration.
 	 *
-	 * @return collection of configuration defined parsers or {@code null} if
-	 *         there is no parsers defined
+	 * @return collection of configuration defined parsers or {@code null} if there is no parsers defined
 	 */
 	public Collection<ActivityParser> getParsers() {
 		return parsers == null ? null : parsers.values();
@@ -85,8 +83,7 @@ public class StreamsConfigData {
 	/**
 	 * Checks if configuration has any streams defined.
 	 *
-	 * @return {@code true} if streams collection contains at least one stream
-	 *         object, {@code false} - otherwise.
+	 * @return {@code true} if streams collection contains at least one stream object, {@code false} - otherwise.
 	 */
 	public boolean isStreamsAvailable() {
 		return MapUtils.isNotEmpty(streams);
@@ -95,8 +92,7 @@ public class StreamsConfigData {
 	/**
 	 * Checks if configuration has any parsers defined.
 	 *
-	 * @return {@code true} if parsers collection contains at least one parser
-	 *         object, {@code false} - otherwise.
+	 * @return {@code true} if parsers collection contains at least one parser object, {@code false} - otherwise.
 	 */
 	public boolean isParsersAvailable() {
 		return MapUtils.isNotEmpty(parsers);

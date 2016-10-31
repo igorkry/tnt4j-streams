@@ -36,31 +36,24 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * This class implements directory files streaming manager. Manager monitors
- * directory (and subdirectories) for stream configuration files (i.e.
- * tnt-data-source*.xml) and invokes streaming actions on stream configuration
- * files changes. Stream configuration file name must also contain job
- * identifier (@link UUID) set by job producer (i.e.
- * tnt-data-source_123e4567-e89b-12d3-a456-426655440000.xml) to make
- * events/actions correlations between all participating pats: job producer,
- * TNT4J-Streams API and JKoolCloud. Without identifier, stream job
- * configurations won't be processed.
+ * This class implements directory files streaming manager. Manager monitors directory (and subdirectories) for stream
+ * configuration files (i.e. tnt-data-source*.xml) and invokes streaming actions on stream configuration files changes.
+ * Stream configuration file name must also contain job identifier {@link UUID} set by job producer (i.e.
+ * tnt-data-source_123e4567-e89b-12d3-a456-426655440000.xml) to make events/actions correlations between all
+ * participating pats: job producer, TNT4J-Streams API and JKoolCloud. Without identifier, stream job configurations
+ * won't be processed.
  * <p>
- * Because streaming actions are invoked on stream configuration file changes,
- * it is recommended to upload (make to be available for steaming) actual
- * activities RAW data files before stream configuration file gets available in
- * monitored directory.
+ * Because streaming actions are invoked on stream configuration file changes, it is recommended to upload (make to be
+ * available for steaming) actual activities RAW data files before stream configuration file gets available in monitored
+ * directory.
  * <p>
- * Streaming jobs are processed using {@link ThreadPoolExecutor} with 10 core
- * threads and max 100 threads by default.
+ * Streaming jobs are processed using {@link ThreadPoolExecutor} with 10 core threads and max 100 threads by default.
  * <p>
- * Directory monitoring is performed using {@link DirWatchdog}. Manager handles
- * those watchdog invoked file notifications:
+ * Directory monitoring is performed using {@link DirWatchdog}. Manager handles those watchdog invoked file
+ * notifications:
  * <ul>
- * <li>Create - creates new streaming job and enqueues it to executor service.
- * </li>
- * <li>Change - creates new streaming job if such job is not available in
- * executor queue.</li>
+ * <li>Create - creates new streaming job and enqueues it to executor service.</li>
+ * <li>Change - creates new streaming job if such job is not available in executor queue.</li>
  * <li>Delete - removes streaming job from executor queue.</li>
  * </ul>
  *
@@ -137,8 +130,7 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Constructs a new DirStreamingManager. Defines watched directory path and
-	 * monitored files wildcard name pattern.
+	 * Constructs a new DirStreamingManager. Defines watched directory path and monitored files wildcard name pattern.
 	 *
 	 * @param dirPath
 	 *            watched directory path
@@ -237,8 +229,8 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Cleans up directory files streaming manager referenced objects after
-	 * manager has stopped. Stops directory watchdog and shuts down executors.
+	 * Cleans up directory files streaming manager referenced objects after manager has stopped. Stops directory
+	 * watchdog and shuts down executors.
 	 */
 	protected void cleanup() {
 		try {
@@ -368,8 +360,7 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners
-	 * list.
+	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamingJobListener} to be added
@@ -387,8 +378,7 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Removes defined {@code StreamingJobListener} from streaming jobs
-	 * listeners list.
+	 * Removes defined {@code StreamingJobListener} from streaming jobs listeners list.
 	 *
 	 * @param l
 	 *            the {@code StreamingJobListener} to be removed
@@ -400,8 +390,7 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Notifies that stream executor service has rejected offered files
-	 * streaming job to queue.
+	 * Notifies that stream executor service has rejected offered files streaming job to queue.
 	 *
 	 * @param job
 	 *            executor rejected files streaming job
@@ -415,8 +404,8 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Notifies that stream executor service has been shot down and unprocessed
-	 * files streaming job has been dropped off the queue.
+	 * Notifies that stream executor service has been shot down and unprocessed files streaming job has been dropped off
+	 * the queue.
 	 *
 	 * @param job
 	 *            executor dropped off files streaming job

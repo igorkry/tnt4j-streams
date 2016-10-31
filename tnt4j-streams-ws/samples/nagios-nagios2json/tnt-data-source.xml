@@ -28,6 +28,12 @@
         <field name="EventType" value="Activity"/>
         <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>
         <field name="ApplName" value="nagios2json"/>
+        <field name="Message" separator=", ">
+            <field-locator locator="$.version" locator-type="Label"/>
+            <field-locator locator="$.running" locator-type="Label"/>
+            <field-locator locator="$.servertime" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+            <field-locator locator="$.localtime" locator-type="Label"/>
+        </field>
     </parser>
 
     <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">

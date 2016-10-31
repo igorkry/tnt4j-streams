@@ -19,10 +19,8 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 
 /**
- * <p>
- * A streaming progress/status notifications listener interface. This interface
- * can be implemented by classes that are interested in streaming process
- * progress and status changes.
+ * A streaming progress/status notifications listener interface. This interface can be implemented by classes that are
+ * interested in streaming process progress and status changes.
  *
  * @version $Revision: 1 $
  *
@@ -30,8 +28,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
  */
 public interface InputStreamListener {
 	/**
-	 * This method gets called when activity items streaming process progress
-	 * has updated.
+	 * This method gets called when activity items streaming process progress has updated.
 	 *
 	 * @param stream
 	 *            stream sending notification
@@ -43,8 +40,7 @@ public interface InputStreamListener {
 	void onProgressUpdate(TNTInputStream<?, ?> stream, int current, int total);
 
 	/**
-	 * This method gets called when activity items streaming process has
-	 * completed successfully.
+	 * This method gets called when activity items streaming process has completed successfully.
 	 *
 	 * @param stream
 	 *            stream sending notification
@@ -66,8 +62,7 @@ public interface InputStreamListener {
 	void onFailure(TNTInputStream<?, ?> stream, String msg, Throwable exc, String code);
 
 	/**
-	 * This method gets called when activity items streaming process status has
-	 * changed.
+	 * This method gets called when activity items streaming process status has changed.
 	 *
 	 * @param stream
 	 *            stream sending notification
@@ -77,8 +72,7 @@ public interface InputStreamListener {
 	void onStatusChange(TNTInputStream<?, ?> stream, StreamStatus status);
 
 	/**
-	 * This method gets called when activity items streaming process has
-	 * finished independent of completion state.
+	 * This method gets called when activity items streaming process has finished independent of completion state.
 	 *
 	 * @param stream
 	 *            stream sending notification
@@ -88,8 +82,7 @@ public interface InputStreamListener {
 	void onFinish(TNTInputStream<?, ?> stream, TNTInputStream.StreamStats stats);
 
 	/**
-	 * This method gets called when activity items streaming process detects
-	 * some notable event.
+	 * This method gets called when activity items streaming process detects some notable event.
 	 *
 	 * @param stream
 	 *            stream sending notification

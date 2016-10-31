@@ -23,7 +23,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * 
  * Defines Cron scheduler parameters.
  * 
  * 
@@ -31,8 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  * Java class for ScheduleCronType complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ScheduleCronType">

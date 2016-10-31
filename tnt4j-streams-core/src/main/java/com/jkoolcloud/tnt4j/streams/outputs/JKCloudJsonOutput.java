@@ -22,21 +22,40 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to jKool Cloud
+ * service over TNT4J and JESL APIs.
+ * <p>
+ * This output logger primarily is used by {@link com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream} to redirect
+ * incoming activities from other TNT4J based producer APIs like 'tnt4j-stream-jmx'.
+ *
+ * @version $Revision: 1 $
+ *
+ * @see com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream
+ * @see Tracker#log(OpLevel, String, Object...)
  */
 public class JKCloudJsonOutput extends AbstractJKCloudOutput<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudJsonOutput.class);
 
 	/**
-	 * TODO
+	 * Constructs a new JKCloudJsonOutput.
 	 */
 	public JKCloudJsonOutput() {
-		super(LOGGER);
+		super();
 	}
 
 	@Override
-	public void sendItem(String ai) throws Exception {
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * 
+	 * @see Tracker#log(OpLevel, String, Object...)
+	 */
+	@Override
+	public void logItem(String ai) throws Exception {
 		Tracker tracker = getTracker(null, Thread.currentThread());
 
 		ensureTrackerOpened(tracker);

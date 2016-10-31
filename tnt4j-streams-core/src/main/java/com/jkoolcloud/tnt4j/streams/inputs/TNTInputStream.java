@@ -33,7 +33,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
- * <p>
  * Base class that all activity streams must extend. It provides some base functionality useful for all activity
  * streams.
  * <p>
@@ -51,23 +50,19 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  *
  * @param <T>
  *            the type of handled RAW activity data
- * @param <K>
+ * @param <O>
  *            the type of handled output data
  *
  * @version $Revision: 1 $
  *
- * @see ExecutorService
+ * @see java.util.concurrent.ExecutorService
+ * @see com.jkoolcloud.tnt4j.streams.outputs.TNTOutput
  */
-public abstract class TNTInputStream<T, K> implements Runnable {
+public abstract class TNTInputStream<T, O> implements Runnable {
 
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
 	private static final int DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT = 20;
-
-	/**
-	 * Stream logger.
-	 */
-	protected final EventSink logger;
 
 	/**
 	 * StreamThread running this stream.
@@ -94,24 +89,21 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 	private String name;
 
-	private TNTOutput<K> out;
+	private TNTOutput<O> out;
 
 	/**
-	 * Constructs a new TNTInputStream.
+	 * Returns logger used by this stream.
 	 *
-	 * @param logger
-	 *            logger used by activity stream
+	 * @return stream logger
 	 */
-	protected TNTInputStream(EventSink logger) {
-		this.logger = logger;
-	}
+	protected abstract EventSink logger();
 
 	/**
 	 * Gets stream output handler.
 	 * 
 	 * @return stream output handler
 	 */
-	public TNTOutput<K> getOutput() {
+	public TNTOutput<O> getOutput() {
 		return out;
 	}
 
@@ -121,7 +113,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * @param out
 	 *            stream output handler
 	 */
-	protected void setOutput(TNTOutput<K> out) {
+	protected void setOutput(TNTOutput<O> out) {
 		this.out = out;
 		out.setStream(this);
 	}
@@ -225,7 +217,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 * {@link #run()} method, it must call this at start of {@link #run()} method before entering into processing loop.
 	 *
 	 * @throws Exception
-	 *             indicates that stream is not configured properly and cannot continue.
+	 *             indicates that stream is not configured properly and cannot continue
 	 */
 	protected void initialize() throws Exception {
 		if (out == null) {
@@ -233,7 +225,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 			// throw new
 			// IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 			// "TNTInputStream.output.undefined"));
-			logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.output.undefined"));
 		}
 
@@ -249,6 +241,32 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
+	 * Starts stream data input.
+	 *
+	 * @throws Exception
+	 *             indicates that stream was unable to start and cannot continue
+	 */
+	protected void start() throws Exception {
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.ready"),
+				getClass().getSimpleName(), getName());
+
+		startTime = System.currentTimeMillis();
+		notifyStatusChange(StreamStatus.STARTED);
+	}
+
+	/**
+	 * Initializes stream and starts data input.
+	 *
+	 * @throws Exception
+	 *             indicates that stream is not configured properly or was unable to start and cannot continue
+	 */
+	public void startStream() throws Exception {
+		initialize();
+		start();
+	}
+
+	/**
 	 * Creates default thread pool executor service for a given number of threads. Using this executor service tasks
 	 * queue size is unbound. Thus memory use may be high to store all producer thread created tasks.
 	 *
@@ -261,17 +279,25 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 */
 	private ExecutorService getDefaultExecutorService(int threadsQty) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamDefaultExecutorThread-"); // NON-NLS
-		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
-			@Override
-			public void newThreadCreated(Thread t) {
-				out.handleConsumerThread(t);
-			}
-		});
+		stf.addThreadFactoryListener(new StreamsThreadFactoryListener());
 
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(), stf);
 
 		return tpe;
+	}
+
+	private class StreamsThreadFactoryListener implements StreamsThreadFactory.StreamsThreadFactoryListener {
+		@Override
+		public void newThreadCreated(Thread t) {
+			try {
+				out.handleConsumerThread(t);
+			} catch (IllegalStateException exc) {
+				logger().log(OpLevel.FAILURE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTInputStream.tracker.check.state.failed"));
+				halt(true);
+			}
+		}
 	}
 
 	/**
@@ -292,12 +318,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	 */
 	private ExecutorService getBoundedExecutorService(int threadsQty, final int offerTimeout) {
 		StreamsThreadFactory stf = new StreamsThreadFactory("StreamBoundedExecutorThread-"); // NON-NLS
-		stf.addThreadFactoryListener(new StreamsThreadFactory.StreamsThreadFactoryListener() {
-			@Override
-			public void newThreadCreated(Thread t) {
-				out.handleConsumerThread(t);
-			}
-		});
+		stf.addThreadFactoryListener(new StreamsThreadFactoryListener());
 
 		ThreadPoolExecutor tpe = new ThreadPoolExecutor(threadsQty, threadsQty, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(threadsQty * 2), stf);
@@ -308,12 +329,12 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 				try {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
-						logger.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.tasks.buffer.limit"), offerTimeout);
 						notifyStreamTaskRejected(r);
 					}
 				} catch (InterruptedException exc) {
-					halt();
+					halt(true);
 				}
 			}
 		});
@@ -332,12 +353,11 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	@SuppressWarnings("unchecked")
 	public void addReference(Object refObject) throws IllegalStateException {
 		if (refObject instanceof TNTOutput) {
-			setOutput((TNTOutput<K>) refObject);
+			setOutput((TNTOutput<O>) refObject);
 		}
 	}
 
 	/**
-	 * <p>
 	 * Get the position in the source activity data currently being processed. For line-based data sources, this is
 	 * generally the line number of currently processed file or other text source. If activity items source (i.e. file)
 	 * changes - activity position gets reset.
@@ -427,6 +447,15 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	}
 
 	/**
+	 * Updates activities skipped and total counts and fires progress update notification when activity data gets
+	 * filtered out by streaming settings (i.e. file lines range).
+	 */
+	protected void skipFilteredActivities() {
+		incrementSkippedActivitiesCount();
+		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
+	}
+
+	/**
 	 * Adds number of bytes to streamed bytes counter.
 	 *
 	 * @param bytesCount
@@ -479,11 +508,26 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 	/**
 	 * Signals that this stream should stop processing so that controlling thread will terminate.
+	 *
+	 * @deprecated this method has bean replaced by {@link #halt(boolean)}
+	 * @see #halt(boolean)
 	 */
+	@Deprecated
 	public void halt() {
+		halt(true);
+	}
+
+	/**
+	 * Signals that this stream has finished processing so controlling thread will set to stopping state and will
+	 * terminate if {@code halt} is set to {@code true}.
+	 *
+	 * @param terminate
+	 *            flag indicating controlling thread to terminate
+	 */
+	public void halt(boolean terminate) {
 		shutdownExecutors();
 
-		ownerThread.halt();
+		ownerThread.halt(terminate);
 	}
 
 	/**
@@ -526,7 +570,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 		try {
 			streamExecutorService.awaitTermination(executorsTerminationTimeout, TimeUnit.SECONDS);
 		} catch (InterruptedException exc) {
-			halt();
+			halt(true);
 		} finally {
 			List<Runnable> droppedTasks = streamExecutorService.shutdownNow();
 
@@ -544,7 +588,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 	public void run() {
 		notifyStatusChange(StreamStatus.NEW);
 
-		logger.log(OpLevel.INFO,
+		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.starting"), name);
 		if (ownerThread == null) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
@@ -556,16 +600,15 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 		AtomicBoolean failureFlag = new AtomicBoolean(false);
 		try {
-			initialize();
-			startTime = System.currentTimeMillis();
-			notifyStatusChange(StreamStatus.STARTED);
+			startStream();
+
 			while (!isHalted()) {
 				try {
 					T item = getNextItem();
 					if (item == null) {
-						logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.data.stream.ended"), name);
-						halt(); // no more data items to process
+						halt(false); // no more data items to process
 					} else {
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
@@ -574,22 +617,22 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger.log(OpLevel.ERROR,
+					logger().log(OpLevel.ERROR,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"TNTInputStream.failed.record.activity.at"),
 							getActivityPosition(), ise.getLocalizedMessage(), ise);
 					failureFlag.set(true);
 					notifyFailed(null, ise, null);
-					halt();
+					halt(false);
 				} catch (Exception exc) {
-					logger.log(OpLevel.ERROR,
+					logger().log(OpLevel.ERROR,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"TNTInputStream.failed.record.activity.at"),
 							getActivityPosition(), exc.getLocalizedMessage(), exc);
 				}
 			}
 		} catch (Exception e) {
-			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
@@ -602,14 +645,24 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 			cleanup();
 
-			logger.log(OpLevel.INFO,
+			logger().log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
 					Thread.currentThread().getName());
-			logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.stream.statistics"), name, getStreamStatistics());
 		}
 	}
 
+	/**
+	 * Performs processing of raw activity data item: it may be parsing, redirecting, etc.
+	 * 
+	 * @param item
+	 *            raw activity data item
+	 * @param failureFlag
+	 *            item processing failure flag instance
+	 * @throws Exception
+	 *             if any errors occurred while processing item
+	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
 	// /**
@@ -849,7 +902,7 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 			try {
 				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
-				logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTInputStream.failed.record.activity"), e.getLocalizedMessage(), e);
 				failureFlag.set(true);
 				notifyFailed(null, e, null);
@@ -979,6 +1032,10 @@ public abstract class TNTInputStream<T, K> implements Runnable {
 
 			if (activitiesTotal == -1) {
 				activitiesTotal = currActivity;
+			}
+
+			if (elapsedTime == -1) {
+				elapsedTime = 0;
 			}
 		}
 

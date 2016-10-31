@@ -39,34 +39,13 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
- * Implements a HDFS files lines activity stream, where each line of the file is
- * assumed to represent a single activity or event which should be recorded.
- * Stream reads changes from defined files every "FileReadDelay" property
- * defined seconds (default is 15sec.).
+ * Implements a HDFS files lines activity stream, where each line of the file is assumed to represent a single activity
+ * or event which should be recorded. Stream reads changes from defined files every "FileReadDelay" property defined
+ * seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties:
- * <ul>
- * <li>FileName - URI of HDFS file or file URI pattern defined using wildcard
- * characters '*' and '?'. (Required)</li>
- * <li>FilePolling - flag {@code true}/{@code false} indicating whether files
- * should be polled for changes or not. If not, then files are read from oldest
- * to newest sequentially one single time. Default value - {@code false}.
- * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that
- * streaming should be performed from latest file entry line. If {@code false} -
- * then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}.
- * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual
- * just if 'FilePolling' property is set to {@code true}. Default value - 15sec.
- * (Optional)</li>
- * <li>RestoreState - flag {@code true}/{@code false} indicating whether files
- * read state should be stored and restored on stream restart. Default value -
- * {@code true}. (Optional)</li>
- * </ul>
+ * This activity stream supports properties from {@link AbstractFileLineStream} (and higher hierarchy streams).
  *
  * @version $Revision: 2 $
  *
@@ -80,7 +59,12 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 	 * Constructs a new HdfsFileLineStream.
 	 */
 	public HdfsFileLineStream() {
-		super(LOGGER);
+		super();
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -89,12 +73,10 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 	}
 
 	/**
-	 * Searches for files matching name pattern. Name pattern also may contain
-	 * path of directory, where file search should be performed i.e.
-	 * C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just
-	 * file name pattern) then files are searched in
-	 * {@code System.getProperty("user.dir")}. Files array is ordered by file
-	 * create timestamp in descending order.
+	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
+	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file create
+	 * timestamp in descending order.
 	 *
 	 * @param path
 	 *            path of file
@@ -152,8 +134,8 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 	}
 
 	/**
-	 * HDFS files changes watcher thread. It reads changes from defined HDFS
-	 * files using last modification timestamp of file.
+	 * HDFS files changes watcher thread. It reads changes from defined HDFS files using last modification timestamp of
+	 * file.
 	 */
 	private class HdfsFileWatcher extends FileWatcher {
 
@@ -167,14 +149,13 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		/**
-		 * Initializes files watcher thread. Picks file matching user defined
-		 * file name to monitor. If user defined to start streaming from latest
-		 * file line, then count of lines in file is calculated to mark latest
-		 * activity position.
+		 * Initializes files watcher thread. Picks file matching user defined file name to monitor. If user defined to
+		 * start streaming from latest file line, then count of lines in file is calculated to mark latest activity
+		 * position.
 		 *
 		 * @throws Exception
-		 *             indicates that stream is not configured properly and
-		 *             files monitoring can't initialize and continue.
+		 *             indicates that stream is not configured properly and files monitoring can't initialize and
+		 *             continue.
 		 */
 		@Override
 		protected void initialize() throws Exception {
@@ -209,31 +190,26 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		/**
-		 * Reads defined HDFS file changes since last read iteration (or from
-		 * stream initialization if it is first monitor invocation).
+		 * Reads defined HDFS file changes since last read iteration (or from stream initialization if it is first
+		 * monitor invocation).
 		 * <p>
-		 * Monitor checks if it can read defined file. If not then tries to swap
-		 * to next available file. If swap can't be done (no newer readable
-		 * file) then file monitoring is interrupted.
+		 * Monitor checks if it can read defined file. If not then tries to swap to next available file. If swap can't
+		 * be done (no newer readable file) then file monitoring is interrupted.
 		 * <p>
-		 * If defined file is readable, then monitor checks modification
-		 * timestamp. If it is newer than {@link #lastModifTime} value, file
-		 * gets opened for reading. If not, monitor tries to swap to next
-		 * available file. If swap can'e be done (no newer readable file) then
-		 * file reading is skipped until next monitor invocation.
+		 * If defined file is readable, then monitor checks modification timestamp. If it is newer than
+		 * {@link #lastModifTime} value, file gets opened for reading. If not, monitor tries to swap to next available
+		 * file. If swap can'e be done (no newer readable file) then file reading is skipped until next monitor
+		 * invocation.
 		 * <p>
-		 * When file gets opened for reading reader is rolled to file marked by
-		 * {@link #lineNumber} attribute. If turns out that file got smaller in
-		 * lines count, then monitor tries to swap to previous file. If no
-		 * previous readable file is available, then reader is reset to first
-		 * file line.
+		 * When file gets opened for reading reader is rolled to file marked by {@link #lineNumber} attribute. If turns
+		 * out that file got smaller in lines count, then monitor tries to swap to previous file. If no previous
+		 * readable file is available, then reader is reset to first file line.
 		 * <p>
-		 * Reader reads all file lines until end of file and puts them to
-		 * changed lines buffer.
+		 * Reader reads all file lines until end of file and puts them to changed lines buffer.
 		 */
 		@Override
 		protected void readFileChanges() {
-			LOGGER.log(OpLevel.DEBUG,
+			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.reading.changes"),
 					fileToRead.toString());
 
@@ -245,13 +221,13 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				FileStatus fStatus = fs.getFileStatus(fileToRead);
 
 				if (!canRead(fStatus)) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FileLineStream.cant.access"));
 
 					boolean swapped = swapToNextFile(fs);
 
 					if (!swapped) {
-						LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"FileLineStream.next.not.found"));
 
 						shutdown();
@@ -260,7 +236,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				} else {
 					long flm = fStatus.getModificationTime();
 					if (flm > lastModifTime) {
-						LOGGER.log(OpLevel.DEBUG,
+						logger().log(OpLevel.DEBUG,
 								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 										"FileLineStream.file.updated"),
 								TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
@@ -271,8 +247,8 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 						boolean swapped = swapToNextFile(fs);
 
 						if (!swapped) {
-							LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"FileLineStream.no.changes"));
+							logger().log(OpLevel.DEBUG, StreamsResources
+									.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.no.changes"));
 
 							return;
 						}
@@ -284,7 +260,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				try {
 					lnr = rollToCurrentLine(fs);
 				} catch (IOException exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FileLineStream.error.rolling"), exc);
 				}
 
@@ -292,18 +268,18 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					try {
 						readNewFileLines(lnr);
 					} catch (IOException exc) {
-						LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"FileLineStream.error.reading"), exc);
 					} finally {
 						Utils.close(lnr);
 					}
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"FileLineStream.error.reading.changes"), exc);
 			}
 
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileLineStream.changes.read.end"), fileToRead.toString());
 		}
 
@@ -312,7 +288,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 			try {
 				lnr = new LineNumberReader(new InputStreamReader(fs.open(fileToRead)));
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"FileLineStream.reader.error"));
 
 				shutdown();
@@ -328,7 +304,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FileLineStream.file.shorter"));
 
 					skipFail = true;
@@ -345,7 +321,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					return rollToCurrentLine(fs);
 				} else {
 					if (lnr.markSupported()) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"FileLineStream.resetting.reader"), 0);
 
 						lnr.reset();
@@ -371,7 +347,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					setFileToRead(prevFile);
 					lastModifTime = getModificationTime(prevFile, fs);
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FileLineStream.changing.to.previous"), prevFile.toUri());
 				}
 
@@ -396,7 +372,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					lastModifTime = getModificationTime(nextFile, fs);
 					lineNumber = 0;
 
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FileLineStream.changing.to.next"), nextFile.toUri());
 				}
 

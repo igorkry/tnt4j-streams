@@ -19,15 +19,12 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import com.jkoolcloud.tnt4j.streams.PropertiesTestBase;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -35,7 +32,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @author akausinis
  * @version 1.0
  */
-public class ActivityNameValueParserTest extends PropertiesTestBase {
+public class ActivityNameValueParserTest {
 
 	private static final String TEST = "TEST=TESTVALUE\nTEST2=TESTVALUE2";
 	private ActivityNameValueParser activityNameValueParser = new ActivityNameValueParser();
@@ -111,25 +108,25 @@ public class ActivityNameValueParserTest extends PropertiesTestBase {
 
 	@Test
 	public void setPropertiesWhenValueEmptyTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_FLD_DELIM, "")
-				.build();
-		activityNameValueParser.setProperties(props);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(ParserProperties.PROP_FLD_DELIM, "");
+		activityNameValueParser.setProperties(props.entrySet());
 		assertNull(activityNameValueParser.fieldDelim);
 	}
 
 	@Test
 	public void setPropertiesWhenOtherValueEmptyTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_PATTERN, "")
-				.build();
-		activityNameValueParser.setProperties(props);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(ParserProperties.PROP_PATTERN, "");
+		activityNameValueParser.setProperties(props.entrySet());
 		assertNull(activityNameValueParser.pattern);
 	}
 
 	@Test
 	public void setPropertiesWhenNotEqualsNameTest() throws Exception {
-		final Collection<Entry<String, String>> props = getPropertyList().add(ParserProperties.PROP_NAMESPACE, "Test")
-				.build();
-		activityNameValueParser.setProperties(props);
+		Map<String, String> props = new HashMap<String, String>(1);
+		props.put(ParserProperties.PROP_NAMESPACE, "Test");
+		activityNameValueParser.setProperties(props.entrySet());
 		assertTrue(activityNameValueParser.stripQuotes);
 	}
 }

@@ -19,11 +19,8 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
 
@@ -53,7 +50,7 @@ public class MessageActivityXmlParserTest {
 	}
 
 	@Test
-	public void testapplyFieldValue() throws ParserConfigurationException, ParseException {
+	public void testapplyFieldValue() throws Exception {
 		MessageActivityXmlParser parser = new MessageActivityXmlParser();
 		ActivityInfo ai = mock(ActivityInfo.class);
 		ActivityField field = mock(ActivityField.class);

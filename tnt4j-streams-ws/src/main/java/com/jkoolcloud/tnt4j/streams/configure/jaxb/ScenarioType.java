@@ -23,12 +23,10 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * <p>
  * Java class for ScenarioType complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ScenarioType">
@@ -61,10 +59,9 @@ public class ScenarioType {
 	 * Gets the value of the step property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the step property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the step property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -75,8 +72,7 @@ public class ScenarioType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link ScenarioStepType }
+	 * Objects of the following type(s) are allowed in the list {@link ScenarioStepType }
 	 * 
 	 * 
 	 */

@@ -16,13 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.assertEquals;
 
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.FixMethodOrder;
@@ -43,20 +42,22 @@ public class CharacterStreamTest {
 	@Test
 	public void settingsTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, PORT);
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_HALT_ON_PARSER, false);
-
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
+		cStream.setProperties(props.entrySet());
+		testPropertyList(cStream, props.entrySet());
 		cStream.cleanup();
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void settingsFailToSetBothTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_FILENAME, "TestFileName");
-		InputPropertiesTestUtils.testInputPropertySetAndGet(cStream, StreamProperties.PROP_PORT, PORT);
-
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_FILENAME, "TestFileName"); // NON-NLS
+		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
+		cStream.setProperties(props.entrySet());
+		testPropertyList(cStream, props.entrySet());
 		cStream.cleanup();
 	}
 
@@ -65,11 +66,10 @@ public class CharacterStreamTest {
 		CharacterStream cStream = new CharacterStream();
 		cStream.setName("TEST_CHAR_STREAM");
 
-		Collection<Map.Entry<String, String>> props = new ArrayList<Map.Entry<String, String>>();
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_PORT, String.valueOf(PORT)));
-		props.add(new AbstractMap.SimpleEntry<String, String>(StreamProperties.PROP_HALT_ON_PARSER,
-				String.valueOf(false)));
-		cStream.setProperties(props);
+		Map<String, String> props = new HashMap<String, String>(2);
+		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
+		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
+		cStream.setProperties(props.entrySet());
 
 		StreamThread thread = new StreamThread(cStream);
 		thread.start();
@@ -85,7 +85,7 @@ public class CharacterStreamTest {
 
 		Thread.sleep(50);
 
-		cStream.halt();
+		cStream.halt(true);
 
 		Thread.sleep(50);
 

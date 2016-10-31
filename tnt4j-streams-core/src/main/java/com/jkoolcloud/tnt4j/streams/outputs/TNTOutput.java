@@ -19,49 +19,70 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
- * @author akausinis
- * @version 1.0 TODO
+ * This interface defines operations commonly used by TNT4J-Streams outputs.
+ *
+ * @param <T>
+ *            the type of handled activity data
+ *
+ * @version $Revision: 1 $
+ *
+ * @see TNTInputStream#setOutput(TNTOutput)
+ * @see com.jkoolcloud.tnt4j.tracker.Tracker
  */
 public interface TNTOutput<T> {
-	/**
-	 * TODO
-	 * 
-	 * @param item
-	 * @throws Exception
-	 */
-	void sendItem(T item) throws Exception;
 
 	/**
-	 * TODO
+	 * Performs streamed activity item logging processing. To log activity item various implementations of
+	 * {@link com.jkoolcloud.tnt4j.tracker.Tracker} may be used.
+	 * 
+	 * @param item
+	 *            activity item to log
+	 * @throws Exception
+	 *             if any errors occurred while logging item
+	 */
+	void logItem(T item) throws Exception;
+
+	/**
+	 * Performs initialization of stream output handler.
 	 * 
 	 * @throws Exception
+	 *             indicates that stream output handler is not configured properly
 	 */
 	void initialize() throws Exception;
 
 	/**
-	 * TODO
+	 * Performs stream output handler cleanup.
+	 *
+	 * @see TNTInputStream#cleanup()
 	 */
 	void cleanup();
 
 	/**
-	 * TODO
+	 * Handles consumer {@link Thread} initiation in streaming process. May require to create new
+	 * {@link com.jkoolcloud.tnt4j.tracker.Tracker} for provided {@link Thread}.
 	 * 
 	 * @param t
+	 *            thread to handle
+	 * @throws IllegalStateException
+	 *             indicates that tracker created for the thread is not opened and can not record activity data
 	 */
-	void handleConsumerThread(Thread t);
+	void handleConsumerThread(Thread t) throws IllegalStateException;
 
 	/**
-	 * TODO
+	 * Sets output configuration property.
 	 * 
 	 * @param name
+	 *            property name
 	 * @param value
+	 *            property value
 	 */
 	void setProperty(String name, Object value);
 
 	/**
-	 * TODO
+	 * Sets related {@link TNTInputStream} instance.
 	 * 
 	 * @param inputStream
+	 *            related input stream instance
 	 */
 	void setStream(TNTInputStream<?, ?> inputStream);
 }

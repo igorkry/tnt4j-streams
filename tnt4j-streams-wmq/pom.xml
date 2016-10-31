@@ -17,6 +17,10 @@
 
     <artifactId>tnt4j-streams-wmq</artifactId>
 
+    <properties>
+        <ibm.mq.version>7.5</ibm.mq.version>
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -86,34 +90,33 @@
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>com.ibm.mq</artifactId>
-            <version>7.5</version>
+            <version>${ibm.mq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>com.ibm.mq.commonservices</artifactId>
-            <version>7.5</version>
+            <version>${ibm.mq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>com.ibm.mq.headers</artifactId>
-            <version>7.5</version>
+            <version>${ibm.mq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>com.ibm.mq.jmqi</artifactId>
-            <version>7.5</version>
+            <version>${ibm.mq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm</groupId>
             <artifactId>com.ibm.mq.pcf</artifactId>
-            <version>7.5</version>
+            <version>${ibm.mq.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.resource</groupId>
             <artifactId>javax.resource-api</artifactId>
             <version>1.7</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>

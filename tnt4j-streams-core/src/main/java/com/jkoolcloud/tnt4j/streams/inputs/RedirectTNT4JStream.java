@@ -34,55 +34,47 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.inputs.feeds.Feed;
+import com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput;
-import com.jkoolcloud.tnt4j.streams.utils.FeedReader;
+import com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
+ * Implements a redirecting activity stream, where activity data is prepared by other TNT4J based streaming libraries
+ * (i.e. tnt4j-stream-jmx, tnt4j-stream-gc) using {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
+ * data. Redirected activities JSON data ban be read from the specified InputStream-based stream or Reader-based reader.
+ * This class wraps the raw {@link InputStream} or {@link Reader} with a {@link BufferedReader}. Input source also can
+ * be {@link File} descriptor or {@link ServerSocket} connections.
  * <p>
- * Implements a redirecting activity stream, where activity data is prepared by
- * other streaming libraries (i.e. tnt4j-stream-jms, tnt4j-stream-gc) using
- * TNT4J {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
- * data. Redirected activities JSON data ban be read from the specified
- * InputStream-based stream or Reader-based reader. This class wraps the raw
- * {@link InputStream} or {@link Reader} with a {@link BufferedReader}. Input
- * source also can be {@link File} descriptor or {@link ServerSocket}
- * connections.
+ * In case input source is {@link ServerSocket} connections, there is stream property 'RestartOnInputClose' allowing to
+ * restart {@link ServerSocket} (open new {@link ServerSocket} instance) if listened {@link ServerSocket} gets closed or
+ * fails to accept connections.
  * <p>
- * In case input source is {@link ServerSocket} connections, there is stream
- * property 'RestartOnInputClose' allowing to restart {@link ServerSocket} (open
- * new {@link ServerSocket} instance) if listened {@link ServerSocket} gets
- * closed or fails to accept connections.
+ * This activity stream requires parsers that can support {@link String} activity data.
  * <p>
- * This activity stream requires parsers that can support {@link String}
- * activity data.
- * <p>
- * This activity stream supports the following properties:
+ * This activity stream supports the following properties (in addition to those supported by {@link TNTInputStream}):
  * <ul>
- * <li>FileName - the system-dependent file name. (Required - just one
- * 'FileName' or 'Port')</li>
- * <li>Port - port number to accept character stream over TCP/IP. (Required -
- * just one 'FileName' or 'Port')</li>
- * <li>RestartOnInputClose - flag indicating to restart {@link ServerSocket}
- * (open new {@link ServerSocket} instance) if listened server socked gets
- * closed or fails to accept connection. (Optional)</li>
- * <li>BufferSize - maximal buffer queue capacity. Default value - 512.
- * (Optional)</li>
- * <li>BufferOfferTimeout - how long to wait if necessary for space to become
- * available when adding data item to buffer queue. Default value - 45sec.
- * (Optional)</li>
+ * <li>FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')</li>
+ * <li>Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')</li>
+ * <li>RestartOnInputClose - flag indicating to restart {@link ServerSocket} (open new {@link ServerSocket} instance) if
+ * listened server socked gets closed or fails to accept connection. (Optional)</li>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
+ * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
+ * queue. Default value - 45sec. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
  *
  * @see ArrayBlockingQueue
  * @see BlockingQueue#offer(Object, long, TimeUnit)
- * @see com.jkoolcloud.tnt4j.format.JSONFormatter
+ * @see RedirectTNT4JStreamFormatter
+ * @see ReaderFeed
  */
-public class RedirectStream extends TNTInputStream<String, String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RedirectStream.class);
+public class RedirectTNT4JStream extends TNTInputStream<String, String> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RedirectTNT4JStream.class);
 
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
 	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE:
@@ -102,46 +94,37 @@ public class RedirectStream extends TNTInputStream<String, String> {
 	protected BlockingQueue<Object> inputBuffer;
 
 	/**
-	 * Constructs an empty RedirectStream. Requires configuration settings to
-	 * set input stream source.
-	 *
-	 * @param logger
-	 *            logger used by activity stream
+	 * Constructs an empty RedirectTNT4JStream. Requires configuration settings to set input stream source.
 	 */
-	protected RedirectStream(EventSink logger) {
-		super(logger);
+	public RedirectTNT4JStream() {
+		super();
 	}
 
 	/**
-	 * Constructs an empty RedirectStream. Requires configuration settings to
-	 * set input stream source.
-	 */
-	public RedirectStream() {
-		super(LOGGER);
-	}
-
-	/**
-	 * Constructs a new RedirectStream to obtain activity data from the
-	 * specified {@link InputStream}.
+	 * Constructs a new RedirectTNT4JStream to obtain activity data from the specified {@link InputStream}.
 	 *
 	 * @param stream
 	 *            input stream to read data from
 	 */
-	public RedirectStream(InputStream stream) {
-		super(LOGGER);
+	public RedirectTNT4JStream(InputStream stream) {
+		this();
 		setStream(stream);
 	}
 
 	/**
-	 * Constructs a new RedirectStream to obtain activity data from the
-	 * specified {@link Reader}.
+	 * Constructs a new RedirectTNT4JStream to obtain activity data from the specified {@link Reader}.
 	 *
 	 * @param reader
 	 *            reader to read data from
 	 */
-	public RedirectStream(Reader reader) {
-		super(LOGGER);
+	public RedirectTNT4JStream(Reader reader) {
+		this();
 		setReader(reader);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -183,14 +166,14 @@ public class RedirectStream extends TNTInputStream<String, String> {
 			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				if (socketPort != null) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 				}
 				fileName = value;
 			} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(fileName)) {
 					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "CharacterStream.cannot.set.both",
+							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 				}
 				socketPort = Integer.valueOf(value);
@@ -234,6 +217,17 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		initializeStreamInternals();
 	}
 
+	@Override
+	protected void start() throws Exception {
+		super.start();
+
+		startDataStream();
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
+				getClass().getSimpleName(), getName());
+	}
+
 	private void initializeStreamInternals() throws Exception {
 		if (rawReader == null) {
 			if (StringUtils.isEmpty(fileName) && socketPort == null) {
@@ -248,11 +242,9 @@ public class RedirectStream extends TNTInputStream<String, String> {
 				feedsProducer = new ServerSocketFeedsProducer(socketPort);
 			} else {
 				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"CharacterStream.no.stream.source"));
+						"FeedInputStream.no.stream.source"));
 			}
 		}
-
-		startDataStream();
 	}
 
 	/**
@@ -264,7 +256,7 @@ public class RedirectStream extends TNTInputStream<String, String> {
 	protected void startDataStream() throws IOException {
 		if (rawReader == null && feedsProducer == null) {
 			throw new IOException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"CharacterStream.no.stream.reader"));
+					"FeedInputStream.no.stream.reader"));
 		}
 
 		if (rawReader != null) {
@@ -280,13 +272,13 @@ public class RedirectStream extends TNTInputStream<String, String> {
 				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
 
 				if (!added) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
 				}
 
 				return added;
 			} catch (InterruptedException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
@@ -297,12 +289,10 @@ public class RedirectStream extends TNTInputStream<String, String> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method does not actually return the next item, but the
-	 * {@link BufferedReader} from which the next item should be read. This is
-	 * useful for parsers that accept {@link Reader}s that are using underlying
-	 * classes to process the data from an input stream. The parser, or its
-	 * underlying data reader needs to handle all I/O, along with any associated
-	 * errors.
+	 * This method does not actually return the next item, but the {@link BufferedReader} from which the next item
+	 * should be read. This is useful for parsers that accept {@link Reader}s that are using underlying classes to
+	 * process the data from an input stream. The parser, or its underlying data reader needs to handle all I/O, along
+	 * with any associated errors.
 	 */
 	@Override
 	public String getNextItem() throws Exception {
@@ -332,14 +322,20 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		return activityInput;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Redirects raw activity data (already JSON formatted by TNT4J based producers) from input to output.
+	 */
 	@Override
 	protected void processActivityItem(String item, AtomicBoolean failureFlag) throws Exception {
 		notifyProgressUpdate(incrementCurrentActivitiesCount(), getTotalActivities());
 
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectStream.sending.item"), item);
+		logger().log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectTNT4JStream.sending.item"),
+				item);
 
-		getOutput().sendItem(item);
+		getOutput().logItem(item);
 	}
 
 	private boolean isInputEnded() {
@@ -358,31 +354,19 @@ public class RedirectStream extends TNTInputStream<String, String> {
 			feedsProducer.halt();
 		}
 
-		inputBuffer.clear();
-	}
-
-	private class CharFeedReader extends FeedReader {
-		CharFeedReader(Reader in) {
-			super(in);
-		}
-
-		CharFeedReader(InputStream in) {
-			super(in);
-		}
-
-		@Override
-		protected void notifyBytesRead(int bCount) {
-			// addStreamedBytesCount(bCount);
+		if (inputBuffer != null) {
+			inputBuffer.clear();
 		}
 	}
 
-	private abstract class FeedersProducer extends StreamsThread {
+	private abstract class FeedersProducer extends StreamsThread implements Closeable {
 		List<ActivitiesFeeder> activeFeedersList = new ArrayList<ActivitiesFeeder>();
 
 		void removeInactiveFeeder(ActivitiesFeeder conn) {
 			activeFeedersList.remove(conn);
 		}
 
+		@Override
 		public void close() {
 			for (ActivitiesFeeder f : activeFeedersList) {
 				f.halt();
@@ -394,8 +378,8 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		}
 
 		@Override
-		public void halt() {
-			super.halt();
+		public void halt(boolean interrupt) {
+			super.halt(interrupt);
 			close();
 		}
 	}
@@ -414,19 +398,19 @@ public class RedirectStream extends TNTInputStream<String, String> {
 			while (!isStopRunning() && !srvSocket.isClosed()) {
 				Socket connSocket = null;
 				try {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"CharacterStream.waiting.for.connection"), srvSocketPort);
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"FeedInputStream.waiting.for.connection"), srvSocketPort);
 					connSocket = srvSocket.accept();
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"CharacterStream.accepted.connection"), connSocket);
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"FeedInputStream.accepted.connection"), connSocket);
 				} catch (Exception e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"RedirectStream.failed.accept.connection"), e.getLocalizedMessage(), e);
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"RedirectTNT4JStream.failed.accept.connection"), e.getLocalizedMessage(), e);
 
 					boolean recovered = restartOnInputClose && resetDataStream();
 
 					if (!recovered) {
-						halt();
+						halt(false);
 					}
 				}
 
@@ -436,8 +420,8 @@ public class RedirectStream extends TNTInputStream<String, String> {
 						activeFeedersList.add(feeder);
 						feeder.start();
 					} catch (Exception e) {
-						LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"RedirectStream.socket.initialization"), e.getLocalizedMessage(), e);
+						logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"RedirectTNT4JStream.socket.initialization"), e.getLocalizedMessage(), e);
 					}
 				}
 			}
@@ -446,19 +430,19 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		}
 
 		private boolean resetDataStream() {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"RedirectStream.resetting.stream"), getName());
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"RedirectTNT4JStream.resetting.stream"), getName());
 
 			Utils.close(srvSocket);
 
 			try {
 				srvSocket = new ServerSocket(srvSocketPort);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"CharacterStream.stream.reset"), srvSocketPort);
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"FeedInputStream.stream.reset"), srvSocketPort);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"RedirectStream.resetting.failed"), getName(), exc);
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"RedirectTNT4JStream.resetting.failed"), getName(), exc);
 
 				return false;
 			}
@@ -469,6 +453,8 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		@Override
 		public void close() {
 			Utils.close(srvSocket);
+
+			super.close();
 		}
 	}
 
@@ -486,67 +472,69 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		}
 	}
 
-	private class ActivitiesFeeder extends StreamsThread {
+	private class ActivitiesFeeder extends StreamsThread implements Closeable {
 		private Socket socket = null;
 
 		/**
-		 * BufferedReader that wraps {@link Socket#getInputStream()} or
-		 * {@link Reader}
+		 * BufferedReader that wraps {@link Socket#getInputStream()} or {@link Reader}
 		 */
-		protected FeedReader dataReader = null;
+		protected ReaderFeed dataReader = null;
 
 		ActivitiesFeeder(Socket socket) throws IOException {
 			this.socket = socket;
-			this.dataReader = new CharFeedReader(socket.getInputStream());
+			this.dataReader = new ReaderFeed(socket.getInputStream());
+			this.dataReader.addFeedListener(new StreamFeedsListener());
 		}
 
 		ActivitiesFeeder(Reader reader) {
-			this.dataReader = new CharFeedReader(reader);
+			this.dataReader = new ReaderFeed(reader);
+			this.dataReader.addFeedListener(new StreamFeedsListener());
 		}
 
 		@Override
 		public void run() {
 			while (!isStopRunning() && !(dataReader.isClosed() || dataReader.hasError())) {
 				try {
-					String line = dataReader.readLine();
+					String line = dataReader.getInput().readLine();
 
 					if (line == null) {
-						LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"RedirectStream.feeder.data.ended"));
+						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"RedirectTNT4JStream.feeder.data.ended"));
 						halt(); // no more data items to process
 					} else {
 						if (line.isEmpty()) {
-							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
-									StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectStream.redirect.empty.input"));
+							logger().log(OpLevel.WARNING, StreamsResources.getString(
+									StreamsResources.RESOURCE_BUNDLE_NAME, "RedirectTNT4JStream.redirect.empty.input"));
 							incrementSkippedActivitiesCount();
 							notifyStreamEvent(OpLevel.WARNING,
 									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-											"RedirectStream.redirect.empty.input", line),
+											"RedirectTNT4JStream.redirect.empty.input", line),
 									line);
 						} else {
 							addInputToBuffer(line);
 						}
 					}
 				} catch (IOException ioe) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"RedirectStream.feeder.failure"), ioe.getLocalizedMessage());
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"RedirectTNT4JStream.feeder.failure"), ioe.getLocalizedMessage());
 					halt();
 				} catch (Exception e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"RedirectStream.feeder.failure"), e.getLocalizedMessage(), e);
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"RedirectTNT4JStream.feeder.failure"), e.getLocalizedMessage(), e);
 				}
 			}
 
 			close();
 		}
 
+		@Override
 		public void close() {
 			Utils.close(dataReader);
 			dataReader = null;
 
 			if (socket != null) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"CharacterStream.closing.stream.connection"), socket);
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"FeedInputStream.closing.stream.connection"), socket);
 
 				Utils.close(socket);
 				socket = null;
@@ -558,9 +546,16 @@ public class RedirectStream extends TNTInputStream<String, String> {
 		}
 
 		@Override
-		public void halt() {
-			super.halt();
+		public void halt(boolean interrupt) {
+			super.halt(interrupt);
 			close();
+		}
+	}
+
+	private class StreamFeedsListener implements Feed.FeedListener {
+		@Override
+		public void bytesReadFromInput(int bCount) {
+			addStreamedBytesCount(bCount);
 		}
 	}
 }

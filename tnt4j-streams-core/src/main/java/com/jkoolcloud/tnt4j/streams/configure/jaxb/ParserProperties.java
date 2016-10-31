@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * <p>
  * Java class for ParserProperties.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
@@ -58,43 +56,44 @@ public enum ParserProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Pattern") PATTERN("Pattern"),
+	@XmlEnumValue("Pattern")
+	PATTERN("Pattern"),
 
 	/**
 	 * 
-	 * Property value represents the delimiter between fields in raw activity
-	 * data.
+	 * Property value represents the delimiter between fields in raw activity data.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("FieldDelim") FIELD_DELIM("FieldDelim"),
+	@XmlEnumValue("FieldDelim")
+	FIELD_DELIM("FieldDelim"),
 
 	/**
 	 * 
-	 * Property value represents the delimiter between the label and value for a
-	 * field in raw activity data.
+	 * Property value represents the delimiter between the label and value for a field in raw activity data.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ValueDelim") VALUE_DELIM("ValueDelim"),
+	@XmlEnumValue("ValueDelim")
+	VALUE_DELIM("ValueDelim"),
 
 	/**
 	 * 
-	 * Property value is "true" to remove surrounding double quotes from data
-	 * value, or "false" to keep them.
+	 * Property value is "true" to remove surrounding double quotes from data value, or "false" to keep them.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StripQuotes") STRIP_QUOTES("StripQuotes"),
+	@XmlEnumValue("StripQuotes")
+	STRIP_QUOTES("StripQuotes"),
 
 	/**
 	 * 
-	 * Property value is string identifying the delimiter between signature
-	 * elements.
+	 * Property value is string identifying the delimiter between signature elements.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("SignatureDelim") SIGNATURE_DELIM("SignatureDelim"),
+	@XmlEnumValue("SignatureDelim")
+	SIGNATURE_DELIM("SignatureDelim"),
 
 	/**
 	 * 
@@ -102,16 +101,17 @@ public enum ParserProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("RequireDefault") REQUIRE_DEFAULT("RequireDefault"),
+	@XmlEnumValue("RequireDefault")
+	REQUIRE_DEFAULT("RequireDefault"),
 
 	/**
 	 * 
-	 * Property identifies whether stream should strip RAW activity data (i.e.
-	 * WMQ message) headers.
+	 * Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("StripHeaders") STRIP_HEADERS("StripHeaders"),
+	@XmlEnumValue("StripHeaders")
+	STRIP_HEADERS("StripHeaders"),
 
 	/**
 	 * 
@@ -119,16 +119,17 @@ public enum ParserProperties {
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("Namespace") NAMESPACE("Namespace"),
+	@XmlEnumValue("Namespace")
+	NAMESPACE("Namespace"),
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (i.e. JSON) package is
-	 * single line.
+	 * Property indicates that complete activity RAW data (i.e. JSON) package is single line.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("ReadLines") READ_LINES("ReadLines");
+	@XmlEnumValue("ReadLines")
+	READ_LINES("ReadLines");
 	private final String value;
 
 	ParserProperties(String v) {

@@ -1,0 +1,24 @@
+{
+    "name": "njstrace-timed-process",
+    "version": "0.0.1",
+    "description": "njstrace add-on for blocked event loop detecting",
+    "main": "jsTimedProcess.js",
+    "dependencies": {
+        "idgen": "^2.0",
+        "njstrace": "^0.0.3"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nastel/tnt4j-streams.git"
+    },
+    "author": "JKool LLC",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Nastel/tnt4j-streams/issues"
+    },
+    "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
+}

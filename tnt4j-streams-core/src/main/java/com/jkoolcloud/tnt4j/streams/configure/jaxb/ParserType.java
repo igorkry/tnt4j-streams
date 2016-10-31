@@ -24,12 +24,10 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * <p>
  * Java class for ParserType complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ParserType">
@@ -111,10 +109,9 @@ public class ParserType {
 	 * Gets the value of the property property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the property property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the property property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -125,8 +122,7 @@ public class ParserType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link ParserProperty }
+	 * Objects of the following type(s) are allowed in the list {@link ParserProperty }
 	 * 
 	 * 
 	 */
@@ -150,10 +146,9 @@ public class ParserType {
 	 * Gets the value of the field property.
 	 * 
 	 * <p>
-	 * This accessor method returns a reference to the live list, not a
-	 * snapshot. Therefore any modification you make to the returned list will
-	 * be present inside the JAXB object. This is why there is not a
-	 * <CODE>set</CODE> method for the field property.
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the field property.
 	 * 
 	 * <p>
 	 * For example, to add a new item, do as follows:
@@ -164,8 +159,7 @@ public class ParserType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list
-	 * {@link ParserType.Field }
+	 * Objects of the following type(s) are allowed in the list {@link ParserType.Field }
 	 * 
 	 * 
 	 */
@@ -251,12 +245,10 @@ public class ParserType {
 	}
 
 	/**
-	 * <p>
 	 * Java class for anonymous complex type.
 	 * 
 	 * <p>
-	 * The following schema fragment specifies the expected content contained
-	 * within this class.
+	 * The following schema fragment specifies the expected content contained within this class.
 	 * 
 	 * <pre>
 	 * &lt;complexType>
@@ -377,10 +369,9 @@ public class ParserType {
 		 * Gets the value of the fieldLocator property.
 		 * 
 		 * <p>
-		 * This accessor method returns a reference to the live list, not a
-		 * snapshot. Therefore any modification you make to the returned list
-		 * will be present inside the JAXB object. This is why there is not a
-		 * <CODE>set</CODE> method for the fieldLocator property.
+		 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you
+		 * make to the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE>
+		 * method for the fieldLocator property.
 		 * 
 		 * <p>
 		 * For example, to add a new item, do as follows:
@@ -391,8 +382,7 @@ public class ParserType {
 		 * 
 		 * 
 		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link ParserType.Field.FieldLocator }
+		 * Objects of the following type(s) are allowed in the list {@link ParserType.Field.FieldLocator }
 		 * 
 		 * 
 		 */
@@ -412,10 +402,9 @@ public class ParserType {
 		 * Gets the value of the fieldMap property.
 		 * 
 		 * <p>
-		 * This accessor method returns a reference to the live list, not a
-		 * snapshot. Therefore any modification you make to the returned list
-		 * will be present inside the JAXB object. This is why there is not a
-		 * <CODE>set</CODE> method for the fieldMap property.
+		 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you
+		 * make to the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE>
+		 * method for the fieldMap property.
 		 * 
 		 * <p>
 		 * For example, to add a new item, do as follows:
@@ -426,8 +415,7 @@ public class ParserType {
 		 * 
 		 * 
 		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link FieldMap }
+		 * Objects of the following type(s) are allowed in the list {@link FieldMap }
 		 * 
 		 * 
 		 */
@@ -455,10 +443,9 @@ public class ParserType {
 		 * Gets the value of the parserRef property.
 		 * 
 		 * <p>
-		 * This accessor method returns a reference to the live list, not a
-		 * snapshot. Therefore any modification you make to the returned list
-		 * will be present inside the JAXB object. This is why there is not a
-		 * <CODE>set</CODE> method for the parserRef property.
+		 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you
+		 * make to the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE>
+		 * method for the parserRef property.
 		 * 
 		 * <p>
 		 * For example, to add a new item, do as follows:
@@ -469,8 +456,7 @@ public class ParserType {
 		 * 
 		 * 
 		 * <p>
-		 * Objects of the following type(s) are allowed in the list
-		 * {@link Reference }
+		 * Objects of the following type(s) are allowed in the list {@link Reference }
 		 * 
 		 * 
 		 */
@@ -748,12 +734,10 @@ public class ParserType {
 		}
 
 		/**
-		 * <p>
 		 * Java class for anonymous complex type.
 		 * 
 		 * <p>
-		 * The following schema fragment specifies the expected content
-		 * contained within this class.
+		 * The following schema fragment specifies the expected content contained within this class.
 		 * 
 		 * <pre>
 		 * &lt;complexType>
@@ -827,10 +811,9 @@ public class ParserType {
 			 * Gets the value of the fieldMap property.
 			 * 
 			 * <p>
-			 * This accessor method returns a reference to the live list, not a
-			 * snapshot. Therefore any modification you make to the returned
-			 * list will be present inside the JAXB object. This is why there is
-			 * not a <CODE>set</CODE> method for the fieldMap property.
+			 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you
+			 * make to the returned list will be present inside the JAXB object. This is why there is not a
+			 * <CODE>set</CODE> method for the fieldMap property.
 			 * 
 			 * <p>
 			 * For example, to add a new item, do as follows:
@@ -841,8 +824,7 @@ public class ParserType {
 			 * 
 			 * 
 			 * <p>
-			 * Objects of the following type(s) are allowed in the list
-			 * {@link FieldMap }
+			 * Objects of the following type(s) are allowed in the list {@link FieldMap }
 			 * 
 			 * 
 			 */

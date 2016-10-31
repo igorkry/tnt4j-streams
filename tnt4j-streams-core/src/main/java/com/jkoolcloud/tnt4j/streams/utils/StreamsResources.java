@@ -40,10 +40,9 @@ public final class StreamsResources {
 	}
 
 	/**
-	 * Initializes singleton instance of resource bundle for default locale if
-	 * such is not available in bundles cache map. After initialization bundle
-	 * object is placed into cache map and retrieved from it on subsequent
-	 * calls. Cache map entry key is {@code bundleName}
+	 * Initializes singleton instance of resource bundle for default locale if such is not available in bundles cache
+	 * map. After initialization bundle object is placed into cache map and retrieved from it on subsequent calls. Cache
+	 * map entry key is {@code bundleName}
 	 *
 	 * @param bundleName
 	 *            the base name of the resource bundle
@@ -124,7 +123,7 @@ public final class StreamsResources {
 		try {
 			return getBundle(bundleName).getString(String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
 		} catch (MissingResourceException mre) {
-			return key.toString();
+			return key.name();
 		}
 	}
 

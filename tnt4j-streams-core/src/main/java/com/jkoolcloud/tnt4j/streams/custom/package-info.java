@@ -15,8 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams
- * custom streams components implementations.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams custom streams components implementations.
  *
  * @author akausinis
  * @version 1.0

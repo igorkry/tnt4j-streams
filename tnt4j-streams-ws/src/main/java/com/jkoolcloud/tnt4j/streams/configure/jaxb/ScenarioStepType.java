@@ -20,7 +20,6 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * 
  * Defines scenario step providing request/command params and scheduler.
  * 
  * 
@@ -28,8 +27,7 @@ import javax.xml.bind.annotation.*;
  * Java class for ScenarioStepType complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within
- * this class.
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ScenarioStepType">

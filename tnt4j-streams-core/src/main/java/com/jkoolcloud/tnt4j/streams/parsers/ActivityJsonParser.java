@@ -16,31 +16,35 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.JsonPathException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * <p>
  * Implements an activity data parser that assumes each activity data item is an JSON format string. JSON parsing is
  * performed using {@link JsonPath} API. Activity fields locator values are treated as JsonPath expressions.
  * <p>
@@ -57,7 +61,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
 
 	private static final String JSON_PATH_ROOT = "$";// NON-NLS
-	private static final String JSON_PATH_SEPARATOR = ".";// NON-NLS
+	private static final String JSON_PATH_SEPARATOR = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	private boolean jsonAsLine = true;
 
@@ -65,17 +69,12 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
-		this(LOGGER);
+		super();
 	}
 
-	/**
-	 * Constructs a new ActivityJsonParser.
-	 *
-	 * @param logger
-	 *            logger used by activity parser
-	 */
-	protected ActivityJsonParser(EventSink logger) {
-		super(logger);
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	@Override
@@ -90,8 +89,29 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
 				jsonAsLine = Boolean.parseBoolean(value);
+
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This parser supports the following class types (and all classes extending/implementing any of these):
+	 * <ul>
+	 * <li>{@link com.jayway.jsonpath.DocumentContext}</li>
+	 * <li>{@link java.lang.String}</li>
+	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.io.Reader}</li>
+	 * <li>{@link java.io.InputStream}</li>
+	 * </ul>
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return DocumentContext.class.isInstance(data) || super.isDataClassSupported(data);
 	}
 
 	@Override
@@ -104,16 +124,16 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		if (data == null) {
 			return null;
 		}
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), data);
 
 		DocumentContext jsonDoc = null;
 		String jsonString = null;
 		try {
 			if (data instanceof DocumentContext) {
 				jsonDoc = (DocumentContext) data;
+			} else if (data instanceof InputStream) {
+				jsonDoc = JsonPath.parse((InputStream) data);
 			} else {
-				jsonString = getNextJSONString(data, jsonAsLine);
+				jsonString = getNextActivityString(data);
 				if (StringUtils.isEmpty(jsonString)) {
 					return null;
 				}
@@ -131,42 +151,23 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			jsonString = jsonDoc.jsonString();
 		}
 
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				jsonString);
+
 		return parsePreparedItem(stream, jsonString, jsonDoc);
 	}
 
 	/**
-	 * Reads the next complete JSON document string from the specified data input source and returns it as a string.
+	 * Reads RAW activity data JSON package string from {@link BufferedReader}.
 	 *
-	 * @param data
-	 *            input source for activity data
-	 * @param jsonAsLine
-	 *            if {@code true} indicates complete JSON package is line, if {@code false} - whole data available to
-	 *            read
-	 * @return JSON document string, or {@code null} if end of input source has been reached
-	 * @throws IllegalArgumentException
-	 *             if the class of input source supplied is not supported.
+	 * @param rdr
+	 *            reader to use for reading
+	 * @return non empty RAW activity data JSON package string, or {@code null} if the end of the stream has been
+	 *         reached
 	 */
-	protected String getNextJSONString(Object data, boolean jsonAsLine) {
-		if (data == null) {
-			return null;
-		}
-		if (data instanceof String) {
-			return (String) data;
-		} else if (data instanceof byte[]) {
-			return Utils.getString((byte[]) data);
-		}
-		BufferedReader rdr;
-		if (data instanceof BufferedReader) {
-			rdr = (BufferedReader) data;
-		} else if (data instanceof Reader) {
-			rdr = new BufferedReader((Reader) data);
-		} else if (data instanceof InputStream) {
-			rdr = new BufferedReader(new InputStreamReader((InputStream) data));
-		} else {
-			throw new IllegalArgumentException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.unsupported", data.getClass().getName()));
-		}
+	@Override
+	protected String readNextActivity(BufferedReader rdr) {
 		StringBuilder jsonStringBuilder = new StringBuilder();
 		String line;
 
@@ -178,56 +179,85 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				}
 			}
 		} catch (EOFException eof) {
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.data.end"),
-					eof);
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+					getActivityDataType(), eof);
 		} catch (IOException ioe) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityJsonParser.error.reading"), ioe);
+			logger().log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
+					getActivityDataType(), ioe);
 		}
 
 		return jsonStringBuilder.toString();
 	}
 
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries - JSON
+	 */
+	@Override
+	protected String getActivityDataType() {
+		return "JSON"; // NON-NLS
+	}
+
+	/**
+	 * Gets field raw data value resolved by locator and formats it according locator definition.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param jsonDocContext
+	 *            {@link JsonPath} document context to read
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
+	 *
+	 * @throws ParseException
+	 *             if exception occurs while resolving raw data value or applying locator format properties to specified
+	 *             value
+	 *
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, DocumentContext data)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, DocumentContext jsonDocContext,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
-		if (locator != null) {
-			boolean format = true;
-			String locStr = locator.getLocator();
-			if (!StringUtils.isEmpty(locStr)) {
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
-				} else {
-					if (!locStr.startsWith(JSON_PATH_ROOT)) {
-						locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
-					}
-					Object jsonValue = data.read(locStr);
+		String locStr = locator.getLocator();
 
-					List<Object> jsonValuesList;
-					if (jsonValue instanceof List) {
-						jsonValuesList = (List<Object>) jsonValue;
-					} else {
-						jsonValuesList = new ArrayList<Object>(1);
-						jsonValuesList.add(jsonValue);
-					}
-
-					if (CollectionUtils.isNotEmpty(jsonValuesList)) {
-						List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
-						for (Object jsonValues : jsonValuesList) {
-							valuesList.add(locator.formatValue(jsonValues));
-						}
-
-						val = wrapValue(valuesList);
-						format = false;
-					}
-				}
+		if (StringUtils.isNotEmpty(locStr)) {
+			if (!locStr.startsWith(JSON_PATH_ROOT)) {
+				locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
 			}
 
-			if (format) {
-				val = locator.formatValue(val);
+			Object jsonValue = null;
+			try {
+				jsonValue = jsonDocContext.read(locStr);
+			} catch (JsonPathException exc) {
+				logger().log(
+						!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources
+								.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.path.exception"),
+						locStr, exc.getLocalizedMessage());
+			}
+
+			if (jsonValue != null) {
+				List<Object> jsonValuesList;
+				if (jsonValue instanceof List) {
+					jsonValuesList = (List<Object>) jsonValue;
+				} else {
+					jsonValuesList = new ArrayList<Object>(1);
+					jsonValuesList.add(jsonValue);
+				}
+
+				if (CollectionUtils.isNotEmpty(jsonValuesList)) {
+					List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
+					for (Object jsonValues : jsonValuesList) {
+						valuesList.add(locator.formatValue(jsonValues));
+					}
+
+					val = Utils.simplifyValue(valuesList);
+					formattingNeeded.set(false);
+				}
 			}
 		}
 
