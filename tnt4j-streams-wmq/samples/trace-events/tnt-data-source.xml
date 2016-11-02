@@ -24,7 +24,7 @@
 
         <!-- message fields -->
         <field name="MQCA_Q_MGR_NAME" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
-        <field name="MQCACF_HOST_NAME" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <field name="ServerName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
         <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
             <field-locator locator="MQCAMO_START_TIME" locator-type="Label"/>
@@ -35,7 +35,7 @@
         </field>
         <field name="MQIA_COMMAND_LEVEL" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
         <field name="MQIACF_SEQUENCE_NUMBER" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
-        <field name="MQCACF_APPL_NAME" locator="MQCACF_APPL_NAME" locator-type="Label"/>
+        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label"/>
         <field name="MQIA_APPL_TYPE" locator="MQIA_APPL_TYPE" locator-type="Label"/>
         <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
         <field name="MQCACF_USER_IDENTIFIER" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
@@ -50,14 +50,14 @@
         <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" format="bytes"/>
 
         <!-- activity trace fields -->
-        <field name="MQIACF_OPERATION_ID" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label"/>
+        <field name="EventName" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label"/>
         <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label"/>
         <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
         <field name="MQIACF_OBJECT_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
-        <field name="MQCACF_OBJECT_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
+        <field name="ResourceName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
         <field name="MQCACF_OBJECT_Q_MGR_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
         <field name="MQIACF_HOBJ" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
         <field name="MQIACF_COMP_CODE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label"/>
