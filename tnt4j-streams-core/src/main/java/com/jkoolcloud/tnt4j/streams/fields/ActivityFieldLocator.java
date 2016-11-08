@@ -281,7 +281,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 * @param format
 	 *            the format string for interpreting raw data value
 	 * @param locale
-	 *            locale for formatter to use.
+	 *            locale for formatter to use
 	 */
 	public void setFormat(String format, String locale) {
 		this.format = format;

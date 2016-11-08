@@ -41,10 +41,11 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * corresponding activity field.
  * <p>
  * PCF message can have grouped parameters - all message will have header {@link MQCFH} and may have {@link MQCFGR} type
- * parameters. To access PCF message header fields use {@value #HEAD_MQCFH} expression with header field name separated
- * using '{@value StreamsConstants#DEFAULT_PATH_DELIM}' (i.e. 'MQCFH.CompCode'). To access inner {@link MQCFGR} (or
- * inner inner and so on) parameters use group parameter MQ constant name/value with grouped parameter MQ constant
- * name/value separated using '{@value StreamsConstants#DEFAULT_PATH_DELIM}' (i.e.
+ * parameters. To access PCF message header fields use 'MQCFH' expression with header field name separated using
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' (i.e. 'MQCFH.CompCode'). To access
+ * inner {@link MQCFGR} (or inner inner and so on) parameters use group parameter MQ constant name/value with grouped
+ * parameter MQ constant name/value separated using
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' (i.e.
  * 'MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE').
  * <p>
  * This parser supports the following properties:

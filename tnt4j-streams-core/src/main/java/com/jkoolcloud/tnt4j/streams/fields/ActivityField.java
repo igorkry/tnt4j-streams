@@ -43,7 +43,7 @@ public class ActivityField {
 	/**
 	 * Constant for default delimiter symbol used to delimit multiple field values.
 	 */
-	public static final String DEFAULT_FIELD_VALUES_DELIM = ",";
+	public static final String DEFAULT_FIELD_VALUES_DELIM = ","; // NON-NLS
 
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
@@ -191,15 +191,23 @@ public class ActivityField {
 	}
 
 	/**
-	 * TODO
+	 * Sets grouping field (containing no direct value locator, but grouping several field value locators) locator used
+	 * to format resolved activity RAW data avalue.
 	 *
 	 * @param radix
+	 *            radix of field values
 	 * @param reqVal
+	 *            {@code true}/{@code false} string
 	 * @param dataType
+	 *            the data type for raw data field
 	 * @param units
+	 *            the units the raw data value represents
 	 * @param format
+	 *            the format string for interpreting raw data value
 	 * @param locale
+	 *            locale for formatter to use
 	 * @param timeZone
+	 *            the timeZone to set
 	 */
 	public void setGroupLocator(int radix, String reqVal, ActivityFieldDataType dataType, String units, String format,
 			String locale, String timeZone) {
@@ -221,9 +229,10 @@ public class ActivityField {
 	}
 
 	/**
-	 * TODO
+	 * Gets grouping field (containing no direct value locator, but grouping several field value locators) locator used
+	 * to format resolved activity RAW data avalue.
 	 * 
-	 * @return
+	 * @return grouping field locator
 	 */
 	public ActivityFieldLocator getGroupLocator() {
 		return groupLocator;

@@ -41,8 +41,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * structure, where each field is represented by declared class field and the field name is used to map each field onto
  * its corresponding activity field.
  * <p>
- * If field is complex object, subfields can be accessed using '{@value StreamsConstants#DEFAULT_PATH_DELIM}' as naming
- * hierarchy separator: i.e. 'header.author.name'.
+ * If field is complex object, subfields can be accessed using
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator: i.e.
+ * 'header.author.name'.
  *
  * @version $Revision: 1 $
  */

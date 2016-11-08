@@ -40,13 +40,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * field onto its corresponding activity field.
  * <p>
  * If map entry value is inner map, entries of that map can be accessed using
- * '{@value StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e. 'headers.auth.name'. Locator path
- * delimiter value can be configured over parser 'LocPathDelim' property.
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e.
+ * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
  * This parser supports the following properties:
  * <ul>
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
- * elements. Default value - '{@value StreamsConstants#DEFAULT_PATH_DELIM}'. (Optional)</li>
+ * elements. Default value - '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}'.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
