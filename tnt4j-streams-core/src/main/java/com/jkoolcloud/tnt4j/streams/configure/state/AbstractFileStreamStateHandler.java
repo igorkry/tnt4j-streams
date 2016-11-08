@@ -135,8 +135,6 @@ public abstract class AbstractFileStreamStateHandler<T> {
 								StreamsResources.RESOURCE_BUNDLE_NAME, "FileStreamStateHandler.location.not.found"));
 					}
 				}
-			} else {
-				fileAccessState = new FileAccessState();
 			}
 		} catch (IOException e) {
 			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -144,6 +142,10 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		} catch (JAXBException e) {
 			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FileStreamStateHandler.file.not.parsed"), e);
+		}
+
+		if (fileAccessState == null) {
+			fileAccessState = new FileAccessState();
 		}
 	}
 

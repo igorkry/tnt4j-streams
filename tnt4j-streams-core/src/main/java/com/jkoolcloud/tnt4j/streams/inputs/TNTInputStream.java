@@ -87,6 +87,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
 
+	private AtomicBoolean failureFlag = new AtomicBoolean(false);
+
 	private String name;
 
 	private TNTOutput<O> out;
@@ -264,6 +266,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	public void startStream() throws Exception {
 		initialize();
 		start();
+
+		// TODO: maybe add some Runtime shutdown hook? like {halt(false); shutdownStream ();}
 	}
 
 	/**
@@ -598,7 +602,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			throw e;
 		}
 
-		AtomicBoolean failureFlag = new AtomicBoolean(false);
 		try {
 			startStream();
 
@@ -637,20 +640,30 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
 		} finally {
-			endTime = System.currentTimeMillis();
-			if (!failureFlag.get()) {
-				notifyStreamSuccess();
-			}
-			notifyFinished();
-
-			cleanup();
-
-			logger().log(OpLevel.INFO,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
-					Thread.currentThread().getName());
-			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.stream.statistics"), name, getStreamStatistics());
+			shutdownStream();
 		}
+	}
+
+	private void shutdownStream() {
+		// check if stream is already shot down
+		if (endTime != -1) {
+			return;
+		}
+
+		endTime = System.currentTimeMillis();
+		if (!failureFlag.get()) {
+			notifyStreamSuccess();
+		}
+		notifyFinished();
+
+		cleanup();
+
+		logger().log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
+				Thread.currentThread().getName());
+		logger().log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.statistics"),
+				name, getStreamStatistics());
 	}
 
 	/**
