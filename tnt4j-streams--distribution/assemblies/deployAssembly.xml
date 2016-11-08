@@ -68,6 +68,20 @@
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>../tnt4j-streams-wmq/config</directory>
+            <includes>
+                <include>*.*</include>
+            </includes>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../tnt4j-streams-ws/config</directory>
+            <includes>
+                <include>*.*</include>
+            </includes>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>../</directory>
             <includes>
                 <include>README*</include>

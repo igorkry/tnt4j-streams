@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-ws.xsd">
+        xsi:noNamespaceSchemaLocation="tnt-data-source-ws.xsd">
 
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
         <property name="Pattern"
@@ -16,8 +16,8 @@
 
         <scenario name="Sample Win Cmd stream scenario">
             <step name="Step Windows">
-                <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
                 <schedule-simple interval="25" units="Seconds" repeatCount="-1"/>
+                <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
             </step>
         </scenario>
 

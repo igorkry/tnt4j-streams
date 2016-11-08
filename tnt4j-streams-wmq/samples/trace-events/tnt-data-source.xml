@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-wmq_pcf.xsd">
+        xsi:noNamespaceSchemaLocation="tnt-data-source-wmq_pcf.xsd">
 
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser">
         <property name="TranslateNumValues" value="true"/>
@@ -56,67 +56,68 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
-        <field name="MQIACF_OBJECT_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_OBJECT_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
         <field name="ResourceName" separator=" ">
-			<field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
-			<field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
-		</field>
-        <field name="MQIACF_HOBJ" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
-        <field name="MQIACF_COMP_CODE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
+        </field>
+        <field name="MQTrace.MQIACF_HOBJ" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_COMP_CODE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label"/>
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label"/>
-        <field name="MQIACF_OPEN_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
-        <field name="MQCACF_RESOLVED_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
-        <field name="MQCACF_RESOLVED_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_MGR" locator-type="Label"/>
-        <field name="MQCACF_RESOLVED_LOCAL_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME" locator-type="Label"/>
-        <field name="MQCACF_RESOLVED_LOCAL_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
-        <field name="MQIACF_RESOLVED_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
-        <field name="MQCACF_DYNAMIC_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
-        <field name="MQIACF_GET_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
-        <field name="MQIACF_MSG_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label"/>
-        <field name="MQIAMO64_HIGHRES_TIME" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
-               units="Microseconds"/>
-        <field name="MQIACF_BUFFER_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label"/>
-        <field name="MQIACF_REPORT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
-        <field name="MQIACF_MSG_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
-        <field name="MQIACF_EXPIRY" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label"/>
-        <field name="MQCACH_FORMAT_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
-        <field name="MQIACF_PRIORITY" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label"/>
-        <field name="MQIACF_PERSISTENCE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
-        <field name="MQBACF_MSG_ID" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"
+        <field name="MQTrace.MQIACF_OPEN_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_RESOLVED_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_RESOLVED_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_MGR" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_RESOLVED_LOCAL_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME"
+               locator-type="Label"/>
+        <field name="MQTrace.MQCACF_RESOLVED_LOCAL_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_RESOLVED_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_DYNAMIC_Q_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_GET_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_MSG_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label"/>
+        <field name="MQTrace.MQIAMO64_HIGHRES_TIME" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label"
+               datatype="Timestamp" units="Microseconds"/>
+        <field name="MQTrace.MQIACF_BUFFER_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_REPORT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_MSG_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_EXPIRY" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label"/>
+        <field name="MQTrace.MQCACH_FORMAT_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_PRIORITY" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_PERSISTENCE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
+        <field name="MQTrace.MQBACF_MSG_ID" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"
                format="bytes"/>
         <field name="Correlator" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"
                format="bytes"/>
-        <field name="MQCACF_REPLY_TO_Q" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
-        <field name="MQCACF_REPLY_TO_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
-        <field name="MQIA_CODED_CHAR_SET_ID" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
-        <field name="MQIACF_ENCODING" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_REPLY_TO_Q" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_REPLY_TO_Q_MGR" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
+        <field name="MQTrace.MQIA_CODED_CHAR_SET_ID" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_ENCODING" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
         <field name="PutTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
         </field>
-        <field name="MQIACF_CLOSE_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
-        <field name="MQIACF_SELECTOR_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label"/>
-        <field name="MQIACF_SELECTORS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/> <!-- array -->
-        <field name="MQIACF_MQCB_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
-        <field name="MQBACF_CONNECTION_ID" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"
-               format="bytes"/>
-        <field name="MQCA_Q_MGR_NAME2" locator="MQGACF_ACTIVITY_TRACE.MQCA_Q_MGR_NAME" locator-type="Label"/>
-        <field name="MQIACF_RECS_PRESENT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
-        <field name="MQIACF_CONNECT_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
-        <field name="MQIACF_CALL_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
-        <field name="MQIACF_CTL_OPERATION" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
-        <field name="MQIACF_PUT_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
-        <field name="MQIACF_INVALID_DEST_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label"/>
-        <field name="MQCACF_MQCB_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
-        <field name="MQBACF_MQCB_FUNCTION" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label"/>
-        <field name="MQIACF_UNKNOWN_DEST_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label"/>
-        <field name="MQIACF_MQCB_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
-        <field name="MQIACF_MQCB_OPERATION" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
-        <field name="MQIACH_MAX_MSG_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_CLOSE_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_SELECTOR_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_SELECTORS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/> <!-- array -->
+        <field name="MQTrace.MQIACF_MQCB_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQBACF_CONNECTION_ID" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label"
+               datatype="Binary" format="bytes"/>
+        <field name="MQTrace.MQCA_Q_MGR_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_RECS_PRESENT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_CONNECT_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_CALL_TYPE" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_CTL_OPERATION" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_PUT_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_INVALID_DEST_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label"/>
+        <field name="MQTrace.MQCACF_MQCB_NAME" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQBACF_MQCB_FUNCTION" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_UNKNOWN_DEST_COUNT" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_MQCB_OPTIONS" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQIACF_MQCB_OPERATION" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
+        <field name="MQTrace.MQIACH_MAX_MSG_LENGTH" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label"/>
     </parser>
 
     <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
-        <property name="Host" value="172.16.6.54"/>
+        <property name="Host" value="[YOUR_MQ_HOST]"/>
         <property name="Port" value="1420"/>
         <property name="QueueManager" value="TT1"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
@@ -125,7 +126,8 @@
         <property name="TraceOperations" value="*"/>
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
-        
+        <!--<property name="TraceOperations" value="MQXF_(CCCCC|TTTTT)"/>-->
+
         <parser-ref name="TraceEventsParser"/>
     </stream>
 </tnt-data-source>

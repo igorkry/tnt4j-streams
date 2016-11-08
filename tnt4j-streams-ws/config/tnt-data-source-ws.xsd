@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="TNTDataSourceWS" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-    <xs:redefine schemaLocation="../../config/tnt-data-source.xsd">
+    <xs:redefine schemaLocation="tnt-data-source.xsd">
         <xs:complexType name="StreamType">
             <xs:complexContent>
                 <xs:extension base="StreamType">

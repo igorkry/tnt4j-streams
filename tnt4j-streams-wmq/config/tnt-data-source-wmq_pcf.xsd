@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="TNTDataSourceWMQ_PCF" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:redefine schemaLocation="tnt-data-source.xsd">
+        <xs:attributeGroup name="FieldLocatorAttributes">
+            <xs:attributeGroup ref="FieldLocatorAttributes"/>
+            <xs:attribute name="locator" use="optional" type="PCFLocatorValues">
+                <xs:annotation>
+                    <xs:documentation>
+                        PCF message parameter MQ constant name/value (for body) or field name (for header).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:attributeGroup>
+    </xs:redefine>
+
+    <!-- PCF message parameter locator definition -->
+    <xs:simpleType name="PCFLocatorValues">
+        <xs:annotation>
+            <xs:documentation>
+                Can be either one of predefined PCF message parameters or PCF parameter MQ constant name/value.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:union memberTypes="PCFHeaderFields PCFParameters ActivityTraceParameters PCFNumericParameters xs:string xs:integer"/>
+    </xs:simpleType>
+
+    <!-- PCF message header fields -->
+    <xs:simpleType name="PCFHeaderFields">
+        <xs:annotation>
+            <xs:documentation>
+                PCF message header fields list.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MQCFH.Command"/>
+            <xs:enumeration value="MQCFH.MsgSeqNumber"/>
+            <xs:enumeration value="MQCFH.Control"/>
+            <xs:enumeration value="MQCFH.CompCode"/>
+            <xs:enumeration value="MQCFH.Reason"/>
+            <xs:enumeration value="MQCFH.ParameterCount"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- PCF message parameters -->
+    <xs:simpleType name="PCFParameters">
+        <xs:annotation>
+            <xs:documentation>
+                PCF message parameters list.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MQCA_Q_MGR_NAME"/>
+            <xs:enumeration value="MQCACF_HOST_NAME"/>
+            <xs:enumeration value="MQCAMO_START_DATE"/>
+            <xs:enumeration value="MQCAMO_START_TIME"/>
+            <xs:enumeration value="MQCAMO_END_DATE"/>
+            <xs:enumeration value="MQCAMO_END_TIME"/>
+            <xs:enumeration value="MQIA_COMMAND_LEVEL"/>
+            <xs:enumeration value="MQIACF_SEQUENCE_NUMBER"/>
+            <xs:enumeration value="MQCACF_APPL_NAME"/>
+            <xs:enumeration value="MQIA_APPL_TYPE"/>
+            <xs:enumeration value="MQIACF_PROCESS_ID"/>
+            <xs:enumeration value="MQCACF_USER_IDENTIFIER"/>
+            <xs:enumeration value="MQIACF_API_CALLER_TYPE"/>
+            <xs:enumeration value="MQIACF_API_ENVIRONMENT"/>
+            <xs:enumeration value="MQCACF_APPL_FUNCTION"/>
+            <xs:enumeration value="MQIACF_APPL_FUNCTION_TYPE"/>
+            <xs:enumeration value="MQIACF_TRACE_DETAIL"/>
+            <xs:enumeration value="MQIACF_TRACE_DATA_LENGTH"/>
+            <xs:enumeration value="MQIACF_POINTER_SIZE"/>
+            <xs:enumeration value="MQIA_PLATFORM"/>
+            <xs:enumeration value="MQBACF_CORREL_ID"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- MQ activity trace parameters -->
+    <xs:simpleType name="ActivityTraceParameters">
+        <xs:annotation>
+            <xs:documentation>
+                MQ activity trace parameters list.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_MGR"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCA_Q_MGR_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION"/>
+            <xs:enumeration value="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PCFNumericParameters">
+        <xs:annotation>
+            <xs:documentation>
+                PCF parameter numeric values list.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:union>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQIA_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="1"/>
+                    <xs:maxInclusive value="252"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQIAMO_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="701"/>
+                    <xs:maxInclusive value="837"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQIACF_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="1001"/>
+                    <xs:maxInclusive value="1404"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQIACH_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="1501"/>
+                    <xs:maxInclusive value="1643"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQCA_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="2001"/>
+                    <xs:maxInclusive value="2124"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQCAMO_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="2701"/>
+                    <xs:maxInclusive value="2712"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQCACF_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="3001"/>
+                    <xs:maxInclusive value="3204"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQCACH_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="3501"/>
+                    <xs:maxInclusive value="3569"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQHA_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="4001"/>
+                    <xs:maxInclusive value="4001"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQBACF_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="7001"/>
+                    <xs:maxInclusive value="7035"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:annotation>
+                        <xs:documentation>
+                            MQGACF_*
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:minInclusive value="8001"/>
+                    <xs:maxInclusive value="8014"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+</xs:schema>

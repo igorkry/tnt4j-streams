@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../config/tnt-data-source-wmq_pcf.xsd">
+        xsi:noNamespaceSchemaLocation="tnt-data-source-wmq_pcf.xsd">
 
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
@@ -51,7 +51,7 @@
     </parser>
 
     <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
-        <property name="Host" value="172.16.6.54"/>
+        <property name="Host" value="[YOUR_MQ_HOST]"/>
         <property name="Port" value="1420"/>
         <property name="QueueManager" value="TT1"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
