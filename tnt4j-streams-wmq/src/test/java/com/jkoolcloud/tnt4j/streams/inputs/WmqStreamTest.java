@@ -91,7 +91,7 @@ public class WmqStreamTest {
 	}
 
 	@Test
-	public void testcloseQmgrConnection() throws MQException {
+	public void testCloseQmgrConnection() throws MQException {
 		final MQQueueManager mqqManager = mock(MQQueueManager.class);
 		final MQDestination mqDestination = mock(MQDestination.class);
 

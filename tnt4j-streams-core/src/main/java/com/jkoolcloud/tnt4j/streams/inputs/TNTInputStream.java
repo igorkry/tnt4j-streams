@@ -60,6 +60,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  */
 public abstract class TNTInputStream<T, O> implements Runnable {
 
+	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = 5 * 1000L;
+
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
 	private static final int DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT = 20;
@@ -72,8 +74,12 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private AtomicInteger currActivityIndex = new AtomicInteger(0);
 	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
 	private AtomicLong streamedBytesCount = new AtomicLong(0);
+	private AtomicBoolean failureFlag = new AtomicBoolean(false);
 	private long startTime = -1;
 	private long endTime = -1;
+	private String name;
+
+	private TNTOutput<O> out;
 
 	private List<InputStreamListener> streamListeners;
 	private List<StreamTasksListener> streamTasksListeners;
@@ -86,12 +92,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private int executorThreadsQty = DEFAULT_EXECUTOR_THREADS_QTY;
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
-
-	private AtomicBoolean failureFlag = new AtomicBoolean(false);
-
-	private String name;
-
-	private TNTOutput<O> out;
 
 	/**
 	 * Returns logger used by this stream.
@@ -267,7 +267,17 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		initialize();
 		start();
 
-		// TODO: maybe add some Runtime shutdown hook? like {halt(false); shutdownStream ();}
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (!isShotDown()) {
+					halt(false);
+					if (ownerThread != null) {
+						ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
+					}
+				}
+			}
+		}));
 	}
 
 	/**
@@ -531,7 +541,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	public void halt(boolean terminate) {
 		shutdownExecutors();
 
-		ownerThread.halt(terminate);
+		if (ownerThread != null) {
+			ownerThread.halt(terminate);
+		}
 	}
 
 	/**
@@ -540,7 +552,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @return {@code true} if stream has stopped processing, {@code false} - otherwise
 	 */
 	public boolean isHalted() {
-		return ownerThread.isStopRunning();
+		return ownerThread == null ? false : ownerThread.isStopRunning();
 	}
 
 	/**
@@ -644,9 +656,12 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		}
 	}
 
+	private boolean isShotDown() {
+		return endTime != -1;
+	}
+
 	private void shutdownStream() {
-		// check if stream is already shot down
-		if (endTime != -1) {
+		if (isShotDown()) {
 			return;
 		}
 
@@ -679,19 +694,14 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
 	// /**
-	// * Signals that streaming process has to be canceled and invokes status
-	// * change event.
+	// * Signals that streaming process has to be canceled and invokes status change event.
 	// */
 	// public void cancel() { // TODO
-	// halt();
-	//
-	// // ownerThread.join();
+	// halt(false);
+	// ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
 	//
 	// notifyStatusChange(StreamStatus.CANCEL);
 	// // notifyFinished();
-	//
-	// // shutdownExecutors();
-	// // cleanup();
 	// }
 
 	/**

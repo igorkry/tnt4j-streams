@@ -319,7 +319,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			T msgData = getActivityDataFromMessage(mqMsg);
 			qmgr.commit();
 			curFailCount = 0;
-			addStreamedBytesCount(mqMsg.getDataLength());
+			addStreamedBytesCount(mqMsg.getMessageLength());
 			// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
 			return msgData;
 		} catch (MQException mqe) {
