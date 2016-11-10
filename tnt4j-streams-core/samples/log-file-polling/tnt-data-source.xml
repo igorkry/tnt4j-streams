@@ -31,6 +31,8 @@
         <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="20"/>
         <property name="StartFromLatest" value="true"/>
+        <property name="RestoreState" value="true"/>
+
         <parser-ref name="AccessLogParserCommon"/>
     </stream>
 </tnt-data-source>

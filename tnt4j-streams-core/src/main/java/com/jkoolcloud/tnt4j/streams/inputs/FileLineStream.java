@@ -150,9 +150,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			File file;
 			stateHandler = storeState ? new FileStreamStateHandler(availableFiles, FileLineStream.this.getName())
 					: null;
-			if (stateHandler != null && stateHandler.isStreamedFileAvailable()) {
+			if (isStoredStateAvailable()) {
 				file = stateHandler.getFile();
 				lineNumber = stateHandler.getLineNumber();
+				// lastModifTime = stateHandler.getReadTime();
 			} else {
 				file = ArrayUtils.isEmpty(availableFiles) ? null
 						: startFromLatestActivity ? availableFiles[availableFiles.length - 1] : availableFiles[0];
@@ -210,7 +211,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"FileLineStream.file.updated"),
 							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-							TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
+							getLastReadTimeToLog(flm));
 
 					lastModifTime = flm;
 				} else {

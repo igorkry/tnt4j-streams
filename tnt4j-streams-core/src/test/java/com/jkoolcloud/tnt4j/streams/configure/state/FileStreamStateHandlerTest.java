@@ -93,6 +93,7 @@ public class FileStreamStateHandlerTest {
 				if (count2 == 3) {
 					newFAS.currentLineCrc = lineCRC;
 					newFAS.currentLineNumber = lineNumber;
+					newFAS.lastReadTime = System.currentTimeMillis();
 					lineLastRead = lineNumber;
 				}
 				line = reader.readLine();

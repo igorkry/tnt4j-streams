@@ -46,6 +46,11 @@ public class FileAccessState {
 	 */
 	@XmlElement(required = true)
 	public Long currentLineCrc;
+	/**
+	 * Timestamp value of last file read.
+	 */
+	@XmlElement(required = false)
+	public Long lastReadTime;
 
 	/**
 	 * Constructs a new ActivityJsonParser.

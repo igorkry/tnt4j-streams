@@ -295,7 +295,11 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	static FileAccessState loadStateFile(String path, String streamName) throws JAXBException {
 		File stateFile = new File(path + File.separator + getFileName(streamName));
 
-		return stateFile.isFile() ? unmarshal(stateFile) : null;
+		return isFileAvailable(stateFile) ? unmarshal(stateFile) : null;
+	}
+
+	private static boolean isFileAvailable(File f) {
+		return f != null && f.isFile() && f.length() > 0;
 	}
 
 	/**
@@ -405,6 +409,19 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	}
 
 	/**
+	 * Gets the file last read timestamp.
+	 *
+	 * @return file last read timestamp
+	 */
+	public long getReadTime() {
+		return isStreamedFileAvailable() ? getLastReadTime() : -1;
+	}
+
+	private long getLastReadTime() {
+		return fileAccessState == null || fileAccessState.lastReadTime == null ? -1 : fileAccessState.lastReadTime;
+	}
+
+	/**
 	 * Persists files streaming state in specified directory or system temp directory.
 	 *
 	 * @param fileDir
@@ -491,6 +508,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 		try {
 			fileAccessState.currentLineNumber = lineNr;
+			fileAccessState.lastReadTime = System.currentTimeMillis();
 
 			CRC32 crc = new CRC32();
 			final byte[] bytes4Line = lineStr.getBytes(Utils.UTF8);

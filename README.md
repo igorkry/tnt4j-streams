@@ -2888,13 +2888,14 @@ These parameters are applicable to streams which uses parsers to parse incoming 
  * FileName - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
  * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
  are read from oldest to newest sequentially one single time. Default value - `false`. (Optional)
-    * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest file entry line. If
-    `false` - then all lines from available files are streamed on startup. Actual just if `FilePolling` property is set
-    to `true`. Default value - `true`. (Optional)
-    * FileReadDelay - delay is seconds between file reading iterations. Actual just if `FilePolling` property is set to
+    * FileReadDelay - delay is seconds between file reading iterations. Actual only if `FilePolling` property is set to
     `true`. Default value - 15sec. (Optional)
- * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart.
- Default value - `true`. (Optional)
+ * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart. Note, if 
+ `StartFromLatest` is set to `false` - read state storing stays turned on, but previous stored read state is reset (no need to delete state 
+ file manually). Default value - `false`. (Optional)
+ * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest file entry line. If `false` - then all 
+ lines from available files are streamed on startup. Actual only if `FilePolling` or `RestoreState` properties are set to `true`. Default 
+ value - `true`. (Optional)
  * RangeToStream - defines streamed data lines index range. Default value - `1:`. (Optional)
 
     sample:
@@ -2903,7 +2904,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
     <property name="FileReadDelay" value="5"/>
     <property name="StartFromLatest" value="true"/>
     <property name="FilePolling" value="true"/>
-    <property name="RestoreState" value="false"/>
+    <property name="RestoreState" value="true"/>
     <property name="RangeToStream" value="12:125"/>
  ```
 

@@ -50,13 +50,15 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
  * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
- * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual just if
- * 'FilePolling' property is set to {@code true}. Default value - {@code true}. (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual just if 'FilePolling' property is set to
+ * <li>FileReadDelay - delay is seconds between file reading iterations. Actual only if 'FilePolling' property is set to
  * {@code true}. Default value - 15sec. (Optional)</li>
  * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
- * on stream restart. Default value - {@code true}. (Optional)</li>
+ * on stream restart. Note, if 'StartFromLatest' is set to {@code false} - read state storing stays turned on, but
+ * previous stored read state is reset (no need to delete state file manually). Default value - {@code false}.
+ * (Optional)</li>
+ * <li>StartFromLatest - flag {@code true}/{@code false} indicating that streaming should be performed from latest file
+ * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual only if
+ * 'FilePolling' or 'RestoreState' properties are set to {@code true}. Default value - {@code true}. (Optional)</li>
  * <li>RangeToStream - defines streamed data lines index range. Default value - {@code 1:}. (Optional)</li>
  * </ul>
  *
@@ -91,7 +93,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	/**
 	 * Stream attribute defining whether file read state should be stored and restored on stream restart.
 	 */
-	protected boolean storeState = true;
+	protected boolean storeState = false;
 
 	private String rangeValue = "1:"; // NON-NLS
 	private IntRange lineRange = null;
@@ -162,7 +164,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 
-		if (!pollingOn) {
+		if (!pollingOn && !storeState) {
 			startFromLatestActivity = false;
 		}
 
@@ -298,6 +300,15 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		protected abstract void initialize() throws Exception;
 
 		/**
+		 * Checks if stored file read state is available and should be loaded.
+		 *
+		 * @return flag indicating whether stored file read state should be loaded
+		 */
+		protected boolean isStoredStateAvailable() {
+			return startFromLatestActivity && stateHandler != null && stateHandler.isStreamedFileAvailable();
+		}
+
+		/**
 		 * Performs continuous file monitoring until stream thread is halted or monitoring is interrupted. File
 		 * monitoring is performed with {@link #fileWatcherDelay} defined delays between iterations.
 		 */
@@ -368,12 +379,30 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 		@Override
 		void close() throws Exception {
-			super.close();
-
 			if (stateHandler != null && fileToRead != null) {
 				stateHandler.writeState(fileToRead instanceof File ? ((File) fileToRead).getParentFile() : null,
 						AbstractFileLineStream.this.getName());
 			}
+
+			super.close();
+		}
+
+		/**
+		 * Returns time period from last file read to be logged.
+		 *
+		 * @param flm
+		 *            file last modified timestamp
+		 * @return time period representation to be logged
+		 */
+		protected Object getLastReadTimeToLog(long flm) {
+			long fat = flm;
+			long lrt = lastModifTime;
+			if (lrt < 0 && stateHandler != null) {
+				lrt = stateHandler.getReadTime();
+				fat = System.currentTimeMillis();
+			}
+
+			return lrt < 0 ? "UNKNOWN" : TimeUnit.MILLISECONDS.toSeconds(fat - lrt); // NON-NLS
 		}
 	}
 

@@ -173,9 +173,10 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 			stateHandler = storeState
 					? new HdfsFileStreamStateHandler(availableFiles, fs, HdfsFileLineStream.this.getName()) : null;
-			if (stateHandler != null && stateHandler.isStreamedFileAvailable()) {
+			if (isStoredStateAvailable()) {
 				filePath = stateHandler.getFile();
 				lineNumber = stateHandler.getLineNumber();
+				// lastModifTime = stateHandler.getReadTime();
 			} else {
 				filePath = ArrayUtils.isEmpty(availableFiles) ? null
 						: startFromLatestActivity ? availableFiles[availableFiles.length - 1] : availableFiles[0];
@@ -240,7 +241,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 										"FileLineStream.file.updated"),
 								TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-								TimeUnit.MILLISECONDS.toSeconds(flm - lastModifTime));
+								getLastReadTimeToLog(flm));
 
 						lastModifTime = flm;
 					} else {
@@ -428,9 +429,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 		@Override
 		void close() throws Exception {
-			super.close();
-
 			Utils.close(fs);
+
+			super.close();
 		}
 	}
 }
