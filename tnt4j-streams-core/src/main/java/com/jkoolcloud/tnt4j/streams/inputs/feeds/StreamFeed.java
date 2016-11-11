@@ -115,7 +115,7 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 			try {
 				int total = super.read(b, off, len);
 
-				String line = total == -1 ? "EOF" : Utils.toHex(b, off, total); // NON-NLS
+				String line = total == -1 ? "EOF" : Utils.toHexDump(b, off, total); // NON-NLS
 
 				LOGGER.log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.bytes"),

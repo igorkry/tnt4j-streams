@@ -82,7 +82,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected static String toString(Object data) {
 		if (data instanceof byte[]) {
-			return Utils.toHex((byte[]) data);
+			return Utils.toHexDump((byte[]) data);
 		}
 
 		return String.valueOf(data);

@@ -91,6 +91,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Base64 encodes the specified sequence of bytes as string.
+	 *
+	 * @param src
+	 *            byte sequence to encode
+	 * @return encoded string
+	 */
+	public static String base64EncodeStr(byte[] src) {
+		return Base64.encodeBase64String(src);
+	}
+
+	/**
 	 * Base64 decodes the specified sequence of bytes.
 	 *
 	 * @param src
@@ -102,14 +113,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Converts an array of bytes into an array of characters representing the hexadecimal values.
+	 * Converts an array of bytes into a string representing the hexadecimal bytes values.
 	 *
 	 * @param src
 	 *            byte sequence to encode
-	 * @return encoded character sequence
+	 * @return encoded bytes hex string
 	 */
-	public static char[] encodeHex(byte[] src) {
-		return Hex.encodeHex(src);
+	public static String encodeHex(byte[] src) {
+		return Hex.encodeHexString(src);
 	}
 
 	/**
@@ -219,7 +230,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (putTime != null) {
 			_msgDigest.update(putTime.trim().getBytes());
 		}
-		return new String(base64Encode(_msgDigest.digest()));
+		return base64EncodeStr(_msgDigest.digest());
 	}
 
 	/**
@@ -458,7 +469,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
 		if (tagsData instanceof byte[]) {
-			return new String[] { "0x" + Hex.encodeHexString((byte[]) tagsData) };
+			return new String[] { toHexString((byte[]) tagsData) };
 		} else if (tagsData instanceof String) {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
@@ -474,6 +485,19 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Makes Hex string representation (starting '0x') of byte array.
+	 *
+	 * @param bytes
+	 *            byte array to represent as string
+	 * @return hex string representation of byte array
+	 *
+	 * @see #encodeHex(byte[])
+	 */
+	public static String toHexString(byte[] bytes) {
+		return "0x" + encodeHex(bytes);
 	}
 
 	/**
@@ -807,7 +831,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param obj
 	 *            object to check
-	 * @return {@code true} if obj is {@link Collection} or {@code Object[]}, {@code false} - otherwise.
+	 * @return {@code true} if obj is {@link Collection} or {@code Object[]}, {@code false} - otherwise
 	 */
 	public static boolean isCollection(Object obj) {
 		return obj instanceof Object[] || obj instanceof Collection;
@@ -819,7 +843,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param cls
 	 *            class to check
 	 * @return {@code true} if cls is implementation of {@link Collection} or represents an array class, {@code false} -
-	 *         otherwise.
+	 *         otherwise
 	 */
 	public static boolean isCollectionType(Class<?> cls) {
 		return cls != null && (cls.isArray() || Collection.class.isAssignableFrom(cls));
@@ -939,22 +963,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Makes a HEX dump string representation of provided bytes array. Does all the same as {@link #toHex(byte[], int)}
-	 * setting {@code offset} parameter to {@code 0}.
+	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
+	 * {@link #toHexDump(byte[], int)} setting {@code offset} parameter to {@code 0}.
 	 *
 	 * @param b
 	 *            bytes array make HEX dump
 	 * @return returns HEX dump representation of provided bytes array
 	 *
-	 * @see #toHex(byte[], int, int)
+	 * @see #toHexDump(byte[], int, int)
 	 */
-	public static String toHex(byte[] b) {
-		return toHex(b, 0);
+	public static String toHexDump(byte[] b) {
+		return toHexDump(b, 0);
 	}
 
 	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
-	 * {@link #toHex(byte[], int, int)} setting {@code len} parameter to {@code 0}.
+	 * {@link #toHexDump(byte[], int, int)} setting {@code len} parameter to {@code 0}.
 	 * 
 	 * @param b
 	 *            bytes array make HEX dump
@@ -962,10 +986,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            offset at which to start dumping bytes
 	 * @return returns HEX dump representation of provided bytes array
 	 *
-	 * @see #toHex(byte[], int, int)
+	 * @see #toHexDump(byte[], int, int)
 	 */
-	public static String toHex(byte[] b, int offset) {
-		return toHex(b, offset, 0);
+	public static String toHexDump(byte[] b, int offset) {
+		return toHexDump(b, offset, 0);
 	}
 
 	/**
@@ -979,7 +1003,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            maximum number of bytes to dump
 	 * @return returns HEX dump representation of provided bytes array
 	 */
-	public static String toHex(byte[] b, int offset, int len) {
+	public static String toHexDump(byte[] b, int offset, int len) {
 		if (b == null) {
 			return "<EMPTY>"; // NON-NLS
 		}
@@ -1017,5 +1041,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Checks if provided object is an array - of primitives or objects.
+	 *
+	 * @param obj
+	 *            object to check
+	 * @return {@code true} if obj is an array, {@code false} - otherwise
+	 */
+	public static boolean isArray(Object obj) {
+		return obj instanceof Object[] || (obj != null && obj.getClass().isArray());
 	}
 }

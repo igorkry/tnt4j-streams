@@ -22,10 +22,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
@@ -222,6 +222,10 @@ public class ActivityInfo {
 	 *             if there are any errors with conversion to internal format
 	 */
 	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
+		if (isValueEmpty(fieldValue)) {
+			return;
+		}
+
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null) {
 			switch (fieldType) {
@@ -241,7 +245,7 @@ public class ActivityInfo {
 				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
-				elapsedTime = substitute(elapsedTime, getLongValue(fieldValue), Long.class);
+				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class), Long.class);
 				break;
 			case EndTime:
 				endTime = substitute(endTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
@@ -253,7 +257,7 @@ public class ActivityInfo {
 				location = substitute(location, getStringValue(fieldValue, field));
 				break;
 			case ReasonCode:
-				reasonCode = substitute(reasonCode, getIntValue(fieldValue), Integer.class);
+				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class), Integer.class);
 				break;
 			case ResourceName:
 				resourceName = substitute(resourceName, getStringValue(fieldValue, field));
@@ -293,16 +297,16 @@ public class ActivityInfo {
 				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue, field));
 				break;
 			case MsgLength:
-				msgLength = substitute(msgLength, getIntValue(fieldValue), Integer.class);
+				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class), Integer.class);
 				break;
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
 			case ProcessId:
-				processId = substitute(processId, getIntValue(fieldValue), Integer.class);
+				processId = substitute(processId, getNumberValue(fieldValue, Integer.class), Integer.class);
 				break;
 			case ThreadId:
-				threadId = substitute(threadId, getIntValue(fieldValue), Integer.class);
+				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class), Integer.class);
 				break;
 			case Category:
 				category = substitute(category, getStringValue(fieldValue, field));
@@ -319,10 +323,42 @@ public class ActivityInfo {
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
 					fieldValue);
 		} else {
-			addActivityProperty(field.getFieldTypeName(),
-					fieldValue instanceof Object[] ? getStringValue(fieldValue, field) : fieldValue,
-					field.getValueType());
+			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), field.getValueType());
 		}
+	}
+
+	private static boolean isValueEmpty(Object fieldValue) {
+		if (fieldValue != null) {
+			Object[] va = fieldValue instanceof Object[] ? (Object[]) fieldValue : new Object[] { fieldValue };
+
+			for (Object ve : va) {
+				if (ve != null) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
+		ActivityFieldLocator locator = field.getGroupLocator() != null ? field.getGroupLocator()
+				: CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
+
+		if (locator != null) {
+			switch (locator.getDataType()) {
+			case Number:
+				return getNumberValue(fieldValue);
+			case DateTime:
+			case Timestamp:
+				return getTimestampValue(fieldValue, field);
+			case Binary:
+			default:
+				return getStringValue(fieldValue, field);
+			}
+		}
+
+		return getStringValue(fieldValue, field);
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
@@ -360,11 +396,15 @@ public class ActivityInfo {
 				if (vArray[v] instanceof UsecTimestamp && StringUtils.isNotEmpty(format)) {
 					sb.append(((UsecTimestamp) vArray[v]).toString(format));
 				} else {
-					sb.append(Utils.toString(vArray[v]));
+					sb.append(vArray[v] == null ? "" : Utils.toString(vArray[v])); // NON-NLS
 				}
 			}
 
 			return sb.toString();
+		} else if (value instanceof byte[]) {
+			Utils.toHexString((byte[]) value);
+		} else if (value != null && value.getClass().isArray()) {
+			return ArrayUtils.toString(value);
 		}
 
 		return Utils.toString(value);
@@ -411,7 +451,7 @@ public class ActivityInfo {
 		}
 
 		Property p = new Property(propName, wrapPropertyValue(propValue),
-				StringUtils.isEmpty(valueType) ? ValueTypes.VALUE_TYPE_NONE : valueType);
+				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType);
 		Object prevValue = activityProperties.put(propName, p);
 
 		LOGGER.log(OpLevel.TRACE,
@@ -419,6 +459,14 @@ public class ActivityInfo {
 				propName, Utils.toString(p.getValue()), p.getValueType(), prevValue);
 
 		return prevValue;
+	}
+
+	private static String getDefaultValueType(Object propValue) {
+		if (propValue instanceof UsecTimestamp) {
+			return ValueTypes.VALUE_TYPE_TIMESTAMP;
+		}
+
+		return ValueTypes.VALUE_TYPE_NONE;
 	}
 
 	private static Object wrapPropertyValue(Object propValue) {
@@ -668,7 +716,7 @@ public class ActivityInfo {
 			String strData;
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
-				strData = new String(Base64.encodeBase64(binData));
+				strData = Utils.base64EncodeStr(binData);
 				msgEncoding = "base64"; // NON-NLS
 				msgMimeType = "application/octet-stream"; // NON-NLS
 			} else {
@@ -768,7 +816,7 @@ public class ActivityInfo {
 			String strData;
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
-				strData = new String(Base64.encodeBase64(binData));
+				strData = Utils.base64EncodeStr(binData);
 				msgEncoding = "base64"; // NON-NLS
 				msgMimeType = "application/octet-stream"; // NON-NLS
 			} else {
@@ -897,12 +945,39 @@ public class ActivityInfo {
 		}
 	}
 
-	private static Integer getIntValue(Object value) {
-		return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(Utils.toString(value));
+	// private static Integer getIntValue(Object value) {
+	// return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(Utils.toString(value));
+	// }
+	//
+	// private static Long getLongValue(Object value) {
+	// return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(Utils.toString(value));
+	// }
+
+	private static Number getNumberValue(Object value) {
+		return value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 	}
 
-	private static Long getLongValue(Object value) {
-		return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(Utils.toString(value));
+	@SuppressWarnings("unchecked")
+	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {
+		Number num = value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
+
+		Number cNum = 0;
+
+		if (clazz.isAssignableFrom(Long.class)) {
+			cNum = num.longValue();
+		} else if (clazz.isAssignableFrom(Integer.class)) {
+			cNum = num.intValue();
+		} else if (clazz.isAssignableFrom(Byte.class)) {
+			cNum = num.byteValue();
+		} else if (clazz.isAssignableFrom(Float.class)) {
+			cNum = num.floatValue();
+		} else if (clazz.isAssignableFrom(Double.class)) {
+			cNum = num.doubleValue();
+		} else if (clazz.isAssignableFrom(Short.class)) {
+			cNum = num.shortValue();
+		}
+
+		return (T) cNum;
 	}
 
 	/**

@@ -54,7 +54,7 @@ public class WmqStreamB extends AbstractWmqStream<byte[]> {
 		mqMsg.readFully(msgData);
 		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.message.data"),
-				msgData.length, Utils.toHex(msgData));
+				msgData.length, Utils.toHexDump(msgData));
 		return msgData;
 	}
 }

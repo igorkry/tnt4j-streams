@@ -19,11 +19,11 @@
             <field-map source="MQCC_WARNING" target="WARNING"/>
             <field-map source="" target="ERROR"/>
         </field>
-        <field name="Reason" locator="MQCFH.Reason" locator-type="Label"/>
+        <field name="ReasonCode" locator="MQCFH.Reason" locator-type="Label"/>
         <field name="ParameterCount" locator="MQCFH.ParameterCount" locator-type="Label"/>
 
         <!-- message fields -->
-        <field name="MQCA_Q_MGR_NAME" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="ServerName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
         <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
@@ -33,25 +33,25 @@
             <field-locator locator="MQCAMO_END_DATE" locator-type="Label"/>
             <field-locator locator="MQCAMO_END_TIME" locator-type="Label"/>
         </field>
-        <field name="MQIA_COMMAND_LEVEL" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
-        <field name="MQIACF_SEQUENCE_NUMBER" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
+        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
         <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label"/>
-        <field name="MQIA_APPL_TYPE" locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
         <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
-        <field name="MQCACF_USER_IDENTIFIER" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
-        <field name="MQIACF_API_CALLER_TYPE" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
-        <field name="MQIACF_API_ENVIRONMENT" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
-        <field name="MQCACF_APPL_FUNCTION" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
-        <field name="MQIACF_APPL_FUNCTION_TYPE" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
-        <field name="MQIACF_TRACE_DETAIL" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
-        <field name="MQIACF_TRACE_DATA_LENGTH" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
-        <field name="MQIACF_POINTER_SIZE" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
-        <field name="MQIA_PLATFORM" locator="MQIA_PLATFORM" locator-type="Label"/>
+        <field name="UserId" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
+        <field name="ApiEnv" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
+        <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
+        <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
         <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" format="bytes"/>
     </parser>
 
     <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
-        <property name="Host" value="[YOUR_MQ_HOST]"/>
+        <property name="Host" value="172.16.6.54"/>
         <property name="Port" value="1420"/>
         <property name="QueueManager" value="TT1"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>

@@ -180,7 +180,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 					logger().log(OpLevel.TRACE,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"MessageActivityXmlParser.msg.signature"),
-							value, msgType, msgFormat, msgId == null ? "null" : new String(Utils.encodeHex(msgId)),
+							value, msgType, msgFormat, msgId == null ? "null" : Utils.encodeHex(msgId),
 							msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
 							msgPutTime);
 				}
