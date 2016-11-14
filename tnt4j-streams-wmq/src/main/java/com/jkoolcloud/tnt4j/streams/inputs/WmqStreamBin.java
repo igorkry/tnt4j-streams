@@ -33,13 +33,13 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  *
  * @version $Revision: 1 $
  */
-public class WmqStreamB extends AbstractWmqStream<byte[]> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamB.class);
+public class WmqStreamBin extends AbstractWmqStream<byte[]> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamBin.class);
 
 	/**
-	 * Constructs an empty WmqStreamB. Requires configuration settings to set input source.
+	 * Constructs an empty WmqStreamBin. Requires configuration settings to set input source.
 	 */
-	public WmqStreamB() {
+	public WmqStreamBin() {
 		super();
 	}
 
