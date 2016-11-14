@@ -122,8 +122,8 @@
 
     <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="Host" value="[YOUR_MQ_HOST]"/>
-        <property name="Port" value="1420"/>
-        <property name="QueueManager" value="TT1"/>
+        <property name="Port" value="[YOUR_MQ_PORT]"/>
+        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
         <property name="StripHeaders" value="false"/>
 
