@@ -49,7 +49,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * This activity stream supports the following properties (in addition to those supported by {@link WmqStreamPCF}):
  * <ul>
  * <li>TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ
- * operations which names matches this mask. Default value - ''. (Optional)</li>
+ * operations which names matches this mask. Default value - '*'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

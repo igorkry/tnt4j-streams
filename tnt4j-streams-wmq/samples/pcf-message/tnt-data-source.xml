@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="tnt-data-source-wmq_pcf.xsd">
 
-    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
+    <parser name="PCFEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
 
         <field name="EventType" value="EVENT"/>
@@ -47,7 +47,7 @@
         <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
         <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
         <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
-        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" format="bytes"/>
+        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
     </parser>
 
     <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
@@ -57,6 +57,6 @@
         <property name="Queue" value="[YOUR_Q_NAME]"/>
         <property name="StripHeaders" value="false"/>
 
-        <parser-ref name="TraceEventsParser"/>
+        <parser-ref name="PCFEventsParser"/>
     </stream>
 </tnt-data-source>

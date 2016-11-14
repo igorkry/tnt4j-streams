@@ -130,8 +130,7 @@
         <property name="TraceOperations" value="*"/>
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
-        <!--<property name="TraceOperations" value="MQXF_(DUMMY|YUMMY)"/>-->
-
+        
         <parser-ref name="TraceEventsParser"/>
     </stream>
 </tnt-data-source>

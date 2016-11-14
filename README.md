@@ -17,7 +17,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * Apache Kafka (as Consumer and as Server/Consumer)
     * Apache Flume
     * Logstash
-    * WMQ
+    * WMQ (IBM MQ)
     * OS pipes
     * Zipped files (HDFS also)
     * Standard Java InputStream/Reader
@@ -34,6 +34,8 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     event. Stream stops only when application gets terminated or some critical runtime error occurs.
 
 * Has customized parser to parse Apache Access Logs.
+
+* Has customized WMQ Trace Events stream (and parser).
 
 * It can be integrated with:
     * Logstash
@@ -64,7 +66,7 @@ TNT4J-Streams project
 Running TNT4J-Streams
 ======================================
 
-## TNT4J-Streams can be run:
+## Running TNT4J-Streams
 * As standalone application
     * write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * configure Your loggers
@@ -1723,7 +1725,7 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 
 #### WMQ Message broker
 
-This sample shows how to stream activity events received over WMQ as MQ messages.
+This sample shows how to stream activity events received over WMQ as message broker event messages.
 
 Sample files can be found in `samples/message-broker` directory.
 
@@ -1835,9 +1837,7 @@ Sample stream configuration:
 Stream configuration states that `WmqStream` referencing `EventParser` shall be used. Stream deserialize message to
 string and passes it to parser.
 
-`QueueManager` property defines name of queue manager.
-
-`Queue` property defines name of queue to get messages.
+`QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
 
 `EventParser` is of type `MessageActivityXmlParser` meaning that it will parse messages de-serialized into XML strings.
 
@@ -1845,6 +1845,240 @@ string and passes it to parser.
 
 `Namespace` property adds `wmb` namespace definition mapping to mapping
 `http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event`.
+
+#### WMQ PCF messages streaming
+
+This sample shows how to stream activity events received over WMQ as PCF messages.
+
+Sample files can be found in `samples/pcf-message` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-data-source-wmq_pcf.xsd">
+
+    <parser name="PCFEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
+        <property name="TranslateNumValues" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <!-- header fields -->
+        <field name="Command" locator="MQCFH.Command" locator-type="Label"/>
+        <field name="MsgSeqNumber" locator="MQCFH.MsgSeqNumber" locator-type="Label"/>
+        <field name="Control" locator="MQCFH.Control" locator-type="Label"/>
+        <field name="CompCode" locator="MQCFH.CompCode" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="WARNING"/>
+            <field-map source="MQCC_OK" target="SUCCESS"/>
+            <field-map source="MQCC_WARNING" target="WARNING"/>
+            <field-map source="" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="MQCFH.Reason" locator-type="Label"/>
+        <field name="ParameterCount" locator="MQCFH.ParameterCount" locator-type="Label"/>
+
+        <!-- message fields -->
+        <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="ServerName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_START_TIME" locator-type="Label"/>
+        </field>
+        <field name="EndTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_END_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_END_TIME" locator-type="Label"/>
+        </field>
+        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
+        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label"/>
+        <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
+        <field name="UserId" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
+        <field name="ApiEnv" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
+        <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
+        <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
+        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+    </parser>
+
+    <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
+        <property name="Host" value="[YOUR_MQ_HOST]"/>
+        <property name="Port" value="[YOUR_MQ_PORT]"/>
+        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
+        <property name="Queue" value="[YOUR_Q_NAME]"/>
+        <property name="StripHeaders" value="false"/>
+
+        <parser-ref name="PCFEventsParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `WmqStreamPCF` referencing `PCFEventsParser` shall be used. Stream takes MQ message from QM, transforms it 
+to PCF message and passes it to parser.
+
+`Host` property defines MQ server host name or IP. `Port` property defines MQ server port.
+
+`QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
+
+`StripHeaders` property states that MQ message headers shall be preserved. 
+
+`PCFEventsParser` is of type `ActivityPCFParser` meaning that it will parse PCF messages.
+
+`TranslateNumValues` property defines that parser should translate resolved numeric values to corresponding MQ constant names if possible.
+
+#### WMQ Trace Events streaming
+
+This sample shows how to stream activity events received over WMQ as MQ Trace Events.
+
+Sample files can be found in `samples/trace-events` directory.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-data-source-wmq_pcf.xsd">
+
+    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser">
+        <property name="TranslateNumValues" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <!-- message fields -->
+        <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="ServerName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_START_TIME" locator-type="Label"/>
+        </field>
+        <field name="EndTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQCAMO_END_DATE" locator-type="Label"/>
+            <field-locator locator="MQCAMO_END_TIME" locator-type="Label"/>
+        </field>
+        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
+        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label"/>
+        <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
+        <field name="UserId" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
+        <field name="ApiEnv" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
+        <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
+        <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
+        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+
+        <!-- activity trace fields -->
+        <field name="EventName" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label"/>
+        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label"/>
+        <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+        <field name="MQTrace.ObjType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
+        <field name="ResourceName" separator="/">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_MGR" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
+        </field>
+        <field name="MQTrace.ObjQMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
+        <field name="MQTrace.ObjHandle" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
+        <field name="CompCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="WARNING"/>
+            <field-map source="MQCC_OK" target="SUCCESS"/>
+            <field-map source="MQCC_WARNING" target="WARNING"/>
+            <field-map source="" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label"/>
+        <field name="MQTrace.ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.PutOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.CloseOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
+        <field name="MQTrace.ResolvedLocalQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME" locator-type="Label"/>
+        <field name="MQTrace.ResolvedLocalQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
+        <field name="MQTrace.ResolvedType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
+        <field name="MQTrace.DynamicQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
+        <field name="MQTrace.MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label"/>
+        <field name="MQTrace.HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
+               units="Microseconds"/>
+        <field name="MQTrace.BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label"/>
+        <field name="MQTrace.Report" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
+        <field name="MQTrace.MsgType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
+        <field name="MQTrace.Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label"/>
+        <field name="MQTrace.FormatName" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+        <field name="MQTrace.Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label"/>
+        <field name="MQTrace.Persistence" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
+        <field name="MQTrace.MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+        <field name="Correlator" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+        <field name="MQTrace.ReplyToQ" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
+        <field name="MQTrace.ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
+        <field name="MQTrace.CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
+        <field name="MQTrace.Encoding" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
+        <field name="PutTime" separator=" " datatype="DateTime" format="yyyyMMdd HHmmss">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
+        </field>
+        <field name="MQTrace.SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label"/>
+        <field name="MQTrace.Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/> <!-- int array -->
+        <field name="MQTrace.ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
+        <field name="MQTrace.QMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <field name="MQTrace.ObjNameRecsPresent" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
+        <field name="MQTrace.CallType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
+        <field name="MQTrace.CtlOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
+        <field name="MQTrace.MQCallbackType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
+        <field name="MQTrace.MQCallbackName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
+        <field name="MQTrace.MQCallbackFunction" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label"
+               datatype="Binary"/>
+        <field name="MQTrace.MQCallbackOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
+        <field name="MQTrace.MQCallbackOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
+        <field name="MQTrace.InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label"/>
+        <field name="MQTrace.UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label"/>
+        <field name="MQTrace.MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label"/>
+    </parser>
+
+    <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+        <property name="Host" value="[YOUR_MQ_HOST]"/>
+        <property name="Port" value="[YOUR_MQ_PORT]"/>
+        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
+        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+        <property name="StripHeaders" value="false"/>
+
+        <property name="TraceOperations" value="*"/>
+        <!--<property name="TraceOperations" value="MQXF_*"/>-->
+        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->        
+
+        <parser-ref name="TraceEventsParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `WmqActivityTraceStream` referencing `TraceEventsParser` shall be used. Stream takes MQ message from QM, 
+transforms it to PCF message and passes it to parser. If PCF message contains multiple MQ Trace Events, then multiple activity events will 
+be made from it. 
+
+`Host` property defines MQ server host name or IP. `Port` property defines MQ server port.
+
+`QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
+
+`StripHeaders` property states that MQ message headers shall be preserved.
+ 
+`TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Traces Events referencing operations not 
+covered by this set will be filtered out from activities stream.   
+
+`TraceEventsParser` is of type `WmqTraceParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
+MQCFGR PCF structures.
+
+`TranslateNumValues` property defines that parser should translate resolved numeric values to corresponding MQ constant names if possible.
 
 #### Angulartics (AngularJS tracing)
 
@@ -3056,7 +3290,19 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Zipped file line stream parameters (and Hdfs):
+##### WMQ Trace Events Stream parameters
+
+ * TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ operations which names 
+ matches this mask. Default value - `*`. (Optional)
+ 
+    sample:
+```xml
+    <property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>
+``` 
+
+Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
+
+#### Zipped file line stream parameters (and Hdfs)
 
  * FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
  and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
@@ -3185,7 +3431,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 ### Parsers configuration
 
-#### Activity Name-Value parser:
+#### Activity Name-Value parser
 
  * FieldDelim - fields separator. Default value - `,`. (Optional)
  * ValueDelim - value delimiter. Default value - `=`. (Optional)
@@ -3202,7 +3448,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="StripQuotes" value="false"/>
 ```
 
-#### Activity RegEx parser:
+#### Activity RegEx parser
 
  * Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)
 
@@ -3211,7 +3457,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
 ```
 
-#### Activity token parser:
+#### Activity token parser
 
  * FieldDelim - fields separator. Default value - `,`. (Optional)
  * Pattern - pattern used to determine which types of activity data string this parser supports. When `null`, all
@@ -3226,7 +3472,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="StripQuotes" value="false"/>
 ```
 
-#### Activity XML parser:
+#### Activity XML parser
 
  * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
  * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
@@ -3238,7 +3484,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="RequireDefault" value="true"/>
 ```
 
-#### Message activity XML parser:
+#### Message activity XML parser
 
  * SignatureDelim - signature fields delimiter. Default value - `,`. (Optional)
 
@@ -3247,7 +3493,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="SignatureDelim" value="#"/>
 ```
 
-#### Apache access log parser:
+#### Apache access log parser
 
  * LogPattern - access log pattern. (Optional, if RegEx `Pattern` property is defined)
  * ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if `LogPattern` property is used)
@@ -3266,13 +3512,23 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
               value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
 
-#### Activity JSON parser:
+#### Activity JSON parser
 
  * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
 
     sample:
 ```xml
     <property name="ReadLines" value="false"/>
+```
+
+#### Activity PCF parser
+
+ * TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible. 
+ Default value - `true`. (Optional)
+ 
+    sample:
+```xml
+    <property name="TranslateNumValues" value="false"/>
 ```
 
 How to Build TNT4J-Streams
