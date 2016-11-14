@@ -54,7 +54,7 @@
         <property name="Host" value="[YOUR_MQ_HOST]"/>
         <property name="Port" value="[YOUR_MQ_PORT]"/>
         <property name="QueueManager" value="[YOUR_QM_NAME]"/>
-        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+        <property name="Queue" value="[YOUR_Q_NAME]"/>
         <property name="StripHeaders" value="false"/>
 
         <parser-ref name="TraceEventsParser"/>
