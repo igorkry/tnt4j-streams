@@ -32,7 +32,7 @@
         <httpcomponents.version>4.5.2</httpcomponents.version>
         <httpcomponents.core.version>4.4.5</httpcomponents.core.version>
 
-        <msgpack.version>0.8.10</msgpack.version>
+        <msgpack.version>0.8.11</msgpack.version>
 
         <org.slf4j.version>1.7.21</org.slf4j.version>
         <log4j.version>1.2.17</log4j.version>
@@ -159,6 +159,11 @@
             <artifactId>msgpack-core</artifactId>
             <version>${msgpack.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.msgpack</groupId>
+            <artifactId>jackson-dataformat-msgpack</artifactId>
+            <version>${msgpack.version}</version>
+        </dependency>
         <!--<dependency>-->
         <!--<groupId>com.google.protobuf</groupId>-->
         <!--<artifactId>protobuf-java</artifactId>-->
@@ -174,6 +179,17 @@
         <!--<groupId>org.apache.avro</groupId>-->
         <!--<artifactId>avro</artifactId>-->
         <!--<version>1.8.1</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.4.7</version>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>xalan</groupId>-->
+        <!--<artifactId>xalan</artifactId>-->
+        <!--<version>2.7.2</version>-->
         <!--</dependency>-->
 
         <dependency>

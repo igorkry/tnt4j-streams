@@ -32,6 +32,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldMappingType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
+import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -82,6 +84,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String FIELD_LOC_ELMT = "field-locator"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String FIELD_TRANSFORM_ELMT = "field-transform"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -199,6 +205,14 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String ID_ATTR = "id"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String BEAN_REF_ATTR = "beanRef"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String LANG_ATTR = "lang"; // NON-NLS
 
 	/**
 	 * Currently configured TNT input stream.
@@ -224,6 +238,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private JavaObjectData javaObjectData = null;
 	private Property currProperty = null;
 	private FieldLocatorData currLocatorData = null;
+	private FieldTransformData currTransform = null;
 
 	/**
 	 * Buffer to put current configuration element (token) data value
@@ -305,6 +320,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			processJavaObject(attributes);
 		} else if (PARAM_ELMT.equals(qName)) {
 			processParam(attributes);
+		} else if (FIELD_TRANSFORM_ELMT.equals(qName)) {
+			processFieldTransform(attributes);
 		}
 	}
 
@@ -592,8 +609,6 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 		// currFieldHasLocElmt = true;
-
-		elementData = new StringBuilder();
 	}
 
 	/**
@@ -656,6 +671,52 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Processes a field-transform element.
+	 * 
+	 * @param attrs
+	 *            List of element attributes
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processFieldTransform(Attributes attrs) throws SAXException {
+		if (currTransform != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", FIELD_TRANSFORM_ELMT), currParseLocation);
+		}
+
+		if (currField == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration3", FIELD_TRANSFORM_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
+					currParseLocation);
+		}
+
+		if (currTransform == null) {
+			currTransform = new FieldTransformData();
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				currTransform.name = attValue;
+			} else if (BEAN_REF_ATTR.equals(attName)) {
+				currTransform.beanRef = attValue;
+			} else if (LANG_ATTR.equals(attName)) {
+				currTransform.scriptLang = attValue;
+			}
+		}
+
+		if (StringUtils.isNoneEmpty(currTransform.beanRef, currTransform.scriptLang)) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.cannot.contain", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR, LANG_ATTR),
+					currParseLocation);
+		}
+
+		elementData = new StringBuilder();
 	}
 
 	/**
@@ -1056,7 +1117,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleFieldLocator(currLocatorData);
 
 					currLocatorData = null;
-					elementData = null;
 				}
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 				processingTNT4JProperties = false;
@@ -1071,6 +1131,13 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleProperty(currProperty);
 
 					currProperty.reset();
+					elementData = null;
+				}
+			} else if (FIELD_TRANSFORM_ELMT.equals(qName)) {
+				if (currTransform != null) {
+					handleFieldTransform(currTransform);
+
+					currTransform = null;
 					elementData = null;
 				}
 			}
@@ -1121,17 +1188,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleFieldLocator(FieldLocatorData currLocatorData) throws SAXException {
-		String eDataVal = getElementData();
-
-		if (eDataVal != null) {
-			if (currLocatorData.locator != null && eDataVal.length() > 0) {
-				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ConfigParserHandler.element.has.both3", FIELD_LOC_ELMT, LOCATOR_ATTR, getLocationInfo()));
-			} else if (currLocatorData.locator == null) {
-				currLocatorData.locator = eDataVal;
-			}
-		}
-
 		if (currLocatorData.locator != null && currLocatorData.locator.isEmpty()) {
 			currLocatorData.locator = null;
 		}
@@ -1174,7 +1230,61 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
+		if (CollectionUtils.isNotEmpty(currLocatorData.valueTransforms)) {
+			for (ValueTransformation<Object, Object> vt : currLocatorData.valueTransforms) {
+				afl.addTransformation(vt);
+			}
+		}
+
 		currField.addLocator(afl);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void handleFieldTransform(FieldTransformData currTransformData) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			if (currTransformData.beanRef != null && eDataVal.length() > 0) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.element.has.both3", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR,
+						getLocationInfo()));
+			} else if (currTransformData.scriptCode == null) {
+				currTransformData.scriptCode = eDataVal;
+			}
+		}
+
+		ValueTransformation<Object, Object> transform;
+
+		if (StringUtils.isNotEmpty(currTransformData.beanRef)) {
+			Object tObj = javaObjectsMap.get(currTransformData.beanRef);
+
+			if (tObj == null) {
+				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.undefined.reference", FIELD_TRANSFORM_ELMT, currTransformData.beanRef),
+						currParseLocation);
+			}
+
+			if (tObj instanceof ValueTransformation) {
+				transform = (ValueTransformation<Object, Object>) tObj;
+			} else {
+				throw new SAXNotSupportedException(
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ConfigParserHandler.not.extend.class", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR,
+								tObj.getClass().getName(), ValueTransformation.class.getName(), getLocationInfo()));
+			}
+		} else {
+			transform = AbstractScriptTransformation.createScriptTransformation(currTransformData.name,
+					currTransformData.scriptLang, currTransformData.scriptCode);
+		}
+
+		if (currLocatorData != null) {
+			currLocatorData.valueTransforms.add(transform);
+		} else {
+			ActivityFieldLocator locator = currField.getMasterLocator();
+			if (locator != null) {
+				locator.addTransformation(transform);
+			}
+		}
 	}
 
 	/**
@@ -1238,6 +1348,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String id;
 
 		List<ValueMapData> valueMapItems;
+		List<ValueTransformation<Object, Object>> valueTransforms;
 
 		private FieldLocatorData() {
 			reset();
@@ -1260,6 +1371,12 @@ public class ConfigParserHandler extends DefaultHandler {
 				valueMapItems = new ArrayList<ValueMapData>();
 			} else {
 				valueMapItems.clear();
+			}
+
+			if (valueTransforms == null) {
+				valueTransforms = new ArrayList<ValueTransformation<Object, Object>>();
+			} else {
+				valueTransforms.clear();
 			}
 		}
 
@@ -1324,6 +1441,20 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (types != null) {
 				types.clear();
 			}
+		}
+	}
+
+	private static class FieldTransformData {
+		String name;
+		String beanRef;
+		String scriptLang;
+		String scriptCode;
+
+		private void reset() {
+			name = "";
+			beanRef = "";
+			scriptLang = "";
+			scriptCode = "";
 		}
 	}
 }

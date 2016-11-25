@@ -20,11 +20,13 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,6 +42,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -424,48 +427,5 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	@Override
 	protected String getActivityDataType() {
 		return "XML"; // NON-NLS
-	}
-
-	private static final class NamespaceMap implements NamespaceContext {
-		private final Map<String, String> map = new HashMap<String, String>();
-
-		private NamespaceMap() {
-		}
-
-		/**
-		 * Adds mapping of prefix to namespace URI.
-		 *
-		 * @param prefix
-		 *            prefix to put into mapping
-		 * @param uri
-		 *            uri to put into mapping
-		 */
-		public void addPrefixUriMapping(String prefix, String uri) {
-			map.put(prefix, uri);
-		}
-
-		@Override
-		public String getNamespaceURI(String prefix) {
-			String uri = map.get(prefix);
-			if (uri == null) {
-				uri = XMLConstants.XML_NS_URI;
-			}
-			return uri;
-		}
-
-		@Override
-		public String getPrefix(String namespaceURI) {
-			for (Map.Entry<String, String> entry : map.entrySet()) {
-				if (Utils.equal(entry.getValue(), namespaceURI)) {
-					return entry.getKey();
-				}
-			}
-			return XMLConstants.DEFAULT_NS_PREFIX;
-		}
-
-		@Override
-		public Iterator<String> getPrefixes(String namespaceURI) {
-			return map.keySet().iterator();
-		}
 	}
 }

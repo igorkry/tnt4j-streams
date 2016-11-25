@@ -17,17 +17,17 @@
 package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
@@ -60,6 +60,8 @@ public class ActivityFieldLocator implements Cloneable {
 
 	private NumericFormatter numberParser = null;
 	private TimestampFormatter timeParser = null;
+
+	private List<ValueTransformation<Object, Object>> transformations;
 
 	/**
 	 * Constructs a new activity field locator for either a built-in type or a custom type.
@@ -456,6 +458,41 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
+	 * Adds data value transformation instance to locator transformations list.
+	 *
+	 * @param transformation
+	 *            transformation to add
+	 */
+	public void addTransformation(ValueTransformation<Object, Object> transformation) {
+		if (transformations == null) {
+			transformations = new ArrayList<ValueTransformation<Object, Object>>();
+		}
+
+		transformations.add(transformation);
+	}
+
+	/**
+	 * Transforms provided object value using defined transformations. If more than one transformation defined,
+	 * transformations are applied sequentially where transformation input data is output of previous transformation.
+	 * 
+	 * @param fieldValue
+	 *            value to transform
+	 * @return transformed value
+	 */
+	public Object transformValue(Object fieldValue) throws Exception {
+		if (CollectionUtils.isEmpty(transformations)) {
+			return fieldValue;
+		}
+
+		Object tValue = fieldValue;
+		for (ValueTransformation<Object, Object> vt : transformations) {
+			tValue = vt.transform(tValue);
+		}
+
+		return tValue;
+	}
+
+	/**
 	 * Formats the specified value based on the locator's formatting properties.
 	 *
 	 * @param value
@@ -590,6 +627,7 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.builtInUnits = builtInUnits;
 			cafl.valueMap = valueMap;
 			cafl.mapCatchAll = mapCatchAll;
+			cafl.transformations = transformations;
 
 			return cafl;
 		} catch (CloneNotSupportedException exc) {

@@ -239,6 +239,17 @@ public class ActivityField {
 	}
 
 	/**
+	 * Gets master locator for this field. If field has grouping locator defined then this locator is returned. If no
+	 * grouping locator defined, but there is at least one ordinary locator defined, then first ordinary locator is
+	 * returned.
+	 *
+	 * @return field master locator, or {@code null} if none locators defined for this field
+	 */
+	public ActivityFieldLocator getMasterLocator() {
+		return groupLocator != null ? groupLocator : CollectionUtils.isEmpty(locators) ? null : locators.get(0);
+	}
+
+	/**
 	 * Gets the string to insert between values when concatenating multiple raw activity values into the converted value
 	 * for this field.
 	 *

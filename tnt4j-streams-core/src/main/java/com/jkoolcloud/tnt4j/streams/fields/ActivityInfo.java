@@ -149,7 +149,37 @@ public class ActivityInfo {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
 				field, fieldValue);
 
+		fieldValue = transform(field, fieldValue);
 		setFieldValue(field, fieldValue);
+	}
+
+	/**
+	 * Transforms the value for the field using defined field transformations.
+	 * <p>
+	 * Note that field value there is combination of all field locators resolved values. Transformations defined for
+	 * particular locator is already performed by parser while resolving locator value.
+	 *
+	 * @param field
+	 *            field whose value is to be transformed
+	 * @param fieldValue
+	 *            field data value to transform
+	 * @return transformed field value
+	 */
+	protected Object transform(ActivityField field, Object fieldValue) {
+		ActivityFieldLocator locator = field.getGroupLocator();
+
+		if (locator != null) {
+			try {
+				fieldValue = locator.transformValue(fieldValue);
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.WARNING,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityInfo.transformation.failed"),
+						field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			}
+		}
+
+		return fieldValue;
 	}
 
 	/**
@@ -342,8 +372,7 @@ public class ActivityInfo {
 	}
 
 	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getGroupLocator() != null ? field.getGroupLocator()
-				: CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
+		ActivityFieldLocator locator = field.getMasterLocator();
 
 		if (locator != null) {
 			switch (locator.getDataType()) {
@@ -362,8 +391,7 @@ public class ActivityInfo {
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getGroupLocator() != null ? field.getGroupLocator()
-				: CollectionUtils.isEmpty(field.getLocators()) ? null : field.getLocators().get(0);
+		ActivityFieldLocator locator = field.getMasterLocator();
 
 		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
 				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(),

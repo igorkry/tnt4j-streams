@@ -403,6 +403,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			if (formattingNeeded.get()) {
 				val = locator.formatValue(val);
 			}
+
+			try {
+				val = locator.transformValue(val);
+			} catch (Exception exc) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.transformation.failed"), locStr, toString(val), exc);
+			}
 		}
 		return val;
 	}
