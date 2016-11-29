@@ -88,7 +88,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
 sample:
 ```xml
     <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
-        ...
+        <.../>
         <field name="StartTime" locator="1" format="dd MMM yyyy HH:mm:ss" locale="en-US"/>
         <field name="ServerIp" locator="2"/>
         <field name="ApplName" value="orders"/>
@@ -330,19 +330,19 @@ sample:
         xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
 
     <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
-        ...
+        <...>
     </parser>
 
     <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
-        ...
+        <...>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        ...
+        <...>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
-        ...
+        <...>
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -356,6 +356,179 @@ named `AccessLogParserCommon`.
 
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
+
+### Field value transformations
+
+In streams configuration You can define field or locator resolved values transformations. In general transformations performs resolved 
+activity value post-processing before sending it to jKool Cloud service: i.e. extracts file name from resolved activity file path.
+
+To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`.
+
+#### Transformation definition
+
+To define transformations stream configuration token `<field-transform>` shall be used. Attributes:
+ * `name` - name of transformation (optional)
+ * `lang` - transformation script/expression language. Can be one of `groovy`, `javascript` or `xpath`. Default value - `javascript`.
+ * `beanRef` - transformation implementing bean reference
+ 
+Token body is used to define transformation script/expression code.
+
+Valid transformation configuration should define `beanRef`, or have script/expression code defined in token body data (`<![CDATA[]]>`).
+     
+##### TNT4J-Streams predefined custom XPath functions 
+
+To use TNT4J-Streams predefined functions namespace `ts:` shall be used.
+   
+Streams predefined custom XPath functions may be used in transformation expressions:                 
+* `ts:getFileName(filePath)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName`. Retrieves file 
+name from provided file path.
+
+You may also define your own customized XPath functions. To do this Your API has to:
+* implement interface `javax.xml.xpath.XPathFunction`
+* register function by invoking `com.jkoolcloud.tnt4j.streams.transform.XPathTransformation.registerCustomFunction(functionName, function)`.
+
+i.e.:
+```java
+public class YourTransform implements XPathFunction {
+  @Override
+   public Object evaluate(List args) {
+    // retrieve expression code provided arguments and make transformation here. 
+  }
+}
+...
+XPathTransformation.registerCustomFunction("yourTransformation", new YourTransform());
+...
+```  
+then You can use it from stream configuration:
+```xml
+<field name="InvoiceFileFromFunction" locator="7">
+    <field-transform name="fileNameF" lang="xpath">
+        ts:yourTransformation($fieldValue, "arg2", "arg3")
+    </field-transform>
+</field>
+```
+
+#### Stream elements transformations 
+  
+* Field value transformation
+```xml
+<field name="Field" separator=",">
+    <field-transform name="toUpper" lang="groovy">
+        $fieldValue.toUpperCase()
+    </field-transform>
+    <field-locator locator="loc1" locator-type="Label"/>
+    <field-locator locator="loc2" locator-type="Label"/>
+    <...>
+</field>
+```
+When transformation is defined for a field containing multiple locators, field value transformation is applied to all field locators 
+aggregated field value. 
+
+Sample above states that field value combined from locators `loc1` and `loc2` and separated by `,` should be upper cased. For example 
+locator `loc1` resolves value `value1`, locator `loc2` resolves value `vaLue2`. Then field value before transformations is `value1,vaLue2` 
+and field value after transformation is `VALUE1,VALUE2`.   
+   
+* Field locator value transformation
+```xml
+<field name="Field" separator=",">
+    <field-locator locator="loc1" locator-type="Label"/>
+        <field-transform name="toUpper" lang="groovy">
+            $fieldValue.toUpperCase()
+        </field-transform>
+    <field-locator locator="loc2" locator-type="Label"/>
+        <field-transform name="toUpperConcat" lang="groovy">
+            $fieldValue.toUpperCase() + "_transformed"
+        </field-transform>
+    <...>
+</field>
+```
+
+Sample above states that locator `loc1` resolved value should be upper cased and locator `loc2` resolved value should be upper cased and 
+concatenated with string `_transformed`. Then those transformed values should be aggregated to field value separated by `,` symbol. For 
+example locator `loc1` resolved value `value1`, then after transformation value is changed to `VALUE1`. Locator `loc2` resolved value 
+`value2`, then after transformation value is changed to `VALIUE2_transformed`. Field aggregates those locators values to 
+`VALUE1,VALUE2_transformed`.    
+
+NOTE: 
+* transformations are applied after field/locator value formatting.
+* locator defined transformations are applied before field value transformations.
+* it is possible to define multiple transformations for same stream element (field/locator). In that case transformations are applied 
+sequentially where input of applied transformation is output of previous transformation. 
+* it is allowed to combine field and locators transformations within same stream field scope setting transformations for both field and 
+locators independently.
+* when "short form" of field-locator configuration is used, transformation is bound to locator (because field-locator relation is  1:1 and 
+resolved value is same for locator and for field). Example:
+```xml
+<field name="Correlator" locator="3">
+    <field-transform name="concat">
+        "corel_" + $fieldValue
+    </field-transform>
+</field>
+```    
+
+#### Transformation definition samples
+
+* Groovy script/expression
+```xml
+<field name="ApplName" value="orders">
+    <field-transform name="toUpper" lang="groovy">
+        $fieldValue.toUpperCase().center(30)
+    </field-transform>
+</field>
+```
+This sample upper case resolved value and makes "centred" (padded and tailed with space symbols) 30 symbols length string.   
+
+* JavaScript script/expression
+```xml
+<field name="UserName" locator="4">
+    <field-transform name="toUpper" lang="javascript">
+        $fieldValue.toUpperCase()
+    </field-transform>
+</field>
+```
+This sample upper case resolved value.
+
+Or (using default attribute `lang` value) 
+```xml
+<field name="Correlator" locator="3">
+    <field-transform name="concat">
+        "corel_" + $fieldValue
+    </field-transform>
+</field>
+```
+This sample concatenates string `corel_` and resolved value.
+
+* XPath expression
+```xml
+<field name="InvoiceFileFromFunction" locator="7">
+    <field-transform name="fileNameF" lang="xpath">
+        concat(ts:getFileName($fieldValue), "_cust")
+    </field-transform>
+</field>
+```
+This sample retrieves file name from resolved file path (contained in `$fieldValue`) and concatenates it with string `_cust`.
+
+* Transformation bean
+
+To make custom Java Bean based transformations Your API should implement interface `com.jkoolcloud.tnt4j.streams.transform.ValueTransformation<V, T>`.
+
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+    <...>
+    <java-object name="getFileNameTransform" class="com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName"/>
+    <...>
+    <field name="InvoiceFileFromBean">
+        <field-locator locator="7">
+            <field-transform beanRef="getFileNameTransform"/>
+        </field-locator>
+    </field>
+    <...>
+```
+This sample shows how to invoke Java Bean defined transformation. Class `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName` implements 
+custom XPath function to get file name from provided file path. Field/locator value mapping to function arguments is performed automatically 
+and there is no need to define additional mapping.   
 
 ## Samples
 
@@ -377,7 +550,7 @@ Sample files can be found in `samples/single-log` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -433,10 +606,10 @@ Sample files can be found in `samples/multiple-logs` directory.
 `orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
 single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
-Sample configuration and sample idea is same as 'Single Log file' with one single difference:
+Sample configuration and sample idea is same as ['Single Log file'](#single-log-file) with one single difference:
 ```xml
     <property name="FileName" value="orders-*.log"/>
 ```
@@ -451,7 +624,7 @@ Sample files can be found in `samples/piping-stream` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 `jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
@@ -548,9 +721,9 @@ Sample stream configuration:
     </parser>
 
     <stream name="SampleZipFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.ZipLineStream">
-        <property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip"/>
-        <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt"/>-->
-        <!--<property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz"/>-->
+        <property name="FileName" value="./tnt4j-streams-core/samples/zip-stream/sample.zip"/>
+        <!--<property name="FileName" value="./tnt4j-streams-core/samples/zip-stream/sample.zip!2/*.txt"/>-->
+        <!--<property name="FileName" value="./tnt4j-streams-core/samples/zip-stream/sample.gz"/>-->
         <!--<property name="ArchType" value="GZIP"/>-->
 
         <parser-ref name="AccessLogParserExt"/>
@@ -567,8 +740,8 @@ used.
 To filter zip file entries use zip entry name wildcard pattern i.e. `sample.zip!2/*.txt`. In this case stream will read
 just zipped files having extension `txt` from internal zip directory named `2` (from sub-directories also).
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 #### Standard Java InputStream/Reader
 
@@ -628,13 +801,13 @@ Sample stream configuration:
     </parser>
 
     <java-object name="SampleFileStream" class="java.io.FileInputStream">
-        <param name="fileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz" type="java.lang.String"/>
+        <param name="fileName" value="./tnt4j-streams-core/samples/zip-stream/sample.gz" type="java.lang.String"/>
     </java-object>
     <java-object name="SampleZipStream" class="java.util.zip.GZIPInputStream">
         <param name="stream" value="SampleFileStream" type="java.io.InputStream"/>
     </java-object>
     <!--java-object name="SampleFileReader" class="java.io.FileReader">
-        <param name="fileName" value=".\tnt4j-streams-core\samples\apache-access-single-log\access.log"
+        <param name="fileName" value="./tnt4j-streams-core/samples/apache-access-single-log/access.log"
             type="java.lang.String"/>
     </java-object-->
 
@@ -662,8 +835,8 @@ like `SampleFileStream` in this particular sample.
 To use `Reader` as input you should uncomment configuration lines defining and referring `SampleFileReader` and comment
 out `SampleZipStream` reference.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 #### Apache Access log single file
 
@@ -673,7 +846,7 @@ Sample files can be found in `samples/apache-access-single-log` directory.
 
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
-NOTE: records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -780,9 +953,10 @@ Sample files can be found in `samples/apache-access-multi-log` directory.
 `localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
 
 NOTE: records in this file are from year `2015` ranging from April until November, so then getting events data
-in JKoolCloud please do not forget to just to dashboard time frame to that period!
+in JKool Cloud please do not forget to just to dashboard time frame to that period!
 
-Sample configuration and sample idea is same as 'Apache Access log single file' with one single difference:
+Sample configuration and sample idea is same as ['Apache Access log single file'](#apache-access-log-single-file) with one single 
+difference:
 ```xml
     <property name="FileName" value="*_access_log.2015-*.txt"/>
 ```
@@ -840,8 +1014,7 @@ Stream configuration states that `FilePollingStream` referencing `AccessLogParse
 `FileStream` reads data from `access.log` file. `HaltIfNoParser` property states that stream should skip unparseable
 entries and don't stop if such situation occurs.
 
-`AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
-['Apache Access log single file'](#apache-access-log-single-file) section.
+`AccessLogParserCommon` is same as in ['Apache Access log single file'](#apache-access-log-single-file) sample, so refer it for more details.
 
 `FileName` property defines that stream should watch for files matching `localhost_access_log.*.txt` wildcard pattern.
  This is needed to properly handle file rolling.
@@ -857,8 +1030,8 @@ NOTE: Stream stops only when critical runtime error/exception occurs or applicat
 
 #### HDFS
 
-These samples shows how to read or poll HDFS files contents. Samples are very similar to 'Log file polling' or
-'Apache Access log single file'. Difference is that specialized stream classes are used.
+These samples shows how to read or poll HDFS files contents. Samples are very similar to ['Log file polling'](#log-file-polling) or
+['Apache Access log single file'](#apache-access-log-single-file). Difference is that specialized stream classes are used.
 
 * Simple HDFS file streaming
 
@@ -867,7 +1040,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-file
 ```xml
     <stream name="SampleHdfsFileLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
-        ...
+        <...>
     </stream>
 ```
 
@@ -882,7 +1055,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
         <property name="FilePolling" value="true"/>
-        ...
+        <...>
     </stream>
 ```
 
@@ -900,7 +1073,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-zip-
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/sample.zip!2/*.txt"/>
         <property name="ArchType" value="ZIP"/>
-        ...
+        <...>
     </stream>
 ```
 
@@ -970,8 +1143,8 @@ stream should skip unparseable entries.
 `headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property
 indicates that every line in parsed string represents single JSON data package.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -1034,8 +1207,8 @@ Stream configuration states that `CharacterStream` referencing `FlumeJSONParser`
 has inner map as value. Fields of such entries can be accessed defining field name using `.` as field hierarchy
 separator. `ReadLines` property indicates that every line in parsed string represents single JSON data package.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 #### Logstash RAW data
 
@@ -1106,8 +1279,8 @@ stream should skip unparseable entries.
 `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property indicates that
 every line in parsed string represents single JSON data package.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -1231,8 +1404,7 @@ should skip unparseable entries. Stream puts received request payload data as `b
 `SampleHttpReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
 `AccessLogParserCommon` to parse format.
 
-`AccessLogParserCommon` is same as in 'Apache Access log single file' sample, so for more details see
-['Apache Access log single file'](#apache-access-log-single-file) section.
+`AccessLogParserCommon` is same as in ['Apache Access log single file'](#apache-access-log-single-file) sample, so refer it for more details.
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
@@ -1358,8 +1530,8 @@ Stream puts received message data to map and passes it to parser.
 `SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parser configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
@@ -1561,8 +1733,8 @@ Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configurat
 `KafkaMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
@@ -1715,8 +1887,8 @@ Stream puts received message data to map and passes it to parser.
 `MqttMessageParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
 `AccessLogParserCommon`.
 
-Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in section
-'Apache Access log single file' and 'Parsers configuration # Apache access log parser'.
+Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
+['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
@@ -2644,7 +2816,7 @@ accepted, stream reads incoming data from connection dedicated socket.
 `RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
 accept inbound connection.
 
-Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKoolCloud service.
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKool Cloud service.
 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
 additional JSON reformatting in default TNT4J data flow.  
@@ -2674,7 +2846,7 @@ This sample shows how to stream MS Excel workbook rows as activity events.
 
 Sample files can be found in `samples/xlsx-rows` directory.
 
-NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -2703,7 +2875,7 @@ Sample stream configuration:
 
     <stream name="SampleExcelRowsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelRowStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+        <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
         <property name="RangeToStream" value="1:"/>
         <property name="SheetsToProcess" value="Sheet*"/>
 
@@ -2717,7 +2889,7 @@ workbook sheet row and passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable rows.
 
-`SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx` file.
+`SampleExcelRowsStream` reads data from `./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx` file.
 
 `RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`. 
 
@@ -2735,7 +2907,7 @@ This sample shows how to stream MS Excel workbook sheets as activity events.
 
 Sample files can be found in `samples/xlsx-sheets` directory.
 
-NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKoolCloud
+NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -2764,7 +2936,7 @@ Sample stream configuration:
 
     <stream name="SampleExcelSheetsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelSheetStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-sheets\sample.xlsx"/>
+        <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-sheets/sample.xlsx"/>
         <property name="SheetsToProcess" value="Sheet*"/>
 
         <parser-ref name="ExcelSheetParser"/>
@@ -2777,7 +2949,7 @@ workbook sheet and passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable sheets.
 
-`SampleExcelRowsStream` reads data from `.\tnt4j-streams-msoffice\samples\xlsx-sheets\sample.xlsx` file.
+`SampleExcelRowsStream` reads data from `./tnt4j-streams-msoffice/samples/xlsx-sheets/sample.xlsx` file.
 
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
@@ -3011,7 +3183,7 @@ Configuring TNT4J-Streams
 
 Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKoolCloud token assigned for You.
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKool Cloud token assigned for You.
 
 For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started).
 Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/blob/master/README.md).
@@ -3060,7 +3232,7 @@ Because streams configuration is read using SAX parser referenced entities shoul
 Note that `stream` uses `parser` reference:
 ```xml
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
-        ...
+        <...>
         <parser-ref name="TokenParser"/>
     </stream>
 ```
@@ -3306,12 +3478,12 @@ Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
 
  * FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
  and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
- `.\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt`. (Required)
+ `./tnt4j-streams-core/samples/zip-stream/sample.zip!2/*.txt`. (Required)
  * ArchType - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)
 
     sample:
 ```xml
-    <property name="FileName" value=".\tnt4j-streams-core\samples\zip-stream\sample.gz"/>
+    <property name="FileName" value="./tnt4j-streams-core/samples/zip-stream/sample.gz"/>
     <property name="ArchType" value="GZIP"/>
 ```
 
@@ -3346,7 +3518,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
             method="GET" >
             <schedule-cron expression="0/15 * * * * ? *"/>
         </step>
-        ...
+        <...>
         <step name="Step Klaipeda"
               url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
               method="GET">
@@ -3412,7 +3584,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
     sample:
 ```xml
-    <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+    <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
 ```
 
@@ -3424,7 +3596,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
     sample:
 ```xml
-    <property name="FileName" value=".\tnt4j-streams-msoffice\samples\xlsx-rows\sample.xlsx"/>
+    <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
     <property name="RangeToStream" value="5:30"/>
 ```

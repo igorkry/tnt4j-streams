@@ -29,7 +29,7 @@
         <!--<field name="Referer" locator="14" locator-type="REGroupNum"/>-->
         <!--<field name="UserAgent" locator="15" locator-type="REGroupNum"/>-->
         <field name="ElapsedTime" locator="15" locator-type="REGroupNum" datatype="Number" format="#####0.000"
-               locale="en-US" units="Seconds"/>        
+               locale="en-US" units="Seconds"/>
     </parser>
 
     <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
@@ -50,7 +50,7 @@
             <field-map source="500:511" target="ERROR" type="Range"/>
         </field>
         <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
-        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>        
+        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">

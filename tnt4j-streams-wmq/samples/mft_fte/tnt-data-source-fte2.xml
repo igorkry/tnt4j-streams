@@ -47,7 +47,7 @@
     <!--</stream>-->
 
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value=".\tnt4j-streams-wmq\samples\mft_fte\message.xml"/>
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/message.xml"/>
 
         <parser-ref name="MQFTEParser"/>
     </stream>

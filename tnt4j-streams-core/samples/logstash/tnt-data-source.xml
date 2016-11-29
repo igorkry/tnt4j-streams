@@ -37,7 +37,7 @@
     <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="RestartOnInputClose" value="true"/>
-        <!--<property name="FileName" value=".\tnt4j-streams-core\samples\logstash\messages.json"/>-->
+        <!--<property name="FileName" value="./tnt4j-streams-core/samples/logstash/messages.json"/>-->
         <property name="Port" value="9595"/>
 
         <parser-ref name="JSONEnvelopeParser"/>

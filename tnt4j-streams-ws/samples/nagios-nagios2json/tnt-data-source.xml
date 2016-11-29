@@ -54,7 +54,7 @@
 
     <!-- TO STREAM FROM SAMPLE REPORT JSON FILE-->
     <!--<stream name="NagiosFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
-    <!--<property name="FileName" value=".\tnt4j-streams-ws\samples\nagios-nagios2json\report.json"/>-->
+    <!--<property name="FileName" value="./tnt4j-streams-ws/samples/nagios-nagios2json/report.json"/>-->
     <!--&lt;!&ndash;<property name="Port" value="9595"/>&ndash;&gt;-->
 
     <!--<parser-ref name="ResponseParser"/>-->

@@ -47,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <ul>
  * <li>FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters
  * '*' and '?'. Definition pattern is "zipFilePath!entryNameWildcard". I.e.:
- * ".\tnt4j-streams-core\samples\zip-stream\sample.zip!2/*.txt". (Required)</li>
+ * "./tnt4j-streams-core/samples/zip-stream/sample.zip!2/*.txt". (Required)</li>
  * <li>ArchType - defines archive type. Can be one of: ZIP, GZIP, JAR. Default value - ZIP. (Optional)</li>
  * </ul>
  *

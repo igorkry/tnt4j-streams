@@ -214,6 +214,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private static final String LANG_ATTR = "lang"; // NON-NLS
 
+	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
+
 	/**
 	 * Currently configured TNT input stream.
 	 */
@@ -1244,13 +1246,20 @@ public class ConfigParserHandler extends DefaultHandler {
 		String eDataVal = getElementData();
 
 		if (eDataVal != null) {
-			if (currTransformData.beanRef != null && eDataVal.length() > 0) {
+			if (StringUtils.isNotEmpty(currTransformData.beanRef) && eDataVal.length() > 0) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ConfigParserHandler.element.has.both3", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR,
 						getLocationInfo()));
 			} else if (currTransformData.scriptCode == null) {
 				currTransformData.scriptCode = eDataVal;
 			}
+		}
+
+		if (StringUtils.isEmpty(currTransformData.beanRef) && StringUtils.isEmpty(currTransformData.scriptCode)) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.must.contain", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR, CDATA),
+					currParseLocation);
 		}
 
 		ValueTransformation<Object, Object> transform;

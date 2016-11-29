@@ -26,7 +26,7 @@
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value=".\tnt4j-streams-core\samples\logstash-parsed\messages.json"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/logstash-parsed/messages.json"/>
         <!--<property name="Port" value="9595"/>-->
 
         <parser-ref name="LogstashJSONParser"/>

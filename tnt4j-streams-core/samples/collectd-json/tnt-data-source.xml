@@ -46,7 +46,7 @@
 
     <!-- TO STREAM FROM SAMPLE STATS JSON FILE-->
     <!--<stream name="CollectdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
-    <!--<property name="FileName" value=".\tnt4j-streams-core\samples\collectd-json\stats.json"/>-->
+    <!--<property name="FileName" value="./tnt4j-streams-core/samples/collectd-json/stats.json"/>-->
     <!--&lt;!&ndash;<property name="Port" value="9595"/>&ndash;&gt;-->
 
     <!--<parser-ref name="CollectdReqBodyParser"/>-->

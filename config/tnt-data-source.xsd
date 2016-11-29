@@ -1125,7 +1125,7 @@
         <xs:attribute name="lang" use="optional" type="ScriptLang" default="javascript">
             <xs:annotation>
                 <xs:documentation>
-                    Transformation script language.
+                    Transformation script/expression language.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
