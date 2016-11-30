@@ -154,16 +154,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>msgpack-core</artifactId>
-            <version>${msgpack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>jackson-dataformat-msgpack</artifactId>
-            <version>${msgpack.version}</version>
-        </dependency>
+             
+        <!--dependency-->
+        <!--groupId>org.msgpack</groupId-->
+        <!--artifactId>msgpack-core</artifactId-->
+        <!--version>${msgpack.version}</version-->
+        <!--/dependency-->
+        <!--dependency-->
+        <!--groupId>org.msgpack</groupId-->
+        <!--artifactId>jackson-dataformat-msgpack</artifactId-->
+        <!--version>${msgpack.version}</version-->
+        <!--/dependency-->
+         
         <!--<dependency>-->
         <!--<groupId>com.google.protobuf</groupId>-->
         <!--<artifactId>protobuf-java</artifactId>-->
@@ -183,7 +185,7 @@
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
             <version>2.4.7</version>
         </dependency>
         <!--<dependency>-->
@@ -208,6 +210,7 @@
             <groupId>com.jkoolcloud</groupId>
             <artifactId>jesl</artifactId>
             <version>${jesl.version}</version>
+            <scope>runtime</scope>
             <!-- streams uses newer version of those -->
             <exclusions>
                 <exclusion>
