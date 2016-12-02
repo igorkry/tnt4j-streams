@@ -125,14 +125,12 @@ sample:
     ServerIp(String.class),
 
     /**
-     * Name to assign to activity entry. Examples are operation, method, API
-     * call, event, etc.
+     * Name to assign to activity entry. Examples are operation, method, API call, event, etc.
      */
     EventName(String.class),
 
     /**
-     * Type of activity - Value must match values in
-     * {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
+     * Type of activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
      */
     EventType(Enum.class),
 
@@ -162,8 +160,7 @@ sample:
     ThreadId(Integer.class),
 
     /**
-     * Indicates completion status of the activity - Value must match values in
-     * {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
+     * Indicates completion status of the activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
      */
     CompCode(Enum.class),
 
@@ -178,9 +175,8 @@ sample:
     Exception(String.class),
 
     /**
-     * Indicates completion status of the activity - Value can either be label
-     * from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration or a numeric
-     * value.
+     * Indicates completion status of the activity - Value can either be label from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration 
+     * or a numeric value.
      */
     Severity(Enum.class),
 
@@ -190,14 +186,12 @@ sample:
     Location(String.class),
 
     /**
-     * Identifier used to correlate/relate activity entries to group them into
-     * logical entities.
+     * Identifier used to correlate/relate activity entries to group them into logical entities.
      */
     Correlator(String[].class),
 
     /**
-     * User-defined label to associate with the activity, generally for locating
-     * activity.
+     * User-defined label to associate with the activity, generally for locating activity.
      */
     Tag(String[].class),
 
@@ -217,8 +211,7 @@ sample:
     Message(String.class),
 
     /**
-     * Identifier used to uniquely identify the data associated with this
-     * activity.
+     * Identifier used to uniquely identify the data associated with this activity.
      */
     TrackingId(String.class),
 
@@ -248,8 +241,7 @@ sample:
     Category(String.class),
 
     /**
-     * Identifier used to uniquely identify parent activity associated with this
-     * activity.
+     * Identifier used to uniquely identify parent activity associated with this activity.
      */
     ParentId(String.class);
 ```
@@ -268,37 +260,31 @@ sample:
 
 ```java
     /**
-     * Indicates that raw data value is the value of a named property of the
-     * current stream.
+     * Indicates that raw data value is the value of a named property of the current stream.
      */
     StreamProp,
-    
+
     /**
-     * Indicates that raw data value is at a specified index location, offset,
-     * etc. This is a generic index/offset value whose interpretation is up to
-     * the specific parser applying the locator.
+     * Indicates that raw data value is at a specified index location, offset, etc. This is a generic index/offset value whose 
+     * interpretation is up to the specific parser applying the locator.
      */
     Index,
-    
+
     /**
-     * Indicates that raw data value is the value of a particular key or label.
-     * Examples of this are XPath expressions for XML elements, and where each
-     * element of a raw activity data string is a name/value pair.
+     * Indicates that raw data value is the value of a particular key or label. Examples of this are XPath expressions for XML elements, 
+     * and where each element of a raw activity data string is a name/value pair.
      */
     Label,
-    
+
     /**
-     * Indicates that raw data value is the value of a specific regular
-     * expression group, for parsers that interpret the raw activity data using
-     * a regular expression pattern defined as a sequence of groups.
+     * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the raw activity data 
+     * using a regular expression pattern defined as a sequence of groups.
      */
     REGroupNum,
-    
+
     /**
-     * Indicates that raw data value is the value of a specific regular
-     * expression match, for parsers that interpret the raw activity data using
-     * a regular expression pattern defined as a sequence of repeating match
-     * patterns.
+     * Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the raw activity data 
+     * using a regular expression pattern defined as a sequence of repeating match patterns.
      */
     REMatchNum
 ```
