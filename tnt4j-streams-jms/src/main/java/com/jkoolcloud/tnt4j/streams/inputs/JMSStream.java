@@ -250,6 +250,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		 *
 		 * @throws JMSException
 		 *             if JMS fails to close objects due to internal error
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
 		 */
 		@Override
 		void close() throws Exception {

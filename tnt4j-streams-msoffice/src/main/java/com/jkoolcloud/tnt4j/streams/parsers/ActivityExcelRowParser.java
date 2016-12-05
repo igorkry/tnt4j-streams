@@ -37,6 +37,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * Implements activity data parser that assumes each activity data item is an MS Excel
  * {@link org.apache.poi.ss.usermodel.Workbook} {@link Row} data structure, where each field is represented by a row
  * column reference (i.e B, C, AB) and the name is used to map each field onto its corresponding activity field.
+ *
+ * @version $Revision: 1 $
  */
 public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelRowParser.class);

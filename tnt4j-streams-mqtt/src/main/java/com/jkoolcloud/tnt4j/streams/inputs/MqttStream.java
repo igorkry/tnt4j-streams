@@ -267,6 +267,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 		 *
 		 * @throws MqttException
 		 *             if Mqtt fails to disconnect client due to internal error
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
 		 */
 		@Override
 		void close() throws Exception {
