@@ -365,7 +365,7 @@ Valid transformation configuration should define `beanRef`, or have script/expre
 
 To use TNT4J-Streams predefined functions namespace `ts:` shall be used.
    
-Streams predefined custom XPath functions may be used in transformation expressions:                 
+Streams predefined custom XPath functions to be used in transformation expressions:                 
 * `ts:getFileName(filePath)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName`. Retrieves file 
 name from provided file path.
 
@@ -392,6 +392,16 @@ then You can use it from stream configuration:
         ts:yourTransformation($fieldValue, "arg2", "arg3")
     </field-transform>
 </field>
+```
+
+NOTE: those functions can be also used in XPath expressions of [ActivityXMLParser](#activity-xml-parser) (or [MessageActivityXMLParser](#message-activity-xml-parser)) 
+field locators. For example: 
+```xml
+    <parser name="XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <.../>
+        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
+        <.../>
+    </parser>    
 ```
 
 #### Stream elements transformations 
@@ -3632,6 +3642,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 #### Activity XML parser
 
+This parser uses XPath expressions as field locators. You may also use [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions).
+
  * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
  * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
 
@@ -3650,6 +3662,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 ```xml
     <property name="SignatureDelim" value="#"/>
 ```
+
+Also see ['Activity XML parser'](#activity-xml-parser).
 
 #### Apache access log parser
 
