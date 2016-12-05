@@ -138,8 +138,8 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	@Override
 	public void addParser(ActivityParser parser) throws IllegalStateException {
 		if (!parsersMap.isEmpty()) {
-			StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.cannot.have.multiple.parsers");
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.cannot.have.multiple.parsers"));
 		}
 
 		super.addParser(parser);

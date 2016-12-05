@@ -130,7 +130,7 @@ sample:
     EventName(String.class),
 
     /**
-     * Type of activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
+     * Type of activity - value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
      */
     EventType(Enum.class),
 
@@ -160,7 +160,7 @@ sample:
     ThreadId(Integer.class),
 
     /**
-     * Indicates completion status of the activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
+     * Indicates completion status of the activity - value must match values in {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
      */
     CompCode(Enum.class),
 
@@ -175,7 +175,7 @@ sample:
     Exception(String.class),
 
     /**
-     * Indicates completion status of the activity - Value can either be label from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration 
+     * Indicates completion status of the activity - value can either be label from {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration 
      * or a numeric value.
      */
     Severity(Enum.class),
@@ -371,7 +371,7 @@ name from provided file path.
 
 You may also define your own customized XPath functions. To do this Your API has to:
 * implement interface `javax.xml.xpath.XPathFunction`
-* register function by invoking `com.jkoolcloud.tnt4j.streams.transform.XPathTransformation.registerCustomFunction(functionName, function)`.
+* register function by invoking `com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils.registerCustomFunction(functionName, function)`.
 
 i.e.:
 ```java
@@ -382,7 +382,7 @@ public class YourTransform implements XPathFunction {
   }
 }
 ...
-XPathTransformation.registerCustomFunction("yourTransformation", new YourTransform());
+StreamsXMLUtils.registerCustomFunction("yourTransformation", new YourTransform());
 ...
 ```  
 then You can use it from stream configuration:

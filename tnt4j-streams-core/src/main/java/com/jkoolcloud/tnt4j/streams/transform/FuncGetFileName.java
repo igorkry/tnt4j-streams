@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Data value transformation function resolving file name from provided file path.
@@ -51,22 +53,44 @@ public class FuncGetFileName extends AbstractFunction<String> {
 	}
 
 	/**
-	 * Resolves file name from provided file path.
+	 * Resolves file name from provided file path. File path can be provided as {@link String}, {@link Node} or
+	 * {@link NodeList} (first node item containing file path).
 	 *
 	 * @param args
 	 *            arguments list containing file path as first item
 	 * @return file name resolved from provided path
+	 *
+	 * @see Node
+	 * @see NodeList
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Object evaluate(List args) {
-		String param = CollectionUtils.isEmpty(args) ? null : String.valueOf(args.get(0));
+		Object param = CollectionUtils.isEmpty(args) ? null : args.get(0);
 
-		if (StringUtils.isEmpty(param)) {
+		if (param == null) {
 			return param;
 		}
 
-		return param.substring(param.lastIndexOf(UNIX_PATH_SEPARATOR) + 1)
-				.substring(param.lastIndexOf(WIN_PATH_SEPARATOR) + 1);
+		String filePath = null;
+		if (param instanceof String) {
+			filePath = (String) param;
+		} else if (param instanceof Node) {
+			filePath = ((Node) param).getTextContent();
+		} else if (param instanceof NodeList) {
+			NodeList nodes = (NodeList) param;
+
+			if (nodes.getLength() > 0) {
+				Node node = nodes.item(0);
+				filePath = node.getTextContent();
+			}
+		}
+
+		if (StringUtils.isEmpty(filePath)) {
+			return filePath;
+		}
+
+		return filePath.substring(filePath.lastIndexOf(UNIX_PATH_SEPARATOR) + 1)
+				.substring(filePath.lastIndexOf(WIN_PATH_SEPARATOR) + 1);
 	}
 }

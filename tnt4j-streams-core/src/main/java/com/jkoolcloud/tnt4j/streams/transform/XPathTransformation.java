@@ -16,14 +16,11 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.xpath.*;
 
-import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 
 /**
  * Data value transformation based on XPath function expressions.
@@ -39,19 +36,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  */
 public class XPathTransformation extends AbstractScriptTransformation<Object> {
 
-	private static final String STREAMS_NS = "ts"; // NON-NLS
-	private static final String STREAMS_NS_URI = "http://github.com/Nastel/tnt4j-streams"; // NON-NLS
-
-	private static NamespaceMap tsContext;
-	private static StreamsFunctionResolver tsFunctionResolver;
-
-	static {
-		tsContext = new NamespaceMap();
-		tsFunctionResolver = new StreamsFunctionResolver();
-
-		tsContext.addPrefixUriMapping(STREAMS_NS, STREAMS_NS_URI);
-	}
-
 	/**
 	 * Constructs a new XPathTransformation.
 	 *
@@ -66,10 +50,11 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 
 	@Override
 	public Object transform(Object value) throws TransformationException {
-		XPath xPath = XPathFactory.newInstance().newXPath();
+		if (value == null) {
+			return value;
+		}
 
-		xPath.setNamespaceContext(tsContext);
-		xPath.setXPathFunctionResolver(tsFunctionResolver);
+		XPath xPath = StreamsXMLUtils.getStreamsXPath();
 		xPath.setXPathVariableResolver(new StreamsVariableResolver(value));
 
 		try {
@@ -77,39 +62,6 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName()), exc);
-		}
-	}
-
-	/**
-	 * Adds XPath function to custom functions registry.
-	 * <p>
-	 * To call these functions from script code use 'ts:' prefix: i.e. 'ts:getFileName()'
-	 *
-	 * @param functionName
-	 *            name of custom function to be used
-	 * @param function
-	 *            custom XPath function to add to registry
-	 * @return previously registered function for defined function name, or {@code null} if function was not previously
-	 *         registered.
-	 */
-	public static XPathFunction registerCustomFunction(String functionName, XPathFunction function) {
-		return tsFunctionResolver.fMap.put(functionName, function);
-	}
-
-	private static class StreamsFunctionResolver implements XPathFunctionResolver {
-		private static Map<String, XPathFunction> fMap = new HashMap<String, XPathFunction>(2);
-
-		static {
-			fMap.put(FuncGetFileName.FUNCTION_NAME, new FuncGetFileName());
-		}
-
-		@Override
-		public XPathFunction resolveFunction(QName functionName, int arity) {
-			if (functionName.getNamespaceURI().equalsIgnoreCase(STREAMS_NS_URI)) {
-				return fMap.get(functionName.getLocalPart());
-			}
-
-			return null;
 		}
 	}
 

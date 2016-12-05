@@ -44,6 +44,7 @@ import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -106,15 +107,20 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(true);
 		builder = domFactory.newDocumentBuilder();
-		XPathFactory xPathFactory = XPathFactory.newInstance();
-		xPath = xPathFactory.newXPath();
+		xPath = StreamsXMLUtils.getStreamsXPath();
 		xmlBuffer = new StringBuilder(1024);
 
 		if (namespaces == null) {
-			namespaces = new NamespaceMap();
-			namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
-			namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
+			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
+				namespaces = (NamespaceMap) xPath.getNamespaceContext();
+			} else {
+				namespaces = new NamespaceMap();
+				xPath.setNamespaceContext(namespaces);
+			}
 		}
+
+		namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
+		namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
 	}
 
 	@Override
@@ -146,9 +152,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 							name, value);
 				}
 			}
-		}
-		if (namespaces != null) {
-			xPath.setNamespaceContext(namespaces);
 		}
 	}
 

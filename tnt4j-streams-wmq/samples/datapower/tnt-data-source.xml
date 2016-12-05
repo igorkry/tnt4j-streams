@@ -18,7 +18,7 @@
         <field name="ServerName" locator="/tracking_event/HostName" locator-type="Label"/>
         <field name="TrackingId" locator="/tracking_event/Signature" locator-type="Label"/>
         <field name="StartTime" locator="/tracking_event/StartTime" locator-type="Label" datatype="Timestamp"/>
-        <field name="CompCode" locator="/tracking_event/ErrorCode" locator-type="Label" datatype="Number">
+        <field name="CompCode" locator="/tracking_event/ErrorCode" locator-type="Label">
             <field-map source="0" target="SUCCESS"/>
             <field-map source="" target="ERROR"/>
         </field>
