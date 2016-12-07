@@ -19,11 +19,13 @@ package com.jkoolcloud.tnt4j.streams;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
+
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({})
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class })
 public class AllMsOfficeStreamTests {
 }
