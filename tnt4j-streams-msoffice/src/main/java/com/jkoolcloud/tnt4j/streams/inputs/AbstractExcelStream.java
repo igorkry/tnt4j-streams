@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -44,6 +46,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
  * matches this mask. Default value - ''. (Optional)</li>
  * </ul>
+ *
+ * @param <T>
+ *            the type of handled RAW activity data - {@link Sheet} or {@link Row}
  *
  * @version $Revision: 1 $
  */
@@ -121,6 +126,11 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		sheetIterator = workbook.sheetIterator();
 	}
 
+	// @Override
+	// public long getTotalBytes() {
+	// return super.getTotalBytes();
+	// }
+
 	@Override
 	protected void cleanup() {
 		Utils.close(workbook);
@@ -135,7 +145,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	 *
 	 * @param countSkips
 	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count
-	 * 
+	 *
 	 * @return next workbook sheet matching name filter mask, or {@code null} if no more sheets matching name mask
 	 *         available in this workbook.
 	 */
@@ -163,5 +173,46 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 				"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
 
 		return sheet;
+	}
+
+	/**
+	 * Calculates {@link Row} contained data bytes count.
+	 *
+	 * @param row
+	 *            the row
+	 *
+	 * @return the row data bytes count
+	 */
+	static int getRowBytesCount(Row row) {
+		int bCount = 0;
+
+		Iterator<Cell> cells = row.cellIterator();
+		while (cells.hasNext()) {
+			Cell c = cells.next();
+			String cv = c.toString();
+			bCount += cv.getBytes().length;
+		}
+
+		return bCount;
+	}
+
+	/**
+	 * Gets {@link Sheet} contained data bytes count.
+	 *
+	 * @param sheet
+	 *            the sheet
+	 *
+	 * @return the sheet data bytes count
+	 */
+	static int getSheetBytesCount(Sheet sheet) {
+		int bCount = 0;
+
+		Iterator<Row> rows = sheet.rowIterator();
+		while (rows.hasNext()) {
+			Row r = rows.next();
+			bCount += getRowBytesCount(r);
+		}
+
+		return bCount;
 	}
 }

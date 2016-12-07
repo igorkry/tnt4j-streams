@@ -140,6 +140,12 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 			return getNextItem();
 		}
 
-		return rowIterator.next();
+		Row row = rowIterator.next();
+
+		if (row != null) {
+			addStreamedBytesCount(getRowBytesCount(row));
+		}
+
+		return row;
 	}
 }

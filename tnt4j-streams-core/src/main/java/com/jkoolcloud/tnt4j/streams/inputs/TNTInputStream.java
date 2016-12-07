@@ -1056,7 +1056,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			if (activitiesTotal == -1) {
 				activitiesTotal = currActivity;
 			}
-
+			if (totalBytes == 0) {
+				totalBytes = bytesStreamed;
+			}
 			if (elapsedTime == -1) {
 				elapsedTime = 0;
 			}

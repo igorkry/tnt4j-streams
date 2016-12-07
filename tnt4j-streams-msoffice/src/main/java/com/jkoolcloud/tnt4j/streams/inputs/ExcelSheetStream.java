@@ -55,6 +55,12 @@ public class ExcelSheetStream extends AbstractExcelStream<Sheet> {
 	 */
 	@Override
 	public Sheet getNextItem() throws Exception {
-		return getNextNameMatchingSheet(true);
+		Sheet sheet = getNextNameMatchingSheet(true);
+
+		if (sheet != null) {
+			addStreamedBytesCount(getSheetBytesCount(sheet));
+		}
+
+		return sheet;
 	}
 }
