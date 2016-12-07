@@ -186,11 +186,15 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	static int getRowBytesCount(Row row) {
 		int bCount = 0;
 
-		Iterator<Cell> cells = row.cellIterator();
-		while (cells.hasNext()) {
-			Cell c = cells.next();
-			String cv = c.toString();
-			bCount += cv.getBytes().length;
+		if (row != null) {
+			Iterator<Cell> cells = row.cellIterator();
+			while (cells.hasNext()) {
+				Cell c = cells.next();
+				if (c != null) {
+					String cv = c.toString();
+					bCount += cv.getBytes().length;
+				}
+			}
 		}
 
 		return bCount;
@@ -207,10 +211,12 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	static int getSheetBytesCount(Sheet sheet) {
 		int bCount = 0;
 
-		Iterator<Row> rows = sheet.rowIterator();
-		while (rows.hasNext()) {
-			Row r = rows.next();
-			bCount += getRowBytesCount(r);
+		if (sheet != null) {
+			Iterator<Row> rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				Row r = rows.next();
+				bCount += getRowBytesCount(r);
+			}
 		}
 
 		return bCount;
