@@ -21,10 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkoolcloud.tnt4j.core.OpCompCode;
-import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.core.OpType;
-import com.jkoolcloud.tnt4j.core.UsecTimestamp;
+import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -56,9 +53,14 @@ public enum StreamFieldType {
 	EventName(String.class),
 
 	/**
-	 * Type of activity - Value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
+	 * Type of activity - value must match values in {@link com.jkoolcloud.tnt4j.core.OpType} enumeration.
 	 */
 	EventType(Enum.class),
+
+	/**
+	 * Status of activity - value must match values in {@link com.jkoolcloud.tnt4j.core.ActivityStatus} enumeration.
+	 */
+	EventStatus(Enum.class),
 
 	/**
 	 * Time action associated with activity started.
@@ -86,7 +88,7 @@ public enum StreamFieldType {
 	ThreadId(Integer.class),
 
 	/**
-	 * Indicates completion status of the activity - Value must match values in
+	 * Indicates completion status of the activity - value must match values in
 	 * {@link com.jkoolcloud.tnt4j.core.OpCompCode} enumeration.
 	 */
 	CompCode(Enum.class),
@@ -102,7 +104,7 @@ public enum StreamFieldType {
 	Exception(String.class),
 
 	/**
-	 * Indicates completion status of the activity - Value can either be label from
+	 * Indicates completion status of the activity - value can either be label from
 	 * {@link com.jkoolcloud.tnt4j.core.OpLevel} enumeration or a numeric value.
 	 */
 	Severity(Enum.class),
@@ -206,6 +208,8 @@ public enum StreamFieldType {
 			return OpType.class;
 		case CompCode:
 			return OpCompCode.class;
+		case EventStatus:
+			return ActivityStatus.class;
 
 		default:
 			throw new IllegalArgumentException(StreamsResources
@@ -243,6 +247,8 @@ public enum StreamFieldType {
 			return OpType.valueOf(enumLabel).ordinal();
 		case CompCode:
 			return OpCompCode.valueOf(enumLabel).ordinal();
+		case EventStatus:
+			return ActivityStatus.valueOf(enumLabel).ordinal();
 
 		default:
 			throw new IllegalArgumentException(StreamsResources
@@ -271,6 +277,8 @@ public enum StreamFieldType {
 			return OpType.valueOf(enumLabel.toUpperCase());
 		case CompCode:
 			return OpCompCode.valueOf(enumLabel.toUpperCase());
+		case EventStatus:
+			return ActivityStatus.valueOf(enumLabel.toUpperCase());
 
 		default:
 			throw new IllegalArgumentException(StreamsResources
@@ -299,6 +307,8 @@ public enum StreamFieldType {
 			return OpType.valueOf(value).name();
 		case CompCode:
 			return OpCompCode.valueOf(value).name();
+		case EventStatus:
+			return ActivityStatus.valueOf(value).name();
 
 		default:
 			throw new IllegalArgumentException(StreamsResources
@@ -327,6 +337,8 @@ public enum StreamFieldType {
 			return OpType.valueOf(value);
 		case CompCode:
 			return OpCompCode.valueOf(value);
+		case EventStatus:
+			return ActivityStatus.valueOf(value);
 
 		default:
 			throw new IllegalArgumentException(StreamsResources

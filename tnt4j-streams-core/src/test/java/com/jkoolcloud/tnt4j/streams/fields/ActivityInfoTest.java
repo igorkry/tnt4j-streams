@@ -96,6 +96,9 @@ public class ActivityInfoTest {
 		case ServerIp:
 			valueT.value = "127.0.0.1";
 			break;
+		case EventStatus:
+			valueT.valueExpected = ActivityStatus.END;
+			valueT.value = ActivityStatus.END.toString();
 		default:
 			// generic cases
 			valueT.value = getTestValueForClass(field.getDataType());

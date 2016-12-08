@@ -321,13 +321,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 					if (!pollingOn) {
 						shutdown();
 					} else {
-						try {
-							logger().log(OpLevel.DEBUG, StreamsResources
-									.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.waiting"),
-									fileWatcherDelay / 1000.0);
-							Thread.sleep(fileWatcherDelay);
-						} catch (InterruptedException exc) {
-						}
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"FileLineStream.waiting"), fileWatcherDelay / 1000.0);
+						StreamThread.sleep(fileWatcherDelay);
 					}
 				}
 			}

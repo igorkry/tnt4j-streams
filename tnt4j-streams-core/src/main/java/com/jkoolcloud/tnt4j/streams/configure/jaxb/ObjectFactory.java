@@ -96,6 +96,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link FieldTransform }
+	 * 
+	 */
+	public FieldTransform createFieldTransform() {
+		return new FieldTransform();
+	}
+
+	/**
 	 * Create an instance of {@link ParamType }
 	 * 
 	 */

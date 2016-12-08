@@ -59,6 +59,10 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Map<String, ?> getDataMap(Object data) {
+		if (data == null) {
+			return null;
+		}
+
 		Map<String, Object> map = (Map<String, Object>) data;
 
 		Object activityData = map.get(StreamsConstants.ACTIVITY_DATA_KEY);

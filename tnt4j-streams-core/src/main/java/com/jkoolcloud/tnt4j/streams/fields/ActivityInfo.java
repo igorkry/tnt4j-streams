@@ -63,6 +63,7 @@ public class ActivityInfo {
 
 	private String eventName = null;
 	private OpType eventType = null;
+	private ActivityStatus eventStatus = null;
 	private UsecTimestamp startTime = null;
 	private UsecTimestamp endTime = null;
 	private long elapsedTime = -1L;
@@ -110,6 +111,7 @@ public class ActivityInfo {
 	 * @param value
 	 *            value to apply for this field, which could be an array of objects if value for field consists of
 	 *            multiple locations
+	 *
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             format, etc.)
@@ -268,6 +270,10 @@ public class ActivityInfo {
 			case EventType:
 				eventType = substitute(eventType, Utils.mapOpType(fieldValue), OpType.class);
 				break;
+			case EventStatus:
+				ActivityStatus as = fieldValue instanceof ActivityStatus ? (ActivityStatus) fieldValue
+						: ActivityStatus.valueOf(fieldValue);
+				eventStatus = substitute(eventStatus, as, ActivityStatus.class);
 			case ApplName:
 				applName = substitute(applName, getStringValue(fieldValue, field));
 				break;
@@ -299,8 +305,7 @@ public class ActivityInfo {
 				serverName = substitute(serverName, getStringValue(fieldValue, field));
 				break;
 			case Severity:
-				OpLevel sev = fieldValue instanceof Number ? OpLevel.valueOf(((Number) fieldValue).intValue())
-						: OpLevel.valueOf(fieldValue);
+				OpLevel sev = fieldValue instanceof OpLevel ? (OpLevel) fieldValue : OpLevel.valueOf(fieldValue);
 				severity = substitute(severity, sev, OpLevel.class);
 				break;
 			case TrackingId:
@@ -310,7 +315,7 @@ public class ActivityInfo {
 				startTime = substitute(startTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
 				break;
 			case CompCode:
-				OpCompCode cc = fieldValue instanceof Number ? OpCompCode.valueOf(((Number) fieldValue).intValue())
+				OpCompCode cc = fieldValue instanceof OpCompCode ? (OpCompCode) fieldValue
 						: OpCompCode.valueOf(fieldValue);
 				compCode = substitute(compCode, cc, OpCompCode.class);
 				break;
@@ -372,6 +377,10 @@ public class ActivityInfo {
 	}
 
 	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
+		if (fieldValue instanceof Trackable) {
+			return fieldValue;
+		}
+
 		ActivityFieldLocator locator = field.getMasterLocator();
 
 		if (locator != null) {
@@ -449,6 +458,7 @@ public class ActivityInfo {
 	 *            activity item property value
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
+	 *
 	 * @see Map#put(Object, Object)
 	 * @see #recordActivity(Tracker, long)
 	 * @see #addActivityProperty(String, Object, String)
@@ -469,6 +479,7 @@ public class ActivityInfo {
 	 *            activity item property value type from {@link com.jkoolcloud.tnt4j.core.ValueTypes} set
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
+	 *
 	 * @see Map#put(Object, Object)
 	 * @see #recordActivity(Tracker, long)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
@@ -532,7 +543,9 @@ public class ActivityInfo {
 			}
 
 			for (String str : strings) {
-				collection.add(str.trim());
+				if (StringUtils.isNotEmpty(str)) {
+					collection.add(str.trim());
+				}
 			}
 		}
 
@@ -575,6 +588,7 @@ public class ActivityInfo {
 	 *            communication gateway to use to record activity
 	 * @param retryPeriod
 	 *            period in milliseconds between activity resubmission in case of failure
+	 *
 	 * @throws Exception
 	 *             indicates an error building data message or sending data to jKool Cloud Service
 	 */
@@ -687,7 +701,7 @@ public class ActivityInfo {
 
 		event.getOperation().setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		event.getOperation().setReasonCode(reasonCode);
-		event.getOperation().setType(eventType);
+		event.getOperation().setType(eventType == null ? OpType.EVENT : eventType);
 		event.getOperation().setException(exception);
 		if (StringUtils.isNotEmpty(location)) {
 			event.getOperation().setLocation(location);
@@ -698,12 +712,19 @@ public class ActivityInfo {
 		event.getOperation().setPID(processId == null ? Utils.getVMPID() : processId);
 		// event.getOperation().setSeverity(severity == null ? OpLevel.INFO :
 		// severity);
+		if (eventStatus != null) {
+			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
+		}
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
 			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				event.getOperation().addProperty(ape.getValue());
+				if (ape.getValue().getValue() instanceof Snapshot) {
+					event.getOperation().addSnapshot((Snapshot) ape.getValue().getValue());
+				} else {
+					event.getOperation().addProperty(ape.getValue());
+				}
 			}
 		}
 
@@ -725,7 +746,6 @@ public class ActivityInfo {
 	 *            name of tracking activity
 	 * @param trackId
 	 *            identifier (signature) of tracking activity
-	 *
 	 * @return tracking activity instance
 	 */
 	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId) {
@@ -767,7 +787,8 @@ public class ActivityInfo {
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		activity.setReasonCode(reasonCode);
 		activity.setType(eventType);
-		activity.setStatus(StringUtils.isNotEmpty(exception) ? ActivityStatus.EXCEPTION : ActivityStatus.END);
+		activity.setStatus(StringUtils.isNotEmpty(exception) ? ActivityStatus.EXCEPTION
+				: eventStatus == null ? ActivityStatus.END : eventStatus);
 		activity.setException(exception);
 		if (StringUtils.isNotEmpty(location)) {
 			activity.setLocation(location);
@@ -782,7 +803,11 @@ public class ActivityInfo {
 
 		if (activityProperties != null) {
 			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				activity.addProperty(ape.getValue());
+				if (ape.getValue().getValue() instanceof Trackable) {
+					activity.add((Trackable) ape.getValue().getValue());
+				} else {
+					activity.addProperty(ape.getValue());
+				}
 			}
 		}
 
@@ -823,7 +848,6 @@ public class ActivityInfo {
 	 *            name of snapshot
 	 * @param trackId
 	 *            identifier (signature) of snapshot
-	 *
 	 * @return snapshot instance
 	 */
 	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
@@ -877,6 +901,9 @@ public class ActivityInfo {
 		snapshot.add(JSONFormatter.JSON_TID_FIELD, threadId == null ? Thread.currentThread().getId() : threadId);
 		snapshot.add(JSONFormatter.JSON_PID_FIELD, processId == null ? Utils.getVMPID() : processId);
 		snapshot.setTimeStamp(startTime == null ? (endTime == null ? UsecTimestamp.now() : endTime) : startTime);
+		if (eventStatus != null) {
+			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
+		}
 
 		if (activityProperties != null) {
 			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
@@ -1038,6 +1065,9 @@ public class ActivityInfo {
 		}
 		if (eventType == null) {
 			eventType = otherAi.eventType;
+		}
+		if (eventStatus == null) {
+			eventStatus = otherAi.eventStatus;
 		}
 		if (startTime == null) {
 			startTime = otherAi.startTime;
@@ -1202,6 +1232,15 @@ public class ActivityInfo {
 	 */
 	public OpType getEventType() {
 		return eventType;
+	}
+
+	/**
+	 * Gets event status.
+	 *
+	 * @return the event status
+	 */
+	public ActivityStatus getEventStatus() {
+		return eventStatus;
 	}
 
 	/**

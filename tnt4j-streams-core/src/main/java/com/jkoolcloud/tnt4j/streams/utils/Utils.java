@@ -1053,4 +1053,36 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static boolean isArray(Object obj) {
 		return obj instanceof Object[] || (obj != null && obj.getClass().isArray());
 	}
+
+	/**
+	 * Sleeps current running thread and silently consumes thrown {@link InterruptedException}.
+	 *
+	 * @param millis
+	 *            the length of time to sleep in milliseconds
+	 *
+	 * @see Thread#sleep(long)
+	 */
+	public static void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException exc) {
+		}
+	}
+
+	/**
+	 * Sleeps current running thread and silently consumes thrown {@link InterruptedException}.
+	 *
+	 * @param millis
+	 *            the length of time to sleep in milliseconds
+	 * @param nanos
+	 *            {@code 0-999999} additional nanoseconds to sleep
+	 *
+	 * @see Thread#sleep(long, int)
+	 */
+	public static void sleep(long millis, int nanos) {
+		try {
+			Thread.sleep(millis, nanos);
+		} catch (InterruptedException exc) {
+		}
+	}
 }
