@@ -133,12 +133,15 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		 * start streaming from latest file line, then count of lines in file is calculated to mark latest activity
 		 * position.
 		 *
+		 * @param params
+		 *            initialization parameters array
+		 *
 		 * @throws Exception
 		 *             indicates that stream is not configured properly and files monitoring can't initialize and
-		 *             continue.
+		 *             continue
 		 */
 		@Override
-		protected void initialize() throws Exception {
+		protected void initialize(Object... params) throws Exception {
 			if (Utils.isWildcardString(fileName)) {
 				availableFiles = searchFiles(fileName);
 			} else {

@@ -17,8 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Collection;
@@ -222,17 +220,28 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	 */
 	private class MqttDataReceiver extends InputProcessor implements MqttCallback {
 
+		private MqttConnectOptions options;
 		private MqttClient client;
 
 		private MqttDataReceiver() {
 			super("MqttStream.MqttDataReceiver"); // NON-NLS
 		}
 
-		private void initialize() throws MqttException, GeneralSecurityException, IOException {
+		/**
+		 * Input data receiver initialization - Mqtt client configuration.
+		 *
+		 * @param params
+		 *            initialization parameters array
+		 *
+		 * @throws Exception
+		 *             if fails to initialize Mqtt data receiver and configure Mqtt client
+		 */
+		@Override
+		protected void initialize(Object... params) throws Exception {
 			client = new MqttClient(serverURI, MqttClient.generateClientId(), new MemoryPersistence());
 			client.setCallback(this);
 
-			MqttConnectOptions options = new MqttConnectOptions();
+			options = new MqttConnectOptions();
 			if (StringUtils.isNotEmpty(userName)) {
 				options.setUserName(userName);
 				options.setPassword((password == null ? "" : password).toCharArray());
@@ -257,30 +266,39 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 				options.setSocketFactory(sslContext.getSocketFactory());
 			}
-
-			client.connect(options);
-			client.subscribe(topic);
 		}
 
 		/**
-		 * Closes Mqtt objects.
+		 * Connects client to Mqtt server and subscribes defined topic. Shuts down this data receiver if exception
+		 * occurs.
+		 */
+		@Override
+		public void run() {
+			if (client != null) {
+				try {
+					client.connect(options == null ? new MqttConnectOptions() : options);
+					client.subscribe(topic);
+				} catch (MqttException exc) {
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"AbstractBufferedStream.input.start.failed"), exc);
+					shutdown();
+				}
+			}
+		}
+
+		/**
+		 * Closes opened Mqtt client.
 		 *
 		 * @throws MqttException
 		 *             if Mqtt fails to disconnect client due to internal error
-		 * @throws Exception
-		 *             if fails to close opened resources due to internal error
 		 */
 		@Override
-		void close() throws Exception {
-			closeConnection();
-
-			super.close();
-		}
-
-		private void closeConnection() throws MqttException {
-			client.unsubscribe(topic);
-			client.disconnect();
-			// client.close();
+		void closeInternals() throws MqttException {
+			if (client.isConnected()) {
+				client.unsubscribe(topic);
+				client.disconnect();
+			}
+			client.close();
 		}
 
 		@Override
@@ -290,7 +308,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 					cause);
 
 			try {
-				closeConnection();
+				closeInternals();
 			} catch (MqttException exc) {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
 						"MqttStream.error.closing.receiver"), exc);

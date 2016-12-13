@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
@@ -224,12 +223,13 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		}
 
 		/**
-		 * Initialize.
+		 * Input request handler initialization - HTTP server configuration.
 		 *
 		 * @throws Exception
-		 *             the exception
+		 *             if fails to initialize request handler and configure HTTP server
 		 */
-		void initialize() throws Exception {
+		@Override
+		protected void initialize(Object... params) throws Exception {
 			SSLContext sslcontext = null;
 			int port;
 
@@ -256,6 +256,9 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 					.setExceptionLogger(new HttpStreamExceptionLogger()).registerHandler("*", this).create();
 		}
 
+		/**
+		 * Starts HTTP server to receive incoming data. Shuts down this request handler if exception occurs.
+		 */
 		@Override
 		public void run() {
 			if (server != null) {
@@ -263,37 +266,26 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 					server.start();
 				} catch (IOException exc) {
 					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"HttpStream.could.not.receive.data"), exc);
+							"AbstractBufferedStream.input.start.failed"), exc);
 					shutdown();
 				}
-
-				// try {
-				// server.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-				// } catch (InterruptedException exc) {
-				//
-				// }
-
-				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-					@Override
-					public void run() {
-						if (server != null) {
-							server.shutdown(5, TimeUnit.SECONDS);
-							// server.stop();
-						}
-					}
-				}));
 			}
 		}
 
+		/**
+		 * Closes running HTTP server.
+		 *
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
+		 */
 		@Override
-		void close() throws Exception {
+		void closeInternals() throws Exception {
 			if (server != null) {
 				// server.shutdown(5, TimeUnit.SECONDS);
+				// server.awaitTermination ();
 				server.stop();
 				server = null;
 			}
-
-			super.close();
 		}
 
 		/**

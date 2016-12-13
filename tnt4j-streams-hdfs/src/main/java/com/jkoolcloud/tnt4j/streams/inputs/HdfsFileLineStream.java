@@ -153,12 +153,15 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		 * start streaming from latest file line, then count of lines in file is calculated to mark latest activity
 		 * position.
 		 *
+		 * @param params
+		 *            initialization parameters array
+		 *
 		 * @throws Exception
 		 *             indicates that stream is not configured properly and files monitoring can't initialize and
-		 *             continue.
+		 *             continue
 		 */
 		@Override
-		protected void initialize() throws Exception {
+		protected void initialize(Object... params) throws Exception {
 			URI fileUri = new URI(fileName);
 			fs = FileSystem.get(fileUri, new Configuration());
 			Path filePath = new Path(fileUri);
@@ -427,11 +430,17 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 			totalLinesCount = totals[1];
 		}
 
+		/**
+		 * Closes opened {@link FileSystem} and persists file access state.
+		 *
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
+		 */
 		@Override
-		void close() throws Exception {
+		void closeInternals() throws Exception {
 			Utils.close(fs);
 
-			super.close();
+			super.closeInternals();
 		}
 	}
 }

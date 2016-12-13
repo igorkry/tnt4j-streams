@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -215,19 +214,59 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		private Destination destination;
 
 		private JMSDataReceiver() {
-
 			super("JMSStream.JMSDataReceiver"); // NON-NLS
 		}
 
-		private void initialize(Context ctx, String destinationName, String jmsConnFactoryName)
-				throws NamingException, JMSException {
+		/**
+		 * Input data receiver initialization - JMS client configuration.
+		 *
+		 * @param params
+		 *            initialization parameters array
+		 *
+		 * @throws Exception
+		 *             if fails to initialize data receiver and configure JMS client
+		 */
+		@Override
+		protected void initialize(Object... params) throws Exception {
+			Context ctx = (Context) params[0];
+			String destinationName = (String) params[1];
+			String jmsConnFactoryName = (String) params[2];
+
 			jmsConFactory = (ConnectionFactory) ctx.lookup(jmsConnFactoryName);
 			jmsCon = jmsConFactory.createConnection();
 			jmsSession = jmsCon.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			destination = (Destination) ctx.lookup(destinationName);
 			jmsReceiver = jmsSession.createConsumer(destination);
 			jmsReceiver.setMessageListener(this);
-			jmsCon.start();
+		}
+
+		/**
+		 * Starts JMS client to receive incoming data. Shuts down this data receiver if exception occurs.
+		 */
+		@Override
+		public void run() {
+			if (jmsCon != null) {
+				try {
+					jmsCon.start();
+				} catch (JMSException exc) {
+					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"AbstractBufferedStream.input.start.failed"), exc);
+					shutdown();
+				}
+			}
+		}
+
+		/**
+		 * Closes JMS client objects.
+		 *
+		 * @throws JMSException
+		 *             if JMS fails to close objects due to internal error
+		 */
+		@Override
+		void closeInternals() throws JMSException {
+			jmsReceiver.close();
+			jmsSession.close();
+			jmsCon.close();
 		}
 
 		/**
@@ -243,23 +282,6 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 			}
 
 			addInputToBuffer(msg);
-		}
-
-		/**
-		 * Closes JMS objects.
-		 *
-		 * @throws JMSException
-		 *             if JMS fails to close objects due to internal error
-		 * @throws Exception
-		 *             if fails to close opened resources due to internal error
-		 */
-		@Override
-		void close() throws Exception {
-			jmsReceiver.close();
-			jmsSession.close();
-			jmsCon.close();
-
-			super.close();
 		}
 	}
 }

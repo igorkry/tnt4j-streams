@@ -3684,6 +3684,16 @@ Also see ['Activity XML parser'](#activity-xml-parser).
               value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
 
+#### Activity map parser
+ 
+ * LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path elements. 
+ Default value - `.`. (Optional)
+ 
+    sample:
+```xml
+    <property name="LocPathDelim" value="/"/>
+``` 
+ 
 #### Activity JSON parser
 
  * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
@@ -3692,6 +3702,18 @@ Also see ['Activity XML parser'](#activity-xml-parser).
 ```xml
     <property name="ReadLines" value="false"/>
 ```
+
+#### Activity JMS message parser
+
+ * ConvertToString - flag indicating whether to convert message payload `byte[]` data to string. Applicable to `BytesMessage` and 
+ `StreamMessage`. Default value - `false`. (Optional)
+ 
+    sample:
+```xml
+    <property name="ConvertToString" value="true"/>
+```  
+ 
+Also see ['Activity map parser'](#activity-map-parser).
 
 #### Activity PCF parser
 

@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,14 +43,22 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * payload data is put into map entry using key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
  * supports JMS messages of those types:
  * <ul>
- * <li>TextMessage - activity data is message text</li>
- * <li>BytesMessage - activity data is string made from message bytes</li>
- * <li>MapMessage - activity data is message map entries</li>
- * <li>StreamMessage - activity data is string made from message bytes</li>
- * <li>ObjectMessage - activity data is message serializable object</li>
+ * <li>{@link TextMessage} - activity data is message text</li>
+ * <li>{@link BytesMessage} - activity data is message {@code byte[]} or string made from message {@code byte[]}
+ * depending on property 'ConvertToString' value</li>
+ * <li>{@link MapMessage} - activity data is message map entries</li>
+ * <li>{@link StreamMessage} - activity data is message {@code byte[]} or string made from message {@code byte[]}
+ * depending on property 'ConvertToString' value</li>
+ * <li>{@link ObjectMessage} - activity data is message serializable object</li>
  * </ul>
  * <p>
- * Custom messages parsing not implemented and puts just log entry.
+ * NOTE: Custom messages parsing not implemented and puts just log entry.
+ * <p>
+ * This parser supports the following properties (in addition to those supported by {@link AbstractActivityMapParser}):
+ * <ul>
+ * <li>ConvertToString - flag indicating whether to convert message payload {@code byte[]} data to string. Applicable to
+ * {@link BytesMessage} and {@link StreamMessage}. Default value - 'false'. (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
@@ -57,6 +66,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJMSMessageParser.class);
 
 	private static final int BYTE_BUFFER_LENGTH = 1024;
+
+	private boolean convertToString = false;
 
 	/**
 	 * Constructs a new ActivityJMSMessageParser.
@@ -81,6 +92,28 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	@Override
 	public boolean isDataClassSupported(Object data) {
 		return Message.class.isInstance(data);
+	}
+
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		if (props == null) {
+			return;
+		}
+
+		super.setProperties(props);
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+
+			if (JMSStreamConstants.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
+				convertToString = Boolean.parseBoolean(value);
+
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
+			}
+		}
 	}
 
 	/**
@@ -160,7 +193,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		bytesMessage.readBytes(bytes);
 
 		if (ArrayUtils.isNotEmpty(bytes)) {
-			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, Utils.getString(bytes));
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, convertToString ? Utils.getString(bytes) : bytes);
 		}
 	}
 
@@ -216,7 +249,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		Utils.close(baos);
 
 		if (ArrayUtils.isNotEmpty(bytes)) {
-			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, Utils.getString(bytes));
+			dataMap.put(StreamsConstants.ACTIVITY_DATA_KEY, convertToString ? Utils.getString(bytes) : bytes);
 		}
 	}
 

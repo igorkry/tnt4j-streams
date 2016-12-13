@@ -289,17 +289,6 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 
 		/**
-		 * Initializes file watcher thread. Picks file matching user defined file name to monitor. If user defined to
-		 * start streaming from latest file line then count of lines in file is calculated to mark latest activity
-		 * position.
-		 *
-		 * @throws Exception
-		 *             indicates that stream is not configured properly and files monitoring can't initialize and
-		 *             continue.
-		 */
-		protected abstract void initialize() throws Exception;
-
-		/**
 		 * Checks if stored file read state is available and should be loaded.
 		 *
 		 * @return flag indicating whether stored file read state should be loaded
@@ -373,14 +362,18 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			}
 		}
 
+		/**
+		 * Persists file access state.
+		 *
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
+		 */
 		@Override
-		void close() throws Exception {
+		void closeInternals() throws Exception {
 			if (stateHandler != null && fileToRead != null) {
 				stateHandler.writeState(fileToRead instanceof File ? ((File) fileToRead).getParentFile() : null,
 						AbstractFileLineStream.this.getName());
 			}
-
-			super.close();
 		}
 
 		/**

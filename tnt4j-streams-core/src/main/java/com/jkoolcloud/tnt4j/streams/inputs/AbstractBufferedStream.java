@@ -229,6 +229,17 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		}
 
 		/**
+		 * Initializes input processor.
+		 *
+		 * @param params
+		 *            initialization parameters array
+		 *
+		 * @throws Exception
+		 *             indicates that input processor initialization failed
+		 */
+		protected abstract void initialize(Object... params) throws Exception;
+
+		/**
 		 * Checks if input processor should stop running.
 		 *
 		 * @return {@code true} input processor is interrupted or parent thread is halted
@@ -243,18 +254,32 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * @throws Exception
 		 *             if fails to close opened resources due to internal error
 		 */
-		void close() throws Exception {
-			// mark input end (in case producer thread is faster than consumer).
-			markInputEnd();
-			// add "DIE" marker to buffer (in case producer thread is slower
-			// than waiting consumer).
-			inputBuffer.offer(DIE_MARKER);
+		private void close() throws Exception {
+			try {
+				closeInternals();
+			} finally {
+				// mark input end (in case producer thread is faster than consumer).
+				markInputEnd();
+				// add "DIE" marker to buffer (in case producer thread is slower
+				// than waiting consumer).
+				inputBuffer.offer(DIE_MARKER);
+			}
 		}
+
+		/**
+		 * Closes opened data input resources.
+		 *
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
+		 */
+		abstract void closeInternals() throws Exception;
 
 		/**
 		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"AbstractBufferedStream.input.shutdown"), AbstractBufferedStream.this.getName(), getName());
 			if (isStopRunning() && inputEnd) {
 				// shot down already.
 				return;
