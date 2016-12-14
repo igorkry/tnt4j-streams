@@ -102,7 +102,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		}
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
+				getLogString(data));
 
 		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 		return parsePreparedItem(stream, dataStr, data);

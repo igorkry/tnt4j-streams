@@ -96,7 +96,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		}
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
+				getLogString(data));
 
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {

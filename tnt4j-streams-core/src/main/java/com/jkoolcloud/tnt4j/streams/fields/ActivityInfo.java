@@ -358,7 +358,7 @@ public class ActivityInfo {
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
 					fieldValue);
 		} else {
-			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), field.getValueType());
+			addCustomActivityProperty(field, fieldValue);
 		}
 	}
 
@@ -376,11 +376,21 @@ public class ActivityInfo {
 		return true;
 	}
 
-	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
+	@SuppressWarnings("unchecked")
+	private void addCustomActivityProperty(ActivityField field, Object fieldValue) throws ParseException {
 		if (fieldValue instanceof Trackable) {
-			return fieldValue;
+			addActivityProperty(field.getFieldTypeName(), fieldValue);
+		} else if (fieldValue instanceof Map) {
+			Map<Object, Object> pMap = (Map<Object, Object>) fieldValue;
+			for (Map.Entry<Object, Object> pme : pMap.entrySet()) {
+				addActivityProperty(String.valueOf(pme.getKey()), pme.getValue());
+			}
+		} else {
+			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), field.getValueType());
 		}
+	}
 
+	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
 		ActivityFieldLocator locator = field.getMasterLocator();
 
 		if (locator != null) {

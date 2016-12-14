@@ -200,7 +200,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName());
+				getLogString(data));
 
 		T aData = (T) data;
 
@@ -430,4 +430,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, T data, AtomicBoolean formattingNeeded)
 			throws ParseException;
+
+	/**
+	 * Makes string representation of data package to put into log.
+	 *
+	 * @param data
+	 *            data package to be logged
+	 * @return string representation of data package to be logged
+	 */
+	protected String getLogString(Object data) {
+		return data instanceof String ? data.toString()
+				: logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
+	}
 }
