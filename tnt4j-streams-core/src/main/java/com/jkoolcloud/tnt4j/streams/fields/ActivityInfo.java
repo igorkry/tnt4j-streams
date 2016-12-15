@@ -376,17 +376,25 @@ public class ActivityInfo {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addCustomActivityProperty(ActivityField field, Object fieldValue) throws ParseException {
 		if (fieldValue instanceof Trackable) {
 			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		} else if (fieldValue instanceof Map) {
-			Map<Object, Object> pMap = (Map<Object, Object>) fieldValue;
-			for (Map.Entry<Object, Object> pme : pMap.entrySet()) {
-				addActivityProperty(String.valueOf(pme.getKey()), pme.getValue());
-			}
+			addPropertiesMap((Map<?, ?>) fieldValue, "");
 		} else {
 			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), field.getValueType());
+		}
+	}
+
+	private void addPropertiesMap(Map<?, ?> pMap, String propPrefix) {
+		String ppStr = StringUtils.isEmpty(propPrefix) ? "" : propPrefix + '.';
+
+		for (Map.Entry<?, ?> pme : pMap.entrySet()) {
+			if (pme.getValue() instanceof Map) {
+				addPropertiesMap((Map<?, ?>) pme.getValue(), ppStr + pme.getKey());
+			} else {
+				addActivityProperty(ppStr + String.valueOf(pme.getKey()), pme.getValue());
+			}
 		}
 	}
 
