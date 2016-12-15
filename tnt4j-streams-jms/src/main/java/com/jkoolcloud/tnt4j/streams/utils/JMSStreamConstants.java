@@ -28,12 +28,12 @@ public final class JMSStreamConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-jms"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in stream {@value} property.
 	 */
 	public static final String PROP_JMS_CONN_FACTORY = "JMSConnFactory"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in parser {@value} property.
 	 */
 	public static final String PROP_CONV_TO_STRING = "ConvertToString"; // NON-NLS
 

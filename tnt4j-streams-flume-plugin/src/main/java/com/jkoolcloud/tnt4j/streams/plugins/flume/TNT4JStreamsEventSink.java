@@ -45,17 +45,17 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TNT4JStreamsEventSink.class);
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in sink @value} property.
 	 */
 	public static final String PROP_HOST = "hostname"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in sink {@value} property.
 	 */
 	public static final String PROP_PORT = "port"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in sink {@value} property.
 	 */
 	public static final String PROP_STREAM_CONFIG = "streamConfig"; // NON-NLS
 

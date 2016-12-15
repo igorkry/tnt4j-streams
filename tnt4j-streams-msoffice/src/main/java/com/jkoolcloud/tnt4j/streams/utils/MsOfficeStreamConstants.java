@@ -28,7 +28,7 @@ public final class MsOfficeStreamConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-msoffice"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property.
+	 * Constant for name of built-in stream {@value} property.
 	 */
 	public static final String PROP_SHEETS = "SheetsToProcess"; // NON-NLS
 
