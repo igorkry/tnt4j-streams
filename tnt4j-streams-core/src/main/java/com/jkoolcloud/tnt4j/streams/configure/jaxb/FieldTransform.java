@@ -163,7 +163,7 @@ public class FieldTransform {
 	/**
 	 * Sets the value of the tScript property.
 	 *
-	 * @param value
+	 * @param tScript
 	 *            allowed object is {@link String }
 	 *
 	 */
