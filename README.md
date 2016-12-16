@@ -3843,3 +3843,4 @@ Maven tests run is disabled by default. To enable Maven to run tests set Maven c
 Known Projects Using TNT4J
 ===============================================
 * [TNT4J-Streams-Zorka](https://github.com/Nastel/tnt4j-streams-zorka)
+* [TNT4J-Streams-Syslogd](https://github.com/Nastel/tnt4j-streams-syslogd)
