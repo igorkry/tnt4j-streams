@@ -246,7 +246,8 @@ sample:
     ParentId(String.class);
 ```
 
-NOTE: `EventType` field is mandatory and can't have value `null`.
+NOTE: `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 
+value to `EVENT`. 
 
 NOTE: Custom fields values can be found as activity event properties:
 
