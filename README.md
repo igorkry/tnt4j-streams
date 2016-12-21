@@ -532,7 +532,7 @@ and there is no need to define additional mapping.
 ### Running samples
 When release assemblies are built, samples are located in `samples` directory i.e.
 `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
-To run desired sample:
+To run particular sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
 
@@ -1520,7 +1520,7 @@ Sample stream configuration:
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
-`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+`Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
@@ -1585,7 +1585,7 @@ Sample stream configuration:
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
-`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+`Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
@@ -1650,7 +1650,7 @@ Sample stream configuration:
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
 `JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
-`Topic` property. To define desired queue use `Queue` property. `HaltIfNoParser` property indicates that stream
+`Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
 should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
@@ -3178,12 +3178,93 @@ and comment out log4j dependencies
 Configuring TNT4J-Streams
 ======================================
 
+## TNT4J configuration
+
 Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKool Cloud token assigned for You.
 
-For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started).
+For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started) and 
+[TNT4J README](https://github.com/Nastel/TNT4J/blob/master/README.md).
+
 Details on JESL related configuration can be found in [JESL README](https://github.com/Nastel/JESL/blob/master/README.md).
+
+### Basic TNT4J configuration of TNT4J-Streams
+
+Filling in configuration template:
+* Replace `<YOUR XXXX>` value placeholder with actual value corresponding to your environment.
+* Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.  
+
+NOTE: DO NOT use `BufferedEventSinkFactory` with TNT4J-Streams at the moment because of known occasional threading issues when.
+
+```properties
+# Stanza used for TNT4J-Streams sources
+{
+	source: com.jkoolcloud.tnt4j.streams
+	source.factory: com.jkoolcloud.tnt4j.source.SourceFactoryImpl
+	source.factory.GEOADDR: <YOUR GEO ADDRESS>
+	source.factory.DATACENTER: <YOUR DATA CENTER NAME>
+	source.factory.RootFQN: RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?
+	source.factory.RootSSN: tnt4j-streams
+
+	tracker.factory: com.jkoolcloud.tnt4j.tracker.DefaultTrackerFactory
+	dump.sink.factory: com.jkoolcloud.tnt4j.dump.DefaultDumpSinkFactory
+	tracker.default.snapshot.category: TNT4J-Streams-event-snapshot
+
+	# event sink configuration: destination and data format
+	<YOUR EVENT SINK CONFIGURATION: JKoolCloud, Kafka, MQTT, etc.>
+
+	event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
+	#event.formatter.Newline: true
+
+	# Configure default sink filter based on level and time (elapsed/wait)
+	##event.sink.factory.Filter: com.jkoolcloud.tnt4j.filters.EventLevelTimeFilter
+	##event.sink.factory.Filter.Level: TRACE
+	# Uncomment lines below to filter out events based on elapsed time and wait time
+	# Timed event/activities greater or equal to given values will be logged
+	##event.sink.factory.Filter.ElapsedUsec: 100
+	##event.sink.factory.Filter.WaitUsec: 100
+
+	tracking.selector: com.jkoolcloud.tnt4j.selector.DefaultTrackingSelector
+	tracking.selector.Repository: com.jkoolcloud.tnt4j.repository.FileTokenRepository
+}
+```
+
+#### JKoolCloud sink configuration
+
+```properties
+    #### JKool Cloud event sink factory configuration ####
+    event.sink.factory: com.jkoolcloud.jesl.tnt4j.sink.JKCloudEventSinkFactory
+    event.sink.factory.Filename: logs/tnt4j-streams-activities.log
+
+    event.sink.factory.Url: http://data.jkoolcloud.com:6580
+    #event.sink.factory.Url: https://data.jkoolcloud.com:6585
+    #event.sink.factory.Url: https://data.jkoolcloud.com
+    event.sink.factory.Token: <YOUR TOKEN>    
+    #### JKool Cloud event sink factory configuration end ####
+```
+
+#### Kafka sink configuration
+
+```properties
+    #### Kafka event sink factory configuration ####
+    event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.kafka.KafkaEventSinkFactory
+    event.sink.factory.propFile: <YOUR PATH>/tnt4j-kafka.properties
+    event.sink.factory.topic: <YOUR TOPIC>
+    #### Kafka event sink factory configuration end ####
+```
+
+#### MQTT sink configuration
+
+```properties
+    #### MQTT event sink factory configuration ####
+    event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.mqtt.MqttEventSinkFactory
+    event.sink.factory.mqtt-server-url: <YOUR MQTT SERVER ULR> #
+    event.sink.factory.mqtt-topic: <YOUR TOPIC> #
+    event.sink.factory.mqtt-user: <MQTT-USER> #
+    event.sink.factory.mqtt-pwd: <MQTT-PWD>
+    #### MQTT event sink factory configuration end ####
+```
 
 ## Streams configuration
 
