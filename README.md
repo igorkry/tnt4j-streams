@@ -3195,7 +3195,8 @@ Filling in configuration template:
 * Replace `<YOUR XXXX>` value placeholder with actual value corresponding to your environment.
 * Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.  
 
-**NOTE:** DO NOT use `BufferedEventSinkFactory` with TNT4J-Streams at the moment because of known occasional threading issues when.
+**NOTE:** It is **NOT RECOMMENDED** to use `BufferedEventSinkFactory` (or any other asynchronous sinks) with TNT4J-Streams. Streams and 
+sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `Kafka`) consumer uses network communication. 
 
 ```properties
 # Stanza used for TNT4J-Streams sources
