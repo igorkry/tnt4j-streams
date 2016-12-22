@@ -1,1 +1,6 @@
+@echo off
+set RUNDIR=%~p0
+set ZKOPTS=-Dtnt4j.zookeeper.config="%RUNDIR%..\config\zookeeper.properties"
+set KAFKAOPTS=-Dtnt4j.kafka.srv.config="%RUNDIR%..\config\kafka-server.properties"
+set STREAMSOPTS=%ZKOPTS% %KAFKAOPTS%
 ..\..\bin\tnt4j-streams.bat -f:tnt-data-source.xml
