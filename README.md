@@ -246,10 +246,10 @@ sample:
     ParentId(String.class);
 ```
 
-NOTE: `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 
+**NOTE:** `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 
 value to `EVENT`. 
 
-NOTE: Custom fields values can be found as activity event properties:
+**NOTE:** Custom fields values can be found as activity event properties:
 
 sample:
 ```xml
@@ -290,7 +290,7 @@ sample:
     REMatchNum
 ```
 
-NOTE: `Index` is default value and may be suppressed in field/locator definition:
+**NOTE:** `Index` is default value and may be suppressed in field/locator definition:
 
 this:
 ```xml
@@ -306,7 +306,7 @@ is same as:
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
 one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
 
-NOTE: activity event will contain all fields processed by all stacked parsers.
+**NOTE:** activity event will contain all fields processed by all stacked parsers.
 
 To define stacked parser You have to define `parser-ref` tad in parser `field` definition.
 
@@ -395,7 +395,7 @@ then You can use it from stream configuration:
 </field>
 ```
 
-NOTE: those functions can be also used in XPath expressions of [ActivityXMLParser](#activity-xml-parser) (or [MessageActivityXMLParser](#message-activity-xml-parser)) 
+**NOTE:** those functions can be also used in XPath expressions of [ActivityXMLParser](#activity-xml-parser) (or [MessageActivityXMLParser](#message-activity-xml-parser)) 
 field locators. For example: 
 ```xml
     <parser name="XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
@@ -446,7 +446,7 @@ example locator `loc1` resolved value `value1`, then after transformation value 
 `value2`, then after transformation value is changed to `VALIUE2_transformed`. Field aggregates those locators values to 
 `VALUE1,VALUE2_transformed`.    
 
-NOTE: 
+**NOTE:** 
 * transformations are applied after field/locator value formatting.
 * locator defined transformations are applied before field value transformations.
 * it is possible to define multiple transformations for same stream element (field/locator). In that case transformations are applied 
@@ -547,7 +547,7 @@ Sample files can be found in `samples/single-log` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -590,7 +590,7 @@ Stream configuration states that `FileLineStream` referencing `TokenParser` shal
 
 `TokenParser` uses `|` symbol as fields delimiter and maps fields to TNT4J event fields using field index locator.
 
-Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+**NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
 #### Multiple Log files
@@ -603,7 +603,7 @@ Sample files can be found in `samples/multiple-logs` directory.
 `orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
 single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Single Log file'](#single-log-file) with one single difference:
@@ -621,7 +621,7 @@ Sample files can be found in `samples/piping-stream` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-NOTE: records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 `jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
@@ -826,7 +826,7 @@ shall be used.
 `SampleJavaInputStream` reads all lines from `SampleZipStream` referring FileInputStream `SampleFileStream` which reads
 file `sample.gz`.
 
-NOTE: that `java-object/param@value` value may be reference to configuration already defined object
+**NOTE:** that `java-object/param@value` value may be reference to configuration already defined object
 like `SampleFileStream` in this particular sample.
 
 To use `Reader` as input you should uncomment configuration lines defining and referring `SampleFileReader` and comment
@@ -843,7 +843,7 @@ Sample files can be found in `samples/apache-access-single-log` directory.
 
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
-NOTE: records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -937,7 +937,7 @@ So if for example half of log file was made using log pattern defined in `Access
 property and the second part using log pater defined in `AccessLogParserExt` parser `LogPattern` property - stream
 should be able to handle whole log file with no problems.
 
-Note: `StartTime` fields defines format and locale to correctly parse field data string. `CompCode` uses manual
+**NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `CompCode` uses manual
 field string mapping to TNT4J event field value.
 
 #### Apache Access log multiple files
@@ -949,7 +949,7 @@ Sample files can be found in `samples/apache-access-multi-log` directory.
 
 `localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
 
-NOTE: records in this file are from year `2015` ranging from April until November, so then getting events data
+**NOTE:** records in this file are from year `2015` ranging from April until November, so then getting events data
 in JKool Cloud please do not forget to just to dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Apache Access log single file'](#apache-access-log-single-file) with one single 
@@ -1023,7 +1023,7 @@ entries and don't stop if such situation occurs.
 `StartFromLatest` property indicates that stream should start from latest entry record in log file. Setting this
 property to `false` would stream all log entries starting from oldest file matching wildcard pattern.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### HDFS
 
@@ -1059,7 +1059,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-
 To poll HDFS file `HdfsFileLineStream` shall be used with property `FilePolling` value set to `true`. `FileName` is
 defined using URI starting `hdfs://`.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 * Zipped HDFS file streaming
 
@@ -1143,7 +1143,7 @@ indicates that every line in parsed string represents single JSON data package.
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Apache Flume Parsed Data
 
@@ -1279,7 +1279,7 @@ every line in parsed string represents single JSON data package.
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Logstash parsed data
 
@@ -1403,10 +1403,10 @@ should skip unparseable entries. Stream puts received request payload data as `b
 
 `AccessLogParserCommon` is same as in ['Apache Access log single file'](#apache-access-log-single-file) sample, so refer it for more details.
 
-NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+**NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### HTTP request form
 
@@ -1460,7 +1460,7 @@ should skip unparseable entries. Stream puts received form parameters data to ma
 
 `SampleFormDataParser` performs form data mapping to TNT4J activity event data using form data parameters name labels.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS text message
 
@@ -1469,7 +1469,7 @@ how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-mapmessage` directory.
 
-NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -1530,10 +1530,10 @@ Stream puts received message data to map and passes it to parser.
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parser configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+**NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS map message
 
@@ -1541,7 +1541,7 @@ This sample shows how to stream activity events received over JMS transport as m
 
 Sample files can be found in `samples/jms-textmessage` directory.
 
-NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -1591,7 +1591,7 @@ Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps activity event data from JMS map message using map entries key labels.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### JMS object message
 
@@ -1600,7 +1600,7 @@ also shows how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-objectmessage` directory.
 
-NOTE: in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -1660,7 +1660,7 @@ Stream puts received message data to map and passes it to parser.
 `SampleObjectParser` is able to map activity event fields values from serialized object declared fields using field
 names as labels.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Kafka client stream
 
@@ -1733,10 +1733,10 @@ Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configurat
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+**NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Kafka server stream
 
@@ -1817,7 +1817,7 @@ Also there is extended set of Apache Kafka configuration properties used by serv
 
 Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html). 
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### MQTT
 
@@ -1887,10 +1887,10 @@ Stream puts received message data to map and passes it to parser.
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-NOTE: to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
+**NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
 complies Your data format.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### WMQ Message broker
 
@@ -2716,7 +2716,7 @@ definition stating `execute endlessly every 25 seconds`.
 `ResponseParser` parses command output string using `Pattern` property defined RegEx and produces activity snapshot
 containing field `ProcessorTime`.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 ##### *nix
 
@@ -2764,7 +2764,7 @@ definition stating `execute endlessly every 45 seconds`.
 `ResponseParser` parses command output string using `Pattern` property defined RegEx and produces activity snapshot
 containing field `TomcatActive`.
 
-NOTE: Stream stops only when critical runtime error/exception occurs or application gets terminated.
+**NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
 #### Redirecting TNT4J streams
 
@@ -2782,7 +2782,7 @@ should contain such stanza:
     event.sink.factory.EventSinkFactory.Port: 9009
     event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
 ```
-NOTE: change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
+**NOTE:** change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
 
 Sample stream configuration:
 ```xml
@@ -2818,7 +2818,7 @@ Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKool 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
 additional JSON reformatting in default TNT4J data flow.  
 
-NOTE: you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
+**NOTE:** you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
 format. 
 
 To do re-streaming from file, change sample configuration by replacing `SampleJMXRoutingStream` stream property `Port` to `FileName` 
@@ -2843,7 +2843,7 @@ This sample shows how to stream MS Excel workbook rows as activity events.
 
 Sample files can be found in `samples/xlsx-rows` directory.
 
-NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -2895,7 +2895,7 @@ workbook sheet row and passes it to parser.
 
 `ExcelRowParser` parser uses literal sheet column indicators as locators (i.e. `A`, `D`, `AB`).
 
-Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+**NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
 ##### Sheets
@@ -2904,7 +2904,7 @@ This sample shows how to stream MS Excel workbook sheets as activity events.
 
 Sample files can be found in `samples/xlsx-sheets` directory.
 
-NOTE: records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -2954,7 +2954,7 @@ workbook sheet and passes it to parser.
 `ExcelSheetParser` parser uses literal sheet cell indicators as locators (i.e. `A1`, `D5`, `AB12` where letters
 identifies column and number identifies row).
 
-Note: `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
+**NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
 #### Collectd performance metrics streaming
@@ -2963,7 +2963,7 @@ This sample shows how to stream `collectd` monitoring reports data as activity e
 
 Sample files can be found in `samples/collectd-json` directory (`tnt4j-streams-core` module).
 
-NOTE: to use this sample `collectd` should be running `Write HTTP` plugin. See [Collectd Wiki](https://collectd.org/wiki/index.php/Plugin:Write_HTTP)
+**NOTE:** to use this sample `collectd` should be running `Write HTTP` plugin. See [Collectd Wiki](https://collectd.org/wiki/index.php/Plugin:Write_HTTP)
 for details.
 
 Sample report data is available in `stats.json` file. 
@@ -3043,7 +3043,7 @@ This sample shows how to stream Nagios monitoring reports data as activity event
 
 Sample files can be found in `samples/nagios-nagios2json` directory (`tnt4j-streams-ws` module).
 
-NOTE: to use this sample Nagios should be running extension `nagios2json`. See [Sample README](tnt4j-streams-ws/samples/nagios-nagios2json/readme.md)
+**NOTE:** to use this sample Nagios should be running extension `nagios2json`. See [Sample README](tnt4j-streams-ws/samples/nagios-nagios2json/readme.md)
 for details. `nagios2json` extension works as `CGI` script, but can be handled as simple RESTful service.
 
 Sample report data is available in `report.json` file. 
@@ -3195,7 +3195,7 @@ Filling in configuration template:
 * Replace `<YOUR XXXX>` value placeholder with actual value corresponding to your environment.
 * Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.  
 
-NOTE: DO NOT use `BufferedEventSinkFactory` with TNT4J-Streams at the moment because of known occasional threading issues when.
+**NOTE:** DO NOT use `BufferedEventSinkFactory` with TNT4J-Streams at the moment because of known occasional threading issues when.
 
 ```properties
 # Stanza used for TNT4J-Streams sources
@@ -3414,7 +3414,7 @@ or
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-NOTE: there can be ony one parser referenced to this stream.
+**NOTE:** there can be ony one parser referenced to this stream.
 
 #### Standard Java input stream parameters
 
@@ -3830,8 +3830,8 @@ Modules list:
 
 All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
-NOTE: `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
-NOTE: `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
+**NOTE:** `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
+**NOTE:** `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
 
 ## Requirements
 * JDK 1.6+
@@ -3850,7 +3850,7 @@ how to do this.
 
 #### `WMQ` module
 
-NOTE: Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
+**NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
 default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
 libraries will be installed to local maven repository.    
 
@@ -3886,13 +3886,13 @@ or
 mvn --projects tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution --also-make clean install
 ```
 
-NOTE: modules list should be without spaces after comma!
+**NOTE:** modules list should be without spaces after comma!
 
 Issuing these commands, maven will build only `tnt4j-streams-core`, `tnt4j-streams-samples` and `tnt4j-streams--distribution` modules.
 
 Release assemblies are built to `../build/tnt4j-streams` directory.
 
-NOTE: sometimes maven fails to correctly handle dependencies. If dependency configuration looks
+**NOTE:** sometimes maven fails to correctly handle dependencies. If dependency configuration looks
 fine, but maven still complains about missing dependencies try to delete local maven repository
 by hand: i.e. delete contents of `c:\Users\[username]\.m2\repository` directory.
 

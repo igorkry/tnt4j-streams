@@ -13,7 +13,7 @@
 3. Configure your parsing properties in tnt-data-source.xml <br>
 	Supplied sample is suitable for common Apache log.
 
-	NOTE: parsers can be mapped to activity event data from different sources using tags.
+	**NOTE:** parsers can be mapped to activity event data from different sources using tags.
 	One parser can be mapped to multiple tags. If no tag is defined for parser then such parser
 	is applied to all activities.
 	

@@ -26,7 +26,7 @@ var njstrace = require('njstrace').inject({	formatter: new Tnt4jStreamsFormatter
 											files: ['**/*.js', '!**/node_modules/**',  '**/node_modules/http-server/**'],});
 ```
 
-NOTE: You may want to deactivate argument inspection by `inspectArgs=false`, because you may start getting large amount
+**NOTE:** You may want to deactivate argument inspection by `inspectArgs=false`, because you may start getting large amount
 of data otherwise.
 
 In this example instrumentation happens on http-server. 

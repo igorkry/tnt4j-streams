@@ -73,7 +73,8 @@ The NJSTrace object is the result of `require('njstrace')` it exposes the follow
 
 ### inject(config)
 The inject method can get a configuration object with the following:
-* `enabled {boolean}` - Whether tracing is active, `default: true` **Note:** njstrace will instrument the code regardless of this setting, and njstrace tracing methods would be called, they will just do nothing, so the affect on runtime peeformace should be minimal. You can enable njstrace during runtime by setting `njstrace.enabled = true`
+* `enabled {boolean}` - Whether tracing is active, `default: true` 
+  **NOTE:** njstrace will instrument the code regardless of this setting, and njstrace tracing methods would be called, they will just do nothing, so the affect on runtime peeformace should be minimal. You can enable njstrace during runtime by setting `njstrace.enabled = true`
 
 * `files {string|string[]}` - A glob file pattern(s) that matches the files to instrument,
 this can be any pattern that is supported by `minimatch` npm module.
@@ -82,7 +83,8 @@ negative pattern (i.e starts with "!") which negates (if matches) all matches up
 All file paths are processed **relative** to the process working directory.
 `default: All .js files EXCLUDING node_modules ['**/*.js', '!**/node_modules/**']`
 
-* `wrapFunctions {boolean}` - Whether njstrace should wrap the instrumented functions in a try/catch block. Wrapping the functions in try/catch can give better tracing in case of uncaought exceptions. `default: true` **NOTE:** wrapping functions in try/catch prevent v8 optimizations on the function, don't use it when profiling.
+* `wrapFunctions {boolean}` - Whether njstrace should wrap the instrumented functions in a try/catch block. Wrapping the functions in try/catch can give better tracing in case of uncaought exceptions. `default: true` 
+  **NOTE:** wrapping functions in try/catch prevent v8 optimizations on the function, don't use it when profiling.
 
 * `logger {boolean|string|function}` - Controls where the logger output should go. `default: false` njstrace uses the logger to log about the instrumentation process and other information messages, the logger is NOT used for writing the tracing info (for this see `formatter` below).
     * If Boolean, indicates whether NJSTrace will log (to the console) its progress.
@@ -90,7 +92,8 @@ All file paths are processed **relative** to the process working directory.
     * If function, a custom log function, gets a single {string} argument.
 
 
-* `inspectArgs {boolean}` - Whether njstrace should inspect the traced functions arguments and return values. `default: true` **NOTE:** Inspecting the arguments is done by passing the function's `arguments` object to a tracer method, passing the arguments object to another method prevent v8 optimizations on the function, don't use it when profiling.
+* `inspectArgs {boolean}` - Whether njstrace should inspect the traced functions arguments and return values. `default: true` 
+  **NOTE:** Inspecting the arguments is done by passing the function's `arguments` object to a tracer method, passing the arguments object to another method prevent v8 optimizations on the function, don't use it when profiling.
 
 * `formatter {Formatter|object | (Formatter|object)[]}` - An instance of Formatter(s) to use for output or a config object(s) for the default formatter (read more on Formatters below)
     * if Formatter object, it will be added to the list of formatters to use

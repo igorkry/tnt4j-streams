@@ -9,4 +9,4 @@ should contain such stanza:
     event.sink.factory.EventSinkFactory.Port: 9009
     event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
 ```
-NOTE: change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
+**NOTE:** change `IP_OF_STREAMS_RUNNING_MACHINE` to IP of machine running `TNT4J-Streams` `RedirectTNT4JStream`.
