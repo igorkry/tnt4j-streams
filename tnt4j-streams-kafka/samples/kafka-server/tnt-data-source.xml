@@ -32,25 +32,29 @@
 
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="Topic" value="TNT4JKafkaTestTopic"/>
+        <property name="Topic" value="TNT4JStreams"/>
         <property name="StartServer" value="true"/>
+        <property name="StartZookeeper" value="true"/>
 
-        <!-- Kafka server and consumer properties -->
+        <!-- Common Kafka server/consumer properties -->
         <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-        <property name="group.id" value="TNT4JStreams"/>
+        <property name="zookeeper.connection.timeout.ms" value="5000"/>
 
-        <property name="zookeeper.session.timeout.ms" value="4000"/>
-        <property name="port" value="9092"/>
-        <property name="broker.id" value="684231"/>
-        <property name="host.name" value="localhost"/>
-        <property name="advertised.host.name" value="localhost"/>
-        <property name="log.flush.interval.messages" value="1"/>
-        <property name="log.flush.interval.ms" value="1000"/>
-        <property name="zookeeper.connection.timeout.ms" value="3000"/>
+        <!-- Kafka consumer properties -->
+        <property name="consumer:group.id" value="TNT4JStreams"/>
+        <!--<property name="consumer:zookeeper.connection.timeout.ms" value="6000"/>-->
+        <property name="consumer:consumer.timeout.ms" value="1000"/>
+        <property name="consumer:auto.commit.interval.ms" value="1000"/>
 
-        <property name="zookeeper.sync.time.ms" value="200"/>
-        <property name="auto.commit.interval.ms" value="1000"/>
-        <property name="consumer.timeout.ms" value="1000"/>
+        <!-- Kafka server properties -->
+        <property name="server:broker.id" value="684231"/>
+        <property name="server:host.name" value="localhost"/>
+        <property name="server:port" value="9092"/>
+        <!--<property name="server:log.flush.interval.messages" value="1"/>-->
+        <!--<property name="server:log.flush.interval.ms" value="1000"/>-->
+        <property name="server:zookeeper.session.timeout.ms" value="4000"/>
+        <!--<property name="server:zookeeper.connection.timeout.ms" value="3000"/>-->
+        <property name="server:zookeeper.sync.time.ms" value="200"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>
