@@ -1747,6 +1747,12 @@ Stream starts Apache Kafka server and binds consumer to it to receive and proces
 
 Sample files can be found in `samples/kafka-server` directory.
 
+`tnt4j-streams-kafka/config` directory contains default configuration properties files for Zookeeper (`zookeeper.propertoes`) and Kafka 
+(`kafka-server.properties`) servers. Kafka stream is using those files referenced over Java system properties 
+`-Dtnt4j.zookeeper.config=tnt4j-streams-kafka/config/zookeeper.properties` for Zookeeper server and 
+`-Dtnt4j.kafka.srv.config=tnt4j-streams-kafka/config/kafka-server.properties` for Kafka server (see `samples/kafka-server/run.bat` or `.sh` 
+files as sample). **NOTE:** those file defined Kafka server properties gets merged with ones defined in stream configuration.
+
 Sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -1783,25 +1789,29 @@ Sample stream configuration:
 
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="Topic" value="TNT4JKafkaTestTopic"/>
+        <property name="Topic" value="TNT4JStreams"/>
         <property name="StartServer" value="true"/>
+        <property name="StartZookeeper" value="true"/>
 
-        <!-- Kafka server and consumer properties -->
+        <!-- Common Kafka server/consumer properties -->
         <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-        <property name="group.id" value="TNT4JStreams"/>
+        <property name="zookeeper.connection.timeout.ms" value="5000"/>
 
-        <property name="zookeeper.session.timeout.ms" value="4000"/>
-        <property name="port" value="9092"/>
-        <property name="broker.id" value="684231"/>
-        <property name="host.name" value="localhost"/>
-        <property name="advertised.host.name" value="localhost"/>
-        <property name="log.flush.interval.messages" value="1"/>
-        <property name="log.flush.interval.ms" value="1000"/>
-        <property name="zookeeper.connection.timeout.ms" value="3000"/>
+        <!-- Kafka consumer properties -->
+        <property name="consumer:group.id" value="TNT4JStreams"/>
+        <!--<property name="consumer:zookeeper.connection.timeout.ms" value="6000"/>-->
+        <property name="consumer:consumer.timeout.ms" value="1000"/>
+        <property name="consumer:auto.commit.interval.ms" value="1000"/>
 
-        <property name="zookeeper.sync.time.ms" value="200"/>
-        <property name="auto.commit.interval.ms" value="1000"/>
-        <property name="consumer.timeout.ms" value="1000"/>
+        <!-- Kafka server properties -->
+        <property name="server:broker.id" value="684231"/>
+        <property name="server:host.name" value="localhost"/>
+        <property name="server:port" value="9092"/>
+        <!--<property name="server:log.flush.interval.messages" value="1"/>-->
+        <!--<property name="server:log.flush.interval.ms" value="1000"/>-->
+        <property name="server:zookeeper.session.timeout.ms" value="4000"/>
+        <!--<property name="server:zookeeper.connection.timeout.ms" value="3000"/>-->
+        <property name="server:zookeeper.sync.time.ms" value="200"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>
@@ -1811,9 +1821,12 @@ Sample stream configuration:
 Stream configuration in general is mostly same as for ['Kafka client stream'](#kafka-client-stream). 
 
 Difference is `StartServer` stream property set to `true` stating that Apache Kafka server should be started by stream and messages consumer 
-has to bind to it.
+has to bind to it. `StartZookeeper` stream property set to `true` states that Zookeeper server shall be started on stream startup.
 
-Also there is extended set of Apache Kafka configuration properties used by server and consumer.  
+Also there is extended set of Apache Kafka configuration properties used by server and consumer. Kafka server dedicated properties starts 
+with prefix `server:` while Kafka consumer properties - with `consumer:`. Properties having no prefix (or prefixes `:`, `common:`) are 
+applied for both - server and consumer. Those properties gets merged with ones defined in properties files. **NOTE:** Stream configuration 
+defined properties has priority over property files defined properties - thus property files defines **default** values used by stream. 
 
 Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html). 
 
@@ -3484,13 +3497,15 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
  * Topic - topic name to listen. (Required)
  * StartServer - flag indicating if stream has to start Kafka server on startup. Default value - `false`. (Optional)
+ * StartZookeeper - flag indicating if stream has to start Zookeeper server on startup. Default value - `false`. (Optional)
  * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
  details on Kafka consumer properties.
 
     sample:
 ```xml
     <property name="Topic" value="TNT4JKafkaTestTopic"/>
-    <property name="StartServer" value="false"/>
+    <property name="StartServer" value="true"/>
+    <property name="StartZookeeper" value="true"/>
     <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
     <property name="group.id" value="TNT4JStreams"/>
 ```
