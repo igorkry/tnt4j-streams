@@ -52,7 +52,9 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * This parser supports the following properties:
  * <ul>
  * <li>TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant
- * names if possible. (Optional)</li>
+ * names if possible and field/locator data type is 'String' (meaning translated value can be assigned to field). If
+ * value of particular field should be left as number (i.e. {@code ReasonCode}), use field/locator attribute
+ * {@code datatype="Number"}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

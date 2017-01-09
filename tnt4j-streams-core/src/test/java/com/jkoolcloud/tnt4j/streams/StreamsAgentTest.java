@@ -90,8 +90,8 @@ public class StreamsAgentTest {
 		FileWriter fw = new FileWriter(tempConfFile);
 		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Utils.NEW_LINE + "<tnt-data-source" + Utils.NEW_LINE
 				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + Utils.NEW_LINE
-				+ "        xsi:noNamespaceSchemaLocation=\"../../../config/tnt-data-source.xsd\">" + Utils.NEW_LINE
-				+ "    <stream name=\"" + testStreamName
+				+ "        xsi:noNamespaceSchemaLocation=\"https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd\">"
+				+ Utils.NEW_LINE + "    <stream name=\"" + testStreamName
 				+ "\" class=\"com.jkoolcloud.tnt4j.streams.inputs.CharacterStream\">" + Utils.NEW_LINE
 				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + Utils.NEW_LINE
 				+ "        <property name=\"Port\" value=\"9595\"/>" + Utils.NEW_LINE + "    </stream>" + Utils.NEW_LINE
