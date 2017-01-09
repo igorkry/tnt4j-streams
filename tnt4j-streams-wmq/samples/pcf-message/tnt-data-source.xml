@@ -19,7 +19,7 @@
             <field-map source="MQCC_WARNING" target="WARNING"/>
             <field-map source="" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="MQCFH.Reason" locator-type="Label"/>
+        <field name="ReasonCode" locator="MQCFH.Reason" locator-type="Label" datatype="Number"/>
         <field name="ParameterCount" locator="MQCFH.ParameterCount" locator-type="Label"/>
 
         <!-- message fields -->
@@ -51,10 +51,10 @@
     </parser>
 
     <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
-        <property name="Host" value="[YOUR_MQ_HOST]"/>
-        <property name="Port" value="[YOUR_MQ_PORT]"/>
-        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
-        <property name="Queue" value="[YOUR_Q_NAME]"/>
+        <property name="Host" value="172.16.6.54"/>
+        <property name="Port" value="1420"/>
+        <property name="QueueManager" value="TT1"/>
+        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
         <property name="StripHeaders" value="false"/>
 
         <parser-ref name="PCFEventsParser"/>

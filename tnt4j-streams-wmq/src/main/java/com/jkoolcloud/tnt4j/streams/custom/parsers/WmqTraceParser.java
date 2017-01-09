@@ -27,6 +27,7 @@ import com.ibm.mq.pcf.PCFMessage;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser;
 
 /**
@@ -56,8 +57,8 @@ public class WmqTraceParser extends ActivityPCFParser {
 	}
 
 	@Override
-	protected Object getParamValue(String[] path, PCFMessage pcfMsg, PCFContent pcfContent, int i)
-			throws ParseException {
+	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFMessage pcfMsg,
+			PCFContent pcfContent, int i) throws ParseException {
 		if (ArrayUtils.isEmpty(path) || (pcfMsg == null && pcfContent == null)) {
 			return null;
 		}
@@ -68,9 +69,9 @@ public class WmqTraceParser extends ActivityPCFParser {
 			Integer traceM = (Integer) pcfMsg.getParameterValue(WmqTraceStream.TRACE_MARKER);
 			PCFContent traceData = getActivityTraceGroupParameter(traceM, pcfMsg);
 
-			return super.getParamValue(path, pcfMsg, traceData, ++i);
+			return super.getParamValue(fDataType, path, pcfMsg, traceData, ++i);
 		} else {
-			return super.getParamValue(path, pcfMsg, pcfContent, i);
+			return super.getParamValue(fDataType, path, pcfMsg, pcfContent, i);
 		}
 	}
 

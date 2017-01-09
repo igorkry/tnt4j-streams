@@ -71,7 +71,7 @@
             <field-map source="MQCC_WARNING" target="WARNING"/>
             <field-map source="" target="ERROR"/>
         </field>
-        <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label"/>
+        <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
         <field name="MQTrace.ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
         <field name="MQTrace.OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
         <field name="MQTrace.GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
@@ -121,16 +121,17 @@
     </parser>
 
     <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
-        <property name="Host" value="[YOUR_MQ_HOST]"/>
-        <property name="Port" value="[YOUR_MQ_PORT]"/>
-        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
+        <property name="Host" value="172.16.6.54"/>
+        <property name="Port" value="1420"/>
+        <property name="QueueManager" value="TT1"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
         <property name="StripHeaders" value="false"/>
 
         <property name="TraceOperations" value="*"/>
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
-        
+        <!--<property name="TraceOperations" value="MQXF_(DUMMY|YUMMY)"/>-->
+
         <parser-ref name="TraceEventsParser"/>
     </stream>
 </tnt-data-source>
