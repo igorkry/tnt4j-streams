@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="TNTDataSourceWMQ_PCF" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-    <xs:redefine schemaLocation="tnt-data-source.xsd">
+    <xs:redefine schemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
         <xs:attributeGroup name="FieldLocatorAttributes">
             <xs:attributeGroup ref="FieldLocatorAttributes"/>
             <xs:attribute name="locator" use="optional" type="PCFLocatorValues">
