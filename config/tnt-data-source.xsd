@@ -888,21 +888,25 @@
             </xs:documentation>
         </xs:annotation>
 
-        <xs:attribute name="name" use="required" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Name of the property.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of the property.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
 
-        <xs:attribute name="value" use="optional" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Value of the property.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+                <xs:attribute name="value" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Value of the property.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
     </xs:complexType>
 
     <!-- Common configuration entity attributes -->
@@ -1106,30 +1110,33 @@
             </xs:documentation>
         </xs:annotation>
 
-        <xs:attribute name="name" use="optional" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Transformation name.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Transformation name.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
 
-        <xs:attribute name="beanRef" use="optional" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Transformation implementing bean reference.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+                <xs:attribute name="beanRef" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Transformation implementing bean reference.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
 
-        <xs:attribute name="lang" use="optional" type="ScriptLang" default="javascript">
-            <xs:annotation>
-                <xs:documentation>
-                    Transformation script/expression language.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-
+                <xs:attribute name="lang" use="optional" type="ScriptLang" default="javascript">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Transformation script/expression language.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
         <!--<xs:assert test="(@bean and not(@lang)) or (not(@bean) and @lang)"/>-->
     </xs:complexType>
 

@@ -31,27 +31,29 @@ import javax.xml.bind.annotation.*;
  * 
  * <pre>
  * &lt;complexType name="Property">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *   &lt;simpleContent>
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
+ *     &lt;/extension>
+ *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
  * 
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Property")
+@XmlType(name = "Property", propOrder = { "pValue" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
 public class Property {
 
+	@XmlValue
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	protected String pValue;
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 	@XmlAttribute(name = "value")
-	@XmlValue
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
 	protected String value;
 
@@ -60,7 +62,34 @@ public class Property {
 
 	public Property(String name, String value) {
 		this.name = name;
-		this.value = value;
+		if (value != null && (value.length() > 50)) {
+			this.pValue = value;
+		} else {
+			this.value = value;
+		}
+	}
+
+	/**
+	 * Gets the value of the pValue property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-01-10T11:02:31+02:00", comments = "JAXB RI v2.2.4-2")
+	public String getPValue() {
+		return pValue;
+	}
+
+	/**
+	 * Sets the value of the pValue property.
+	 *
+	 * @param pValue
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-01-10T11:02:31+02:00", comments = "JAXB RI v2.2.4-2")
+	public void setPValue(String pValue) {
+		this.pValue = pValue;
 	}
 
 	/**
