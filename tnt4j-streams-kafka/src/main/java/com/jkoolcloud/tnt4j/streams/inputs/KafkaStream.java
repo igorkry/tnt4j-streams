@@ -77,6 +77,18 @@ import kafka.utils.SystemTime$;
  * configuration reference</a></li>.
  * </ul>
  *
+ * Default Zookeeper and Kafka server configuration properties are loaded from configuration files referenced by Java
+ * System properties:
+ * <ul>
+ * <li>tnt4j.zookeeper.config - defines path of Zookeeper server configuration properties file. Sample:
+ * {@code -Dtnt4j.zookeeper.config=tnt4j-streams-kafka/config/zookeeper.properties}</li>
+ * <li>tnt4j.kafka.srv.config - defines path of Kafka server configuration properties file. Sample:
+ * {@code -Dtnt4j.kafka.srv.config=tnt4j-streams-kafka/config/kafka-server.properties}</li>
+ * </ul>
+ *
+ * NOTE: those file defined Kafka server properties gets merged with ones defined in stream configuration - user defined
+ * properties.
+ *
  * @version $Revision: 1 $
  *
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
@@ -87,12 +99,27 @@ import kafka.utils.SystemTime$;
 public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
 
-	private static final String PROP_SCOPE_COMMON = "common"; // NON-NLS
-	private static final String PROP_SCOPE_SERVER = "server"; // NON-NLS
-	private static final String PROP_SCOPE_CONSUMER = "consumer"; // NON-NLS
+	/**
+	 * Kafka server/consumer properties scope mapping key.
+	 */
+	protected static final String PROP_SCOPE_COMMON = "common"; // NON-NLS
+	/**
+	 * Kafka server properties scope mapping key.
+	 */
+	protected static final String PROP_SCOPE_SERVER = "server"; // NON-NLS
+	/**
+	 * Kafka consumer properties scope mapping key.
+	 */
+	protected static final String PROP_SCOPE_CONSUMER = "consumer"; // NON-NLS
 
-	private static final String ZK_PROP_FILE_KEY = "tnt4j.zookeeper.config"; // NON-NLS
-	private static final String KS_PROP_FILE_KEY = "tnt4j.kafka.srv.config"; // NON-NLS
+	/**
+	 * System property key for Zookeeper server configuration properties file path.
+	 */
+	protected static final String ZK_PROP_FILE_KEY = "tnt4j.zookeeper.config"; // NON-NLS
+	/**
+	 * System property key for Kafka server configuration properties file path.
+	 */
+	protected static final String KS_PROP_FILE_KEY = "tnt4j.kafka.srv.config"; // NON-NLS
 
 	private final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -178,7 +205,17 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return prop;
 	}
 
-	private Object addUserKafkaProperty(String pName, String pValue) {
+	/**
+	 * Adds Kafka configuration property to user defined (from stream configuration) properties map.
+	 * 
+	 * @param pName
+	 *            fully qualified property name
+	 * @param pValue
+	 *            property value
+	 * @return the previous value of the specified property in user's Kafka configuration property list, or {@code null}
+	 *         if it did not have one
+	 */
+	protected Object addUserKafkaProperty(String pName, String pValue) {
 		if (StringUtils.isEmpty(pName)) {
 			return null;
 		}
@@ -194,7 +231,14 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return sProps.setProperty(pParts[1], pValue);
 	}
 
-	private String getUserKafkaProperty(String pName) {
+	/**
+	 * Gets user defined (from stream configuration) Kafka server configuration property value.
+	 * 
+	 * @param pName
+	 *            fully qualified property name
+	 * @return property value, or {@code null} if property is not set
+	 */
+	protected String getUserKafkaProperty(String pName) {
 		if (StringUtils.isEmpty(pName)) {
 			return null;
 		}
@@ -205,7 +249,14 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return sProperties == null ? null : sProperties.getProperty(pParts[1]);
 	}
 
-	private static String[] tokenizePropertyName(String pName) {
+	/**
+	 * Splits fully qualified property name to property scope and name.
+	 * 
+	 * @param pName
+	 *            fully qualified property name
+	 * @return string array containing property scope and name
+	 */
+	protected static String[] tokenizePropertyName(String pName) {
 		if (StringUtils.isEmpty(pName)) {
 			return null;
 		}
@@ -227,7 +278,14 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return pParts;
 	}
 
-	private Properties getScopeProps(String scope) {
+	/**
+	 * Returns scope defined properties set.
+	 * 
+	 * @param scope
+	 *            properties scope key
+	 * @return scope defined properties
+	 */
+	protected Properties getScopeProps(String scope) {
 		Properties allScopeProperties = new Properties();
 
 		Properties sProperties = userKafkaProps.get(scope);
@@ -235,9 +293,11 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			allScopeProperties.putAll(sProperties);
 		}
 
-		sProperties = userKafkaProps.get(PROP_SCOPE_COMMON);
-		if (sProperties != null) {
-			allScopeProperties.putAll(sProperties);
+		if (!PROP_SCOPE_COMMON.equals(scope)) {
+			sProperties = userKafkaProps.get(PROP_SCOPE_COMMON);
+			if (sProperties != null) {
+				allScopeProperties.putAll(sProperties);
+			}
 		}
 
 		return allScopeProperties;
@@ -274,7 +334,13 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(getScopeProps(PROP_SCOPE_CONSUMER)));
 	}
 
-	private void startZookeeper() throws Exception {
+	/**
+	 * Starts Zookeeper server instance.
+	 *
+	 * @throws Exception
+	 *             if an error occurred wile starting Zookeeper server
+	 */
+	protected void startZookeeper() throws Exception {
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 				"KafkaStream.zookeeper.server.starting"));
 
@@ -297,7 +363,17 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				"KafkaStream.zookeeper.server.started"));
 	}
 
-	private static Properties getServerProperties(Properties userDefinedProps) throws IOException {
+	/**
+	 * Loads Kafka server configuration properties.
+	 * 
+	 * @param userDefinedProps
+	 *            properties set to append
+	 * @return properties set appended with loaded Kafka server configuration properties
+	 *
+	 * @throws IOException
+	 *             if an error occurred when reading properties file
+	 */
+	protected static Properties getServerProperties(Properties userDefinedProps) throws IOException {
 		putIfAbsent(userDefinedProps, "zookeeper.connect", "localhost:2181/tnt4j_kafka"); // NON-NLS
 
 		Properties fProps = loadPropertiesFile(KS_PROP_FILE_KEY);
@@ -309,7 +385,19 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return userDefinedProps;
 	}
 
-	private static boolean putIfAbsent(Properties props, String key, Object value) {
+	/**
+	 * Updates provided properties set by setting property value if properties has no such property yet set or property
+	 * value is empty.
+	 *
+	 * @param props
+	 *            properties to update
+	 * @param key
+	 *            property name
+	 * @param value
+	 *            property value to set
+	 * @return flag indicating whether property was updated - {@code true}, {@code false} if not
+	 */
+	protected static boolean putIfAbsent(Properties props, String key, Object value) {
 		if (StringUtils.isEmpty(props.getProperty(key))) {
 			props.put(key, String.valueOf(value));
 
@@ -319,7 +407,17 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		return false;
 	}
 
-	private static Properties loadPropertiesFile(String propKey) throws IOException {
+	/**
+	 * Loads properties from file referenced by provided system property.
+	 *
+	 * @param propKey
+	 *            system property key referencing properties file path
+	 * @return properties loaded from file
+	 *
+	 * @throws IOException
+	 *             if an error occurred when reading properties file
+	 */
+	protected static Properties loadPropertiesFile(String propKey) throws IOException {
 		String configFile = System.getProperty(propKey);
 		Properties fProps = new Properties();
 
