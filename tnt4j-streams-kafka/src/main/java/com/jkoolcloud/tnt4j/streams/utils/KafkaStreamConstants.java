@@ -35,7 +35,7 @@ public final class KafkaStreamConstants {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	public static final String PROP_START_ZOOKEEPER = "StartZookeeper"; // NON-NLS
+	public static final String PROP_START_ZOOKEEPER = "StartZooKeeper"; // NON-NLS
 
 	private KafkaStreamConstants() {
 	}

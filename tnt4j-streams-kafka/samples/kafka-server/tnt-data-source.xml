@@ -34,7 +34,7 @@
         <property name="HaltIfNoParser" value="false"/>
         <property name="Topic" value="TNT4JStreams"/>
         <property name="StartServer" value="true"/>
-        <property name="StartZookeeper" value="true"/>
+        <property name="StartZooKeeper" value="true"/>
 
         <!-- Common Kafka server/consumer properties -->
         <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>

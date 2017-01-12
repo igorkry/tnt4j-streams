@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServer;
-import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -70,17 +70,17 @@ import kafka.utils.SystemTime$;
  * <li>Topic - topic name to listen. (Required)</li>
  * <li>StartServer - flag indicating if stream has to start Kafka server on startup. Default value - {@code false}.
  * (Optional)</li>
- * <li>StartZookeeper - flag indicating if stream has to start Zookeeper server on startup. Default value -
+ * <li>StartZooKeeper - flag indicating if stream has to start ZooKeeper server on startup. Default value -
  * {@code false}. (Optional)</li>
  * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id. See {@link kafka.consumer.ConsumerConfig}
  * for more details on Kafka consumer properties. @see <a href="https://kafka.apache.org/08/configuration.html">Kafka
  * configuration reference</a></li>.
  * </ul>
  *
- * Default Zookeeper and Kafka server configuration properties are loaded from configuration files referenced by Java
+ * Default ZooKeeper and Kafka server configuration properties are loaded from configuration files referenced by Java
  * System properties:
  * <ul>
- * <li>tnt4j.zookeeper.config - defines path of Zookeeper server configuration properties file. Sample:
+ * <li>tnt4j.zookeeper.config - defines path of ZooKeeper server configuration properties file. Sample:
  * {@code -Dtnt4j.zookeeper.config=tnt4j-streams-kafka/config/zookeeper.properties}</li>
  * <li>tnt4j.kafka.srv.config - defines path of Kafka server configuration properties file. Sample:
  * {@code -Dtnt4j.kafka.srv.config=tnt4j-streams-kafka/config/kafka-server.properties}</li>
@@ -113,7 +113,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	protected static final String PROP_SCOPE_CONSUMER = "consumer"; // NON-NLS
 
 	/**
-	 * System property key for Zookeeper server configuration properties file path.
+	 * System property key for ZooKeeper server configuration properties file path.
 	 */
 	protected static final String ZK_PROP_FILE_KEY = "tnt4j.zookeeper.config"; // NON-NLS
 	/**
@@ -127,7 +127,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private String topicName;
 
 	private ServerCnxnFactory zkCnxnFactory;
-	private boolean startZookeeper = false;
+	private FileTxnSnapLog zLog;
+	private boolean startZooKeeper = false;
 	private KafkaServer server;
 	private boolean startServer = false;
 
@@ -163,7 +164,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
 				startServer = Boolean.parseBoolean(value);
 			} else if (KafkaStreamConstants.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
-				startZookeeper = Boolean.parseBoolean(value);
+				startZooKeeper = Boolean.parseBoolean(value);
 			} else {
 				Field[] propFields = StreamProperties.class.getDeclaredFields();
 
@@ -194,7 +195,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		}
 
 		if (KafkaStreamConstants.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
-			return startZookeeper;
+			return startZooKeeper;
 		}
 
 		Object prop = super.getProperty(name);
@@ -207,7 +208,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	/**
 	 * Adds Kafka configuration property to user defined (from stream configuration) properties map.
-	 * 
+	 *
 	 * @param pName
 	 *            fully qualified property name
 	 * @param pValue
@@ -233,7 +234,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	/**
 	 * Gets user defined (from stream configuration) Kafka server configuration property value.
-	 * 
+	 *
 	 * @param pName
 	 *            fully qualified property name
 	 * @return property value, or {@code null} if property is not set
@@ -251,7 +252,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	/**
 	 * Splits fully qualified property name to property scope and name.
-	 * 
+	 *
 	 * @param pName
 	 *            fully qualified property name
 	 * @return string array containing property scope and name
@@ -280,7 +281,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	/**
 	 * Returns scope defined properties set.
-	 * 
+	 *
 	 * @param scope
 	 *            properties scope key
 	 * @return scope defined properties
@@ -313,8 +314,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		}
 
 		if (startServer) {
-			if (startZookeeper) {
-				startZookeeper();
+			if (startZooKeeper) {
+				startZooKeeper();
 			}
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -335,25 +336,24 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	}
 
 	/**
-	 * Starts Zookeeper server instance.
+	 * Starts ZooKeeper server instance.
 	 *
 	 * @throws Exception
-	 *             if an error occurred wile starting Zookeeper server
+	 *             if an error occurred wile starting ZooKeeper server
 	 */
-	protected void startZookeeper() throws Exception {
+	protected void startZooKeeper() throws Exception {
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 				"KafkaStream.zookeeper.server.starting"));
 
-		Properties zkProps = loadPropertiesFile(ZK_PROP_FILE_KEY);
-
-		QuorumPeerConfig conf = new QuorumPeerConfig();
-		conf.parseProperties(zkProps);
+		// ZooKeeperServerMain.main();
 
 		ServerConfig sc = new ServerConfig();
-		sc.readFrom(conf);
+		sc.parse(System.getProperty(ZK_PROP_FILE_KEY));
 
-		ZooKeeperServer zkServer = new ZooKeeperServer(new File(sc.getDataLogDir()), new File(sc.getDataDir()),
-				sc.getTickTime());
+		ZooKeeperServer zkServer = new ZooKeeperServer();
+		zLog = new FileTxnSnapLog(new File(sc.getDataLogDir()), new File(sc.getDataDir()));
+		zkServer.setTxnLogFactory(zLog);
+		zkServer.setTickTime(sc.getTickTime());
 		zkServer.setMinSessionTimeout(sc.getMinSessionTimeout());
 		zkServer.setMaxSessionTimeout(sc.getMaxSessionTimeout());
 		zkCnxnFactory = ServerCnxnFactory.createFactory(sc.getClientPortAddress(), sc.getMaxClientCnxns());
@@ -365,7 +365,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	/**
 	 * Loads Kafka server configuration properties.
-	 * 
+	 *
 	 * @param userDefinedProps
 	 *            properties set to append
 	 * @return properties set appended with loaded Kafka server configuration properties
@@ -504,6 +504,13 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		if (server != null) {
 			server.shutdown();
 			server.awaitShutdown();
+		}
+
+		if (zLog != null) {
+			try {
+				zLog.close();
+			} catch (IOException exc) {
+			}
 		}
 
 		if (zkCnxnFactory != null) {
