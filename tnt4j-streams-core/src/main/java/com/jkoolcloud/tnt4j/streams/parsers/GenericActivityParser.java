@@ -238,8 +238,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 			// apply fields for parser
 			Object value;
-			for (int fi = 0; fi < fieldList.size(); fi++) {
-				field = fieldList.get(fi);
+			for (ActivityField aFieldList : fieldList) {
+				field = aFieldList;
 				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
 
 				if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {

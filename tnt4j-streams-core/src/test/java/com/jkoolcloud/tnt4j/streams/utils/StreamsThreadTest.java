@@ -18,8 +18,6 @@ package com.jkoolcloud.tnt4j.streams.utils;
 
 import static org.junit.Assert.*;
 
-import java.lang.Thread.State;
-
 import org.junit.Test;
 
 /**
@@ -140,7 +138,7 @@ public class StreamsThreadTest {
 			Thread.sleep(50);
 		} catch (InterruptedException e) {
 		}
-		final State state = thread.getState();
+		final Thread.State state = thread.getState();
 		assertTrue(System.currentTimeMillis() - testStartTime >= sleepTime);
 	}
 

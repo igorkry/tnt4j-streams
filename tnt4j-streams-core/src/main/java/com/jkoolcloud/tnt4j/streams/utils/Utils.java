@@ -497,7 +497,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @see #encodeHex(byte[])
 	 */
 	public static String toHexString(byte[] bytes) {
-		return "0x" + encodeHex(bytes);
+		return "0x" + encodeHex(bytes); // NON-NLS
 	}
 
 	/**

@@ -47,7 +47,7 @@ public class TestFileList extends ArrayList<File> {
 			if (fill) {
 				FileOutputStream fos = new FileOutputStream(tempFile);
 				fos.write("TEST".getBytes());
-				fos.write(i.toString().getBytes());
+				fos.write(String.valueOf(i).getBytes());
 				fos.close();
 			}
 			tempFile.deleteOnExit();

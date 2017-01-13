@@ -47,14 +47,14 @@ public final class SampleIntegration {
 					: new StreamsConfigLoader(cfgFileName);
 			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
 			if (streams == null || streams.isEmpty()) {
-				throw new IllegalStateException("No Activity Streams found in configuration");
+				throw new IllegalStateException("No Activity Streams found in configuration"); // NON-NLS
 			}
 
-			ThreadGroup streamThreads = new ThreadGroup("Streams");
+			ThreadGroup streamThreads = new ThreadGroup("Streams"); // NON-NLS
 			StreamThread ft;
 			for (TNTInputStream<?, ?> stream : streams) {
 				ft = new StreamThread(streamThreads, stream,
-						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName()));
+						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
 			}
 		} catch (Exception e) {
@@ -71,7 +71,7 @@ public final class SampleIntegration {
 	public static void simpleConfigAndRun(String cfgFileName) {
 		try {
 			StreamsConfigLoader cfg = new StreamsConfigLoader();
-			TNTInputStream<?, ?> stream = cfg.getStream("StreamName");
+			TNTInputStream<?, ?> stream = cfg.getStream("StreamName"); // NON-NLS
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
 		} catch (Exception e) {

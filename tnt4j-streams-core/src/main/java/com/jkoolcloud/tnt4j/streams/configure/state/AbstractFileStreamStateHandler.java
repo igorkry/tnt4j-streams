@@ -33,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.inputs.AbstractFileLineStream.Line;
+import com.jkoolcloud.tnt4j.streams.inputs.AbstractFileLineStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -74,7 +74,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 */
 	protected T file;
 
-	private Line prevLine;
+	private AbstractFileLineStream.Line prevLine;
 
 	private FileAccessState fileAccessState;
 
@@ -217,7 +217,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 	/**
 	 * Check the line CRC.
-	 * 
+	 *
 	 * @param line
 	 *            line to check
 	 * @param crc
@@ -342,7 +342,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 	/**
 	 * Creates a new {@link Reader} object for given file to read from.
-	 * 
+	 *
 	 * @param file
 	 *            file to open for reading
 	 *
@@ -477,7 +477,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 	/**
 	 * Returns file name string for persisted streamed files access state.
-	 * 
+	 *
 	 * @param streamName
 	 *            stream name
 	 *
@@ -496,8 +496,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 * @param streamName
 	 *            stream name
 	 */
-	public void saveState(Line line, String streamName) {
-		Line procLine = prevLine;
+	public void saveState(AbstractFileLineStream.Line line, String streamName) {
+		AbstractFileLineStream.Line procLine = prevLine;
 		prevLine = line;
 		if (procLine == null) {
 			return;

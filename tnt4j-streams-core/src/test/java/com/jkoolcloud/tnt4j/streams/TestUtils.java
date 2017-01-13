@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -31,8 +31,8 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 public final class TestUtils {
 
 	public static void testPropertyList(TNTInputStream<?, ?> stream,
-			Collection<Entry<String, String>> propertiesToTest) {
-		for (Entry<String, String> property : propertiesToTest) {
+			Collection<Map.Entry<String, String>> propertiesToTest) {
+		for (Map.Entry<String, String> property : propertiesToTest) {
 			String name = property.getKey();
 			Object result = stream.getProperty(name);
 			assertNotNull("Property " + name + " is null", result); // NON-NLS

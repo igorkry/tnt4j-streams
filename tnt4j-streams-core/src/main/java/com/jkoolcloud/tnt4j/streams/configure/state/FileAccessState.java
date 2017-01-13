@@ -49,7 +49,7 @@ public class FileAccessState {
 	/**
 	 * Timestamp value of last file read.
 	 */
-	@XmlElement(required = false)
+	@XmlElement
 	public Long lastReadTime;
 
 	/**

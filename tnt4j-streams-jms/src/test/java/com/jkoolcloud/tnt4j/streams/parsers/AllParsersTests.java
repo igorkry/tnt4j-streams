@@ -18,14 +18,13 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ ActivityJMSMessageParserTest.class })
+@Suite.SuiteClasses({ ActivityJMSMessageParserTest.class })
 public class AllParsersTests {
 
 }

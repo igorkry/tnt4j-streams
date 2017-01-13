@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 import java.io.*;
 import java.security.MessageDigest;
 import java.util.*;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
@@ -94,8 +93,8 @@ public class UtilsTest {
 			}
 		}
 
-		final Set<Entry<String, OpType>> entrySet = opTypes.entrySet();
-		for (Entry<String, OpType> entry : entrySet) {
+		final Set<Map.Entry<String, OpType>> entrySet = opTypes.entrySet();
+		for (Map.Entry<String, OpType> entry : entrySet) {
 			assertEquals(entry.getValue(), Utils.mapOpType(entry.getKey()));
 		}
 	}

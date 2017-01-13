@@ -24,7 +24,6 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
@@ -208,7 +207,8 @@ public abstract class ActivityParser {
 
 	/**
 	 * Returns whether this parser supports delimited locators in parser fields configuration. This allows user to
-	 * define multiple locations for a field using locators delimiter {@link ConfigParserHandler#LOC_DELIM} field value.
+	 * define multiple locations for a field using locators delimiter
+	 * {@link com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandler#LOC_DELIM} field value.
 	 * <p>
 	 * But if locators are some complex expressions like XPath functions, it may be better to deny this feature for a
 	 * parser to correctly load locator expression.

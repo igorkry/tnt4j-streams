@@ -60,15 +60,15 @@ public class SampleStreamingApp {
 	 */
 	public static void main(String... args) throws Exception {
 		Map<String, String> props = new HashMap<String, String>();
-		props.put(ParserProperties.PROP_FLD_DELIM, "|");
+		props.put(ParserProperties.PROP_FLD_DELIM, "|"); // NON-NLS
 
 		ActivityTokenParser atp = new ActivityTokenParser();
-		atp.setName("TokenParser");
+		atp.setName("TokenParser"); // NON-NLS
 		atp.setProperties(props.entrySet());
 
 		ActivityField f = new ActivityField(StreamFieldType.StartTime.name());
 		ActivityFieldLocator afl = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1");
-		afl.setFormat("dd MMM yyyy HH:mm:ss", "en-US");
+		afl.setFormat("dd MMM yyyy HH:mm:ss", "en-US"); // NON-NLS
 		f.addLocator(afl);
 		atp.addField(f);
 
@@ -78,7 +78,7 @@ public class SampleStreamingApp {
 		atp.addField(f);
 
 		f = new ActivityField(StreamFieldType.ApplName.name());
-		afl = new ActivityFieldLocator("orders");
+		afl = new ActivityFieldLocator("orders"); // NON-NLS
 		f.addLocator(afl);
 		atp.addField(f);
 
@@ -99,22 +99,22 @@ public class SampleStreamingApp {
 
 		f = new ActivityField(StreamFieldType.EventType.name());
 		afl = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "5");
-		afl.addValueMap("Order Placed", "START").addValueMap("Order Received", "RECEIVE")
-				.addValueMap("Order Processing", "OPEN").addValueMap("Order Processed", "SEND")
-				.addValueMap("Order Shipped", "END");
+		afl.addValueMap("Order Placed", "START").addValueMap("Order Received", "RECEIVE") // NON-NLS
+				.addValueMap("Order Processing", "OPEN").addValueMap("Order Processed", "SEND") // NON-NLS
+				.addValueMap("Order Shipped", "END"); // NON-NLS
 		f.addLocator(afl);
 		atp.addField(f);
 
-		f = new ActivityField("MsgValue");
+		f = new ActivityField("MsgValue"); // NON-NLS
 		afl = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "8");
 		f.addLocator(afl);
 		atp.addField(f);
 
 		props = new HashMap<String, String>();
-		props.put(StreamProperties.PROP_FILENAME, ArrayUtils.isEmpty(args) ? "orders.log" : args[0]);
+		props.put(StreamProperties.PROP_FILENAME, ArrayUtils.isEmpty(args) ? "orders.log" : args[0]); // NON-NLS
 
 		FileLineStream fls = new FileLineStream();
-		fls.setName("FileStream");
+		fls.setName("FileStream"); // NON-NLS
 		fls.setProperties(props.entrySet());
 		fls.addParser(atp);
 		// if (fls.getOutput() == null) {

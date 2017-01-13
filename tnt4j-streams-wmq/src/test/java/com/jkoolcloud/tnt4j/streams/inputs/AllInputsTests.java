@@ -18,14 +18,13 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ WmqStreamTest.class })
+@Suite.SuiteClasses({ WmqStreamTest.class })
 public class AllInputsTests {
 
 }

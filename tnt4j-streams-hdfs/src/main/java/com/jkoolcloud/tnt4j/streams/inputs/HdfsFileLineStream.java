@@ -95,7 +95,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 			@Override
 			public boolean accept(Path path) {
 				String name = path.getName();
-				return FilenameUtils.wildcardMatch(name, "*", IOCase.INSENSITIVE);
+				return FilenameUtils.wildcardMatch(name, "*", IOCase.INSENSITIVE); // NON-NLS
 			}
 		});
 

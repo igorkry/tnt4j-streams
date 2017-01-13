@@ -103,9 +103,9 @@ public class SampleStream extends TNTParseableInputStream<String> {
 	public void initialize() throws Exception {
 		super.initialize();
 		if (fileName == null) {
-			throw new IllegalStateException("SampleStream: File name not defined");
+			throw new IllegalStateException("SampleStream: File name not defined"); // NON-NLS
 		}
-		logger().log(OpLevel.DEBUG, "Opening file: {0}", fileName);
+		logger().log(OpLevel.DEBUG, "Opening file: {0}", fileName); // NON-NLS
 		activityFile = new File(fileName);
 		lineReader = new LineNumberReader(new FileReader(activityFile));
 	}
@@ -118,7 +118,7 @@ public class SampleStream extends TNTParseableInputStream<String> {
 	@Override
 	public String getNextItem() throws Exception {
 		if (lineReader == null) {
-			throw new IllegalStateException("SampleStream: File is not opened for reading");
+			throw new IllegalStateException("SampleStream: File is not opened for reading"); // NON-NLS
 		}
 		String line = lineReader.readLine();
 		lineNumber = lineReader.getLineNumber();

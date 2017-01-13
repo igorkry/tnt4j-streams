@@ -74,7 +74,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value);
+			logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value); // NON-NLS
 			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = value;
 			}
@@ -84,7 +84,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	@Override
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
-			throw new IllegalStateException("SampleParser: field delimiter not specified or empty");
+			throw new IllegalStateException("SampleParser: field delimiter not specified or empty"); // NON-NLS
 		}
 		if (data == null) {
 			return null;
@@ -94,13 +94,13 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		logger().log(OpLevel.DEBUG, "Parsing: {0}", dataStr);
+		logger().log(OpLevel.DEBUG, "Parsing: {0}", dataStr); // NON-NLS
 		String[] fields = dataStr.split(fieldDelim);
 		if (ArrayUtils.isEmpty(fields)) {
-			logger().log(OpLevel.DEBUG, "Did not find any fields in input string");
+			logger().log(OpLevel.DEBUG, "Did not find any fields in input string"); // NON-NLS
 			return null;
 		}
-		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length);
+		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length); // NON-NLS
 
 		return parsePreparedItem(stream, dataStr, fields);
 	}

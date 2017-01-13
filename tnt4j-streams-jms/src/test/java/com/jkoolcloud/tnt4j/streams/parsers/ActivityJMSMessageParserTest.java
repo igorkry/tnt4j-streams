@@ -44,8 +44,7 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 	@Test
 	@Override
 	public void isDataClassSupportedTest() {
-		assertTrue("javax.jms.Message.class shall be supported ",
-				parser.isDataClassSupported(mock(javax.jms.Message.class)));
+		assertTrue("javax.jms.Message.class shall be supported ", parser.isDataClassSupported(mock(Message.class)));
 		assertFalse("ActivityJMSMessageParser does not support Strings", parser.isDataClassSupported(String.class));
 	}
 

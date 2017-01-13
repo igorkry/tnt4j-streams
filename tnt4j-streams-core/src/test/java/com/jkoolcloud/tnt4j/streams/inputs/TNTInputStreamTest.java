@@ -18,13 +18,10 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -238,7 +235,7 @@ public class TNTInputStreamTest {
 		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
 		final Runnable runnable = mock(Runnable.class);
-		final java.util.List<Runnable> list = Collections.singletonList(runnable);
+		final List<Runnable> list = Collections.singletonList(runnable);
 		ts.addStreamListener(inputStreamListenerMock);
 		ts.addStreamTasksListener(streamTaskListenerMock);
 		ts.cleanup();
@@ -263,7 +260,7 @@ public class TNTInputStreamTest {
 		ts.notifyStreamTaskRejected(runnable);
 		verify(streamTaskListenerMock).onReject(eq(ts), any(Runnable.class));
 
-		final java.util.List<Runnable> list = Collections.singletonList(runnable);
+		final List<Runnable> list = Collections.singletonList(runnable);
 		ts.notifyStreamTasksDropOff(list);
 		verify(streamTaskListenerMock).onDropOff(ts, list);
 
@@ -306,7 +303,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		public void setProperties(Collection<Entry<String, String>> props) throws Exception {
+		public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		}
 
 		@Override

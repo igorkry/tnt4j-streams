@@ -18,7 +18,6 @@ package com.jkoolcloud.tnt4j.streams.fields;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.InvocationTargetException;

@@ -253,7 +253,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 					.build();
 			server = ServerBootstrap.bootstrap().setListenerPort(port).setServerInfo("TNT4J-Streams-HttpStream") // NON-NLS
 					.setSocketConfig(socketConfig).setSslContext(sslcontext)
-					.setExceptionLogger(new HttpStreamExceptionLogger()).registerHandler("*", this).create();
+					.setExceptionLogger(new HttpStreamExceptionLogger()).registerHandler("*", this).create(); // NON-NLS
 		}
 
 		/**

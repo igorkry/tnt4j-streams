@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,6 +36,8 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
+import kafka.consumer.Consumer;
+import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.javaapi.consumer.ConsumerConnector;
 
@@ -84,7 +87,7 @@ public class KafkaStreamTest {
 	@Test
 	public void produceMessages() throws InterruptedException {
 		Properties props = new Properties();
-		props.put(org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		props.put("client.id", "TestProducer");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -121,8 +124,7 @@ public class KafkaStreamTest {
 		props.put("auto.commit.interval.ms", "1000");
 		props.put("consumer.timeout.ms", "1000");
 
-		ConsumerConnector consumer = kafka.consumer.Consumer
-				.createJavaConsumerConnector(new kafka.consumer.ConsumerConfig(props));
+		ConsumerConnector consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
 		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
 		topicCountMap.put(DEFAULT_TEST_TOPIC, 1);
 

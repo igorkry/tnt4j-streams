@@ -18,14 +18,13 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
+@Suite.SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
 		FileLineStreamTest.class, HttpStreamTest.class, JavaInputStreamTest.class, StreamThreadTest.class,
 		TNTInputStreamTest.class, PipedStreamTest.class, RedirectTNT4JStreamTest.class, ZipLineStreamTest.class })
 public class AllInputsTests {

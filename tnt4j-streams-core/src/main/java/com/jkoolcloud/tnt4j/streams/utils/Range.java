@@ -33,7 +33,7 @@ public abstract class Range<T extends Number> {
 	/**
 	 * Constant defining number minus sign RegEx.
 	 */
-	public static final String NEGATIVE_REGEX = "-?";
+	public static final String NEGATIVE_REGEX = "-?"; // NON-NLS
 	/**
 	 * Constant defining integer number RegEx.
 	 */

@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.inputs.AbstractFileLineStream.FileWatcher;
 import com.jkoolcloud.tnt4j.streams.utils.TestFileList;
 
 /**
@@ -59,7 +58,7 @@ public class FileLineStreamTest {
 		props.put(StreamProperties.PROP_RESTORE_STATE, String.valueOf(false));
 		fls.setProperties(props.entrySet());
 		fls.startStream();
-		final FileWatcher fileWatcher = fls.createFileWatcher();
+		final AbstractFileLineStream.FileWatcher fileWatcher = fls.createFileWatcher();
 		// TODO assert smth
 		fileWatcher.shutdown();
 

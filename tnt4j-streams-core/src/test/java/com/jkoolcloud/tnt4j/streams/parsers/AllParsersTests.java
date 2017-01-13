@@ -18,17 +18,16 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ AbstractActivityMapParserTest.class, ActivityJavaObjectParserTest.class, ActivityJsonParserTest.class,
-		ActivityMapParserTest.class, ActivityNameValueParserTest.class, ActivityRegExParserTest.class,
-		ActivityTokenParserTest.class, ActivityXmlParserTest.class, MessageTypeTest.class,
-		MessageActivityXmlParserTest.class })
+@Suite.SuiteClasses({ AbstractActivityMapParserTest.class, ActivityJavaObjectParserTest.class,
+		ActivityJsonParserTest.class, ActivityMapParserTest.class, ActivityNameValueParserTest.class,
+		ActivityRegExParserTest.class, ActivityTokenParserTest.class, ActivityXmlParserTest.class,
+		MessageTypeTest.class, MessageActivityXmlParserTest.class })
 public class AllParsersTests {
 
 }
