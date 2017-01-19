@@ -3851,7 +3851,7 @@ All optional modules (extensions) depends to `core` module and can't be build an
 **NOTE:** `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
 
 ## Requirements
-* JDK 1.6+
+* JDK 1.7+
 * [Apache Maven 3](https://maven.apache.org/)
 * [TNT4J](https://github.com/Nastel/TNT4J)
 * [JESL](https://github.com/Nastel/JESL)
