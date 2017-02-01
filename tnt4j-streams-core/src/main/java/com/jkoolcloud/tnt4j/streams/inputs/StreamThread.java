@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.util.concurrent.CountDownLatch;
+
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
 /**
@@ -31,6 +33,8 @@ public class StreamThread extends StreamsThread {
 	 * TNTInputStream being executed by this thread.
 	 */
 	protected final TNTInputStream<?, ?> target;
+
+	private CountDownLatch completionLatch;
 
 	/**
 	 * Creates thread to run specified TNTInputStream.
@@ -99,5 +103,25 @@ public class StreamThread extends StreamsThread {
 	 */
 	public TNTInputStream<?, ?> getTarget() {
 		return target;
+	}
+
+	/**
+	 * Sets running streams threads counting controller to be used, when some actions needed to be performed after all
+	 * threads (streams) has been completed.
+	 *
+	 * @param completionLatch
+	 *            running threads count controller
+	 */
+	public void setCompletionLatch(CountDownLatch completionLatch) {
+		this.completionLatch = completionLatch;
+	}
+
+	/**
+	 * Notifies this thread, that running stream has completed.
+	 */
+	public void notifyCompleted() {
+		if (completionLatch != null) {
+			completionLatch.countDown();
+		}
 	}
 }

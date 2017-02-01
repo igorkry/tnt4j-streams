@@ -58,13 +58,13 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data from which to
 	 * extract its value.
 	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
+	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<>();
 
 	/**
 	 * Defines the mapping of activity fields to the regular expression match sequence(s) in the raw data from which to
 	 * extract its value.
 	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<ActivityField, List<ActivityFieldLocator>>();
+	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<>();
 
 	/**
 	 * Constructs a new ActivityRegExParser.
@@ -105,8 +105,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (locations == null) {
 			return;
 		}
-		List<ActivityFieldLocator> matchLocs = new ArrayList<ActivityFieldLocator>();
-		List<ActivityFieldLocator> groupLocs = new ArrayList<ActivityFieldLocator>();
+		List<ActivityFieldLocator> matchLocs = new ArrayList<>();
+		List<ActivityFieldLocator> groupLocs = new ArrayList<>();
 		for (ActivityFieldLocator locator : locations) {
 			ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
 			try {
@@ -169,7 +169,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			if (!matchMap.isEmpty()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.applying.regex"), matchMap.size());
-				ArrayList<String> matches = new ArrayList<String>();
+				ArrayList<String> matches = new ArrayList<>();
 				matches.add(""); // dummy entry to index array with match
 									// locations
 				while (matcher.find()) {

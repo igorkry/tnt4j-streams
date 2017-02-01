@@ -41,7 +41,7 @@ public class ActivityJavaObjectParserTest {
 	@Test
 	public void setPropertiesTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		HashMap<String, String> myMap = new HashMap<String, String>();
+		HashMap<String, String> myMap = new HashMap<>();
 		myMap.put(ParserProperties.PROP_LOC_PATH_DELIM, "TEST_DELIM"); // NON-NLS
 		Collection<Map.Entry<String, String>> props = myMap.entrySet();
 		testParser.setProperties(props);
@@ -102,7 +102,7 @@ public class ActivityJavaObjectParserTest {
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp,
 				"ExecutorThreadsQuantity"); // NON-NLS
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5");
 		stream.setProperties(props.entrySet());

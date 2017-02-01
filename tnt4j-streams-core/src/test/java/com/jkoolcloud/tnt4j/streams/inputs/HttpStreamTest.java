@@ -75,7 +75,7 @@ public class HttpStreamTest {
 
 	private static void initHttpStream() throws Exception {
 		htStream = new HttpStream();
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
 		props.put(StreamProperties.PROP_PORT, String.valueOf(TEST_PORT));
 		htStream.setProperties(props.entrySet());
@@ -154,7 +154,7 @@ public class HttpStreamTest {
 
 	@Test
 	public void propertiesTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(4);
+		Map<String, String> props = new HashMap<>(4);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(TEST_PORT));
 		props.put(StreamProperties.PROP_KEYSTORE, "TEST"); // NON-NLS
 		props.put(StreamProperties.PROP_KEYSTORE_PASS, "TEST"); // NON-NLS

@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
 
-	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<String, String>();
+	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<>();
 	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
 	private static final String LOCAL_SERVER_IP_KEY = "LOCAL_SERVER_IP_KEY"; // NON-NLS
 
@@ -504,7 +504,7 @@ public class ActivityInfo {
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
 		if (activityProperties == null) {
-			activityProperties = new HashMap<String, Property>();
+			activityProperties = new HashMap<>();
 		}
 
 		Property p = new Property(propName, wrapPropertyValue(propValue),
@@ -557,7 +557,7 @@ public class ActivityInfo {
 	private static Collection<String> addStrings(Collection<String> collection, String... strings) {
 		if (ArrayUtils.isNotEmpty(strings)) {
 			if (collection == null) {
-				collection = new ArrayList<String>();
+				collection = new ArrayList<>();
 			}
 
 			for (String str : strings) {
@@ -573,16 +573,22 @@ public class ActivityInfo {
 	/**
 	 * Makes fully qualified name of activity source. Name is made from stream parsed data attributes.
 	 *
+	 * @param resolveOverDNS
+	 *            flag indicating whether to use DNS to resolve server names and IP addresses
+	 *
 	 * @return fully qualified name of this activity source, or {@code null} if no source defining attributes where
 	 *         parsed from stream.
 	 */
-	public String getSourceFQN() {
-		resolveServer(false);
+	public String getSourceFQN(boolean resolveOverDNS) {
+		resolveServer(resolveOverDNS);
+
 		StringBuilder fqnB = new StringBuilder();
 
 		addSourceValue(fqnB, SourceType.APPL, applName);
+		addSourceValue(fqnB, SourceType.USER, userName);
 		addSourceValue(fqnB, SourceType.SERVER, serverName);
 		addSourceValue(fqnB, SourceType.NETADDR, serverIp);
+		addSourceValue(fqnB, SourceType.GEOADDR, location);
 
 		String fqn = fqnB.toString();
 
@@ -990,8 +996,7 @@ public class ActivityInfo {
 		}
 
 		if (StringUtils.isEmpty(serverIp)) {
-			serverIp = " "; // prevents streams API from resolving it to the
-			// local IP address
+			serverIp = " "; // prevents streams API from resolving it to the local IP address
 		}
 	}
 
@@ -1113,7 +1118,7 @@ public class ActivityInfo {
 		}
 		if (otherAi.correlator != null) {
 			if (correlator == null) {
-				correlator = new ArrayList<String>();
+				correlator = new ArrayList<>();
 			}
 
 			correlator.addAll(otherAi.correlator);
@@ -1124,7 +1129,7 @@ public class ActivityInfo {
 		}
 		if (otherAi.tag != null) {
 			if (tag == null) {
-				tag = new ArrayList<String>();
+				tag = new ArrayList<>();
 			}
 
 			tag.addAll(otherAi.tag);
@@ -1164,7 +1169,7 @@ public class ActivityInfo {
 
 		if (otherAi.activityProperties != null) {
 			if (activityProperties == null) {
-				activityProperties = new HashMap<String, Property>();
+				activityProperties = new HashMap<>();
 			}
 
 			activityProperties.putAll(otherAi.activityProperties);
@@ -1172,7 +1177,7 @@ public class ActivityInfo {
 
 		if (CollectionUtils.isNotEmpty(otherAi.children)) {
 			if (children == null) {
-				children = new ArrayList<ActivityInfo>();
+				children = new ArrayList<>();
 			}
 
 			children.addAll(otherAi.children);
@@ -1468,7 +1473,7 @@ public class ActivityInfo {
 	 */
 	public void addChild(ActivityInfo ai) {
 		if (children == null) {
-			children = new ArrayList<ActivityInfo>();
+			children = new ArrayList<>();
 		}
 
 		children.add(ai);

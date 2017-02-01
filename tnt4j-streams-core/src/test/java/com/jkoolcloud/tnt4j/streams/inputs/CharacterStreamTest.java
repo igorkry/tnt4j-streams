@@ -42,7 +42,7 @@ public class CharacterStreamTest {
 	@Test
 	public void settingsTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
 		cStream.setProperties(props.entrySet());
@@ -53,7 +53,7 @@ public class CharacterStreamTest {
 	@Test(expected = IllegalStateException.class)
 	public void settingsFailToSetBothTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, "TestFileName"); // NON-NLS
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
 		cStream.setProperties(props.entrySet());
@@ -66,7 +66,7 @@ public class CharacterStreamTest {
 		CharacterStream cStream = new CharacterStream();
 		cStream.setName("TEST_CHAR_STREAM");
 
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(false));
 		cStream.setProperties(props.entrySet());

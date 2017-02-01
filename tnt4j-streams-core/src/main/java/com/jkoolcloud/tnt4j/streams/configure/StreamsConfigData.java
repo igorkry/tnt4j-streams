@@ -106,7 +106,7 @@ public class StreamsConfigData {
 	 */
 	public void addStream(TNTInputStream<?, ?> stream) {
 		if (streams == null) {
-			streams = new HashMap<String, TNTInputStream<?, ?>>();
+			streams = new HashMap<>();
 		}
 
 		streams.put(stream.getName(), stream);
@@ -120,7 +120,7 @@ public class StreamsConfigData {
 	 */
 	public void addParser(ActivityParser parser) {
 		if (parsers == null) {
-			parsers = new HashMap<String, ActivityParser>();
+			parsers = new HashMap<>();
 		}
 
 		parsers.put(parser.getName(), parser);

@@ -50,12 +50,12 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	/**
 	 * Map of parsers being used by stream.
 	 */
-	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<String, List<ActivityParser>>();
+	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<>();
 
 	private boolean haltIfNoParser = true;
 
 	@Override
-	public void setDefaultStreamOutput() {
+	protected void setDefaultStreamOutput() {
 		setOutput(new JKCloudActivityOutput());
 	}
 
@@ -119,7 +119,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		List<ActivityParser> tpl = parsersMap.get(tag);
 
 		if (tpl == null) {
-			tpl = new ArrayList<ActivityParser>();
+			tpl = new ArrayList<>();
 			parsersMap.put(tag, tpl);
 		}
 
@@ -179,7 +179,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	private Set<ActivityParser> getParsersFor(String[] tags) {
-		Set<ActivityParser> parsersSet = new LinkedHashSet<ActivityParser>();
+		Set<ActivityParser> parsersSet = new LinkedHashSet<>();
 
 		if (ArrayUtils.isNotEmpty(tags)) {
 			for (String tag : tags) {

@@ -104,7 +104,7 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader for the specified file.
+	 * Constructs a new TNT4J-Streams Configuration loader for the specified {@link java.io.File}.
 	 *
 	 * @param configFile
 	 *            configuration file
@@ -120,10 +120,11 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Constructs a new TNT4J-Streams Configuration loader, using the specified Reader to obtain the configuration data.
+	 * Constructs a new TNT4J-Streams Configuration loader, using the specified {@link java.io.Reader} to obtain the
+	 * configuration data.
 	 *
 	 * @param configReader
-	 *            Reader to get configuration data from
+	 *            reader to get configuration data from
 	 * @throws SAXException
 	 *             if there was an error parsing the configuration
 	 * @throws ParserConfigurationException
@@ -133,6 +134,23 @@ public class StreamsConfigLoader {
 	 */
 	public StreamsConfigLoader(Reader configReader) throws SAXException, ParserConfigurationException, IOException {
 		load(configReader);
+	}
+
+	/**
+	 * Constructs a new TNT4J-Streams Configuration loader, using the specified {@link java.io.InputStream} to obtain
+	 * the configuration data.
+	 * 
+	 * @param is
+	 *            input stream to get configuration data from
+	 * @throws SAXException
+	 *             if there was an error parsing the configuration
+	 * @throws ParserConfigurationException
+	 *             if there is an inconsistency in the configuration
+	 * @throws IOException
+	 *             if there is an error reading the configuration data
+	 */
+	public StreamsConfigLoader(InputStream is) throws SAXException, ParserConfigurationException, IOException {
+		load(new InputStreamReader(is));
 	}
 
 	/**

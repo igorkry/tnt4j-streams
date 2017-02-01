@@ -89,7 +89,7 @@ public class ActivityField {
 		this(fieldTypeName);
 		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0");
 		loc.setDataType(dataType);
-		locators = new ArrayList<ActivityFieldLocator>(1);
+		locators = new ArrayList<>(1);
 		locators.add(loc);
 	}
 
@@ -176,7 +176,7 @@ public class ActivityField {
 
 	private void addDynamicLocator(String id, ActivityFieldLocator locator) {
 		if (dynamicAttrLocators == null) {
-			dynamicAttrLocators = new HashMap<String, ActivityFieldLocator>();
+			dynamicAttrLocators = new HashMap<>();
 		}
 
 		dynamicAttrLocators.put(id, locator);
@@ -184,7 +184,7 @@ public class ActivityField {
 
 	private void addStaticLocator(ActivityFieldLocator locator) {
 		if (locators == null) {
-			locators = new ArrayList<ActivityFieldLocator>();
+			locators = new ArrayList<>();
 		}
 
 		locators.add(locator);
@@ -373,7 +373,7 @@ public class ActivityField {
 	public ActivityField addStackedParser(ActivityParser parser) {
 		if (parser != null) {
 			if (stackedParsers == null) {
-				stackedParsers = new ArrayList<ActivityParser>();
+				stackedParsers = new ArrayList<>();
 			}
 
 			stackedParsers.add(parser);
@@ -539,7 +539,7 @@ public class ActivityField {
 		String tAttr = dAttr;
 
 		if (isDynamicAttr(dAttr) && MapUtils.isNotEmpty(dValMap)) {
-			List<String> vars = new ArrayList<String>();
+			List<String> vars = new ArrayList<>();
 			Utils.resolveVariables(vars, dAttr);
 
 			for (String var : vars) {
@@ -555,7 +555,7 @@ public class ActivityField {
 			return locators;
 		}
 
-		List<ActivityFieldLocator> fLocators = new ArrayList<ActivityFieldLocator>(1);
+		List<ActivityFieldLocator> fLocators = new ArrayList<>(1);
 		if (index >= 0 && index < locators.size()) {
 			fLocators.add(locators.get(index));
 		}

@@ -51,7 +51,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	/**
 	 * List of supported activity fields used to extract values from RAW activity data defined by field location(s).
 	 */
-	protected final List<ActivityField> fieldList = new ArrayList<ActivityField>();
+	protected final List<ActivityField> fieldList = new ArrayList<>();
 
 	/**
 	 * {@inheritDoc}
@@ -264,7 +264,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		Object[] fValues = Utils.makeArray(value);
 
-		List<ActivityField> tFieldsList = new ArrayList<ActivityField>();
+		List<ActivityField> tFieldsList = new ArrayList<>();
 		for (int vi = 0; vi < fValues.length; vi++) {
 			ActivityField tField = field.createTempField(dValMap, vi);
 			tFieldsList.add(tField);
@@ -354,7 +354,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private Map<String, Object> parseDynamicValues(TNTInputStream<?, ?> stream, T data,
 			Map<String, ActivityFieldLocator> dynamicLocators) throws ParseException {
-		Map<String, Object> dynamicValuesMap = new HashMap<String, Object>();
+		Map<String, Object> dynamicValuesMap = new HashMap<>();
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
 				final Object dynamicLocatorValue = Utils

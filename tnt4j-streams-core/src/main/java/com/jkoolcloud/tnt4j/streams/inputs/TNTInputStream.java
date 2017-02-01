@@ -28,7 +28,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.outputs.TNTOutput;
+import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
@@ -53,10 +53,10 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @param <O>
  *            the type of handled output data
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see java.util.concurrent.ExecutorService
- * @see com.jkoolcloud.tnt4j.streams.outputs.TNTOutput
+ * @see com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput
  */
 public abstract class TNTInputStream<T, O> implements Runnable {
 
@@ -79,7 +79,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private long endTime = -1;
 	private String name;
 
-	private TNTOutput<O> out;
+	private TNTStreamOutput<O> out;
 
 	private List<InputStreamListener> streamListeners;
 	private List<StreamTasksListener> streamTasksListeners;
@@ -102,29 +102,42 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Gets stream output handler.
-	 * 
+	 *
 	 * @return stream output handler
 	 */
-	public TNTOutput<O> getOutput() {
+	public TNTStreamOutput<O> getOutput() {
 		return out;
 	}
 
 	/**
 	 * Sets stream output handler.
-	 * 
+	 *
 	 * @param out
 	 *            stream output handler
 	 */
-	protected void setOutput(TNTOutput<O> out) {
+	protected void setOutput(TNTStreamOutput<O> out) {
 		this.out = out;
 		out.setStream(this);
+	}
+
+	/**
+	 * Ensures stream output handler is set and returns stream output handler instance.
+	 *
+	 * @return stream output handler
+	 *
+	 * @see #ensureOutputSet()
+	 */
+	public TNTStreamOutput<O> output() {
+		ensureOutputSet();
+
+		return out;
 	}
 
 	/**
 	 * Sets default stream output handler. It may happen when stream configuration does not define particular output
 	 * handler reference (i.e. from older TNT4J-Streams API versions).
 	 */
-	public abstract void setDefaultStreamOutput();
+	protected abstract void setDefaultStreamOutput();
 
 	/**
 	 * Get the thread owning this stream.
@@ -220,16 +233,11 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @throws Exception
 	 *             indicates that stream is not configured properly and cannot continue
+	 *
+	 * @see #ensureOutputSet()
 	 */
 	protected void initialize() throws Exception {
-		if (out == null) {
-			setDefaultStreamOutput();
-			// throw new
-			// IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-			// "TNTInputStream.output.undefined"));
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.output.undefined"));
-		}
+		ensureOutputSet();
 
 		out.initialize();
 
@@ -239,6 +247,17 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
 			out.handleConsumerThread(ownerThread == null ? Thread.currentThread() : ownerThread);
+		}		
+	}
+
+	/**
+	 * Checks stream output handler instance and if it is {@code null} - sets default one.
+	 */
+	public void ensureOutputSet() {
+		if (out == null) {
+			setDefaultStreamOutput();
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.output.undefined"));
 		}
 	}
 
@@ -320,7 +339,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * task can't be put into queue over this time, task is skipped with making warning log entry. Thus memory use does
 	 * not grow drastically if consumers can't keep up the pace of producers filling in the queue, making producers
 	 * synchronize with consumers.
-	 * 
+	 *
 	 * @param threadsQty
 	 *            the number of threads in the pool
 	 * @param offerTimeout
@@ -366,8 +385,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	@SuppressWarnings("unchecked")
 	public void addReference(Object refObject) throws IllegalStateException {
-		if (refObject instanceof TNTOutput) {
-			setOutput((TNTOutput<O>) refObject);
+		if (refObject instanceof TNTStreamOutput) {
+			setOutput((TNTStreamOutput<O>) refObject);
 		}
 	}
 
@@ -381,6 +400,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @return current position in activity data source being processed, or {@code 0} if activity position can't be
 	 *         determined
+	 *
 	 * @see #getCurrentActivity()
 	 */
 	public int getActivityPosition() {
@@ -395,6 +415,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * {@link #getActivityPosition()}.
 	 *
 	 * @return currently processed activity item index
+	 *
 	 * @see #getActivityPosition()
 	 * @see #getTotalActivities()
 	 */
@@ -404,7 +425,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Increments index of currently processed activity item.
-	 * 
+	 *
 	 * @return new value of current activity index
 	 */
 	protected int incrementCurrentActivitiesCount() {
@@ -416,6 +437,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @return total number of activities available to stream, or {@code -1} if total number of activities is
 	 *         undetermined
+	 *
 	 * @see #getCurrentActivity()
 	 */
 	public int getTotalActivities() {
@@ -453,7 +475,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Increments processing skipped activity items count.
-	 * 
+	 *
 	 * @return new value of skipped items count
 	 */
 	protected int incrementSkippedActivitiesCount() {
@@ -523,8 +545,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	/**
 	 * Signals that this stream should stop processing so that controlling thread will terminate.
 	 *
-	 * @deprecated this method has bean replaced by {@link #halt(boolean)}
 	 * @see #halt(boolean)
+	 * @deprecated this method has bean replaced by {@link #halt(boolean)}
 	 */
 	@Deprecated
 	public void halt() {
@@ -679,11 +701,15 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.statistics"),
 				name, getStreamStatistics());
+
+		if (ownerThread != null) {
+			ownerThread.notifyCompleted();
+		}
 	}
 
 	/**
 	 * Performs processing of raw activity data item: it may be parsing, redirecting, etc.
-	 * 
+	 *
 	 * @param item
 	 *            raw activity data item
 	 * @param failureFlag
@@ -735,7 +761,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		}
 
 		if (streamListeners == null) {
-			streamListeners = new ArrayList<InputStreamListener>();
+			streamListeners = new ArrayList<>();
 		}
 
 		streamListeners.add(l);
@@ -856,7 +882,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		}
 
 		if (streamTasksListeners == null) {
-			streamTasksListeners = new ArrayList<StreamTasksListener>();
+			streamTasksListeners = new ArrayList<>();
 		}
 
 		streamTasksListeners.add(l);
@@ -993,7 +1019,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			}
 
 			if (listeners == null) {
-				listeners = new ArrayList<StreamsThreadFactoryListener>();
+				listeners = new ArrayList<>();
 			}
 
 			listeners.add(l);
@@ -1120,7 +1146,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 		/**
 		 * Returns stream statistics as text string.
-		 * 
+		 *
 		 * @return stream statistics text string
 		 */
 		@Override

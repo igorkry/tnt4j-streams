@@ -88,7 +88,7 @@ public class HdfsFileLineStreamTest {
 		final String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix()
 				+ "*.TST").replace("\\", "/");
 
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, fileName);
 		props.put(StreamProperties.PROP_RESTORE_STATE, "false");
 

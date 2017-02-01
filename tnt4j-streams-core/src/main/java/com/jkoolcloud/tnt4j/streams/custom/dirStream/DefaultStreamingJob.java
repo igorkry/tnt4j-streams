@@ -101,7 +101,7 @@ public class DefaultStreamingJob implements StreamingJob {
 			DefaultStreamListener dsl = new DefaultStreamListener();
 
 			for (TNTInputStream<?, ?> stream : streams) {
-				stream.getOutput().setProperty(OutputProperties.PROP_TNT4J_CONFIG_FILE, tnt4jCfgFilePath);
+				stream.output().setProperty(OutputProperties.PROP_TNT4J_CONFIG_FILE, tnt4jCfgFilePath);
 
 				stream.addStreamListener(dsl);
 				ft = new StreamThread(streamThreads, stream,
@@ -179,7 +179,7 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 
 		if (jobListeners == null) {
-			jobListeners = new ArrayList<StreamingJobListener>();
+			jobListeners = new ArrayList<>();
 		}
 
 		jobListeners.add(l);

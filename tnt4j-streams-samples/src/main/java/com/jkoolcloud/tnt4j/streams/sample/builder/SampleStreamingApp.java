@@ -59,7 +59,7 @@ public class SampleStreamingApp {
 	 *             if any exception occurs while running application
 	 */
 	public static void main(String... args) throws Exception {
-		Map<String, String> props = new HashMap<String, String>();
+		Map<String, String> props = new HashMap<>();
 		props.put(ParserProperties.PROP_FLD_DELIM, "|"); // NON-NLS
 
 		ActivityTokenParser atp = new ActivityTokenParser();
@@ -110,7 +110,7 @@ public class SampleStreamingApp {
 		f.addLocator(afl);
 		atp.addField(f);
 
-		props = new HashMap<String, String>();
+		props = new HashMap<>();
 		props.put(StreamProperties.PROP_FILENAME, ArrayUtils.isEmpty(args) ? "orders.log" : args[0]); // NON-NLS
 
 		FileLineStream fls = new FileLineStream();

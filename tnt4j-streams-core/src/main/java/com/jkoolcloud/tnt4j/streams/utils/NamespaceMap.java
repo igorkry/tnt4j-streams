@@ -30,7 +30,7 @@ import javax.xml.namespace.NamespaceContext;
  * @version $Revision: 1 $
  */
 public final class NamespaceMap implements NamespaceContext {
-	private final Map<String, String> map = new HashMap<String, String>();
+	private final Map<String, String> map = new HashMap<>();
 
 	/**
 	 * Constructs a new namespaces map.

@@ -57,7 +57,7 @@ public class WsScenario {
 	 */
 	public void addStep(WsScenarioStep scenarioStep) {
 		if (stepsList == null) {
-			stepsList = new ArrayList<WsScenarioStep>();
+			stepsList = new ArrayList<>();
 		}
 
 		stepsList.add(scenarioStep);

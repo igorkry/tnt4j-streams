@@ -17,11 +17,13 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.TrackingLogger;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
@@ -33,6 +35,7 @@ import com.jkoolcloud.tnt4j.source.DefaultSourceFactory;
 import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
+import com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigManager;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
@@ -48,7 +51,7 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
+public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 
 	private static final String DEFAULT_SOURCE_NAME = "com.jkoolcloud.tnt4j.streams"; // NON-NLS
 	/**
@@ -57,14 +60,17 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
 
+	private static final String FILE_PREFIX = "file://"; // NON-NLS
+	private static final String ZK_PREFIX = "zk://"; // NON-NLS
+
 	/**
 	 * Used to deliver processed activity data to destination.
 	 */
-	private final Map<String, Tracker> trackersMap = new HashMap<String, Tracker>();
+	private final Map<String, Tracker> trackersMap = new HashMap<>();
 
-	private TrackerConfig streamConfig;
+	private TrackerConfig trackerConfig;
 	private Source defaultSource;
-	private String tnt4jCfgFilePath;
+	private String tnt4jCfgPath;
 	private Map<String, String> tnt4jProperties;
 
 	private TNTInputStream<?, ?> stream;
@@ -88,22 +94,22 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	/**
-	 * Gets path string of TNT4J configuration file.
+	 * Gets path string of TNT4J configuration resource: file, ZooKeeper node.
 	 *
-	 * @return returns path of TNT4J configuration file
+	 * @return returns path of TNT4J configuration resource
 	 */
-	public String getTnt4jCfgFilePath() {
-		return tnt4jCfgFilePath;
+	public String getTnt4jCfgPath() {
+		return tnt4jCfgPath;
 	}
 
 	/**
-	 * Sets path string of TNT4J configuration file.
+	 * Sets path string of TNT4J configuration resource: file, ZooKeeper node.
 	 *
-	 * @param tnt4jCfgFilePath
-	 *            path of TNT4J configuration file
+	 * @param tnt4jCfgPath
+	 *            path of TNT4J configuration resource
 	 */
-	public void setTnt4jCfgFilePath(String tnt4jCfgFilePath) {
-		this.tnt4jCfgFilePath = tnt4jCfgFilePath;
+	public void setTnt4jCfgPath(String tnt4jCfgPath) {
+		this.tnt4jCfgPath = tnt4jCfgPath;
 	}
 
 	/**
@@ -118,51 +124,45 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	 */
 	public String addTNT4JProperty(String key, String value) {
 		if (tnt4jProperties == null) {
-			tnt4jProperties = new HashMap<String, String>();
+			tnt4jProperties = new HashMap<>();
 		}
 
 		return tnt4jProperties.put(key, value);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * Loads {@link com.jkoolcloud.tnt4j.config.TrackerConfig} and setups default
+	 * {@link com.jkoolcloud.tnt4j.source.Source}.
+	 */
 	@Override
 	public void initialize() throws Exception {
-		streamConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
-				tnt4jCfgFilePath);
-		if (MapUtils.isNotEmpty(tnt4jProperties)) {
-			for (Map.Entry<String, String> tnt4jProp : tnt4jProperties.entrySet()) {
-				streamConfig.setProperty(tnt4jProp.getKey(), tnt4jProp.getValue());
-			}
+		initializeTNT4JConfig();
 
-			((TrackerConfigStore) streamConfig).applyProperties();
-		}
-
-		// NOTE: removing APPL=streams "layer" from default source and copy
-		// SSN=streams value from config
-		streamConfig = streamConfig.build();
-		defaultSource = streamConfig.getSource().getSource();
-		defaultSource.setSSN(streamConfig.getSource().getSSN());
+		setupDefaultSource();
 	}
 
 	@Override
 	public void handleConsumerThread(Thread t) throws IllegalStateException {
-		TrackingLogger tracker = TrackingLogger.getInstance(streamConfig.build());
+		TrackingLogger tracker = TrackingLogger.getInstance(trackerConfig.build());
 		checkTrackerState(tracker);
 		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.default.tracker"),
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.default.tracker"),
 				(t == null ? "null" : t.getName()), defaultSource.getFQName());
 	}
 
-	private void checkTrackerState(TrackingLogger tracker) throws IllegalStateException {
-		boolean tOpen = tracker == null ? false : tracker.isOpen();
+	private static void checkTrackerState(TrackingLogger tracker) throws IllegalStateException {
+		boolean tOpen = tracker != null && tracker.isOpen();
 		Tracker logger = tracker == null ? null : tracker.getTracker();
-		boolean lOpen = logger == null ? false : logger.isOpen();
+		boolean lOpen = logger != null && logger.isOpen();
 		EventSink eSink = logger == null ? null : logger.getEventSink();
-		boolean esOpen = eSink == null ? false : eSink.isOpen();
+		boolean esOpen = eSink != null && eSink.isOpen();
 
 		if (!tOpen || !lOpen || !esOpen) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.tracker.not.opened"));
+					"TNTStreamOutput.tracker.not.opened"));
 		}
 	}
 
@@ -170,10 +170,20 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	@SuppressWarnings("unchecked")
 	public void setProperty(String name, Object value) {
 		if (OutputProperties.PROP_TNT4J_CONFIG_FILE.equalsIgnoreCase(name)) {
-			setTnt4jCfgFilePath((String) value);
+			String path = (String) value;
+			if (StringUtils.isNotEmpty(path) && !path.startsWith(FILE_PREFIX)) {
+				path = FILE_PREFIX + path;
+			}
+			setTnt4jCfgPath(path);
 		} else if (OutputProperties.PROP_TNT4J_PROPERTY.equalsIgnoreCase(name)) {
 			Map.Entry<String, String> p = (Map.Entry<String, String>) value;
 			addTNT4JProperty(p.getKey(), p.getValue());
+		} else if (OutputProperties.PROP_TNT4J_CONFIG_ZK_NODE.equalsIgnoreCase(name)) {
+			String path = (String) value;
+			if (StringUtils.isNotEmpty(path) && !path.startsWith(ZK_PREFIX)) {
+				path = ZK_PREFIX + path;
+			}
+			setTnt4jCfgPath(path);
 		}
 	}
 
@@ -197,12 +207,12 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 			if (tracker == null) {
 				Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(aiSourceFQN);
 				aiSource.setSSN(defaultSource.getSSN());
-				streamConfig.setSource(aiSource);
-				tracker = TrackingLogger.getInstance(streamConfig.build());
+				trackerConfig.setSource(aiSource);
+				tracker = TrackingLogger.getInstance(trackerConfig.build());
 				checkTrackerState((TrackingLogger) tracker);
 				trackersMap.put(getTrackersMapKey(t, aiSource.getFQName()), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTInputStream.build.new.tracker"), aiSource.getFQName());
+						"TNTStreamOutput.build.new.tracker"), aiSource.getFQName());
 			}
 
 			return tracker;
@@ -226,8 +236,8 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 	}
 
 	/**
-	 * Checks stream and provided {@link Tracker} states to allow data streaming and opens tracker if it is in not open.
-	 * 
+	 * Checks stream and provided {@link Tracker} states to allow data streaming and opens tracker if it is not open.
+	 *
 	 * @param tracker
 	 *            tracker instance to check state and to open if it is not open
 	 */
@@ -237,7 +247,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 				tracker.open();
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTInputStream.failed.to.connect"), tracker, ioe);
+						"TNTStreamOutput.failed.to.connect"), tracker, ioe);
 				Utils.close(tracker);
 				logger().log(OpLevel.INFO,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.will.retry"),
@@ -247,5 +257,75 @@ public abstract class AbstractJKCloudOutput<T> implements TNTOutput<T> {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Performs initialization of tracker configuration using provided resource: file, ZooKeeper node.
+	 */
+	protected void initializeTNT4JConfig() {
+		if (StringUtils.isEmpty(tnt4jCfgPath) || tnt4jCfgPath.startsWith(FILE_PREFIX)) {
+			String cfgFilePath = StringUtils.isEmpty(tnt4jCfgPath) ? tnt4jCfgPath
+					: tnt4jCfgPath.substring(FILE_PREFIX.length());
+			logger().log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.init.cfg.file"),
+					StringUtils.isEmpty(cfgFilePath) ? System.getProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY)
+							: cfgFilePath);
+			trackerConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
+					cfgFilePath);
+
+			applyUserTNT4JProperties();
+		} else if (tnt4jCfgPath.startsWith(ZK_PREFIX)) {
+			String cfgNodePath = tnt4jCfgPath.substring(ZK_PREFIX.length());
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTStreamOutput.init.cfg.zknode"), cfgNodePath);
+
+			ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
+				@Override
+				public void applyConfigurationData(byte[] data) {
+					reconfigureTNT4J(Utils.bytesReader(data));
+				}
+			});
+		}
+
+		// TODO: add TNT4J-Kafka configuration handling.
+	}
+
+	private void reconfigureTNT4J(Reader cfgReader) {
+		if (trackerConfig == null) {
+			trackerConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
+					cfgReader);
+
+			applyUserTNT4JProperties();
+		} else {
+			TrackerConfigStore tcs = (TrackerConfigStore) trackerConfig;
+			tcs.initConfig(cfgReader);
+
+			applyUserTNT4JProperties();
+
+			cleanup();
+		}
+
+		setupDefaultSource();
+	}
+
+	private void applyUserTNT4JProperties() {
+		if (MapUtils.isNotEmpty(tnt4jProperties)) {
+			for (Map.Entry<String, String> tnt4jProp : tnt4jProperties.entrySet()) {
+				trackerConfig.setProperty(tnt4jProp.getKey(), tnt4jProp.getValue());
+			}
+
+			((TrackerConfigStore) trackerConfig).applyProperties();
+		}
+	}
+
+	/**
+	 * Performs default {@link com.jkoolcloud.tnt4j.source.Source} initialization and setup.
+	 */
+	protected void setupDefaultSource() {
+		// NOTE: removing APPL=streams "layer" from default source and copy
+		// SSN=streams value from config
+		trackerConfig = trackerConfig.build();
+		defaultSource = trackerConfig.getSource().getSource();
+		defaultSource.setSSN(trackerConfig.getSource().getSSN());
 	}
 }

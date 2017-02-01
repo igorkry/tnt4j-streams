@@ -17,9 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -153,7 +151,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		if (props == null) {
 			return;
 		}
-		userKafkaProps = new HashMap<String, Properties>(3);
+		userKafkaProps = new HashMap<>(3);
 		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
@@ -376,7 +374,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	protected static Properties getServerProperties(Properties userDefinedProps) throws IOException {
 		putIfAbsent(userDefinedProps, "zookeeper.connect", "localhost:2181/tnt4j_kafka"); // NON-NLS
 
-		Properties fProps = loadPropertiesFile(KS_PROP_FILE_KEY);
+		Properties fProps = Utils.loadPropertiesFor(KS_PROP_FILE_KEY);
 
 		for (Map.Entry<?, ?> pe : fProps.entrySet()) {
 			putIfAbsent(userDefinedProps, String.valueOf(pe.getKey()), pe.getValue());
@@ -408,31 +406,6 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	}
 
 	/**
-	 * Loads properties from file referenced by provided system property.
-	 *
-	 * @param propKey
-	 *            system property key referencing properties file path
-	 * @return properties loaded from file
-	 *
-	 * @throws IOException
-	 *             if an error occurred when reading properties file
-	 */
-	protected static Properties loadPropertiesFile(String propKey) throws IOException {
-		String configFile = System.getProperty(propKey);
-		Properties fProps = new Properties();
-
-		InputStream is = null;
-		try {
-			is = new FileInputStream(new File(configFile));
-			fProps.load(is);
-		} finally {
-			Utils.close(is);
-		}
-
-		return fProps;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * This method returns a map structured content of next raw activity data item received over Kafka consumer.
@@ -450,7 +423,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				if (messageBuffer == null || !messageBuffer.hasNext()) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 							"KafkaStream.empty.messages.buffer"));
-					Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+					Map<String, Integer> topicCountMap = new HashMap<>();
 					topicCountMap.put(topicName, 1);
 
 					Map<String, List<kafka.consumer.KafkaStream<byte[], byte[]>>> streams = consumer
@@ -477,7 +450,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 							"KafkaStream.next.message"), msgData);
 
-					Map<String, Object> msgDataMap = new HashMap<String, Object>();
+					Map<String, Object> msgDataMap = new HashMap<>();
 
 					if (ArrayUtils.isNotEmpty(msgPayload)) {
 						msgDataMap.put(StreamsConstants.TOPIC_KEY, msg.topic());

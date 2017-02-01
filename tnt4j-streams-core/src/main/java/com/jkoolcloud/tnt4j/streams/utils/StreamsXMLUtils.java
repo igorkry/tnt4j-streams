@@ -84,7 +84,7 @@ public final class StreamsXMLUtils {
 	}
 
 	private static class StreamsFunctionResolver implements XPathFunctionResolver {
-		private static Map<String, XPathFunction> fMap = new HashMap<String, XPathFunction>(2);
+		private static Map<String, XPathFunction> fMap = new HashMap<>(2);
 
 		static {
 			fMap.put(FuncGetFileName.FUNCTION_NAME, new FuncGetFileName());

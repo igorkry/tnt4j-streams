@@ -42,7 +42,7 @@ public class WmqStreamTest {
 
 	@Test
 	public void propertiesSetTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(9);
+		Map<String, String> props = new HashMap<>(9);
 		props.put(WmqStreamProperties.PROP_QMGR_NAME, "TEST"); // NON-NLS
 		props.put(WmqStreamProperties.PROP_QUEUE_NAME, "TEST"); // NON-NLS
 		props.put(WmqStreamProperties.PROP_TOPIC_NAME, "TEST"); // NON-NLS

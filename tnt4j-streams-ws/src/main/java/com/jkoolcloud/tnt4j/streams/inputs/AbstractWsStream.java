@@ -191,7 +191,7 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 */
 	public void addScenario(WsScenario scenario) {
 		if (scenarioList == null) {
-			scenarioList = new ArrayList<WsScenario>();
+			scenarioList = new ArrayList<>();
 		}
 
 		scenarioList.add(scenario);

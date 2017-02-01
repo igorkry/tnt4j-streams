@@ -39,7 +39,7 @@ public class MqttStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new MqttStream();
-		Map<String, String> props = new HashMap<String, String>(7);
+		Map<String, String> props = new HashMap<>(7);
 		props.put(StreamProperties.PROP_SERVER_URI, "tcp://localhost:1883"); // NON-NLS
 		props.put(StreamProperties.PROP_USERNAME, ""); // NON-NLS
 		props.put(StreamProperties.PROP_PASSWORD, ""); // NON-NLS
@@ -66,7 +66,7 @@ public class MqttStreamTest {
 	@Test(expected = IllegalStateException.class)
 	public void testInitializeFailDueToNotAllPropertiesSet2() throws Exception {
 		input = new MqttStream();
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(StreamProperties.PROP_SERVER_URI, "tcp://localhost:1883"); // NON-NLS
 		input.setProperties(props.entrySet());
 		input.startStream();

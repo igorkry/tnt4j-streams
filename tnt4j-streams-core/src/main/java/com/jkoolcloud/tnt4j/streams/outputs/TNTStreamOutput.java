@@ -26,10 +26,11 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @version $Revision: 1 $
  *
- * @see TNTInputStream#setOutput(TNTOutput)
+ * @see TNTInputStream#setOutput(TNTStreamOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
+ * @see com.jkoolcloud.tnt4j.streams.inputs.TNTStreamInput
  */
-public interface TNTOutput<T> {
+public interface TNTStreamOutput<T> {
 
 	/**
 	 * Performs streamed activity item logging processing. To log activity item various implementations of

@@ -228,7 +228,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	protected void connectToQmgr() throws Exception {
 		qmgr = null;
 		dest = null;
-		Hashtable<String, Object> props = new Hashtable<String, Object>();
+		Hashtable<String, Object> props = new Hashtable<>();
 		props.put(CMQC.CONNECT_OPTIONS_PROPERTY, CMQC.MQCNO_HANDLE_SHARE_NONE);
 		if (StringUtils.isNotEmpty(qmgrHostName)) {
 			props.put(CMQC.HOST_NAME_PROPERTY, qmgrHostName);
@@ -305,7 +305,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			MQMessage mqMsg = new MQMessage();
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 					"WmqStream.waiting.for.message"), dest.getName().trim());
-			dest.get(mqMsg, gmo);
+			dest.get(mqMsg, gmo); // TODO: interrupt on halt
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
 					dest.getName().trim(), mqMsg.getMessageLength());

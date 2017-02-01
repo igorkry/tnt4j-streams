@@ -167,7 +167,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
 				fields.length);
-		Map<String, String> nameValues = new HashMap<String, String>(fields.length);
+		Map<String, String> nameValues = new HashMap<>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
 				String[] nv = field.split(Pattern.quote(valueDelim));

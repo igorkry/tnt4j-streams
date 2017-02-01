@@ -296,7 +296,7 @@ public class TimestampFormatter {
 			return scale(dTime, units);
 		}
 
-		return new ImmutablePair<Double, TimeUnit>(dTime, units);
+		return new ImmutablePair<>(dTime, units);
 	}
 
 	/**

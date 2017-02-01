@@ -68,7 +68,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void setPropertiesTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(8);
+		Map<String, String> props = new HashMap<>(8);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
 		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));
@@ -89,7 +89,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void getBoundedExecutorServiceTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(8);
+		Map<String, String> props = new HashMap<>(8);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
 		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));
@@ -103,7 +103,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void getDefaultExecutorServiceTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(8);
+		Map<String, String> props = new HashMap<>(8);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
 		props.put(StreamProperties.PROP_USE_EXECUTOR_SERVICE, String.valueOf(true));

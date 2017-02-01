@@ -49,7 +49,7 @@ public class ZipLineStreamTest {
 
 	@Test
 	public void testProperties() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, "test.zip"); // NON-NLS
 		props.put(StreamProperties.PROP_ARCH_TYPE, "ZIP"); // NON-NLS
 		zs.setProperties(props.entrySet());
@@ -77,7 +77,7 @@ public class ZipLineStreamTest {
 			fis.close();
 		}
 		zos.close();
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, zipFile.getAbsolutePath());
 		props.put(StreamProperties.PROP_ARCH_TYPE, "ZIP"); // NON-NLS
 		zs.setProperties(props.entrySet());

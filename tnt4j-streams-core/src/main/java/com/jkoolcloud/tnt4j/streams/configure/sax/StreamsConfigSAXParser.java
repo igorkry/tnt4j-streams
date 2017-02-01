@@ -61,8 +61,11 @@ public final class StreamsConfigSAXParser {
 		Properties p = new Properties();
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		InputStream ins = loader.getResourceAsStream("sax.properties"); // NON-NLS
-		p.load(ins);
-		Utils.close(ins);
+		try {
+			p.load(ins);
+		} finally {
+			Utils.close(ins);
+		}
 
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();

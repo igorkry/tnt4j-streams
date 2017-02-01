@@ -123,7 +123,7 @@ public abstract class AbstractFeed<T extends Closeable> implements Feed<T> {
 		}
 
 		if (feedListeners == null) {
-			feedListeners = new ArrayList<FeedListener>();
+			feedListeners = new ArrayList<>();
 		}
 
 		feedListeners.add(listener);

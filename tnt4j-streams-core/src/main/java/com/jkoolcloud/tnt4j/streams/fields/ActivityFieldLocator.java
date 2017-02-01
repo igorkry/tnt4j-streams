@@ -400,7 +400,7 @@ public class ActivityFieldLocator implements Cloneable {
 			mapCatchAll = target;
 		} else {
 			if (valueMap == null) {
-				valueMap = new ValueMap<Object, Object>();
+				valueMap = new ValueMap<>();
 			}
 			try {
 				if (mapType == null) {
@@ -465,7 +465,7 @@ public class ActivityFieldLocator implements Cloneable {
 	 */
 	public void addTransformation(ValueTransformation<Object, Object> transformation) {
 		if (transformations == null) {
-			transformations = new ArrayList<ValueTransformation<Object, Object>>();
+			transformations = new ArrayList<>();
 		}
 
 		transformations.add(transformation);

@@ -108,7 +108,7 @@ public class ActivityNameValueParserTest {
 
 	@Test
 	public void setPropertiesWhenValueEmptyTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_FLD_DELIM, "");
 		activityNameValueParser.setProperties(props.entrySet());
 		assertNull(activityNameValueParser.fieldDelim);
@@ -116,7 +116,7 @@ public class ActivityNameValueParserTest {
 
 	@Test
 	public void setPropertiesWhenOtherValueEmptyTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_PATTERN, "");
 		activityNameValueParser.setProperties(props.entrySet());
 		assertNull(activityNameValueParser.pattern);
@@ -124,7 +124,7 @@ public class ActivityNameValueParserTest {
 
 	@Test
 	public void setPropertiesWhenNotEqualsNameTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_NAMESPACE, "Test");
 		activityNameValueParser.setProperties(props.entrySet());
 		assertTrue(activityNameValueParser.stripQuotes);

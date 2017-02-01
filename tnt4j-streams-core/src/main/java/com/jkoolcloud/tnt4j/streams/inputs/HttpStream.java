@@ -315,7 +315,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				boolean added = false;
 
 				if (reqEntity != null) {
-					Map<String, Object> reqMap = new HashMap<String, Object>();
+					Map<String, Object> reqMap = new HashMap<>();
 					if (URLEncodedUtils.isEncoded(reqEntity)) {
 						List<NameValuePair> reqParams = URLEncodedUtils.parse(reqEntity);
 						if (reqParams != null) {

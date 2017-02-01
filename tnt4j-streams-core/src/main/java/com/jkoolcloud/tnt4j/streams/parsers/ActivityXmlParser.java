@@ -321,7 +321,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				int length = nodes == null ? 0 : nodes.getLength();
 
 				if (length > 0) {
-					List<Object> valuesList = new ArrayList<Object>(length);
+					List<Object> valuesList = new ArrayList<>(length);
 					for (int i = 0; i < length; i++) {
 						Node node = nodes.item(i);
 

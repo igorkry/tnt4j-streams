@@ -148,7 +148,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	}
 
 	@Override
-	public void setDefaultStreamOutput() {
+	protected void setDefaultStreamOutput() {
 		setOutput(new JKCloudJsonOutput());
 	}
 
@@ -212,7 +212,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		inputBuffer = new ArrayBlockingQueue<Object>(bufferSize, true);
+		inputBuffer = new ArrayBlockingQueue<>(bufferSize, true);
 
 		initializeStreamInternals();
 	}
@@ -360,7 +360,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	}
 
 	private abstract class FeedersProducer extends StreamsThread implements Closeable {
-		List<ActivitiesFeeder> activeFeedersList = new ArrayList<ActivitiesFeeder>();
+		List<ActivitiesFeeder> activeFeedersList = new ArrayList<>();
 
 		void removeInactiveFeeder(ActivitiesFeeder conn) {
 			activeFeedersList.remove(conn);

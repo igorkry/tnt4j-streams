@@ -33,7 +33,7 @@ public final class StreamsResources {
 	 */
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-core"; // NON-NLS
 
-	private static final Map<String, ResourceBundle> resBundlesMap = new HashMap<String, ResourceBundle>(8);
+	private static final Map<String, ResourceBundle> resBundlesMap = new HashMap<>(8);
 
 	private StreamsResources() {
 

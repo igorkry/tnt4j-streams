@@ -371,7 +371,7 @@ public class DirStreamingManager {
 		}
 
 		if (streamingJobsListeners == null) {
-			streamingJobsListeners = new ArrayList<StreamingJobListener>();
+			streamingJobsListeners = new ArrayList<>();
 		}
 
 		streamingJobsListeners.add(l);

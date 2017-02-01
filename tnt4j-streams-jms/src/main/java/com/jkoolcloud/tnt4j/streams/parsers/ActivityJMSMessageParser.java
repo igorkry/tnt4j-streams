@@ -131,7 +131,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		}
 
 		Message message = (Message) data;
-		Map<String, Object> dataMap = new HashMap<String, Object>();
+		Map<String, Object> dataMap = new HashMap<>();
 
 		try {
 			if (message instanceof TextMessage) {

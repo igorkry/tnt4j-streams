@@ -292,7 +292,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 	//
 	// File f = new File("TRACES_MAP1.log");
 	// try {
-	// FileUtils.write(f, str, "UTF-8");
+	// FileUtils.write(f, str, Utils.UTF8);
 	// } catch (Exception exc) {
 	// exc.printStackTrace();
 	// }

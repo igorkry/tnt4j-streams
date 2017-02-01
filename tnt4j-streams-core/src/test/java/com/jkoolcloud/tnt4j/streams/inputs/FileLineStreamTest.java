@@ -53,7 +53,7 @@ public class FileLineStreamTest {
 
 		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST"; // NON-NLS
 
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, fileName);
 		props.put(StreamProperties.PROP_RESTORE_STATE, String.valueOf(false));
 		fls.setProperties(props.entrySet());
@@ -69,7 +69,7 @@ public class FileLineStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		TestFileList testFiles = new TestFileList(true);
-		Map<String, String> props = new HashMap<String, String>(6);
+		Map<String, String> props = new HashMap<>(6);
 		props.put(StreamProperties.PROP_FILENAME, testFiles.getWildcardName());
 		props.put(StreamProperties.PROP_START_FROM_LATEST, String.valueOf(false));
 		props.put(StreamProperties.PROP_FILE_READ_DELAY, String.valueOf(0));

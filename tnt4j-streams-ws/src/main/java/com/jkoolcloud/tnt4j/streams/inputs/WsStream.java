@@ -104,7 +104,7 @@ public class WsStream extends AbstractWsStream {
 				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.invoking.request"), url,
 				soapRequestData);
 
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		// separate SOAP message header values from request body XML
 		BufferedReader br = new BufferedReader(new StringReader(soapRequestData));
 		StringBuilder sb = new StringBuilder();

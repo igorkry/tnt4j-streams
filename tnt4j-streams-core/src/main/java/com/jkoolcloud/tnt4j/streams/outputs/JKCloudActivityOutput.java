@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
@@ -32,6 +33,8 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
 
+	private boolean resolveServer = false;
+
 	/**
 	 * Constructs a new JKCloudActivityOutput.
 	 */
@@ -44,6 +47,15 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 		return LOGGER;
 	}
 
+	@Override
+	public void setProperty(String name, Object value) {
+		super.setProperty(name, value);
+
+		if (OutputProperties.PROP_RESOLVE_SERVER.equalsIgnoreCase(name)) {
+			resolveServer = Boolean.parseBoolean((String) value);
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -52,7 +64,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		Tracker tracker = getTracker(ai.getSourceFQN(), Thread.currentThread());
+		Tracker tracker = getTracker(ai.getSourceFQN(resolveServer), Thread.currentThread());
 
 		ensureTrackerOpened(tracker);
 

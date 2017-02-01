@@ -31,4 +31,14 @@ public interface OutputProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_TNT4J_PROPERTY = "TNT4JProperty"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_RESOLVE_SERVER = "ResolveServerFromDNS"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_TNT4J_CONFIG_ZK_NODE = "TNT4JConfigZKNode"; // NON-NLS
 }

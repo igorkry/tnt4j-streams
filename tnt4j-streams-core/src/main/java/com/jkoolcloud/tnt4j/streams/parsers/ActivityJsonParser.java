@@ -245,12 +245,12 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				if (jsonValue instanceof List) {
 					jsonValuesList = (List<Object>) jsonValue;
 				} else {
-					jsonValuesList = new ArrayList<Object>(1);
+					jsonValuesList = new ArrayList<>(1);
 					jsonValuesList.add(jsonValue);
 				}
 
 				if (CollectionUtils.isNotEmpty(jsonValuesList)) {
-					List<Object> valuesList = new ArrayList<Object>(jsonValuesList.size());
+					List<Object> valuesList = new ArrayList<>(jsonValuesList.size());
 					for (Object jsonValues : jsonValuesList) {
 						valuesList.add(locator.formatValue(jsonValues));
 					}

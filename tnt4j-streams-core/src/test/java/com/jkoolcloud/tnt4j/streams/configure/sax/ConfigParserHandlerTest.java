@@ -62,7 +62,7 @@ public class ConfigParserHandlerTest {
 	}
 
 	private static void initSamplesDir() throws Exception {
-		skipConfigurationsList = new ArrayList<String>();
+		skipConfigurationsList = new ArrayList<>();
 
 		samplesDir = new File("./samples/");
 		if (!samplesDir.isDirectory()) {
@@ -88,7 +88,7 @@ public class ConfigParserHandlerTest {
 						.asFileFilter((FilenameFilter) new WildcardFileFilter(configFileWildcard, IOCase.INSENSITIVE)),
 				TrueFileFilter.INSTANCE);
 
-		Collection<File> sampleConfigurationsFiltered = new ArrayList<File>(sampleConfigurations);
+		Collection<File> sampleConfigurationsFiltered = new ArrayList<>(sampleConfigurations);
 		if (CollectionUtils.isNotEmpty(skipFiles)) {
 			for (File sampleConfiguration : sampleConfigurations) {
 				for (String skipFile : skipFiles) {

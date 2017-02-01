@@ -44,7 +44,7 @@ public class RedirectTNT4JStreamTest {
 	public void setPropertiesFileTest() throws Exception {
 		final File tempFile = File.createTempFile("Test", ".test");
 		tempFile.deleteOnExit();
-		Map<String, String> props = new HashMap<String, String>(3);
+		Map<String, String> props = new HashMap<>(3);
 		props.put(StreamProperties.PROP_FILENAME, tempFile.getAbsolutePath());
 		props.put(StreamProperties.PROP_BUFFER_SIZE, String.valueOf(55));
 		props.put(StreamProperties.PROP_OFFER_TIMEOUT, String.valueOf(10));
@@ -55,7 +55,7 @@ public class RedirectTNT4JStreamTest {
 
 	@Test
 	public void setPropertiesSocketTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(9010));
 		rs.setProperties(props.entrySet());
 		testPropertyList(rs, props.entrySet());
@@ -64,7 +64,7 @@ public class RedirectTNT4JStreamTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void setPropertiesSetShouldFailTest() throws Exception {
-		Map<String, String> props = new HashMap<String, String>(3);
+		Map<String, String> props = new HashMap<>(3);
 		props.put(StreamProperties.PROP_FILENAME, "TestFile"); // NON-NLS
 		props.put(StreamProperties.PROP_RESTART_ON_CLOSE, String.valueOf(true));
 		props.put(StreamProperties.PROP_PORT, String.valueOf(9009));

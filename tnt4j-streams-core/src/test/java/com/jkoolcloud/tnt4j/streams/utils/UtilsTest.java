@@ -80,7 +80,7 @@ public class UtilsTest {
 	@Test
 	public void testMapOpType() {
 		int opTypeCount = 20;
-		Map<String, OpType> opTypes = new HashMap<String, OpType>(opTypeCount);
+		Map<String, OpType> opTypes = new HashMap<>(opTypeCount);
 
 		for (int i = 0; i <= opTypeCount; i++) {
 			final OpType opType = Utils.mapOpType(i);
@@ -118,7 +118,7 @@ public class UtilsTest {
 	public void testGetFirstNewer() throws Exception {
 		final int count = 5;
 		Long date = null;
-		List<File> files = new ArrayList<File>();
+		List<File> files = new ArrayList<>();
 		for (int i = 0; i <= count; i++) {
 			File tempFile = File.createTempFile("TEST", ".TST");
 			if (count / 2 >= i)

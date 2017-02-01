@@ -53,7 +53,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void setPropertiesWhenPropDoesNotMatchTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		parser.setProperties(props.entrySet());
 	}
@@ -69,7 +69,7 @@ public class ActivityJsonParserTest {
 	public void parseExceptionTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> myMap = new HashMap<String, String>();
+		Map<String, String> myMap = new HashMap<>();
 		parser.parse(stream, myMap);
 	}
 
@@ -126,7 +126,7 @@ public class ActivityJsonParserTest {
 	public void getLocatorValueWhenTypeExpectedTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(2);
+		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
 		stream.setProperties(props.entrySet());
@@ -165,14 +165,14 @@ public class ActivityJsonParserTest {
 		ActivityFieldLocator aLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "$.values"); // NON-NLS
 		String jsonString = "{\"test\":\"OK\",\"status\":\"finished\",\"values\":[]}"; // NON-NLS
 		DocumentContext jsonContext = JsonPath.parse(jsonString);
-		List<Object> testData = new ArrayList<Object>();
+		List<Object> testData = new ArrayList<>();
 		testData.equals(parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
 	@Test
 	public void getNextJSONStringWhenNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(false));
 		parser.setProperties(props.entrySet());
 		assertNull(parser.getNextActivityString(null));
@@ -181,7 +181,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getNextJSONStringWhenByteArrayTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(false));
 		parser.setProperties(props.entrySet());
 		byte[] myVar = "testing some data".getBytes(); // NON-NLS
@@ -191,7 +191,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getNextJSONStringWhenBufferedReaderTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(false));
 		parser.setProperties(props.entrySet());
 		InputStream textStream = new ByteArrayInputStream("testing some data".getBytes()); // NON-NLS
@@ -202,7 +202,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getNextJSONStringWhenBufferedReaderTrueTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(true));
 		parser.setProperties(props.entrySet());
 		InputStream textStream = new ByteArrayInputStream("testing some data".getBytes()); // NON-NLS
@@ -213,7 +213,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getNextJSONStringWhenReaderTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(false));
 		parser.setProperties(props.entrySet());
 		String stringToBeParsed = "Testing some tests"; // NON-NLS
@@ -224,7 +224,7 @@ public class ActivityJsonParserTest {
 	@Test
 	public void getNextJSONStringWhenInputStreamTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put("ReadLines", String.valueOf(false));
 		parser.setProperties(props.entrySet());
 		String stringToBeParsed = "Testing"; // NON-NLS

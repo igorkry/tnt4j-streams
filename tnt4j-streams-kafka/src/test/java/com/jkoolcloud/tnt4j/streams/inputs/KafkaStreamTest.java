@@ -54,7 +54,7 @@ public class KafkaStreamTest {
 	public void testProperties() throws Exception {
 		input = new KafkaStream();
 
-		Map<String, String> props = new HashMap<String, String>(3);
+		Map<String, String> props = new HashMap<>(3);
 		props.put(StreamProperties.PROP_TOPIC_NAME, DEFAULT_TEST_TOPIC);
 		props.put("zookeeper.connect", "127.0.0.1:2181");// NON-NLS
 		props.put("group.id", "TEST"); // NON-NLS
@@ -91,7 +91,7 @@ public class KafkaStreamTest {
 		props.put("client.id", "TestProducer");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		final KafkaProducer<Integer, String> producer = new KafkaProducer<Integer, String>(props);
+		final KafkaProducer<Integer, String> producer = new KafkaProducer<>(props);
 
 		Thread thred = new Thread(new Runnable() {
 
@@ -125,7 +125,7 @@ public class KafkaStreamTest {
 		props.put("consumer.timeout.ms", "1000");
 
 		ConsumerConnector consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
-		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> topicCountMap = new HashMap<>();
 		topicCountMap.put(DEFAULT_TEST_TOPIC, 1);
 
 		Map<String, List<kafka.consumer.KafkaStream<byte[], byte[]>>> consumerMap = consumer

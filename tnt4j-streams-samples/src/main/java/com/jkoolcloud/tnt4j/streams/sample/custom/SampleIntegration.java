@@ -58,7 +58,7 @@ public final class SampleIntegration {
 				ft.start();
 			}
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, e.getLocalizedMessage(), e);
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
 	}
 
@@ -75,7 +75,7 @@ public final class SampleIntegration {
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, e.getLocalizedMessage(), e);
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
 	}
 }

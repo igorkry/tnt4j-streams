@@ -345,7 +345,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.message.received"),
 					msgData);
 
-			Map<String, Object> msgDataMap = new HashMap<String, Object>();
+			Map<String, Object> msgDataMap = new HashMap<>();
 
 			if (ArrayUtils.isNotEmpty(message.getPayload())) {
 				msgDataMap.put(StreamsConstants.TOPIC_KEY, topic);

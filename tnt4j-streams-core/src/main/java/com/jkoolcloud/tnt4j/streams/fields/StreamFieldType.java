@@ -392,7 +392,7 @@ public enum StreamFieldType {
 				"StreamFieldType.no.enum.constant", name, StreamFieldType.class.getSimpleName()));
 	}
 
-	private static final Map<String, Object> CACHE = new HashMap<String, Object>();
+	private static final Map<String, Object> CACHE = new HashMap<>();
 	private static final Object NULL_VALUE = new Object();
 
 	/**

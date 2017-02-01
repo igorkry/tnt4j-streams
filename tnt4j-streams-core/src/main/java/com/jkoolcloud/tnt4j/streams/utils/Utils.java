@@ -24,10 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1084,5 +1081,56 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			Thread.sleep(millis, nanos);
 		} catch (InterruptedException exc) {
 		}
+	}
+
+	/**
+	 * Loads properties from file referenced by provided system property.
+	 *
+	 * @param propKey
+	 *            system property key referencing properties file path
+	 * @return properties loaded from file
+	 *
+	 * @throws IOException
+	 *             if an error occurred when reading properties file
+	 */
+	public static Properties loadPropertiesFor(String propKey) throws IOException {
+		String propFile = System.getProperty(propKey);
+
+		return loadPropertiesFile(propFile);
+	}
+
+	/**
+	 * Loads properties from file.
+	 *
+	 * @param propFile
+	 *            properties file path
+	 * @return properties loaded from file
+	 *
+	 * @throws IOException
+	 *             if an error occurred when reading properties file
+	 */
+	public static Properties loadPropertiesFile(String propFile) throws IOException {
+		Properties fProps = new Properties();
+
+		InputStream is = null;
+		try {
+			is = new FileInputStream(new File(propFile));
+			fProps.load(is);
+		} finally {
+			Utils.close(is);
+		}
+
+		return fProps;
+	}
+
+	/**
+	 * Creates {@link java.io.BufferedReader} instance to read provided bytes data.
+	 *
+	 * @param data
+	 *            bytes data to read
+	 * @return bytes data reader
+	 */
+	public static BufferedReader bytesReader(byte[] data) {
+		return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
 	}
 }

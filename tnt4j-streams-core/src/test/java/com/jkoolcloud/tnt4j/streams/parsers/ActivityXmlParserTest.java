@@ -98,8 +98,8 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void simpleInputStreamParseTest() throws Exception {
 
-		InputStream reader = new ByteArrayInputStream(simpleString.toString().getBytes());
-		ActivityInfo ai = parser.parse(is, reader);
+		InputStream bis = new ByteArrayInputStream(simpleString.toString().getBytes());
+		ActivityInfo ai = parser.parse(is, bis);
 		assertNotNull(ai);
 	}
 

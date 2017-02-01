@@ -150,7 +150,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		}
 
 		jmsDataReceiver = new JMSDataReceiver();
-		Hashtable<String, String> env = new Hashtable<String, String>(2);
+		Hashtable<String, String> env = new Hashtable<>(2);
 		env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
 		env.put(Context.PROVIDER_URL, serverURL);
 

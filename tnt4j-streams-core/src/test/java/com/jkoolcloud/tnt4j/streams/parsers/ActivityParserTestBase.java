@@ -39,7 +39,7 @@ public abstract class ActivityParserTestBase {
 
 	public static Collection<Map.Entry<String, String>> makeProperty(final String propertyName,
 			final String testValue) {
-		Map<String, String> props = new HashMap<String, String>(1);
+		Map<String, String> props = new HashMap<>(1);
 		props.put(propertyName, String.valueOf(testValue));
 
 		return props.entrySet();

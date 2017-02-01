@@ -279,7 +279,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		// currFieldHasMapElmt = false;
 		processingTNT4JProperties = false;
 		streamsConfigData = new StreamsConfigData();
-		javaObjectsMap = new HashMap<String, Object>();
+		javaObjectsMap = new HashMap<>();
 	}
 
 	@Override
@@ -774,9 +774,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		currStream.setName(name);
 		streamsConfigData.addStream(currStream);
 
-		if (currStream.getOutput() == null) {
-			currStream.setDefaultStreamOutput();
-		}
+		currStream.ensureOutputSet();
 	}
 
 	/**
@@ -1066,10 +1064,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					currParseLocation);
 		}
 
-		if (currStream.getOutput() == null) {
-			currStream.setDefaultStreamOutput();
-		}
-
 		processingTNT4JProperties = true;
 	}
 
@@ -1178,12 +1172,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (processingTNT4JProperties) {
-			Map.Entry<String, String> p = new AbstractMap.SimpleEntry<String, String>(currProperty.name,
-					currProperty.value);
-			currStream.getOutput().setProperty(OutputProperties.PROP_TNT4J_PROPERTY, p);
+			Map.Entry<String, String> p = new AbstractMap.SimpleEntry<>(currProperty.name, currProperty.value);
+			currStream.output().setProperty(OutputProperties.PROP_TNT4J_PROPERTY, p);
 		} else {
 			if (currProperties == null) {
-				currProperties = new HashMap<String, String>();
+				currProperties = new HashMap<>();
 			}
 			currProperties.put(currProperty.name, currProperty.value);
 		}
@@ -1317,7 +1310,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					getLocationInfo()));
 		}
 
-		List<String> dynamicLocators = new ArrayList<String>();
+		List<String> dynamicLocators = new ArrayList<>();
 		Utils.resolveVariables(dynamicLocators, aField.getFieldTypeName(), aField.getValueType());
 
 		for (String dLoc : dynamicLocators) {
@@ -1377,13 +1370,13 @@ public class ConfigParserHandler extends DefaultHandler {
 			id = null;
 
 			if (valueMapItems == null) {
-				valueMapItems = new ArrayList<ValueMapData>();
+				valueMapItems = new ArrayList<>();
 			} else {
 				valueMapItems.clear();
 			}
 
 			if (valueTransforms == null) {
-				valueTransforms = new ArrayList<ValueTransformation<Object, Object>>();
+				valueTransforms = new ArrayList<>();
 			} else {
 				valueTransforms.clear();
 			}
@@ -1410,7 +1403,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		private void addArg(Object arg) {
 			if (args == null) {
-				args = new ArrayList<Object>();
+				args = new ArrayList<>();
 			}
 
 			args.add(arg);
@@ -1422,7 +1415,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		private void addType(Class<?> typeClass) {
 			if (types == null) {
-				types = new ArrayList<Class<?>>();
+				types = new ArrayList<>();
 			}
 
 			types.add(typeClass);
