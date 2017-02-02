@@ -147,10 +147,13 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 	public void handleConsumerThread(Thread t) throws IllegalStateException {
 		TrackingLogger tracker = TrackingLogger.getInstance(trackerConfig.build());
 		checkTrackerState(tracker);
-		trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.default.tracker"),
-				(t == null ? "null" : t.getName()), defaultSource.getFQName());
+		synchronized (trackersMap) {
+			trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"TNTStreamOutput.default.tracker"),
+					(t == null ? "null" : t.getName()), defaultSource.getFQName());
+		}
 	}
 
 	private static void checkTrackerState(TrackingLogger tracker) throws IllegalStateException {
@@ -225,13 +228,15 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 
 	@Override
 	public void cleanup() {
-		if (!trackersMap.isEmpty()) {
-			for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
-				Tracker tracker = te.getValue();
-				Utils.close(tracker);
-			}
+		synchronized (trackersMap) {
+			if (!trackersMap.isEmpty()) {
+				for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
+					Tracker tracker = te.getValue();
+					Utils.close(tracker);
+				}
 
-			trackersMap.clear();
+				trackersMap.clear();
+			}
 		}
 	}
 
