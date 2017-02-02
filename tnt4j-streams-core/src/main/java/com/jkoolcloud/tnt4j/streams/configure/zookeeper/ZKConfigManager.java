@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.configure.zookeeper;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
@@ -35,16 +36,11 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  *
  * @version $Revision: 1 $
  */
-public class ZKConfigManager {
+public class ZKConfigManager implements ZKConfigConstants {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsAgent.class);
 
-	/**
-	 * Constant for ZooKeeper node path delimiter.
-	 */
-	public static final String PATH_DELIM = "/"; // NON-NLS
-
-	// create static instance for ZooKeeperConnection class.
-	private static ZooKeeperConnection conn;
+	// create static instance for ZKConnection class.
+	private static ZKConnection conn;
 
 	private static Properties zkConfigProperties;
 
@@ -253,9 +249,9 @@ public class ZKConfigManager {
 	 *
 	 * @see #handleZKStoredConfiguration(org.apache.zookeeper.ZooKeeper, String, ZKConfigManager.ZKConfigChangeListener)
 	 */
-	public static void handleZKStoredConfiguration(final String path,
-			final ZKConfigChangeListener zkCfgChangeListener) {
-		handleZKStoredConfiguration(conn.zk(), path, zkCfgChangeListener);
+	public static void handleZKStoredConfiguration(final String path, final ZKConfigChangeListener zkCfgChangeListener)
+			throws IOException, InterruptedException {
+		handleZKStoredConfiguration(zk(), path, zkCfgChangeListener);
 	}
 
 	/**
@@ -324,13 +320,19 @@ public class ZKConfigManager {
 
 			try {
 				zkConfigProperties = Utils.loadPropertiesFile(zookeeperCfgFile);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ZKConfigManager.loaded.props"), zkConfigProperties.size());
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ZKConfigManager.props.load.error"), zookeeperCfgFile);
 				zkConfigProperties = null;
 			}
 		} else {
-			zkConfigProperties = null;
+			LOGGER.log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.resetting.cfg"));
+			if (zkConfigProperties != null) {
+				zkConfigProperties.clear();
+			}
 		}
 
 		return zkConfigProperties;
@@ -366,22 +368,51 @@ public class ZKConfigManager {
 	 * 
 	 * @param zkConfProps
 	 *            streams ZooKeeper configuration properties
+	 * @return instance of opened ZK connection
 	 * @throws IOException
 	 *             if I/O exception occurs while initializing ZooKeeper connection
 	 * @throws InterruptedException
 	 *             if the current thread is interrupted while waiting
 	 */
-	public static void openConnection(Properties zkConfProps) throws IOException, InterruptedException {
+	public static ZKConnection openConnection(Properties zkConfProps) throws IOException, InterruptedException {
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.connecting"));
 
-		conn = new ZooKeeperConnection();
-		String zkConnStr = zkConfProps.getProperty("zk.conn", "localhost"); // NON-NLS
-		conn.connect(zkConnStr); // NON-NLS
+		if (MapUtils.isEmpty(zkConfProps)) {
+
+		}
+
+		conn = new ZKConnection();
+
+		String zkConnStr = zkConfProps.getProperty(PROP_ZK_CONN, DEFAULT_CONN_HOST);
+		int timeout = Integer
+				.parseInt(zkConfProps.getProperty(PROP_ZK_CONN_TIMEOUT, String.valueOf(DEFAULT_CONN_TIMEOUT)));
+
+		conn.connect(zkConnStr, timeout); // NON-NLS
 
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.connected"),
 				zkConnStr);
+
+		return conn;
+	}
+
+	/**
+	 * Returns {@link org.apache.zookeeper.ZooKeeper} instance connection was established to. If no connection is
+	 * established, then opens new connection using last read streams ZK configuration properties.
+	 *
+	 * @return zookeeper instance
+	 * @throws IOException
+	 *             if I/O exception occurs while initializing ZooKeeper connection
+	 * @throws InterruptedException
+	 *             if the current thread is interrupted while waiting
+	 */
+	public static ZooKeeper zk() throws IOException, InterruptedException {
+		if (conn == null || !conn.isConnected()) {
+			openConnection(zkConfigProperties);
+		}
+
+		return conn.zk();
 	}
 
 	/**

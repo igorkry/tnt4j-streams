@@ -29,12 +29,7 @@ import org.apache.zookeeper.ZooKeeper;
  * 
  * @version $Revision: 1 $
  */
-public class ZooKeeperConnection implements Closeable {
-
-	/**
-	 * Constant for default ZooKeeper connection timeout - {@value}ms.
-	 */
-	public static final int DEFAULT_CONN_TIMEOUT = 5000;
+public class ZKConnection implements Closeable {
 
 	// ZooKeeper instance to access ZooKeeper ensemble
 	private ZooKeeper zk;
@@ -54,7 +49,7 @@ public class ZooKeeperConnection implements Closeable {
 	 * @see #connect(String, int)
 	 */
 	public ZooKeeper connect(String connStr) throws IOException, InterruptedException {
-		return connect(connStr, DEFAULT_CONN_TIMEOUT);
+		return connect(connStr, ZKConfigConstants.DEFAULT_CONN_TIMEOUT);
 	}
 
 	/**

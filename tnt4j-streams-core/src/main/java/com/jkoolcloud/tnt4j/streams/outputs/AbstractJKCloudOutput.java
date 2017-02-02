@@ -282,14 +282,20 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 		} else if (tnt4jCfgPath.startsWith(ZK_PREFIX)) {
 			String cfgNodePath = tnt4jCfgPath.substring(ZK_PREFIX.length());
 			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTStreamOutput.init.cfg.zknode"), cfgNodePath);
+					"TNTStreamOutput.zk.cfg.monitor.tnt4j"), cfgNodePath);
 
-			ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
-				@Override
-				public void applyConfigurationData(byte[] data) {
-					reconfigureTNT4J(Utils.bytesReader(data));
-				}
-			});
+			try {
+				ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
+					@Override
+					public void applyConfigurationData(byte[] data) {
+						reconfigureTNT4J(Utils.bytesReader(data));
+					}
+				});
+			} catch (Exception exc) {
+				logger().log(OpLevel.ERROR,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.zk.cfg.failed"),
+						exc);
+			}
 		}
 
 		// TODO: add TNT4J-Kafka configuration handling.

@@ -94,7 +94,8 @@ public class LoggerUtils {
 		} else if ((lMask & JUL) == JUL) {
 			setJULConfig(cfgData, logger);
 		} else {
-			logger.log(OpLevel.WARNING, "Unknown logger. Can not apply new logger configuration...");
+			logger.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "LoggerUtils.unknown.logger"));
 		}
 	}
 
@@ -104,46 +105,56 @@ public class LoggerUtils {
 		try {
 			loggerProps.load(is);
 		} catch (Exception exc) {
-			logger.log(OpLevel.ERROR, "Could not load LOG4J properties...", exc);
+			logger.log(OpLevel.ERROR,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "LoggerUtils.log4j.load.error"),
+					exc);
 		} finally {
 			Utils.close(is);
 		}
 
 		if (MapUtils.isEmpty(loggerProps)) {
-			logger.log(OpLevel.INFO, "Loaded LOG4J logger configuration properties are empty!..");
+			logger.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.log4j.empty.configuration"));
 		} else {
-			logger.log(OpLevel.DEBUG, "Reconfiguring LOG4J logger. Loaded {0} logger properties...",
-					loggerProps.size());
+			logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.log4j.reconfiguring"), loggerProps.size());
 			try {
 				// org.apache.log4j.PropertyConfigurator.configure(loggerProps);
 
 				invoke("org.apache.log4j.PropertyConfigurator", "configure", new Class[] { Properties.class }, // NON-NLS
 						loggerProps);
 			} catch (Exception exc) {
-				logger.log(OpLevel.ERROR, "Could not invoke LOG4J configurator...", exc);
+				logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"LoggerUtils.log4j.reconfiguring.fail"), exc);
 			}
 
-			logger.log(OpLevel.DEBUG, "LOG4J logger reconfiguration completed...");
+			logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.log4j.reconfiguring.end"));
 		}
 	}
 
 	private static void setJULConfig(byte[] data, EventSink logger) {
 		InputStream is = new ByteArrayInputStream(data);
 		try {
-			logger.log(OpLevel.DEBUG, "Reconfiguring JUL logger...");
+			logger.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "LoggerUtils.jul.reconfiguring"));
 			java.util.logging.LogManager.getLogManager().readConfiguration(is);
 		} catch (Exception exc) {
+			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.jul.reconfiguring.fail"), exc);
 		} finally {
 			Utils.close(is);
 		}
 
-		logger.log(OpLevel.DEBUG, "JUL logger reconfiguration completed...");
+		logger.log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "LoggerUtils.jul.reconfiguring.end"));
 	}
 
 	private static void setLogbackConfig(byte[] data, EventSink logger) {
 		InputStream is = new ByteArrayInputStream(data);
 		try {
-			logger.log(OpLevel.DEBUG, "Reconfiguring LOGBACK logger...");
+			logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.logback.reconfiguring"));
 			// ch.qos.logback.classic.LoggerContext context = (ch.qos.logback.classic.LoggerContext)
 			// org.slf4j.LoggerFactory.getILoggerFactory();
 			Object context = invoke("org.slf4j.LoggerFactory", "getILoggerFactory", null); // NON-NLS
@@ -157,12 +168,14 @@ public class LoggerUtils {
 			// jc.doConfigure(is);
 			invoke(jc, "doConfigure", new Class[] { InputStream.class }, is); // NON-NLS
 		} catch (Exception exc) {
-			logger.log(OpLevel.ERROR, "Could not invoke LOGBACK configurator...", exc);
+			logger.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"LoggerUtils.logback.reconfiguring.fail"), exc);
 		} finally {
 			Utils.close(is);
 		}
 
-		logger.log(OpLevel.DEBUG, "LOGBACK logger reconfiguration completed...");
+		logger.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"LoggerUtils.logback.reconfiguring.end"));
 	}
 
 	private static Object invoke(String className, String methodName, Class<?>[] paramTypes, Object... params)

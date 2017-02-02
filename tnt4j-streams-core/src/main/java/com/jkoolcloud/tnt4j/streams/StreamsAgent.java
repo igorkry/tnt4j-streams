@@ -269,7 +269,7 @@ public final class StreamsAgent {
 			try {
 				ZKConfigManager.openConnection(zooProps);
 
-				String path = zooProps.getProperty("logger.configuration.path");
+				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
 
 				if (StringUtils.isNotEmpty(path)) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -283,7 +283,7 @@ public final class StreamsAgent {
 					});
 				}
 
-				path = zooProps.getProperty("stream.configuration.path");
+				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAMS);
 
 				if (path != null) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -332,9 +332,9 @@ public final class StreamsAgent {
 			}
 
 			stream.output().setProperty(OutputProperties.PROP_TNT4J_CONFIG_ZK_NODE,
-					ZKConfigManager.getZKCfgProperty("tnt4j.configuration.path"));
+					ZKConfigManager.getZKCfgProperty(ZKConfigManager.PROP_CONF_PATH_TNT4J));
 			// TODO: tnt4j-kafka settings
-			// ZKConfigManager.getZKCfgProperty("tnt4j-kafka.configuration.path");
+			// ZKConfigManager.getZKCfgProperty(ZKConfigManager.PROP_CONF_PATH_TNT4J_KAFKA);
 
 			ft = new StreamThread(streamThreads, stream,
 					String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS

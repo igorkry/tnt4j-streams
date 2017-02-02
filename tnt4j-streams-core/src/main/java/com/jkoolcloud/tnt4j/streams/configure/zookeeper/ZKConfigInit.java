@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZKUtil;
 
@@ -29,7 +30,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Main class for jKool LLC TNT4J-Streams configuration uploader to ZooKeeper.
@@ -85,57 +85,42 @@ public class ZKConfigInit {
 					"ZKConfigInit.upload.cfg.not.defined"));
 			System.exit(0);
 		}
-		ZooKeeperConnection zkConn = null;
 
-		try {
-			Properties zkup = Utils.loadPropertiesFile(cfgFileName);
+		Properties zkup = ZKConfigManager.readStreamsZKConfig(cfgFileName);
 
-			zkConn = new ZooKeeperConnection();
-			zkConn.connect(zkup.getProperty("zk.conn", "localhost")); // NON-NLS
+		if (MapUtils.isNotEmpty(zkup)) {
+			try {
+				ZKConfigManager.openConnection(zkup);
 
-			String streamsPath = zkup.getProperty("zk.streams.path");
-			// ZKConfigManager.ensureNodeExists(zkConn.zk(), streamsPath);
+				String streamsPath = zkup.getProperty(ZKConfigManager.PROP_ZK_STREAMS_PATH);
 
-			if (clean) {
-				LOGGER.log(OpLevel.INFO,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.clearing.zk"),
-						streamsPath);
-				ZKUtil.deleteRecursive(zkConn.zk(), streamsPath);
-			}
-
-			byte[] cfgData;
-			String cfgPath;
-
-			// String streamsCfgPath = streamsPath + "/config"; // NON-NLS
-			// ZKConfigManager.ensureNodeExists(zkConn.zk(), streamsCfgPath);
-			//
-			// cfgData = loadDataFromFile(zkup.getProperty("config.logger"));
-			// cfgPath = streamsCfgPath + "/logger"; // NON-NLS
-			// ZKConfigManager.setNodeData(zkConn.zk(), cfgPath, cfgData);
-			//
-			// cfgData = loadDataFromFile(zkup.getProperty("config.tnt4j"));
-			// cfgPath = streamsCfgPath + "/tnt4j"; // NON-NLS
-			// ZKConfigManager.setNodeData(zkConn.zk(), cfgPath, cfgData);
-			//
-			// String samplesPath = streamsPath + "/samples"; // NON-NLS
-			// ZKConfigManager.ensureNodeExists(zkConn.zk(), samplesPath);
-
-			for (Map.Entry<?, ?> pe : zkup.entrySet()) {
-				String pk = (String) pe.getKey();
-				String pv = (String) pe.getValue();
-
-				if (pk.startsWith("samples.") || pk.startsWith("config.")) { // NON-NLS
-					cfgData = loadDataFromFile(pv);
-					cfgPath = streamsPath + ZKConfigManager.PATH_DELIM + pk.replaceAll("\\.", "/"); // NON-NLS
-					ZKConfigManager.setNodeData(zkConn.zk(), cfgPath, cfgData);
+				if (clean) {
+					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ZKConfigInit.clearing.zk"), streamsPath);
+					ZKUtil.deleteRecursive(ZKConfigManager.zk(), streamsPath);
 				}
+
+				byte[] cfgData;
+				String cfgPath;
+
+				for (Map.Entry<?, ?> pe : zkup.entrySet()) {
+					String pk = (String) pe.getKey();
+					String pv = (String) pe.getValue();
+
+					if (pk.startsWith("samples.") || pk.startsWith("config.")) { // NON-NLS
+						cfgData = loadDataFromFile(pv);
+						cfgPath = streamsPath + ZKConfigManager.PATH_DELIM
+								+ pk.replaceAll("\\.", ZKConfigManager.PATH_DELIM); // NON-NLS
+						ZKConfigManager.setNodeData(ZKConfigManager.zk(), cfgPath, cfgData);
+					}
+				}
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.ERROR,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.upload.error"),
+						exc.getLocalizedMessage(), exc);
+			} finally {
+				ZKConfigManager.close();
 			}
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.upload.error"),
-					exc.getLocalizedMessage(), exc);
-		} finally {
-			zkConn.close();
 		}
 	}
 
