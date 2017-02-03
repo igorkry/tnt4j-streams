@@ -69,8 +69,16 @@ public class ZKConfigInit {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.starting.main"));
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
-			loadConfigAndRun(cfgFileName);
+			if (StringUtils.isEmpty(cfgFileName)) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ZKConfigInit.upload.cfg.not.defined"));
+				System.exit(2);
+			} else {
+				loadConfigAndRun(cfgFileName);
+			}
 		}
+
+		System.exit(argsValid ? 0 : 1);
 	}
 
 	/**
@@ -83,7 +91,7 @@ public class ZKConfigInit {
 		if (StringUtils.isEmpty(cfgFileName)) {
 			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ZKConfigInit.upload.cfg.not.defined"));
-			System.exit(0);
+			return;
 		}
 
 		Properties zkup = ZKConfigManager.readStreamsZKConfig(cfgFileName);

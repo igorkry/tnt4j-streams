@@ -1,0 +1,1 @@
+..\..\bin\tnt4j-streams.bat -z:stream-zk.properties
