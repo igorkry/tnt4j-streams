@@ -3895,7 +3895,7 @@ comply properties naming specification to handle it as property and also must co
 ### Loading ZooKeeper stored configuration data
 
 To make `TNT4J-Streams` load configuration from ZooKeeper use program argument `-z:` referencing `TNT4J-Streams` ZooKeeper configuration 
-file i.e. `-z:./tnt4j-streams-core/samples/single-log/stream-zk.properties`. 
+file i.e. `-z:./tnt4j-streams-core/samples/zookeeper-cfg/stream-zk.properties`. 
 
 Program argument `-z:` can be used in common with `-f:` argument. Then streams will try to load ZooKeeper stored configuration first and if
 fails - then loads configuration from file referenced by `-f:` argument.
