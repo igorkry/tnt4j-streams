@@ -3143,9 +3143,9 @@ TODO
 
 See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` module.
 
-### How to use TNT4J loggers
+## How to use TNT4J loggers
 
-#### tnt4j-log4j12
+### tnt4j-log4j12
 
 * in `config/log4j.properties` file change log appender to
 `log4j.appender.tnt4j=com.jkoolcloud.tnt4j.logger.log4j.TNT4JAppender`. Note that there should be on line like
@@ -3159,24 +3159,12 @@ See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` mo
         <scope>runtime</scope>
     </dependency>
 ```
+* when running `TNT4J-Streams` use system property `-Dlog4j.configuration` to define `log4j.properties` file location i.e.: 
+`-Dlog4j.configuration="file:./config/log4j.properties"`.  
 
-#### tnt4j-logback
+### tnt4j-logback
 
 * make logback configuration file `config/logback.xml`.
-* change `bin/tnt-streams.bat` or `bin/tnt-streams.sh` file to pass logback configuration to Java:
-
-`bat` file:
-```
-set LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%..\config\logback.xml"
-java %LOGBACKOPTS% %TNT4JOPTS% ...
-```
-
-`sh` file:
-```
-LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%/../config/logback.xml"
-java $LOGBACKOPTS $TNT4JOPTS
-```
-
 * in `pom.xml` file of `core` change dependencies - uncomment:
 ```xml
     <dependency>
@@ -3187,15 +3175,37 @@ java $LOGBACKOPTS $TNT4JOPTS
     </dependency>
 ```
 and comment out log4j dependencies
+* when running `TNT4J-Streams` use system property `-Dlogback.configurationFile` to define `logback.xml` file location i.e.:
+`-Dlog4j.configuration="file:./config/logback.xml"`. Change `bin/tnt-streams.bat` or `bin/tnt-streams.sh` file to pass logback configuration 
+to Java:
+
+`bat` file:
+```
+set LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%..\config\logback.xml"
+java %LOGBACKOPTS% %TNT4JOPTS% ...
+```
+`sh` file:
+```
+LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%/../config/logback.xml"
+java $LOGBACKOPTS $TNT4JOPTS
+```
 
 Configuring TNT4J-Streams
 ======================================
+
+TNT4J-Streams configuration sources may be:
+* configuration files - like `tnt4j.properties`, `log4j.properties`, `tnt-data-source.xml`, etc. 
+* ZooKeeper nodes data - see [ZooKeeper stored configuration](#zookeeper-stored-configuration) chapter for more details.
+
+Configuration data format is same for all sources now.  
 
 ## TNT4J configuration
 
 Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKool Cloud token assigned for You.
+
+To define `tnt4j.properties` file location use system property `-Dtnt4j.config` i.e. `-Dtnt4j.config="./config/tnt4j.properties"`.
 
 For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started) and 
 [TNT4J README](https://github.com/Nastel/TNT4J/blob/master/README.md).
@@ -3284,6 +3294,11 @@ sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `K
 
 Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration
 can be found in `tnt-data-source.xsd` file located in project `config` directory.
+
+To define `tnt-data-source.xml` file location use program argument `-f:` i.e. `-f:./tnt4j-streams-core/samples/single-log/tnt-data-source.xml`.
+
+Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
+[OS piped stream](#os-piped-stream).  
 
 sample stream configuration:
 ```xml
@@ -3823,6 +3838,100 @@ Also see ['Activity map parser'](#activity-map-parser).
 ```xml
     <property name="TranslateNumValues" value="false"/>
 ```
+
+## ZooKeeper stored configuration
+
+`TNT4J-Streams` has ability to load configuration not only from configuration files, but either from ZooKeeper nodes stored data. ZooKeeper 
+allows handle configuration data in more centralized way.  
+
+`TNT4J-Streams` is able to load ZooKeeper stored configuration on application startup and also to monitor referenced ZooKeeper nodes for 
+configuration data changes, making it possible to apply new configuration on runtime.
+    
+### Uploading configuration data to ZooKeeper
+
+To upload files contained `TNT4J-Streams` configuration to ZooKeeper nodes there is utility called `ZKConfigInit`. It has those program 
+arguments:
+* `-f:` - defines file reference containing uploader utility configuration. (Required)
+* `-c` - indicates to clean ZooKeeper nodes contained TNT4J-Streams configuration. (Optional)  
+
+To run it use `./bin/zk-init-cfg.bat` or `./bin/zk-init-cfg.sh` files. It uses uploader configuration file `./config/zk-init-cfg.properties`.
+ 
+Uploader configuration properties file contents:
+```properties
+# ZooKeeper server parameters
+zk.conn=localhost:2181
+#zk.conn.timeout=5000
+zk.streams.path=/tnt4j-streams
+
+# generic app configurations
+config.logger=../config/log4j.properties
+config.tnt4j=../config/tnt4j.properties
+config.tnt4j-kafka=./config/tnt4j-kafka.properties
+
+# core module samples configurations
+samples.core.ajax=../samples/ajax/tnt-data-source.xml
+samples.core.angular-js-tracing=../samples/angular-js-tracing/tnt-data-source.xml
+samples.core.single-log=../samples/single-log/tnt-data-source.xml
+...
+```    
+
+`zk.*` properties defines ZK connection configuration settings. 
+
+**NOTE:** `zk.streams.path` property defines root ZK node of streams configuration. All other configuration data nodes will be uploaded 
+under this initial ZK path.
+
+**NOTE:** Do not start you configuration files referencing properties with `zk.`. Such streams configuration reference definition properties
+will be ignored and files referenced by these properties wont be used in upload process. 
+
+`config.*` and `samples.*` properties defines streams configuration files data mapping to ZK nodes. 
+
+Mapping works this way: property name defines ZK node path (under root configuration node defined using `zk.streams.path` property) and 
+property value is reference to a file containing configuration data to be uploaded to ZK. 
+
+So in upload process property name like `samples.core.single-log` turns to ZK node path `/samples/core/single-log` (full upload ZK path 
+would be `/tnt4j-streams/samples/core/single-log`). You can freely name properties according to your environment organization, but it must 
+comply properties naming specification to handle it as property and also must comply ZK node path specification after "translation".  
+
+### Loading ZooKeeper stored configuration data
+
+To make `TNT4J-Streams` load configuration from ZooKeeper use program argument `-z:` referencing `TNT4J-Streams` ZooKeeper configuration 
+file i.e. `-z:./tnt4j-streams-core/samples/single-log/stream-zk.properties`. 
+
+Program argument `-z:` can be used in common with `-f:` argument. Then streams will try to load ZooKeeper stored configuration first and if
+fails - then loads configuration from file referenced by `-f:` argument.
+
+Sample streams ZooKeeper configuration contents:
+```properties
+# ZooKeeper server parameters
+zk.conn=localhost:2181/tnt4j-streams
+#zk.conn.timeout=5000
+
+# logger configuration: log4j properties, logback xml/groovy
+logger.configuration.path=/config/logger
+
+# TNT4J configuration: properties
+tnt4j.configuration.path=/config/tnt4j
+#tnt4j-kafka.configuration.path=/config/tnt4j-kafka
+
+# Stream configuration: XML containing <tnt-data-source/>
+stream.configuration.path=/samples/core/single-log
+```
+
+`zk.*` properties defines ZK connection configuration settings.
+
+`logger.configuration.path` property defines ZK node path containing logger configuration data. If absent system property 
+`-Dlog4j.configuration` (or `-Dlogback.configurationFile` - depending on logging framework used) defined configuration file will be used.
+**NOTE:** currently supports `log4j`, `JUL` and `Logback` logging frameworks configuration handling.
+
+`tnt4j.configuration.path` property defines ZK node path containing TNT4J configuration data. If absent system property 
+`-Dtnt4j.config` defined configuration file will be used.
+
+`tnt4j-kafka.configuration.path` property is reserved to define ZK node path containing TNT4J-Kafka configuration data. It is not currently 
+used. //TBD 
+
+`stream.configuration.path` property defines ZK node path containing stream configuration data. If absent program argument `-f:` defined 
+configuration file will be used.
+
 
 How to Build TNT4J-Streams
 =========================================

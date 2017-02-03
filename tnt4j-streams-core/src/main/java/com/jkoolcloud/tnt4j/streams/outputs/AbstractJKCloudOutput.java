@@ -267,7 +267,7 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 	/**
 	 * Performs initialization of tracker configuration using provided resource: file, ZooKeeper node.
 	 */
-	protected void initializeTNT4JConfig() {
+	protected void initializeTNT4JConfig() throws IOException, InterruptedException {
 		if (StringUtils.isEmpty(tnt4jCfgPath) || tnt4jCfgPath.startsWith(FILE_PREFIX)) {
 			String cfgFilePath = StringUtils.isEmpty(tnt4jCfgPath) ? tnt4jCfgPath
 					: tnt4jCfgPath.substring(FILE_PREFIX.length());
@@ -284,18 +284,12 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTStreamOutput.zk.cfg.monitor.tnt4j"), cfgNodePath);
 
-			try {
-				ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
-					@Override
-					public void applyConfigurationData(byte[] data) {
-						reconfigureTNT4J(Utils.bytesReader(data));
-					}
-				});
-			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.zk.cfg.failed"),
-						exc);
-			}
+			ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
+				@Override
+				public void applyConfigurationData(byte[] data) {
+					reconfigureTNT4J(Utils.bytesReader(data));
+				}
+			});
 		}
 
 		// TODO: add TNT4J-Kafka configuration handling.

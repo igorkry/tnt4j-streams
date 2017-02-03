@@ -107,7 +107,7 @@ public class ZKConfigInit {
 					String pk = (String) pe.getKey();
 					String pv = (String) pe.getValue();
 
-					if (pk.startsWith("samples.") || pk.startsWith("config.")) { // NON-NLS
+					if (!pk.startsWith("zk.")) { // NON-NLS
 						cfgData = loadDataFromFile(pv);
 						cfgPath = streamsPath + ZKConfigManager.PATH_DELIM
 								+ pk.replaceAll("\\.", ZKConfigManager.PATH_DELIM); // NON-NLS
