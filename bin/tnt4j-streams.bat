@@ -6,7 +6,7 @@ set LOG4JOPTS=-Dlog4j.configuration="file:%RUNDIR%..\config\log4j.properties"
 REM set LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%..\config\logback.xml"
 set STREAMSOPTS=%STREAMSOPTS% %LOG4JOPTS% %TNT4JOPTS%
 
-if "%MAINCLASS%" == "" goto set_default
+if "%MAINCLASS%" == "" goto set_default_main
 goto run_stream
 
 :set_default_main
