@@ -161,9 +161,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			return null;
 		}
 		ActivityInfo ai = new ActivityInfo();
-		// save entire activity string as message data
-		ActivityField field = new ActivityField(StreamFieldType.Message.name());
-		applyFieldValue(stream, ai, field, dataStr);
+		ActivityField field = null;
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
@@ -215,6 +213,12 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				}
 
 				applyFieldValue(stream, ai, field, value);
+			}
+
+			if (ai.getMessage() == null) {
+				// save entire activity string as message data
+				field = new ActivityField(StreamFieldType.Message.name());
+				applyFieldValue(stream, ai, field, dataStr);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(

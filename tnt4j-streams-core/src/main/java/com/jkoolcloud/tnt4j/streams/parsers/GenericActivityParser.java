@@ -230,12 +230,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		try {
-			if (dataStr != null) {
-				// save entire activity string as message data
-				field = new ActivityField(StreamFieldType.Message.name());
-				applyFieldValue(stream, ai, field, dataStr);
-			}
-
 			// apply fields for parser
 			Object value;
 			for (ActivityField aFieldList : fieldList) {
@@ -247,6 +241,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				} else {
 					applyFieldValue(stream, ai, field, value);
 				}
+			}
+
+			if (ai.getMessage() == null && dataStr != null) {
+				// save entire activity string as message data
+				field = new ActivityField(StreamFieldType.Message.name());
+				applyFieldValue(stream, ai, field, dataStr);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
