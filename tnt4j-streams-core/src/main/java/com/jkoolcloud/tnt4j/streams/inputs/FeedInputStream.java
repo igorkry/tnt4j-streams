@@ -245,6 +245,14 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	}
 
 	/**
+	 * Closes opened data feed.
+	 */
+	@Override
+	protected void stopInternals() {
+		Utils.close(dataFeed);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * This method does not actually return the next item, but the activity data feed from which the next item should be

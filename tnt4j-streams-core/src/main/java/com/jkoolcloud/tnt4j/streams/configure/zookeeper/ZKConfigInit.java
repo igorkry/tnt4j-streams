@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZKUtil;
+import org.apache.zookeeper.data.Stat;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -101,8 +102,9 @@ public class ZKConfigInit {
 				ZKConfigManager.openConnection(zkup);
 
 				String streamsPath = zkup.getProperty(ZKConfigManager.PROP_ZK_STREAMS_PATH);
+				Stat nodeStat = ZKConfigManager.zk().exists(streamsPath, false);
 
-				if (clean) {
+				if (clean && nodeStat != null) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ZKConfigInit.clearing.zk"), streamsPath);
 					ZKUtil.deleteRecursive(ZKConfigManager.zk(), streamsPath);

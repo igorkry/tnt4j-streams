@@ -118,7 +118,7 @@ public class TNTInputStreamTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void runTest() {
-		ts.ownerThread = null;
+		ts.setOwnerThread(null);
 		ts.run();
 	}
 
@@ -248,7 +248,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void getOwnerThreadTest() {
-		ts.ownerThread.setName("TEST_STREAM"); // NON-NLS
+		ts.getOwnerThread().setName("TEST_STREAM"); // NON-NLS
 		assertEquals("TEST_STREAM", ts.getOwnerThread().getName());
 	}
 

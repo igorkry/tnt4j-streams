@@ -288,16 +288,16 @@ public class ZKConfigManager implements ZKConfigConstants {
 			}
 		};
 
-		Stat stat = null;
+		Stat nStat = null;
 
 		try {
-			stat = zk.exists(path, false);
+			nStat = zk.exists(path, false);
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ZKConfigManager.node.exists.failed"), path, exc);
 		}
 
-		if (stat == null) {
+		if (nStat == null) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ZKConfigManager.node.create.wait"), path);
 			zk.exists(path, watch, null, null);
@@ -308,7 +308,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 	/**
 	 * Reads streams ZooKeeper configuration file and loads contents into {@link java.util.Properties} object.
-	 * 
+	 *
 	 * @param zookeeperCfgFile
 	 *            streams zookeeper configuration file path string
 	 * @return properties loaded from configuration file
@@ -328,9 +328,9 @@ public class ZKConfigManager implements ZKConfigConstants {
 				zkConfigProperties = null;
 			}
 		} else {
-			LOGGER.log(OpLevel.INFO,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.resetting.cfg"));
 			if (zkConfigProperties != null) {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ZKConfigManager.resetting.cfg"));
 				zkConfigProperties.clear();
 			}
 		}
@@ -340,7 +340,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 	/**
 	 * Gets streams ZooKeeper configuration property value.
-	 * 
+	 *
 	 * @param propName
 	 *            streams ZooKeeper configuration property name
 	 * @return streams ZooKeeper configuration property contained value
@@ -351,7 +351,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 	/**
 	 * Gets streams ZooKeeper configuration property value.
-	 * 
+	 *
 	 * @param propName
 	 *            streams ZooKeeper configuration property name
 	 * @param defValue
@@ -365,7 +365,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 	/**
 	 * Opens ZK ensemble connection using configuration properties defined values.
-	 * 
+	 *
 	 * @param zkConfProps
 	 *            streams ZooKeeper configuration properties
 	 * @return instance of opened ZK connection
@@ -452,7 +452,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 		/**
 		 * Defines ZK node retrieved configuration data processing.
-		 * 
+		 *
 		 * @param data
 		 *            data retrieved from ZK ensemble node
 		 */

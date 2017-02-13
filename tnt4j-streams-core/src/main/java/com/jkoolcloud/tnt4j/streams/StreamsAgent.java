@@ -57,6 +57,9 @@ public final class StreamsAgent {
 	private static boolean noStreamConfig = false;
 	private static boolean haltOnUnparsed = true;
 
+	private static ThreadGroup streamThreads;
+	private static boolean restarting = true;
+
 	private StreamsAgent() {
 	}
 
@@ -84,7 +87,7 @@ public final class StreamsAgent {
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;-z:&lt;cfg_file_name&gt;</td>
-	 *            <td>(optional) Load ZooKeeper configuration from &lt;cfg_file_name&gt;</td>
+	 *            <td>(optional) Load TNT4J-Streams ZooKeeper configuration from &lt;cfg_file_name&gt;</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
@@ -105,6 +108,23 @@ public final class StreamsAgent {
 				// DefaultTNTStreamListener dsl = new DefaultTNTStreamListener (LOGGER);
 				// loadConfigAndRun(cfgFileName, dsl, dsl);
 			}
+
+			boolean complete = false;
+			while (!complete) {
+				try {
+					synchronized (streamThreads) {
+						streamThreads.wait();
+						if (restarting) {
+							complete = true;
+						}
+					}
+				} catch (InterruptedException exc) {
+				}
+			}
+
+			System.exit(0);
+		} else {
+			System.exit(1);
 		}
 	}
 
@@ -193,7 +213,8 @@ public final class StreamsAgent {
 
 	private static void loadConfigAndRun(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		loadConfigAndRun(new File(cfgFileName), streamListener, streamTasksListener);
+		loadConfigAndRun(StringUtils.isEmpty(cfgFileName) ? null : new File(cfgFileName), streamListener,
+				streamTasksListener);
 	}
 
 	private static void loadConfigAndRun(File cfgFile) {
@@ -202,8 +223,11 @@ public final class StreamsAgent {
 
 	private static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.loading.config.file"),
+				cfgFile == null ? StreamsConfigLoader.getDefaultFile() : cfgFile);
 		try {
-			loadConfigAndRun(new FileReader(cfgFile), streamListener, streamTasksListener);
+			loadConfigAndRun(cfgFile == null ? null : new FileReader(cfgFile), streamListener, streamTasksListener);
 		} catch (FileNotFoundException e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
@@ -268,6 +292,12 @@ public final class StreamsAgent {
 		if (MapUtils.isNotEmpty(zooProps)) {
 			try {
 				ZKConfigManager.openConnection(zooProps);
+				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+					@Override
+					public void run() {
+						ZKConfigManager.close();
+					}
+				}));
 
 				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
 
@@ -292,7 +322,19 @@ public final class StreamsAgent {
 					ZKConfigManager.handleZKStoredConfiguration(path, new ZKConfigManager.ZKConfigChangeListener() {
 						@Override
 						public void applyConfigurationData(byte[] data) {
-							loadConfigAndRun(Utils.bytesReader(data));
+							if (isStreamsRunning()) {
+								restarting = false;
+								stopStreams();
+								restarting = true;
+							}
+
+							try {
+								loadConfigAndRun(Utils.bytesReader(data));
+							} catch (Exception exc) {
+								synchronized (streamThreads) {
+									streamThreads.notifyAll();
+								}
+							}
 						}
 					});
 					return true;
@@ -307,6 +349,52 @@ public final class StreamsAgent {
 		return false;
 	}
 
+	private static boolean isStreamsRunning() {
+		return streamThreads == null ? false : streamThreads.activeCount() > 0;
+	}
+
+	private static void stopStreams() {
+		if (streamThreads != null) {
+			LOGGER.log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.stopping.streams"),
+					streamThreads.getName());
+			Thread[] atl = new Thread[streamThreads.activeCount()];
+			streamThreads.enumerate(atl, false);
+
+			List<StreamThread> stl = new ArrayList<>(atl.length);
+
+			for (Thread t : atl) {
+				if (t instanceof StreamThread) {
+					stl.add((StreamThread) t);
+				}
+			}
+
+			if (stl.isEmpty()) {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.empty"));
+			} else {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.start"), stl.size());
+				CountDownLatch streamsCompletionSignal = new CountDownLatch(stl.size());
+				long t1 = System.currentTimeMillis();
+
+				for (StreamThread st : stl) {
+					st.addCompletionLatch(streamsCompletionSignal);
+
+					st.getTarget().stop();
+				}
+
+				try {
+					streamsCompletionSignal.await();
+				} catch (InterruptedException exc) {
+				}
+
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.complete"), (System.currentTimeMillis() - t1));
+			}
+		}
+	}
+
 	/**
 	 * Adds listeners to provided streams and runs streams on separate threads.
 	 *
@@ -319,9 +407,12 @@ public final class StreamsAgent {
 	 */
 	private static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
+		if (streamThreads == null) {
+			streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
+		}
+
 		StreamThread ft;
-		final CountDownLatch streamsCompletionSignal = new CountDownLatch(streams.size());
+		// final CountDownLatch streamsCompletionSignal = new CountDownLatch(streams.size());
 		for (TNTInputStream<?, ?> stream : streams) {
 			if (streamListener != null) {
 				stream.addStreamListener(streamListener);
@@ -338,16 +429,14 @@ public final class StreamsAgent {
 
 			ft = new StreamThread(streamThreads, stream,
 					String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
-			ft.setCompletionLatch(streamsCompletionSignal);
+			// ft.addCompletionLatch(streamsCompletionSignal);
 			ft.start();
 		}
 
-		try {
-			streamsCompletionSignal.await();
-		} catch (InterruptedException exc) {
-		}
-
-		ZKConfigManager.close();
+		// try {
+		// streamsCompletionSignal.await();
+		// } catch (InterruptedException exc) {
+		// }
 	}
 
 	private static Collection<TNTInputStream<?, ?>> initPiping(StreamsConfigLoader cfg) throws Exception {

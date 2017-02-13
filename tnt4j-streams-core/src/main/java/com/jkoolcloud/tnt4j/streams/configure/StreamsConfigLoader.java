@@ -67,7 +67,7 @@ public class StreamsConfigLoader {
 		}
 		if (config == null) {
 			throw new FileNotFoundException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH2));
+					"StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH, DFLT_CONFIG_FILE_PATH2));
 		}
 
 		load(new InputStreamReader(config));
@@ -85,6 +85,29 @@ public class StreamsConfigLoader {
 		}
 
 		return config;
+	}
+
+	/**
+	 * Returns configuration file defined by one of default paths: {@value #DFLT_CONFIG_PATH} or
+	 * {@value #DFLT_CONFIG_PATH2}.
+	 *
+	 * @return existing configuration file, or {@code null} if no configuration file found using default paths
+	 */
+	public static File getDefaultFile() {
+		return getDefaultFile(DFLT_CONFIG_FILE_PATH, DFLT_CONFIG_FILE_PATH2);
+	}
+
+	private static File getDefaultFile(String... paths) {
+		if (paths != null) {
+			for (String path : paths) {
+				File f = new File(path);
+				if (f.exists()) {
+					return f;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**

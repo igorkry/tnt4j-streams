@@ -117,6 +117,17 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	/**
+	 * Adds terminator object to input buffer.
+	 */
+	@Override
+	protected void stopInternals() {
+		if (inputBuffer != null) {
+			// inputBuffer.clear(); //???
+			inputBuffer.offer(DIE_MARKER);
+		}
+	}
+
+	/**
 	 * Get the next activity data item to be processed. Method blocks and waits for activity input data available in
 	 * input buffer. Input buffer is filled by {@link InputProcessor} thread.
 	 *

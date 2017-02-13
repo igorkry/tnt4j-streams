@@ -55,6 +55,8 @@
         <property name="Port" value="<PORT>"/>
         <property name="QueueManager" value="<QMGR_NAME>"/>
         <property name="Queue" value="<Q_NAME>"/>
+        <!--<property name="UserName" value="<USER_NAME>"/>-->
+        <!--<property name="Password" value="<USER_PASS>"/>-->
         <property name="StripHeaders" value="false"/>
 
         <parser-ref name="PCFEventsParser"/>

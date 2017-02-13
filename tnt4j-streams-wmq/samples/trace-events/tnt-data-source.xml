@@ -125,6 +125,8 @@
         <property name="Port" value="<PORT>"/>
         <property name="QueueManager" value="<QMGR_NAME>"/>
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+        <!--<property name="UserName" value="<USER_NAME>"/>-->
+        <!--<property name="Password" value="<USER_PASS>"/>-->
         <property name="StripHeaders" value="false"/>
 
         <property name="TraceOperations" value="*"/>

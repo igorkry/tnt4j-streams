@@ -43,7 +43,7 @@ public enum StreamStatus implements StreamingStatus {
 	FAILURE,
 
 	/**
-	 * Indicates streaming process is canceled.
+	 * Indicates streaming process was stopped from stream outside.
 	 */
-	CANCEL,
+	STOP,
 }

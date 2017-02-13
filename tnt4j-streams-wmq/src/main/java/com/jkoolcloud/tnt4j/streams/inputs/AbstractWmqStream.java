@@ -52,6 +52,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Host - WMQ connection host name. (Optional)</li>
  * <li>Port - WMQ connection port number. (Optional)</li>
+ * <li>UserName - WMQ user identifier. (Optional)</li>
+ * <li>Password - WMQ user password. (Optional)</li>
  * <li>Channel - Server connection channel name. (Optional)</li>
  * <li>StripHeaders - identifies whether stream should strip WMQ message headers. (Optional)</li>
  * </ul>
@@ -105,6 +107,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private int qmgrPort = 1414;
 	private String qmgrChannelName = "SYSTEM.DEF.SVRCONN"; // NON-NLS
 	private boolean stripHeaders = true;
+	private String userName;
+	private String userPass;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -135,6 +139,10 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				qmgrChannelName = value;
 			} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 				stripHeaders = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+				userName = value;
+			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+				userPass = value;
 			}
 		}
 	}
@@ -168,6 +176,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 			return stripHeaders;
 		}
+		if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+			return userName;
+		}
+		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+			return userPass;
+		}
 
 		return super.getProperty(name);
 	}
@@ -188,6 +202,24 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		gmo.waitInterval = CMQC.MQWI_UNLIMITED;
 		gmo.options &= ~CMQC.MQGMO_NO_SYNCPOINT;
 		gmo.options |= CMQC.MQGMO_SYNCPOINT | CMQC.MQGMO_WAIT;
+	}
+
+	/**
+	 * Interrupts owner thread to interrupt sleep between QM reconnect attempts and closes target {@link #dest} if
+	 * opened.
+	 */
+	@Override
+	protected void stopInternals() {
+		if (isOwned()) {
+			getOwnerThread().interrupt();
+		}
+
+		if (dest != null) {
+			try {
+				dest.close();
+			} catch (Exception exc) {
+			}
+		}
 	}
 
 	/**
@@ -234,6 +266,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			props.put(CMQC.HOST_NAME_PROPERTY, qmgrHostName);
 			props.put(CMQC.PORT_PROPERTY, qmgrPort);
 			props.put(CMQC.CHANNEL_PROPERTY, qmgrChannelName);
+		}
+		if (StringUtils.isNotEmpty(userName)) {
+			props.put(CMQC.USER_ID_PROPERTY, userName);
+		}
+		if (StringUtils.isNotEmpty(userPass)) {
+			props.put(CMQC.PASSWORD_PROPERTY, userPass);
 		}
 		if (StringUtils.isEmpty(qmgrName)) {
 			logger().log(OpLevel.INFO,
@@ -301,11 +339,17 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				}
 			}
 		}
+
+		if (isHalted() || !isConnectedToQmgr(null)) {
+			// stream is halted or not connected to qmgr, so exit
+			return null;
+		}
+
 		try {
 			MQMessage mqMsg = new MQMessage();
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 					"WmqStream.waiting.for.message"), dest.getName().trim());
-			dest.get(mqMsg, gmo); // TODO: interrupt on halt
+			dest.get(mqMsg, gmo);
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
 					dest.getName().trim(), mqMsg.getMessageLength());
@@ -323,6 +367,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
 			return msgData;
 		} catch (MQException mqe) {
+			if (isHalted() && mqe.getReason() == CMQC.MQRC_UNEXPECTED_ERROR) {
+				// stream is halted and most likely dest.get(MQMessage) was interrupted by stream stop method invoking
+				// dest.close()
+				return null;
+			}
+
 			curFailCount++;
 			logger().log(OpLevel.ERROR,
 					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),

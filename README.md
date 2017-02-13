@@ -3559,14 +3559,21 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * TopicString - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
  * Host - WMQ connection host name. (Optional)
  * Port - WMQ connection port number. Default value - `1414`. (Optional)
+ * UserName - WMQ user identifier. (Optional)
+ * Password - WMQ user password. (Optional)
  * Channel - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
  * StripHeaders - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
 
     sample:
 ```xml
     <property name="QueueManager" value="QMGR"/>
-    <property name="Queue" value="EVENT.QUEUE"/>
+    <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
     <property name="Host" value="wmq.sample.com"/>
+    <property name="Port" value="1420"/>
+    <property name="UserName" value="Administrator"/>
+    <property name="Password" value="someUserPass"/>
+    <property name="Channel" value="SYSTEM.DEF.SVRCONN2"/>
+    <property name="StripHeaders" value="false"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).

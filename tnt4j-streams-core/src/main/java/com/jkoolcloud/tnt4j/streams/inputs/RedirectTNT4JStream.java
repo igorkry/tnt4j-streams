@@ -287,6 +287,17 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	}
 
 	/**
+	 * Adds terminator object to input buffer.
+	 */
+	@Override
+	protected void stopInternals() {
+		if (inputBuffer != null) {
+			// inputBuffer.clear(); //???
+			inputBuffer.offer(DIE_MARKER);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * This method does not actually return the next item, but the {@link BufferedReader} from which the next item

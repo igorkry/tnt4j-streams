@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
@@ -34,7 +36,7 @@ public class StreamThread extends StreamsThread {
 	 */
 	protected final TNTInputStream<?, ?> target;
 
-	private CountDownLatch completionLatch;
+	private Set<CountDownLatch> completionLatchSet = new HashSet<>();
 
 	/**
 	 * Creates thread to run specified TNTInputStream.
@@ -106,22 +108,31 @@ public class StreamThread extends StreamsThread {
 	}
 
 	/**
-	 * Sets running streams threads counting controller to be used, when some actions needed to be performed after all
-	 * threads (streams) has been completed.
+	 * Adds running streams threads counting controller to be used, when some actions needed to be performed after set
+	 * of threads (streams) has been completed.
 	 *
 	 * @param completionLatch
 	 *            running threads count controller
 	 */
-	public void setCompletionLatch(CountDownLatch completionLatch) {
-		this.completionLatch = completionLatch;
+	public void addCompletionLatch(CountDownLatch completionLatch) {
+		if (!isAlive()) { // isStopRunning ()
+			return;
+		}
+
+		synchronized (completionLatchSet) {
+			completionLatchSet.add(completionLatch);
+		}
 	}
 
 	/**
 	 * Notifies this thread, that running stream has completed.
 	 */
 	public void notifyCompleted() {
-		if (completionLatch != null) {
-			completionLatch.countDown();
+		synchronized (completionLatchSet) {
+			for (CountDownLatch cl : completionLatchSet) {
+				cl.countDown();
+			}
+			completionLatchSet.clear();
 		}
 	}
 }

@@ -159,6 +159,15 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
+	 * Checks whether this stream has owner thread assigned.
+	 *
+	 * @return {@code true} if owner thread is assigned, {@code false} - if owner thread is {@code null}
+	 */
+	protected boolean isOwned() {
+		return ownerThread != null;
+	}
+
+	/**
 	 * Set properties for activity stream. This method is invoked by the configuration loader in response to the
 	 * {@code property} configuration elements. It is invoked once per stream definition, with all property names and
 	 * values specified for this stream. Subclasses should generally override this method to process custom properties,
@@ -246,8 +255,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
-			out.handleConsumerThread(ownerThread == null ? Thread.currentThread() : ownerThread);
-		}		
+			out.handleConsumerThread(isOwned() ? ownerThread : Thread.currentThread());
+		}
 	}
 
 	/**
@@ -289,12 +298,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
-				if (!isShotDown()) {
-					halt(false);
-					if (ownerThread != null) {
-						ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
-					}
-				}
+				stop();
 			}
 		}));
 	}
@@ -563,7 +567,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	public void halt(boolean terminate) {
 		shutdownExecutors();
 
-		if (ownerThread != null) {
+		if (isOwned()) {
 			ownerThread.halt(terminate);
 		}
 	}
@@ -574,7 +578,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @return {@code true} if stream has stopped processing, {@code false} - otherwise
 	 */
 	public boolean isHalted() {
-		return ownerThread == null ? false : ownerThread.isStopRunning();
+		return isOwned() ? ownerThread.isStopRunning() : false;
 	}
 
 	/**
@@ -628,7 +632,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.starting"), name);
-		if (ownerThread == null) {
+		if (!isOwned()) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
 					.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.no.owner.thread"));
 			notifyFailed(null, e, null);
@@ -645,7 +649,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					if (item == null) {
 						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.data.stream.ended"), name);
-						halt(false); // no more data items to process
+						if (!isHalted()) {
+							halt(false); // no more data items to process
+						}
 					} else {
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
@@ -702,7 +708,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.statistics"),
 				name, getStreamStatistics());
 
-		if (ownerThread != null) {
+		if (isOwned()) {
 			ownerThread.notifyCompleted();
 		}
 	}
@@ -719,16 +725,28 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
-	// /**
-	// * Signals that streaming process has to be canceled and invokes status change event.
-	// */
-	// public void cancel() { // TODO
-	// halt(false);
-	// ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
-	//
-	// notifyStatusChange(StreamStatus.CANCEL);
-	// // notifyFinished();
-	// }
+	/**
+	 * Signals that streaming process has to be stopped/canceled and invokes status change event.
+	 */
+	public void stop() {
+		if (!isShotDown()) {
+			halt(false);
+
+			stopInternals();
+
+			if (isOwned()) {
+				ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
+			}
+
+			notifyStatusChange(StreamStatus.STOP);
+		}
+	}
+
+	/**
+	 * Performs internal stop actions, like immediately stopping input reading.
+	 */
+	protected void stopInternals() {
+	}
 
 	/**
 	 * Returns stream name value
