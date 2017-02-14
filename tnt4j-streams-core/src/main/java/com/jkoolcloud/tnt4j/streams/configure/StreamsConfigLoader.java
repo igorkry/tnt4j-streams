@@ -88,8 +88,7 @@ public class StreamsConfigLoader {
 	}
 
 	/**
-	 * Returns configuration file defined by one of default paths: {@value #DFLT_CONFIG_PATH} or
-	 * {@value #DFLT_CONFIG_PATH2}.
+	 * Returns configuration file defined by one of default paths: {@code "./../config"} or {@code "./config"}.
 	 *
 	 * @return existing configuration file, or {@code null} if no configuration file found using default paths
 	 */
