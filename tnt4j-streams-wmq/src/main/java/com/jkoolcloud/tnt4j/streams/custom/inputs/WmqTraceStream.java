@@ -16,13 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.inputs;
 
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -40,8 +39,13 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * 'marks' PCF message contained trace entry as 'processed' by setting custom PCF parameter {@link #TRACE_MARKER}. Using
  * this PCF parameter parser "knows" which trace entry to process.
  * <p>
- * Stream also performs traced operations filtering using 'TraceOperations' property. I.e. setting value to
- * 'MQXF_(GET|PUT|CLOSE)' will stream only traces for 'MQXF_GET', 'MQXF_PUT' and 'MQXF_CLOSE' MQ operations.
+ * Stream also performs traced operations filtering using 'TraceOperations' and 'ExcludedRC' properties:
+ * <ul>
+ * <li>setting 'TraceOperations' property value to 'MQXF_(GET|PUT|CLOSE)' will stream only traces for 'MQXF_GET',
+ * 'MQXF_PUT' and 'MQXF_CLOSE' MQ operations.</li>
+ * <li>setting 'ExcludedRC' property value to 'MQRC_NO_MSG_AVAILABLE' will not stream MQ operations (i.e. 'MQXF_GET')
+ * traces when there was no messages available in queue.</li>
+ * </ul>
  * <p>
  * This activity stream requires parsers that can support {@link PCFMessage} data. But primarily it is meant to be used
  * in common with {@link com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser}.
@@ -50,6 +54,9 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * <ul>
  * <li>TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ
  * operations which names matches this mask. Default value - '*'. (Optional)</li>
+ * <li>ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using '|' character) to process only
+ * MQ trace events having reason codes not contained in this set. Set entries may be defined using both numeric and MQ
+ * constant name values. Default value - ''. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -67,6 +74,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	private String opName = null;
 	private Pattern opNameMatcher = null;
+
+	private String rcExclude = null;
+	private Set<Integer> excludedRCs = null;
 
 	/**
 	 * Constructs an empty WmqTraceStream. Requires configuration settings to set input source.
@@ -97,6 +107,31 @@ public class WmqTraceStream extends WmqStreamPCF {
 				if (StringUtils.isNotEmpty(value)) {
 					opNameMatcher = Pattern.compile(Utils.wildcardToRegex2(opName));
 				}
+			} else if (WmqStreamProperties.PROP_EXCLUDED_REASON_CODES.equalsIgnoreCase(name)) {
+				rcExclude = value;
+
+				if (StringUtils.isNotEmpty(value)) {
+					String[] erca = rcExclude.split("\\|"); // NON-NLS
+
+					excludedRCs = new HashSet<>(erca.length);
+
+					Integer eRC;
+					for (String erc : erca) {
+						try {
+							eRC = Integer.parseInt(erc);
+						} catch (NumberFormatException nfe) {
+							try {
+								eRC = MQConstants.getIntValue(erc);
+							} catch (NoSuchElementException nsee) {
+								logger().log(OpLevel.WARNING, StreamsResources.getString(
+										WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
+								continue;
+							}
+						}
+
+						excludedRCs.add(eRC);
+					}
+				}
 			}
 		}
 	}
@@ -105,6 +140,10 @@ public class WmqTraceStream extends WmqStreamPCF {
 	public Object getProperty(String name) {
 		if (WmqStreamProperties.PROP_TRACE_OPERATIONS.equalsIgnoreCase(name)) {
 			return opName;
+		}
+
+		if (WmqStreamProperties.PROP_EXCLUDED_REASON_CODES.equalsIgnoreCase(name)) {
+			return rcExclude;
 		}
 
 		return super.getProperty(name);
@@ -174,7 +213,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 				// collectAttrs(trace);
 				trC++;
 
-				if (!opFound && opNameMatch(trace)) {
+				if (!opFound && isTraceRelevant(trace)) {
 					opFound = true;
 					trM = trC;
 				}
@@ -207,7 +246,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 				if (trI > marker) {
 					MQCFGR trace = (MQCFGR) param;
-					if (opNameMatch(trace)) {
+					if (isTraceRelevant(trace)) {
 						return trI;
 					}
 				}
@@ -217,13 +256,30 @@ public class WmqTraceStream extends WmqStreamPCF {
 		return -1;
 	}
 
+	private boolean isTraceRelevant(MQCFGR trace) {
+		return opNameMatch(trace) && rcMatch(trace);
+	}
+
 	private boolean opNameMatch(MQCFGR trace) {
 		String operationName = getOpName(trace);
-		boolean match = opNameMatcher == null || opNameMatcher.matcher(operationName).matches();
+		boolean match = operationName == null || opNameMatcher == null
+				|| opNameMatcher.matcher(operationName).matches();
 
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.trace.name.match"),
 				operationName, match);
+
+		return match;
+	}
+
+	private boolean rcMatch(MQCFGR trace) {
+		Integer traceRC = getRC(trace);
+
+		boolean match = traceRC == null || excludedRCs == null || !excludedRCs.contains(traceRC);
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.trace.rc.match"),
+				traceRC == null ? "null" : PCFConstants.lookupReasonCode(traceRC), match);
 
 		return match;
 	}
@@ -236,6 +292,16 @@ public class WmqTraceStream extends WmqStreamPCF {
 		}
 
 		return opName;
+	}
+
+	private static Integer getRC(MQCFGR trace) {
+		Integer traceRC = null;
+		PCFParameter op = trace.getParameter(PCFConstants.MQIACF_REASON_CODE);
+		if (op != null) {
+			traceRC = ((MQCFIN) op).getIntValue();
+		}
+
+		return traceRC;
 	}
 
 	// ---- R&D UTILITY CODE ---

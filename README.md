@@ -2237,7 +2237,8 @@ Sample stream configuration:
 
         <property name="TraceOperations" value="*"/>
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
-        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->        
+        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->    
+        <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
@@ -2254,8 +2255,11 @@ be made from it.
 
 `StripHeaders` property states that MQ message headers shall be preserved.
  
-`TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Traces Events referencing operations not 
+`TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Trace Events referencing operations not 
 covered by this set will be filtered out from activities stream.   
+
+`ExcludedRC` property defines set of excluded MQ traces reason codes (delimited using '|' character). MQ Trace Events having reason codes 
+ defined by this set will be filtered out from activities stream. Set entries may be defined using both numeric and MQ constant name values.
 
 `TraceEventsParser` is of type `WmqTraceParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
 MQCFGR PCF structures.
@@ -3582,10 +3586,14 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
  * TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ operations which names 
  matches this mask. Default value - `*`. (Optional)
+ * ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using '|' character) to process only MQ trace events having 
+ reason codes not contained in this set. Set entries may be defined using both numeric and MQ constant name values. 
+ Default value - ''. (Optional)
  
     sample:
 ```xml
     <property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>
+    <property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>
 ``` 
 
 Also see ['WMQ Stream parameters'](#wmq-stream-parameters).

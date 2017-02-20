@@ -133,6 +133,7 @@
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
         <!--<property name="TraceOperations" value="MQXF_(DUMMY|YUMMY)"/>-->
+        <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
 
         <parser-ref name="TraceEventsParser"/>
     </stream>

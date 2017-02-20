@@ -48,4 +48,9 @@ public interface WmqStreamProperties extends StreamProperties {
 	 */
 	String PROP_TRACE_OPERATIONS = "TraceOperations"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_EXCLUDED_REASON_CODES = "ExcludedRC"; // NON-NLS
+
 }
