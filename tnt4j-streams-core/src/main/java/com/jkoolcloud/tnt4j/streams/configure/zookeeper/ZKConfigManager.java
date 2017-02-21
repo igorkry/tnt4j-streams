@@ -137,7 +137,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 	}
 
 	/**
-	 * Checks whether node exists in ZK ensemble by given path and creates one if it does not.
+	 * Checks whether node exists in ZK ensemble by given path and creates one if it does not. Does same as
+	 * {@link #ensureNodeExists(org.apache.zookeeper.ZooKeeper, String, byte[])} setting node data to {@code null}.
 	 *
 	 * @param zk
 	 *            ZooKeeper instance
@@ -148,14 +149,35 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @throws InterruptedException
 	 *             if the server transaction is interrupted
 	 *
-	 * @see #nodeExists(org.apache.zookeeper.ZooKeeper, String)
-	 * @see #create(org.apache.zookeeper.ZooKeeper, String, byte[])
+	 * @see #ensureNodeExists(org.apache.zookeeper.ZooKeeper, String, byte[])
 	 */
 	public static void ensureNodeExists(ZooKeeper zk, String path) throws KeeperException, InterruptedException {
+		ensureNodeExists(zk, path, null);
+	}
+
+	/**
+	 * Checks whether node exists in ZK ensemble by given path and creates one if it does not.
+	 *
+	 * @param zk
+	 *            ZooKeeper instance
+	 * @param path
+	 *            node path
+	 * @param data
+	 *            node data to set
+	 * @throws KeeperException
+	 *             if the server signals an error
+	 * @throws InterruptedException
+	 *             if the server transaction is interrupted
+	 *
+	 * @see #nodeExists(org.apache.zookeeper.ZooKeeper, String)
+	 * @see #createAllNodes(org.apache.zookeeper.ZooKeeper, String, byte[])
+	 */
+	public static void ensureNodeExists(ZooKeeper zk, String path, byte[] data)
+			throws KeeperException, InterruptedException {
 		Stat nStat = nodeExists(zk, path);
 
 		if (nStat == null) {
-			create(zk, path, null);
+			createAllNodes(zk, path, data);
 		}
 	}
 
@@ -247,7 +269,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @param zkCfgChangeListener
 	 *            zookeeper node data change listener instance
 	 *
-	 * @see #handleZKStoredConfiguration(org.apache.zookeeper.ZooKeeper, String, ZKConfigManager.ZKConfigChangeListener)
+	 * @see #handleZKStoredConfiguration(org.apache.zookeeper.ZooKeeper, String, ZKConfigChangeListener)
 	 */
 	public static void handleZKStoredConfiguration(final String path, final ZKConfigChangeListener zkCfgChangeListener)
 			throws IOException, InterruptedException {
@@ -379,7 +401,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.connecting"));
 
 		if (MapUtils.isEmpty(zkConfProps)) {
-
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ZKConfigManager.empty.cfg.props"));
 		}
 
 		conn = new ZKConnection();
@@ -413,6 +436,119 @@ public class ZKConfigManager implements ZKConfigConstants {
 		}
 
 		return conn.zk();
+	}
+
+	/**
+	 * Sets up ZooKeeper node data for defined configuration entity. Node path is referenced by property named
+	 * {@code cfgId} + {@value #CFG_SUFFIX_ZK_PATH}.
+	 * <p>
+	 * If node exists and node data is not {@code null} - does nothing.
+	 * <p>
+	 * If node does not exist - creates all missing ZK path nodes and sets node data from configuration file referenced
+	 * by property named {@code cfgId} + {@value #CFG_SUFFIX_CFG_FILE}.
+	 * <p>
+	 * If node exists, but node data is null or empty - updates node data from configuration file referenced by property
+	 * named {@code cfgId} + {@value #CFG_SUFFIX_CFG_FILE}.
+	 *
+	 * @param zkConfProps
+	 *            streams ZooKeeper configuration properties
+	 * @param cfgId
+	 *            configuration entity identifier
+	 * @throws IOException
+	 *             if I/O exception occurs while initializing ZooKeeper connection
+	 * @throws InterruptedException
+	 *             if the current thread is interrupted while waiting
+	 * @throws KeeperException
+	 *             if the server signals an error
+	 *
+	 * @see #nodeExists(org.apache.zookeeper.ZooKeeper, String)
+	 * @see #createAllNodes(org.apache.zookeeper.ZooKeeper, String, byte[])
+	 * @see #update(org.apache.zookeeper.ZooKeeper, String, byte[])
+	 */
+	public static void setupZKNodeData(Properties zkConfProps, String cfgId)
+			throws IOException, InterruptedException, KeeperException {
+		String zkPath = getZKNodePath(zkConfProps, cfgId);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"ZKConfigManager.cfg.ent.setup.zk.path"), cfgId, zkPath);
+		if (StringUtils.isEmpty(zkPath)) {
+			LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ZKConfigManager.cfg.ent.setup.zk.path.empty"), cfgId);
+
+			return;
+		}
+
+		Stat nStat = nodeExists(zk(), zkPath);
+
+		if (nStat == null || nStat.getDataLength() <= 0) {
+			String cfgFile = getCfgFilePath(zkConfProps, cfgId);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ZKConfigManager.cfg.ent.setup.file.path"), cfgId, cfgFile);
+			byte[] cfgData = ZKConfigInit.loadDataFromFile(cfgFile);
+
+			if (nStat == null) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ZKConfigManager.cfg.ent.setup.setting"), cfgId, cfgFile);
+				createAllNodes(zk(), zkPath, cfgData);
+			} else {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ZKConfigManager.cfg.ent.setup.updating"), cfgId, cfgFile);
+				if (cfgData != null) {
+					update(zk(), zkPath, cfgData);
+				}
+			}
+		} else {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ZKConfigManager.cfg.ent.setup.ok"), cfgId);
+		}
+	}
+
+	/**
+	 * Makes configuration entity ZK node path property name.
+	 *
+	 * @param cfgId
+	 *            configuration entity identifier
+	 * @return configuration entity ZK node path property name
+	 */
+	public static String getZKNodePathProperty(String cfgId) {
+		return cfgId + CFG_SUFFIX_ZK_PATH;
+	}
+
+	/**
+	 * Makes configuration entity configuration file path property name.
+	 *
+	 * @param cfgId
+	 *            configuration entity identifier
+	 * @return configuration entity configuration file path property name
+	 */
+	public static String getCfgFilePathProperty(String cfgId) {
+		return cfgId + CFG_SUFFIX_CFG_FILE;
+	}
+
+	/**
+	 * Finds and returns configuration entity ZK node path defined in streams ZooKeeper configuration properties.
+	 *
+	 * @param zkConfProps
+	 *            streams ZooKeeper configuration properties
+	 * @param cfgId
+	 *            configuration entity identifier
+	 * @return configuration entity ZK node path
+	 */
+	public static String getZKNodePath(Properties zkConfProps, String cfgId) {
+		return zkConfProps == null ? null : zkConfProps.getProperty(getZKNodePathProperty(cfgId));
+	}
+
+	/**
+	 * Finds and returns configuration entity configuration file path defined in streams ZooKeeper configuration
+	 * properties.
+	 *
+	 * @param zkConfProps
+	 *            streams ZooKeeper configuration properties
+	 * @param cfgId
+	 *            configuration entity identifier
+	 * @return configuration entity configuration file path
+	 */
+	public static String getCfgFilePath(Properties zkConfProps, String cfgId) {
+		return zkConfProps == null ? null : zkConfProps.getProperty(getCfgFilePathProperty(cfgId));
 	}
 
 	/**

@@ -48,12 +48,14 @@ public final class StreamsAgent {
 	private static final String PARAM_STREAM_CFG = "-f:"; // NON-NLS
 	private static final String PARAM_PARSER_CFG = "-p:"; // NON-NLS
 	private static final String PARAM_ZOOKEEPER_CFG = "-z:"; // NON-NLS
+	private static final String PARAM_ZOOKEEPER_STREAM_ID = "-sid:"; // NON-NLS
 	private static final String PARAM_SKIP_UNPARSED = "-s"; // NON-NLS
 	private static final String PARAM_HELP1 = "-h"; // NON-NLS
 	private static final String PARAM_HELP2 = "-?"; // NON-NLS
 
 	private static String cfgFileName = null;
 	private static String zookeeperCfgFile = null;
+	private static String zookeeperStreamId = null;
 	private static boolean noStreamConfig = false;
 	private static boolean haltOnUnparsed = true;
 
@@ -91,6 +93,11 @@ public final class StreamsAgent {
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
+	 *            <td>&nbsp;&nbsp;&nbsp;-sid:</td>
+	 *            <td>(optional) Stream identifier to use form ZooKeeper configuration</td>
+	 *            </tr>
+	 *            <tr>
+	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;-h | -?</td>
 	 *            <td>(optional) Print usage</td>
 	 *            </tr>
@@ -101,7 +108,7 @@ public final class StreamsAgent {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.main"));
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
-			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile);
+			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile, zookeeperStreamId);
 
 			if (!loadedZKConfig) {
 				loadConfigAndRun(cfgFileName);
@@ -286,7 +293,7 @@ public final class StreamsAgent {
 		run(streams, streamListener, streamTasksListener);
 	}
 
-	private static boolean loadZKConfig(String zookeeperCfgFile) {
+	private static boolean loadZKConfig(String zookeeperCfgFile, String zookeeperStreamId) {
 		Properties zooProps = ZKConfigManager.readStreamsZKConfig(zookeeperCfgFile);
 
 		if (MapUtils.isNotEmpty(zooProps)) {
@@ -299,7 +306,29 @@ public final class StreamsAgent {
 					}
 				}));
 
-				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
+				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAM);
+				if (StringUtils.isEmpty(path) && StringUtils.isNotEmpty(zookeeperStreamId)) {
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid"), zookeeperStreamId);
+					path = ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid.zk.path"), zookeeperStreamId, path);
+
+					if (StringUtils.isEmpty(path)) {
+						throw new IllegalArgumentException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"StreamsAgent.invalid.stream.id", zookeeperStreamId));
+					}
+
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid.setup"), zookeeperStreamId);
+					ZKConfigManager.setupZKNodeData(zooProps, zookeeperStreamId);
+					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_LOGGER);
+					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_TNT4J);
+					// ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_TNT4J_KAFKA);
+				}
+
+				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
 
 				if (StringUtils.isNotEmpty(path)) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -313,7 +342,9 @@ public final class StreamsAgent {
 					});
 				}
 
-				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAMS);
+				path = StringUtils.isEmpty(zookeeperStreamId)
+						? zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAM)
+						: ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
 
 				if (path != null) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -485,10 +516,10 @@ public final class StreamsAgent {
 					return false;
 				}
 
-				cfgFileName = arg.substring(3);
+				cfgFileName = arg.substring(PARAM_STREAM_CFG.length());
 				if (StringUtils.isEmpty(cfgFileName)) {
 					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+							"StreamsAgent.missing.cfg.file", arg.substring(0, PARAM_STREAM_CFG.length())));
 					printUsage();
 					return false;
 				}
@@ -502,10 +533,25 @@ public final class StreamsAgent {
 					return false;
 				}
 
-				zookeeperCfgFile = arg.substring(3);
+				zookeeperCfgFile = arg.substring(PARAM_ZOOKEEPER_CFG.length());
 				if (StringUtils.isEmpty(zookeeperCfgFile)) {
 					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+							"StreamsAgent.missing.cfg.file", arg.substring(0, PARAM_ZOOKEEPER_CFG.length())));
+					printUsage();
+					return false;
+				}
+			} else if (arg.startsWith(PARAM_ZOOKEEPER_STREAM_ID)) {
+				if (StringUtils.isNotEmpty(zookeeperStreamId)) {
+					System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.invalid.args3"));
+					printUsage();
+					return false;
+				}
+				zookeeperStreamId = arg.substring(PARAM_ZOOKEEPER_STREAM_ID.length());
+				if (StringUtils.isEmpty(zookeeperStreamId)) {
+					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.missing.argument.value",
+							arg.substring(0, PARAM_ZOOKEEPER_STREAM_ID.length())));
 					printUsage();
 					return false;
 				}

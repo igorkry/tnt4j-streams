@@ -3304,6 +3304,9 @@ To define `tnt-data-source.xml` file location use program argument `-f:` i.e. `-
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
 [OS piped stream](#os-piped-stream).  
 
+Program argument `-z:` is used to define configuration file for ZooKeeper based TNT4J-Streams configuration. 
+See [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data).
+
 sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -3922,29 +3925,29 @@ zk.conn=localhost:2181/tnt4j-streams
 #zk.conn.timeout=5000
 
 # logger configuration: log4j properties, logback xml/groovy
-logger.configuration.path=/config/logger
+config.logger.zk.path=/config/logger
 
 # TNT4J configuration: properties
-tnt4j.configuration.path=/config/tnt4j
-#tnt4j-kafka.configuration.path=/config/tnt4j-kafka
+config.tnt4j.zk.path=/config/tnt4j
+#config.tnt4j-kafka.zk.path=/config/tnt4j-kafka
 
 # Stream configuration: XML containing <tnt-data-source/>
-stream.configuration.path=/samples/core/single-log
+config.stream.zk.path=/samples/core/single-log
 ```
 
 `zk.*` properties defines ZK connection configuration settings.
 
-`logger.configuration.path` property defines ZK node path containing logger configuration data. If absent system property 
+`config.logger.zk.path` property defines ZK node path containing logger configuration data. If absent system property 
 `-Dlog4j.configuration` (or `-Dlogback.configurationFile` - depending on logging framework used) defined configuration file will be used.
 **NOTE:** currently supports `log4j`, `JUL` and `Logback` logging frameworks configuration handling.
 
-`tnt4j.configuration.path` property defines ZK node path containing TNT4J configuration data. If absent system property 
+`config.tnt4j.zk.path` property defines ZK node path containing TNT4J configuration data. If absent system property 
 `-Dtnt4j.config` defined configuration file will be used.
 
-`tnt4j-kafka.configuration.path` property is reserved to define ZK node path containing TNT4J-Kafka configuration data. It is not currently 
+`config.tnt4j-kafka.zk.path` property is reserved to define ZK node path containing TNT4J-Kafka configuration data. It is not currently 
 used. //TBD 
 
-`stream.configuration.path` property defines ZK node path containing stream configuration data. If absent program argument `-f:` defined 
+`config.stream.zk.path` property defines ZK node path containing stream configuration data. If absent program argument `-f:` defined 
 configuration file will be used.
 
 

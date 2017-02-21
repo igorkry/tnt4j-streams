@@ -50,19 +50,45 @@ public interface ZKConfigConstants {
 	static final String PROP_ZK_STREAMS_PATH = "zk.streams.path"; // NON-NLS
 
 	/**
-	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property suffix {@value}.
 	 */
-	static final String PROP_CONF_PATH_LOGGER = "logger.configuration.path"; // NON-NLS
+	static final String CFG_SUFFIX_ZK_PATH = ".zk.path"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property suffix {@value}.
+	 */
+	static final String CFG_SUFFIX_CFG_FILE = ".cfg.file"; // NON-NLS
+
 	/**
 	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
 	 */
-	static final String PROP_CONF_PATH_TNT4J = "tnt4j.configuration.path"; // NON-NLS
+	static final String PROP_CONF_LOGGER = "config.logger"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
 	 */
-	static final String PROP_CONF_PATH_TNT4J_KAFKA = "tnt4j-kafka.configuration.path"; // NON-NLS
+	static final String PROP_CONF_TNT4J = "config.tnt4j"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
 	 */
-	static final String PROP_CONF_PATH_STREAMS = "stream.configuration.path"; // NON-NLS
+	static final String PROP_CONF_TNT4J_KAFKA = "config.tnt4j-kafka"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 */
+	static final String PROP_CONF_STREAM = "config.stream"; // NON-NLS
+
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 */
+	static final String PROP_CONF_PATH_LOGGER = PROP_CONF_LOGGER + CFG_SUFFIX_ZK_PATH; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 */
+	static final String PROP_CONF_PATH_TNT4J = PROP_CONF_TNT4J + CFG_SUFFIX_ZK_PATH; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 */
+	static final String PROP_CONF_PATH_TNT4J_KAFKA = PROP_CONF_TNT4J_KAFKA + CFG_SUFFIX_ZK_PATH; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams ZooKeeper configuration property {@value}.
+	 */
+	static final String PROP_CONF_PATH_STREAM = PROP_CONF_STREAM + CFG_SUFFIX_ZK_PATH; // NON-NLS
 }
