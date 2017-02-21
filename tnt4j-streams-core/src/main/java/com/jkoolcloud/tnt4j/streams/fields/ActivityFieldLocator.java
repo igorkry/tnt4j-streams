@@ -515,11 +515,11 @@ public class ActivityFieldLocator implements Cloneable {
 			return getMappedValue(formatNumericValue(value));
 		case Binary:
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
-				value = Utils.base64Decode(value.toString().getBytes());
+				value = Utils.base64Decode(String.valueOf(value).getBytes());
 			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
-				value = Utils.decodeHex(value.toString());
+				value = Utils.decodeHex(String.valueOf(value));
 			} else if (builtInFormat == ActivityFieldFormatType.string) {
-				value = value.toString().getBytes();
+				value = String.valueOf(value).getBytes();
 			}
 			break;
 		case DateTime:

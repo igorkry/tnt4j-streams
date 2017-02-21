@@ -3305,7 +3305,7 @@ Program argument `-p:` is used in common with `PipedStream` and only parsers con
 [OS piped stream](#os-piped-stream).  
 
 Program argument `-z:` is used to define configuration file for ZooKeeper based TNT4J-Streams configuration. 
-See [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data).
+See [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data) and [Streams registry](#streams-registry).
 
 sample stream configuration:
 ```xml
@@ -3950,6 +3950,76 @@ used. //TBD
 `config.stream.zk.path` property defines ZK node path containing stream configuration data. If absent program argument `-f:` defined 
 configuration file will be used.
 
+### Streams registry
+
+`TNT4J-Streams` also able to contain all ZooKeeper configuration in one single file. See [`streams-zk.properties`](config/streams-zk.properties).
+
+File consists of ZK configuration registry entities every entity having two properties (except `zk.*` properties set used to configure ZK 
+connection):
+* `cfg.entity.id` + `.zk.path` - defines ZK node path containing entity configuration data. **NOTE:** actual path in ZK ensemble may not 
+necessarily exist and will be created on demand. 
+* `cfg.entity.id` + `.cfg.file` - defines configuration file path to upload configuration data to ZK node in case ZK node does not exist or 
+is empty. 
+
+Sample streams ZooKeeper configuration registry stile contents:
+```properties
+########################### ZooKeeper server parameters ###########################
+# ZooKeeper connection string
+zk.conn=localhost:2181/tnt4j-streams
+# ZooKeeper connection timeout
+#zk.conn.timeout=5000
+# ZooKeeper path of TNT4J-Streams root node location
+zk.streams.path=/tnt4j-streams
+
+########################### Generic app configurations ###########################
+# Logger configuration: log4j properties, logback xml/groovy
+config.logger.zk.path=/config/logger
+config.logger.cfg.file=../config/log4j.properties
+
+# TNT4J configuration
+config.tnt4j.zk.path=/config/tnt4j
+config.tnt4j.cfg.file=../config/tnt4j.properties
+
+# TNT4J-Kafka configuration (used by KafkaEventSink)
+config.tnt4j-kafka.zk.path=/config/tnt4j-kafka
+config.tnt4j-kafka.cfg.file=../config/tnt4j-kafka.properties
+
+########################### Sample Streams configurations ###########################
+### core module samples configurations
+# sample stream: samples.core.ajax
+samples.core.ajax.zk.path=/samples/core/ajax
+samples.core.ajax.cfg.file=../samples/ajax/tnt-data-source.xml
+
+# sample stream: samples.core.multiple-logs
+samples.core.multiple-logs.zk.path=/samples/core/multiple-logs
+samples.core.multiple-logs.cfg.file=../samples/multiple-logs/tnt-data-source.xml
+
+# sample stream: samples.core.piping-stream
+samples.core.piping-stream.zk.path=/samples/core/piping-stream
+samples.core.piping-stream.cfg.file=../samples/piping-stream/parsers.xml
+
+# sample stream: samples.core.single-log
+samples.core.single-log.zk.path=/samples/core/single-log
+samples.core.single-log.cfg.file=../samples/single-log/tnt-data-source.xml
+...
+```
+
+`zk.*` properties defines ZK connection configuration settings.
+
+`config.*` properties defines configuration entities for `logger`, `tnt4j` and `tnt4j-kafka`.
+
+`samples.*` properties defines configuration entities for sample steams.
+
+Also see [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data).
+
+When using registry style ZooKeeper configuration, missing configuration entities ZK nodes data is automatically uploaded on demand from 
+entity configuration file property (ending `.cfg.file`) referenced file.      
+
+To run `TNT4J-Streams` using registry style ZooKeeper configuration define those program arguments: `-z:<cfg_file> -sid:<stream_id>` i.e.
+```cmd
+-z:.\config\streams-zk.properties -sid:samples.core.single-log
+```
+Streams will run sample stream `single-log`. See [Single Log file](#single-log-file) for sample details.
 
 How to Build TNT4J-Streams
 =========================================

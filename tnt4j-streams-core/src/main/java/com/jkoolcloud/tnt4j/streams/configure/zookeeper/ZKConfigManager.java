@@ -440,15 +440,17 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 	/**
 	 * Sets up ZooKeeper node data for defined configuration entity. Node path is referenced by property named
-	 * {@code cfgId} + {@value #CFG_SUFFIX_ZK_PATH}.
+	 * {@code cfgId} + {@value com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigConstants#CFG_SUFFIX_ZK_PATH}.
 	 * <p>
 	 * If node exists and node data is not {@code null} - does nothing.
 	 * <p>
 	 * If node does not exist - creates all missing ZK path nodes and sets node data from configuration file referenced
-	 * by property named {@code cfgId} + {@value #CFG_SUFFIX_CFG_FILE}.
+	 * by property named {@code cfgId} +
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigConstants#CFG_SUFFIX_CFG_FILE}.
 	 * <p>
 	 * If node exists, but node data is null or empty - updates node data from configuration file referenced by property
-	 * named {@code cfgId} + {@value #CFG_SUFFIX_CFG_FILE}.
+	 * named {@code cfgId} +
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigConstants#CFG_SUFFIX_CFG_FILE}.
 	 *
 	 * @param zkConfProps
 	 *            streams ZooKeeper configuration properties
@@ -464,6 +466,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @see #nodeExists(org.apache.zookeeper.ZooKeeper, String)
 	 * @see #createAllNodes(org.apache.zookeeper.ZooKeeper, String, byte[])
 	 * @see #update(org.apache.zookeeper.ZooKeeper, String, byte[])
+	 * @see #makeCfgFilePathProperty(String)
+	 * @see #makeZKNodePathProperty(String)
 	 */
 	public static void setupZKNodeData(Properties zkConfProps, String cfgId)
 			throws IOException, InterruptedException, KeeperException {
@@ -503,24 +507,26 @@ public class ZKConfigManager implements ZKConfigConstants {
 	}
 
 	/**
-	 * Makes configuration entity ZK node path property name.
+	 * Makes configuration entity ZK node path property name: {@code cfgId} +
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigConstants#CFG_SUFFIX_ZK_PATH}.
 	 *
 	 * @param cfgId
 	 *            configuration entity identifier
 	 * @return configuration entity ZK node path property name
 	 */
-	public static String getZKNodePathProperty(String cfgId) {
+	public static String makeZKNodePathProperty(String cfgId) {
 		return cfgId + CFG_SUFFIX_ZK_PATH;
 	}
 
 	/**
-	 * Makes configuration entity configuration file path property name.
+	 * Makes configuration entity configuration file path property name: {@code cfgId} +
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigConstants#CFG_SUFFIX_CFG_FILE}.
 	 *
 	 * @param cfgId
 	 *            configuration entity identifier
 	 * @return configuration entity configuration file path property name
 	 */
-	public static String getCfgFilePathProperty(String cfgId) {
+	public static String makeCfgFilePathProperty(String cfgId) {
 		return cfgId + CFG_SUFFIX_CFG_FILE;
 	}
 
@@ -534,7 +540,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @return configuration entity ZK node path
 	 */
 	public static String getZKNodePath(Properties zkConfProps, String cfgId) {
-		return zkConfProps == null ? null : zkConfProps.getProperty(getZKNodePathProperty(cfgId));
+		return zkConfProps == null ? null : zkConfProps.getProperty(makeZKNodePathProperty(cfgId));
 	}
 
 	/**
@@ -548,7 +554,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @return configuration entity configuration file path
 	 */
 	public static String getCfgFilePath(Properties zkConfProps, String cfgId) {
-		return zkConfProps == null ? null : zkConfProps.getProperty(getCfgFilePathProperty(cfgId));
+		return zkConfProps == null ? null : zkConfProps.getProperty(makeCfgFilePathProperty(cfgId));
 	}
 
 	/**
