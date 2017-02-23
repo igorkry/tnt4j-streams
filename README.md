@@ -7,7 +7,7 @@ Why TNT4J-Streams
 * TNT4J-Streams can be run out of the box for a large set of data streaming without writing no additional code.
 All You need is to define Your data format mapping to TNT4J event mapping in TNT4J-Streams configuration.
 
-* It supports the following data sources:
+* Supports the following data sources:
     * File
     * Character stream over TCP/IP
     * HDFS
@@ -33,9 +33,9 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     When file changes, changed (appended) lines are read by stream and interpreted as single line is single activity
     event. Stream stops only when application gets terminated or some critical runtime error occurs.
 
-* Has customized parser to parse Apache Access Logs.
+* Customized parser for Apache Access Logs.
 
-* Has customized WMQ Trace Events stream (and parser).
+* Customized IBM MQ Trace Events stream (and parser).
 
 * It can be integrated with:
     * Logstash
@@ -49,7 +49,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
 
     just by applying configuration and without additional coding.
 
-* Can redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator. 
+* Redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator. 
 
 Importing TNT4J-Streams project into IDE
 ======================================
