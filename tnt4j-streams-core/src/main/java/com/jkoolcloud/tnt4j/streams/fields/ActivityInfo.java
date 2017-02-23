@@ -457,7 +457,7 @@ public class ActivityInfo {
 
 			return sb.toString();
 		} else if (value instanceof byte[]) {
-			Utils.toHexString((byte[]) value);
+			Utils.encodeHex((byte[]) value);
 		} else if (value != null && value.getClass().isArray()) {
 			return ArrayUtils.toString(value);
 		}
@@ -706,11 +706,13 @@ public class ActivityInfo {
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
 				event.setMessage(binData, (Object[]) null);
-				event.setSize(msgLength == null ? binData.length : msgLength);
 			} else {
 				String strData = Utils.toString(message);
 				event.setMessage(strData, (Object[]) null);
-				event.setSize(msgLength == null ? strData.length() : msgLength);
+			}
+
+			if (msgLength != null) {
+				event.setSize(msgLength);
 			}
 		}
 		if (StringUtils.isNotEmpty(msgMimeType)) {
