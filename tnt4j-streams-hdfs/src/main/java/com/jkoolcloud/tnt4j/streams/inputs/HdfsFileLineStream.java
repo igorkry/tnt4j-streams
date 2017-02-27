@@ -421,7 +421,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean canRead(FileStatus fs) {
-			return fs != null && ((fs.getPermission().toShort() & 0444) == 0444);
+			return fs != null && Utils.matchMask(fs.getPermission().toShort(), 0444);
 		}
 
 		private void updateDataTotals(Path[] activityFiles, FileSystem fs) {

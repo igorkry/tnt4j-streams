@@ -2239,6 +2239,7 @@ Sample stream configuration:
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->    
         <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
+        <property name="SuppressBrowseGets" value="true"/>
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
@@ -2258,8 +2259,10 @@ be made from it.
 `TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Trace Events referencing operations not 
 covered by this set will be filtered out from activities stream.   
 
-`ExcludedRC` property defines set of excluded MQ traces reason codes (delimited using '|' character). MQ Trace Events having reason codes 
+`ExcludedRC` property defines set of excluded MQ traces reason codes (delimited using `|` character). MQ Trace Events having reason codes 
  defined by this set will be filtered out from activities stream. Set entries may be defined using both numeric and MQ constant name values.
+ 
+`SuppressBrowseGets` property defines flag indicating whether to exclude WMQ **BROWSE** type **GET** operation traces from streaming.
 
 `TraceEventsParser` is of type `WmqTraceParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
 MQCFGR PCF structures.
@@ -3589,14 +3592,17 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
  * TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ operations which names 
  matches this mask. Default value - `*`. (Optional)
- * ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using '|' character) to process only MQ trace events having 
+ * ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using `|` character) to process only MQ trace events having 
  reason codes not contained in this set. Set entries may be defined using both numeric and MQ constant name values. 
- Default value - ''. (Optional)
+ Default value - ``. (Optional)
+ * SuppressBrowseGets - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming. Default value - `false`. 
+ (Optional)
  
     sample:
 ```xml
     <property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>
     <property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>
+    <property name="SuppressBrowseGets" value="true"/>
 ``` 
 
 Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
@@ -3681,8 +3687,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Redirect TNT4J Stream parameters
 
- * FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')
- * Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')
+ * FileName - the system-dependent file name. (Required - just one `FileName` or `Port`)
+ * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
  * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
  connection. (Optional)
  * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
@@ -3707,7 +3713,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
  * FileName - the system-dependent file name of MS Excel document. (Required)
  * SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
- matches this mask. Default value - ''. (Optional)
+ matches this mask. Default value - ``. (Optional)
 
     sample:
 ```xml
@@ -3730,6 +3736,13 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 ### Parsers configuration
 
+#### Generic parser parameters
+ 
+ * UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping for
+  that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is recommended to use 
+  it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser configuration. 
+  Default value - `false`. (Optional)
+
 #### Activity Name-Value parser
 
  * FieldDelim - fields separator. Default value - `,`. (Optional)
@@ -3747,6 +3760,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="StripQuotes" value="false"/>
 ```
 
+Also see [Generic parser parameters](#generic-parser-parameters).
+
 #### Activity RegEx parser
 
  * Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)
@@ -3755,6 +3770,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 ```xml
     <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
 ```
+
+Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity token parser
 
@@ -3771,6 +3788,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="StripQuotes" value="false"/>
 ```
 
+Also see [Generic parser parameters](#generic-parser-parameters).
+
 #### Activity XML parser
 
 This parser uses XPath expressions as field locators. You may also use [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions).
@@ -3785,6 +3804,8 @@ This parser uses XPath expressions as field locators. You may also use [TNT4J-St
     <property name="RequireDefault" value="true"/>
 ```
 
+Also see [Generic parser parameters](#generic-parser-parameters).
+
 #### Message activity XML parser
 
  * SignatureDelim - signature fields delimiter. Default value - `,`. (Optional)
@@ -3794,7 +3815,7 @@ This parser uses XPath expressions as field locators. You may also use [TNT4J-St
     <property name="SignatureDelim" value="#"/>
 ```
 
-Also see ['Activity XML parser'](#activity-xml-parser).
+Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser parameters](#generic-parser-parameters).
 
 #### Apache access log parser
 
@@ -3815,6 +3836,8 @@ Also see ['Activity XML parser'](#activity-xml-parser).
               value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
 
+Also see [Generic parser parameters](#generic-parser-parameters).
+
 #### Activity map parser
  
  * LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path elements. 
@@ -3825,6 +3848,8 @@ Also see ['Activity XML parser'](#activity-xml-parser).
     <property name="LocPathDelim" value="/"/>
 ``` 
  
+Also see [Generic parser parameters](#generic-parser-parameters).
+ 
 #### Activity JSON parser
 
  * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
@@ -3833,6 +3858,8 @@ Also see ['Activity XML parser'](#activity-xml-parser).
 ```xml
     <property name="ReadLines" value="false"/>
 ```
+
+Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity JMS message parser
 
@@ -3844,7 +3871,7 @@ Also see ['Activity XML parser'](#activity-xml-parser).
     <property name="ConvertToString" value="true"/>
 ```  
  
-Also see ['Activity map parser'](#activity-map-parser).
+Also see ['Activity map parser'](#activity-map-parser) and [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity PCF parser
 
@@ -3856,6 +3883,8 @@ Also see ['Activity map parser'](#activity-map-parser).
 ```xml
     <property name="TranslateNumValues" value="false"/>
 ```
+
+Also see [Generic parser parameters](#generic-parser-parameters).
 
 ## ZooKeeper stored configuration
 

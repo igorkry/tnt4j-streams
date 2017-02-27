@@ -134,6 +134,7 @@
         <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
         <!--<property name="TraceOperations" value="MQXF_(DUMMY|YUMMY)"/>-->
         <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
+        <property name="SuppressBrowseGets" value="true"/>
 
         <parser-ref name="TraceEventsParser"/>
     </stream>

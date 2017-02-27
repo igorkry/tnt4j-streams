@@ -53,4 +53,9 @@ public interface WmqStreamProperties extends StreamProperties {
 	 */
 	String PROP_EXCLUDED_REASON_CODES = "ExcludedRC"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_SUPPRESS_BROWSE_GETS = "SuppressBrowseGets"; // NON-NLS
+
 }

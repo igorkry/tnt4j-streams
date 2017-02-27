@@ -19,15 +19,13 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -36,10 +34,18 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Generic class for common activity parsers. It provides some generic functionality witch is common to most activity
  * parsers.
+ * <p>
+ * This parser supports the following properties:
+ * <ul>
+ * <li>UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field 'Message' if
+ * there is no mapping for that field in stream parser configuration or value was not resolved by parser from RAW
+ * activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
+ * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
+ * </ul>
  *
  * @param <T>
  *            the type of handled activity data
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public abstract class GenericActivityParser<T> extends ActivityParser {
 
@@ -52,6 +58,28 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * List of supported activity fields used to extract values from RAW activity data defined by field location(s).
 	 */
 	protected final List<ActivityField> fieldList = new ArrayList<>();
+
+	private boolean useActivityAsMessage = false;
+
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		if (props == null) {
+			return;
+		}
+
+		for (Map.Entry<String, String> prop : props) {
+			String name = prop.getKey();
+			String value = prop.getValue();
+
+			if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
+				useActivityAsMessage = Boolean.parseBoolean(value);
+
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+						name, value);
+			}
+		}
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -192,7 +220,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
@@ -202,9 +229,30 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
 				getLogString(data));
 
+		ItemToParse item = prepareItem(data);
+
+		ActivityInfo ai = parsePreparedItem(stream, String.valueOf(item.message), item.item);
+		// postParse(ai, stream, aData);
+
+		return ai;
+	}
+
+	/**
+	 * Prepares RAW activity data to be parsed.
+	 *
+	 * @param data
+	 *            raw activity data to prepare
+	 * @return activity data item prepared to be parsed
+	 */
+	@SuppressWarnings("unchecked")
+	protected ItemToParse prepareItem(Object data) {
 		T aData = (T) data;
 
-		return parsePreparedItem(stream, aData.toString(), aData);
+		ItemToParse item = new ItemToParse();
+		item.item = aData;
+		item.message = getRawDataAsMessage(aData);
+
+		return item;
 	}
 
 	/**
@@ -243,7 +291,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				}
 			}
 
-			if (ai.getMessage() == null && dataStr != null) {
+			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
 				// save entire activity string as message data
 				field = new ActivityField(StreamFieldType.Message.name());
 				applyFieldValue(stream, ai, field, dataStr);
@@ -257,6 +305,27 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		return ai;
 	}
+
+	/**
+	 * Transforms activity data to be put to activity field "Message". This is used when no field "Message" mapping
+	 * defined in parser configuration.
+	 * 
+	 * @param data
+	 *            activity data
+	 * @return data to be used for activity field "Message"
+	 */
+	protected Object getRawDataAsMessage(T data) {
+		return data.toString();
+	}
+
+	// protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
+	// Object msgData = getRawDataAsMessage(data);
+	// if (useActivityAsMessage && ai.getMessage() == null && msgData != null) {
+	// // save entire activity string as message data
+	// ActivityField field = new ActivityField(StreamFieldType.Message.name());
+	// applyFieldValue(stream, ai, field, msgData);
+	// }
+	// }
 
 	private void applyDynamicValue(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
 			Object value) throws ParseException {
@@ -441,5 +510,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected String getLogString(Object data) {
 		return data instanceof String ? data.toString()
 				: logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
+	}
+
+	protected class ItemToParse {
+		T item;
+		Object message;
 	}
 }

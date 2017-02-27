@@ -52,7 +52,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This parser supports the following properties:
  * <ul>
- * <li>ReadLines - indicates that complete JSON data package is single line. (Optional)</li>
+ * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $

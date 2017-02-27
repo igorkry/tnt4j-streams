@@ -24,6 +24,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.ibm.mq.pcf.MQCFGR;
 import com.ibm.mq.pcf.PCFContent;
 import com.ibm.mq.pcf.PCFMessage;
+import com.ibm.mq.pcf.PCFParameter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream;
@@ -57,6 +58,14 @@ public class WmqTraceParser extends ActivityPCFParser {
 	}
 
 	@Override
+	protected Object getRawDataAsMessage(PCFMessage pcfMsg) {
+		Integer traceM = (Integer) pcfMsg.getParameterValue(WmqTraceStream.TRACE_MARKER);
+		PCFMessage traceMsg = strip(pcfMsg, traceM);
+
+		return traceMsg.toString();
+	}
+
+	@Override
 	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFMessage pcfMsg,
 			PCFContent pcfContent, int i) throws ParseException {
 		if (ArrayUtils.isEmpty(path) || (pcfMsg == null && pcfContent == null)) {
@@ -80,8 +89,8 @@ public class WmqTraceParser extends ActivityPCFParser {
 			Enumeration<?> prams = pcfMsg.getParameters();
 			int trI = 0;
 			while (prams.hasMoreElements()) {
-				Object param = prams.nextElement();
-				if (param instanceof MQCFGR) {
+				PCFParameter param = (PCFParameter) prams.nextElement();
+				if (WmqTraceStream.isTraceParameter(param)) {
 					trI++;
 					if (trI == traceIndex) {
 						return (MQCFGR) param;
@@ -101,5 +110,55 @@ public class WmqTraceParser extends ActivityPCFParser {
 	@Override
 	protected String getActivityDataType() {
 		return "ACTIVITY TRACE MESSAGE"; // NON-NLS
+	}
+
+	// private static PCFMessage copy(PCFMessage pcfMsg) {
+	// PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
+	// pcfMsg.getControl() == 1);
+	//
+	// Enumeration<?> params = pcfMsg.getParameters();
+	//
+	// while (params.hasMoreElements()) {
+	// PCFParameter param = (PCFParameter) params.nextElement();
+	// msgCpy.addParameter(param);
+	// }
+	//
+	// return msgCpy;
+	// }
+
+	/**
+	 * Strips off PCF message MQ activity trace parameters leaving only one - corresponding trace marker value.
+	 *
+	 * @param pcfMsg
+	 *            PCF message containing MQ activity traces
+	 * @param traceMarker
+	 *            processed MQ activity trace marker
+	 * @return PCF message copy containing only one MQ activity trace marked by trace marker
+	 */
+	private static PCFMessage strip(PCFMessage pcfMsg, int traceMarker) {
+		PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
+				pcfMsg.getControl() == 1);
+
+		Enumeration<?> params = pcfMsg.getParameters();
+		int trI = 0;
+		while (params.hasMoreElements()) {
+			PCFParameter param = (PCFParameter) params.nextElement();
+
+			if (param.getParameter() == WmqTraceStream.TRACE_MARKER
+					|| param.getParameter() == WmqTraceStream.TRACES_COUNT) {
+				continue;
+			}
+
+			if (WmqTraceStream.isTraceParameter(param)) {
+				trI++;
+				if (trI != traceMarker) {
+					continue;
+				}
+			}
+
+			msgCpy.addParameter(param);
+		}
+
+		return msgCpy;
 	}
 }

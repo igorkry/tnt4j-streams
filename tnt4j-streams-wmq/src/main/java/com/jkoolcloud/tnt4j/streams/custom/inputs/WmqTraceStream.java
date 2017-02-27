@@ -57,6 +57,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * <li>ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using '|' character) to process only
  * MQ trace events having reason codes not contained in this set. Set entries may be defined using both numeric and MQ
  * constant name values. Default value - ''. (Optional)</li>
+ * <li>SuppressBrowseGets - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming.
+ * Default value - 'false'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -64,7 +66,10 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 public class WmqTraceStream extends WmqStreamPCF {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqTraceStream.class);
 
-	private static final int TRACES_COUNT = 919191919;
+	/**
+	 * Custom PCF parameter identifier to store PCF message contained traces count.
+	 */
+	public static final int TRACES_COUNT = 919191919;
 	/**
 	 * Custom PCF parameter identifier to store processed PCF message trace entry index.
 	 */
@@ -77,6 +82,10 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	private String rcExclude = null;
 	private Set<Integer> excludedRCs = null;
+
+	private boolean suppressBrowseGets = false;
+
+	// private Map<String, MQCFGR> dupIds = new HashMap<>(); //TODO: duplicate traces handling if such may occur
 
 	/**
 	 * Constructs an empty WmqTraceStream. Requires configuration settings to set input source.
@@ -132,6 +141,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 						excludedRCs.add(eRC);
 					}
 				}
+			} else if (WmqStreamProperties.PROP_SUPPRESS_BROWSE_GETS.equalsIgnoreCase(name)) {
+				suppressBrowseGets = Boolean.parseBoolean(value);
 			}
 		}
 	}
@@ -144,6 +155,10 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 		if (WmqStreamProperties.PROP_EXCLUDED_REASON_CODES.equalsIgnoreCase(name)) {
 			return rcExclude;
+		}
+
+		if (WmqStreamProperties.PROP_SUPPRESS_BROWSE_GETS.equalsIgnoreCase(name)) {
+			return suppressBrowseGets;
 		}
 
 		return super.getProperty(name);
@@ -207,8 +222,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 		Enumeration<?> prams = pcfMsg.getParameters();
 		while (prams.hasMoreElements()) {
-			Object param = prams.nextElement();
-			if (param instanceof MQCFGR) {
+			PCFParameter param = (PCFParameter) prams.nextElement();
+			if (isTraceParameter(param)) {
 				MQCFGR trace = (MQCFGR) param;
 				// collectAttrs(trace);
 				trC++;
@@ -232,16 +247,32 @@ public class WmqTraceStream extends WmqStreamPCF {
 					"WmqTraceStream.trace.init.no.traces"));
 		}
 
+		// if (!dupIds.isEmpty()) {
+		// dupIds.clear();
+		// }
+
 		return opFound;
+	}
+
+	/**
+	 * Checks whether provided PCF parameter contains MQ activity trace data.
+	 *
+	 * @param param
+	 *            PCF parameter to check
+	 * @return {@code true} if parameter is of type {@link com.ibm.mq.pcf.MQCFGR} and parameter's parameter field value
+	 *         is {@value com.ibm.mq.constants.MQConstants#MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
+	 */
+	public static boolean isTraceParameter(PCFParameter param) {
+		return param.getParameter() == MQConstants.MQGACF_ACTIVITY_TRACE && param instanceof MQCFGR;
 	}
 
 	private int getNextMatchingTrace(PCFMessage pcfMsg, int marker) {
 		Enumeration<?> prams = pcfMsg.getParameters();
 		int trI = 0;
 		while (prams.hasMoreElements()) {
-			Object param = prams.nextElement();
+			PCFParameter param = (PCFParameter) prams.nextElement();
 
-			if (param instanceof MQCFGR) {
+			if (isTraceParameter(param)) {
 				trI++;
 
 				if (trI > marker) {
@@ -257,10 +288,26 @@ public class WmqTraceStream extends WmqStreamPCF {
 	}
 
 	private boolean isTraceRelevant(MQCFGR trace) {
-		return opNameMatch(trace) && rcMatch(trace);
+		boolean relevant = opNameMatch(trace) && rcMatch(trace) && !isBrowseGetSuppressed(trace);
+
+		if (!relevant) {
+			logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+					"WmqTraceStream.trace.suppressed"), trace);
+		}
+
+		return relevant;
 	}
 
 	private boolean opNameMatch(MQCFGR trace) {
+		// Object msgId = trace.getParameterValue(PCFConstants.MQBACF_MSG_ID);
+		// String msgIdStr = msgId instanceof byte[] ? Utils.toHexString((byte[]) msgId) : "<EMPTY>";
+		//
+		// MQCFGR dTrace = dupIds.put(msgIdStr, trace);
+		// if (dTrace != null) {
+		// logger().log(OpLevel.ERROR, "Duplicate message found: {0} \n----\n{1} \n----\n{2}\n-----", msgIdStr,
+		// dTrace.toString(), trace.toString());
+		// }
+
 		String operationName = getOpName(trace);
 		boolean match = operationName == null || opNameMatcher == null
 				|| opNameMatcher.matcher(operationName).matches();
@@ -284,6 +331,29 @@ public class WmqTraceStream extends WmqStreamPCF {
 		return match;
 	}
 
+	private boolean isBrowseGetSuppressed(MQCFGR trace) {
+		if (!suppressBrowseGets) {
+			return false;
+		}
+
+		boolean browseGet = false;
+		PCFParameter go = trace.getParameter(MQConstants.MQIACF_GET_OPTIONS);
+		if (go != null) {
+			int getOptions = ((MQCFIN) go).getIntValue();
+
+			browseGet = Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_FIRST)
+					|| Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_NEXT)
+					|| Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_MSG_UNDER_CURSOR);
+
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqTraceStream.trace.browse.get"),
+					getOptions, MQConstants.decodeOptions(getOptions, "MQGMO_.*"), browseGet); // NON-NLS
+		}
+
+		return browseGet;
+	}
+
 	private static String getOpName(MQCFGR trace) {
 		String opName = null;
 		PCFParameter op = trace.getParameter(PCFConstants.MQIACF_OPERATION_ID);
@@ -296,9 +366,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	private static Integer getRC(MQCFGR trace) {
 		Integer traceRC = null;
-		PCFParameter op = trace.getParameter(PCFConstants.MQIACF_REASON_CODE);
-		if (op != null) {
-			traceRC = ((MQCFIN) op).getIntValue();
+		PCFParameter rc = trace.getParameter(PCFConstants.MQIACF_REASON_CODE);
+		if (rc != null) {
+			traceRC = ((MQCFIN) rc).getIntValue();
 		}
 
 		return traceRC;

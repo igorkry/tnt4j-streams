@@ -85,13 +85,13 @@ public class LoggerUtils {
 	 *            logger instance
 	 */
 	public static void setLoggerConfig(byte[] cfgData, EventSink logger) {
-		int lMask = detectLogger(logger);
+		int lUsed = detectLogger(logger);
 
-		if ((lMask & LOG4J) == LOG4J) {
+		if (Utils.matchMask(lUsed, LOG4J)) {
 			setLog4jConfig(cfgData, logger);
-		} else if ((lMask & LOGBACK) == LOGBACK) {
+		} else if (Utils.matchMask(lUsed, LOGBACK)) {
 			setLogbackConfig(cfgData, logger);
-		} else if ((lMask & JUL) == JUL) {
+		} else if (Utils.matchMask(lUsed, JUL)) {
 			setJULConfig(cfgData, logger);
 		} else {
 			logger.log(OpLevel.WARNING,
