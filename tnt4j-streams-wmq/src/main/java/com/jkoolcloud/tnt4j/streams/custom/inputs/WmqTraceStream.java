@@ -260,7 +260,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 	 * @param param
 	 *            PCF parameter to check
 	 * @return {@code true} if parameter is of type {@link com.ibm.mq.pcf.MQCFGR} and parameter's parameter field value
-	 *         is {@value com.ibm.mq.constants.MQConstants#MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
+	 *         is {@code MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
 	 */
 	public static boolean isTraceParameter(PCFParameter param) {
 		return param.getParameter() == MQConstants.MQGACF_ACTIVITY_TRACE && param instanceof MQCFGR;

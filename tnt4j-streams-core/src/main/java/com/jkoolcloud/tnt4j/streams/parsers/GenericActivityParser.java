@@ -38,8 +38,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This parser supports the following properties:
  * <ul>
  * <li>UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field 'Message' if
- * there is no mapping for that field in stream parser configuration or value was not resolved by parser from RAW
- * activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
+ * there is no mapping defined for that field in stream parser configuration or value was not resolved by parser from
+ * RAW activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
  * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
  * </ul>
  *
@@ -59,7 +59,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected final List<ActivityField> fieldList = new ArrayList<>();
 
-	private boolean useActivityAsMessage = false;
+	/**
+	 * Flag indicating weather RAW activity data shall be put into field 'Message' if there is no mapping defined for
+	 * that field in stream parser configuration or value was not resolved by parser from RAW activity data.
+	 */
+	protected boolean useActivityAsMessage = false;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -512,8 +516,18 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				: logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
 	}
 
+	/**
+	 * Activity RAW data item prepared to be parsed.
+	 */
 	protected class ItemToParse {
+		/**
+		 * Activity RAW data to parse.
+		 */
 		T item;
+
+		/**
+		 * Activity RAW data representation to be used as field 'Message' data.
+		 */
 		Object message;
 	}
 }

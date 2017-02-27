@@ -272,7 +272,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				}
 			}
 
-			if (ai.getMessage() == null && dataStr != null) {
+			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
 				// save entire activity string as message data
 				field = new ActivityField(StreamFieldType.Message.name());
 				applyFieldValue(stream, ai, field, dataStr);

@@ -3738,10 +3738,15 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 #### Generic parser parameters
  
- * UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping for
-  that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is recommended to use 
-  it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser configuration. 
-  Default value - `false`. (Optional)
+ * UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping 
+ defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
+ recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
+ configuration. Default value - `false`. (Optional)
+ 
+    sample:
+```xml
+    <property name="UseActivityDataAsMessageForUnset" value="true"/>    
+``` 
 
 #### Activity Name-Value parser
 

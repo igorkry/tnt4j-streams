@@ -215,7 +215,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				applyFieldValue(stream, ai, field, value);
 			}
 
-			if (ai.getMessage() == null) {
+			if (useActivityAsMessage && ai.getMessage() == null) {
 				// save entire activity string as message data
 				field = new ActivityField(StreamFieldType.Message.name());
 				applyFieldValue(stream, ai, field, dataStr);
