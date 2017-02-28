@@ -16,21 +16,25 @@
 
 package com.jkoolcloud.tnt4j.streams.outputs;
 
+import com.jkoolcloud.tnt4j.core.Snapshot;
+import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
+import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
+import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
  * Implements TNT4J-Streams output logger for activities provided as {@link ActivityInfo} entities to be recorded to
- * jKool Cloud service over TNT4J and JESL APIs.
+ * JKool Cloud over TNT4J and JESL APIs.
  *
  * @version $Revision: 1 $
  *
- * @see ActivityInfo#recordActivity(Tracker, long)
+ * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
  */
-public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
+public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
 
 	private boolean resolveServer = false;
@@ -60,14 +64,26 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo> {
 	 * {@inheritDoc}
 	 * <p>
 	 * 
-	 * @see ActivityInfo#recordActivity(Tracker, long)
+	 * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		Tracker tracker = getTracker(ai.getSourceFQN(resolveServer), Thread.currentThread());
+		String fqn = ai.getSourceFQN(resolveServer);
+		Tracker tracker = getTracker(fqn, Thread.currentThread());
 
-		ensureTrackerOpened(tracker);
+		Trackable t = ai.buildTrackable(tracker);
 
-		ai.recordActivity(tracker, CONN_RETRY_INTERVAL);
+		recordActivity(tracker, CONN_RETRY_INTERVAL, t);
+	}
+
+	@Override
+	protected void logJKCActivity(Tracker tracker, Trackable trackable) {
+		if (trackable instanceof TrackingActivity) {
+			tracker.tnt((TrackingActivity) trackable);
+		} else if (trackable instanceof Snapshot) {
+			tracker.tnt((Snapshot) trackable);
+		} else {
+			tracker.tnt((TrackingEvent) trackable);
+		}
 	}
 }

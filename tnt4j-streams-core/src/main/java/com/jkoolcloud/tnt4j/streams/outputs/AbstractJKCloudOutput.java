@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.sink.impl.BufferedEventSink;
 import com.jkoolcloud.tnt4j.source.DefaultSourceFactory;
 import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
@@ -47,16 +48,17 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  * tracker to use according streamed data source FQN and stream running {@link Thread}.
  *
  * @param <T>
- *            the type of handled activity data
+ *            the type of incoming activity data from stream
+ * @param <O>
+ *            the type of outgoing activity data package to be sent to JKool Cloud
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
+public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> {
 
 	private static final String DEFAULT_SOURCE_NAME = "com.jkoolcloud.tnt4j.streams"; // NON-NLS
 	/**
-	 * Delay between retries to submit data package to jKool Cloud Service if some transmission failure occurs, in
-	 * milliseconds.
+	 * Delay between retries to submit data package to JKool Cloud if some transmission failure occurs, in milliseconds.
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
 
@@ -245,6 +247,8 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 	 *
 	 * @param tracker
 	 *            tracker instance to check state and to open if it is not open
+	 *
+	 * @see #sendActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
 	 */
 	protected void ensureTrackerOpened(Tracker tracker) {
 		while (!stream.isHalted() && !tracker.isOpen()) {
@@ -333,4 +337,88 @@ public abstract class AbstractJKCloudOutput<T> implements TNTStreamOutput<T> {
 		defaultSource = trackerConfig.getSource().getSource();
 		defaultSource.setSSN(trackerConfig.getSource().getSSN());
 	}
+
+	/**
+	 * Sends activity data package to JKool Cloud using the specified tracker. Performs resend after defined period of
+	 * time if initial sending fails.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param retryPeriod
+	 *            period in milliseconds between activity resubmission in case of failure
+	 * @param activityData
+	 *            activity data to send
+	 * @throws Exception
+	 *             indicates an error when sending activity data to JKool Cloud
+	 */
+	protected void recordActivity(Tracker tracker, long retryPeriod, O activityData) throws Exception {
+		StreamsThread thread = null;
+		if (Thread.currentThread() instanceof StreamsThread) {
+			thread = (StreamsThread) Thread.currentThread();
+		}
+
+		boolean retryAttempt = false;
+		do {
+			try {
+				sendActivity(tracker, activityData);
+
+				if (retryAttempt) {
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"JKCloudActivityOutput.retry.successful"));
+				}
+				return;
+			} catch (IOException ioe) {
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"JKCloudActivityOutput.recording.failed"), ioe.getLocalizedMessage());
+				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"JKCloudActivityOutput.recording.failed.trace"), ioe);
+				Utils.close(tracker);
+				if (thread == null) {
+					throw ioe;
+				}
+				retryAttempt = true;
+				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"JKCloudActivityOutput.will.retry"), TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
+				StreamsThread.sleep(retryPeriod);
+			}
+		} while (thread != null && !thread.isStopRunning());
+	}
+
+	/**
+	 * Performs activity data package sending (logging) to JKool Cloud and checks tracker event sink state if there was
+	 * any communication errors.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param activityData
+	 *            activity data to send
+	 * @throws IOException
+	 *             if communication with JKool Cloud fails
+	 *
+	 * @see #ensureTrackerOpened(com.jkoolcloud.tnt4j.tracker.Tracker)
+	 * @see #logJKCActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
+	 */
+	protected void sendActivity(Tracker tracker, O activityData) throws IOException {
+		boolean handleErrorInternally = !(tracker.getEventSink() instanceof BufferedEventSink);
+
+		ensureTrackerOpened(tracker);
+
+		logJKCActivity(tracker, activityData);
+
+		if (tracker.getEventSink().errorState() && handleErrorInternally) {
+			if (tracker.getEventSink().getLastError() instanceof IOException) {
+				throw (IOException) tracker.getEventSink().getLastError();
+			}
+		}
+	}
+
+	/**
+	 * Logs given activity data using provided tracker to communicate JKool Cloud.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param activityData
+	 *            activity data to send
+	 */
+	protected abstract void logJKCActivity(Tracker tracker, O activityData);
 }

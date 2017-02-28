@@ -22,7 +22,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to jKool Cloud
+ * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to JKool Cloud
  * service over TNT4J and JESL APIs.
  * <p>
  * This output logger primarily is used by {@link com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream} to redirect
@@ -33,7 +33,7 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  * @see com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream
  * @see Tracker#log(OpLevel, String, Object...)
  */
-public class JKCloudJsonOutput extends AbstractJKCloudOutput<String> {
+public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudJsonOutput.class);
 
 	/**
@@ -58,8 +58,11 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String> {
 	public void logItem(String ai) throws Exception {
 		Tracker tracker = getTracker(null, Thread.currentThread());
 
-		ensureTrackerOpened(tracker);
+		recordActivity(tracker, CONN_RETRY_INTERVAL, ai);
+	}
 
-		tracker.log(OpLevel.INFO, ai);
+	@Override
+	protected void logJKCActivity(Tracker tracker, String trackable) {
+		tracker.log(OpLevel.INFO, trackable);
 	}
 }

@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -55,13 +56,13 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void recordActivityTest() throws Exception {
+	public void streamFlowTest() throws Exception {
 		ts.addParser(parser);
 		streamThread.start();
 		when(ai.isFilteredOut()).thenReturn(false);
 
 		Thread.sleep(500);
-		verify(ai).recordActivity(any(Tracker.class), any(Long.class));
+		Trackable trackable = verify(ai).buildTrackable(any(Tracker.class));
 		ts.halt(true);
 		ts.cleanup();
 	}

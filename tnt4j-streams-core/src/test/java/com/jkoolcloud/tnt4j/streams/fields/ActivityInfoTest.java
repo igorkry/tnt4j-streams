@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -112,7 +111,7 @@ public class ActivityInfoTest {
 	}
 
 	@Test
-	public void recordActivityTest() throws Exception {
+	public void buildTrackableTest() throws Exception {
 		Tracker tracker = mock(Tracker.class);
 		UUIDFactory uiFactory = mock(UUIDFactory.class);
 		TrackerConfig tConfig = mock(TrackerConfig.class);
@@ -132,16 +131,19 @@ public class ActivityInfoTest {
 		when(tEvent.getOperation()).thenReturn(new Operation("TEST", OpType.SEND));
 
 		ActivityInfo activityInfo = createTestTrackable(false, OpType.ACTIVITY);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(TrackingActivity.class));
+		TrackingActivity ta = (TrackingActivity) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built tracking activity is null", ta);
+		verify(tracker).tnt(ta);
 
 		activityInfo = createTestTrackable(false, OpType.EVENT);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(TrackingEvent.class));
+		TrackingEvent te = (TrackingEvent) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built tracking event is null", te);
+		verify(tracker).tnt(te);
 
 		activityInfo = createTestTrackable(false, OpType.SNAPSHOT);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(PropertySnapshot.class));
+		PropertySnapshot ps = (PropertySnapshot) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built property snapshot is null", ps);
+		verify(tracker).tnt(ps);
 
 		// Utils.close(verify(tracker));
 	}

@@ -33,7 +33,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
@@ -43,9 +42,9 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
- * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKool Cloud Service.
+ * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKool Cloud.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
@@ -104,7 +103,7 @@ public class ActivityInfo {
 
 	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
-	 * the jKool Cloud Service.
+	 * the JKool Cloud.
 	 *
 	 * @param field
 	 *            field to apply
@@ -143,7 +142,7 @@ public class ActivityInfo {
 
 		if (fieldValue == null) {
 			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.field.null"),
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.field.value.null"),
 					field);
 			return;
 		}
@@ -467,7 +466,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #recordActivity(Tracker, long)} is invoked. Same as invoking
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)} is invoked. Same as invoking
 	 * {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
 	 *
 	 * @param propName
@@ -478,7 +477,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #recordActivity(Tracker, long)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
 	 * @see #addActivityProperty(String, Object, String)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
@@ -487,7 +486,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #recordActivity(Tracker, long)} is invoked.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -499,7 +498,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #recordActivity(Tracker, long)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
@@ -605,31 +604,28 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Creates the appropriate data message to send to jKool Cloud Service and records the activity using the specified
-	 * tracker.
+	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
+	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
+	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
 	 *
 	 * @param tracker
-	 *            communication gateway to use to record activity
-	 * @param retryPeriod
-	 *            period in milliseconds between activity resubmission in case of failure
+	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
+	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
 	 *
-	 * @throws Exception
-	 *             indicates an error building data message or sending data to jKool Cloud Service
+	 * @return trackable instance made from this activity entity data
+	 * @throws java.lang.IllegalArgumentException
+	 *             if {@code tracker} is null
+	 * @see com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput#logItem(ActivityInfo)
 	 */
-	public void recordActivity(Tracker tracker, long retryPeriod) throws Exception {
+	public Trackable buildTrackable(Tracker tracker) {
 		if (tracker == null) {
-			LOGGER.log(OpLevel.WARNING,
+			throw new IllegalArgumentException(
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
-			return;
 		}
 
 		resolveServer(false);
 		determineTimes();
 
-		send(tracker, retryPeriod, buildTrackable(tracker));
-	}
-
-	private Trackable buildTrackable(Tracker tracker) {
 		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
 
@@ -640,43 +636,6 @@ public class ActivityInfo {
 		} else {
 			return buildEvent(tracker, eventName, trackId);
 		}
-	}
-
-	private void send(Tracker tracker, long retryPeriod, Trackable trackable) throws Exception {
-		StreamsThread thread = null;
-		if (Thread.currentThread() instanceof StreamsThread) {
-			thread = (StreamsThread) Thread.currentThread();
-		}
-		boolean retryAttempt = false;
-		do {
-			try {
-				if (trackable instanceof TrackingActivity) {
-					tracker.tnt((TrackingActivity) trackable);
-				} else if (trackable instanceof Snapshot) {
-					tracker.tnt((Snapshot) trackable);
-				} else {
-					tracker.tnt((TrackingEvent) trackable);
-				}
-
-				if (retryAttempt) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.retry.successful"));
-				}
-				return;
-			} catch (Exception ioe) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.recording.failed"), ioe);
-				Utils.close(tracker);
-				if (thread == null) {
-					throw ioe;
-				}
-				retryAttempt = true;
-				LOGGER.log(OpLevel.INFO,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.will.retry"),
-						TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
-				StreamsThread.sleep(retryPeriod);
-			}
-		} while (thread != null && !thread.isStopRunning());
 	}
 
 	/**

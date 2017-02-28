@@ -113,7 +113,7 @@ public enum MessageType {
 	public static MessageType valueOf(Object value) {
 		if (value == null) {
 			throw new IllegalArgumentException(
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "MessageType.null.object"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "MessageType.object.null"));
 		}
 		if (value instanceof Number) {
 			return valueOf(((Number) value).intValue());
