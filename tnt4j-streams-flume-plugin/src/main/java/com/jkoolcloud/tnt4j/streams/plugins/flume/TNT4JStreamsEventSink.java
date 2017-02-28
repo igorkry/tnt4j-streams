@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Extends Apache Flume {@link AbstractSink} to deliver output events to JKool Cloud service.
+ * Extends Apache Flume {@link AbstractSink} to deliver output events to JKool Cloud.
  *
  * @version $Revision: 1 $
  */
@@ -137,7 +137,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	}
 
 	/**
-	 * Starts Apache Flume output events sink to JKool Cloud service.
+	 * Starts Apache Flume output events sink to JKool Cloud.
 	 */
 	@Override
 	public synchronized void start() {

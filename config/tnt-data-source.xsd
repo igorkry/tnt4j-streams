@@ -1039,7 +1039,7 @@
     <xs:complexType name="FieldMap">
         <xs:annotation>
             <xs:documentation>
-                Maps a raw value from the activity string to the required field value for jKool Cloud Service.
+                Maps a raw value from the activity string to the required field value for JKool Cloud.
             </xs:documentation>
         </xs:annotation>
         <xs:attribute name="source" use="required" type="xs:string">
@@ -1221,8 +1221,7 @@
                                                 maxOccurs="unbounded">
                                         <xs:annotation>
                                             <xs:documentation>
-                                                Maps a field value from the activity string to the required field value
-                                                for jKool Cloud Service.
+                                                Maps a field value from the activity string to the required field value for JKool Cloud.
                                             </xs:documentation>
                                         </xs:annotation>
                                     </xs:element>
@@ -1242,8 +1241,7 @@
                                     maxOccurs="unbounded">
                             <xs:annotation>
                                 <xs:documentation>
-                                    Maps a field value from the activity string to the required field value for jKool
-                                    Cloud Service.
+                                    Maps a field value from the activity string to the required field value for JKool Cloud.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:element>

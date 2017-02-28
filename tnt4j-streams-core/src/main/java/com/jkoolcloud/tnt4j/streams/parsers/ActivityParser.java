@@ -81,7 +81,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
-	 * to jKool Cloud Service.
+	 * to JKool Cloud.
 	 *
 	 * @param stream
 	 *            parent stream

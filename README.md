@@ -347,7 +347,7 @@ After processing one JMS message TNT4J activity event will contain fields mapped
 ### Field value transformations
 
 In streams configuration You can define field or locator resolved values transformations. In general transformations performs resolved 
-activity value post-processing before sending it to jKool Cloud service: i.e. extracts file name from resolved activity file path.
+activity value post-processing before sending it to JKool Cloud: i.e. extracts file name from resolved activity file path.
 
 To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`.
 
@@ -2788,8 +2788,8 @@ containing field `TomcatActive`.
 
 #### Redirecting TNT4J streams
 
-This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to jKool Cloud service 
-over single `TNT4J-Streams` stream instance.
+This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to JKool Cloud over single
+`TNT4J-Streams` stream instance.
 
 Sample files can be found in `samples/stream-jmx` directory.
 
@@ -2833,7 +2833,7 @@ accepted, stream reads incoming data from connection dedicated socket.
 `RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
 accept inbound connection.
 
-Stream referenced object `JMXRedirectOutput` sends JSON formatted data to jKool Cloud service.
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to JKool Cloud.
 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
 additional JSON reformatting in default TNT4J data flow.  
@@ -3210,7 +3210,7 @@ Configuration data format is same for all sources now.
 
 Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with jKool Cloud token assigned for You.
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with JKool Cloud token assigned for You.
 
 To define `tnt4j.properties` file location use system property `-Dtnt4j.config` i.e. `-Dtnt4j.config="./config/tnt4j.properties"`.
 
