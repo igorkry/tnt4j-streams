@@ -37,12 +37,12 @@
         <field name="Location" locator="substring-before(string(/transaction/@xsi:noNamespaceSchemaLocation),'.xsd')"
                locator-type="Label"/>
         <field name="EventType" value="EVENT"/>
-
     </parser>
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">-->
     <!--<property name="QueueManager" value="MB8QMGR"/>-->
     <!--<property name="Queue" value="NASTEL.FTE.EVENTS"/>-->
+
     <!--<parser-ref name="MQFTEParser"/>-->
     <!--</stream>-->
 
