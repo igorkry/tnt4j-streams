@@ -60,7 +60,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	/**
 	 * Delay between retries to submit data package to JKool Cloud if some transmission failure occurs, in milliseconds.
 	 */
-	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
+	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
 	private static final String FILE_PREFIX = "file://"; // NON-NLS
 	private static final String ZK_PREFIX = "zk://"; // NON-NLS
@@ -247,23 +247,20 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 *
 	 * @param tracker
 	 *            tracker instance to check state and to open if it is not open
+	 * @throws java.io.IOException
+	 *             if error opening tracker handle
 	 *
 	 * @see #sendActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
 	 */
-	protected void ensureTrackerOpened(Tracker tracker) {
-		while (!stream.isHalted() && !tracker.isOpen()) {
+	protected void ensureTrackerOpened(Tracker tracker) throws IOException {
+		if (!tracker.isOpen()) {
 			try {
 				tracker.open();
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTStreamOutput.failed.to.connect"), tracker, ioe);
-				Utils.close(tracker);
-				logger().log(OpLevel.INFO,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.will.retry"),
-						TimeUnit.MILLISECONDS.toSeconds(CONN_RETRY_INTERVAL));
-				if (!stream.isHalted()) {
-					StreamsThread.sleep(CONN_RETRY_INTERVAL);
-				}
+						"TNTStreamOutput.failed.to.open"), tracker, ioe);
+				// Utils.close(tracker);
+				throw ioe;
 			}
 		}
 	}
@@ -352,6 +349,17 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 *             indicates an error when sending activity data to JKool Cloud
 	 */
 	protected void recordActivity(Tracker tracker, long retryPeriod, O activityData) throws Exception {
+		if (tracker == null) {
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
+		}
+
+		if (activityData == null) {
+			logger().log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.null.activity"));
+			return;
+		}
+
 		StreamsThread thread = null;
 		if (Thread.currentThread() instanceof StreamsThread) {
 			thread = (StreamsThread) Thread.currentThread();
@@ -364,22 +372,26 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 				if (retryAttempt) {
 					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"JKCloudActivityOutput.retry.successful"));
+							"TNTStreamOutput.retry.successful"));
 				}
 				return;
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"JKCloudActivityOutput.recording.failed"), ioe.getLocalizedMessage());
+						"TNTStreamOutput.recording.failed"), ioe.getLocalizedMessage());
+				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTStreamOutput.recording.failed.activity"), activityData); // TODO: maybe use some formatter?
 				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"JKCloudActivityOutput.recording.failed.trace"), ioe);
+						"TNTStreamOutput.recording.failed.trace"), ioe);
 				Utils.close(tracker);
 				if (thread == null) {
 					throw ioe;
 				}
 				retryAttempt = true;
-				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"JKCloudActivityOutput.will.retry"), TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
-				StreamsThread.sleep(retryPeriod);
+				if (!thread.isStopRunning()) {
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"TNTStreamOutput.will.retry"), TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
+					StreamsThread.sleep(retryPeriod);
+				}
 			}
 		} while (thread != null && !thread.isStopRunning());
 	}

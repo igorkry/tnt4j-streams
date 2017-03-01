@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -44,7 +45,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @version $Revision: 1 $
  */
 public class DirWatchdog {
-	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = 5 * 1000L;
+	private static final long DEFAULT_WATCH_REFRESH_INTERVAL = TimeUnit.SECONDS.toMillis(5);
 
 	private String dirPath;
 	private long interval;

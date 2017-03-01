@@ -441,7 +441,7 @@ public class ActivityFieldLocator implements Cloneable {
 		if (source == null) {
 			target = mapCatchAll;
 		} else {
-			String srcString = String.valueOf(source);
+			String srcString = Utils.toString(source);
 			if (valueMap != null) {
 				target = valueMap.get(srcString);
 			}
