@@ -234,12 +234,27 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			if (!trackersMap.isEmpty()) {
 				for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
 					Tracker tracker = te.getValue();
+					dumpTrackerStats(tracker, te.getKey());
 					Utils.close(tracker);
 				}
 
 				trackersMap.clear();
 			}
 		}
+	}
+
+	private void dumpTrackerStats(Tracker tracker) {
+		dumpTrackerStats(tracker, tracker.getSource() == null ? "<UNKNOWN>" : tracker.getSource().getFQName()); // NON-NLS
+	}
+
+	private void dumpTrackerStats(Tracker tracker, String trackerId) {
+		if (tracker == null) {
+			return;
+		}
+
+		logger().log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.tracker.statistics"),
+				trackerId, Utils.toString(tracker.getStats()));
 	}
 
 	/**
@@ -259,6 +274,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTStreamOutput.failed.to.open"), tracker, ioe);
+				// dumpTrackerStats(tracker);
 				// Utils.close(tracker);
 				throw ioe;
 			}
@@ -382,6 +398,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 						"TNTStreamOutput.recording.failed.activity"), activityData); // TODO: maybe use some formatter?
 				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTStreamOutput.recording.failed.trace"), ioe);
+				dumpTrackerStats(tracker);
 				Utils.close(tracker);
 				if (thread == null) {
 					throw ioe;
