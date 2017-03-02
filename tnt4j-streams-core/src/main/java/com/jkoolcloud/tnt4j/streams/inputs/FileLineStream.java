@@ -107,7 +107,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			for (File f : activityFiles) {
 				tbc += f.length();
 				try {
-					tlc += Utils.countLines(new FileReader(f));
+					tlc += Utils.countLines(new FileInputStream(f));
 				} catch (IOException exc) {
 				}
 			}
@@ -166,7 +166,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 			if (startFromLatestActivity && fileToRead != null) {
 				lastModifTime = fileToRead.lastModified();
-				lineNumber = Utils.countLines(new FileReader(fileToRead));
+				lineNumber = Utils.countLines(new FileInputStream(fileToRead));
 			}
 		}
 

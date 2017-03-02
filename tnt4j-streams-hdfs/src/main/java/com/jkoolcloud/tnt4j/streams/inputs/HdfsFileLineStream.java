@@ -124,7 +124,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				try {
 					ContentSummary cSummary = fs.getContentSummary(f);
 					tbc += cSummary.getLength();
-					tlc += Utils.countLines(new InputStreamReader(fs.open(f)));
+					tlc += Utils.countLines(fs.open(f));
 				} catch (IOException exc) {
 				}
 			}
@@ -189,7 +189,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 			if (startFromLatestActivity && fileToRead != null) {
 				lastModifTime = getModificationTime(fileToRead, fs);
-				lineNumber = Utils.countLines(new InputStreamReader(fs.open(fileToRead)));
+				lineNumber = Utils.countLines(fs.open(fileToRead));
 			}
 		}
 

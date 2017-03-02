@@ -114,6 +114,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Base64 decodes the specified encoded data string.
+	 *
+	 * @param src
+	 *            base64 encoded string to decode
+	 * @return decoded byte sequence
+	 */
+	public static byte[] base64Decode(String src) {
+		return Base64.decodeBase64(src);
+	}
+
+	/**
 	 * Converts an array of bytes into a string representing the hexadecimal bytes values.
 	 *
 	 * @param src
@@ -337,7 +348,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return number of lines currently available in input
 	 * @throws java.io.IOException
 	 *             If an I/O error occurs
+	 * @deprecated use {@link #countLines(java.io.InputStream)} instead
 	 */
+	@Deprecated
 	public static int countLines(Reader reader) throws IOException {
 		int lCount = 0;
 		LineNumberReader lineReader = null;
@@ -351,6 +364,38 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return lCount;
+	}
+
+	/**
+	 * Counts text lines available in input.
+	 *
+	 * @param is
+	 *            a {@link java.io.InputStream} object to provide the underlying file input stream
+	 * @return number of lines currently available in input
+	 * @throws java.io.IOException
+	 *             If an I/O error occurs
+	 */
+	public static int countLines(InputStream is) throws IOException {
+		InputStream bis = is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is);
+		try {
+			byte[] c = new byte[1024];
+			int count = 0;
+			int readChars = 0;
+			boolean endsWithoutNewLine = false;
+			while ((readChars = bis.read(c)) != -1) {
+				for (int i = 0; i < readChars; ++i) {
+					if (c[i] == '\n')
+						++count;
+				}
+				endsWithoutNewLine = (c[readChars - 1] != '\n');
+			}
+			if (endsWithoutNewLine) {
+				++count;
+			}
+			return count;
+		} finally {
+			Utils.close(bis);
+		}
 	}
 
 	/**
