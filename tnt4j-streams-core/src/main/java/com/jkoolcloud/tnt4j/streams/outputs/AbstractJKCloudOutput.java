@@ -243,6 +243,15 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 	}
 
+	// protected void closeTracker(String aiSourceFQN, Tracker tracker) {
+	// String trackerId = getTrackersMapKey(Thread.currentThread(), aiSourceFQN);
+	// synchronized (trackersMap) {
+	// trackersMap.remove(trackerId);
+	// }
+	// dumpTrackerStats(tracker, trackerId);
+	// Utils.close(tracker);
+	// }
+
 	private void dumpTrackerStats(Tracker tracker) {
 		dumpTrackerStats(tracker, tracker.getSource() == null ? "<UNKNOWN>" : tracker.getSource().getFQName()); // NON-NLS
 	}
@@ -274,8 +283,6 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTStreamOutput.failed.to.open"), tracker, ioe);
-				// dumpTrackerStats(tracker);
-				// Utils.close(tracker);
 				throw ioe;
 			}
 		}
@@ -398,8 +405,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 						"TNTStreamOutput.recording.failed.activity"), activityData); // TODO: maybe use some formatter?
 				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"TNTStreamOutput.recording.failed.trace"), ioe);
-				dumpTrackerStats(tracker);
-				Utils.close(tracker);
+				resetTracker(tracker);
 				if (thread == null) {
 					throw ioe;
 				}
@@ -411,6 +417,13 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				}
 			}
 		} while (thread != null && !thread.isStopRunning());
+	}
+
+	private void resetTracker(Tracker tracker) throws IOException {
+		EventSink eSink = tracker.getEventSink();
+
+		eSink.close();
+		// eSink.open();
 	}
 
 	/**
@@ -428,17 +441,34 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @see #logJKCActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
 	 */
 	protected void sendActivity(Tracker tracker, O activityData) throws IOException {
-		boolean handleErrorInternally = !(tracker.getEventSink() instanceof BufferedEventSink);
+		EventSink eSink = tracker.getEventSink();
+		boolean handleErrorInternally = !(eSink instanceof BufferedEventSink);
+		long dropCountBefore = handleErrorInternally
+				? (long) tracker.getStats().get(Utils.qualify(getTrackerImpl(tracker), Tracker.KEY_DROP_COUNT)) : -1;
 
 		ensureTrackerOpened(tracker);
 
 		logJKCActivity(tracker, activityData);
 
-		if (tracker.getEventSink().errorState() && handleErrorInternally) {
-			if (tracker.getEventSink().getLastError() instanceof IOException) {
-				throw (IOException) tracker.getEventSink().getLastError();
+		if (handleErrorInternally) {
+			if (eSink.errorState()) {
+				if (eSink.getLastError() instanceof IOException) {
+					throw (IOException) eSink.getLastError();
+				}
+			}
+
+			long dropCountAfter = (long) tracker.getStats()
+					.get(Utils.qualify(getTrackerImpl(tracker), Tracker.KEY_DROP_COUNT));
+
+			if (dropCountBefore >= 0 && dropCountAfter > dropCountBefore) {
+				throw new IOException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTStreamOutput.tracker.drop.detected"));
 			}
 		}
+	}
+
+	private static Tracker getTrackerImpl(Tracker tracker) {
+		return tracker instanceof TrackingLogger ? ((TrackingLogger) tracker).getTracker() : tracker;
 	}
 
 	/**
