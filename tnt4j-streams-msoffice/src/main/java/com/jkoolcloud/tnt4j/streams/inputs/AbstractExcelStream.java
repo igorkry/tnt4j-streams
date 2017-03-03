@@ -150,29 +150,31 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	 *         available in this workbook.
 	 */
 	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
-		if (sheetIterator == null || !sheetIterator.hasNext()) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-					"AbstractExcelStream.no.more.sheets"));
+		while (true) {
+			if (sheetIterator == null || !sheetIterator.hasNext()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+						"AbstractExcelStream.no.more.sheets"));
 
-			return null;
-		}
-
-		Sheet sheet = sheetIterator.next();
-		boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
-
-		if (!match) {
-			if (countSkips) {
-				skipFilteredActivities();
+				return null;
 			}
-			return getNextNameMatchingSheet(countSkips);
+
+			Sheet sheet = sheetIterator.next();
+			boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
+
+			if (!match) {
+				if (countSkips) {
+					skipFilteredActivities();
+				}
+				continue;
+			}
+
+			activityPosition = workbook.getSheetIndex(sheet);
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+					"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
+
+			return sheet;
 		}
-
-		activityPosition = workbook.getSheetIndex(sheet);
-
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-				"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
-
-		return sheet;
 	}
 
 	/**

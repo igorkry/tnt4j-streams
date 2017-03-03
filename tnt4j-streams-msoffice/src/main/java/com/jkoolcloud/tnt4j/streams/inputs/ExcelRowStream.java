@@ -115,37 +115,39 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	 */
 	@Override
 	public Row getNextItem() throws Exception {
-		if (currSheet == null || !rowIterator.hasNext()) {
-			activityPosition = 0;
-			currSheet = getNextNameMatchingSheet(false);
+		while (true) {
+			if (currSheet == null || !rowIterator.hasNext()) {
+				activityPosition = 0;
+				currSheet = getNextNameMatchingSheet(false);
 
-			if (currSheet == null) {
-				return null;
-			} else {
-				rowIterator = currSheet.rowIterator();
-				totalRows += currSheet.getPhysicalNumberOfRows();
+				if (currSheet == null) {
+					return null;
+				} else {
+					rowIterator = currSheet.rowIterator();
+					totalRows += currSheet.getPhysicalNumberOfRows();
+				}
 			}
+
+			if (!rowIterator.hasNext()) {
+				continue;
+			}
+
+			activityPosition++;
+			if (!rowRange.inRange(activityPosition)) {
+				// skip row if it is not in range
+				skipFilteredActivities();
+				rowIterator.next();
+
+				continue;
+			}
+
+			Row row = rowIterator.next();
+
+			if (row != null) {
+				addStreamedBytesCount(getRowBytesCount(row));
+			}
+
+			return row;
 		}
-
-		if (!rowIterator.hasNext()) {
-			return getNextItem();
-		}
-
-		activityPosition++;
-		if (!rowRange.inRange(activityPosition)) {
-			// skip row if it is not in range
-			skipFilteredActivities();
-			rowIterator.next();
-
-			return getNextItem();
-		}
-
-		Row row = rowIterator.next();
-
-		if (row != null) {
-			addStreamedBytesCount(getRowBytesCount(row));
-		}
-
-		return row;
 	}
 }

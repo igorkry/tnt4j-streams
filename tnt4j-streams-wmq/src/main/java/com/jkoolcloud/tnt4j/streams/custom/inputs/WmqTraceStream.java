@@ -166,20 +166,22 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	@Override
 	public PCFMessage getNextItem() throws Exception {
-		if (isPCFMessageConsumed(pcfMessage)) {
-			pcfMessage = super.getNextItem();
+		while (true) {
+			if (isPCFMessageConsumed(pcfMessage)) {
+				pcfMessage = super.getNextItem();
 
-			if (pcfMessage != null) {
-				boolean hasMatchingTraces = initTrace(pcfMessage);
+				if (pcfMessage != null) {
+					boolean hasMatchingTraces = initTrace(pcfMessage);
 
-				if (!hasMatchingTraces) {
-					pcfMessage = null;
-					return getNextItem();
+					if (!hasMatchingTraces) {
+						pcfMessage = null;
+						continue;
+					}
 				}
 			}
-		}
 
-		return pcfMessage;
+			return pcfMessage;
+		}
 	}
 
 	private boolean isPCFMessageConsumed(PCFMessage pcfMsg) {

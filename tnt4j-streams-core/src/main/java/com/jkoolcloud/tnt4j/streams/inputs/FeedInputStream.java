@@ -262,22 +262,24 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	 */
 	@Override
 	public T getNextItem() throws Exception {
-		if (dataFeed == null) {
-			startDataStream();
-		}
-		if (dataFeed.isClosed() || dataFeed.hasError()) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.reader.terminated"));
-			if (restartOnInputClose && socketPort != null) {
-				resetDataStream();
-				return getNextItem();
-			} else {
-				return null;
+		while (true) {
+			if (dataFeed == null) {
+				startDataStream();
 			}
+			if (dataFeed.isClosed() || dataFeed.hasError()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"FeedInputStream.reader.terminated"));
+				if (restartOnInputClose && socketPort != null) {
+					resetDataStream();
+					continue;
+				} else {
+					return null;
+				}
+			}
+			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.stream.still.open"));
+			return dataFeed.getInput();
 		}
-		logger().log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FeedInputStream.stream.still.open"));
-		return dataFeed.getInput();
 	}
 
 	private void resetDataStream() throws Exception {
