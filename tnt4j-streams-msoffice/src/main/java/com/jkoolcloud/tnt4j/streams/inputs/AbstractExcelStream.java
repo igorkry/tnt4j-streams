@@ -27,7 +27,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -122,7 +122,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 
-		workbook = new XSSFWorkbook(new FileInputStream(fileName));
+		workbook =  WorkbookFactory.create(new FileInputStream(fileName)); 
 		sheetIterator = workbook.sheetIterator();
 	}
 
