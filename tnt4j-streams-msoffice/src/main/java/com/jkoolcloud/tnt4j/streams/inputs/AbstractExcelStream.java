@@ -16,18 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -122,7 +118,13 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 
-		workbook = new XSSFWorkbook(new FileInputStream(fileName));
+		File wsFile = new File(fileName);
+		if (!wsFile.exists()) {
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractExcelStream.file.not.exist", fileName));
+		}
+
+		workbook = WorkbookFactory.create(wsFile);
 		sheetIterator = workbook.sheetIterator();
 	}
 
