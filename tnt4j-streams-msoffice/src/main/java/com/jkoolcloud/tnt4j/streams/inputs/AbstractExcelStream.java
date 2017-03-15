@@ -118,13 +118,13 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 
-		File wsFile = new File(fileName);
-		if (!wsFile.exists()) {
+		File wbFile = new File(fileName);
+		if (!wbFile.exists()) {
 			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 					MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractExcelStream.file.not.exist", fileName));
 		}
 
-		workbook = WorkbookFactory.create(wsFile);
+		workbook = WorkbookFactory.create(wbFile);
 		sheetIterator = workbook.sheetIterator();
 	}
 
