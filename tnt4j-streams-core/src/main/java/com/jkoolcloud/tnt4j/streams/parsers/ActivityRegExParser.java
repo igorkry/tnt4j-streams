@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -101,13 +102,13 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 
 	@Override
 	public void addField(ActivityField field) {
-		List<ActivityFieldLocator> locations = field.getLocators();
-		if (locations == null) {
+		List<ActivityFieldLocator> locators = field.getLocators();
+		if (CollectionUtils.isEmpty(locators)) {
 			return;
 		}
 		List<ActivityFieldLocator> matchLocs = new ArrayList<>();
 		List<ActivityFieldLocator> groupLocs = new ArrayList<>();
-		for (ActivityFieldLocator locator : locations) {
+		for (ActivityFieldLocator locator : locators) {
 			ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
 			try {
 				locType = ActivityFieldLocatorType.valueOf(locator.getType());
@@ -253,7 +254,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			if (regexData instanceof Matcher) {
 				Matcher matcher = (Matcher) regexData;
 
-				if (loc >= 0 && loc < matcher.groupCount()) {
+				if (loc >= 0 && loc <= matcher.groupCount()) {
 					val = matcher.group(loc);
 				}
 			} else {
