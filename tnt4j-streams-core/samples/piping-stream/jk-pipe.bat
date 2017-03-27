@@ -1,4 +1,6 @@
-@echo OFF
+@echo off
+setlocal
+
 set PARSERS_CFG=%*
 if "%1"=="" goto set_default
 goto run_stream
@@ -7,5 +9,5 @@ goto run_stream
 set PARSERS_CFG=parsers.xml
 
 :run_stream
-@echo ON
+@echo on
 ..\..\bin\tnt4j-streams.bat -p:%PARSERS_CFG%
