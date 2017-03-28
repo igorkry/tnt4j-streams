@@ -85,12 +85,12 @@ public class HdfsFileLineStreamTest {
 
 		TestFileList files = new TestFileList(false);
 
-		final String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix()
-				+ "*.TST").replace("\\", "/");
+		final String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix() // NON-NLS
+				+ "*.TST").replace("\\", "/"); // NON-NLS
 
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, fileName);
-		props.put(StreamProperties.PROP_RESTORE_STATE, "false");
+		props.put(StreamProperties.PROP_RESTORE_STATE, "false"); // NON-NLS
 
 		when(fs.open(any(Path.class))).thenReturn(new FSDataInputStream(new TestInputStreamStub()));
 		final FileStatus fileStatusMock = mock(FileStatus.class);
@@ -101,13 +101,13 @@ public class HdfsFileLineStreamTest {
 		when(fileStatusMock.getPath()).thenReturn(mock(Path.class));
 		when(fs.getContentSummary(any(Path.class))).thenReturn(mock(ContentSummary.class));
 
-		Method m = FileSystem.class.getDeclaredMethod("addFileSystemForTesting", URI.class, Configuration.class,
+		Method m = FileSystem.class.getDeclaredMethod("addFileSystemForTesting", URI.class, Configuration.class, // NON-NLS
 				FileSystem.class);
 		m.setAccessible(true);
 		m.invoke(FileSystem.class, URI.create(fileName), new Configuration(), fs);
 
 		StreamThread st = mock(StreamThread.class);
-		st.setName("HdfsFileLineStreamTestThreadName");
+		st.setName("HdfsFileLineStreamTestThreadName"); // NON-NLS
 		stream.setOwnerThread(st);
 
 		stream.setProperties(props.entrySet());

@@ -51,7 +51,7 @@ public class StreamsConfigLoaderTest {
 			}
 		}
 
-		TEST_FILE_NAME = samplesDir.getPath() + "/apache-access-multi-log/tnt-data-source.xml";
+		TEST_FILE_NAME = samplesDir.getPath() + "/apache-access-multi-log/tnt-data-source.xml"; // NON-NLS
 
 		File testfile = new File(TEST_FILE_NAME);
 		assertTrue("Test configuration failure: XML file doesn't exist ", testfile.exists());
@@ -92,7 +92,7 @@ public class StreamsConfigLoaderTest {
 		char[] buffer = new char[(int) filSize];
 		fr.read(buffer);
 		fw.write(buffer);
-		fw.write("ERROR<>");
+		fw.write("ERROR<>"); // NON-NLS
 		Utils.close(fw);
 		Utils.close(fr);
 		new StreamsConfigLoader(TEST_FILE_NAME);
@@ -100,7 +100,7 @@ public class StreamsConfigLoaderTest {
 
 	@Test(expected = IOException.class)
 	public void testStreamsConfigConfigWithFileNameNotFound() throws Exception {
-		new StreamsConfigLoader(TEST_FILE_NAME + "ERROR");
+		new StreamsConfigLoader(TEST_FILE_NAME + "ERROR"); // NON-NLS
 	}
 
 	@Test

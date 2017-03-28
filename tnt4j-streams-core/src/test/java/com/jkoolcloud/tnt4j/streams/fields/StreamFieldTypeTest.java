@@ -31,7 +31,7 @@ public class StreamFieldTypeTest {
 		for (StreamFieldType type : StreamFieldType.values()) {
 			final Enum<?> enumRet = type.getEnum(0);
 			if (type.getDataType() == Enum.class) {
-				assertTrue("Enum " + type.name() + " is of " + enumRet.getClass(), enumRet instanceof Enum);
+				assertTrue("Enum " + type.name() + " is of " + enumRet.getClass(), enumRet instanceof Enum); // NON-NLS
 				for (Enum<?> enumOn : enumRet.getClass().getEnumConstants()) {
 					assertEquals(enumOn, type.getEnum(enumOn.name()));
 					assertEquals(enumOn.name(), type.getEnumLabel(enumOn.ordinal()));

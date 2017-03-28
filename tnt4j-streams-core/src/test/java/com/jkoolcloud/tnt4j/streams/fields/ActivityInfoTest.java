@@ -88,11 +88,11 @@ public class ActivityInfoTest {
 			break;
 		case Tag:
 		case Correlator:
-			String[] array = { "Cheese", "Pepperoni", "Black Olives" };
+			String[] array = { "Cheese", "Pepperoni", "Black Olives" }; // NON-NLS
 			valueT.value = Arrays.asList(array);
 			break;
 		case ServerIp:
-			valueT.value = "127.0.0.1";
+			valueT.value = "127.0.0.1"; // NON-NLS
 			break;
 		case EventStatus:
 			valueT.valueExpected = ActivityStatus.END;
@@ -106,7 +106,7 @@ public class ActivityInfoTest {
 			valueT.valueExpected = valueT.value;
 
 		activityInfo.applyField(activityField, valueT.value);
-		System.out.println("Setting " + field.name() + " to " + valueT.value);
+		System.out.println("Setting " + field.name() + " to " + valueT.value); // NON-NLS
 		return valueT;
 	}
 
@@ -127,8 +127,8 @@ public class ActivityInfoTest {
 		when(tracker.newSnapshot(any(String.class), any(String.class))).thenReturn(snapshot);
 
 		when(tConfig.getUUIDFactory()).thenReturn(uiFactory);
-		when(uiFactory.newUUID()).thenReturn("TEST");
-		when(tEvent.getOperation()).thenReturn(new Operation("TEST", OpType.SEND));
+		when(uiFactory.newUUID()).thenReturn("TEST"); // NON-NLS
+		when(tEvent.getOperation()).thenReturn(new Operation("TEST", OpType.SEND)); // NON-NLS
 
 		ActivityInfo activityInfo = createTestTrackable(false, OpType.ACTIVITY);
 		TrackingActivity ta = (TrackingActivity) activityInfo.buildTrackable(tracker);
@@ -164,20 +164,20 @@ public class ActivityInfoTest {
 
 	private Object getTestValueForClass(Class<?> clazz) {
 		final String className = clazz.getName();
-		if (className.equals("java.lang.String")) {
-			return "TEST";
-		} else if (className.equals("[Ljava.lang.String;")) {
+		if (className.equals("java.lang.String")) { // NON-NLS
+			return "TEST"; // NON-NLS
+		} else if (className.equals("[Ljava.lang.String;")) { // NON-NLS
 			return TestEnum.Skip;
-		} else if (className.equals("java.lang.Integer")) {
+		} else if (className.equals("java.lang.Integer")) { // NON-NLS
 			return 111;
-		} else if (className.equals("java.lang.Long")) {
+		} else if (className.equals("java.lang.Long")) { // NON-NLS
 			return 111L;
-		} else if (className.equals("java.lang.Enum")) {
+		} else if (className.equals("java.lang.Enum")) { // NON-NLS
 			return TestEnum.Skip;
-		} else if (className.equals("com.jkoolcloud.tnt4j.core.UsecTimestamp")) {
+		} else if (className.equals("com.jkoolcloud.tnt4j.core.UsecTimestamp")) { // NON-NLS
 			return new UsecTimestamp(new Date());
 		} else {
-			fail("No such test case for class: " + className);
+			fail("No such test case for class: " + className); // NON-NLS
 		}
 		return null;
 	}

@@ -59,7 +59,7 @@ public class FileStreamStateHandlerTest {
 		FileStreamStateHandler rwd = new FileStreamStateHandler();
 
 		File testFilesDir = new File(samplesDir, "/multiple-logs/");
-		File[] testFiles = testFilesDir.listFiles((FilenameFilter) new WildcardFileFilter("orders*"));
+		File[] testFiles = testFilesDir.listFiles((FilenameFilter) new WildcardFileFilter("orders*")); // NON-NLS
 		FileAccessState newFAS = new FileAccessState();
 
 		int count = 0;
@@ -89,7 +89,7 @@ public class FileStreamStateHandlerTest {
 				crcLine.update(bytes4Line, 0, bytes4Line.length);
 				final long lineCRC = crcLine.getValue();
 				final int lineNumber = reader.getLineNumber();
-				System.out.println("for " + lineNumber + " line CRC is " + lineCRC);
+				System.out.println("for " + lineNumber + " line CRC is " + lineCRC); // NON-NLS
 				if (count2 == 3) {
 					newFAS.currentLineCrc = lineCRC;
 					newFAS.currentLineNumber = lineNumber;
@@ -98,7 +98,7 @@ public class FileStreamStateHandlerTest {
 				}
 				line = reader.readLine();
 			}
-			fileWritten = AbstractFileStreamStateHandler.writeState(newFAS, testFilesDir, "TestStream");
+			fileWritten = AbstractFileStreamStateHandler.writeState(newFAS, testFilesDir, "TestStream"); // NON-NLS
 			Utils.close(reader);
 		}
 

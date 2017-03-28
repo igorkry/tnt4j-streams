@@ -39,7 +39,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void setPropertiesTest() throws Exception {
 		setProperty(parser, ParserProperties.PROP_FLD_DELIM, ";");
-		setProperty(parser, ParserProperties.PROP_PATTERN, "\\S+");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\S+"); // NON-NLS
 		setProperty(parser, ParserProperties.PROP_STRIP_QUOTES, true);
 
 	}
@@ -53,7 +53,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void testParse() throws Exception {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
-		final Object data = "TEST";
+		final Object data = "TEST"; // NON-NLS
 		setPropertiesTest();
 		assertNotNull(parser.parse(stream, data));
 	}
@@ -61,7 +61,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void testParseDoensMatch() throws Exception {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
-		final Object data = "TEST TTT";
+		final Object data = "TEST TTT"; // NON-NLS
 		setPropertiesTest();
 		assertNull(parser.parse(stream, data));
 	}
@@ -69,7 +69,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	@Test
 	public void testGetLocatorValueAsProperty() throws ParseException {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
-		final ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "TEST");
+		final ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "TEST"); // NON-NLS
 		((ActivityTokenParser) parser).getLocatorValue(stream, locator, null);
 		verify(stream).getProperty(any(String.class));
 	}
@@ -78,7 +78,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 	public void testGetLocatorAsIndex() throws ParseException {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 		final ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "2");
-		String[] fields = { "FAIL", "GOOD" };
+		String[] fields = { "FAIL", "GOOD" }; // NON-NLS
 		Object result = ((ActivityTokenParser) parser).getLocatorValue(stream, locator, fields);
 		assertEquals("GOOD", result);
 	}

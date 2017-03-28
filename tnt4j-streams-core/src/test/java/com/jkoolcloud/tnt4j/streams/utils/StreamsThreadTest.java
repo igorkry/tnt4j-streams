@@ -40,7 +40,7 @@ public class StreamsThreadTest {
 
 	@Test
 	public void testStreamsThreadRunnableString() {
-		final String name = "TEST-NAME";
+		final String name = "TEST-NAME"; // NON-NLS
 		StreamsThread thread = new StreamsThread(simpleRunnable, name);
 		assertNotNull(thread);
 		assertThreadNameCorrect(name, thread);
@@ -54,7 +54,7 @@ public class StreamsThreadTest {
 
 	@Test
 	public void testStreamsThreadString() {
-		final String name = "TEST-NAME";
+		final String name = "TEST-NAME"; // NON-NLS
 		StreamsThread thread = new StreamsThread(name);
 		assertNotNull(thread);
 		assertThreadNameCorrect(name, thread);
@@ -62,7 +62,7 @@ public class StreamsThreadTest {
 
 	@Test
 	public void testStreamsThreadThreadGroupRunnable() {
-		ThreadGroup tGroup = new ThreadGroup("TEST");
+		ThreadGroup tGroup = new ThreadGroup("TEST"); // NON-NLS
 		StreamsThread thread = new StreamsThread(tGroup, simpleRunnable);
 		StreamsThread thread2 = new StreamsThread(tGroup, simpleRunnable);
 		thread.start();
@@ -72,9 +72,9 @@ public class StreamsThreadTest {
 
 	@Test
 	public void testStreamsThreadThreadGroupRunnableString() {
-		final String name = "TEST-NAME";
-		final String name2 = "TEST-NAME2";
-		ThreadGroup tGroup = new ThreadGroup("TEST");
+		final String name = "TEST-NAME"; // NON-NLS
+		final String name2 = "TEST-NAME2"; // NON-NLS
+		ThreadGroup tGroup = new ThreadGroup("TEST"); // NON-NLS
 		StreamsThread thread = new StreamsThread(tGroup, simpleRunnable, name);
 		StreamsThread thread2 = new StreamsThread(tGroup, simpleRunnable, name2);
 		// assertEquals(2, tGroup.);
@@ -84,9 +84,9 @@ public class StreamsThreadTest {
 
 	@Test
 	public void testStreamsThreadThreadGroupString() {
-		final String name = "TEST-NAME";
-		final String name2 = "TEST-NAME2";
-		ThreadGroup tGroup = new ThreadGroup("TEST");
+		final String name = "TEST-NAME"; // NON-NLS
+		final String name2 = "TEST-NAME2"; // NON-NLS
+		ThreadGroup tGroup = new ThreadGroup("TEST"); // NON-NLS
 		StreamsThread thread = new StreamsThread(tGroup, name);
 		StreamsThread thread2 = new StreamsThread(tGroup, name2);
 		// assertEquals(2, tGroup.);

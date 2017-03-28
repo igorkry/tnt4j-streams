@@ -64,7 +64,7 @@ public class CharacterStreamTest {
 	@Test
 	public void startDataStreamTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-		cStream.setName("TEST_CHAR_STREAM");
+		cStream.setName("TEST_CHAR_STREAM"); // NON-NLS
 
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
@@ -75,7 +75,7 @@ public class CharacterStreamTest {
 		thread.start();
 
 		Thread.sleep(250);
-		Socket socket = new Socket("localhost", PORT);
+		Socket socket = new Socket("localhost", PORT); // NON-NLS
 		final OutputStream outputStream = socket.getOutputStream();
 		outputStream.write(55);
 		outputStream.flush();

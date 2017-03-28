@@ -38,15 +38,15 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
 import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.message.MessageAndMetadata;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 public class KafkaStreamTest {
-	private static final String DEFAULT_TEST_TOPIC = "TNT4JKafkaTestTopic";
+	private static final String DEFAULT_TEST_TOPIC = "TNT4JKafkaTestTopic"; // NON-NLS
 
 	KafkaStream input;
 
@@ -87,10 +87,10 @@ public class KafkaStreamTest {
 	@Test
 	public void produceMessages() throws InterruptedException {
 		Properties props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-		props.put("client.id", "TestProducer");
-		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // NON-NLS
+		props.put("client.id", "TestProducer"); // NON-NLS
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"); // NON-NLS
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"); // NON-NLS
 		final KafkaProducer<Integer, String> producer = new KafkaProducer<>(props);
 
 		Thread thred = new Thread(new Runnable() {
@@ -99,9 +99,9 @@ public class KafkaStreamTest {
 			public void run() {
 				int messageNo = 1;
 				for (int i = 0; i <= 150; i++) {
-					System.out.println("Sending message: " + i);
-					String messageStr = "0:0:0:0:0:0:0:1 - - [09/Sep/2016:15:18:34 +0300] \"GET /SimpleJSF/Index.xhtml "
-							+ i + " HTTP/1.1\" 200 6561";
+					System.out.println("Sending message: " + i); // NON-NLS
+					String messageStr = "0:0:0:0:0:0:0:1 - - [09/Sep/2016:15:18:34 +0300] \"GET /SimpleJSF/Index.xhtml " // NON-NLS
+							+ i + " HTTP/1.1\" 200 6561"; // NON-NLS
 					long startTime = System.currentTimeMillis();
 					producer.send(new ProducerRecord<Integer, String>(DEFAULT_TEST_TOPIC, messageStr));
 				}
@@ -117,12 +117,12 @@ public class KafkaStreamTest {
 	public void consumeMessages() {
 		Properties props = new Properties();
 
-		props.put("zookeeper.connect", "localhost:2181");
-		props.put("group.id", "TNT4JStreams");
-		props.put("zookeeper.session.timeout.ms", "4000");
-		props.put("zookeeper.sync.time.ms", "200");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("consumer.timeout.ms", "1000");
+		props.put("zookeeper.connect", "localhost:2181"); // NON-NLS
+		props.put("group.id", "TNT4JStreams"); // NON-NLS
+		props.put("zookeeper.session.timeout.ms", "4000"); // NON-NLS
+		props.put("zookeeper.sync.time.ms", "200"); // NON-NLS
+		props.put("auto.commit.interval.ms", "1000"); // NON-NLS
+		props.put("consumer.timeout.ms", "1000"); // NON-NLS
 
 		ConsumerConnector consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
 		Map<String, Integer> topicCountMap = new HashMap<>();
@@ -131,10 +131,9 @@ public class KafkaStreamTest {
 		Map<String, List<kafka.consumer.KafkaStream<byte[], byte[]>>> consumerMap = consumer
 				.createMessageStreams(topicCountMap);
 		kafka.consumer.KafkaStream<byte[], byte[]> stream = consumerMap.get(DEFAULT_TEST_TOPIC).get(0);
-		ConsumerIterator<byte[], byte[]> it = stream.iterator();
 
-		while (it.hasNext()) {
-			System.out.println(new String(it.next().message()));
+		for (MessageAndMetadata<byte[], byte[]> aStream : stream) {
+			System.out.println(new String(aStream.message()));
 		}
 
 		System.err.println();

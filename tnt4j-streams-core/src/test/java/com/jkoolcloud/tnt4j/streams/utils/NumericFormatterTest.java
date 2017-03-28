@@ -40,7 +40,7 @@ public class NumericFormatterTest {
 
 	@Test
 	public void testParseStaticHex() throws ParseException {
-		assertEquals(342.0, NumericFormatter.parse(null, "0xAB", 2));
+		assertEquals(342.0, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
 		assertEquals(171.0, NumericFormatter.parse(null, 0XAB, null));
 		assertNull(NumericFormatter.parse(null, null, null));
 	}
@@ -48,7 +48,7 @@ public class NumericFormatterTest {
 	@Test
 	public void testParseObjectHex() throws ParseException {
 		NumericFormatter formatter = new NumericFormatter();
-		assertEquals(342.0, formatter.parse("0xAB", 2));
+		assertEquals(342.0, formatter.parse("0xAB", 2)); // NON-NLS
 		assertEquals(171.0, formatter.parse(0XAB));
 		assertNull(formatter.parse(null, null));
 	}
@@ -69,7 +69,7 @@ public class NumericFormatterTest {
 	@Test
 	public void testPattern() {
 		NumericFormatter formatter = new NumericFormatter();
-		formatter.setPattern("#", null);
+		formatter.setPattern("#", null); // NON-NLS
 		assertEquals("#", formatter.getPattern());
 	}
 

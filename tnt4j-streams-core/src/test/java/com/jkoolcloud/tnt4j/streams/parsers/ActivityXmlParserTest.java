@@ -45,7 +45,7 @@ import com.jkoolcloud.tnt4j.streams.utils.UtilsTest;
  */
 public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 
-	private final static Object simpleString = "<MsgData format=\"string\" value=\"Message Body\"/>";
+	private final static Object simpleString = "<MsgData format=\"string\" value=\"Message Body\"/>"; // NON-NLS
 	private TNTInputStream<String, ActivityInfo> is;
 
 	@Override
@@ -62,7 +62,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		List<ActivityFieldLocator> locatorList = Collections.singletonList(locator);
 		when(field.getLocators()).thenReturn(locatorList);
 		when(locator.clone()).thenReturn(locator);
-		when(locator.getLocator()).thenReturn("MsgData/@value");
+		when(locator.getLocator()).thenReturn("MsgData/@value"); // NON-NLS
 		parser.addField(field);
 	}
 
@@ -106,14 +106,14 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	@Override
 	@Test
 	public void setPropertiesTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_NAMESPACE, "NAMESPACE=asdcf");
+		setProperty(parser, ParserProperties.PROP_NAMESPACE, "NAMESPACE=asdcf"); // NON-NLS
 		setProperty(parser, ParserProperties.PROP_REQUIRE_ALL, true);
 	}
 
 	@Test
 	public void getLocatorValue() throws Exception {
 		TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
-		ActivityFieldLocator locator = new ActivityFieldLocator("Label", "MsgData/@value");
+		ActivityFieldLocator locator = new ActivityFieldLocator("Label", "MsgData/@value"); // NON-NLS
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document document = builder.parse(UtilsTest.toInputStream(simpleString.toString()));
 

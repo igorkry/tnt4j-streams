@@ -38,7 +38,7 @@ public class DirStreamingManagerTest {
 		final File tmpFile = File.createTempFile("TEST", ".TST");
 		tmpFile.deleteOnExit();
 		final File parentFile = tmpFile.getParentFile();
-		dsm = new DirStreamingManager(parentFile.getAbsolutePath(), "tnt-data-source*.xml");
+		dsm = new DirStreamingManager(parentFile.getAbsolutePath(), "tnt-data-source*.xml"); // NON-NLS
 	}
 
 	@Test

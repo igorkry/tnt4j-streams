@@ -34,7 +34,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  */
 public class ActivityNameValueParserTest {
 
-	private static final String TEST = "TEST=TESTVALUE\nTEST2=TESTVALUE2";
+	private static final String TEST = "TEST=TESTVALUE\nTEST2=TESTVALUE2"; // NON-NLS
 	private ActivityNameValueParser activityNameValueParser = new ActivityNameValueParser();
 	private TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 
@@ -43,9 +43,9 @@ public class ActivityNameValueParserTest {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
 				put(ParserProperties.PROP_FLD_DELIM, "\n");
-				put(ParserProperties.PROP_VAL_DELIM, "=");
-				put(ParserProperties.PROP_PATTERN, ".*");
-				put(ParserProperties.PROP_STRIP_QUOTES, "false");
+				put(ParserProperties.PROP_VAL_DELIM, "="); // NON-NLS
+				put(ParserProperties.PROP_PATTERN, ".*"); // NON-NLS
+				put(ParserProperties.PROP_STRIP_QUOTES, "false"); // NON-NLS
 			}
 		};
 		activityNameValueParser.setProperties(propertiesMap.entrySet());
@@ -54,7 +54,7 @@ public class ActivityNameValueParserTest {
 		assertEquals(propertiesMap.get(ParserProperties.PROP_VAL_DELIM), activityNameValueParser.valueDelim);
 		assertEquals(propertiesMap.get(ParserProperties.PROP_PATTERN), activityNameValueParser.pattern.toString());
 		assertEquals(propertiesMap.get(ParserProperties.PROP_STRIP_QUOTES),
-				activityNameValueParser.stripQuotes ? "true" : "false");
+				activityNameValueParser.stripQuotes ? "true" : "false"); // NON-NLS
 
 	}
 
@@ -79,7 +79,7 @@ public class ActivityNameValueParserTest {
 	@Test(expected = IllegalStateException.class)
 	public void parseDelimExceptionTest() throws Exception {
 		activityNameValueParser.valueDelim = null;
-		activityNameValueParser.parse(stream, "Test");
+		activityNameValueParser.parse(stream, "Test"); // NON-NLS
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class ActivityNameValueParserTest {
 	public void parseWhenPatternNotNullTest() throws Exception {
 		Pattern pattern = Pattern.compile("\\d+");
 		activityNameValueParser.pattern = pattern;
-		assertNull(activityNameValueParser.parse(stream, "test"));
+		assertNull(activityNameValueParser.parse(stream, "test")); // NON-NLS
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class ActivityNameValueParserTest {
 	@Test
 	public void setPropertiesWhenNotEqualsNameTest() throws Exception {
 		Map<String, String> props = new HashMap<>(1);
-		props.put(ParserProperties.PROP_NAMESPACE, "Test");
+		props.put(ParserProperties.PROP_NAMESPACE, "Test"); // NON-NLS
 		activityNameValueParser.setProperties(props.entrySet());
 		assertTrue(activityNameValueParser.stripQuotes);
 	}
