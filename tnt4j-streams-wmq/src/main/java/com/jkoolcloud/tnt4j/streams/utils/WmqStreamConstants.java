@@ -28,6 +28,15 @@ public final class WmqStreamConstants {
 	 */
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-wmq"; // NON-NLS
 
+	/**
+	 * Custom PCF parameter identifier to store PCF message contained traces count.
+	 */
+	public static final int TRACES_COUNT = 919191919;
+	/**
+	 * Custom PCF parameter identifier to store processed PCF message trace entry index.
+	 */
+	public static final int TRACE_MARKER = 929292929;
+
 	private WmqStreamConstants() {
 
 	}

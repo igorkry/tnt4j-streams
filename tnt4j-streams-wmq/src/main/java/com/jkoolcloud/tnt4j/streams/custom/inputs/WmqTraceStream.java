@@ -31,13 +31,14 @@ import com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
  * Implements a WebSphere MQ activity traces stream, where activity data is {@link PCFMessage} contained PCF parameters
  * and MQ activity trace entries (as {@link MQCFGR}). Same PCF message will be returned as next item until all trace
  * entries are processed (message gets 'consumed') and only then new PCF message is retrieved from MQ server. Stream
- * 'marks' PCF message contained trace entry as 'processed' by setting custom PCF parameter {@link #TRACE_MARKER}. Using
- * this PCF parameter parser "knows" which trace entry to process.
+ * 'marks' PCF message contained trace entry as 'processed' by setting custom PCF parameter
+ * {@link WmqStreamConstants#TRACE_MARKER}. Using this PCF parameter parser "knows" which trace entry to process.
  * <p>
  * Stream also performs traced operations filtering using 'TraceOperations' and 'ExcludedRC' properties:
  * <ul>
@@ -65,15 +66,6 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  */
 public class WmqTraceStream extends WmqStreamPCF {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqTraceStream.class);
-
-	/**
-	 * Custom PCF parameter identifier to store PCF message contained traces count.
-	 */
-	public static final int TRACES_COUNT = 919191919;
-	/**
-	 * Custom PCF parameter identifier to store processed PCF message trace entry index.
-	 */
-	public static final int TRACE_MARKER = 929292929;
 
 	private PCFMessage pcfMessage;
 
@@ -127,15 +119,11 @@ public class WmqTraceStream extends WmqStreamPCF {
 					Integer eRC;
 					for (String erc : erca) {
 						try {
-							eRC = Integer.parseInt(erc);
-						} catch (NumberFormatException nfe) {
-							try {
-								eRC = MQConstants.getIntValue(erc);
-							} catch (NoSuchElementException nsee) {
-								logger().log(OpLevel.WARNING, StreamsResources.getString(
-										WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
-								continue;
-							}
+							eRC = WmqUtils.getParamId(erc);
+						} catch (NoSuchElementException exc) {
+							logger().log(OpLevel.WARNING, StreamsResources.getString(
+									WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
+							continue;
 						}
 
 						excludedRCs.add(eRC);
@@ -191,9 +179,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 			return true;
 		}
 
-		MQCFIN tcp = (MQCFIN) pcfMsg.getParameter(TRACES_COUNT);
+		MQCFIN tcp = (MQCFIN) pcfMsg.getParameter(WmqStreamConstants.TRACES_COUNT);
 		int tc = tcp == null ? 0 : tcp.getIntValue();
-		MQCFIN tmp = (MQCFIN) pcfMsg.getParameter(TRACE_MARKER);
+		MQCFIN tmp = (MQCFIN) pcfMsg.getParameter(WmqStreamConstants.TRACE_MARKER);
 		int ti = tmp == null ? 0 : tmp.getIntValue();
 
 		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -225,9 +213,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 		Enumeration<?> prams = pcfMsg.getParameters();
 		while (prams.hasMoreElements()) {
 			PCFParameter param = (PCFParameter) prams.nextElement();
-			if (isTraceParameter(param)) {
+			if (WmqUtils.isTraceParameter(param)) {
 				MQCFGR trace = (MQCFGR) param;
-				// collectAttrs(trace);
+				// WmqUtils.collectAttrs(trace);
 				trC++;
 
 				if (!opFound && isTraceRelevant(trace)) {
@@ -239,8 +227,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 		}
 
 		if (opFound) {
-			pcfMsg.addParameter(TRACES_COUNT, trC);
-			pcfMsg.addParameter(TRACE_MARKER, trM);
+			pcfMsg.addParameter(WmqStreamConstants.TRACES_COUNT, trC);
+			pcfMsg.addParameter(WmqStreamConstants.TRACE_MARKER, trM);
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 					"WmqTraceStream.trace.init.marker"), trM, trC);
@@ -256,25 +244,13 @@ public class WmqTraceStream extends WmqStreamPCF {
 		return opFound;
 	}
 
-	/**
-	 * Checks whether provided PCF parameter contains MQ activity trace data.
-	 *
-	 * @param param
-	 *            PCF parameter to check
-	 * @return {@code true} if parameter is of type {@link com.ibm.mq.pcf.MQCFGR} and parameter's parameter field value
-	 *         is {@code MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
-	 */
-	public static boolean isTraceParameter(PCFParameter param) {
-		return param.getParameter() == MQConstants.MQGACF_ACTIVITY_TRACE && param instanceof MQCFGR;
-	}
-
 	private int getNextMatchingTrace(PCFMessage pcfMsg, int marker) {
 		Enumeration<?> prams = pcfMsg.getParameters();
 		int trI = 0;
 		while (prams.hasMoreElements()) {
 			PCFParameter param = (PCFParameter) prams.nextElement();
 
-			if (isTraceParameter(param)) {
+			if (WmqUtils.isTraceParameter(param)) {
 				trI++;
 
 				if (trI > marker) {
@@ -310,7 +286,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 		// dTrace.toString(), trace.toString());
 		// }
 
-		String operationName = getOpName(trace);
+		String operationName = WmqUtils.getOpName(trace);
 		boolean match = operationName == null || opNameMatcher == null
 				|| opNameMatcher.matcher(operationName).matches();
 
@@ -322,7 +298,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 	}
 
 	private boolean rcMatch(MQCFGR trace) {
-		Integer traceRC = getRC(trace);
+		Integer traceRC = WmqUtils.getRC(trace);
 
 		boolean match = traceRC == null || excludedRCs == null || !excludedRCs.contains(traceRC);
 
@@ -343,9 +319,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 		if (go != null) {
 			int getOptions = ((MQCFIN) go).getIntValue();
 
-			browseGet = Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_FIRST)
-					|| Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_NEXT)
-					|| Utils.matchMask(getOptions, MQConstants.MQGMO_BROWSE_MSG_UNDER_CURSOR);
+			browseGet = Utils.matchAny(getOptions, MQConstants.MQGMO_BROWSE_FIRST | MQConstants.MQGMO_BROWSE_NEXT
+					| MQConstants.MQGMO_BROWSE_MSG_UNDER_CURSOR);
 
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -355,85 +330,4 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 		return browseGet;
 	}
-
-	private static String getOpName(MQCFGR trace) {
-		String opName = null;
-		PCFParameter op = trace.getParameter(PCFConstants.MQIACF_OPERATION_ID);
-		if (op != null) {
-			opName = PCFConstants.lookup(((MQCFIN) op).getIntValue(), "MQXF_.*"); // NON-NLS
-		}
-
-		return opName;
-	}
-
-	private static Integer getRC(MQCFGR trace) {
-		Integer traceRC = null;
-		PCFParameter rc = trace.getParameter(PCFConstants.MQIACF_REASON_CODE);
-		if (rc != null) {
-			traceRC = ((MQCFIN) rc).getIntValue();
-		}
-
-		return traceRC;
-	}
-
-	// ---- R&D UTILITY CODE ---
-	// private Map<String, Set<String>> tracesMap = new HashMap<String, Set<String>>();
-	//
-	// private void collectAttrs(MQCFGR trace) {
-	// boolean changed = false;
-	// String opKey = getOpName(trace);
-	//
-	// Set<String> opParamSet = tracesMap.get(opKey);
-	// if (opParamSet == null) {
-	// opParamSet = new HashSet<String>();
-	// tracesMap.put(opKey, opParamSet);
-	// changed = true;
-	// }
-	//
-	// Set<String> allOpsSet = tracesMap.get("ALL_OPERATIONS_SET");
-	// if (allOpsSet == null) {
-	// allOpsSet = new HashSet<String>();
-	// tracesMap.put("ALL_OPERATIONS_SET", allOpsSet);
-	// changed = true;
-	// }
-	//
-	// Enumeration<?> prams = trace.getParameters();
-	// while (prams.hasMoreElements()) {
-	// PCFParameter param = (PCFParameter) prams.nextElement();
-	// String pString = PCFConstants.lookupParameter(param.getParameter());
-	//
-	// if (!opParamSet.contains(pString)) {
-	// opParamSet.add(pString);
-	// changed = true;
-	// }
-	//
-	// if (!allOpsSet.contains(pString)) {
-	// allOpsSet.add(pString);
-	// changed = true;
-	// }
-	// }
-	//
-	// if (changed) {
-	// write(tracesMap);
-	// }
-	// }
-	//
-	// private static void write(Map<String, Set<String>> map) {
-	// String str = "";
-	//
-	// for (Map.Entry<String, Set<String>> e : map.entrySet()) {
-	// str += e.getKey() + "\n";
-	// for (String s : e.getValue()) {
-	// str += " " + s + "\n";
-	// }
-	// }
-	//
-	// File f = new File("TRACES_MAP1.log");
-	// try {
-	// FileUtils.write(f, str, Utils.UTF8);
-	// } catch (Exception exc) {
-	// exc.printStackTrace();
-	// }
-	// }
-	// ---- R&D UTILITY CODE ---
 }

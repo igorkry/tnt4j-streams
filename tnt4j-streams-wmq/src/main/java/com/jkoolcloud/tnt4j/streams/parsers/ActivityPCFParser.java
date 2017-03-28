@@ -31,10 +31,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an {@link PCFMessage} where each field is
@@ -170,19 +167,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 		if (i == 0 && paramStr.equals(HEAD_MQCFH)) {
 			val = resolvePCFHeaderValue(fDataType, path[i + 1], pcfMsg);
 		} else {
-			Integer paramId = getParamId(paramStr);
+			try {
+				Integer paramId = WmqUtils.getParamId(paramStr);
 
-			if (paramId == null) {
+				PCFParameter param = pcfContent.getParameter(paramId);
+
+				if (i < path.length - 1 && param instanceof MQCFGR) {
+					val = getParamValue(fDataType, path, pcfMsg, (MQCFGR) param, ++i);
+				} else {
+					val = resolvePCFParamValue(fDataType, param);
+				}
+			} catch (NoSuchElementException exc) {
 				throw new ParseException(StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 						"ActivityPCFParser.unresolved.pcf.parameter", paramStr), pcfMsg.getMsgSeqNumber());
-			}
-
-			PCFParameter param = pcfContent.getParameter(paramId);
-
-			if (i < path.length - 1 && param instanceof MQCFGR) {
-				val = getParamValue(fDataType, path, pcfMsg, (MQCFGR) param, ++i);
-			} else {
-				val = resolvePCFParamValue(fDataType, param);
 			}
 		}
 
@@ -222,29 +219,6 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 
 	private boolean isValueTranslatable(ActivityFieldDataType fDataType) {
 		return translateNumValues && fDataType == ActivityFieldDataType.String;
-	}
-
-	/**
-	 * Translates PCF parameter MQ constant name to constant numeric value.
-	 *
-	 * @param paramIdStr
-	 *            PCF parameter MQ constant name
-	 *
-	 * @return PCF parameter MQ constant numeric value
-	 */
-	protected static Integer getParamId(String paramIdStr) {
-		Integer paramId = null;
-
-		try {
-			paramId = Integer.parseInt(paramIdStr);
-		} catch (NumberFormatException nfe) {
-			try {
-				paramId = PCFConstants.getIntValue(paramIdStr);
-			} catch (NoSuchElementException nsee) {
-			}
-		}
-
-		return paramId;
 	}
 
 	/**

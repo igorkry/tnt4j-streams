@@ -27,16 +27,17 @@ import com.ibm.mq.pcf.PCFMessage;
 import com.ibm.mq.pcf.PCFParameter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser;
+import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an IBM MQ activity trace
  * {@link PCFMessage}.
  * <p>
- * Parser uses {@link PCFMessage} contained parameter {@link WmqTraceStream#TRACE_MARKER} to determine which trace entry
- * to process.
+ * Parser uses {@link PCFMessage} contained parameter {@link WmqStreamConstants#TRACE_MARKER} to determine which trace
+ * entry to process.
  *
  * @version $Revision: 1 $
  */
@@ -59,7 +60,7 @@ public class WmqTraceParser extends ActivityPCFParser {
 
 	@Override
 	protected Object getRawDataAsMessage(PCFMessage pcfMsg) {
-		Integer traceM = (Integer) pcfMsg.getParameterValue(WmqTraceStream.TRACE_MARKER);
+		Integer traceM = (Integer) pcfMsg.getParameterValue(WmqStreamConstants.TRACE_MARKER);
 		PCFMessage traceMsg = strip(pcfMsg, traceM);
 
 		return traceMsg.toString();
@@ -75,7 +76,7 @@ public class WmqTraceParser extends ActivityPCFParser {
 		String paramStr = path[i];
 
 		if (paramStr.equals(MQGACF_ACTIVITY_TRACE)) {
-			Integer traceM = (Integer) pcfMsg.getParameterValue(WmqTraceStream.TRACE_MARKER);
+			Integer traceM = (Integer) pcfMsg.getParameterValue(WmqStreamConstants.TRACE_MARKER);
 			PCFContent traceData = getActivityTraceGroupParameter(traceM, pcfMsg);
 
 			return super.getParamValue(fDataType, path, pcfMsg, traceData, ++i);
@@ -90,7 +91,7 @@ public class WmqTraceParser extends ActivityPCFParser {
 			int trI = 0;
 			while (prams.hasMoreElements()) {
 				PCFParameter param = (PCFParameter) prams.nextElement();
-				if (WmqTraceStream.isTraceParameter(param)) {
+				if (WmqUtils.isTraceParameter(param)) {
 					trI++;
 					if (trI == traceIndex) {
 						return (MQCFGR) param;
@@ -144,12 +145,12 @@ public class WmqTraceParser extends ActivityPCFParser {
 		while (params.hasMoreElements()) {
 			PCFParameter param = (PCFParameter) params.nextElement();
 
-			if (param.getParameter() == WmqTraceStream.TRACE_MARKER
-					|| param.getParameter() == WmqTraceStream.TRACES_COUNT) {
+			if (param.getParameter() == WmqStreamConstants.TRACE_MARKER
+					|| param.getParameter() == WmqStreamConstants.TRACES_COUNT) {
 				continue;
 			}
 
-			if (WmqTraceStream.isTraceParameter(param)) {
+			if (WmqUtils.isTraceParameter(param)) {
 				trI++;
 				if (trI != traceMarker) {
 					continue;

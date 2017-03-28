@@ -5,6 +5,7 @@
 
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser">
         <property name="TranslateNumValues" value="true"/>
+        <property name="UseActivityDataAsMessageForUnset" value="false"/>
 
         <field name="EventType" value="EVENT"/>
 
