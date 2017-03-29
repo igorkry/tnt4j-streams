@@ -14,7 +14,7 @@ public interface DataPreParser<O> {
 	 *
 	 * @param data
 	 *            activity data package
-	 * @return
+	 * @return pre-parsed object
 	 * @throws Exception
 	 *
 	 * @see com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#preParse(com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream,
