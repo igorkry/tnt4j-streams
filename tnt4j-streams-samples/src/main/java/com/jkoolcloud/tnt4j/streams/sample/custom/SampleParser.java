@@ -89,6 +89,9 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		// Get next string to parse
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
@@ -102,7 +105,10 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		}
 		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length); // NON-NLS
 
-		return parsePreparedItem(stream, dataStr, fields);
+		ActivityInfo ai = parsePreparedItem(stream, dataStr, fields);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

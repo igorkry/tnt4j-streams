@@ -142,5 +142,10 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 
 			super.close();
 		}
+
+		@Override
+		public boolean markSupported() {
+			return false;
+		}
 	}
 }

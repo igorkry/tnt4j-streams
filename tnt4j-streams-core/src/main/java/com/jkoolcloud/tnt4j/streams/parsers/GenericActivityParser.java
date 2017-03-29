@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -29,6 +30,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.preparsers.DataPreParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -68,7 +70,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
-	// private List<DataPreParser<?>> preParsers; //TODO
+	private List<DataPreParser<?>> preParsers;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -613,12 +615,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	@Override
 	public void addReference(Object refObject) {
-		// if (refObject instanceof DataPreParser) {
-		// if (preParsers == null) {
-		// preParsers = new ArrayList<>();
-		// }
-		// preParsers.add((DataPreParser<?>) refObject);
-		// }
+		if (refObject instanceof DataPreParser) {
+			if (preParsers == null) {
+				preParsers = new ArrayList<>();
+			}
+			preParsers.add((DataPreParser<?>) refObject);
+		}
 	}
 
 	/**
@@ -631,22 +633,22 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *             if pre-parsing activity data fails
 	 */
 	protected Object preParseActivityData(Object data) throws Exception {
-		// if (CollectionUtils.isNotEmpty(preParsers)) { //TODO
-		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-		// "ActivityParser.data.before.pre.parsing"), getLogString(data));
-		//
-		// for (DataPreParser<?> preParser : preParsers) {
-		// boolean isValidClass = preParser.isDataClassSupported(data);
-		// if (getActivityDataType().equals(preParser.dataTypeReturned()) && isValidClass) {
-		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-		// "ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
-		// data = preParser.preParse(data);
-		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-		// "ActivityParser.data.after.pre.parsing"), getLogString(data));
-		// }
-		// }
-		// }
-		//
+		if (CollectionUtils.isNotEmpty(preParsers)) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.data.before.pre.parsing"), getLogString(data));
+
+			for (DataPreParser<?> preParser : preParsers) {
+				boolean isValidClass = preParser.isDataClassSupported(data);
+				if (getActivityDataType().equals(preParser.dataTypeReturned()) && isValidClass) {
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
+					data = preParser.preParse(data);
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.data.after.pre.parsing"), getLogString(data));
+				}
+			}
+		}
+
 		return data;
 	}
 
