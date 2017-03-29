@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,57 +14,68 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.transform;
+package com.jkoolcloud.tnt4j.streams.filters;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 
 /**
- * Data value transformation based on XPath function expressions.
- *
+ * Data value filtering based on XPath expressions.
+ * 
  * @version $Revision: 1 $
  *
  * @see com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils#getStreamsXPath()
  * @see XPathVariableResolver
- * @see XPathFunctionResolver
+ * @see javax.xml.xpath.XPathFunctionResolver
  * @see javax.xml.namespace.NamespaceContext
- * @see XPathFunction
+ * @see javax.xml.xpath.XPathFunction
  * @see XPath#evaluate(String, Object)
  */
-public class XPathTransformation extends AbstractScriptTransformation<Object> {
+public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
 
 	/**
-	 * Constructs a new XPathTransformation.
+	 * Constructs a new XPathExpressionFilter. Handle type is set to
+	 * {@link com.jkoolcloud.tnt4j.streams.filters.HandleType#INCLUDE}.
 	 *
-	 * @param name
-	 *            transformation name
-	 * @param scriptCode
-	 *            XPath expression code
+	 * @param filterExpression
+	 *            filter expression string
 	 */
-	public XPathTransformation(String name, String scriptCode) {
-		super(name, scriptCode);
+	public XPathExpressionFilter(String filterExpression) {
+		super(filterExpression);
+	}
+
+	/**
+	 * Constructs a new XPathExpressionFilter.
+	 * 
+	 * @param handleType
+	 *            filter {@link com.jkoolcloud.tnt4j.streams.filters.HandleType} name
+	 * @param filterExpression
+	 *            filter expression string
+	 */
+	public XPathExpressionFilter(String handleType, String filterExpression) {
+		super(handleType, filterExpression);
 	}
 
 	@Override
-	public Object transform(Object value) throws TransformationException {
+	public boolean doFilter(Object value) throws FilterException {
 		if (value == null) {
-			return value;
+			return false;
 		}
 
 		XPath xPath = StreamsXMLUtils.getStreamsXPath();
-		xPath.setXPathVariableResolver(new StreamsVariableResolver(value));
+		xPath.setXPathVariableResolver(new XPathExpressionFilter.StreamsVariableResolver(value));
 
 		try {
-			return xPath.evaluate(getScriptCode(), (Object) null);
+			boolean match = "true".equals(xPath.evaluate(getExpression(), (Object) null)); // NON-NLS
+
+			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
-			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName()), exc);
+			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ExpressionFilter.filtering.failed", filterExpression), exc);
 		}
 	}
 

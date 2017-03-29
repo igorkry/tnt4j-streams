@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-/**
- * Contains the API (classes and interfaces) for streamed activities filters: include/exclude streamed activity data,
- * alter streamed data and so on.
- *
- * @author akausinis
- * @version 1.0
- */
-
 package com.jkoolcloud.tnt4j.streams.filters;
+
+/**
+ * Provides list of stream entities filter types.
+ *
+ * @version $Revision: 1 $
+ */
+public enum StreamFilterType {
+	/**
+	 * Filtering performed by evaluating value.
+	 */
+	VALUE,
+
+	/**
+	 * Filtering performed by evaluating expression.
+	 */
+	EXPRESSION
+}

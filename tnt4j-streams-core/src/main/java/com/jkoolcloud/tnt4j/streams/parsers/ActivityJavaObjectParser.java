@@ -100,12 +100,18 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
 				getLogString(data));
 
 		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
-		return parsePreparedItem(stream, dataStr, data);
+		ActivityInfo ai = parsePreparedItem(stream, dataStr, data);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

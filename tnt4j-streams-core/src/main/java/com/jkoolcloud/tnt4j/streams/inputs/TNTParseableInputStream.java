@@ -259,6 +259,9 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		} else {
 			if (!ai.isFilteredOut()) {
 				getOutput().logItem(ai);
+			} else {
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTInputStream.activity.filtered.out"), ai);
 			}
 		}
 	}

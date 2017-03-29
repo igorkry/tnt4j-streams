@@ -125,6 +125,9 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		// Get next string to parse
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
@@ -153,7 +156,10 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
 				fields.length);
 
-		return parsePreparedItem(stream, dataStr, fields);
+		ActivityInfo ai = parsePreparedItem(stream, dataStr, fields);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

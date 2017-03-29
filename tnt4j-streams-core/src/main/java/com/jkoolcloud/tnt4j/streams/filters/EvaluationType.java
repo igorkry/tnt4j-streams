@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-/**
- * Contains the API (classes and interfaces) for streamed activities filters: include/exclude streamed activity data,
- * alter streamed data and so on.
- *
- * @author akausinis
- * @version 1.0
- */
-
 package com.jkoolcloud.tnt4j.streams.filters;
+
+/**
+ * Provides list of stream entity filters value evaluation types.
+ *
+ * @version $Revision: 1 $
+ */
+public enum EvaluationType {
+	/**
+	 * Value is same as filtered object.
+	 */
+	IS,
+
+	/**
+	 * Value is contained within filtered object.
+	 */
+	CONTAINS,
+
+	/**
+	 * Value matching using wildcards.
+	 */
+	WILDCARD,
+
+	/**
+	 * Value matching using regular expressions.
+	 */
+	REGEX
+}

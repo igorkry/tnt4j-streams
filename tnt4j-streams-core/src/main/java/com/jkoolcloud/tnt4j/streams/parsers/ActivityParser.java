@@ -121,9 +121,7 @@ public abstract class ActivityParser {
 	 *             if an error parsing the specified value
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		if (!field.isTransparent()) {
-			ai.applyField(field, value);
-		}
+		ai.applyField(field, value);
 	}
 
 	/**
@@ -218,4 +216,21 @@ public abstract class ActivityParser {
 	public boolean canHaveDelimitedLocators() {
 		return true;
 	}
+
+	/**
+	 * Adds reference to specified entity object being used by this parser.
+	 *
+	 * @param refObject
+	 *            entity object to reference
+	 * @throws IllegalStateException
+	 *             if referenced object can't be linked to parser
+	 */
+	public abstract void addReference(Object refObject) throws IllegalStateException;
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries
+	 */
+	protected abstract Object getActivityDataType();
 }

@@ -126,6 +126,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			return null;
 		}
 
+		data = preParse(stream, data);
+
 		DocumentContext jsonDoc = null;
 		String jsonString = null;
 		try {
@@ -156,7 +158,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
 				jsonString);
 
-		return parsePreparedItem(stream, jsonString, jsonDoc);
+		ActivityInfo ai = parsePreparedItem(stream, jsonString, jsonDoc);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

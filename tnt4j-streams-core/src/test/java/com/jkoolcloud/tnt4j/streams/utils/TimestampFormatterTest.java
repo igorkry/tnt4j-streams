@@ -68,7 +68,7 @@ public class TimestampFormatterTest {
 
 	@Test(expected = ParseException.class)
 	public void testParseExcepion() throws ParseException {
-		TimestampFormatter.parse(TimeUnit.MICROSECONDS, "TEST");
+		TimestampFormatter.parse(TimeUnit.MICROSECONDS, "TEST"); // NON-NLS
 	}
 
 	@Test(expected = ParseException.class)

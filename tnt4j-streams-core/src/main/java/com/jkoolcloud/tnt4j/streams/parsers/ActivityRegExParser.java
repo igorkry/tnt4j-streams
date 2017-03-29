@@ -148,6 +148,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
@@ -227,6 +230,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			pe.initCause(e);
 			throw pe;
 		}
+
+		postParse(ai, stream, data);
+
 		return ai;
 	}
 

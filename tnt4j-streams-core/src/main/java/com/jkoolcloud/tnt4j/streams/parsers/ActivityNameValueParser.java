@@ -141,6 +141,9 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
@@ -179,7 +182,10 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			}
 		}
 
-		return parsePreparedItem(stream, dataStr, nameValues);
+		ActivityInfo ai = parsePreparedItem(stream, dataStr, nameValues);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

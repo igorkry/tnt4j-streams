@@ -22,6 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -30,9 +32,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Represents a specific activity field, containing the necessary information on how to extract its value from the raw
  * activity data.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
-public class ActivityField {
+public class ActivityField extends AbstractFieldEntity {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
 	/**
 	 * Activity field attribute dynamic value variable definition start token.
@@ -48,7 +51,6 @@ public class ActivityField {
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String separator = DEFAULT_FIELD_VALUES_DELIM;
-	private String reqValue = ""; /* string to allow no value */
 	private Collection<ActivityParser> stackedParsers;
 	private boolean transparent = false;
 	private boolean splitCollection = false;
@@ -91,6 +93,11 @@ public class ActivityField {
 		loc.setDataType(dataType);
 		locators = new ArrayList<>(1);
 		locators.add(loc);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -275,29 +282,6 @@ public class ActivityField {
 	}
 
 	/**
-	 * Sets the required flag indicates where field is required or optional.
-	 *
-	 * @param reqValue
-	 *            string representing flag value
-	 *
-	 * @return instance of this activity field
-	 */
-	public ActivityField setRequired(String reqValue) {
-		this.reqValue = reqValue;
-
-		return this;
-	}
-
-	/**
-	 * Determines whether field value is optional for activity.
-	 *
-	 * @return flag indicating field value is optional for activity.
-	 */
-	public boolean isOptional() {
-		return "false".equalsIgnoreCase(reqValue); // NON-NLS
-	}
-
-	/**
 	 * Gets field value type.
 	 *
 	 * @return string representing field value type
@@ -343,7 +327,7 @@ public class ActivityField {
 	}
 
 	/**
-	 * Returns hash code for this filed object.
+	 * Returns hash code for this field object.
 	 *
 	 * @return a hash code value for this field.
 	 */
@@ -528,7 +512,7 @@ public class ActivityField {
 		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
 		tField.locators = getTempFieldLocators(locators, valueIndex);
 		tField.separator = separator;
-		tField.reqValue = reqValue;
+		tField.requiredVal = requiredVal;
 		tField.stackedParsers = stackedParsers;
 		tField.valueType = fillDynamicAttr(valueType, dValues, valueIndex);
 
@@ -540,7 +524,7 @@ public class ActivityField {
 
 		if (isDynamicAttr(dAttr) && MapUtils.isNotEmpty(dValMap)) {
 			List<String> vars = new ArrayList<>();
-			Utils.resolveVariables(vars, dAttr);
+			Utils.resolveCfgVariables(vars, dAttr);
 
 			for (String var : vars) {
 				tAttr = tAttr.replace(var, String.valueOf(Utils.getItem(dValMap.get(var), valueIndex)));
@@ -561,5 +545,34 @@ public class ActivityField {
 		}
 
 		return fLocators;
+	}
+
+	/**
+	 * Applies field master locator filters on provided value to check if value should be filtered out from streaming.
+	 * 
+	 * @param ai
+	 *            activity info instance to alter "filtered out" flag
+	 * @param value
+	 *            value to apply filters
+	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
+	 *         passed over parameters - otherwise
+	 * @throws Exception
+	 *             if evaluation of filter fails
+	 *
+	 * @see #filterValue(Object)
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityInfo#setFiltered(boolean)
+	 */
+	public Object filterValue(ActivityInfo ai, Object value) throws Exception {
+		boolean filteredOut = filterValue(value);
+
+		if (filteredOut) {
+			if (isOptional()) {
+				return null;
+			} else {
+				ai.setFiltered(true);
+			}
+		}
+
+		return value;
 	}
 }

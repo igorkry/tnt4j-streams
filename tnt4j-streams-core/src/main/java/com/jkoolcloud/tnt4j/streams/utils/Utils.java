@@ -65,7 +65,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
-	private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
+	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
+	private static final Pattern EXPR_VAR_PATTERN = CFG_VAR_PATTERN;// Pattern.compile("\\$(\\w+)"); // NON-NLS
 
 	/**
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
@@ -861,15 +862,32 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param attrs
 	 *            array of {@link String}s to find variable expressions
 	 */
-	public static void resolveVariables(Collection<String> vars, String... attrs) {
+	public static void resolveCfgVariables(Collection<String> vars, String... attrs) {
 		if (attrs != null) {
 			for (String attr : attrs) {
 				if (StringUtils.isNotEmpty(attr)) {
-					Matcher m = VAR_PATTERN.matcher(attr);
+					Matcher m = CFG_VAR_PATTERN.matcher(attr);
 					while (m.find()) {
 						vars.add(m.group());
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Finds variable expressions like '${VarName}' in provided string and puts into collection.
+	 *
+	 * @param vars
+	 *            collection to add resolved variable expression
+	 * @param exprStr
+	 *            expression string
+	 */
+	public static void resolveExpressionVariables(Collection<String> vars, String exprStr) {
+		if (StringUtils.isNotEmpty(exprStr)) {
+			Matcher m = EXPR_VAR_PATTERN.matcher(exprStr);
+			while (m.find()) {
+				vars.add(m.group(0));
 			}
 		}
 	}
@@ -1269,5 +1287,99 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static boolean matchMask(int v, int mask) {
 		return (v & mask) == mask;
+	}
+
+	/**
+	 * Checks if provided numeric value match any bit of the mask.
+	 *
+	 * @param v
+	 *            numeric value
+	 * @param mask
+	 *            mask to check
+	 * @return {@code true} if value match any bit from the mask, {@code false} - otherwise
+	 */
+	public static boolean matchAny(int v, int mask) {
+		return (v & mask) != 0;
+	}
+
+	/**
+	 * Removes {@code null} elements from array.
+	 *
+	 * @param array
+	 *            array to cleanup
+	 * @param <T>
+	 *            type of array elements
+	 * @return new array instance without {@code null} elements
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] tidy(T[] array) {
+		if (array == null) {
+			return null;
+		}
+
+		List<T> oList = new ArrayList<>(array.length);
+		for (T obj : array) {
+			if (obj != null) {
+				oList.add(obj);
+			}
+		}
+
+		return (T[]) oList.toArray();
+	}
+
+	/**
+	 * Removes {@code null} elements from collection.
+	 *
+	 * @param coll
+	 *            collection to clean
+	 * @param <T>
+	 *            type of collection elements
+	 * @return new {@link java.util.List} instance without {@code null} elements
+	 */
+	public static <T> List<T> tidy(Collection<T> coll) {
+		if (coll == null) {
+			return null;
+		}
+
+		List<T> oList = new ArrayList<>(coll.size());
+		for (T obj : coll) {
+			if (obj != null) {
+				oList.add(obj);
+			}
+		}
+
+		return oList;
+	}
+
+	/**
+	 * Casts provided number value to desired number type.
+	 * 
+	 * @param num
+	 *            number value to cast
+	 * @param clazz
+	 *            number class to cast number to
+	 * @param <T>
+	 *            desired number type
+	 * @return number value cast to desired numeric type
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Number> T castNumber(Number num, Class<T> clazz) {
+		Number cNum = 0;
+
+		if (clazz.isAssignableFrom(Long.class)) {
+			cNum = num.longValue();
+		} else if (clazz.isAssignableFrom(Integer.class)) {
+			cNum = num.intValue();
+		} else if (clazz.isAssignableFrom(Byte.class)) {
+			cNum = num.byteValue();
+		} else if (clazz.isAssignableFrom(Float.class)) {
+			cNum = num.floatValue();
+		} else if (clazz.isAssignableFrom(Double.class)) {
+			cNum = num.doubleValue();
+		} else if (clazz.isAssignableFrom(Short.class)) {
+			cNum = num.shortValue();
+		}
+
+		return (T) cNum;
 	}
 }

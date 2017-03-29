@@ -201,7 +201,8 @@ public class NumericFormatter {
 					numValue = value instanceof Number ? (Number) value : Double.valueOf(value.toString());
 				}
 			}
-			return numValue.doubleValue() * scale.doubleValue();
+			Number scaledValue = numValue.doubleValue() * scale.doubleValue();
+			return Utils.castNumber(scaledValue, numValue.getClass());
 		} catch (NumberFormatException nfe) {
 			throw new ParseException(nfe.getLocalizedMessage(), 0);
 		}

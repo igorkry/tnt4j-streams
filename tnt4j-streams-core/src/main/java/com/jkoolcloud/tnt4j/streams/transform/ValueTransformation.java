@@ -41,7 +41,7 @@ public interface ValueTransformation<V, T> {
 	 *            data value to transform
 	 * @return transformed data value
 	 *
-	 * @throws TransformationException
+	 * @throws com.jkoolcloud.tnt4j.streams.transform.TransformationException
 	 *             if transformation operation fails
 	 */
 	T transform(V value) throws TransformationException;

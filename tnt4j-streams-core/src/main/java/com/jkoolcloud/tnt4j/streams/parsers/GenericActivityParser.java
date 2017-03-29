@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
+import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -65,6 +66,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected boolean useActivityAsMessage = false;
 
+	private StreamFiltersGroup<ActivityInfo> activityFilter;
+
+	// private List<DataPreParser<?>> preParsers; //TODO
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -100,7 +105,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	@Override
 	public boolean isDataClassSupported(Object data) {
 		return String.class.isInstance(data) || byte[].class.isInstance(data) || ByteBuffer.class.isInstance(data)
-				|| Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+				|| Reader.class.isInstance(data) || InputStream.class.isInstance(data); // TODO: validate if pre-parser
+																						// supports data
 	}
 
 	/**
@@ -143,6 +149,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		fieldList.add(field);
 	}
 
+	/**
+	 * Removed an activity field definition from the set of fields supported by this parser.
+	 *
+	 * @param field
+	 *            activity field to remove
+	 */
 	protected void removeField(ActivityField field) {
 		if (field == null) {
 			return;
@@ -152,6 +164,19 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.removing.field"),
 				field); // Utils.getDebugString(field));
 		fieldList.remove(field);
+	}
+
+	/**
+	 * Sets stream filters group used to filter activity data evaluating multiple activity information fields values.
+	 * 
+	 * @param afg
+	 *            activity filters group instance
+	 */
+	public void setActivityFilter(StreamFiltersGroup<ActivityInfo> afg) {
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.filter"), afg);
+
+		activityFilter = afg;
 	}
 
 	/**
@@ -219,6 +244,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @return type of RAW activity data entries - TEXT
 	 */
+	@Override
 	protected String getActivityDataType() {
 		return "TEXT"; // NON-NLS
 	}
@@ -229,6 +255,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return null;
 		}
 
+		data = preParse(stream, data);
+
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
 				getLogString(data));
@@ -236,7 +264,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		ItemToParse item = prepareItem(data);
 
 		ActivityInfo ai = parsePreparedItem(stream, String.valueOf(item.message), item.item);
-		// postParse(ai, stream, aData);
+		postParse(ai, stream, data);
 
 		return ai;
 	}
@@ -257,6 +285,45 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		item.message = getRawDataAsMessage(aData);
 
 		return item;
+	}
+
+	/**
+	 * Performs pre-parse actions on RAW activity data, i.e. conversion using pre-parsers.
+	 * 
+	 * @param stream
+	 *            stream providing activity data
+	 * @param data
+	 *            raw activity data
+	 * @return pre-parsed activity data
+	 */
+	protected Object preParse(TNTInputStream<?, ?> stream, Object data) {
+		try {
+			data = preParseActivityData(data);
+		} catch (Exception exc) {
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.pre.parsing.failed"), exc);
+		}
+
+		return data;
+	}
+
+	/**
+	 * Performs post-parse actions on resolved activity fields data, i.e. filtering.
+	 *
+	 * @param ai
+	 *            converted activity info
+	 * @param stream
+	 *            stream providing activity data
+	 * @param data
+	 *            raw activity data
+	 */
+	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, Object data) {
+		try {
+			filterActivity(ai);
+		} catch (Exception exc) {
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.activity.filtering.failed"), ai, exc);
+		}
 	}
 
 	/**
@@ -284,8 +351,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			// apply fields for parser
 			Object value;
-			for (ActivityField aFieldList : fieldList) {
-				field = aFieldList;
+			for (ActivityField aField : fieldList) {
+				field = aField;
 				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
 
 				if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
@@ -402,7 +469,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	/**
 	 * Parses values array from prepared activity data item using provided locators list.
 	 *
-	 * @param locations
+	 * @param locators
 	 *            value locators list
 	 * @param stream
 	 *            stream providing activity data
@@ -412,12 +479,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 */
-	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locations, TNTInputStream<?, ?> stream, T data)
+	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, TNTInputStream<?, ?> stream, T data)
 			throws ParseException {
-		if (locations != null) {
-			Object[] values = new Object[locations.size()];
-			for (int li = 0; li < locations.size(); li++) {
-				values[li] = getLocatorValue(stream, locations.get(li), data);
+		if (locators != null) {
+			Object[] values = new Object[locators.size()];
+			for (int li = 0; li < locators.size(); li++) {
+				values[li] = getLocatorValue(stream, locators.get(li), data);
 			}
 			return values;
 		}
@@ -430,8 +497,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		Map<String, Object> dynamicValuesMap = new HashMap<>();
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
-				final Object dynamicLocatorValue = Utils
-						.simplifyValue(getLocatorValue(stream, dLocator.getValue(), data));
+				Object lValue = getLocatorValue(stream, dLocator.getValue(), data);
+				final Object dynamicLocatorValue = Utils.simplifyValue(lValue);
 				if (dynamicLocatorValue != null) {
 					dynamicValuesMap.put(dLocator.getKey(), dynamicLocatorValue);
 				}
@@ -483,6 +550,17 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.transformation.failed"), locStr, toString(val), exc);
 			}
+
+			try {
+				boolean filteredOut = locator.filterValue(val);
+
+				if (filteredOut) {
+					val = null;
+				}
+			} catch (Exception exc) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.field.filtering.failed"), locStr, toString(val), exc);
+			}
 		}
 		return val;
 	}
@@ -514,6 +592,62 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected String getLogString(Object data) {
 		return data instanceof String ? data.toString()
 				: logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
+	}
+
+	/**
+	 * Applies stream filters group defined filters on activity information data. If activity data matches at least one
+	 * excluding filter, activity is marked as "filtered out".
+	 * 
+	 * @param ai
+	 *            activity information data
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityInfo#setFiltered(boolean)
+	 */
+	protected void filterActivity(ActivityInfo ai) throws Exception {
+		if (activityFilter == null || ai == null) {
+			return;
+		}
+
+		activityFilter.doFilter(ai);
+	}
+
+	@Override
+	public void addReference(Object refObject) {
+		// if (refObject instanceof DataPreParser) {
+		// if (preParsers == null) {
+		// preParsers = new ArrayList<>();
+		// }
+		// preParsers.add((DataPreParser<?>) refObject);
+		// }
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param data
+	 *            activity date to pre-parse
+	 * @return pre-parsers converted activity data package
+	 * @throws java.lang.Exception
+	 *             if pre-parsing activity data fails
+	 */
+	protected Object preParseActivityData(Object data) throws Exception {
+		// if (CollectionUtils.isNotEmpty(preParsers)) { //TODO
+		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+		// "ActivityParser.data.before.pre.parsing"), getLogString(data));
+		//
+		// for (DataPreParser<?> preParser : preParsers) {
+		// boolean isValidClass = preParser.isDataClassSupported(data);
+		// if (getActivityDataType().equals(preParser.dataTypeReturned()) && isValidClass) {
+		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+		// "ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
+		// data = preParser.preParse(data);
+		// logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+		// "ActivityParser.data.after.pre.parsing"), getLogString(data));
+		// }
+		// }
+		// }
+		//
+		return data;
 	}
 
 	/**

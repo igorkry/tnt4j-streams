@@ -183,6 +183,8 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			return null;
 		}
 
+		data = preParse(stream, data);
+
 		Document xmlDoc = null;
 		String xmlString = null;
 		try {
@@ -215,7 +217,10 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), xmlString);
 
-		return parsePreparedItem(stream, xmlString, xmlDoc);
+		ActivityInfo ai = parsePreparedItem(stream, xmlString, xmlDoc);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	@Override
@@ -233,22 +238,22 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			String[] savedLocales = null;
 			// apply fields for parser
 			Object[] values;
-			for (ActivityField aFieldList : fieldList) {
+			for (ActivityField aField : fieldList) {
 				values = null;
-				field = aFieldList;
-				List<ActivityFieldLocator> locations = field.getLocators();
-				if (locations != null) {
+				field = aField;
+				List<ActivityFieldLocator> locators = field.getLocators();
+				if (locators != null) {
 					// need to save format and units specification from config
 					// in case individual entry in activity data overrides it
-					if (savedFormats == null || savedFormats.length < locations.size()) {
-						savedFormats = new String[locations.size()];
-						savedUnits = new String[locations.size()];
-						savedLocales = new String[locations.size()];
+					if (savedFormats == null || savedFormats.length < locators.size()) {
+						savedFormats = new String[locators.size()];
+						savedUnits = new String[locators.size()];
+						savedLocales = new String[locators.size()];
 					}
 
-					values = new Object[locations.size()];
-					for (int li = 0; li < locations.size(); li++) {
-						ActivityFieldLocator loc = locations.get(li);
+					values = new Object[locators.size()];
+					for (int li = 0; li < locators.size(); li++) {
+						ActivityFieldLocator loc = locators.get(li);
 						savedFormats[li] = loc.getFormat();
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
@@ -263,9 +268,9 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 					}
 				}
 				applyFieldValue(stream, ai, field, Utils.simplifyValue(values));
-				if (locations != null && savedFormats != null) {
-					for (int li = 0; li < locations.size(); li++) {
-						ActivityFieldLocator loc = locations.get(li);
+				if (locators != null && savedFormats != null) {
+					for (int li = 0; li < locators.size(); li++) {
+						ActivityFieldLocator loc = locators.get(li);
 						loc.setFormat(savedFormats[li], savedLocales[li]);
 						loc.setUnits(savedUnits[li]);
 					}

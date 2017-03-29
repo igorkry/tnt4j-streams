@@ -39,7 +39,7 @@ public abstract class AbstractFunction<V> extends AbstractValueTransformation<V,
 	 *            data value to transform
 	 * @return transformed value
 	 *
-	 * @throws TransformationException
+	 * @throws com.jkoolcloud.tnt4j.streams.transform.TransformationException
 	 *             if function evaluation fails
 	 */
 	@Override

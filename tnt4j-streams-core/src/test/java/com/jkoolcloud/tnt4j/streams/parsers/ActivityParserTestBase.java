@@ -56,7 +56,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void parserNameTest() {
-		final String name = "Test";
+		final String name = "Test"; // NON-NLS
 		parser.setName(name);
 		assertEquals(name, parser.getName());
 	}
@@ -73,7 +73,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void tagsTest() {
-		final String tag = "Test";
+		final String tag = "Test"; // NON-NLS
 		parser.setTags(tag);
 		assertEquals(tag, parser.getTags()[0]);
 	}

@@ -324,6 +324,16 @@ public class TNTInputStreamTest {
 			return true;
 		}
 
+		@Override
+		public void addReference(Object refObject) {
+
+		}
+
+		@Override
+		protected Object getActivityDataType() {
+			return "TEXT"; // NON-NLS
+		}
+
 	}
 
 }

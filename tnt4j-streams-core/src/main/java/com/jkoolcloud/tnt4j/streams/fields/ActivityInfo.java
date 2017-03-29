@@ -98,7 +98,6 @@ public class ActivityInfo {
 	 * Constructs a new ActivityInfo object.
 	 */
 	public ActivityInfo() {
-
 	}
 
 	/**
@@ -123,18 +122,28 @@ public class ActivityInfo {
 
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (values != null && CollectionUtils.isNotEmpty(locators)) {
-			if (locators.size() > 1 && field.isEnumeration()) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.multiple.locators", field), 0);
-			}
 			if (locators.size() > 1 && locators.size() != values.length) {
 				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityInfo.failed.parsing", field), 0);
 			}
+
 			ActivityFieldLocator locator;
+			Object fValue;
+			List<Object> fvList = new ArrayList<>(locators.size());
 			for (int v = 0; v < values.length; v++) {
 				locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
-				values[v] = formatValue(field, locator, values[v]);
+				fValue = formatValue(field, locator, values[v]);
+				if (fValue == null && locator.isOptional()) {
+					continue;
+				}
+				fvList.add(fValue);
+			}
+
+			values = fvList.toArray();
+
+			if (field.isEnumeration() && values.length > 1) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityInfo.multiple.enum.values", field), 0);
 			}
 		}
 
@@ -151,7 +160,10 @@ public class ActivityInfo {
 				field, fieldValue);
 
 		fieldValue = transform(field, fieldValue);
-		setFieldValue(field, fieldValue);
+		fieldValue = filterFieldValue(field, fieldValue);
+		if (!field.isTransparent()) {
+			setFieldValue(field, fieldValue);
+		}
 	}
 
 	/**
@@ -167,20 +179,40 @@ public class ActivityInfo {
 	 * @return transformed field value
 	 */
 	protected Object transform(ActivityField field, Object fieldValue) {
-		ActivityFieldLocator locator = field.getGroupLocator();
-
-		if (locator != null) {
-			try {
-				fieldValue = locator.transformValue(fieldValue);
-			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityInfo.transformation.failed"),
-						field.getFieldTypeName(), Utils.toString(fieldValue), exc);
-			}
+		try {
+			fieldValue = field.transformValue(fieldValue);
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityInfo.transformation.failed"),
+					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 		}
 
 		return fieldValue;
+	}
+
+	/**
+	 * Applies filed defined filtering rules and marks this activity as filtered out or sets field value to
+	 * {@code null}, if field is set as "optional" using attribute {@code required=false}.
+	 * 
+	 * @param field
+	 *            field instance to use filter definition
+	 * @param fieldValue
+	 *            value to apply filters
+	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
+	 *         passed over parameters - otherwise
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityField#filterValue(ActivityInfo, Object)
+	 */
+	protected Object filterFieldValue(ActivityField field, Object fieldValue) {
+		try {
+			return field.filterValue(this, fieldValue);
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.filtering.failed"),
+					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			return fieldValue;
+		}
 	}
 
 	/**
@@ -261,18 +293,18 @@ public class ActivityInfo {
 		if (fieldType != null) {
 			switch (fieldType) {
 			case Message:
-				message = substitute(message, fieldValue, Object.class);
+				message = substitute(message, fieldValue);
 				break;
 			case EventName:
 				eventName = substitute(eventName, getStringValue(fieldValue, field));
 				break;
 			case EventType:
-				eventType = substitute(eventType, Utils.mapOpType(fieldValue), OpType.class);
+				eventType = substitute(eventType, Utils.mapOpType(fieldValue));
 				break;
 			case EventStatus:
 				ActivityStatus as = fieldValue instanceof ActivityStatus ? (ActivityStatus) fieldValue
 						: ActivityStatus.valueOf(fieldValue);
-				eventStatus = substitute(eventStatus, as, ActivityStatus.class);
+				eventStatus = substitute(eventStatus, as);
 			case ApplName:
 				applName = substitute(applName, getStringValue(fieldValue, field));
 				break;
@@ -280,10 +312,10 @@ public class ActivityInfo {
 				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
-				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class), Long.class);
+				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class));
 				break;
 			case EndTime:
-				endTime = substitute(endTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
+				endTime = substitute(endTime, getTimestampValue(fieldValue, field));
 				break;
 			case Exception:
 				exception = substitute(exception, getStringValue(fieldValue, field));
@@ -292,7 +324,7 @@ public class ActivityInfo {
 				location = substitute(location, getStringValue(fieldValue, field));
 				break;
 			case ReasonCode:
-				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class), Integer.class);
+				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class));
 				break;
 			case ResourceName:
 				resourceName = substitute(resourceName, getStringValue(fieldValue, field));
@@ -305,18 +337,18 @@ public class ActivityInfo {
 				break;
 			case Severity:
 				OpLevel sev = fieldValue instanceof OpLevel ? (OpLevel) fieldValue : OpLevel.valueOf(fieldValue);
-				severity = substitute(severity, sev, OpLevel.class);
+				severity = substitute(severity, sev);
 				break;
 			case TrackingId:
 				trackingId = substitute(trackingId, getStringValue(fieldValue, field));
 				break;
 			case StartTime:
-				startTime = substitute(startTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
+				startTime = substitute(startTime, getTimestampValue(fieldValue, field));
 				break;
 			case CompCode:
 				OpCompCode cc = fieldValue instanceof OpCompCode ? (OpCompCode) fieldValue
 						: OpCompCode.valueOf(fieldValue);
-				compCode = substitute(compCode, cc, OpCompCode.class);
+				compCode = substitute(compCode, cc);
 				break;
 			case Tag:
 				addTag(Utils.getTags(fieldValue));
@@ -331,16 +363,16 @@ public class ActivityInfo {
 				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue, field));
 				break;
 			case MsgLength:
-				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class), Integer.class);
+				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class));
 				break;
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
 			case ProcessId:
-				processId = substitute(processId, getNumberValue(fieldValue, Integer.class), Integer.class);
+				processId = substitute(processId, getNumberValue(fieldValue, Integer.class));
 				break;
 			case ThreadId:
-				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class), Integer.class);
+				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class));
 				break;
 			case Category:
 				category = substitute(category, getStringValue(fieldValue, field));
@@ -350,7 +382,7 @@ public class ActivityInfo {
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.activity", field));
+						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", field));
 			}
 
 			LOGGER.log(OpLevel.TRACE,
@@ -398,10 +430,10 @@ public class ActivityInfo {
 	}
 
 	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getMasterLocator();
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
 
-		if (locator != null) {
-			switch (locator.getDataType()) {
+		if (fmLocator != null) {
+			switch (fmLocator.getDataType()) {
 			case Number:
 				return getNumberValue(fieldValue);
 			case DateTime:
@@ -417,19 +449,19 @@ public class ActivityInfo {
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getMasterLocator();
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
 
 		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(),
-						getStringValue(fieldValue, field), locator == null ? null : locator.getTimeZone(),
-						locator == null ? null : locator.getLocale());
+				: TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
+						getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
+						fmLocator == null ? null : fmLocator.getLocale());
 	}
 
 	private static String substitute(String value, String newValue) {
 		return StringUtils.isEmpty(newValue) ? value : newValue;
 	}
 
-	private static <T> T substitute(T value, T newValue, Class<T> clazz) {
+	private static <T> T substitute(T value, T newValue) {
 		return newValue == null ? value : newValue;
 	}
 
@@ -437,18 +469,19 @@ public class ActivityInfo {
 		if (value instanceof Object[]) {
 			Object[] vArray = (Object[]) value;
 			StringBuilder sb = new StringBuilder();
-			ActivityFieldLocator locator;
 			for (int v = 0; v < vArray.length; v++) {
-				locator = field.getLocators().size() == 1 ? field.getLocators().get(0)
-						: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null;
-				String format = locator == null ? null : locator.getFormat();
-
 				if (v > 0) {
 					sb.append(field.getSeparator());
 				}
 
-				if (vArray[v] instanceof UsecTimestamp && StringUtils.isNotEmpty(format)) {
-					sb.append(((UsecTimestamp) vArray[v]).toString(format));
+				if (vArray[v] instanceof UsecTimestamp) {
+					ActivityFieldLocator locator = field.getLocators().size() == 1 ? field.getLocators().get(0)
+							: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null; // TODO
+
+					String format = locator == null ? null : locator.getFormat();
+					if (StringUtils.isNotEmpty(format)) {
+						sb.append(((UsecTimestamp) vArray[v]).toString(format));
+					}
 				} else {
 					sb.append(vArray[v] == null ? "" : Utils.toString(vArray[v])); // NON-NLS
 				}
@@ -508,11 +541,11 @@ public class ActivityInfo {
 
 		Property p = new Property(propName, wrapPropertyValue(propValue),
 				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType);
-		Object prevValue = activityProperties.put(propName, p);
+		Property prevValue = activityProperties.put(propName, p);
 
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
-				propName, Utils.toString(p.getValue()), p.getValueType(), prevValue);
+				propName, Utils.toString(p.getValue()), p.getValueType(), Utils.toString(prevValue));
 
 		return prevValue;
 	}
@@ -996,27 +1029,10 @@ public class ActivityInfo {
 		return value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 	}
 
-	@SuppressWarnings("unchecked")
 	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {
 		Number num = value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 
-		Number cNum = 0;
-
-		if (clazz.isAssignableFrom(Long.class)) {
-			cNum = num.longValue();
-		} else if (clazz.isAssignableFrom(Integer.class)) {
-			cNum = num.intValue();
-		} else if (clazz.isAssignableFrom(Byte.class)) {
-			cNum = num.byteValue();
-		} else if (clazz.isAssignableFrom(Float.class)) {
-			cNum = num.floatValue();
-		} else if (clazz.isAssignableFrom(Double.class)) {
-			cNum = num.doubleValue();
-		} else if (clazz.isAssignableFrom(Short.class)) {
-			cNum = num.shortValue();
-		}
-
-		return (T) cNum;
+		return Utils.castNumber(num, clazz);
 	}
 
 	/**
@@ -1438,5 +1454,121 @@ public class ActivityInfo {
 		}
 
 		children.add(ai);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("ActivityInfo{"); // NON-NLS
+		sb.append("serverName='").append(serverName).append('\''); // NON-NLS
+		sb.append(", serverIp='").append(serverIp).append('\''); // NON-NLS
+		sb.append(", applName='").append(applName).append('\''); // NON-NLS
+		sb.append(", userName='").append(userName).append('\''); // NON-NLS
+		sb.append(", resourceName='").append(resourceName).append('\''); // NON-NLS
+		sb.append(", eventName='").append(eventName).append('\''); // NON-NLS
+		sb.append(", eventType=").append(eventType); // NON-NLS
+		sb.append(", eventStatus=").append(eventStatus); // NON-NLS
+		sb.append(", startTime=").append(startTime); // NON-NLS
+		sb.append(", endTime=").append(endTime); // NON-NLS
+		sb.append(", elapsedTime=").append(elapsedTime); // NON-NLS
+		sb.append(", compCode=").append(compCode); // NON-NLS
+		sb.append(", reasonCode=").append(reasonCode); // NON-NLS
+		sb.append(", exception='").append(exception).append('\''); // NON-NLS
+		sb.append(", severity=").append(severity); // NON-NLS
+		sb.append(", location='").append(location).append('\''); // NON-NLS
+		sb.append(", correlator=").append(correlator); // NON-NLS
+		sb.append(", trackingId='").append(trackingId).append('\''); // NON-NLS
+		sb.append(", parentId='").append(parentId).append('\''); // NON-NLS
+		sb.append(", tag=").append(tag); // NON-NLS
+		sb.append(", message=").append(message); // NON-NLS
+		sb.append(", msgCharSet='").append(msgCharSet).append('\''); // NON-NLS
+		sb.append(", msgEncoding='").append(msgEncoding).append('\''); // NON-NLS
+		sb.append(", msgLength=").append(msgLength); // NON-NLS
+		sb.append(", msgMimeType='").append(msgMimeType).append('\''); // NON-NLS
+		sb.append(", processId=").append(processId); // NON-NLS
+		sb.append(", threadId=").append(threadId); // NON-NLS
+		sb.append(", category='").append(category).append('\''); // NON-NLS
+		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
+		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
+		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
+		sb.append('}');
+		return sb.toString();
+	}
+
+	/**
+	 * Returns activity field value.
+	 * 
+	 * @param fieldName
+	 *            field name value to get
+	 * @return field contained value
+	 */
+	public Object getFieldValue(String fieldName) {
+		try {
+			StreamFieldType sft = StreamFieldType.valueOfIgnoreCase(fieldName);
+			switch (sft) {
+			case ApplName:
+				return applName;
+			case Category:
+				return category;
+			case CompCode:
+				return compCode;
+			case Correlator:
+				return correlator;
+			case ElapsedTime:
+				return elapsedTime;
+			case EndTime:
+				return endTime;
+			case EventName:
+				return eventName;
+			case EventStatus:
+				return eventStatus;
+			case EventType:
+				return eventType;
+			case Exception:
+				return exception;
+			case Location:
+				return location;
+			case Message:
+				return message;
+			case MsgCharSet:
+				return msgCharSet;
+			case MsgEncoding:
+				return msgEncoding;
+			case MsgLength:
+				return msgLength;
+			case MsgMimeType:
+				return msgMimeType;
+			case ParentId:
+				return parentId;
+			case ProcessId:
+				return processId;
+			case ReasonCode:
+				return reasonCode;
+			case ResourceName:
+				return resourceName;
+			case ServerIp:
+				return serverIp;
+			case ServerName:
+				return serverName;
+			case Severity:
+				return severity;
+			case StartTime:
+				return startTime;
+			case Tag:
+				return tag;
+			case ThreadId:
+				return threadId;
+			case TrackingId:
+				return trackingId;
+			case UserName:
+				return userName;
+			default:
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", fieldName));
+			}
+		} catch (IllegalArgumentException exc) {
+			Property p = activityProperties.get(fieldName);
+
+			return p == null ? null : p.getValue();
+		}
 	}
 }

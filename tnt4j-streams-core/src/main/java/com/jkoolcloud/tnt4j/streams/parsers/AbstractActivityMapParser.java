@@ -94,6 +94,9 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (data == null) {
 			return null;
 		}
+
+		data = preParse(stream, data);
+
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
 				getLogString(data));
@@ -105,7 +108,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			return null;
 		}
 
-		return parsePreparedItem(stream, dataMap.toString(), dataMap);
+		ActivityInfo ai = parsePreparedItem(stream, dataMap.toString(), dataMap);
+		postParse(ai, stream, data);
+
+		return ai;
 	}
 
 	/**

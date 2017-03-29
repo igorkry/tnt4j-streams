@@ -92,7 +92,7 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 * @return created transformation instance
 	 *
 	 * @throws IllegalArgumentException
-	 *             if transformation can not be breaded for provided language
+	 *             if transformation can not be created for provided language
 	 */
 	public static ValueTransformation<Object, Object> createScriptTransformation(String name, String lang, String code)
 			throws IllegalArgumentException {
