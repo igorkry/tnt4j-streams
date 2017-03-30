@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,8 @@ public class DefaultStreamingJob implements StreamingJob {
 	public void run() {
 		// StreamsAgent.runFromAPI(streamCfgFile);
 
+		// TODO: configuration from ZooKeeper
+
 		try {
 			StreamsConfigLoader cfg = new StreamsConfigLoader(streamCfgFile);
 			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
@@ -101,9 +103,10 @@ public class DefaultStreamingJob implements StreamingJob {
 			DefaultStreamListener dsl = new DefaultStreamListener();
 
 			for (TNTInputStream<?, ?> stream : streams) {
+				stream.addStreamListener(dsl);
+
 				stream.output().setProperty(OutputProperties.PROP_TNT4J_CONFIG_FILE, tnt4jCfgFilePath);
 
-				stream.addStreamListener(dsl);
 				ft = new StreamThread(streamThreads, stream,
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
