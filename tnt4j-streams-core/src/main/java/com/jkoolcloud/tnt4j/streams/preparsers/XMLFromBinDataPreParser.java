@@ -3,8 +3,10 @@ package com.jkoolcloud.tnt4j.streams.preparsers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.SequenceInputStream;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Stack;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,15 +27,17 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * TODO PreParser for preparing streams of unvalidable XML to actual activity XML parser. It skip's any of unlike XML
- * characters and tries to construct XML DOM structure for actual parser to continue. It uses SAX handler capabilities
- * to parse input stream. The class extends ErrorHandler interface to catch parsing error, on such event the parser
- * skip's a character and continues to parse element
+ * Pre-parser to convert RAW binary activity data to valid XML parseable by actual activity XML parser. It skip's any of
+ * unlike XML characters and tries to construct XML DOM structure for actual parser to continue. It uses SAX handler
+ * capabilities to parse input stream. The class extends ErrorHandler interface to catch parsing error, on such event
+ * the parser skip's a character and continues to parse element.
+ * <p>
+ * This preparer is also capable to make valid XML document from RAW activity data having truncated XML structures.
  *
  * @version $Revision: 1 $
  */
 public class XMLFromBinDataPreParser extends DefaultHandler
-		implements DataPreParser<Document>, ContentHandler, LexicalHandler, ErrorHandler {
+		implements ActivityDataPreParser<Document>, ContentHandler, LexicalHandler, ErrorHandler {
 
 	private static final String XML_PREFIX = "<?xml version='1.0' encoding='UTF-8'?>\n"; // NON-NLS
 	private static final String ROOT_ELEMENT = "root"; // NON-NLS
@@ -52,9 +56,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	private int bPos;
 
 	/**
-	 * TODO
+	 * Constructs a new XMLFromBinDataPreParser.
 	 *
 	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
 	 */
 	public XMLFromBinDataPreParser() throws ParserConfigurationException {
 		try {
@@ -70,7 +75,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	private boolean initNewDocument() {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			document = factory.newDocumentBuilder().newDocument();
+			document = factory.newDocumentBuilder().newDocument(); // TODO: set encoding to UTF-8
 			root = document.createElement(ROOT_ELEMENT);
 			bPos = 0;
 			return true;
@@ -81,6 +86,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * <p>
 	 * Parsing input stream to prepare XML {@link Document} The method checks for acceptable input source and rethrows
 	 * {@link ParseException} if something fails.
 	 */
@@ -90,9 +97,14 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.doc.init.failure"), 0);
 		}
-		InputStream is = null;
+		InputStream is;
+		boolean closeWhenDone = false;
 		if (data instanceof String) {
-			is = new ByteArrayInputStream(((String) data).getBytes());
+			is = new ByteArrayInputStream(((String) data).getBytes()); // TODO: decode from HEX/Base64
+			closeWhenDone = true;
+		} else if (data instanceof byte[]) {
+			is = new ByteArrayInputStream((byte[]) data);
+			closeWhenDone = true;
 		} else if (data instanceof InputStream) {
 			is = (InputStream) data;
 
@@ -101,6 +113,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 					byte[] copy = IOUtils.toByteArray(is); // Read all and make a copy, because stream does not support
 					// rewind.
 					is = new ByteArrayInputStream(copy);
+					closeWhenDone = true;
 				} catch (IOException e) {
 					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"XMLFromBinDataPreParser.data.read.failed", e.getLocalizedMessage()), 0);
@@ -116,45 +129,54 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		} catch (IOException e) {
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.bin.data.parse.failure"), 0);
+		} finally {
+			if (closeWhenDone) {
+				Utils.close(is);
+			}
 		}
 		return getDOM();
 	}
 
 	/**
-	 * Actual parsing method. Field {@code bPos} represents actual source's position. On the SAX exception {@code bPos}
-	 * adjusted to error position and the parser continues from there until the end of stream.
+	 * Actual RAW data parsing method. Field {@code bPos} represents actual position in source data. On the SAX
+	 * exception {@code bPos} adjusted to error position and the parser continues from there until the end of stream.
 	 *
 	 * @param is
 	 *            input stream to read
-	 *
 	 * @throws IOException
+	 *             if I/O exception occurs while reading input stream
 	 */
-	private void parseBinInput(InputStream is) throws IOException { // TODO: optimize
+	private void parseBinInput(InputStream is) throws IOException {
+		InputStream prefixIS = new ByteArrayInputStream(XML_PREFIX.getBytes());
+		SequenceInputStream sIS = new SequenceInputStream(Collections.enumeration(Arrays.asList(prefixIS, is)));
+		InputSource parserInputSource = new InputSource(sIS);
+		parserInputSource.setEncoding(Utils.UTF8);
+
 		while (bPos <= is.available()) {
-			byte[] bb = new byte[is.available()];
 			try {
-				is.read(bb, 0, bPos);
-			} catch (IndexOutOfBoundsException e) {
-				logger().log(OpLevel.CRITICAL, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"XMLFromBinDataPreParser.IOB"));
+				is.skip(bPos);
+			} catch (IOException e) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"XMLFromBinDataPreParser.skip.failed"), e);
+				return;
 			}
-			// is.mark(bPos);
-			StringWriter writer = new StringWriter();
-			writer.write(XML_PREFIX);
-			writer.flush();
-			IOUtils.copy(is, writer, Utils.UTF8);
-			StringBuffer buffer = writer.getBuffer();
-			InputStream inputStream = IOUtils.toInputStream(buffer, Utils.UTF8);
 			try {
-				parser.parse(inputStream, this);
+				parser.parse(parserInputSource, this);
 			} catch (Exception e) {
-				if (e.getMessage().equals("XML document structures must start and end within the same entity.")) { // NON-NLS
+				// if (e.getMessage().equals("XML document structures must start and end within the same entity.")) { //
+				// NON-NLS
+				if (!_nodeStk.isEmpty()) {
 					_nodeStk.pop();
 				}
+				// }
 				bPos += errorColumn;
+
+				prefixIS.reset();
 				is.reset();
 			}
 		}
+
+		Utils.close(prefixIS);
 	}
 
 	private Document getDOM() {
@@ -163,13 +185,9 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		return document;
 	}
 
-	protected EventSink logger() {
-		return LOGGER;
-	}
-
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || InputStream.class.isInstance(data);
+		return String.class.isInstance(data) || InputStream.class.isInstance(data) || byte[].class.isInstance(data);
 	}
 
 	@Override
@@ -178,7 +196,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	@Override
-	public void characters(char[] ch, int start, int length) {
+	public void characters(char[] ch, int start, int length) { // TODO: handle case when XML terminates on element text
+																// data. i.e. <RoutingOverrideQueue>ADP.ES.INFO.BB.PAYX
 		Node last = _nodeStk.peek();
 
 		// No text nodes can be children of root (DOM006 exception)
@@ -217,7 +236,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		last.appendChild(tmp);
 
 		// Push this node onto stack
-		logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"XMLFromBinDataPreParser.found.element"), qName);
 		_nodeStk.push(tmp);
 	}
@@ -227,20 +246,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		_nodeStk.pop();
 	}
 
-	@Override
-	public void endPrefixMapping(String prefix) {
-		// do nothing
-	}
-
 	/**
-	 * This class is only used internally so this method should never be called.
-	 */
-	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length) {
-	}
-
-	/**
-	 * adds processing instruction node to DOM.
+	 * Adds processing instruction node to DOM.
 	 */
 	@Override
 	public void processingInstruction(String target, String data) {
@@ -249,6 +256,13 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		if (pi != null) {
 			last.appendChild(pi);
 		}
+	}
+
+	/**
+	 * This class is only used internally so this method should never be called.
+	 */
+	@Override
+	public void ignorableWhitespace(char[] ch, int start, int length) {
 	}
 
 	/**
@@ -266,6 +280,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * 
 	 * Lexical Handler method to create comment node in DOM tree.
 	 */
 	@Override
@@ -277,7 +293,26 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		}
 	}
 
-	// Lexical Handler methods- not implemented
+	@Override
+	public void warning(SAXParseException e) throws SAXException {
+		error(e);
+	}
+
+	@Override
+	public void error(SAXParseException e) throws SAXException {
+		errorLine = e.getLineNumber();
+		errorColumn = e.getColumnNumber();
+		LOGGER.log(OpLevel.TRACE,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "XMLFromBinDataPreParser.skipping"),
+				bPos);
+	}
+
+	@Override
+	public void fatalError(SAXParseException e) throws SAXException {
+		error(e);
+	}
+
+	// Lexical Handler methods - not implemented
 	@Override
 	public void startCDATA() {
 	}
@@ -303,26 +338,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	@Override
-	public void warning(SAXParseException e) throws SAXException {
-		error(e);
-	}
-
-	@Override
-	public void error(SAXParseException e) throws SAXException {
-		errorLine = e.getLineNumber();
-		errorColumn = e.getColumnNumber();
-		logger().log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "XMLFromBinDataPreParser.skipping"),
-				bPos);
-	}
-
-	@Override
-	public void fatalError(SAXParseException e) throws SAXException {
-		error(e);
-	}
-
-	@Override
 	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void endPrefixMapping(String prefix) {
 	}
 }

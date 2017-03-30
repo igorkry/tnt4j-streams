@@ -30,7 +30,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.preparsers.DataPreParser;
+import com.jkoolcloud.tnt4j.streams.preparsers.ActivityDataPreParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -70,7 +70,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
-	private List<DataPreParser<?>> preParsers;
+	private List<ActivityDataPreParser<?>> preParsers;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -94,6 +94,18 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @see #isDataClassSupportedByParser(Object)
+	 * @see #isDataClassSupportedByPreParser(Object)
+	 */
+	@Override
+	public boolean isDataClassSupported(Object data) {
+		return isDataClassSupportedByParser(data) || isDataClassSupportedByPreParser(data);
+	}
+
+	/**
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
@@ -103,12 +115,35 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@link java.io.InputStream}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
-	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return String.class.isInstance(data) || byte[].class.isInstance(data) || ByteBuffer.class.isInstance(data)
-				|| Reader.class.isInstance(data) || InputStream.class.isInstance(data); // TODO: validate if pre-parser
-																						// supports data
+				|| Reader.class.isInstance(data) || InputStream.class.isInstance(data);
+	}
+
+	/**
+	 * Returns whether this parser pre-parsers supports the given format of the RAW activity data. This is used by
+	 * activity streams to determine if the parser pre-parses can parse the data in the format that the stream has it.
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser pre-parsers can process data in the specified format, {@code false} -
+	 *         otherwise
+	 */
+	protected boolean isDataClassSupportedByPreParser(Object data) {
+		if (CollectionUtils.isNotEmpty(preParsers)) {
+			for (ActivityDataPreParser dp : preParsers) {
+				if (dp.isDataClassSupported(data)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -615,31 +650,32 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	@Override
 	public void addReference(Object refObject) {
-		if (refObject instanceof DataPreParser) {
+		if (refObject instanceof ActivityDataPreParser) {
 			if (preParsers == null) {
 				preParsers = new ArrayList<>();
 			}
-			preParsers.add((DataPreParser<?>) refObject);
+			preParsers.add((ActivityDataPreParser<?>) refObject);
 		}
 	}
 
 	/**
-	 * TODO
+	 * Converts RAW activity data using defined set of pre-parsers. Converted activity data then is parsed by parser
+	 * itself.
 	 * 
 	 * @param data
-	 *            activity date to pre-parse
+	 *            RAW activity data to pre-parse
 	 * @return pre-parsers converted activity data package
 	 * @throws java.lang.Exception
-	 *             if pre-parsing activity data fails
+	 *             if RAW activity data pre-parsing fails
 	 */
 	protected Object preParseActivityData(Object data) throws Exception {
 		if (CollectionUtils.isNotEmpty(preParsers)) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityParser.data.before.pre.parsing"), getLogString(data));
 
-			for (DataPreParser<?> preParser : preParsers) {
-				boolean isValidClass = preParser.isDataClassSupported(data);
-				if (getActivityDataType().equals(preParser.dataTypeReturned()) && isValidClass) {
+			for (ActivityDataPreParser<?> preParser : preParsers) {
+				boolean validData = preParser.isDataClassSupported(data);
+				if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
 					data = preParser.preParse(data);

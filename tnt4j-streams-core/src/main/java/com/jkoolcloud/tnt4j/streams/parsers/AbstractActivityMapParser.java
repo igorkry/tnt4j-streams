@@ -57,15 +57,20 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	private String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.util.Map}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return Map.class.isInstance(data);
 	}
 

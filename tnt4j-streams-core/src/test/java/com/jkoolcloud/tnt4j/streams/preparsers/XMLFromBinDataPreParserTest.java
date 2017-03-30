@@ -18,6 +18,8 @@ package com.jkoolcloud.tnt4j.streams.preparsers;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -26,7 +28,10 @@ import org.junit.Test;
 import org.w3c.dom.Node;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
+
+import com.jkoolcloud.tnt4j.utils.Utils;
 
 /**
  * @author akausinis
@@ -36,16 +41,34 @@ public class XMLFromBinDataPreParserTest {
 
 	@Test
 	public void testPreParse() throws Exception {
-		// init
-		XMLFromBinDataPreParser parser = new XMLFromBinDataPreParser();
-		// init
-
-		// Source
-		int adj = 0;
+		// Source data
 		byte[] fileBuffer = Files
 				.readAllBytes(Paths.get("..\\tnt4j-streams-core\\samples\\XML-from-bin-data\\RFH2.dump")); // NON-NLS
-		InputStream is = new ByteArrayInputStream(fileBuffer);
+
+		String output = preParseBinData(fileBuffer);
+
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n    <mcd>\n        <Msd>jms_text</Msd>\n    </mcd>\n    <jms/>\n    <usr>\n        <Root>ADP</Root>\n        <DataClass>HR</DataClass>\n        <Verb>GET</Verb>\n        <Noun>INDICATIVEASSOCIATE</Noun>\n        <DataVer>003:000</DataVer>\n        <SrcAppID>ACS</SrcAppID>\n        <CustID>0AACH8JB0DZ00013</CustID>\n        <ADPMsgCorrelationID>FE02F255-8872-1319-42C3-B84DFBBBFDF1</ADPMsgCorrelationID>\n        <SrcSysID>ACS</SrcSysID>\n        <SrcAppVer>001:000</SrcAppVer>\n        <ADPHdrVer>002:001</ADPHdrVer>\n        <PldEffTime>20090910T120813000Z</PldEffTime>\n        <PldFmt>XML</PldFmt>\n        <ADPSegCont>N</ADPSegCont>\n        <SrcCorrID>D47E6EE0-C01B-117B-8552-FFD7C1F0F7FF</SrcCorrID>\n        <RoutingOverride>REPLACE</RoutingOverride>\n        <RoutingOverrideQueue>ADP.ES.INFO.BB.PAYX</RoutingOverrideQueue>\n        <TestID>ACS_Get_IndicativeAssociate_3.0</TestID>\n    </usr>\n</root>\n"; // NON-NLS
+		Assert.assertEquals(expected, output);
+	}
+
+	@Test
+	public void testPreParseIncomplete() throws Exception {
+		// Source data
+		byte[] fileBuffer = Files
+				.readAllBytes(Paths.get("..\\tnt4j-streams-core\\samples\\XML-from-bin-data\\RFH2_incomplete.dump")); // NON-NLS
+
+		String output = preParseBinData(fileBuffer);
+
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n    <mcd>\n        <Msd>jms_text</Msd>\n    </mcd>\n    <jms/>\n    <usr>\n        <Root>ADP</Root>\n        <DataClass>HR</DataClass>\n        <Verb>GET</Verb>\n        <Noun>INDICATIVEASSOCIATE</Noun>\n        <DataVer>003:000</DataVer>\n        <SrcAppID>ACS</SrcAppID>\n        <CustID>0AACH8JB0DZ00013</CustID>\n        <ADPMsgCorrelationID>FE02F255-8872-1319-42C3-B84DFBBBFDF1</ADPMsgCorrelationID>\n        <SrcSysID>ACS</SrcSysID>\n        <SrcAppVer>001:000</SrcAppVer>\n        <ADPHdrVer>002:001</ADPHdrVer>\n        <PldEffTime>20090910T120813000Z</PldEffTime>\n        <PldFmt>XML</PldFmt>\n        <ADPSegCont>N</ADPSegCont>\n        <SrcCorrID>D47E6EE0-C01B-117B-8552-FFD7C1F0F7FF</SrcCorrID>\n        <RoutingOverride>REPLACE</RoutingOverride>\n        <RoutingOverrideQueue>ADP.ES.INFO.BB.PAYX</RoutingOverrideQueue>\n        <TestID>ACS_Get_IndicativeAssociate_3.0</TestID>\n    </usr>\n</root>\n"; // NON-NLS
+		Assert.assertEquals(expected, output);
+	}
+
+	private String preParseBinData(byte[] binData) throws Exception {
+		// init
+		XMLFromBinDataPreParser parser = new XMLFromBinDataPreParser();
+
 		// Source
+		InputStream is = new ByteArrayInputStream(binData);
 
 		// Parse
 		Node document = parser.preParse(is);
@@ -53,16 +76,20 @@ public class XMLFromBinDataPreParserTest {
 		// Result
 		final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
 		final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS"); // NON-NLS
-		final LSSerializer writer = impl.createLSSerializer();
+		LSOutput lsOutput = impl.createLSOutput();
+		lsOutput.setEncoding(Utils.UTF8);
+		Writer stringWriter = new StringWriter();
+		lsOutput.setCharacterStream(stringWriter);
+		final LSSerializer lsSerializer = impl.createLSSerializer();
 
-		writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE); // NON-NLS
-		// writer.getDomConfig().setParameter("xml-declaration",
+		lsSerializer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE); // NON-NLS
+		// lsSerializer.getDomConfig().setParameter("xml-declaration",
 		// keepDeclaration); // Set this to true if the declaration is needed to
 		// be outputted.
 
-		String output = writer.writeToString(document);
-		String expected = "<?xml version=\"1.0\" encoding=\"UTF-16\"?>\n<root>\n    <mcd>\n        <Msd>jms_text</Msd>\n    </mcd>\n    <jms/>\n    <usr>\n        <Root>ADP</Root>\n        <DataClass>HR</DataClass>\n        <Verb>GET</Verb>\n        <Noun>INDICATIVEASSOCIATE</Noun>\n        <DataVer>003:000</DataVer>\n        <SrcAppID>ACS</SrcAppID>\n        <CustID>0AACH8JB0DZ00013</CustID>\n        <ADPMsgCorrelationID>FE02F255-8872-1319-42C3-B84DFBBBFDF1</ADPMsgCorrelationID>\n        <SrcSysID>ACS</SrcSysID>\n        <SrcAppVer>001:000</SrcAppVer>\n        <ADPHdrVer>002:001</ADPHdrVer>\n        <PldEffTime>20090910T120813000Z</PldEffTime>\n        <PldFmt>XML</PldFmt>\n        <ADPSegCont>N</ADPSegCont>\n        <SrcCorrID>D47E6EE0-C01B-117B-8552-FFD7C1F0F7FF</SrcCorrID>\n        <RoutingOverride>REPLACE</RoutingOverride>\n        <RoutingOverrideQueue>ADP.ES.INFO.BB.PAYX</RoutingOverrideQueue>\n        <TestID>ACS_Get_IndicativeAssociate_3.0</TestID>\n    </usr>\n</root>\n"; // NON-NLS
-		Assert.assertEquals(expected, output);
-	}
+		lsSerializer.write(document, lsOutput);
+		String output = stringWriter.toString();
 
+		return output;
+	}
 }
