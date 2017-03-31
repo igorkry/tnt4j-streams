@@ -7,7 +7,7 @@
     <parent>
         <artifactId>tnt4j-streams</artifactId>
         <groupId>com.jkoolcloud.tnt4j.streams</groupId>
-        <version>0.1-beta</version>
+        <version>1.0.0</version>
     </parent>
     <packaging>pom</packaging>
 
