@@ -29,8 +29,8 @@
         <tnt4j.version>2.2.1-SNAPSHOT</tnt4j.version>
         <jesl.version>0.1.6-SNAPSHOT</jesl.version>
 
-        <httpcomponents.version>4.5.2</httpcomponents.version>
-        <httpcomponents.core.version>4.4.5</httpcomponents.core.version>
+        <httpcomponents.version>4.5.3</httpcomponents.version>
+        <httpcomponents.core.version>4.4.6</httpcomponents.core.version>
 
         <msgpack.version>0.8.11</msgpack.version>
 
@@ -214,7 +214,7 @@
                 <exclusion>
                     <groupId>commons-lang</groupId>
                     <artifactId>commons-lang</artifactId>
-                </exclusion>     
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
