@@ -892,9 +892,11 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processReference(Attributes attrs) throws SAXException {
-		if ((currStream == null && currParser == null) || (currStream != null && currParser != null)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration2", REF_ELMT, STREAM_ELMT), currParseLocation);
+		if (currStream == null && currParser == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration3", REF_ELMT, STREAM_ELMT, PARSER_ELMT),
+					currParseLocation);
 		}
 
 		if (currStream != null) {

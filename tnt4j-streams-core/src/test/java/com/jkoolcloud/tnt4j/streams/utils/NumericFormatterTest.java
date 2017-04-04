@@ -32,24 +32,24 @@ public class NumericFormatterTest {
 	@Test
 	public void testParseObject() throws ParseException {
 		// Test Integers
-		assertEquals(2.0, NumericFormatter.parse(null, 1, 2));
-		assertEquals(1.0, NumericFormatter.parse(null, 1, null));
+		assertEquals(2, NumericFormatter.parse(null, 1, 2));
+		assertEquals(1, NumericFormatter.parse(null, 1, null));
 		assertNull(NumericFormatter.parse(null, null, null));
 
 	}
 
 	@Test
 	public void testParseStaticHex() throws ParseException {
-		assertEquals(342.0, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
-		assertEquals(171.0, NumericFormatter.parse(null, 0XAB, null));
+		assertEquals(342L, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
+		assertEquals(171, NumericFormatter.parse(null, 0XAB, null));
 		assertNull(NumericFormatter.parse(null, null, null));
 	}
 
 	@Test
 	public void testParseObjectHex() throws ParseException {
 		NumericFormatter formatter = new NumericFormatter();
-		assertEquals(342.0, formatter.parse("0xAB", 2)); // NON-NLS
-		assertEquals(171.0, formatter.parse(0XAB));
+		assertEquals(342L, formatter.parse("0xAB", 2)); // NON-NLS
+		assertEquals(171, formatter.parse(0XAB));
 		assertNull(formatter.parse(null, null));
 	}
 

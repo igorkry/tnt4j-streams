@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
@@ -57,9 +56,8 @@ public class ActivityInfoTest {
 				continue;
 			}
 
-			Method method = ActivityInfo.class.getMethod("get" + field.name());
 			if (test) {
-				final Object result = method.invoke(activityInfo);
+				Object result = activityInfo.getFieldValue(field.name());
 				assertEquals("Value not equal", value.valueExpected, result);
 			}
 		}
@@ -83,8 +81,8 @@ public class ActivityInfoTest {
 			valueT.value = OpLevel.DEBUG.toString();
 			break;
 		case CompCode:
-			valueT.valueExpected = OpCompCode.WARNING;
-			valueT.value = OpCompCode.WARNING.toString();
+			valueT.valueExpected = OpCompCode.SUCCESS;
+			valueT.value = OpCompCode.SUCCESS.toString();
 			break;
 		case Tag:
 		case Correlator:
@@ -97,13 +95,15 @@ public class ActivityInfoTest {
 		case EventStatus:
 			valueT.valueExpected = ActivityStatus.END;
 			valueT.value = ActivityStatus.END.toString();
+			break;
 		default:
 			// generic cases
 			valueT.value = getTestValueForClass(field.getDataType());
 			break;
 		}
-		if (valueT.valueExpected == null)
+		if (valueT.valueExpected == null) {
 			valueT.valueExpected = valueT.value;
+		}
 
 		activityInfo.applyField(activityField, valueT.value);
 		System.out.println("Setting " + field.name() + " to " + valueT.value); // NON-NLS
@@ -157,8 +157,9 @@ public class ActivityInfoTest {
 
 			activityInfoToMerge.merge(activityInfo);
 
-			Method method = ActivityInfo.class.getMethod("get" + field.name());
-			assertEquals("Value not equal", method.invoke(activityInfo), method.invoke(activityInfoToMerge));
+			Object v1 = activityInfo.getFieldValue(field.name());
+			Object v2 = activityInfoToMerge.getFieldValue(field.name());
+			assertEquals("Value not equal", v1, v2);
 		}
 	}
 

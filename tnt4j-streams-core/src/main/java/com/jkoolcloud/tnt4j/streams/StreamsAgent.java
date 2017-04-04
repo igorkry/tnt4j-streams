@@ -129,9 +129,9 @@ public final class StreamsAgent {
 				}
 			}
 
-			System.exit(0);
+			// System.exit(0);
 		} else {
-			System.exit(1);
+			// System.exit(1);
 		}
 	}
 

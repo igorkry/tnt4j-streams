@@ -550,6 +550,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 				return tags;
 			}
+		} else if (tagsData instanceof Object[]) {
+			Object[] tagsArray = (Object[]) tagsData;
+			if (tagsArray.length > 0) {
+				String[] tags = new String[tagsArray.length];
+				for (int i = 0; i < tagsArray.length; i++) {
+					tags[i] = toString(tagsArray[i]);
+				}
+
+				return tags;
+			}
 		}
 
 		return null;
