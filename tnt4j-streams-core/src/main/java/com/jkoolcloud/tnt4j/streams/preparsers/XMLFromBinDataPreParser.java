@@ -23,6 +23,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -44,6 +45,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
 
+	private ActivityFieldFormatType format;
+
 	private int errorLine;
 	private int errorColumn;
 
@@ -62,6 +65,35 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 *             if initialization of SAX parser fails
 	 */
 	public XMLFromBinDataPreParser() throws ParserConfigurationException {
+		this(ActivityFieldFormatType.bytes);
+	}
+
+	/**
+	 * Constructs a new XMLFromBinDataPreParser.
+	 *
+	 * @param type
+	 *            RAW activity data format name from {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType}
+	 *            enumeration
+	 *
+	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
+	 */
+	public XMLFromBinDataPreParser(String type) throws ParserConfigurationException {
+		this(ActivityFieldFormatType.valueOf(type));
+	}
+
+	/**
+	 * Constructs a new XMLFromBinDataPreParser.
+	 *
+	 * @param format
+	 *            RAW activity data format
+	 *
+	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
+	 */
+	public XMLFromBinDataPreParser(ActivityFieldFormatType format) throws ParserConfigurationException {
+		this.format = format;
+
 		try {
 			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 			parser = parserFactory.newSAXParser();
@@ -75,7 +107,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	private boolean initNewDocument() {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			document = factory.newDocumentBuilder().newDocument(); // TODO: set encoding to UTF-8
+			document = factory.newDocumentBuilder().newDocument();
 			root = document.createElement(ROOT_ELEMENT);
 			bPos = 0;
 			return true;
@@ -100,7 +132,19 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		InputStream is;
 		boolean closeWhenDone = false;
 		if (data instanceof String) {
-			is = new ByteArrayInputStream(((String) data).getBytes()); // TODO: decode from HEX/Base64
+			switch (format) {
+			case base64Binary:
+				is = new ByteArrayInputStream(Utils.base64Decode((String) data));
+				break;
+			case hexBinary:
+				is = new ByteArrayInputStream(Utils.decodeHex((String) data));
+				break;
+			case bytes:
+			case string:
+			default:
+				is = new ByteArrayInputStream(((String) data).getBytes());
+				break;
+			}
 			closeWhenDone = true;
 		} else if (data instanceof byte[]) {
 			is = new ByteArrayInputStream((byte[]) data);

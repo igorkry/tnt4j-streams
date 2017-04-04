@@ -3,7 +3,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser"/>
+    <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+        <!--IF RAW ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. SEE BELOW -->
+        <!--<param name="format" value="base64Binary" type="com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType"/>-->
+        <!--<param name="format" value="base64Binary" type="java.lang.String"/>-->
+    </java-object>
 
     <parser name="RFH2XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <reference name="XMLFromRFH2PreParser"/>
