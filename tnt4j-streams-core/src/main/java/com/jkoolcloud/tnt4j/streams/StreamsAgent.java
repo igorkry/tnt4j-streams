@@ -128,10 +128,6 @@ public final class StreamsAgent {
 				} catch (InterruptedException exc) {
 				}
 			}
-
-			// System.exit(0);
-		} else {
-			// System.exit(1);
 		}
 	}
 

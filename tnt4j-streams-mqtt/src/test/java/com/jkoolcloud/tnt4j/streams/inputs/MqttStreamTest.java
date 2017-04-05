@@ -16,13 +16,11 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -39,6 +37,7 @@ public class MqttStreamTest {
 	@Test
 	public void testProperties() throws Exception {
 		input = new MqttStream();
+		input.setName("MQTTTestStream"); // NON-NLS
 		Map<String, String> props = new HashMap<>(7);
 		props.put(StreamProperties.PROP_SERVER_URI, "tcp://localhost:1883"); // NON-NLS
 		props.put(StreamProperties.PROP_USERNAME, ""); // NON-NLS
@@ -51,10 +50,12 @@ public class MqttStreamTest {
 		testPropertyList(input, props.entrySet());
 	}
 
-	@Test(expected = MqttException.class)
+	@Test
 	public void testInitialize() throws Exception {
 		testProperties();
 		input.startStream();
+		Thread.sleep(3000);
+		assertTrue("MQTT stream input has to be ended", input.isInputEnded());
 	}
 
 	@Test(expected = IllegalStateException.class)

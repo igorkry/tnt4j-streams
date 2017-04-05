@@ -47,8 +47,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	private ActivityFieldFormatType format;
 
-	private int errorLine;
-	private int errorColumn;
+	private Position errorPosition = new Position();
+	private Position lastGoodPosition = new Position();
+
+	private Locator locator;
 
 	private Node root = null;
 	private Document document = null;
@@ -207,20 +209,47 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			try {
 				parser.parse(parserInputSource, this);
 			} catch (Exception e) {
-				// if (e.getMessage().equals("XML document structures must start and end within the same entity.")) { //
-				// NON-NLS
-				if (!_nodeStk.isEmpty()) {
-					_nodeStk.pop();
-				}
-				// }
-				bPos += errorColumn;
+				bPos += errorPosition.column;
 
 				prefixIS.reset();
 				is.reset();
+
+				if (bPos >= is.available()) {
+					handleTrailingText(is);
+				}
+
+				if (!_nodeStk.isEmpty()) {
+					_nodeStk.pop();
+				}
+
 			}
 		}
 
 		Utils.close(prefixIS);
+	}
+
+	/**
+	 * In case of incomplete XML data, preserves last chunk of characters as last element text data.
+	 * 
+	 * @param is
+	 *            input stream to read
+	 * @throws IOException
+	 *             if I/O exception occurs while reading input stream
+	 */
+	protected void handleTrailingText(InputStream is) throws IOException {
+		int textLength = errorPosition.column - lastGoodPosition.column;
+
+		if (textLength > 0) {
+			byte[] buffer = new byte[textLength];
+			try {
+				is.skip(bPos - 1 - buffer.length);
+				is.read(buffer);
+				String text = new String(buffer, Utils.UTF8);
+				characters(text.toCharArray(), 0, text.length());
+			} finally {
+				is.reset();
+			}
+		}
 	}
 
 	private Document getDOM() {
@@ -250,8 +279,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	@Override
-	public void characters(char[] ch, int start, int length) { // TODO: handle case when XML terminates on element text
-																// data. i.e. <RoutingOverrideQueue>ADP.ES.INFO.BB.PAYX
+	public void characters(char[] ch, int start, int length) {
 		Node last = _nodeStk.peek();
 
 		// No text nodes can be children of root (DOM006 exception)
@@ -289,6 +317,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		Node last = _nodeStk.peek();
 		last.appendChild(tmp);
 
+		markLastGoodPosition();
+
 		// Push this node onto stack
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"XMLFromBinDataPreParser.found.element"), qName);
@@ -298,6 +328,13 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	@Override
 	public void endElement(String namespace, String localName, String qName) {
 		_nodeStk.pop();
+
+		markLastGoodPosition();
+	}
+
+	private void markLastGoodPosition() {
+		lastGoodPosition.line = locator.getLineNumber();
+		lastGoodPosition.column = locator.getColumnNumber();
 	}
 
 	/**
@@ -324,6 +361,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 */
 	@Override
 	public void setDocumentLocator(Locator locator) {
+		this.locator = locator;
 	}
 
 	/**
@@ -354,8 +392,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void error(SAXParseException e) throws SAXException {
-		errorLine = e.getLineNumber();
-		errorColumn = e.getColumnNumber();
+		errorPosition.line = e.getLineNumber();
+		errorPosition.column = e.getColumnNumber();
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "XMLFromBinDataPreParser.skipping"),
 				bPos);
@@ -397,5 +435,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void endPrefixMapping(String prefix) {
+	}
+
+	private static class Position {
+		int line;
+		int column;
 	}
 }

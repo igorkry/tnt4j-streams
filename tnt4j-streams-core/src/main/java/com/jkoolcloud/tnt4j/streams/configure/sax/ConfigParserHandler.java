@@ -636,6 +636,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 		// currFieldHasLocElmt = true;
+
+		elementData = new StringBuilder();
 	}
 
 	/**
@@ -742,6 +744,8 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.cannot.contain", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR, LANG_ATTR),
 					currParseLocation);
 		}
+
+		handleFieldLocatorCDATA();
 
 		elementData = new StringBuilder();
 	}
@@ -1132,6 +1136,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		} else if (currParser != null) {
 			currFilter = new StreamFiltersGroup<>(name);
 		}
+
+		handleFieldLocatorCDATA();
 	}
 
 	/**
@@ -1271,6 +1277,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleFieldLocator(currLocatorData);
 
 					currLocatorData = null;
+					elementData = null;
 				}
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 				processingTNT4JProperties = false;
@@ -1361,6 +1368,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleFieldLocator(FieldLocatorData currLocatorData) throws SAXException {
+		handleFieldLocatorCDATA();
+
 		if (currLocatorData.locator != null && currLocatorData.locator.isEmpty()) {
 			currLocatorData.locator = null;
 		}
@@ -1414,6 +1423,23 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		currField.addLocator(afl);
+	}
+
+	private void handleFieldLocatorCDATA() throws SAXException {
+		if (currLocatorData == null) {
+			return;
+		}
+
+		String eDataVal = getElementData();
+
+		if (StringUtils.isNotEmpty(eDataVal)) {
+			if (StringUtils.isNotEmpty(currLocatorData.locator) && eDataVal.length() > 0) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.element.has.both3", FIELD_LOC_ELMT, LOCATOR_ATTR, getLocationInfo()));
+			}
+
+			currLocatorData.locator = eDataVal;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

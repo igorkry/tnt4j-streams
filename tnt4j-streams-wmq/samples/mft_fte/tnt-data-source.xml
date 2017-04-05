@@ -32,7 +32,6 @@
             <field-locator locator="/transaction/destinationAgent/@QMgr" locator-type="Label" required="false"/>
             <field-locator locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         </field>
-
         <field name="ResType" value="FILE"/>
 
         <!-- Map fields from mft_trf status "completed"-->
@@ -102,7 +101,6 @@
             <field-locator locator="/transaction/destinationAgent/@QMgr" locator-type="Label" required="false"/>
             <field-locator locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         </field>
-
         <field name="ResType" value="FILE"/>
 
         <!-- Map fields from mft_trf status "progress" -->
@@ -146,13 +144,13 @@
     </parser>
 
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
-        <property name="Host" value="<HOST|IP>"/>
-        <property name="Port" value="<PORT>"/>
-        <property name="Channel" value="<SVRCONN>"/>
-        <property name="QueueManager" value="<CORD_QMGR>"/>
-        <property name="Queue" value="<QNAME ex:FTE.TRANSFER.LOG>"/>
-        <!--<property name="UserName" value="<USER_NAME>"/>-->
-        <!--<property name="Password" value="<USER_PASS>"/>-->
+        <property name="Host" value="[HOST|IP]"/>
+        <property name="Port" value="1414"/>
+        <property name="Channel" value="[SVRCONN]"/>
+        <property name="QueueManager" value="[CORD_QMGR]"/>
+        <property name="Queue" value="[QNAME ex:FTE.TRANSFER.LOG]"/>
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
 
         <parser-ref name="MQFTEParserNormal"/>
         <parser-ref name="MQFTEParserProgress"/>

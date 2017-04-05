@@ -1094,7 +1094,7 @@
     </xs:simpleType>
 
     <!-- Field locator type definition -->
-    <xs:complexType name="FieldLocatorType">
+    <xs:complexType name="FieldLocatorType" mixed="true">
         <xs:annotation>
             <xs:documentation>
                 Defines a field locator configuration entity.
@@ -1391,22 +1391,22 @@
                 </xs:annotation>
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:choice>
-                            <xs:element name="field-locator" type="FieldLocatorType" minOccurs="0" maxOccurs="unbounded">
-                                <xs:annotation>
-                                    <xs:documentation>
-                                        Associates a field location from the activity string with an activity field.
-                                    </xs:documentation>
-                                </xs:annotation>
-                            </xs:element>
-                            <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
-                                <xs:annotation>
-                                    <xs:documentation>
-                                        Maps a field value from the activity string to the required field value for JKool Cloud.
-                                    </xs:documentation>
-                                </xs:annotation>
-                            </xs:element>
-                        </xs:choice>
+                        <!--<xs:choice>-->
+                        <xs:element name="field-locator" type="FieldLocatorType" minOccurs="0" maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Associates a field location from the activity string with an activity field.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    Maps a field value from the activity string to the required field value for JKool Cloud.
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <!--</xs:choice>-->
 
                         <xs:element name="field-transform" type="FieldTransform" minOccurs="0" maxOccurs="unbounded">
                             <xs:annotation>

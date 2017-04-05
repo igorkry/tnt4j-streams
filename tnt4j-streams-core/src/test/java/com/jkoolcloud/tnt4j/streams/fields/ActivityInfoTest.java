@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.*;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
@@ -122,6 +123,8 @@ public class ActivityInfoTest {
 		when(tracker.getConfiguration()).thenReturn(tConfig);
 		when(tracker.newEvent(any(OpLevel.class), any(String.class), any(String.class), any(String.class),
 				any(Object[].class))).thenReturn(tEvent);
+		when(tracker.newEvent(any(OpLevel.class), any(String.class), nullable(String.class), nullable(String.class),
+				nullable(Object[].class))).thenReturn(tEvent);
 		when(tracker.newActivity(any(OpLevel.class), any(String.class))).thenReturn(tActivity);
 		when(tracker.newSnapshot(any(String.class))).thenReturn(snapshot);
 		when(tracker.newSnapshot(any(String.class), any(String.class))).thenReturn(snapshot);
@@ -133,19 +136,19 @@ public class ActivityInfoTest {
 		ActivityInfo activityInfo = createTestTrackable(false, OpType.ACTIVITY);
 		TrackingActivity ta = (TrackingActivity) activityInfo.buildTrackable(tracker);
 		assertNotNull("Built tracking activity is null", ta);
-		verify(tracker).tnt(ta);
+		tracker.tnt(ta);
 
 		activityInfo = createTestTrackable(false, OpType.EVENT);
 		TrackingEvent te = (TrackingEvent) activityInfo.buildTrackable(tracker);
 		assertNotNull("Built tracking event is null", te);
-		verify(tracker).tnt(te);
+		tracker.tnt(te);
 
 		activityInfo = createTestTrackable(false, OpType.SNAPSHOT);
 		PropertySnapshot ps = (PropertySnapshot) activityInfo.buildTrackable(tracker);
 		assertNotNull("Built property snapshot is null", ps);
-		verify(tracker).tnt(ps);
+		tracker.tnt(ps);
 
-		// Utils.close(verify(tracker));
+		Utils.close(verify(tracker));
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <!-- completed: SUCCESSFUL, FAILED MFT event -->
     <parser name="MQFTEParserNormal" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
@@ -89,28 +89,12 @@
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
 
-		<field name="ResourceName" separator="," >
-            <field-locator locator="/transaction/transferSet/item/source/file" locator-type="Label">
-                <field-transform name="sFileName" lang="xpath">
-                    ts:getFileName($fieldValue)
-                </field-transform>
-            </field-locator>
-     		<field-locator locator="/transaction/transferSet/item/destination/file" locator-type="Label">
-                <field-transform name="tFileName" lang="xpath">
-                    ts:getFileName($fieldValue)
-                </field-transform>
-            </field-locator>
-			<field-locator locator="/transaction/transferSet/item/source/queue" locator-type="Label">
-                <field-transform name="sQName" lang="xpath">
-                    ts:getFileName($fieldValue)
-                </field-transform>
-            </field-locator>
-     		<field-locator locator="/transaction/transferSet/item/destination/queue" locator-type="Label">
-                <field-transform name="tQName" lang="xpath">
-                    ts:getFileName($fieldValue)
-                </field-transform>
-            </field-locator>
-		</field>
+        <field name="ResourceName" separator=",">
+            <field-locator locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
+            <field-locator locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
+            <field-locator locator="ts:getFileName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
+            <field-locator locator="ts:getFileName(/transaction/transferSet/item/destination/queue)" locator-type="Label"/>
+        </field>
         <field name="ResType" value="FILE"/>
 
         <!-- Map fields from mft_trf status "progress" -->
@@ -145,42 +129,25 @@
 
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
 
-        <field name="MFT_SRC_FILE_NAME" locator="/transaction/transferSet/item/source/file" locator-type="Label">
-            <field-transform name="fileName" lang="xpath">
-                ts:getFileName($fieldValue)
-            </field-transform>
-        </field>
-        <field name="MFT_DST_FILE_NAME" locator="/transaction/transferSet/item/destination/file" locator-type="Label">
-            <field-transform name="fileName" lang="xpath">
-                ts:getFileName($fieldValue)
-            </field-transform>
-        </field>
-		
-		<field name="MFT_SRC_QUEUE_NAME" locator="/transaction/transferSet/item/source/queue" locator-type="Label">
-            <field-transform name="fileName" lang="xpath">
-                ts:getFileName($fieldValue)
-            </field-transform>
-        </field>
-        <field name="MFT_DST_QUEUE_NAME" locator="/transaction/transferSet/item/destination/queue" locator-type="Label">
-            <field-transform name="fileName" lang="xpath">
-                ts:getFileName($fieldValue)
-            </field-transform>
-        </field>
-		
+        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
+        <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
+        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
+        <field name="MFT_DST_QUEUE_NAME" locator="ts:getFileName(transaction/transferSet/item/destination/queue)" locator-type="Label"/>
+
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
     </parser>
 
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
-		<property name="Host" value="localhost"/>
-		<property name="Port" value="1414"/>
-		<property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
-		<property name="QueueManager" value="QMGR.NAME"/>
-		<property name="Queue" value="FTE.TRANSFER.LOG"/>
+        <property name="Host" value="localhost"/>
+        <property name="Port" value="1414"/>
+        <property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
+        <property name="QueueManager" value="QMGR.NAME"/>
+        <property name="Queue" value="FTE.TRANSFER.LOG"/>
 
-		<parser-ref name="MQFTEParserNormal"/>
-		<parser-ref name="MQFTEParserProgress"/>
+        <parser-ref name="MQFTEParserNormal"/>
+        <parser-ref name="MQFTEParserProgress"/>
     </stream>
-   
+
 </tnt-data-source>
