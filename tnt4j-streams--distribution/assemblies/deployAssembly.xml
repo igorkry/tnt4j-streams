@@ -34,6 +34,7 @@
             <sources>
                 <includeModuleDirectory>false</includeModuleDirectory>
                 <fileSets>
+                    <!-- run scripts -->
                     <fileSet>
                         <outputDirectory>samples</outputDirectory>
                         <includes>
@@ -42,8 +43,6 @@
                         <excludes>
                             <exclude>**/*.bat</exclude>
                             <exclude>**/*.sh</exclude>
-                            <exclude>**/*_dev.*</exclude>
-                            <exclude>**/!stuff/</exclude>
                         </excludes>
                         <directory>samples</directory>
                     </fileSet>
@@ -52,10 +51,6 @@
                         <includes>
                             <include>**/*.bat</include>
                         </includes>
-                        <excludes>
-                            <exclude>**/*_dev.*</exclude>
-                            <exclude>**/!stuff/</exclude>
-                        </excludes>
                         <directory>samples</directory>
                         <lineEnding>crlf</lineEnding>
                     </fileSet>
@@ -64,10 +59,6 @@
                         <includes>
                             <include>**/*.sh</include>
                         </includes>
-                        <excludes>
-                            <exclude>**/*_dev.*</exclude>
-                            <exclude>**/!stuff/</exclude>
-                        </excludes>
                         <directory>samples</directory>
                         <fileMode>0777</fileMode>
                         <lineEnding>unix</lineEnding>
@@ -87,7 +78,7 @@
     </moduleSets>
 
     <fileSets>
-        <!-- static content -->
+        <!-- run scripts -->
         <fileSet>
             <directory>../bin</directory>
             <includes>
@@ -96,8 +87,6 @@
             <excludes>
                 <exclude>*.bat</exclude>
                 <exclude>*.sh</exclude>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
             </excludes>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
@@ -106,10 +95,6 @@
             <includes>
                 <include>*.bat</include>
             </includes>
-            <excludes>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
-            </excludes>
             <outputDirectory>bin</outputDirectory>
             <lineEnding>crlf</lineEnding>
         </fileSet>
@@ -118,23 +103,16 @@
             <includes>
                 <include>*.sh</include>
             </includes>
-            <excludes>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
-            </excludes>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0777</fileMode>
             <lineEnding>unix</lineEnding>
         </fileSet>
+        <!-- user defined property files -->
         <fileSet>
             <directory>../config</directory>
             <includes>
                 <include>*.*</include>
             </includes>
-            <excludes>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
-            </excludes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>
@@ -142,10 +120,6 @@
             <includes>
                 <include>*.*</include>
             </includes>
-            <excludes>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
-            </excludes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>
@@ -153,12 +127,9 @@
             <includes>
                 <include>*.*</include>
             </includes>
-            <excludes>
-                <exclude>**/*_dev.*</exclude>
-                <exclude>**/!stuff/</exclude>
-            </excludes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
+        <!-- static content -->
         <fileSet>
             <directory>../</directory>
             <includes>
