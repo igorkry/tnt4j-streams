@@ -14,6 +14,7 @@
     </prerequisites>
 
     <name>tnt4j-streams</name>
+    <url>${project.organization.url}</url>
     <description>TNT4J Streams allows data streaming, parsing from various data sources into TNT4J event sinks.</description>
     <licenses>
         <license>
