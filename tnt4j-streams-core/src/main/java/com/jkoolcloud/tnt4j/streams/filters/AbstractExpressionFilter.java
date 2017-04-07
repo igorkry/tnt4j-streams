@@ -86,6 +86,12 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	protected AbstractExpressionFilter(String handleType, String filterExpression) {
 		this.handleType = StringUtils.isEmpty(handleType) ? HandleType.INCLUDE
 				: HandleType.valueOf(handleType.toUpperCase());
+
+		if (StringUtils.isEmpty(filterExpression)) {
+			throw new IllegalArgumentException(StreamsResources
+					.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME, "ExpressionFilter.empty.expression"));
+		}
+
 		this.filterExpression = filterExpression;
 
 		initFilter();
@@ -109,9 +115,7 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 		return handleType;
 	}
 
-	/**
-	 * Performs filter initialization.
-	 */
+	@Override
 	protected void initFilter() {
 	}
 

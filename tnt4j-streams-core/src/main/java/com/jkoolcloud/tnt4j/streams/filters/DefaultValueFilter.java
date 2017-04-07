@@ -17,12 +17,15 @@
 package com.jkoolcloud.tnt4j.streams.filters;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -32,12 +35,15 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class DefaultValueFilter extends AbstractEntityFilter<Object> {
+	private static final String VALUE_DELIMITER = "\\|"; // NON-NLS
+
 	private String value;
 	private HandleType handleType;
 	private EvaluationType evalType;
 	private ActivityFieldFormatType format;
 
 	private Pattern matchPattern;
+	private Set<String> valuesSet;
 
 	/**
 	 * Constructs a new DefaultValueFilter. Handle type is set to
@@ -69,6 +75,11 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 				: EvaluationType.valueOf(evalType.toUpperCase());
 		this.format = StringUtils.isEmpty(format) ? null : ActivityFieldFormatType.valueOf(format);
 
+		if (StringUtils.isEmpty(value)) {
+			throw new IllegalArgumentException(StreamsResources
+					.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME, "DefaultValueFilter.empty.value"));
+		}
+
 		this.value = value;
 
 		initFilter();
@@ -79,15 +90,23 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 	 * {@link com.jkoolcloud.tnt4j.streams.filters.EvaluationType#WILDCARD} or
 	 * {@link com.jkoolcloud.tnt4j.streams.filters.EvaluationType#REGEX}.
 	 */
+	@Override
 	protected void initFilter() {
 		if (evalType == EvaluationType.WILDCARD) {
-			matchPattern = Pattern.compile(Utils.wildcardToRegex2(this.value));
+			matchPattern = Pattern.compile(Utils.wildcardToRegex2(value));
 		} else if (evalType == EvaluationType.REGEX) {
-			matchPattern = Pattern.compile(this.value);
+			matchPattern = Pattern.compile(value);
+		} else {
+			String[] va = value.split(VALUE_DELIMITER);
+
+			valuesSet = new HashSet<>(va.length);
+
+			for (String v : va) {
+				valuesSet.add(v);
+			}
 		}
 
-		// TODO: make multiple values (using "|") handling and values conversions: i.e. from MQ constant names to
-		// numeric.
+		// TODO: values conversions: i.e. from MQ constant names to numeric.
 	}
 
 	@Override
@@ -103,10 +122,10 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 			String fvStr = formatValue(value);
 			match = matchPattern.matcher(fvStr).matches();
 		} else if (evalType == EvaluationType.CONTAINS) {
-			match = contains(this.value, value);
+			match = contains(valuesSet, value);
 		} else {
 			String fvStr = formatValue(value);
-			match = Objects.equals(this.value, fvStr);
+			match = equals(valuesSet, fvStr);
 		}
 
 		return isFilteredOut(handleType, match);
@@ -136,35 +155,77 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 	}
 
 	/**
-	 * Evaluates whether filtered object contains filter defined value.
+	 * Evaluates whether filtered object contains any of filter defined values.
 	 * 
-	 * @param filterValue
-	 *            filter defined value
+	 * @param filterValues
+	 *            filter defined values set
 	 * @param fieldValue
 	 *            filtered object value
 	 * @return {@code true} if filtered object contains filter defined value, {@code false} - otherwise
 	 */
-	protected boolean contains(String filterValue, Object fieldValue) {
+	protected boolean contains(Set<String> filterValues, Object fieldValue) {
 		if (fieldValue instanceof String) {
-			return ((String) fieldValue).contains(filterValue);
+			return contains(filterValues, (String) fieldValue);
 		} else if (fieldValue instanceof Collection<?>) {
 			for (Object cv : (Collection<?>) fieldValue) {
 				String cvs = Utils.toString(cv);
-				if (cvs.equals(filterValue)) {
+				if (equals(filterValues, cvs)) {
 					return true;
 				}
 			}
 		} else if (Utils.isArray(fieldValue)) {
 			for (Object av : (Object[]) fieldValue) {
 				String avs = Utils.toString(av);
-				if (avs.equals(filterValue)) {
+				if (equals(filterValues, avs)) {
 					return true;
 				}
 			}
 		} else {
 			String fvStr = formatValue(fieldValue);
 
-			return fvStr.contains(filterValue);
+			return contains(filterValues, fvStr);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Evaluates whether formatted filtered object string equals any of filter defined values.
+	 * 
+	 * @param filterValues
+	 *            filter defined values set
+	 * @param fvStr
+	 *            formatted filtered object value string
+	 * @return {@code true} if filtered object contains filter defined value, {@code false} - otherwise
+	 */
+	protected boolean equals(Set<String> filterValues, String fvStr) {
+		if (valuesSet != null) {
+			for (String v : filterValues) {
+				if (Objects.equals(v, fvStr)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Evaluates whether formatted filtered object string contains any of filter defined values.
+	 *
+	 * @param filterValues
+	 *            filter defined values set
+	 * @param fvStr
+	 *            formatted filtered object value string
+	 * @return {@code true} if filtered object contains filter defined value, {@code false} - otherwise
+	 */
+	protected boolean contains(Set<String> filterValues, String fvStr) {
+		if (valuesSet != null) {
+			for (String v : filterValues) {
+				if (fvStr.contains(v)) {
+					return true;
+				}
+			}
 		}
 
 		return false;

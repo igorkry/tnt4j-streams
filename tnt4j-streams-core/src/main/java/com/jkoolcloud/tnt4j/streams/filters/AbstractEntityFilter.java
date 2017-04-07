@@ -45,4 +45,9 @@ public abstract class AbstractEntityFilter<T> implements StreamEntityFilter<T> {
 	 * @return filter type
 	 */
 	public abstract StreamFilterType getFilterType();
+
+	/**
+	 * Performs filter initialization.
+	 */
+	protected abstract void initFilter();
 }
