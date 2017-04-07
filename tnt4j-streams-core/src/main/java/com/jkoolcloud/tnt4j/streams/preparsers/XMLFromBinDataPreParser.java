@@ -47,9 +47,6 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	private ActivityFieldFormatType format;
 
-	private Position errorPosition = new Position();
-	private Position lastGoodPosition = new Position();
-
 	private Locator locator;
 
 	private Node root = null;
@@ -59,6 +56,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	private SAXParser parser;
 
 	private int bPos;
+	private Position errorPosition = new Position();
+	private int absoluteLastGoodPosition;
 
 	/**
 	 * Constructs a new XMLFromBinDataPreParser.
@@ -111,6 +110,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			document = factory.newDocumentBuilder().newDocument();
 			root = document.createElement(ROOT_ELEMENT);
+			_nodeStk.push(root);
 			bPos = 0;
 			return true;
 		} catch (ParserConfigurationException e1) {
@@ -200,28 +200,29 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 		while (bPos <= is.available()) {
 			try {
-				is.skip(bPos);
+				is.skip(bPos > absoluteLastGoodPosition ? bPos : absoluteLastGoodPosition);
 			} catch (IOException e) {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"XMLFromBinDataPreParser.skip.failed"), e);
 				return;
 			}
 			try {
+				errorPosition.reset();
 				parser.parse(parserInputSource, this);
 			} catch (Exception e) {
-				bPos += errorPosition.column;
+				if (errorPosition.column < (absoluteLastGoodPosition - bPos)) {
+					bPos += errorPosition.column;
+				} else {
+					bPos++;
+				}
 
 				prefixIS.reset();
 				is.reset();
 
 				if (bPos >= is.available()) {
 					handleTrailingText(is);
+					break;
 				}
-
-				if (!_nodeStk.isEmpty()) {
-					_nodeStk.pop();
-				}
-
 			}
 		}
 
@@ -237,12 +238,13 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 *             if I/O exception occurs while reading input stream
 	 */
 	protected void handleTrailingText(InputStream is) throws IOException {
-		int textLength = errorPosition.column - lastGoodPosition.column;
+		int lPos = absoluteLastGoodPosition - 1;
+		int textLength = bPos - lPos;
 
 		if (textLength > 0) {
 			byte[] buffer = new byte[textLength];
 			try {
-				is.skip(bPos - 1 - buffer.length);
+				is.skip(lPos);
 				is.read(buffer);
 				String text = new String(buffer, Utils.UTF8);
 				characters(text.toCharArray(), 0, text.length());
@@ -291,7 +293,6 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void startDocument() {
-		_nodeStk.push(root);
 	}
 
 	@Override
@@ -333,8 +334,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	private void markLastGoodPosition() {
-		lastGoodPosition.line = locator.getLineNumber();
-		lastGoodPosition.column = locator.getColumnNumber();
+		absoluteLastGoodPosition = bPos + locator.getColumnNumber();
 	}
 
 	/**
@@ -440,5 +440,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	private static class Position {
 		int line;
 		int column;
+
+		public void reset() {
+			this.line = 1;
+			this.column = 1;
+		}
 	}
 }
