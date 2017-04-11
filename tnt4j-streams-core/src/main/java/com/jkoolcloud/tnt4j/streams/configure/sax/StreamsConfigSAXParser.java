@@ -17,7 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.Properties;
 
@@ -25,6 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -58,21 +58,16 @@ public final class StreamsConfigSAXParser {
 	 */
 	public static StreamsConfigData parse(Reader config)
 			throws ParserConfigurationException, SAXException, IOException {
-		Properties p = new Properties();
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream ins = loader.getResourceAsStream("sax.properties"); // NON-NLS
-		try {
-			p.load(ins);
-		} finally {
-			Utils.close(ins);
-		}
+		Properties p = Utils.loadPropertiesResource("sax.properties"); // NON-NLS
 
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();
 		ConfigParserHandler hndlr = null;
 		try {
 			String handlerClassName = p.getProperty(HANDLER_PROP_KEY, ConfigParserHandler.class.getName());
-			hndlr = (ConfigParserHandler) Utils.createInstance(handlerClassName);
+			if (StringUtils.isNotEmpty(handlerClassName)) {
+				hndlr = (ConfigParserHandler) Utils.createInstance(handlerClassName);
+			}
 		} catch (Exception exc) {
 		}
 

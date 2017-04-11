@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 /**
  * Activity information data filtering based on JavaScript expressions.
@@ -75,7 +76,7 @@ public class JavaScriptActivityExpressionFilter extends AbstractActivityFilter {
 		}
 
 		try {
-			boolean match = (boolean) engine.eval(getExpression());
+			boolean match = (boolean) engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
 
 			boolean filteredOut = isFilteredOut(getHandleType(), match);
 			activityInfo.setFiltered(filteredOut);

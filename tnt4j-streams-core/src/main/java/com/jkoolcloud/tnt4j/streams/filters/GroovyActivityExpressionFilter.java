@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -72,7 +73,7 @@ public class GroovyActivityExpressionFilter extends AbstractActivityFilter {
 				binding.setVariable(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
 			}
 		}
-		GroovyShell shell = new GroovyShell(binding);
+		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
 			boolean match = (boolean) shell.evaluate(getExpression());

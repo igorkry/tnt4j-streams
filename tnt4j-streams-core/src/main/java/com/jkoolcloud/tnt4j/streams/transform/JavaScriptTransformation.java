@@ -20,6 +20,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 /**
  * Data value transformation based on JavaScript code/expressions.
@@ -50,7 +51,7 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 		factory.put(FIELD_VALUE_VARIABLE_EXPR, value);
 
 		try {
-			return engine.eval(getScriptCode());
+			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getScriptCode()));
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName()), exc);

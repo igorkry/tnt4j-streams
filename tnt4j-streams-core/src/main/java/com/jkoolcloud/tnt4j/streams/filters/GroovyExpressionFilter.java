@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.filters;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -58,7 +59,7 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	public boolean doFilter(Object value) throws FilterException {
 		Binding binding = new Binding();
 		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
-		GroovyShell shell = new GroovyShell(binding);
+		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
 			boolean match = (boolean) shell.evaluate(getExpression());

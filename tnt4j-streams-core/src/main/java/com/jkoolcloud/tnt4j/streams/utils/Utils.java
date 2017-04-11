@@ -18,10 +18,7 @@ package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -335,6 +332,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param str
 	 *            string to check and transform
 	 * @return regex ready string
+	 * 
 	 * @see #wildcardToRegex(String)
 	 */
 	public static String wildcardToRegex2(String str) {
@@ -451,6 +449,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *             if there was a problem reading from the Reader
 	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
+	 * 
 	 * @see com.google.gson.Gson#fromJson(String, Class)
 	 * @see com.google.gson.Gson#fromJson(java.io.Reader, Class)
 	 */
@@ -490,6 +489,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return string line read from data source
 	 * @throws java.io.IOException
 	 *             If an I/O error occurs while reading line
+	 *
 	 * @see java.io.BufferedReader#readLine()
 	 */
 	public static String getStringLine(Object data) throws IOException {
@@ -606,6 +606,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
 	 * @return string constructed from specified byte array
+	 * 
 	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
@@ -758,6 +759,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param separateLines
 	 *            flag indicating whether to make string lines separated
 	 * @return string read from input stream
+	 * 
 	 * @see #readInput(java.io.BufferedReader, boolean)
 	 */
 	public static String readInput(InputStream is, boolean separateLines) {
@@ -1216,9 +1218,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param propKey
 	 *            system property key referencing properties file path
 	 * @return properties loaded from file
-	 *
 	 * @throws java.io.IOException
 	 *             if an error occurred when reading properties file
+	 *
+	 * @see #loadPropertiesFile(String)
 	 */
 	public static Properties loadPropertiesFor(String propKey) throws IOException {
 		String propFile = System.getProperty(propKey);
@@ -1232,9 +1235,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param propFile
 	 *            properties file path
 	 * @return properties loaded from file
-	 *
 	 * @throws java.io.IOException
 	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.util.Properties#load(java.io.InputStream)
 	 */
 	public static Properties loadPropertiesFile(String propFile) throws IOException {
 		Properties fProps = new Properties();
@@ -1248,6 +1252,64 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return fProps;
+	}
+
+	/**
+	 * Loads properties from resource with given name.
+	 * 
+	 * @param name
+	 *            the resource name
+	 * @return properties loaded from resource
+	 * @throws java.io.IOException
+	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.lang.ClassLoader#getResourceAsStream(String)
+	 * @see java.util.Properties#load(java.io.InputStream)
+	 */
+	public static Properties loadPropertiesResource(String name) throws IOException {
+		Properties rProps = new Properties();
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InputStream ins = loader.getResourceAsStream(name);
+
+		try {
+			rProps.load(ins);
+		} finally {
+			Utils.close(ins);
+		}
+
+		return rProps;
+	}
+
+	/**
+	 * Loads properties from all resource with given name.
+	 * 
+	 * @param name
+	 *            the resource name
+	 * @return properties loaded from all found resources
+	 * @throws java.io.IOException
+	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.lang.ClassLoader#getResources(String)
+	 * @see java.util.Properties#load(java.io.InputStream)
+	 */
+	public static Properties loadPropertiesResources(String name) throws IOException {
+		Properties rProps = new Properties();
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		Enumeration<URL> rEnum = loader.getResources(name);
+
+		while (rEnum.hasMoreElements()) {
+			InputStream ins = rEnum.nextElement().openStream();
+
+			try {
+				rProps.load(ins);
+			} finally {
+				Utils.close(ins);
+			}
+		}
+
+		return rProps;
 	}
 
 	/**

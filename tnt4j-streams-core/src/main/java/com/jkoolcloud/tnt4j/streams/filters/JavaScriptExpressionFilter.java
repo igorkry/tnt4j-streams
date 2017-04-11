@@ -20,6 +20,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 /**
  * Data value filtering based on JavaScript expressions.
@@ -61,7 +62,7 @@ public class JavaScriptExpressionFilter extends AbstractExpressionFilter<Object>
 		factory.put(FIELD_VALUE_VARIABLE_EXPR, value);
 
 		try {
-			boolean match = (boolean) engine.eval(getExpression());
+			boolean match = (boolean) engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
 
 			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
