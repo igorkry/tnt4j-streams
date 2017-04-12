@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
@@ -27,6 +29,7 @@ import com.ibm.mq.*;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.MQHeaderIterator;
+import com.ibm.msg.client.commonservices.trace.Trace;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
@@ -207,18 +210,34 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	/**
 	 * Interrupts owner thread to interrupt sleep between QM reconnect attempts and closes target {@link #dest} if
 	 * opened.
+	 *
+	 * @see #closeDestination()
 	 */
 	@Override
 	protected void stopInternals() {
+		// Prevents generating FDC trace files for waiting MQGET interrupt.
+		traceOff(true);
+
 		if (isOwned()) {
 			getOwnerThread().interrupt();
 		}
 
-		if (dest != null) {
-			try {
-				dest.close();
-			} catch (Exception exc) {
-			}
+		closeDestination();
+
+		// Restore WMQ tracing.
+		traceOff(false);
+	}
+
+	private void traceOff(boolean off) {
+		try {
+			Field f = Trace.class.getDeclaredField("ffstSuppressionProbeIDs");
+			f.setAccessible(true);
+			Object obj = f.get(null);
+
+			Method m = obj.getClass().getMethod(off ? "add" : "remove", Object.class);
+			m.invoke(obj, "01");
+		} catch (Exception exc) {
+			logger().log(OpLevel.DEBUG, "traceOff(boolean) failed", exc); // NON-NLS
 		}
 	}
 
@@ -401,8 +420,19 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	/**
 	 * Closes open objects and disconnects from queue manager.
+	 *
+	 * @see #closeDestination()
+	 * @see #disconnectQM()
 	 */
 	protected void closeQmgrConnection() {
+		closeDestination();
+		disconnectQM();
+	}
+
+	/**
+	 * Closes opened MQ objects used for retrieving messages.
+	 */
+	protected void closeDestination() {
 		if (dest != null) {
 			try {
 				dest.close();
@@ -417,6 +447,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			}
 			dest = null;
 		}
+	}
+
+	/**
+	 * Disconnects from queue manager if connection is opened.
+	 */
+	protected void disconnectQM() {
 		if (qmgr != null) {
 			try {
 				qmgr.disconnect();
