@@ -54,7 +54,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
 
-	private String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
+	/**
+	 * Constant for map entry locator path delimiter.
+	 */
+	protected String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
@@ -109,7 +112,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
 			return null;
 		}
 

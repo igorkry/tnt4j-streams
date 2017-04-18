@@ -149,7 +149,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,

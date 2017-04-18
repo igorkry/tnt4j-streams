@@ -58,6 +58,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	private static final String TAG_DELIM = ","; // NON-NLS
+	private static final String VALUE_DELIM = "\\|"; // NON-NLS
 	private static final String HEX_PREFIX = "0x"; // NON-NLS
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
@@ -527,7 +528,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns tag strings array retrieved from provided data object. Data object an be string (tags delimiter ','),
+	 * Returns tag strings array retrieved from provided data object. Data object can be string (tags delimiter ','),
 	 * strings collection or strings array.
 	 *
 	 * @param tagsData
@@ -821,7 +822,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 				String valueStr = toString(valueObjFields[i].get(obj));
 
-				sb.append(fieldName).append("='").append(valueStr).append('\'') // NON-NLS
+				sb.append(fieldName).append("=").append(sQuote(valueStr)) // NON-NLS
 						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
 			}
 		} catch (Exception exc) {
@@ -1454,4 +1455,100 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		return (T) cNum;
 	}
+
+	/**
+	 * Sets system property value.
+	 * <p>
+	 * If property name is {@code null} - does nothing. If property value is {@code null} - removes property from system
+	 * properties list.
+	 *
+	 * @param pName
+	 *            the name of the system property
+	 * @param pValue
+	 *            the value of the system property
+	 * @return the previous string value of the system property, or {@code null} if name is {@code null} or there was no
+	 *         property with that name.
+	 */
+	public static String setSystemProperty(String pName, String pValue) {
+		if (StringUtils.isEmpty(pName)) {
+			return null;
+		}
+
+		if (pValue != null) {
+			return System.setProperty(pName, pValue);
+		} else {
+			return System.clearProperty(pName);
+		}
+	}
+
+	/**
+	 * Returns enumeration entry based on entry name value ignoring case.
+	 *
+	 * @param enumClass
+	 *            enumeration instance class
+	 * @param name
+	 *            name of enumeration entry
+	 * @param <E>
+	 *            type of enumeration
+	 * @return enumeration object having provided name
+	 * @throws IllegalArgumentException
+	 *             if name is not a valid enumeration entry name or is {@code null}
+	 */
+	public static <E extends Enum<E>> E valueOfIgnoreCase(Class<E> enumClass, String name)
+			throws IllegalArgumentException {
+		if (StringUtils.isEmpty(name)) {
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "Utils.name.empty"));
+		}
+
+		E[] enumConstants = enumClass.getEnumConstants();
+
+		for (E ec : enumConstants) {
+			if (ec.name().equalsIgnoreCase(name)) {
+				return ec;
+			}
+		}
+
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"Utils.no.enum.constant", name, enumClass.getSimpleName()));
+	}
+
+	/**
+	 * Returns a quoted string, surrounded with single quote.
+	 *
+	 * @param str
+	 *            string handle
+	 * @return a quoted string, surrounded with single quote
+	 *
+	 * @see #surround(String, String)
+	 */
+	public static String sQuote(String str) {
+		return surround(str, "'"); // NON-NLS
+	}
+
+	/**
+	 * Returns a quoted object representation string, surrounded with single quote.
+	 *
+	 * @param obj
+	 *            object handle
+	 * @return a quoted object representation string, surrounded with single quote
+	 *
+	 * @see #sQuote(String)
+	 * @see #toString(Object)
+	 */
+	public static String sQuote(Object obj) {
+		return sQuote(toString(obj));
+	}
+
+	/**
+	 * Splits string contained values delimited using '|' delimiter into array of separate values.
+	 * 
+	 * @param value
+	 *            string contained values to split
+	 * @return array of split string values
+	 */
+	public static String[] splitValue(String value) {
+		return StringUtils.isEmpty(value) ? new String[] { value } : value.split(VALUE_DELIM);
+	}
+
 }
