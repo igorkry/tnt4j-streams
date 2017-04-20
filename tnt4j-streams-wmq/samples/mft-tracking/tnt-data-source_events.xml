@@ -41,11 +41,24 @@
         <property name="TurnOutActivityChildren" value="true"/>
     </java-object>
 
-    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value="./tnt4j-streams-wmq/samples/mft-tracking/msg_arch_dest_list_fixit.xml"/>
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="Host" value="[HOST|IP]"/>
+        <property name="Port" value="1414"/>
+        <property name="Channel" value="[SVRCONN]"/>
+        <property name="QueueManager" value="[CORD_QMGR]"/>
+        <property name="Queue" value="[QNAME ex:FTE.TRANSFER.LOG]"/>
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
 
         <parser-ref name="MFTWorkflowParser"/>
         <reference name="WmqStreamOutput"/>
     </stream>
+
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft-tracking/msg_arch_dest_list_fixit.xml"/>-->
+
+    <!--<parser-ref name="MFTWorkflowParser"/>-->
+    <!--<reference name="WmqStreamOutput"/>-->
+    <!--</stream>-->
 
 </tnt-data-source>
