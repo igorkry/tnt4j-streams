@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transaction ID="414d5120434f52442020202020202020d74333582005f304" agentRole="sourceAgent" version="6.00"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd">
+    <action time="2016-11-23T16:16:08.605Z">progress</action>
+    <sourceAgent QMgr="AGNT1" agent="AGNT1A" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </sourceAgent>
+    <destinationAgent QMgr="AGNT2" agent="AGNT2A" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </destinationAgent>
+    <originator>
+        <hostName>192.168.188.1</hostName>
+        <userID>user</userID>
+        <mqmdUserID>user</mqmdUserID>
+    </originator>
+    <transferSet bytesSent="0" index="0" size="1" startTime="2016-11-23T16:16:08.105Z" total="1">
+        <item mode="binary">
+            <source disposition="leave" type="file">
+                <file last-modified="2016-10-17T15:44:44.377Z" size="2015">C:\Users\user\ADP\ADP.txt</file>
+                <checksum method="MD5">9df86d67e06b9a1307acbffbb6716cf3</checksum>
+            </source>
+            <destination exist="error" type="file">
+                <file>C:\Users\user\AMEREN\FileToFile.txt</file>
+            </destination>
+            <status resultCode="1">
+                <supplement>BFGTR0072E: The transfer failed to complete due to the exception : BFGIO0006E: File
+                    "C:\Users\user\AMEREN\FileToFile.txt" already exists.
+                </supplement>
+            </status>
+        </item>
+    </transferSet>
+    <job>
+        <name>File to File transfer</name>
+    </job>
+</transaction>
