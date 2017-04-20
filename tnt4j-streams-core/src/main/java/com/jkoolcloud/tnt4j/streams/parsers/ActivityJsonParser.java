@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * See <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more details.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'.
  * (Optional)</li>
@@ -83,6 +83,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();

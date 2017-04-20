@@ -155,10 +155,10 @@ public class TNTInputStreamTest {
 		ActivityInfo ai = ts.applyParsers("TEST"); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(tags, "TEST"); // NON-NLS
+		ts.applyParsers("TEST", tags); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(falseTags, "TEST"); // NON-NLS
+		ts.applyParsers("TEST", falseTags); // NON-NLS
 
 		verify(parser, times(3)).parse(any(TNTInputStream.class), any());
 

@@ -22,7 +22,19 @@
         <release.deploy.dir>../../build/${release.deploy.name}</release.deploy.dir>
         <release.deploy.finalName>${release.deploy.name}-${project.version}</release.deploy.finalName>
         <release.deploy.assembly>assemblies/deployAssembly.xml</release.deploy.assembly>
+        <build.assemblies.phase>package</build.assemblies.phase>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>releaseBuild</id>
+
+            <properties>
+                <release.deploy.assembly>assemblies/deployAssembly_dev.xml</release.deploy.assembly>
+                <build.assemblies.phase>deploy</build.assemblies.phase>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <defaultGoal>clean package</defaultGoal>

@@ -41,7 +41,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * structure, where each field is represented by declared class field and the field name is used to map each field onto
  * its corresponding activity field.
  * <p>
- * If field is complex object, subfields can be accessed using
+ * If field is complex object, sub-fields can be accessed using
  * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator: i.e.
  * 'header.author.name'.
  *
@@ -52,7 +52,6 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 	/**
 	 * Constructs a new ActivityJavaObjectParser.
-	 *
 	 */
 	public ActivityJavaObjectParser() {
 		super();
@@ -68,6 +67,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		// for (Map.Entry<String, String> prop : props) {
 		// String name = prop.getKey();

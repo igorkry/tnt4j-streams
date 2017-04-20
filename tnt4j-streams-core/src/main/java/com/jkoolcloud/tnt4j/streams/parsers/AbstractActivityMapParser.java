@@ -43,7 +43,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e.
  * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
  * elements. Default value - '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}'.
@@ -82,6 +82,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();

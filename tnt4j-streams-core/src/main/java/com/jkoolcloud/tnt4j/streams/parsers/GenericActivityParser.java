@@ -392,11 +392,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				field = aField;
 				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
 
-				if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
-					applyDynamicValue(stream, data, ai, field, value);
-				} else {
-					applyFieldValue(stream, ai, field, value);
-				}
+				applyFieldValue(stream, ai, field, value, data);
 			}
 
 			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
@@ -412,6 +408,39 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return ai;
+	}
+
+	/**
+	 * Sets the value for the field in the specified activity entity. Depending on field definition if it is dynamic or
+	 * resolved collection value has to be split, value is applied in dynamic manner using
+	 * {@link #applyDynamicValue(TNTInputStream, Object, ActivityInfo, ActivityField, Object)} method. In all other
+	 * cases {@link #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)} is invoked.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param ai
+	 *            activity object whose field is to be set
+	 * @param field
+	 *            field to apply value to
+	 * @param value
+	 *            value to apply for this field
+	 * @param data
+	 *            prepared activity data item to parse dynamic values
+	 * @throws IllegalStateException
+	 *             if parser has not been properly initialized
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 *
+	 * @see #applyDynamicValue(TNTInputStream, Object, ActivityInfo, ActivityField, Object)
+	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
+	 */
+	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value,
+			T data) throws ParseException {
+		if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
+			applyDynamicValue(stream, data, ai, field, value);
+		} else {
+			applyFieldValue(stream, ai, field, value);
+		}
 	}
 
 	/**
@@ -435,7 +464,31 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	// }
 	// }
 
-	private void applyDynamicValue(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
+	/**
+	 * Sets the value for the dynamic fields in the specified activity entity.
+	 * <p>
+	 * If field has stacked parser defined, then field value is parsed into separate activity using stacked parser. If
+	 * field can be parsed by stacked parser, can be merged or added as a child into specified (parent) activity
+	 * depending on stacked parser reference 'aggregation' attribute value.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param data
+	 *            prepared activity data item to parse dynamic values
+	 * @param ai
+	 *            activity object whose field is to be set
+	 * @param field
+	 *            field to apply value to
+	 * @param value
+	 *            value to apply for dynamic fields
+	 * @throws IllegalStateException
+	 *             if parser has not been properly initialized
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 *
+	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
+	 */
+	protected void applyDynamicValue(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
 			Object value) throws ParseException {
 		Map<String, Object> dValMap = parseDynamicValues(stream, data, field.getDynamicLocators());
 

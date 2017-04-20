@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * specified regular expression, with the value for each field being retrieved from either of the 1-based group
  * position, or match position.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
  * </ul>
@@ -84,6 +84,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
@@ -194,7 +196,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 								"ActivityRegExParser.setting.field"), field);
 					}
 
-					applyFieldValue(stream, ai, field, value);
+					applyFieldValue(stream, ai, field, value, data);
 				}
 			}
 		} catch (Exception e) {
@@ -216,7 +218,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 							"ActivityRegExParser.setting.group.field"), field);
 				}
 
-				applyFieldValue(stream, ai, field, value);
+				applyFieldValue(stream, ai, field, value, data);
 			}
 
 			if (useActivityAsMessage && ai.getMessage() == null) {

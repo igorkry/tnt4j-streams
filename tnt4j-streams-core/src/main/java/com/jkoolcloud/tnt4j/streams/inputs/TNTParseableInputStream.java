@@ -137,26 +137,29 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *             if parser fails to run
 	 * @throws ParseException
 	 *             if any parser encounters an error parsing the activity data
+	 *
+	 * @see #getDataTags(Object)
+	 * @see #applyParsers(Object, String...)
 	 */
 	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
-		return applyParsers(null, data);
+		return applyParsers(data, getDataTags(data));
 	}
 
 	/**
 	 * Applies all defined parsers for this stream that support the format that the raw activity data is in the order
 	 * added until one successfully matches the specified activity data item.
 	 *
-	 * @param tags
-	 *            array of tag strings to map activity data with parsers. Can be {@code null}.
 	 * @param data
 	 *            activity data item to process
+	 * @param tags
+	 *            array of tag strings to map activity data with parsers. Can be {@code null}.
 	 * @return processed activity data item, or {@code null} if activity data item does not match rules for any parsers
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
 	 *             if any parser encounters an error parsing the activity data
 	 */
-	protected ActivityInfo applyParsers(String[] tags, Object data) throws IllegalStateException, ParseException {
+	protected ActivityInfo applyParsers(Object data, String... tags) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
 		}
@@ -175,6 +178,19 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 				}
 			}
 		}
+		return null;
+	}
+
+	/**
+	 * Resolves RAW activity data tag strings array to be used for activity data and parsers mapping.
+	 *
+	 * @param data
+	 *            activity data item to get tags
+	 * @return array of activity data found tag strings
+	 *
+	 * @see #applyParsers(Object, String...)
+	 */
+	protected String[] getDataTags(Object data) {
 		return null;
 	}
 

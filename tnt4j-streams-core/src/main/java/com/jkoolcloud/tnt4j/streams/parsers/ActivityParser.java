@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -125,9 +126,11 @@ public abstract class ActivityParser {
 	}
 
 	/**
-	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
-	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
-	 * is merged into specified (parent) activity.
+	 * Sets the value for the field in the specified activity entity.
+	 * <p>
+	 * If field has stacked parser defined, then field value is parsed into separate activity using stacked parser. If
+	 * field can be parsed by stacked parser, produced activity can be merged or added as a child into specified
+	 * (parent) activity depending on stacked parser reference 'aggregation' attribute value.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -150,18 +153,34 @@ public abstract class ActivityParser {
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
-			for (ActivityParser stackedParser : field.getStackedParsers()) {
+			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
-				if (stackedParser.isDataClassSupported(value)) {
-					ActivityInfo sai = stackedParser.parse(stream, value);
+				boolean applied = applyStackedParser(stream, ai, parserRef, value);
 
-					if (sai != null) {
-						ai.merge(sai);
-						break;
-					}
+				if (applied) {
+					break;
 				}
 			}
 		}
+	}
+
+	private static boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai,
+			ActivityField.ParserReference parserRef, Object value) throws ParseException {
+		if (parserRef.getParser().isDataClassSupported(value)) {
+			ActivityInfo sai = parserRef.getParser().parse(stream, value);
+
+			if (sai != null) {
+				if (parserRef.getAggregationType() == AggregationType.Join) {
+					ai.addChild(sai);
+				} else {
+					ai.mergeAll(sai);
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

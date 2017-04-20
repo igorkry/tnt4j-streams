@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -46,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' (i.e.
  * 'MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE').
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant
  * names if possible and field/locator data type is 'String' (meaning translated value can be assigned to field). If
@@ -80,6 +81,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
@@ -196,24 +199,24 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 		if ("command".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCommand();
 			if (isValueTranslatable(fDataType)) {
-				val = PCFConstants.lookup(val, "MQCMD_.*"); // NON-NLS
+				val = MQConstants.lookup(val, "MQCMD_.*"); // NON-NLS
 			}
 		} else if ("msgseqnumber".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getMsgSeqNumber();
 		} else if ("control".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getControl();
 			if (isValueTranslatable(fDataType)) {
-				val = PCFConstants.lookup(val, "MQCFC_.*"); // NON-NLS
+				val = MQConstants.lookup(val, "MQCFC_.*"); // NON-NLS
 			}
 		} else if ("compcode".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCompCode();
 			if (isValueTranslatable(fDataType)) {
-				val = PCFConstants.lookupCompCode((Integer) val);
+				val = MQConstants.lookupCompCode((Integer) val);
 			}
 		} else if ("reason".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getReason();
 			if (isValueTranslatable(fDataType)) {
-				val = PCFConstants.lookupReasonCode((Integer) val);
+				val = MQConstants.lookupReasonCode((Integer) val);
 			}
 		} else if ("parametercount".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getParameterCount();
@@ -250,36 +253,36 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 
 		if (isValueTranslatable(fDataType)) {
 			switch (param.getParameter()) {
-			case PCFConstants.MQIA_APPL_TYPE:
-				val = PCFConstants.lookup(val, "MQAT_.*"); // NON-NLS
+			case MQConstants.MQIA_APPL_TYPE:
+				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_API_CALLER_TYPE:
-				val = PCFConstants.lookup(val, "MQXACT_.*"); // NON-NLS
+			case MQConstants.MQIACF_API_CALLER_TYPE:
+				val = MQConstants.lookup(val, "MQXACT_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_API_ENVIRONMENT:
-				val = PCFConstants.lookup(val, "MQXE_.*"); // NON-NLS
+			case MQConstants.MQIACF_API_ENVIRONMENT:
+				val = MQConstants.lookup(val, "MQXE_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_APPL_FUNCTION_TYPE:
-				val = PCFConstants.lookup(val, "MQFUN_.*"); // NON-NLS
+			case MQConstants.MQIACF_APPL_FUNCTION_TYPE:
+				val = MQConstants.lookup(val, "MQFUN_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIA_PLATFORM:
-				val = PCFConstants.lookup(val, "MQPL_.*"); // NON-NLS
+			case MQConstants.MQIA_PLATFORM:
+				val = MQConstants.lookup(val, "MQPL_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_OPERATION_ID:
-				val = PCFConstants.lookup(val, "MQXF_.*"); // NON-NLS
+			case MQConstants.MQIACF_OPERATION_ID:
+				val = MQConstants.lookup(val, "MQXF_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_OBJECT_TYPE:
-			case PCFConstants.MQIACF_RESOLVED_TYPE:
-				val = PCFConstants.lookup(val, "MQOT_.*"); // NON-NLS
+			case MQConstants.MQIACF_OBJECT_TYPE:
+			case MQConstants.MQIACF_RESOLVED_TYPE:
+				val = MQConstants.lookup(val, "MQOT_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_COMP_CODE:
-				val = PCFConstants.lookup(val, "MQCC_.*"); // NON-NLS
+			case MQConstants.MQIACF_COMP_CODE:
+				val = MQConstants.lookup(val, "MQCC_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_MSG_TYPE:
-				val = PCFConstants.lookup(val, "MQMT_.*"); // NON-NLS
+			case MQConstants.MQIACF_MSG_TYPE:
+				val = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
 				break;
-			case PCFConstants.MQIACF_REASON_CODE:
-				val = PCFConstants.lookupReasonCode((Integer) val);
+			case MQConstants.MQIACF_REASON_CODE:
+				val = MQConstants.lookupReasonCode((Integer) val);
 			default:
 				break;
 			}

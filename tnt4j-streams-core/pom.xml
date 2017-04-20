@@ -40,18 +40,6 @@
         <tnt4j.logger.version>0.2</tnt4j.logger.version>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>devBuild</id>
-
-            <properties>
-                <tnt4j.version>2.5-SNAPSHOT</tnt4j.version>
-                <jesl.version>0.3-SNAPSHOT</jesl.version>
-                <tnt4j.logger.version>0.2</tnt4j.logger.version>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <resources>
             <resource>

@@ -1,0 +1,103 @@
+<?xml version='1.0'?>
+<Workflow>
+	<trace />
+	<result>OK</result>
+	<userid />
+	<domain />
+	<processId>a8c81fd9-ce36-4e92-8897-1cff07c10d0d</processId>
+	<XMOFTSReq>
+		<label>Simple-Test-With-MIMVARS</label>
+		<lqm>PMFTEUS000</lqm>
+		<sqm>PMFTEUS000</sqm>
+		<dqm>DMFTCUS102</dqm>
+		<oqm>PMFTEUS000</oqm>
+		<spath>/home/xmuser/Test/testfile.txt</spath>
+		<dpath>C:\temp\archive\loand-20170411.dat</dpath>
+		<compressionLevel>5</compressionLevel>
+		<replyQueue>TEST.Q</replyQueue>
+		<replyQueueManager>DMFTSUS043</replyQueueManager>
+		<ControlCenter>
+			<doStatus>1</doStatus>
+		</ControlCenter>
+		<username>leachge</username>
+		<userid>leachge</userid>
+		<Version>
+			<request>A</request>
+			<transfer>A</transfer>
+		</Version>
+		<ttype>binary</ttype>
+		<chmod>644</chmod>
+		<FileStats>
+			<isCompressed>false</isCompressed>
+			<codePage>ASCII</codePage>
+			<sourceCCSID>819</sourceCCSID>
+			<platform>__UNIX__</platform>
+			<DataMessageList>
+				<DataMessage>
+					<msgId>414D5120504D4654455553303030202058D13F6F26A01C85</msgId>
+				</DataMessage>
+			</DataMessageList>
+			<totalBytes>48159</totalBytes>
+			<messageCount>1</messageCount>
+			<totalRecords>0</totalRecords>
+			<fileAccessMode>xmfile</fileAccessMode>
+			<sourceEOL>Cg==</sourceEOL>
+			<After>
+				<totalBytes>48159</totalBytes>
+				<messageCount>1</messageCount>
+				<totalRecords>0</totalRecords>
+				<destinationCCSID>437</destinationCCSID>
+			</After>
+		</FileStats>
+	</XMOFTSReq>
+	<contextId>1</contextId>
+	<XMOFTSFeedBackList>
+		<XMOFTSFeedBack>
+			<ftfId>a8c81fd9-ce36-4e92-8897-1cff07c10d0d</ftfId>
+			<activityId>bcf08681-1ed0-11e7-b1ef-fbf315a3d044</activityId>
+			<branchId />
+			<rc>0</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_REQUEST_SUCCESSFUL</rcTxt>
+			<activity>Send</activity>
+			<locationCode />
+			<message>The request has completed successfully</message>
+			<message2>Send operation complete: /home/xmuser/Test/testfile.txt</message2>
+			<userAction />
+			<sysAdminAction />
+		</XMOFTSFeedBack>
+		<XMOFTSFeedBack>
+			<ftfId>a8c81fd9-ce36-4e92-8897-1cff07c10d0d</ftfId>
+			<activityId>bcf08680-1ed0-11e7-abc7-ad2f3bd08224</activityId>
+			<branchId />
+			<rc>0</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_REQUEST_SUCCESSFUL</rcTxt>
+			<activity>Receive</activity>
+			<locationCode />
+			<message>The request has completed successfully</message>
+			<message2>Receive operation complete: C:\temp\archive\loand-20170411.dat</message2>
+			<userAction />
+			<sysAdminAction />
+		</XMOFTSFeedBack>
+	</XMOFTSFeedBackList>
+	<WfProcess>
+		<process>Transfer_File</process>
+		<priority>0</priority>
+		<next>XMC_EndState</next>
+		<originalmsgid>qMgf2c42TpKIlxz/B8ENDQAAAAAAAAAA</originalmsgid>
+		<activityId>bcf08680-1ed0-11e7-abc7-ad2f3bd08224</activityId>
+		<processId>a8c81fd9-ce36-4e92-8897-1cff07c10d0d</processId>
+		<activity>NotifyUser</activity>
+		<lastActivity>NotifyUser</lastActivity>
+		<previous />
+		<exceptionHandler>XMOFIXIT_Decision</exceptionHandler>
+		<waitFor>0</waitFor>
+	</WfProcess>
+	<WfDescriptor>
+		<userIdentifier>leachge</userIdentifier>
+	</WfDescriptor>
+	<decisionFlag>0</decisionFlag>
+	<method>receiveFile</method>
+	<receiver>Dynamic</receiver>
+</Workflow>

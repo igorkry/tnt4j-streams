@@ -16,6 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.outputs;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.jkoolcloud.tnt4j.core.Snapshot;
 import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -32,12 +36,13 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  *
  * @version $Revision: 1 $
  *
- * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
+ * @see ActivityInfo#buildTrackable(Tracker, Collection)
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
 
 	private boolean resolveServer = false;
+	private boolean turnOutActivityChildren = false;
 
 	/**
 	 * Constructs a new JKCloudActivityOutput.
@@ -57,6 +62,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 
 		if (OutputProperties.PROP_RESOLVE_SERVER.equalsIgnoreCase(name)) {
 			resolveServer = Boolean.parseBoolean((String) value);
+		} else if (OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
+			turnOutActivityChildren = Boolean.parseBoolean((String) value);
 		}
 	}
 
@@ -64,16 +71,28 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 * {@inheritDoc}
 	 * <p>
 	 * 
-	 * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
+	 * @see ActivityInfo#buildTrackable(Tracker, Collection)
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
 		String fqn = ai.getSourceFQN(resolveServer);
 		Tracker tracker = getTracker(fqn, Thread.currentThread());
 
-		Trackable t = ai.buildTrackable(tracker);
+		if (turnOutActivityChildren && ai.hasChildren()) {
+			for (ActivityInfo cai : ai.getChildren()) {
+				cai.merge(ai);
+				Trackable t = cai.buildTrackable(tracker);
+				recordActivity(tracker, CONN_RETRY_INTERVAL, t);
+			}
+		} else {
+			List<Trackable> chTrackables = new ArrayList<>();
+			Trackable t = ai.buildTrackable(tracker, chTrackables);
+			recordActivity(tracker, CONN_RETRY_INTERVAL, t);
 
-		recordActivity(tracker, CONN_RETRY_INTERVAL, t);
+			for (Trackable chT : chTrackables) {
+				recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
+			}
+		}
 	}
 
 	@Override

@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.outputs;
 
+import java.util.Collection;
+import java.util.Map;
+
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -28,6 +31,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @see TNTInputStream#setOutput(TNTStreamOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
+ * @see com.jkoolcloud.tnt4j.streams.inputs.TNTStreamInput
  */
 public interface TNTStreamOutput<T> {
 
@@ -85,4 +89,12 @@ public interface TNTStreamOutput<T> {
 	 *            related input stream instance
 	 */
 	void setStream(TNTInputStream<?, ?> inputStream);
+
+	/**
+	 * Sets output configuration properties collection.
+	 *
+	 * @param props
+	 *            properties to set
+	 */
+	void setProperties(Collection<Map.Entry<String, String>> props);
 }

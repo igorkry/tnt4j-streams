@@ -40,5 +40,10 @@ public interface OutputProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
+	String PROP_TURN_OUT_CHILDREN = "TurnOutActivityChildren"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
 	String PROP_TNT4J_CONFIG_ZK_NODE = "TNT4JConfigZKNode"; // NON-NLS
 }

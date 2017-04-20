@@ -51,7 +51,7 @@ public class ActivityField extends AbstractFieldEntity {
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String separator = DEFAULT_FIELD_VALUES_DELIM;
-	private Collection<ActivityParser> stackedParsers;
+	private Set<ParserReference> stackedParsers;
 	private boolean transparent = false;
 	private boolean splitCollection = false;
 	private String valueType = null;
@@ -351,16 +351,18 @@ public class ActivityField extends AbstractFieldEntity {
 	 *
 	 * @param parser
 	 *            the stacked parser to add
+	 * @param aggregationType
+	 *            resolved activity entities aggregation type
 	 *
 	 * @return instance of this activity field
 	 */
-	public ActivityField addStackedParser(ActivityParser parser) {
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType) {
 		if (parser != null) {
 			if (stackedParsers == null) {
-				stackedParsers = new ArrayList<>();
+				stackedParsers = new HashSet<>(5);
 			}
 
-			stackedParsers.add(parser);
+			stackedParsers.add(new ParserReference(parser, aggregationType));
 		}
 
 		return this;
@@ -371,7 +373,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 *
 	 * @return stacked parsers collection
 	 */
-	public Collection<ActivityParser> getStackedParsers() {
+	public Collection<ParserReference> getStackedParsers() {
 		return stackedParsers;
 	}
 
@@ -515,6 +517,7 @@ public class ActivityField extends AbstractFieldEntity {
 		tField.requiredVal = requiredVal;
 		tField.stackedParsers = stackedParsers;
 		tField.valueType = fillDynamicAttr(valueType, dValues, valueIndex);
+		tField.transparent = transparent;
 
 		return tField;
 	}
@@ -574,5 +577,32 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		return value;
+	}
+
+	public static class ParserReference {
+		private ActivityParser parser;
+		private AggregationType aggregationType;
+
+		ParserReference(ActivityParser parser) {
+			this(parser, AggregationType.Merge);
+		}
+
+		ParserReference(ActivityParser parser, String aggregationType) {
+			this(parser, StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
+					: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType));
+		}
+
+		ParserReference(ActivityParser parser, AggregationType aggregationType) {
+			this.parser = parser;
+			this.aggregationType = aggregationType;
+		}
+
+		public ActivityParser getParser() {
+			return parser;
+		}
+
+		public AggregationType getAggregationType() {
+			return aggregationType;
+		}
 	}
 }

@@ -1,0 +1,111 @@
+<?xml version='1.0'?>
+<Workflow>
+	<trace />
+	<result>OK</result>
+	<userid />
+	<domain />
+	<processId>89d76a66-cfd0-4b66-bfc1-d37c05059b93</processId>
+	<contextId>1</contextId>
+	<XMOFTSFeedBackList>
+		<XMOFTSFeedBack>
+			<ftfId>89d76a66-cfd0-4b66-bfc1-d37c05059b93</ftfId>
+			<activityId>486b1701-1ed3-11e7-ac2e-86a2b986c75b</activityId>
+			<branchId />
+			<rc>0</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_REQUEST_SUCCESSFUL</rcTxt>
+			<activity>Send</activity>
+			<locationCode />
+			<message>The request has completed successfully</message>
+			<message2>Send operation complete: /home/xmuser/Test/testfile.txt</message2>
+			<userAction />
+			<sysAdminAction />
+		</XMOFTSFeedBack>
+		<XMOFTSFeedBack>
+			<ftfId>89d76a66-cfd0-4b66-bfc1-d37c05059b93</ftfId>
+			<activityId>486b1700-1ed3-11e7-b84d-87f37edc995e</activityId>
+			<branchId />
+			<rc>0</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_REQUEST_SUCCESSFUL</rcTxt>
+			<activity>Receive</activity>
+			<locationCode />
+			<message>The request has completed successfully</message>
+			<message2>Receive operation complete: C:\temp\testfile.txt</message2>
+			<userAction />
+			<sysAdminAction />
+		</XMOFTSFeedBack>
+	</XMOFTSFeedBackList>
+	<WfProcess>
+		<process>Transfer_File</process>
+		<priority>0</priority>
+		<next>XMC_EndState</next>
+		<originalmsgid>iddqZs/QS2a/wdN8BQWbkwAAAAAAAAAA</originalmsgid>
+		<activityId>486b1700-1ed3-11e7-b84b-914662b64e29</activityId>
+		<processId>89d76a66-cfd0-4b66-bfc1-d37c05059b93</processId>
+		<activity>NotifyUser</activity>
+		<lastActivity>NotifyUser</lastActivity>
+		<previous />
+		<exceptionHandler>XMOFIXIT_Decision</exceptionHandler>
+		<waitFor>0</waitFor>
+		<dontMerge>TRUE</dontMerge>
+	</WfProcess>
+	<WfDescriptor>
+		<userIdentifier>leachge</userIdentifier>
+	</WfDescriptor>
+	<decisionFlag>0</decisionFlag>
+	<method>receiveFile</method>
+	<receiver>Dynamic</receiver>
+	<batchDQMListSize>25</batchDQMListSize>
+	<batchDQMList>true</batchDQMList>
+	<DQMList />
+	<Batch />
+	<XMOFTSReq>
+		<dqm>DMFTCUS102</dqm>
+		<username>admin</username>
+		<destinationName>DMFTCUS102-Test</destinationName>
+		<dpath>C:\temp\testfile.txt</dpath>
+		<replyQueue>TEST.Q</replyQueue>
+		<replyQueueManager>DMFTSUS043</replyQueueManager>
+		<label>Test-Archiving-With-MIMVARS</label>
+		<lqm>PMFTEUS000</lqm>
+		<sqm>PMFTEUS000</sqm>
+		<oqm>PMFTEUS000</oqm>
+		<destinationListName>DMFTCUS102-Test-Archve</destinationListName>
+		<spath>/home/xmuser/Test/testfile.txt</spath>
+		<compressionLevel>5</compressionLevel>
+		<ControlCenter>
+			<doStatus>1</doStatus>
+		</ControlCenter>
+		<userid>leachge</userid>
+		<Version>
+			<request>A</request>
+			<transfer>A</transfer>
+		</Version>
+		<ttype>binary</ttype>
+		<chmod>644</chmod>
+		<FileStats>
+			<isCompressed>false</isCompressed>
+			<codePage>ASCII</codePage>
+			<sourceCCSID>819</sourceCCSID>
+			<platform>__UNIX__</platform>
+			<DataMessageList>
+				<DataMessage>
+					<msgId>414D5120504D4654455553303030202058D13F6F26D67D62</msgId>
+				</DataMessage>
+			</DataMessageList>
+			<totalBytes>48159</totalBytes>
+			<messageCount>1</messageCount>
+			<totalRecords>0</totalRecords>
+			<fileAccessMode>xmfile</fileAccessMode>
+			<sourceEOL>Cg==</sourceEOL>
+			<After>
+				<totalBytes>48159</totalBytes>
+				<messageCount>1</messageCount>
+				<totalRecords>0</totalRecords>
+				<destinationCCSID>437</destinationCCSID>
+			</After>
+		</FileStats>
+	</XMOFTSReq>
+	<WorkflowList />
+</Workflow>

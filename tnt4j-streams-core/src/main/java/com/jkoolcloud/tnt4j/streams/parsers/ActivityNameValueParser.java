@@ -43,7 +43,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * each field is represented by a name/value pair and the name is used to map each field onto its corresponding activity
  * field. The field-separator and the name/value separator can both be customized.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>ValueDelim - value delimiter. (Optional)</li>
@@ -98,6 +98,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();

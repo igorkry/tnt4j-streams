@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -34,6 +35,7 @@ import com.jkoolcloud.tnt4j.streams.filters.AbstractExpressionFilter;
 import com.jkoolcloud.tnt4j.streams.filters.DefaultValueFilter;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
@@ -233,6 +235,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String EVALUATION_ATTR = "evaluation"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String AGGREGATION_ATTR = "aggregation"; // NON-NLS
 
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
 
@@ -816,11 +822,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processProperty(Attributes attrs) throws SAXException {
-		if (currStream == null && currParser == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT),
-					currParseLocation);
+		if (currStream == null && currParser == null && javaObjectData == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration4", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT,
+					JAVA_OBJ_ELMT), currParseLocation);
 		}
 
 		if (currProperty == null) {
@@ -861,7 +866,19 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration3", PARSER_REF_ELMT, FIELD_ELMT, STREAM_ELMT),
 					currParseLocation);
 		}
-		String parserName = getRefObjectNameFromAttr(attrs);
+		String parserName = null;
+		String aggregationType = null;
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				parserName = attValue;
+			} else if (AGGREGATION_ATTR.equals(attName)) {
+				aggregationType = attValue;
+			}
+		}
+
 		if (StringUtils.isEmpty(parserName)) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.missing.attribute", PARSER_REF_ELMT, NAME_ATTR), currParseLocation);
@@ -873,7 +890,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currField != null) {
-			currField.addStackedParser(parser);
+			currField.addStackedParser(parser, aggregationType);
 		} else {
 			try {
 				currStream.addReference(parser);
@@ -1110,10 +1127,9 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currLocatorData == null && currField == null && currParser == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", FILTER_ELMT, FIELD_LOC_ELMT, FIELD_ELMT),
-					currParseLocation);
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration3", FILTER_ELMT, FIELD_LOC_ELMT, FIELD_ELMT,
+					PARSER_ELMT), currParseLocation);
 		}
 
 		String name = null;
@@ -1338,6 +1354,14 @@ public class ConfigParserHandler extends DefaultHandler {
 				javaObjectData.getTypes());
 
 		javaObjectsMap.put(javaObjectData.name, obj);
+
+		if (MapUtils.isNotEmpty(currProperties)) {
+			if (obj instanceof TNTStreamOutput) {
+				((TNTStreamOutput<?>) obj).setProperties(currProperties.entrySet());
+			}
+
+			currProperties.clear();
+		}
 	}
 
 	private void handleProperty(Property currProperty) throws SAXException {

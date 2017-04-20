@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -189,6 +190,17 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				path = ZK_PREFIX + path;
 			}
 			setTnt4jCfgPath(path);
+		}
+	}
+
+	@Override
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
+		if (props == null) {
+			return;
+		}
+
+		for (Map.Entry<String, String> prop : props) {
+			setProperty(prop.getKey(), prop.getValue());
 		}
 	}
 

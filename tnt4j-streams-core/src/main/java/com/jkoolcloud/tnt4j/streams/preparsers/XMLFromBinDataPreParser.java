@@ -1,9 +1,6 @@
 package com.jkoolcloud.tnt4j.streams.preparsers;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +12,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
@@ -30,20 +28,25 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Pre-parser to convert RAW binary activity data to valid XML parseable by actual activity XML parser. It skip's any of
  * unlike XML characters and tries to construct XML DOM structure for actual parser to continue. It uses SAX handler
- * capabilities to parse input stream. The class extends ErrorHandler interface to catch parsing error, on such event
- * the parser skip's a character and continues to parse element.
+ * capabilities to parse input stream. The class extends {@link ErrorHandler} interface to catch parsing error, on such
+ * event the parser skip's a character and continues to parse element.
  * <p>
  * This preparer is also capable to make valid XML document from RAW activity data having truncated XML structures.
+ * <p>
+ * If resolved XML has multiple nodes in root level, to make XML valid those nodes gets surrounded by single root node
+ * named '{@value #ROOT_ELEMENT}'.
  *
  * @version $Revision: 1 $
  */
 public class XMLFromBinDataPreParser extends DefaultHandler
 		implements ActivityDataPreParser<Document>, ContentHandler, LexicalHandler, ErrorHandler {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
 
 	private static final String XML_PREFIX = "<?xml version='1.0' encoding='UTF-8'?>\n"; // NON-NLS
-	private static final String ROOT_ELEMENT = "root"; // NON-NLS
-
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
+	/**
+	 * Constant for surrounding root level node name.
+	 */
+	public static final String ROOT_ELEMENT = "root"; // NON-NLS
 
 	private ActivityFieldFormatType format;
 
@@ -151,23 +154,26 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		} else if (data instanceof byte[]) {
 			is = new ByteArrayInputStream((byte[]) data);
 			closeWhenDone = true;
+		} else if (data instanceof Reader) {
+			Reader reader = (Reader) data;
+			is = new ReaderInputStream(reader);
 		} else if (data instanceof InputStream) {
 			is = (InputStream) data;
-
-			if (!is.markSupported()) {
-				try {
-					byte[] copy = IOUtils.toByteArray(is); // Read all and make a copy, because stream does not support
-					// rewind.
-					is = new ByteArrayInputStream(copy);
-					closeWhenDone = true;
-				} catch (IOException e) {
-					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"XMLFromBinDataPreParser.data.read.failed", e.getLocalizedMessage()), 0);
-				}
-			}
 		} else {
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.input.unsupported"), 0);
+		}
+
+		if (!is.markSupported()) {
+			try {
+				byte[] copy = IOUtils.toByteArray(is); // Read all and make a copy, because stream does not support
+				// rewind.
+				is = new ByteArrayInputStream(copy);
+				closeWhenDone = true;
+			} catch (IOException e) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"XMLFromBinDataPreParser.data.read.failed", e.getLocalizedMessage()), 0);
+			}
 		}
 
 		try {
@@ -255,7 +261,11 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	private Document getDOM() {
-		document.appendChild(root);
+		if (root.getChildNodes().getLength() == 1) {
+			document.appendChild(root.getFirstChild());
+		} else {
+			document.appendChild(root);
+		}
 
 		return document;
 	}
@@ -267,12 +277,14 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 * <ul>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@link java.io.InputStream}</li>
+	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@code byte[]}</li>
 	 * </ul>
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
-		return String.class.isInstance(data) || InputStream.class.isInstance(data) || byte[].class.isInstance(data);
+		return String.class.isInstance(data) || InputStream.class.isInstance(data) || Reader.class.isInstance(data)
+				|| byte[].class.isInstance(data);
 	}
 
 	@Override

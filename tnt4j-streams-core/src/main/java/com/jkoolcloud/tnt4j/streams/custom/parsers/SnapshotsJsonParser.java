@@ -32,7 +32,6 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser;
-import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -142,8 +141,8 @@ public class SnapshotsJsonParser extends ActivityJsonParser {
 
 	private ActivityInfo applySnapshotParsers(TNTInputStream<?, ?> stream, Object resolvedValue) throws ParseException {
 		if (CollectionUtils.isNotEmpty(snapshotsField.getStackedParsers())) {
-			for (ActivityParser parser : snapshotsField.getStackedParsers()) {
-				ActivityInfo parsedItem = parser.parse(stream, resolvedValue);
+			for (ActivityField.ParserReference parserRef : snapshotsField.getStackedParsers()) {
+				ActivityInfo parsedItem = parserRef.getParser().parse(stream, resolvedValue);
 				if (parsedItem != null) {
 					return parsedItem;
 				}

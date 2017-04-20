@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.filters;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for abstract expression based data value filter.
@@ -198,7 +199,7 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("AbstractExpressionFilter{"); // NON-NLS
 		sb.append("handleType=").append(handleType); // NON-NLS
-		sb.append(", filterExpression='").append(filterExpression).append('\''); // NON-NLS
+		sb.append(", filterExpression=").append(Utils.sQuote(filterExpression)); // NON-NLS
 		sb.append('}');
 		return sb.toString();
 	}

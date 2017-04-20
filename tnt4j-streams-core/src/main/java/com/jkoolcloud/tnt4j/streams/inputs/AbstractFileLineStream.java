@@ -214,6 +214,11 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	}
 
 	@Override
+	protected ActivityInfo applyParsers(Object data, String... tags) throws IllegalStateException, ParseException {
+		return super.applyParsers(data instanceof Line ? ((Line) data).text : data, tags);
+	}
+
+	@Override
 	public Line getNextItem() throws Exception {
 		final Line nextItem = super.getNextItem();
 		if (stateHandler != null) {
@@ -393,11 +398,6 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 			return lrt < 0 ? "UNKNOWN" : TimeUnit.MILLISECONDS.toSeconds(fat - lrt); // NON-NLS
 		}
-	}
-
-	@Override
-	protected ActivityInfo applyParsers(String[] tags, Object data) throws IllegalStateException, ParseException {
-		return super.applyParsers(tags, data instanceof Line ? ((Line) data).text : data);
 	}
 
 	/**

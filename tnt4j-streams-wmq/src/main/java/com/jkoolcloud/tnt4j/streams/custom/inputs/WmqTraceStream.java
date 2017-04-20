@@ -22,7 +22,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.pcf.*;
+import com.ibm.mq.pcf.MQCFGR;
+import com.ibm.mq.pcf.MQCFIN;
+import com.ibm.mq.pcf.PCFMessage;
+import com.ibm.mq.pcf.PCFParameter;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -112,7 +115,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 				rcExclude = value;
 
 				if (StringUtils.isNotEmpty(value)) {
-					String[] erca = rcExclude.split("\\|"); // NON-NLS
+					String[] erca = Utils.splitValue(rcExclude);
 
 					excludedRCs = new HashSet<>(erca.length);
 
@@ -304,7 +307,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.trace.rc.match"),
-				traceRC == null ? "null" : PCFConstants.lookupReasonCode(traceRC), match);
+				traceRC == null ? "null" : MQConstants.lookupReasonCode(traceRC), match);
 
 		return match;
 	}

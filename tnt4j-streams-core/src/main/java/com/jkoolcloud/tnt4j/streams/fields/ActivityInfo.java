@@ -32,6 +32,7 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -418,13 +419,13 @@ public class ActivityInfo {
 	}
 
 	private void addPropertiesMap(Map<?, ?> pMap, String propPrefix) {
-		String ppStr = StringUtils.isEmpty(propPrefix) ? "" : propPrefix + '.';
-
 		for (Map.Entry<?, ?> pme : pMap.entrySet()) {
+			String pKey = propPrefix + String.valueOf(pme.getKey());
+
 			if (pme.getValue() instanceof Map) {
-				addPropertiesMap((Map<?, ?>) pme.getValue(), ppStr + pme.getKey());
+				addPropertiesMap((Map<?, ?>) pme.getValue(), pKey + StreamsConstants.DEFAULT_PATH_DELIM);
 			} else {
-				addActivityProperty(ppStr + String.valueOf(pme.getKey()), pme.getValue());
+				addActivityProperty(pKey, pme.getValue());
 			}
 		}
 	}
@@ -499,7 +500,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)} is invoked. Same as invoking
+	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked. Same as invoking
 	 * {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
 	 *
 	 * @param propName
@@ -510,7 +511,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
+	 * @see #buildTrackable(Tracker, Collection)
 	 * @see #addActivityProperty(String, Object, String)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
@@ -519,7 +520,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)} is invoked.
+	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -531,7 +532,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker)
+	 * @see #buildTrackable(Tracker, Collection)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
@@ -644,13 +645,16 @@ public class ActivityInfo {
 	 * @param tracker
 	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
 	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent trackable and transmitted
+	 *            separately, i.e. activity child events
 	 *
 	 * @return trackable instance made from this activity entity data
 	 * @throws java.lang.IllegalArgumentException
 	 *             if {@code tracker} is null
 	 * @see com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput#logItem(ActivityInfo)
 	 */
-	public Trackable buildTrackable(Tracker tracker) {
+	public Trackable buildTrackable(Tracker tracker, Collection<Trackable> chTrackables) {
 		if (tracker == null) {
 			throw new IllegalArgumentException(
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
@@ -663,12 +667,32 @@ public class ActivityInfo {
 		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
 
 		if (eventType == OpType.ACTIVITY) {
-			return buildActivity(tracker, eventName, trackId);
+			return buildActivity(tracker, eventName, trackId, chTrackables);
 		} else if (eventType == OpType.SNAPSHOT) {
 			return buildSnapshot(tracker, eventName, trackId);
 		} else {
-			return buildEvent(tracker, eventName, trackId);
+			return buildEvent(tracker, eventName, trackId, chTrackables);
 		}
+	}
+
+	/**
+	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
+	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
+	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
+	 * <p>
+	 * Does same as {@link #buildTrackable(Tracker, Collection)} where {@code chTrackables} list is {@code null}.
+	 *
+	 * @param tracker
+	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
+	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
+	 * 
+	 * @return trackable instance made from this activity entity data
+	 * @throws java.lang.IllegalArgumentException
+	 *             if {@code tracker} is null
+	 * @see #buildTrackable(Tracker, Collection)
+	 */
+	public Trackable buildTrackable(Tracker tracker) {
+		return buildTrackable(tracker, null);
 	}
 
 	/**
@@ -680,9 +704,12 @@ public class ActivityInfo {
 	 *            name of tracking event
 	 * @param trackId
 	 *            identifier (signature) of tracking event
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent event and transmitted separately
 	 * @return tracking event instance
 	 */
-	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId) {
+	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId,
+			Collection<Trackable> chTrackables) {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, trackName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
@@ -746,9 +773,14 @@ public class ActivityInfo {
 			}
 		}
 
-		if (CollectionUtils.isNotEmpty(children)) {
+		if (hasChildren()) {
 			for (ActivityInfo child : children) {
-				addTrackableChild(event.getOperation(), buildChild(tracker, child, trackId));
+				Trackable cTrackable = buildChild(tracker, child, trackId);
+				boolean consumed = addTrackableChild(event, cTrackable);
+
+				if (!consumed && chTrackables != null) {
+					chTrackables.add(cTrackable);
+				}
 			}
 		}
 
@@ -764,9 +796,12 @@ public class ActivityInfo {
 	 *            name of tracking activity
 	 * @param trackId
 	 *            identifier (signature) of tracking activity
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent activity and transmitted separately
 	 * @return tracking activity instance
 	 */
-	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId) {
+	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
+			Collection<Trackable> chTrackables) {
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
@@ -829,23 +864,69 @@ public class ActivityInfo {
 			}
 		}
 
-		if (CollectionUtils.isNotEmpty(children)) {
+		if (hasChildren()) {
 			for (ActivityInfo child : children) {
-				addTrackableChild(activity, buildChild(tracker, child, trackId));
+				Trackable cTrackable = buildChild(tracker, child, trackId);
+				boolean consumed = addTrackableChild(activity, cTrackable);
+
+				if (!consumed && chTrackables != null) {
+					chTrackables.add(cTrackable);
+				}
 			}
 		}
 
 		return activity;
 	}
 
-	private static void addTrackableChild(Operation trackableOp, Trackable t) {
-		if (t instanceof Snapshot) {
-			trackableOp.addSnapshot((Snapshot) t);
+	private static boolean addTrackableChild(Trackable pTrackable, Trackable chTrackable) {
+		if (pTrackable instanceof TrackingEvent) {
+			return addEventChild((TrackingEvent) pTrackable, chTrackable);
+		} else if (pTrackable instanceof Activity) {
+			return addActivityChild((Activity) pTrackable, chTrackable);
+		} else if (pTrackable instanceof Snapshot) {
+			return addSnapshotChild((Snapshot) pTrackable, chTrackable);
 		} else {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-					t == null ? null : t.getClass());
+					chTrackable == null ? null : chTrackable.getClass(),
+					pTrackable == null ? null : pTrackable.getClass());
 		}
+
+		return false;
+	}
+
+	private static boolean addEventChild(TrackingEvent event, Trackable chTrackable) {
+		if (chTrackable instanceof Snapshot) {
+			event.getOperation().addSnapshot((Snapshot) chTrackable);
+			return true;
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+					chTrackable == null ? null : chTrackable.getClass(), event.getClass());
+		}
+
+		return false;
+	}
+
+	private static boolean addActivityChild(Activity activity, Trackable chTrackable) {
+		if (chTrackable != null) {
+			activity.add(chTrackable);
+			return chTrackable instanceof Snapshot;
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+					chTrackable == null ? null : chTrackable.getClass(), activity.getClass());
+		}
+
+		return false;
+	}
+
+	private static boolean addSnapshotChild(Snapshot snapshot, Trackable chTrackable) {
+		LOGGER.log(OpLevel.WARNING,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+				chTrackable == null ? null : chTrackable.getClass(), snapshot.getClass());
+
+		return false;
 	}
 
 	private static Trackable buildChild(Tracker tracker, ActivityInfo child, String parentId) {
@@ -1151,8 +1232,21 @@ public class ActivityInfo {
 
 			activityProperties.putAll(otherAi.activityProperties);
 		}
+	}
 
-		if (CollectionUtils.isNotEmpty(otherAi.children)) {
+	/**
+	 * Merges activity info data fields values and child activity entities. Values of fields are changed only if they
+	 * currently hold default (initial) value.
+	 *
+	 * @param otherAi
+	 *            activity info object to merge into this one
+	 *
+	 * @see #merge(ActivityInfo)
+	 */
+	public void mergeAll(ActivityInfo otherAi) {
+		merge(otherAi);
+
+		if (otherAi.hasChildren()) {
 			if (children == null) {
 				children = new ArrayList<>();
 			}
@@ -1443,10 +1537,10 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Adds child activity info data package.
+	 * Adds child activity entity data package.
 	 *
 	 * @param ai
-	 *            activity info object containing child data
+	 *            activity entity object containing child data
 	 */
 	public void addChild(ActivityInfo ai) {
 		if (children == null) {
@@ -1456,15 +1550,33 @@ public class ActivityInfo {
 		children.add(ai);
 	}
 
+	/**
+	 * Returns list of child activity entities.
+	 *
+	 * @return list of child activity entities
+	 */
+	public List<ActivityInfo> getChildren() {
+		return children;
+	}
+
+	/**
+	 * Checks whether this activity entity has any child activity entities added.
+	 *
+	 * @return {@code false} if children list is {@code null} or empty, {@code true} - otherwise
+	 */
+	public boolean hasChildren() {
+		return CollectionUtils.isNotEmpty(children);
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("ActivityInfo{"); // NON-NLS
-		sb.append("serverName='").append(serverName).append('\''); // NON-NLS
-		sb.append(", serverIp='").append(serverIp).append('\''); // NON-NLS
-		sb.append(", applName='").append(applName).append('\''); // NON-NLS
-		sb.append(", userName='").append(userName).append('\''); // NON-NLS
-		sb.append(", resourceName='").append(resourceName).append('\''); // NON-NLS
-		sb.append(", eventName='").append(eventName).append('\''); // NON-NLS
+		sb.append("serverName=").append(Utils.sQuote(serverName)); // NON-NLS
+		sb.append(", serverIp=").append(Utils.sQuote(serverIp)); // NON-NLS
+		sb.append(", applName=").append(Utils.sQuote(applName)); // NON-NLS
+		sb.append(", userName=").append(Utils.sQuote(userName)); // NON-NLS
+		sb.append(", resourceName=").append(Utils.sQuote(resourceName)); // NON-NLS
+		sb.append(", eventName=").append(Utils.sQuote(eventName)); // NON-NLS
 		sb.append(", eventType=").append(eventType); // NON-NLS
 		sb.append(", eventStatus=").append(eventStatus); // NON-NLS
 		sb.append(", startTime=").append(startTime); // NON-NLS
@@ -1472,21 +1584,21 @@ public class ActivityInfo {
 		sb.append(", elapsedTime=").append(elapsedTime); // NON-NLS
 		sb.append(", compCode=").append(compCode); // NON-NLS
 		sb.append(", reasonCode=").append(reasonCode); // NON-NLS
-		sb.append(", exception='").append(exception).append('\''); // NON-NLS
+		sb.append(", exception=").append(Utils.sQuote(exception)); // NON-NLS
 		sb.append(", severity=").append(severity); // NON-NLS
-		sb.append(", location='").append(location).append('\''); // NON-NLS
+		sb.append(", location=").append(Utils.sQuote(location)); // NON-NLS
 		sb.append(", correlator=").append(correlator); // NON-NLS
-		sb.append(", trackingId='").append(trackingId).append('\''); // NON-NLS
-		sb.append(", parentId='").append(parentId).append('\''); // NON-NLS
+		sb.append(", trackingId=").append(Utils.sQuote(trackingId)); // NON-NLS
+		sb.append(", parentId=").append(Utils.sQuote(parentId)); // NON-NLS
 		sb.append(", tag=").append(tag); // NON-NLS
 		sb.append(", message=").append(message); // NON-NLS
-		sb.append(", msgCharSet='").append(msgCharSet).append('\''); // NON-NLS
-		sb.append(", msgEncoding='").append(msgEncoding).append('\''); // NON-NLS
+		sb.append(", msgCharSet=").append(Utils.sQuote(msgCharSet)); // NON-NLS
+		sb.append(", msgEncoding=").append(Utils.sQuote(msgEncoding)); // NON-NLS
 		sb.append(", msgLength=").append(msgLength); // NON-NLS
-		sb.append(", msgMimeType='").append(msgMimeType).append('\''); // NON-NLS
+		sb.append(", msgMimeType=").append(Utils.sQuote(msgMimeType)); // NON-NLS
 		sb.append(", processId=").append(processId); // NON-NLS
 		sb.append(", threadId=").append(threadId); // NON-NLS
-		sb.append(", category='").append(category).append('\''); // NON-NLS
+		sb.append(", category=").append(Utils.sQuote(category)); // NON-NLS
 		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
 		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
 		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
@@ -1503,7 +1615,7 @@ public class ActivityInfo {
 	 */
 	public Object getFieldValue(String fieldName) {
 		try {
-			StreamFieldType sft = StreamFieldType.valueOfIgnoreCase(fieldName);
+			StreamFieldType sft = Utils.valueOfIgnoreCase(StreamFieldType.class, fieldName);
 			switch (sft) {
 			case ApplName:
 				return applName;

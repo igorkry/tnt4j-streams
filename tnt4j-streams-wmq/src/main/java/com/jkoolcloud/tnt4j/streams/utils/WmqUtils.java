@@ -19,7 +19,10 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import java.util.NoSuchElementException;
 
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.pcf.*;
+import com.ibm.mq.pcf.MQCFGR;
+import com.ibm.mq.pcf.MQCFIN;
+import com.ibm.mq.pcf.PCFContent;
+import com.ibm.mq.pcf.PCFParameter;
 
 /**
  * WMQ utility methods used by TNT4J-Streams-WMQ module.
@@ -101,27 +104,27 @@ public class WmqUtils {
 	}
 
 	/**
-	 * Resolves operation id parameter {@link PCFConstants#MQIACF_OPERATION_ID} value from WMQ activity trace PCF data
+	 * Resolves operation id parameter {@link MQConstants#MQIACF_OPERATION_ID} value from WMQ activity trace PCF data
 	 * object and translates it to WMQ operation name constant {@code "MQXF_"}.
 	 *
 	 * @param trace
 	 *            wmq activity trace PCF data
 	 * @return resolved operation name, or {@code null} if no operation id parameter found in PCF content
 	 *
-	 * @see PCFConstants#lookup(int, String)
+	 * @see MQConstants#lookup(int, String)
 	 */
 	public static String getOpName(PCFContent trace) {
 		String opName = null;
-		PCFParameter op = trace.getParameter(PCFConstants.MQIACF_OPERATION_ID);
+		PCFParameter op = trace.getParameter(MQConstants.MQIACF_OPERATION_ID);
 		if (op != null) {
-			opName = PCFConstants.lookup(((MQCFIN) op).getIntValue(), "MQXF_.*"); // NON-NLS
+			opName = MQConstants.lookup(((MQCFIN) op).getIntValue(), "MQXF_.*"); // NON-NLS
 		}
 
 		return opName;
 	}
 
 	/**
-	 * Resolves reason code parameter {@link PCFConstants#MQIACF_REASON_CODE} value from WMQ activity trace PCF data
+	 * Resolves reason code parameter {@link MQConstants#MQIACF_REASON_CODE} value from WMQ activity trace PCF data
 	 * object.
 	 * 
 	 * @param trace
@@ -130,7 +133,7 @@ public class WmqUtils {
 	 */
 	public static Integer getRC(PCFContent trace) {
 		Integer traceRC = null;
-		PCFParameter rc = trace.getParameter(PCFConstants.MQIACF_REASON_CODE);
+		PCFParameter rc = trace.getParameter(MQConstants.MQIACF_REASON_CODE);
 		if (rc != null) {
 			traceRC = ((MQCFIN) rc).getIntValue();
 		}
@@ -150,7 +153,7 @@ public class WmqUtils {
 		try {
 			return Integer.parseInt(paramIdStr);
 		} catch (NumberFormatException nfe) {
-			return PCFConstants.getIntValue(paramIdStr);
+			return MQConstants.getIntValue(paramIdStr);
 		}
 	}
 }

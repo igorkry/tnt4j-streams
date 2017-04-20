@@ -79,6 +79,8 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 			return;
 		}
 
+		super.setProperties(props);
+
 		// for (Map.Entry<String, String> prop : props) {
 		// String name = prop.getKey();
 		// String value = prop.getValue();
