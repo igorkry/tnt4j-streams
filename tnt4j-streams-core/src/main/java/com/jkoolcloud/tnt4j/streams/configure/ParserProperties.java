@@ -75,11 +75,6 @@ public interface ParserProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_CHILDREN_FIELD = "ChildrenField"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET = "UseActivityDataAsMessageForUnset"; // NON-NLS
 
 }

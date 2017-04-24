@@ -16,13 +16,11 @@
         <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
-    <parser name="ResponseParser"
-            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+    <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
-        <property name="ChildrenField" value="MsgBody"/>
 
-        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true">
-            <parser-ref name="SnapshotParser"/>
+        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true" split="true">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
         </field>
 
         <field name="EventType" value="Activity"/>
