@@ -20,7 +20,7 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * Transforms locator resolved field value by applying transformation bean defined rules.
+ * Transforms field/locator value by applying transformation bean/script/expression defined rules.
  * 
  * 
  * <p>

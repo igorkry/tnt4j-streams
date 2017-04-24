@@ -37,9 +37,9 @@ import javax.xml.bind.annotation.*;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="parser" type="{}ParserType" maxOccurs="unbounded"/>
- *         &lt;element name="stream" type="{}StreamType" maxOccurs="unbounded"/>
  *         &lt;element name="java-object" type="{}JavaObjectType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="parser" type="{}ParserType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="stream" type="{}StreamType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -49,20 +49,51 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "parser", "stream", "javaObject" })
+@XmlType(name = "", propOrder = { "javaObject", "parser", "stream" })
 @XmlRootElement(name = "tnt-data-source")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 public class TntDataSource {
 
-	@XmlElement(required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<ParserType> parser;
-	@XmlElement(required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<StreamType> stream;
 	@XmlElement(name = "java-object")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<JavaObjectType> javaObject;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<ParserType> parser;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<StreamType> stream;
+
+	/**
+	 * Gets the value of the javaObject property.
+	 * 
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the javaObject property.
+	 * 
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 * 
+	 * <pre>
+	 * getJavaObject().add(newItem);
+	 * </pre>
+	 * 
+	 * 
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link JavaObjectType }
+	 * 
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<JavaObjectType> getJavaObject() {
+		if (javaObject == null) {
+			javaObject = new ArrayList<JavaObjectType>();
+		}
+		return this.javaObject;
+	}
+
+	public void addJavaObject(JavaObjectType j) {
+		getJavaObject().add(j);
+	}
 
 	/**
 	 * Gets the value of the parser property.
@@ -85,7 +116,7 @@ public class TntDataSource {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<ParserType> getParser() {
 		if (parser == null) {
 			parser = new ArrayList<ParserType>();
@@ -118,7 +149,7 @@ public class TntDataSource {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<StreamType> getStream() {
 		if (stream == null) {
 			stream = new ArrayList<StreamType>();
@@ -128,38 +159,5 @@ public class TntDataSource {
 
 	public void addStream(StreamType s) {
 		getStream().add(s);
-	}
-
-	/**
-	 * Gets the value of the javaObject property.
-	 * 
-	 * <p>
-	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
-	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
-	 * the javaObject property.
-	 * 
-	 * <p>
-	 * For example, to add a new item, do as follows:
-	 * 
-	 * <pre>
-	 * getJavaObject().add(newItem);
-	 * </pre>
-	 * 
-	 * 
-	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link JavaObjectType }
-	 * 
-	 * 
-	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-19T11:37:17+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<JavaObjectType> getJavaObject() {
-		if (javaObject == null) {
-			javaObject = new ArrayList<JavaObjectType>();
-		}
-		return this.javaObject;
-	}
-
-	public void addJavaObject(JavaObjectType j) {
-		getJavaObject().add(j);
 	}
 }

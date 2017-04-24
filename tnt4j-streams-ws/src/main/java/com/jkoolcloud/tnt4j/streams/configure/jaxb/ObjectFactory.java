@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.namespace.QName;
 
 /**
  * This object contains factory methods for each Java content interface and Java element interface generated in the
@@ -31,12 +34,24 @@ import javax.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
+	private final static QName _FieldLocatorTypeFieldTransform_QNAME = new QName("", "field-transform");
+	private final static QName _FieldLocatorTypeFieldMap_QNAME = new QName("", "field-map");
+	private final static QName _FieldLocatorTypeFilter_QNAME = new QName("", "filter");
+
 	/**
 	 * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package:
 	 * com.jkoolcloud.tnt4j.streams.configure.jaxb
 	 * 
 	 */
 	public ObjectFactory() {
+	}
+
+	/**
+	 * Create an instance of {@link FilterType }
+	 * 
+	 */
+	public FilterType createFilterType() {
+		return new FilterType();
 	}
 
 	/**
@@ -56,14 +71,6 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ParserType.Field }
-	 * 
-	 */
-	public ParserType.Field createParserTypeField() {
-		return new ParserType.Field();
-	}
-
-	/**
 	 * Create an instance of {@link TntDataSource }
 	 * 
 	 */
@@ -72,19 +79,19 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link StreamType }
-	 * 
-	 */
-	public StreamType createStreamType() {
-		return new StreamType();
-	}
-
-	/**
 	 * Create an instance of {@link JavaObjectType }
 	 * 
 	 */
 	public JavaObjectType createJavaObjectType() {
 		return new JavaObjectType();
+	}
+
+	/**
+	 * Create an instance of {@link StreamType }
+	 * 
+	 */
+	public StreamType createStreamType() {
+		return new StreamType();
 	}
 
 	/**
@@ -112,6 +119,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link FieldLocatorType }
+	 * 
+	 */
+	public FieldLocatorType createFieldLocatorType() {
+		return new FieldLocatorType();
+	}
+
+	/**
 	 * Create an instance of {@link FieldMap }
 	 * 
 	 */
@@ -133,6 +148,14 @@ public class ObjectFactory {
 	 */
 	public FieldTransform createFieldTransform() {
 		return new FieldTransform();
+	}
+
+	/**
+	 * Create an instance of {@link FieldParserReference }
+	 * 
+	 */
+	public FieldParserReference createFieldParserReference() {
+		return new FieldParserReference();
 	}
 
 	/**
@@ -176,6 +199,22 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link FilterType.Value }
+	 * 
+	 */
+	public FilterType.Value createFilterTypeValue() {
+		return new FilterType.Value();
+	}
+
+	/**
+	 * Create an instance of {@link FilterType.Expression }
+	 * 
+	 */
+	public FilterType.Expression createFilterTypeExpression() {
+		return new FilterType.Expression();
+	}
+
+	/**
 	 * Create an instance of {@link OriginalStreamType.Tnt4JProperties }
 	 * 
 	 */
@@ -184,11 +223,41 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ParserType.Field.FieldLocator }
+	 * Create an instance of {@link ParserType.Field }
 	 * 
 	 */
-	public ParserType.Field.FieldLocator createParserTypeFieldFieldLocator() {
-		return new ParserType.Field.FieldLocator();
+	public ParserType.Field createParserTypeField() {
+		return new ParserType.Field();
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldTransform }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-transform", scope = FieldLocatorType.class)
+	public JAXBElement<FieldTransform> createFieldLocatorTypeFieldTransform(FieldTransform value) {
+		return new JAXBElement<FieldTransform>(_FieldLocatorTypeFieldTransform_QNAME, FieldTransform.class,
+				FieldLocatorType.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldMap }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-map", scope = FieldLocatorType.class)
+	public JAXBElement<FieldMap> createFieldLocatorTypeFieldMap(FieldMap value) {
+		return new JAXBElement<FieldMap>(_FieldLocatorTypeFieldMap_QNAME, FieldMap.class, FieldLocatorType.class,
+				value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FilterType }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "filter", scope = FieldLocatorType.class)
+	public JAXBElement<FilterType> createFieldLocatorTypeFilter(FilterType value) {
+		return new JAXBElement<FilterType>(_FieldLocatorTypeFilter_QNAME, FilterType.class, FieldLocatorType.class,
+				value);
 	}
 
 }

@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *               &lt;sequence>
  *                 &lt;element name="property" type="{}StreamProperty" maxOccurs="unbounded" minOccurs="0"/>
- *                 &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded"/>
+ *                 &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;element name="tnt4j-properties" minOccurs="0">
  *                   &lt;complexType>
@@ -68,10 +68,10 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StreamType", propOrder = { "scenario" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
 public class StreamType extends OriginalStreamType {
 
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
 	protected ScenarioType scenario;
 
 	/**
@@ -80,7 +80,7 @@ public class StreamType extends OriginalStreamType {
 	 * @return possible object is {@link ScenarioType }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
 	public ScenarioType getScenario() {
 		return scenario;
 	}
@@ -92,7 +92,7 @@ public class StreamType extends OriginalStreamType {
 	 *            allowed object is {@link ScenarioType }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setScenario(ScenarioType value) {
 		this.scenario = value;
 	}

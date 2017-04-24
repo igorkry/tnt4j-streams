@@ -17,24 +17,27 @@
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
 import javax.annotation.Generated;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
- * Associates enclosing entity with other defined entity reference.
+ * Associates field with stacked parser reference.
  * 
  * 
  * <p>
- * Java class for Reference complex type.
+ * Java class for FieldParserReference complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Reference">
+ * &lt;complexType name="FieldParserReference">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
+ *     &lt;extension base="{}Reference">
+ *       &lt;attribute name="aggregation" type="{}AggregationTypes" default="Merge" />
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -42,43 +45,48 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Reference")
-@XmlSeeAlso({ FieldParserReference.class })
+@XmlType(name = "FieldParserReference")
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-public class Reference {
+public class FieldParserReference extends Reference {
 
-	@XmlAttribute(name = "name", required = true)
+	@XmlAttribute(name = "aggregation")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	protected String name;
+	protected AggregationTypes aggregation;
 
-	public Reference() {
+	public FieldParserReference() {
+		super();
 	}
 
-	public Reference(String name) {
-		this.name = name;
+	public FieldParserReference(String name, AggregationTypes aType) {
+		super(name);
+		this.aggregation = aType;
 	}
 
 	/**
-	 * Gets the value of the name property.
-	 *
-	 * @return possible object is {@link String }
-	 *
+	 * Gets the value of the aggregation property.
+	 * 
+	 * @return possible object is {@link AggregationTypes }
+	 * 
 	 */
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	public String getName() {
-		return name;
+	public AggregationTypes getAggregation() {
+		if (aggregation == null) {
+			return AggregationTypes.MERGE;
+		} else {
+			return aggregation;
+		}
 	}
 
 	/**
-	 * Sets the value of the name property.
-	 *
+	 * Sets the value of the aggregation property.
+	 * 
 	 * @param value
-	 *            allowed object is {@link String }
-	 *
+	 *            allowed object is {@link AggregationTypes }
+	 * 
 	 */
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setName(String value) {
-		this.name = value;
+	public void setAggregation(AggregationTypes value) {
+		this.aggregation = value;
 	}
 
 }
