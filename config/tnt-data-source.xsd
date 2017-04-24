@@ -1723,35 +1723,11 @@
             <xs:field xpath="@name"/>
         </xs:key>
 
-        <!-- Make sure parser references are to valid parser names -->
-        <xs:keyref name="ValidFieldParserRef" refer="UniqueParserName">
-            <xs:selector xpath="parser/field/parser-ref"/>
-            <xs:field xpath="@name"/>
-        </xs:keyref>
-
         <!-- Make sure stream names are unique -->
         <xs:key name="UniqueStreamName">
             <xs:selector xpath="stream"/>
             <xs:field xpath="@name"/>
         </xs:key>
-
-        <!-- Make sure parser references are to valid parser names -->
-        <xs:keyref name="ValidStreamParserRef" refer="UniqueParserName">
-            <xs:selector xpath="stream/parser-ref"/>
-            <xs:field xpath="@name"/>
-        </xs:keyref>
-
-        <!-- Make sure stream references are to valid parser names -->
-        <xs:keyref name="ValidStreamParserReference" refer="UniqueParserName">
-            <xs:selector xpath="stream/reference"/>
-            <xs:field xpath="@name"/>
-        </xs:keyref>
-
-        <!-- Make sure stream references are to valid stream names -->
-        <xs:keyref name="ValidStreamStreamReference" refer="UniqueStreamName">
-            <xs:selector xpath="stream/reference"/>
-            <xs:field xpath="@name"/>
-        </xs:keyref>
 
         <!-- Make sure java-object names are unique -->
         <xs:key name="UniqueJavaObjectName">
@@ -1759,8 +1735,26 @@
             <xs:field xpath="@name"/>
         </xs:key>
 
+        <!-- Make sure java-object names are unique -->
+        <xs:key name="UniqueRefName">
+            <xs:selector xpath="parser|stream|java-object"/>
+            <xs:field xpath="@name"/>
+        </xs:key>
+
+        <!-- Make sure parser references are to valid parser names -->
+        <xs:keyref name="ValidFieldParserRef" refer="UniqueParserName">
+            <xs:selector xpath="parser/field/parser-ref"/>
+            <xs:field xpath="@name"/>
+        </xs:keyref>
+
+        <!-- Make sure parser references are to valid parser names -->
+        <xs:keyref name="ValidStreamParserRef" refer="UniqueParserName">
+            <xs:selector xpath="stream/parser-ref"/>
+            <xs:field xpath="@name"/>
+        </xs:keyref>
+
         <!-- Make sure stream references are to valid java-object names -->
-        <xs:keyref name="ValidStreamJavaObjectReference" refer="UniqueJavaObjectName">
+        <xs:keyref name="ValidStreamJavaObjectReference" refer="UniqueRefName">
             <xs:selector xpath="stream/reference"/>
             <xs:field xpath="@name"/>
         </xs:keyref>
