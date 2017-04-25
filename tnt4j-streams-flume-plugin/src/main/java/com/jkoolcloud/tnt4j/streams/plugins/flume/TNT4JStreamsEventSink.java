@@ -25,7 +25,6 @@ import org.apache.flume.*;
 import org.apache.flume.conf.Configurable;
 import org.apache.flume.sink.AbstractSink;
 
-import com.google.common.base.Throwables;
 import com.google.gson.Gson;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -115,7 +114,6 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 				} catch (Exception exc) {
 					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
 							"TNT4JStreamsEventSink.transaction.rollback.failed"), exc);
-					throw Throwables.propagate(exc);
 				}
 			}
 			throw new EventDeliveryException(errorMsg, ex);

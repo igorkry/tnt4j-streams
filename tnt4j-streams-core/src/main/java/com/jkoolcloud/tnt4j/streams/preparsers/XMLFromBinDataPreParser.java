@@ -156,7 +156,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			closeWhenDone = true;
 		} else if (data instanceof Reader) {
 			Reader reader = (Reader) data;
-			is = new ReaderInputStream(reader);
+			is = new ReaderInputStream(reader, Utils.UTF8);
 		} else if (data instanceof InputStream) {
 			is = (InputStream) data;
 		} else {
