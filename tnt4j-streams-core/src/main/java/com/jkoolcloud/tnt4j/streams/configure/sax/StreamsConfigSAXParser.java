@@ -16,16 +16,22 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.Properties;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
@@ -34,7 +40,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Utility class dedicated to load TNT4J-Streams configuration using SAX-based parser.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public final class StreamsConfigSAXParser {
 
@@ -47,7 +53,9 @@ public final class StreamsConfigSAXParser {
 	 * Reads the configuration and invokes the (SAX-based) parser to parse the configuration file contents.
 	 *
 	 * @param config
-	 *            Reader to get configuration data from
+	 *            input stream to get configuration data from
+	 * @param validate
+	 *            flag indicating whether to validate configuration XML against XSD schema
 	 * @return streams configuration data
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
@@ -56,8 +64,13 @@ public final class StreamsConfigSAXParser {
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
 	 */
-	public static StreamsConfigData parse(Reader config)
+	public static StreamsConfigData parse(InputStream config, boolean validate)
 			throws ParserConfigurationException, SAXException, IOException {
+		if (validate) {
+			config = config.markSupported() ? config : new ByteArrayInputStream(IOUtils.toByteArray(config));
+			validate(config);
+		}
+
 		Properties p = Utils.loadPropertiesResource("sax.properties"); // NON-NLS
 
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
@@ -75,8 +88,31 @@ public final class StreamsConfigSAXParser {
 			hndlr = new ConfigParserHandler();
 		}
 
-		parser.parse(new InputSource(config), hndlr);
+		parser.parse(config, hndlr);
 
 		return hndlr.getStreamsConfigData();
+	}
+
+	/**
+	 * Validates configuration XML against XML defined XSD schema.
+	 *
+	 * @param config
+	 *            {@link InputStream} to get configuration data from
+	 * @throws SAXException
+	 *             if there was an error parsing the configuration
+	 * @throws IOException
+	 *             if there is an error reading the configuration data
+	 */
+	public static void validate(InputStream config) throws SAXException, IOException {
+		try {
+			SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			Schema schema = factory.newSchema();
+			Validator validator = schema.newValidator();
+			validator.validate(new StreamSource(config));
+		} finally {
+			if (config.markSupported()) {
+				config.reset();
+			}
+		}
 	}
 }

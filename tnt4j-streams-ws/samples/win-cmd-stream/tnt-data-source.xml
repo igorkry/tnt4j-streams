@@ -14,13 +14,13 @@
     <stream name="WinCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">
         <property name="HaltIfNoParser" value="false"/>
 
+        <parser-ref name="ResponseParser"/>
+
         <scenario name="Sample Win Cmd stream scenario">
             <step name="Step Windows">
                 <schedule-simple interval="25" units="Seconds" repeatCount="-1"/>
                 <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
             </step>
         </scenario>
-
-        <parser-ref name="ResponseParser"/>
     </stream>
 </tnt-data-source>

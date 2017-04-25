@@ -13,13 +13,13 @@
     <stream name="UnixCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">
         <property name="HaltIfNoParser" value="false"/>
 
+        <parser-ref name="ResponseParser"/>
+
         <scenario name="Sample *nix Cmd stream scenario">
             <step name="Step Is Active Tomcat">
                 <schedule-simple interval="45" units="Seconds" repeatCount="-1"/>
                 <request>systemctl is-active tomcat7.servicesystemctl is-active tomcat7.service</request>
             </step>
         </scenario>
-
-        <parser-ref name="ResponseParser"/>
     </stream>
 </tnt-data-source>

@@ -19,6 +19,8 @@
     <stream name="RESTfulSampleXMLStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
         <property name="HaltIfNoParser" value="false"/>
 
+        <parser-ref name="RESTResponseParser"/>
+
         <scenario name="Sample REST stream scenario">
             <step name="Step Kaunas"
                   url="http://api.openweathermap.org/data/2.5/weather?q=Kaunas&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric&amp;mode=XML"
@@ -36,7 +38,5 @@
                 <schedule-simple interval="45" units="Seconds" repeatCount="10"/>
             </step>
         </scenario>
-
-        <parser-ref name="RESTResponseParser"/>
     </stream>
 </tnt-data-source>

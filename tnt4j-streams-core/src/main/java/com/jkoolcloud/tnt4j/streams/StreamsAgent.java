@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -116,16 +117,18 @@ public final class StreamsAgent {
 				// loadConfigAndRun(cfgFileName, dsl, dsl);
 			}
 
-			boolean complete = false;
-			while (!complete) {
-				try {
-					synchronized (streamThreads) {
-						streamThreads.wait();
-						if (restarting) {
-							complete = true;
+			if (streamThreads != null) {
+				boolean complete = false;
+				while (!complete) {
+					try {
+						synchronized (streamThreads) {
+							streamThreads.wait();
+							if (restarting) {
+								complete = true;
+							}
 						}
+					} catch (InterruptedException exc) {
 					}
-				} catch (InterruptedException exc) {
 				}
 			}
 		}
@@ -254,6 +257,8 @@ public final class StreamsAgent {
 		try {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
 					streamTasksListener);
+		} catch (SAXException e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}

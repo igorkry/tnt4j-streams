@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser;
@@ -32,7 +33,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * This class will load the specified stream configuration.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class StreamsConfigLoader {
 
@@ -70,7 +71,7 @@ public class StreamsConfigLoader {
 					"StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH, DFLT_CONFIG_FILE_PATH2));
 		}
 
-		load(new InputStreamReader(config));
+		load(config);
 	}
 
 	private static InputStream openCfgFile(String path) {
@@ -122,7 +123,7 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the file
 	 */
 	public StreamsConfigLoader(String configFileName) throws SAXException, ParserConfigurationException, IOException {
-		load(new FileReader(configFileName));
+		load(new FileInputStream(configFileName));
 	}
 
 	/**
@@ -138,7 +139,7 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the file
 	 */
 	public StreamsConfigLoader(File configFile) throws SAXException, ParserConfigurationException, IOException {
-		load(new FileReader(configFile));
+		load(new FileInputStream(configFile));
 	}
 
 	/**
@@ -155,7 +156,7 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the configuration data
 	 */
 	public StreamsConfigLoader(Reader configReader) throws SAXException, ParserConfigurationException, IOException {
-		load(configReader);
+		load(new ReaderInputStream(configReader, Utils.UTF8));
 	}
 
 	/**
@@ -172,25 +173,29 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the configuration data
 	 */
 	public StreamsConfigLoader(InputStream is) throws SAXException, ParserConfigurationException, IOException {
-		load(new InputStreamReader(is));
+		load(is);
 	}
 
 	/**
-	 * Loads the configuration using SAX parser.
+	 * Loads the configuration XML using SAX parser.
+	 * <p>
+	 * Configuration XML validation against XSD schema is performed if system property
+	 * {@code com.jkoolcloud.tnt4j.streams.validate.config} is set to {@code true}.
 	 *
 	 * @param config
-	 *            Reader to get configuration data from.
+	 *            input stream to get configuration data from
 	 * @throws SAXException
 	 *             if there was an error parsing the configuration
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
-	 * @see StreamsConfigSAXParser#parse(Reader)
+	 * @see StreamsConfigSAXParser#parse(InputStream, boolean)
 	 */
-	protected void load(Reader config) throws SAXException, ParserConfigurationException, IOException {
+	protected void load(InputStream config) throws SAXException, ParserConfigurationException, IOException {
+		boolean validate = Boolean.getBoolean("com.jkoolcloud.tnt4j.streams.validate.config");
 		try {
-			streamsCfgData = StreamsConfigSAXParser.parse(config);
+			streamsCfgData = StreamsConfigSAXParser.parse(config, validate);
 		} finally {
 			Utils.close(config);
 		}
