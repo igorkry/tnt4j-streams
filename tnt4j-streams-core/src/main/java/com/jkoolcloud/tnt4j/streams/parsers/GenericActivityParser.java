@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.preparsers.ActivityDataPreParser;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -136,7 +137,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected boolean isDataClassSupportedByPreParser(Object data) {
 		if (CollectionUtils.isNotEmpty(preParsers)) {
-			for (ActivityDataPreParser dp : preParsers) {
+			for (ActivityDataPreParser<?> dp : preParsers) {
 				if (dp.isDataClassSupported(data)) {
 					return true;
 				}
@@ -621,9 +622,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			if (StringUtils.isNotEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
+				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
+					val = StreamsCache.getValue(locStr);
 				} else {
 					val = resolveLocatorValue(locator, data, formattingNeeded);
-
 					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityParser.locator.resolved"), locStr, toString(val));

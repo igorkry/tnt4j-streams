@@ -21,9 +21,9 @@
     <parser name="CollectdReqBodyParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
 
-        <field name="MsgBody" locator="$" locator-type="Label" transparent="true" split="true">
+        <embedded-activity name="MsgBody" locator="$" locator-type="Label">
             <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
-        </field>
+        </embedded-activity>
         <field name="EventType" value="Activity"/>
         <field name="ApplName" value="collectd"/>
     </parser>

@@ -33,8 +33,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
- * Implements an activity data parser that assumes each activity data item is an IBM MQ activity trace
- * {@link PCFMessage}.
+ * Implements an activity data parser that assumes each activity data item is an IBM MQ {@link PCFMessage} activity
+ * trace parameters group ({@link MQCFGR} having parameter value {@code MQGACF_ACTIVITY_TRACE}).
  * <p>
  * Parser uses {@link PCFMessage} contained parameter {@link WmqStreamConstants#TRACE_MARKER} to determine which trace
  * entry to process.
@@ -59,35 +59,52 @@ public class WmqTraceParser extends ActivityPCFParser {
 	}
 
 	@Override
-	protected Object getRawDataAsMessage(PCFMessage pcfMsg) {
-		Integer traceM = (Integer) pcfMsg.getParameterValue(WmqStreamConstants.TRACE_MARKER);
-		PCFMessage traceMsg = strip(pcfMsg, traceM);
+	protected Object getRawDataAsMessage(PCFContent pcfContent) {
+		PCFContent traceContent = strip(pcfContent, getTraceMarker(pcfContent));
 
-		return traceMsg.toString();
+		return traceContent.toString();
+	}
+
+	private static Integer getTraceMarker(PCFContent pcfContent) {
+		return (Integer) pcfContent.getParameterValue(WmqStreamConstants.TRACE_MARKER);
 	}
 
 	@Override
-	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFMessage pcfMsg,
-			PCFContent pcfContent, int i) throws ParseException {
-		if (ArrayUtils.isEmpty(path) || (pcfMsg == null && pcfContent == null)) {
+	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFContent pcfContent, int i)
+			throws ParseException {
+		if (ArrayUtils.isEmpty(path) || pcfContent == null) {
 			return null;
 		}
 
 		String paramStr = path[i];
 
 		if (paramStr.equals(MQGACF_ACTIVITY_TRACE)) {
-			Integer traceM = (Integer) pcfMsg.getParameterValue(WmqStreamConstants.TRACE_MARKER);
-			PCFContent traceData = getActivityTraceGroupParameter(traceM, pcfMsg);
+			PCFContent traceData = getActivityTraceGroupParameter(getTraceMarker(pcfContent), pcfContent);
 
-			return super.getParamValue(fDataType, path, pcfMsg, traceData, ++i);
+			return super.getParamValue(fDataType, path, traceData, ++i);
 		} else {
-			return super.getParamValue(fDataType, path, pcfMsg, pcfContent, i);
+			return super.getParamValue(fDataType, path, pcfContent, i);
 		}
 	}
 
-	private static PCFContent getActivityTraceGroupParameter(Integer traceIndex, PCFMessage pcfMsg) {
+	/**
+	 * Returns PCF content position identifier to know where event has occurred.
+	 *
+	 * @param pcfContent
+	 *            PCF content to get position value
+	 * @return {@link WmqStreamConstants#TRACE_MARKER} parameter value or does same as
+	 *         {@link ActivityPCFParser#getPCFPosition(PCFContent)} if parameter value is {@code null}
+	 */
+	@Override
+	protected int getPCFPosition(PCFContent pcfContent) {
+		Integer traceM = getTraceMarker(pcfContent);
+
+		return traceM == null ? super.getPCFPosition(pcfContent) : traceM;
+	}
+
+	private static PCFContent getActivityTraceGroupParameter(Integer traceIndex, PCFContent pcfContent) {
 		if (traceIndex != null) {
-			Enumeration<?> prams = pcfMsg.getParameters();
+			Enumeration<?> prams = pcfContent.getParameters();
 			int trI = 0;
 			while (prams.hasMoreElements()) {
 				PCFParameter param = (PCFParameter) prams.nextElement();
@@ -100,7 +117,7 @@ public class WmqTraceParser extends ActivityPCFParser {
 			}
 		}
 
-		return pcfMsg;
+		return pcfContent;
 	}
 
 	/**
@@ -113,53 +130,44 @@ public class WmqTraceParser extends ActivityPCFParser {
 		return "ACTIVITY TRACE MESSAGE"; // NON-NLS
 	}
 
-	// private static PCFMessage copy(PCFMessage pcfMsg) {
-	// PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
-	// pcfMsg.getControl() == 1);
-	//
-	// Enumeration<?> params = pcfMsg.getParameters();
-	//
-	// while (params.hasMoreElements()) {
-	// PCFParameter param = (PCFParameter) params.nextElement();
-	// msgCpy.addParameter(param);
-	// }
-	//
-	// return msgCpy;
-	// }
-
 	/**
 	 * Strips off PCF message MQ activity trace parameters leaving only one - corresponding trace marker value.
 	 *
-	 * @param pcfMsg
+	 * @param pcfContent
 	 *            PCF message containing MQ activity traces
 	 * @param traceMarker
 	 *            processed MQ activity trace marker
 	 * @return PCF message copy containing only one MQ activity trace marked by trace marker
 	 */
-	private static PCFMessage strip(PCFMessage pcfMsg, int traceMarker) {
-		PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
-				pcfMsg.getControl() == 1);
+	private static PCFContent strip(PCFContent pcfContent, int traceMarker) {
+		if (pcfContent instanceof PCFMessage) {
+			PCFMessage pcfMsg = (PCFMessage) pcfContent;
+			PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
+					pcfMsg.getControl() == 1);
 
-		Enumeration<?> params = pcfMsg.getParameters();
-		int trI = 0;
-		while (params.hasMoreElements()) {
-			PCFParameter param = (PCFParameter) params.nextElement();
+			Enumeration<?> params = pcfContent.getParameters();
+			int trI = 0;
+			while (params.hasMoreElements()) {
+				PCFParameter param = (PCFParameter) params.nextElement();
 
-			if (param.getParameter() == WmqStreamConstants.TRACE_MARKER
-					|| param.getParameter() == WmqStreamConstants.TRACES_COUNT) {
-				continue;
-			}
-
-			if (WmqUtils.isTraceParameter(param)) {
-				trI++;
-				if (trI != traceMarker) {
+				if (param.getParameter() == WmqStreamConstants.TRACE_MARKER
+						|| param.getParameter() == WmqStreamConstants.TRACES_COUNT) {
 					continue;
 				}
+
+				if (WmqUtils.isTraceParameter(param)) {
+					trI++;
+					if (trI != traceMarker) {
+						continue;
+					}
+				}
+
+				msgCpy.addParameter(param);
 			}
 
-			msgCpy.addParameter(param);
+			return msgCpy;
+		} else {
+			return pcfContent;
 		}
-
-		return msgCpy;
 	}
 }

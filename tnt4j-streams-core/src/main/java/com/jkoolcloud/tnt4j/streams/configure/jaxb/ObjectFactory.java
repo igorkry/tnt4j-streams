@@ -34,9 +34,9 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-	private final static QName _FieldLocatorTypeFieldTransform_QNAME = new QName("", "field-transform");
-	private final static QName _FieldLocatorTypeFieldMap_QNAME = new QName("", "field-map");
-	private final static QName _FieldLocatorTypeFilter_QNAME = new QName("", "filter");
+	private final static QName _FieldLocatorFieldTransform_QNAME = new QName("", "field-transform");
+	private final static QName _FieldLocatorFieldMap_QNAME = new QName("", "field-map");
+	private final static QName _FieldLocatorFilter_QNAME = new QName("", "filter");
 
 	/**
 	 * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package:
@@ -47,27 +47,19 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link FilterType }
+	 * Create an instance of {@link Filter }
 	 * 
 	 */
-	public FilterType createFilterType() {
-		return new FilterType();
+	public Filter createFilter() {
+		return new Filter();
 	}
 
 	/**
-	 * Create an instance of {@link StreamType }
+	 * Create an instance of {@link Stream }
 	 * 
 	 */
-	public StreamType createStreamType() {
-		return new StreamType();
-	}
-
-	/**
-	 * Create an instance of {@link ParserType }
-	 * 
-	 */
-	public ParserType createParserType() {
-		return new ParserType();
+	public Stream createStream() {
+		return new Stream();
 	}
 
 	/**
@@ -79,11 +71,27 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link JavaObjectType }
+	 * Create an instance of {@link JavaObject }
 	 * 
 	 */
-	public JavaObjectType createJavaObjectType() {
-		return new JavaObjectType();
+	public JavaObject createJavaObject() {
+		return new JavaObject();
+	}
+
+	/**
+	 * Create an instance of {@link Parser }
+	 *
+	 */
+	public Parser createParser() {
+		return new Parser();
+	}
+
+	/**
+	 * Create an instance of {@link Field }
+	 *
+	 */
+	public Field createField() {
+		return new Field();
 	}
 
 	/**
@@ -95,14 +103,6 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ParamType }
-	 * 
-	 */
-	public ParamType createParamType() {
-		return new ParamType();
-	}
-
-	/**
 	 * Create an instance of {@link Property }
 	 * 
 	 */
@@ -111,11 +111,11 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link FieldLocatorType }
+	 * Create an instance of {@link Parameter }
 	 * 
 	 */
-	public FieldLocatorType createFieldLocatorType() {
-		return new FieldLocatorType();
+	public Parameter createParameter() {
+		return new Parameter();
 	}
 
 	/**
@@ -143,11 +143,27 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link EmbeddedActivity }
+	 *
+	 */
+	public EmbeddedActivity createEmbeddedActivity() {
+		return new EmbeddedActivity();
+	}
+
+	/**
 	 * Create an instance of {@link Reference }
 	 * 
 	 */
 	public Reference createReference() {
 		return new Reference();
+	}
+
+	/**
+	 * Create an instance of {@link FieldLocator }
+	 *
+	 */
+	public FieldLocator createFieldLocator() {
+		return new FieldLocator();
 	}
 
 	/**
@@ -159,65 +175,55 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link FilterType.Value }
+	 * Create an instance of {@link Filter.Value }
 	 * 
 	 */
-	public FilterType.Value createFilterTypeValue() {
-		return new FilterType.Value();
+	public Filter.Value createFilterValue() {
+		return new Filter.Value();
 	}
 
 	/**
-	 * Create an instance of {@link FilterType.Expression }
+	 * Create an instance of {@link Filter.Expression }
 	 * 
 	 */
-	public FilterType.Expression createFilterTypeExpression() {
-		return new FilterType.Expression();
+	public Filter.Expression createFilterExpression() {
+		return new Filter.Expression();
 	}
 
 	/**
-	 * Create an instance of {@link StreamType.Tnt4JProperties }
+	 * Create an instance of {@link Stream.Tnt4JProperties }
 	 * 
 	 */
-	public StreamType.Tnt4JProperties createStreamTypeTnt4JProperties() {
-		return new StreamType.Tnt4JProperties();
-	}
-
-	/**
-	 * Create an instance of {@link ParserType.Field }
-	 * 
-	 */
-	public ParserType.Field createParserTypeField() {
-		return new ParserType.Field();
+	public Stream.Tnt4JProperties createStreamTnt4JProperties() {
+		return new Stream.Tnt4JProperties();
 	}
 
 	/**
 	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldTransform }{@code >}}
 	 * 
 	 */
-	@XmlElementDecl(namespace = "", name = "field-transform", scope = FieldLocatorType.class)
-	public JAXBElement<FieldTransform> createFieldLocatorTypeFieldTransform(FieldTransform value) {
-		return new JAXBElement<FieldTransform>(_FieldLocatorTypeFieldTransform_QNAME, FieldTransform.class,
-				FieldLocatorType.class, value);
+	@XmlElementDecl(namespace = "", name = "field-transform", scope = FieldLocator.class)
+	public JAXBElement<FieldTransform> createFieldLocatorFieldTransform(FieldTransform value) {
+		return new JAXBElement<FieldTransform>(_FieldLocatorFieldTransform_QNAME, FieldTransform.class,
+				FieldLocator.class, value);
 	}
 
 	/**
 	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldMap }{@code >}}
 	 * 
 	 */
-	@XmlElementDecl(namespace = "", name = "field-map", scope = FieldLocatorType.class)
-	public JAXBElement<FieldMap> createFieldLocatorTypeFieldMap(FieldMap value) {
-		return new JAXBElement<FieldMap>(_FieldLocatorTypeFieldMap_QNAME, FieldMap.class, FieldLocatorType.class,
-				value);
+	@XmlElementDecl(namespace = "", name = "field-map", scope = FieldLocator.class)
+	public JAXBElement<FieldMap> createFieldLocatorFieldMap(FieldMap value) {
+		return new JAXBElement<FieldMap>(_FieldLocatorFieldMap_QNAME, FieldMap.class, FieldLocator.class, value);
 	}
 
 	/**
-	 * Create an instance of {@link JAXBElement }{@code <}{@link FilterType }{@code >}}
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Filter }{@code >}}
 	 * 
 	 */
-	@XmlElementDecl(namespace = "", name = "filter", scope = FieldLocatorType.class)
-	public JAXBElement<FilterType> createFieldLocatorTypeFilter(FilterType value) {
-		return new JAXBElement<FilterType>(_FieldLocatorTypeFilter_QNAME, FilterType.class, FieldLocatorType.class,
-				value);
+	@XmlElementDecl(namespace = "", name = "filter", scope = FieldLocator.class)
+	public JAXBElement<Filter> createFieldLocatorFilter(Filter value) {
+		return new JAXBElement<Filter>(_FieldLocatorFilter_QNAME, Filter.class, FieldLocator.class, value);
 	}
 
 }

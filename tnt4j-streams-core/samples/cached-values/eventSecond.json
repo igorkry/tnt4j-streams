@@ -1,0 +1,5 @@
+{
+    event: "Event2",
+    message: "Second event",
+    resource: "eventSecond.json"
+}

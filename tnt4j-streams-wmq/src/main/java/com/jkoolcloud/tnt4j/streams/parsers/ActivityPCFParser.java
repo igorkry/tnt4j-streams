@@ -35,9 +35,9 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
- * Implements an activity data parser that assumes each activity data item is an {@link PCFMessage} where each field is
- * represented by a PCF parameter and the PCF parameter MQ constant name/value is used to map each field onto its
- * corresponding activity field.
+ * Implements an activity data parser that assumes each activity data item is an {@link PCFContent} ({@link PCFMessage}
+ * or {@link MQCFGR}) where each field is represented by a PCF parameter and the PCF parameter MQ constant name/value is
+ * used to map each field onto its corresponding activity field.
  * <p>
  * PCF message can have grouped parameters - all message will have header {@link MQCFH} and may have {@link MQCFGR} type
  * parameters. To access PCF message header fields use 'MQCFH' expression with header field name separated using
@@ -57,7 +57,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  *
  * @version $Revision: 1 $
  */
-public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
+public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityPCFParser.class);
 
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
@@ -104,7 +104,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
-	 * <li>{@link com.ibm.mq.pcf.PCFMessage}</li>
+	 * <li>{@link com.ibm.mq.pcf.PCFContent}</li>
 	 * </ul>
 	 *
 	 * @param data
@@ -113,7 +113,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 	 */
 	@Override
 	protected boolean isDataClassSupportedByParser(Object data) {
-		return PCFMessage.class.isInstance(data);
+		return PCFContent.class.isInstance(data);
 	}
 
 	/**
@@ -131,12 +131,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, PCFMessage data, AtomicBoolean formattingNeeded)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, PCFContent data, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getParamValue(locator.getDataType(), path, data, data, 0);
+		val = getParamValue(locator.getDataType(), path, data, 0);
 
 		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 				"ActivityPCFParser.resolved.pcf.value"), locStr, toString(val));
@@ -145,15 +145,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 	}
 
 	/**
-	 * Resolves PCF parameter value from provided {@link PCFMessage} and {@link PCFContent}: {@link PCFMessage} or
-	 * {@link MQCFGR}.
+	 * Resolves PCF parameter value from provided {@link PCFContent}: {@link PCFMessage} or {@link MQCFGR}.
 	 *
 	 * @param fDataType
 	 *            field data type
 	 * @param path
 	 *            parameter path as array of PCF parameter identifiers
-	 * @param pcfMsg
-	 *            PCF message
 	 * @param pcfContent
 	 *            PCF content data (message or parameters group)
 	 * @param i
@@ -163,9 +160,9 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFMessage pcfMsg,
-			PCFContent pcfContent, int i) throws ParseException {
-		if (ArrayUtils.isEmpty(path) || (pcfMsg == null && pcfContent == null)) {
+	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFContent pcfContent, int i)
+			throws ParseException {
+		if (ArrayUtils.isEmpty(path) || pcfContent == null) {
 			return null;
 		}
 
@@ -173,7 +170,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 		String paramStr = path[i];
 
 		if (i == 0 && paramStr.equals(HEAD_MQCFH)) {
-			val = resolvePCFHeaderValue(fDataType, path[i + 1], pcfMsg);
+			val = resolvePCFHeaderValue(fDataType, path[i + 1], (PCFMessage) pcfContent);
 		} else {
 			try {
 				Integer paramId = WmqUtils.getParamId(paramStr);
@@ -181,17 +178,29 @@ public class ActivityPCFParser extends GenericActivityParser<PCFMessage> {
 				PCFParameter param = pcfContent.getParameter(paramId);
 
 				if (i < path.length - 1 && param instanceof MQCFGR) {
-					val = getParamValue(fDataType, path, pcfMsg, (MQCFGR) param, ++i);
+					val = getParamValue(fDataType, path, (MQCFGR) param, ++i);
 				} else {
 					val = resolvePCFParamValue(fDataType, param);
 				}
 			} catch (NoSuchElementException exc) {
 				throw new ParseException(StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"ActivityPCFParser.unresolved.pcf.parameter", paramStr), pcfMsg.getMsgSeqNumber());
+						"ActivityPCFParser.unresolved.pcf.parameter", paramStr), getPCFPosition(pcfContent));
 			}
 		}
 
 		return val;
+	}
+
+	/**
+	 * Returns PCF content position identifier to know where event has occurred.
+	 * 
+	 * @param pcfContent
+	 *            PCF content to get position value
+	 * @return PCF message sequence number or {@link MQCFGR} parameter value
+	 */
+	protected int getPCFPosition(PCFContent pcfContent) {
+		return pcfContent instanceof PCFMessage ? ((PCFMessage) pcfContent).getMsgSeqNumber()
+				: ((MQCFGR) pcfContent).getParameter();
 	}
 
 	private Object resolvePCFHeaderValue(ActivityFieldDataType fDataType, String hAttrName, PCFMessage pcfMsg) {

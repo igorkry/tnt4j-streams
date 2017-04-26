@@ -32,7 +32,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Represents a specific activity field, containing the necessary information on how to extract its value from the raw
  * activity data.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  */
 public class ActivityField extends AbstractFieldEntity {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
@@ -55,6 +55,7 @@ public class ActivityField extends AbstractFieldEntity {
 	private boolean transparent = false;
 	private boolean splitCollection = false;
 	private String valueType = null;
+	private String cacheEntryKey = null;
 	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
 
 	private ActivityFieldLocator groupLocator;
@@ -577,6 +578,34 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		return value;
+	}
+
+	/**
+	 * Sets cache entry key to store resolved field value.
+	 * 
+	 * @param cacheKey
+	 *            cache entry key
+	 */
+	public void setCached(String cacheKey) {
+		this.cacheEntryKey = cacheKey;
+	}
+
+	/**
+	 * Gets cache entry key to store resolved field value.
+	 * 
+	 * @return cache entry key
+	 */
+	public String getCacheEntryKey() {
+		return cacheEntryKey;
+	}
+
+	/**
+	 * Checks if field has cache entry key defined to store resolved value.
+	 * 
+	 * @return {@code true} if field has cache entry key defined to store resolved value, {@code false} - otherwise
+	 */
+	public boolean isCached() {
+		return !StringUtils.isEmpty(cacheEntryKey);
 	}
 
 	public static class ParserReference {

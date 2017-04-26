@@ -23,13 +23,13 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * Java class for StreamType complex type.
+ * Java class for Stream complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="StreamType">
+ * &lt;complexType name="Stream">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -58,31 +58,31 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "property", "parserRef", "reference", "tnt4JProperties" })
-@XmlSeeAlso({ StreamType.class })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-public class OriginalStreamType {
+@XmlSeeAlso({ Stream.class })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+public class OriginalStream {
 
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<StreamProperty> property;
 	@XmlElement(name = "parser-ref")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Reference> parserRef;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Reference> reference;
 	@XmlElement(name = "tnt4j-properties")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	protected OriginalStreamType.Tnt4JProperties tnt4JProperties;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	protected OriginalStream.Tnt4JProperties tnt4JProperties;
 	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 	@XmlAttribute(name = "class", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String clazz;
 
-	public OriginalStreamType() {
+	public OriginalStream() {
 	}
 
-	public OriginalStreamType(String name, String clazz) {
+	public OriginalStream(String name, String clazz) {
 		this.name = name;
 		this.clazz = clazz;
 	}
@@ -108,7 +108,7 @@ public class OriginalStreamType {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<StreamProperty> getProperty() {
 		if (property == null) {
 			property = new ArrayList<StreamProperty>();
@@ -145,7 +145,7 @@ public class OriginalStreamType {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<Reference> getParserRef() {
 		if (parserRef == null) {
 			parserRef = new ArrayList<Reference>();
@@ -182,7 +182,7 @@ public class OriginalStreamType {
 	 *
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<Reference> getReference() {
 		if (reference == null) {
 			reference = new ArrayList<Reference>();
@@ -201,11 +201,11 @@ public class OriginalStreamType {
 	/**
 	 * Gets the value of the tnt4JProperties property.
 	 * 
-	 * @return possible object is {@link OriginalStreamType.Tnt4JProperties }
+	 * @return possible object is {@link OriginalStream.Tnt4JProperties }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	public OriginalStreamType.Tnt4JProperties getTnt4JProperties() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public OriginalStream.Tnt4JProperties getTnt4JProperties() {
 		return tnt4JProperties;
 	}
 
@@ -213,11 +213,11 @@ public class OriginalStreamType {
 	 * Sets the value of the tnt4JProperties property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link OriginalStreamType.Tnt4JProperties }
+	 *            allowed object is {@link OriginalStream.Tnt4JProperties }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setTnt4JProperties(OriginalStreamType.Tnt4JProperties value) {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setTnt4JProperties(OriginalStream.Tnt4JProperties value) {
 		this.tnt4JProperties = value;
 	}
 
@@ -227,7 +227,7 @@ public class OriginalStreamType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
@@ -239,7 +239,7 @@ public class OriginalStreamType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}
@@ -250,7 +250,7 @@ public class OriginalStreamType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getClazz() {
 		return clazz;
 	}
@@ -262,7 +262,7 @@ public class OriginalStreamType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setClazz(String value) {
 		this.clazz = value;
 	}
@@ -289,11 +289,11 @@ public class OriginalStreamType {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name = "", propOrder = { "property" })
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public static class Tnt4JProperties {
 
 		@XmlElement(required = true)
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 		protected List<Property> property;
 
 		/**
@@ -317,7 +317,7 @@ public class OriginalStreamType {
 		 * 
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 		public List<Property> getProperty() {
 			if (property == null) {
 				property = new ArrayList<Property>();

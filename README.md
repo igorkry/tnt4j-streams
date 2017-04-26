@@ -83,7 +83,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
 * `locator` attribute defines location of data value from streamed data
 * `format` attribute defines format of data value
 * `value` attribute defines predefined (hardcoded) value of field
-* `fieled-map` tag is used to perform manual mapping from streamed data value `source` to field value `target.`
+* `field-map` tag is used to perform manual mapping from streamed data value `source` to field value `target.`
 
 sample:
 ```xml
@@ -526,6 +526,14 @@ To make custom Java Bean based transformations Your API should implement interfa
 This sample shows how to invoke Java Bean defined transformation. Class `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName` implements 
 custom XPath function to get file name from provided file path. Field/locator value mapping to function arguments is performed automatically 
 and there is no need to define additional mapping.   
+
+### Stream elements filtering
+ 
+TODO
+ 
+### Resolved activity entities aggregation
+ 
+TODO 
 
 ## Samples
 
@@ -1917,11 +1925,16 @@ Sample stream configuration:
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+        
+    <java-object name="MQMsgToStringPreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.MQMessageToStringPreParser"/>    
 
     <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
+        
+        <reference name="MQMsgToStringPreParser"/>          
+                  
         <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
         <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
         <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
@@ -3010,13 +3023,11 @@ Sample stream configuration:
         <field name="StartTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
-    <parser name="CollectdReqBodyParser"
-            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+     <parser name="CollectdReqBodyParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
-        <property name="ChildrenField" value="MsgBody"/>
 
-        <field name="MsgBody" locator="$" locator-type="Label" transparent="true">
-            <parser-ref name="CollectdStatsDataParser"/>
+        <field name="MsgBody" locator="$" locator-type="Label" transparent="true" split="true">
+            <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
         </field>
         <field name="EventType" value="Activity"/>
         <field name="ApplName" value="collectd"/>
@@ -3047,9 +3058,9 @@ should skip unparseable entries. Stream puts received request payload data as `b
 `CollectdReqParser` by default converts `byte[]` for entry `ActivityData` to string and uses stacked parser named
 `CollectdReqBodyParser` to parse HTTP request contained JSON format data.
 
-`CollectdReqBodyParser` maps `collectd` report JSON data to activity (field `EventType`) containing set of snapshots (property `ChildrenField` 
-referencing field `MsgBody`) carrying system metrics data. Each snapshot is parsed using stacked `CollectdStatsDataParser` parser (map parser 
-because parent JSON parser already made map data structures from RAW `collectd` report JSON data).
+`CollectdReqBodyParser` maps `collectd` report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) 
+carrying system metrics data. Each snapshot is parsed using stacked `CollectdStatsDataParser` parser (map parser because parent JSON parser 
+already made map data structures from RAW `collectd` report JSON data).
 
 `CollectdStatsDataParser` maps map entries to snapshot fields `EventName`, `Category`, `ServerName`, `StartTime`. Also this parser uses 
 dynamic field named `${FieldNameLoc}`. Attribute values containing variable expressions `${}` indicates that these attributes can have 
@@ -3088,18 +3099,22 @@ Sample stream configuration:
         <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
-    <parser name="ResponseParser"
-            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+    <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
-        <property name="ChildrenField" value="MsgBody"/>
 
-        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true">
-            <parser-ref name="SnapshotParser"/>
+        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true" split="true">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
         </field>
 
         <field name="EventType" value="Activity"/>
         <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>
         <field name="ApplName" value="nagios2json"/>
+        <field name="Message" separator=", ">
+            <field-locator locator="$.version" locator-type="Label"/>
+            <field-locator locator="$.running" locator-type="Label"/>
+            <field-locator locator="$.servertime" locator-type="Label" datatype="Timestamp" units="Seconds"/>
+            <field-locator locator="$.localtime" locator-type="Label"/>
+        </field>
     </parser>
 
     <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
@@ -3135,9 +3150,9 @@ You may also add additional steps to retrieve different reports defining differe
  
 Nagios sends report as activity wrapping multiple metrics (snapshots).  
 
-`ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (property `ChildrenField` 
-referencing field `MsgBody`) carrying system state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser 
-because parent JSON parser already made map data structures from RAW Nagios report JSON data).
+`ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
+state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser because parent JSON parser already made map 
+data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.   
@@ -3372,6 +3387,8 @@ These parameters are applicable to all types of streams.
         * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if
         max. queue size is reached. Default value - `20sec`. (Optional)
            Actual only if `ExecutorsBoundedModel` is set to `true`.
+  * StreamCacheMaxSize - max. size of stream resolved values cache. Default value - `100`. (Optional)
+  * StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)          
 
     sample:
 ```xml
@@ -3380,6 +3397,9 @@ These parameters are applicable to all types of streams.
     <property name="ExecutorsTerminationTimeout" value="20"/>
     <property name="ExecutorsBoundedModel" value="true"/>
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
+    
+    <property name="StreamCacheMaxSize" value="500"/>
+    <property name="StreamCacheExpireDuration" value="30"/>
 ```
 
 ##### Parseable streams parameters
@@ -3890,6 +3910,10 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
+
+### Pre-parsers
+
+TODO
 
 ## ZooKeeper stored configuration
 

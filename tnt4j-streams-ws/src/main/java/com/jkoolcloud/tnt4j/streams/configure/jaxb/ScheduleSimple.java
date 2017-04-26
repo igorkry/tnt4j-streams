@@ -26,13 +26,13 @@ import javax.xml.bind.annotation.*;
  * 
  * 
  * <p>
- * Java class for ScheduleSimpleType complex type.
+ * Java class for ScheduleSimple complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ScheduleSimpleType">
+ * &lt;complexType name="ScheduleSimple">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="interval" use="required" type="{http://www.w3.org/2001/XMLSchema}nonNegativeInteger" />
@@ -46,26 +46,26 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ScheduleSimpleType")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
-public class ScheduleSimpleType {
+@XmlType(name = "ScheduleSimple")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+public class ScheduleSimple {
 
 	@XmlAttribute(name = "interval", required = true)
 	@XmlSchemaType(name = "nonNegativeInteger")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected BigInteger interval;
 	@XmlAttribute(name = "units")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected UnitsTypes units;
 	@XmlAttribute(name = "repeatCount")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected BigInteger repeatCount;
 
-	public ScheduleSimpleType() {
+	public ScheduleSimple() {
 
 	}
 
-	public ScheduleSimpleType(int interval, UnitsTypes units, Integer repeatCount) {
+	public ScheduleSimple(int interval, UnitsTypes units, Integer repeatCount) {
 		this.interval = BigInteger.valueOf(interval);
 		this.units = units;
 		this.repeatCount = repeatCount == null ? null : BigInteger.valueOf(repeatCount);
@@ -77,7 +77,7 @@ public class ScheduleSimpleType {
 	 * @return possible object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public BigInteger getInterval() {
 		return interval;
 	}
@@ -89,7 +89,7 @@ public class ScheduleSimpleType {
 	 *            allowed object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setInterval(BigInteger value) {
 		this.interval = value;
 	}
@@ -100,7 +100,7 @@ public class ScheduleSimpleType {
 	 * @return possible object is {@link UnitsTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public UnitsTypes getUnits() {
 		if (units == null) {
 			return UnitsTypes.MILLISECONDS;
@@ -116,7 +116,7 @@ public class ScheduleSimpleType {
 	 *            allowed object is {@link UnitsTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setUnits(UnitsTypes value) {
 		this.units = value;
 	}
@@ -127,7 +127,7 @@ public class ScheduleSimpleType {
 	 * @return possible object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public BigInteger getRepeatCount() {
 		if (repeatCount == null) {
 			return new BigInteger("1");
@@ -143,7 +143,7 @@ public class ScheduleSimpleType {
 	 *            allowed object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setRepeatCount(BigInteger value) {
 		this.repeatCount = value;
 	}

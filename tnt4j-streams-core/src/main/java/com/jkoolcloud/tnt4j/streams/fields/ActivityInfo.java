@@ -32,10 +32,7 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
@@ -158,10 +155,19 @@ public class ActivityInfo {
 		}
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
-				field, fieldValue);
+				field, Utils.toString(fieldValue));
 
 		fieldValue = transform(field, fieldValue);
 		fieldValue = filterFieldValue(field, fieldValue);
+
+		if (field.isCached()) {
+			StreamsCache.cacheValue(field.getCacheEntryKey(), fieldValue);
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityInfo.caching.field.value"),
+					field, field.getCacheEntryKey(), Utils.toString(fieldValue));
+		}
+
 		if (!field.isTransparent()) {
 			setFieldValue(field, fieldValue);
 		}

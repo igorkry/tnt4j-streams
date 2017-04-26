@@ -22,14 +22,14 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Java class for ScriptLang.
+ * Java class for ScriptLangs.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
- * &lt;simpleType name="ScriptLang">
+ * &lt;simpleType name="ScriptLangs">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="javascript"/>
  *     &lt;enumeration value="groovy"/>
@@ -39,10 +39,10 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "ScriptLang")
+@XmlType(name = "ScriptLangs")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
-public enum ScriptLang {
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+public enum ScriptLangs {
 
 	/**
 	 * 
@@ -72,7 +72,7 @@ public enum ScriptLang {
 	XPATH("xpath");
 	private final String value;
 
-	ScriptLang(String v) {
+	ScriptLangs(String v) {
 		value = v;
 	}
 
@@ -80,8 +80,8 @@ public enum ScriptLang {
 		return value;
 	}
 
-	public static ScriptLang fromValue(String v) {
-		for (ScriptLang c : ScriptLang.values()) {
+	public static ScriptLangs fromValue(String v) {
+		for (ScriptLangs c : ScriptLangs.values()) {
 			if (c.value.equals(v)) {
 				return c;
 			}

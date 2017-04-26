@@ -27,13 +27,13 @@ import javax.xml.bind.annotation.*;
  * 
  * 
  * <p>
- * Java class for FilterType complex type.
+ * Java class for Filter complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="FilterType">
+ * &lt;complexType name="Filter">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -43,7 +43,7 @@ import javax.xml.bind.annotation.*;
  *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *                 &lt;attribute name="handle" use="required" type="{}HandleTypes" />
  *                 &lt;attribute name="evaluation" type="{}EvaluationTypes" default="is" />
- *                 &lt;attribute name="format" type="{}DataFormatTypes" />
+ *                 &lt;attribute name="format" type="{}DataFormatsAll" />
  *               &lt;/extension>
  *             &lt;/simpleContent>
  *           &lt;/complexType>
@@ -53,7 +53,7 @@ import javax.xml.bind.annotation.*;
  *             &lt;simpleContent>
  *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *                 &lt;attribute name="handle" use="required" type="{}HandleTypes" />
- *                 &lt;attribute name="lang" use="required" type="{}ScriptLang" />
+ *                 &lt;attribute name="lang" use="required" type="{}ScriptLangs" />
  *               &lt;/extension>
  *             &lt;/simpleContent>
  *           &lt;/complexType>
@@ -68,16 +68,16 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "FilterType", propOrder = { "value", "expression" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-public class FilterType {
+@XmlType(name = "Filter", propOrder = { "value", "expression" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+public class Filter {
 
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<FilterType.Value> value;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<FilterType.Expression> expression;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<Filter.Value> value;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<Filter.Expression> expression;
 	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 
 	/**
@@ -97,36 +97,36 @@ public class FilterType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link FilterType.Value }
+	 * Objects of the following type(s) are allowed in the list {@link Filter.Value }
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<FilterType.Value> getValue() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<Filter.Value> getValue() {
 		if (value == null) {
-			value = new ArrayList<FilterType.Value>();
+			value = new ArrayList<Filter.Value>();
 		}
 		return this.value;
 	}
 
-	public void addValue(FilterType.Value value) {
+	public void addValue(Filter.Value value) {
 		getValue().add(value);
 	}
 
 	public void addValue(String value, HandleTypes handle) {
-		getValue().add(new FilterType.Value(value, handle));
+		getValue().add(new Filter.Value(value, handle));
 	}
 
 	public void addValue(String value, HandleTypes handle, String format) {
-		getValue().add(new FilterType.Value(value, handle, format));
+		getValue().add(new Filter.Value(value, handle, format));
 	}
 
 	public void addValue(String value, HandleTypes handle, EvaluationTypes evaluation) {
-		getValue().add(new FilterType.Value(value, handle, evaluation));
+		getValue().add(new Filter.Value(value, handle, evaluation));
 	}
 
 	public void addValue(String value, HandleTypes handle, EvaluationTypes evaluation, String format) {
-		getValue().add(new FilterType.Value(value, handle, evaluation, format));
+		getValue().add(new Filter.Value(value, handle, evaluation, format));
 	}
 
 	/**
@@ -146,28 +146,28 @@ public class FilterType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link FilterType.Expression }
+	 * Objects of the following type(s) are allowed in the list {@link Filter.Expression }
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<FilterType.Expression> getExpression() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<Filter.Expression> getExpression() {
 		if (expression == null) {
-			expression = new ArrayList<FilterType.Expression>();
+			expression = new ArrayList<Filter.Expression>();
 		}
 		return this.expression;
 	}
 
-	public void addExpression(FilterType.Expression expression) {
+	public void addExpression(Filter.Expression expression) {
 		getExpression().add(expression);
 	}
 
 	public void addExpression(String value, HandleTypes handle) {
-		getExpression().add(new FilterType.Expression(value, handle));
+		getExpression().add(new Filter.Expression(value, handle));
 	}
 
-	public void addExpression(String value, HandleTypes handle, ScriptLang lang) {
-		getExpression().add(new FilterType.Expression(value, handle, lang));
+	public void addExpression(String value, HandleTypes handle, ScriptLangs lang) {
+		getExpression().add(new Filter.Expression(value, handle, lang));
 	}
 
 	/**
@@ -176,8 +176,7 @@ public class FilterType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
@@ -189,7 +188,7 @@ public class FilterType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}
@@ -206,7 +205,7 @@ public class FilterType {
 	 *   &lt;simpleContent>
 	 *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
 	 *       &lt;attribute name="handle" use="required" type="{}HandleTypes" />
-	 *       &lt;attribute name="lang" use="required" type="{}ScriptLang" />
+	 *       &lt;attribute name="lang" use="required" type="{}ScriptLangs" />
 	 *     &lt;/extension>
 	 *   &lt;/simpleContent>
 	 * &lt;/complexType>
@@ -216,18 +215,18 @@ public class FilterType {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name = "", propOrder = { "value" })
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public static class Expression {
 
 		@XmlValue
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected String value;
 		@XmlAttribute(name = "handle", required = true)
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected HandleTypes handle;
 		@XmlAttribute(name = "lang", required = true)
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-		protected ScriptLang lang;
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+		protected ScriptLangs lang;
 
 		public Expression() {
 		}
@@ -237,7 +236,7 @@ public class FilterType {
 			this.handle = handle;
 		}
 
-		public Expression(String value, HandleTypes handle, ScriptLang lang) {
+		public Expression(String value, HandleTypes handle, ScriptLangs lang) {
 			this.value = value;
 			this.handle = handle;
 			this.lang = lang;
@@ -249,7 +248,7 @@ public class FilterType {
 		 * @return possible object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public String getValue() {
 			return value;
 		}
@@ -261,7 +260,7 @@ public class FilterType {
 		 *            allowed object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setValue(String value) {
 			this.value = value;
 		}
@@ -272,7 +271,7 @@ public class FilterType {
 		 * @return possible object is {@link HandleTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public HandleTypes getHandle() {
 			return handle;
 		}
@@ -284,7 +283,7 @@ public class FilterType {
 		 *            allowed object is {@link HandleTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setHandle(HandleTypes value) {
 			this.handle = value;
 		}
@@ -292,11 +291,11 @@ public class FilterType {
 		/**
 		 * Gets the value of the lang property.
 		 * 
-		 * @return possible object is {@link ScriptLang }
+		 * @return possible object is {@link ScriptLangs }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-		public ScriptLang getLang() {
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+		public ScriptLangs getLang() {
 			return lang;
 		}
 
@@ -304,11 +303,11 @@ public class FilterType {
 		 * Sets the value of the lang property.
 		 * 
 		 * @param value
-		 *            allowed object is {@link ScriptLang }
+		 *            allowed object is {@link ScriptLangs }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
-		public void setLang(ScriptLang value) {
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+		public void setLang(ScriptLangs value) {
 			this.lang = value;
 		}
 
@@ -327,7 +326,7 @@ public class FilterType {
 	 *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
 	 *       &lt;attribute name="handle" use="required" type="{}HandleTypes" />
 	 *       &lt;attribute name="evaluation" type="{}EvaluationTypes" default="is" />
-	 *       &lt;attribute name="format" type="{}DataFormatTypes" />
+	 *       &lt;attribute name="format" type="{}DataFormatsAll" />
 	 *     &lt;/extension>
 	 *   &lt;/simpleContent>
 	 * &lt;/complexType>
@@ -337,20 +336,20 @@ public class FilterType {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name = "", propOrder = { "value" })
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public static class Value {
 
 		@XmlValue
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected String value;
 		@XmlAttribute(name = "handle", required = true)
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected HandleTypes handle;
 		@XmlAttribute(name = "evaluation")
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected EvaluationTypes evaluation;
 		@XmlAttribute(name = "format")
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		protected String format;
 
 		public Value() {
@@ -386,7 +385,7 @@ public class FilterType {
 		 * @return possible object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public String getValue() {
 			return value;
 		}
@@ -398,7 +397,7 @@ public class FilterType {
 		 *            allowed object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setValue(String value) {
 			this.value = value;
 		}
@@ -409,7 +408,7 @@ public class FilterType {
 		 * @return possible object is {@link HandleTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public HandleTypes getHandle() {
 			return handle;
 		}
@@ -421,7 +420,7 @@ public class FilterType {
 		 *            allowed object is {@link HandleTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setHandle(HandleTypes value) {
 			this.handle = value;
 		}
@@ -432,7 +431,7 @@ public class FilterType {
 		 * @return possible object is {@link EvaluationTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public EvaluationTypes getEvaluation() {
 			if (evaluation == null) {
 				return EvaluationTypes.IS;
@@ -448,7 +447,7 @@ public class FilterType {
 		 *            allowed object is {@link EvaluationTypes }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setEvaluation(EvaluationTypes value) {
 			this.evaluation = value;
 		}
@@ -459,7 +458,7 @@ public class FilterType {
 		 * @return possible object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public String getFormat() {
 			return format;
 		}
@@ -471,7 +470,7 @@ public class FilterType {
 		 *            allowed object is {@link String }
 		 * 
 		 */
-		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+		@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 		public void setFormat(String value) {
 			this.format = value;
 		}

@@ -18,9 +18,9 @@
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
 
-        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true" split="true">
+        <embedded-activity name="MsgBody" locator="$.data" locator-type="Label">
             <parser-ref name="SnapshotParser" aggregation="Join"/>
-        </field>
+        </embedded-activity>
 
         <field name="EventType" value="Activity"/>
         <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>

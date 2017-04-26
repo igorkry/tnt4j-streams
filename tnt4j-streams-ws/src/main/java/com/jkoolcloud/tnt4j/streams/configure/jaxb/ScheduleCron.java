@@ -27,13 +27,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  * <p>
- * Java class for ScheduleCronType complex type.
+ * Java class for ScheduleCron complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ScheduleCronType">
+ * &lt;complexType name="ScheduleCron">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="expression" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -45,19 +45,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ScheduleCronType")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
-public class ScheduleCronType {
+@XmlType(name = "ScheduleCron")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+public class ScheduleCron {
 
 	@XmlAttribute(name = "expression", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String expression;
 
-	public ScheduleCronType() {
+	public ScheduleCron() {
 
 	}
 
-	public ScheduleCronType(String expression) {
+	public ScheduleCron(String expression) {
 		this.expression = expression;
 	}
 
@@ -67,7 +67,7 @@ public class ScheduleCronType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getExpression() {
 		return expression;
 	}
@@ -79,7 +79,7 @@ public class ScheduleCronType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-04-12T03:47:04+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setExpression(String value) {
 		this.expression = value;
 	}

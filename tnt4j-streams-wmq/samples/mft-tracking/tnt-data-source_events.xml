@@ -31,10 +31,9 @@
 
         <field name="EventType" value="ACTIVITY"/>
         <field name="Correlator" value="/Workflow/processId" locator-type="Label"/>
-        <field name="Feedback" locator="/Workflow/XMOFTSFeedBackList/XMOFTSFeedBack" transparent="true" split="true"
-               locator-type="Label">
+        <embedded-activity name="Feedback" locator="/Workflow/XMOFTSFeedBackList/XMOFTSFeedBack" locator-type="Label">
             <parser-ref name="XMOFTSFeedBackParser" aggregation="Join"/>
-        </field>
+        </embedded-activity>
     </parser>
 
     <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">

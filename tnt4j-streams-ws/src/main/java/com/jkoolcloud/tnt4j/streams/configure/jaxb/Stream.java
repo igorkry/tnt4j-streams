@@ -22,17 +22,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Java class for StreamType complex type.
+ * Java class for Stream complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="StreamType">
+ * &lt;complexType name="Stream">
  *   &lt;complexContent>
- *     &lt;extension base="{}StreamType">
+ *     &lt;extension base="{}Stream">
  *       &lt;redefine>
- *         &lt;complexType name="StreamType">
+ *         &lt;complexType name="Stream">
  *           &lt;complexContent>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *               &lt;sequence>
@@ -57,7 +57,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;/complexType>
  *       &lt;/redefine>
  *       &lt;sequence>
- *         &lt;element name="scenario" type="{}ScenarioType" minOccurs="0"/>
+ *         &lt;element name="scenario" type="{}Scenario" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -67,21 +67,21 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StreamType", propOrder = { "scenario" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-public class StreamType extends OriginalStreamType {
+@XmlType(name = "Stream", propOrder = { "scenario" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+public class Stream extends OriginalStream {
 
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	protected ScenarioType scenario;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	protected Scenario scenario;
 
 	/**
 	 * Gets the value of the scenario property.
 	 * 
-	 * @return possible object is {@link ScenarioType }
+	 * @return possible object is {@link Scenario }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	public ScenarioType getScenario() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public Scenario getScenario() {
 		return scenario;
 	}
 
@@ -89,11 +89,11 @@ public class StreamType extends OriginalStreamType {
 	 * Sets the value of the scenario property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link ScenarioType }
+	 *            allowed object is {@link Scenario }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T03:12:38+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setScenario(ScenarioType value) {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setScenario(Scenario value) {
 		this.scenario = value;
 	}
 

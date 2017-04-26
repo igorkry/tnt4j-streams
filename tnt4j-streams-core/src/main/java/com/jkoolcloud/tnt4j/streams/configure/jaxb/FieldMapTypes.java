@@ -22,14 +22,14 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Java class for FieldMapType.
+ * Java class for FieldMapTypes.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
- * &lt;simpleType name="FieldMapType">
+ * &lt;simpleType name="FieldMapTypes">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="Value"/>
  *     &lt;enumeration value="Range"/>
@@ -39,10 +39,10 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "FieldMapType")
+@XmlType(name = "FieldMapTypes")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
-public enum FieldMapType {
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+public enum FieldMapTypes {
 
 	/**
 	 * 
@@ -72,7 +72,7 @@ public enum FieldMapType {
 	CALC("Calc");
 	private final String value;
 
-	FieldMapType(String v) {
+	FieldMapTypes(String v) {
 		value = v;
 	}
 
@@ -80,8 +80,8 @@ public enum FieldMapType {
 		return value;
 	}
 
-	public static FieldMapType fromValue(String v) {
-		for (FieldMapType c : FieldMapType.values()) {
+	public static FieldMapTypes fromValue(String v) {
+		for (FieldMapTypes c : FieldMapTypes.values()) {
 			if (c.value.equals(v)) {
 				return c;
 			}

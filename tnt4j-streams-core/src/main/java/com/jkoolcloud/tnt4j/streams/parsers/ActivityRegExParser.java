@@ -111,11 +111,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		List<ActivityFieldLocator> matchLocs = new ArrayList<>();
 		List<ActivityFieldLocator> groupLocs = new ArrayList<>();
 		for (ActivityFieldLocator locator : locators) {
-			ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
-			try {
-				locType = ActivityFieldLocatorType.valueOf(locator.getType());
-			} catch (Exception e) {
-			}
+			ActivityFieldLocatorType locType = locator.getBuiltInType();
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
 					field); // Utils.getDebugString(field));

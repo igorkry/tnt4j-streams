@@ -78,7 +78,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			builtInType = ActivityFieldLocatorType.valueOf(this.type);
 		} catch (Exception e) {
 		}
-		if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.StreamProp) {
+		if (builtInType != null && builtInType.getDataType() == Integer.class) {
 			int loc = Integer.parseInt(locator);
 			if (loc <= 0) {
 				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

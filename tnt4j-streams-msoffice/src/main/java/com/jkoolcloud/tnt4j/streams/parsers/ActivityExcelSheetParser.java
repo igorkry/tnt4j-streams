@@ -131,6 +131,8 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 				if (cell != null) {
 					val = cell.toString();
 					cellFound = true;
+				} else {
+					val = row;
 				}
 			}
 

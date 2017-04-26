@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="source" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="target" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="type" type="{}FieldMapType" default="Value" />
+ *       &lt;attribute name="type" type="{}FieldMapTypes" default="Value" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -48,27 +48,27 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FieldMap")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 public class FieldMap {
 
 	@XmlAttribute(name = "source", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String source;
 	@XmlAttribute(name = "target", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String target;
 	@XmlAttribute(name = "type")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
-	protected FieldMapType type;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	protected FieldMapTypes type;
 
 	public FieldMap() {
 	}
 
 	public FieldMap(String source, String target) {
-		this(source, target, FieldMapType.VALUE);
+		this(source, target, FieldMapTypes.VALUE);
 	}
 
-	public FieldMap(String source, String target, FieldMapType type) {
+	public FieldMap(String source, String target, FieldMapTypes type) {
 		this.source = source;
 		this.target = target;
 		this.type = type;
@@ -80,7 +80,7 @@ public class FieldMap {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getSource() {
 		return source;
 	}
@@ -92,7 +92,7 @@ public class FieldMap {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setSource(String value) {
 		this.source = value;
 	}
@@ -103,7 +103,7 @@ public class FieldMap {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getTarget() {
 		return target;
 	}
@@ -115,7 +115,7 @@ public class FieldMap {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTarget(String value) {
 		this.target = value;
 	}
@@ -123,13 +123,13 @@ public class FieldMap {
 	/**
 	 * Gets the value of the type property.
 	 * 
-	 * @return possible object is {@link FieldMapType }
+	 * @return possible object is {@link FieldMapTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
-	public FieldMapType getType() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public FieldMapTypes getType() {
 		if (type == null) {
-			return FieldMapType.VALUE;
+			return FieldMapTypes.VALUE;
 		} else {
 			return type;
 		}
@@ -139,11 +139,11 @@ public class FieldMap {
 	 * Sets the value of the type property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link FieldMapType }
+	 *            allowed object is {@link FieldMapTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-09T11:44:31+02:00", comments = "JAXB RI v2.2.4-2")
-	public void setType(FieldMapType value) {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setType(FieldMapTypes value) {
 		this.type = value;
 	}
 

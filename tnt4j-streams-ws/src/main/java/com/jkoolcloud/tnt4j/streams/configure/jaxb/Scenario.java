@@ -23,17 +23,17 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * Java class for ScenarioType complex type.
+ * Java class for Scenario complex type.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ScenarioType">
+ * &lt;complexType name="Scenario">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="step" type="{}ScenarioStepType" maxOccurs="unbounded"/>
+ *         &lt;element name="step" type="{}ScenarioStep" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -44,15 +44,15 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ScenarioType", propOrder = { "step" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-public class ScenarioType {
+@XmlType(name = "Scenario", propOrder = { "step" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+public class Scenario {
 
 	@XmlElement(required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	protected List<ScenarioStepType> step;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<ScenarioStep> step;
 	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 
 	/**
@@ -72,35 +72,34 @@ public class ScenarioType {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link ScenarioStepType }
+	 * Objects of the following type(s) are allowed in the list {@link ScenarioStep }
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
-	public List<ScenarioStepType> getStep() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<ScenarioStep> getStep() {
 		if (step == null) {
-			step = new ArrayList<ScenarioStepType>();
+			step = new ArrayList<ScenarioStep>();
 		}
 		return this.step;
 	}
 
-	public void addStep(ScenarioStepType s) {
+	public void addStep(ScenarioStep s) {
 		getStep().add(s);
 	}
 
 	public void addStep(String expression, String request, String name, String url, String method) {
-		getStep().add(new ScenarioStepType(expression, request, name, url, method));
+		getStep().add(new ScenarioStep(expression, request, name, url, method));
 	}
 
 	public void addStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
 			String method) {
-		getStep().add(new ScenarioStepType(interval, units, repeatCount, request, name, url, method));
+		getStep().add(new ScenarioStep(interval, units, repeatCount, request, name, url, method));
 	}
 
 	public void addStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
 			String method, String username, String password) {
-		getStep().add(
-				new ScenarioStepType(interval, units, repeatCount, request, name, url, method, username, password));
+		getStep().add(new ScenarioStep(interval, units, repeatCount, request, name, url, method, username, password));
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class ScenarioType {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
@@ -121,7 +120,7 @@ public class ScenarioType {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T04:17:48+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}

@@ -22,14 +22,14 @@ import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Java class for StreamFieldType.
+ * Java class for FieldNames.
  * 
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * <p>
  * 
  * <pre>
- * &lt;simpleType name="StreamFieldType">
+ * &lt;simpleType name="FieldNames">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="ApplName"/>
  *     &lt;enumeration value="ServerName"/>
@@ -63,10 +63,10 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "StreamFieldType")
+@XmlType(name = "FieldNames")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-03-18T10:53:03+02:00", comments = "JAXB RI v2.2.4-2")
-public enum StreamFieldType {
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+public enum FieldNames {
 
 	/**
 	 * 
@@ -142,7 +142,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Identifier of process where activity event has occurred.
+	 * Identifier of process where activity entity has occurred.
 	 * 
 	 * 
 	 */
@@ -151,7 +151,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Identifier of thread where activity event has occurred.
+	 * Identifier of thread where activity entity has occurred.
 	 * 
 	 * 
 	 */
@@ -242,7 +242,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Data to associate with the activity event.
+	 * Data to associate with the activity entity.
 	 * 
 	 * 
 	 */
@@ -260,7 +260,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Length of activity event message data.
+	 * Length of activity entity message data.
 	 * 
 	 * 
 	 */
@@ -269,7 +269,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * MIME type of activity event message data.
+	 * MIME type of activity entity message data.
 	 * 
 	 * 
 	 */
@@ -278,7 +278,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Encoding of activity event message data.
+	 * Encoding of activity entity message data.
 	 * 
 	 * 
 	 */
@@ -287,7 +287,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * CharSet of activity event message data.
+	 * CharSet of activity entity message data.
 	 * 
 	 * 
 	 */
@@ -296,7 +296,7 @@ public enum StreamFieldType {
 
 	/**
 	 * 
-	 * Activity event category name.
+	 * Activity entity category name.
 	 * 
 	 * 
 	 */
@@ -313,7 +313,7 @@ public enum StreamFieldType {
 	PARENT_ID("ParentId");
 	private final String value;
 
-	StreamFieldType(String v) {
+	FieldNames(String v) {
 		value = v;
 	}
 
@@ -321,8 +321,8 @@ public enum StreamFieldType {
 		return value;
 	}
 
-	public static StreamFieldType fromValue(String v) {
-		for (StreamFieldType c : StreamFieldType.values()) {
+	public static FieldNames fromValue(String v) {
+		for (FieldNames c : FieldNames.values()) {
 			if (c.value.equals(v)) {
 				return c;
 			}

@@ -29,6 +29,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
@@ -40,12 +41,18 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * <ul>
  * <li>DateTime - default date/time to associate with activities. (Optional)</li>
  * <li>UseExecutors - identifies whether stream should use executor service to process activities data items
- * asynchronously or not. (Optional)</li>
- * <li>ExecutorThreadsQuantity - defines executor service thread pool size. (Optional)</li>
- * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a executor service to terminate. (Optional)</li>
- * <li>ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. (Optional)</li>
+ * asynchronously or not. Default value - {@code false}. (Optional)</li>
+ * <li>ExecutorThreadsQuantity - defines executor service thread pool size. Default value - {@code 4}. (Optional)</li>
+ * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a executor service to terminate. Default value -
+ * {@code 20}. (Optional)</li>
+ * <li>ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value -
+ * {@code false}. (Optional)</li>
  * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
- * queue size is reached. (Optional, actual only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
+ * queue size is reached. Default value - {@code 20}. (Optional, actual only if {@code ExecutorsBoundedModel} is set to
+ * {@code true})</li>
+ * <li>StreamCacheMaxSize - max. size of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
+ * <li>StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value -
+ * {@code 10}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -53,14 +60,14 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @param <O>
  *            the type of handled output data
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  *
  * @see java.util.concurrent.ExecutorService
  * @see com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput
  */
 public abstract class TNTInputStream<T, O> implements Runnable {
 
-	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = 5 * 1000L;
+	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
 
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
@@ -69,7 +76,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	/**
 	 * StreamThread running this stream.
 	 */
-	protected StreamThread ownerThread = null;
+	private StreamThread ownerThread = null;
 
 	private AtomicInteger currActivityIndex = new AtomicInteger(0);
 	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
@@ -92,6 +99,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private int executorThreadsQty = DEFAULT_EXECUTOR_THREADS_QTY;
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
+
+	// cache related properties
+	private Integer cacheMaxSize;
+	private Integer cacheExpireDuration;
 
 	/**
 	 * Returns logger used by this stream.
@@ -196,6 +207,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				executorsTerminationTimeout = Integer.parseInt(value);
 			} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
 				boundedExecutorModel = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_CACHE_MAX_SIZE.equalsIgnoreCase(name)) {
+				cacheMaxSize = Integer.parseInt(value);
+			} else if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equalsIgnoreCase(name)) {
+				cacheExpireDuration = Integer.parseInt(value);
 			}
 		}
 	}
@@ -228,6 +243,12 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (StreamProperties.PROP_EXECUTORS_BOUNDED.equals(name)) {
 			return boundedExecutorModel;
 		}
+		if (StreamProperties.PROP_CACHE_MAX_SIZE.equals(name)) {
+			return cacheMaxSize;
+		}
+		if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equals(name)) {
+			return cacheExpireDuration;
+		}
 
 		return null;
 	}
@@ -256,6 +277,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
 			out.handleConsumerThread(isOwned() ? ownerThread : Thread.currentThread());
+		}
+
+		if (cacheMaxSize != null || cacheExpireDuration != null) {
+			StreamsCache.initCache(cacheMaxSize, cacheExpireDuration);
 		}
 	}
 
@@ -601,6 +626,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (CollectionUtils.isNotEmpty(streamTasksListeners)) {
 			streamTasksListeners.clear();
 		}
+
+		StreamsCache.cleanup();
 	}
 
 	private synchronized void shutdownExecutors() {
@@ -1169,7 +1196,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		 */
 		@Override
 		public String toString() {
-			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
+			return "StreamStats {" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
 					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
 					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
 		}

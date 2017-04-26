@@ -3,6 +3,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
+    <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
+        <property name="TurnOutActivityChildren" value="true"/>
+    </java-object>
+
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
 
         <field name="EventType" locator="name(//*[1])" locator-type="Label">
@@ -51,14 +55,10 @@
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
 
-        <field name="TRANSFERSET" locator="/transaction/transferSet/item/*" transparent="true" split="true" locator-type="Label">
+        <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
             <parser-ref name="TransferSetParser" aggregation="Join"/>
-        </field>
+        </embedded-activity>
     </parser>
-
-    <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
-        <property name="TurnOutActivityChildren" value="true"/>
-    </java-object>
 
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="Host" value="localhost"/>
