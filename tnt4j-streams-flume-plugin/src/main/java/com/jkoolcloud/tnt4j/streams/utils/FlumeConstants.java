@@ -29,6 +29,5 @@ public final class FlumeConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-flume-plugin"; // NON-NLS
 
 	private FlumeConstants() {
-
 	}
 }

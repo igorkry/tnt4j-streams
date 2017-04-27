@@ -28,6 +28,5 @@ public final class HdfsStreamConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-hdfs"; // NON-NLS
 
 	private HdfsStreamConstants() {
-
 	}
 }

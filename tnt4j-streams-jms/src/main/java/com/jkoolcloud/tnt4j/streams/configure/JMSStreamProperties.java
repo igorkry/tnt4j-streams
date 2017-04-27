@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.utils;
+package com.jkoolcloud.tnt4j.streams.configure;
 
 /**
- * TNT4J-Streams "Mqtt" module constants.
+ * Lists predefined property names used by TNT4-Streams JMS input streams.
  *
  * @version $Revision: 1 $
  */
-public final class MqttStreamConstants {
+public interface JMSStreamProperties extends StreamProperties {
 
 	/**
-	 * Resource bundle name constant for TNT4J-Streams "mqtt" module.
+	 * Constant for name of built-in stream {@value} property.
 	 */
-	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-mqtt"; // NON-NLS
-
-	/**
-	 * The constant to indicate activity transport is MQTT.
-	 */
-	public static final String TRANSPORT_MQTT = "Mqtt"; // NON-NLS
-
-	private MqttStreamConstants() {
-	}
+	String PROP_JMS_CONN_FACTORY = "JMSConnFactory"; // NON-NLS
 }

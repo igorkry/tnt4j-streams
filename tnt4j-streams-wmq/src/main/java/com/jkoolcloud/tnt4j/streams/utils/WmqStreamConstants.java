@@ -38,6 +38,5 @@ public final class WmqStreamConstants {
 	public static final int TRACE_MARKER = 929292929;
 
 	private WmqStreamConstants() {
-
 	}
 }

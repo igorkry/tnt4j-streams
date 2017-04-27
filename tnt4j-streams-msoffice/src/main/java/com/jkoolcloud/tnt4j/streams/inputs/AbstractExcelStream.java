@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -77,7 +78,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 			String value = prop.getValue();
 			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				fileName = value;
-			} else if (MsOfficeStreamConstants.PROP_SHEETS.equalsIgnoreCase(name)) {
+			} else if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
 				sheetName = value;
 
 				if (StringUtils.isNotEmpty(sheetName)) {
@@ -92,7 +93,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
-		if (MsOfficeStreamConstants.PROP_SHEETS.equalsIgnoreCase(name)) {
+		if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
 			return sheetName;
 		}
 
@@ -142,8 +143,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	/**
 	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property
-	 * '{@value com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants#PROP_SHEETS}') sheets name filtering mask. If
-	 * no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
+	 * '{@value MsOfficeStreamProperties#PROP_SHEETS}') sheets name filtering mask. If no more sheets matching name
+	 * filter mask is available in workbook, then {@code null} is returned.
 	 *
 	 * @param countSkips
 	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count

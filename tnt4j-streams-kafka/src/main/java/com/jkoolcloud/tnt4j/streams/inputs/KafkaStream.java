@@ -33,6 +33,7 @@ import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.KafkaStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
@@ -161,7 +162,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				topicName = value;
 			} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
 				startServer = Boolean.parseBoolean(value);
-			} else if (KafkaStreamConstants.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
+			} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
 				startZooKeeper = Boolean.parseBoolean(value);
 			} else {
 				Field[] propFields = StreamProperties.class.getDeclaredFields();
@@ -192,7 +193,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 			return startServer;
 		}
 
-		if (KafkaStreamConstants.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
+		if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
 			return startZooKeeper;
 		}
 

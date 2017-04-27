@@ -41,6 +41,5 @@ public class WsStreamConstants {
 	public static final String TRANSPORT_SYS_CMD = "SysCmd"; // NON-NLS
 
 	private WsStreamConstants() {
-
 	}
 }

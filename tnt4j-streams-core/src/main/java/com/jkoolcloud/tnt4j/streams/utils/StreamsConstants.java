@@ -47,7 +47,5 @@ public final class StreamsConstants {
 	public static final String DEFAULT_PATH_DELIM = "."; // NON-NLS
 
 	private StreamsConstants() {
-
 	}
-
 }

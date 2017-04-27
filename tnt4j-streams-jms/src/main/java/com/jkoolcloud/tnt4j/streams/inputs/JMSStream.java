@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.JMSStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -92,7 +92,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 			return jndiFactory;
 		}
-		if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
+		if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 			return jmsConnFactory;
 		}
 
@@ -128,7 +128,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 				topicName = value;
 			} else if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
 				jndiFactory = value;
-			} else if (JMSStreamConstants.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
+			} else if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 				jmsConnFactory = value;
 			}
 		}

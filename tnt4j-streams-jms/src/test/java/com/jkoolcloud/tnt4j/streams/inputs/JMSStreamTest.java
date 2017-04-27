@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.configure.JMSStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 
 /**
  * @author akausinis
@@ -40,7 +40,7 @@ public class JMSStreamTest {
 		props.put(StreamProperties.PROP_SERVER_URI, "localhost"); // NON-NLS
 		props.put(StreamProperties.PROP_QUEUE_NAME, "test"); // NON-NLS
 		props.put(StreamProperties.PROP_JNDI_FACTORY, "JNDI"); // NON-NLS
-		props.put(JMSStreamConstants.PROP_JMS_CONN_FACTORY, "JMS"); // NON-NLS
+		props.put(JMSStreamProperties.PROP_JMS_CONN_FACTORY, "JMS"); // NON-NLS
 		input.setProperties(props.entrySet());
 		testPropertyList(input, props.entrySet());
 	}

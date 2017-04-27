@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.JMSParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -111,7 +112,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 
-			if (JMSStreamConstants.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
+			if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
 				convertToString = Boolean.parseBoolean(value);
 
 				logger().log(OpLevel.DEBUG,
