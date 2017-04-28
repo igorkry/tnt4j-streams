@@ -7,30 +7,19 @@
         <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="EVENT"/>
-
-        <field name="EventName" locator="$.event" locator-type="Label" cacheKey="EventName"/>
         <field name="LastEvent" locator="EventName" locator-type="Cache"/>
+        <field name="EventName" locator="$.event" locator-type="Label" cacheKey="EventName"/>
         <field name="Message" locator="$.message" locator-type="Label"/>
         <field name="Resource" locator="$.resource" locator-type="Label"/>
     </parser>
 
-    <parser name="ReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
-        <field name="MsgBody" locator="ActivityData" locator-type="Label">
-            <parser-ref name="EventParser"/>
-        </field>
-    </parser>
-
-    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.HttpStream">
-        <property name="HaltIfNoParser" value="false"/>
-
-        <property name="Host" value="localhost"/>
-        <property name="Port" value="9595"/>
+    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
 
         <property name="StreamCacheMaxSize" value="300"/>
         <property name="StreamCacheExpireDuration" value="15"/>
 
-        <parser-ref name="ReqParser"/>
+        <parser-ref name="EventParser"/>
     </stream>
 
 </tnt-data-source>

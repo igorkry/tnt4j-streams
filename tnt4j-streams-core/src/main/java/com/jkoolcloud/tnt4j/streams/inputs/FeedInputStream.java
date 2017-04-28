@@ -19,7 +19,9 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +53,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This activity stream supports the following properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
- * <li>FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')</li>
+ * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.
+ * (Required - just one 'FileName' or 'Port')</li>
  * <li>Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')</li>
  * <li>RestartOnInputClose - flag indicating to restart stream if input socked gets closed. (Optional)</li>
  * </ul>
@@ -61,7 +64,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @param <T>
  *            type of activity data feed input
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see BytesInputStream
  * @see CharacterStream
@@ -71,8 +74,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	private String fileName = null;
 	private Integer socketPort = null;
 
-	private ServerSocket svrSocket = null;
-	private Socket socket = null;
+	private FeedInput feedInput;
 
 	/**
 	 * RAW input source (i.e. {@link java.io.Reader} or {@link InputStream}) from which activity data is read.
@@ -194,26 +196,13 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		initializeStreamInternals();
-	}
-
-	private void initializeStreamInternals() throws Exception {
-		if (rawInputSource == null) {
-			if (StringUtils.isEmpty(fileName) && socketPort == null) {
-				throw new IllegalStateException(StreamsResources.getStringFormatted(
-						StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.property.undefined.one.of",
-						StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
-			}
-
-			if (fileName != null) {
-				setInputStream(new FileInputStream(fileName));
-			} else if (socketPort != null) {
-				svrSocket = new ServerSocket(socketPort);
-			} else {
-				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.no.stream.source"));
-			}
+		if (StringUtils.isEmpty(fileName) && socketPort == null) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_FILENAME,
+					StreamProperties.PROP_PORT));
 		}
+
+		feedInput = socketPort == null ? new FileInput(fileName) : new SocketInput(socketPort);
 	}
 
 	/**
@@ -224,17 +213,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	 */
 	protected void startDataStream() throws IOException {
 		if (rawInputSource == null) {
-			if (svrSocket != null) {
-				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.waiting.for.connection"), socketPort);
-				socket = svrSocket.accept();
-				setInputStream(socket.getInputStream());
-				logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.accepted.connection"), socket);
-				// only accept one connection, close down server socket
-				Utils.close(svrSocket);
-				svrSocket = null;
-			}
+			setInputStream(feedInput.getInputStream());
 		}
 		if (rawInputSource == null) {
 			throw new IOException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -264,17 +243,23 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	public T getNextItem() throws Exception {
 		while (true) {
 			if (dataFeed == null) {
-				startDataStream();
+				try {
+					startDataStream();
+				} catch (IOException exc) {
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"FeedInputStream.input.start.failed"), exc.getLocalizedMessage());
+					return null;
+				}
 			}
 			if (dataFeed.isClosed() || dataFeed.hasError()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"FeedInputStream.reader.terminated"));
-				if (restartOnInputClose && socketPort != null) {
+				if (feedInput.canContinue()) {
 					resetDataStream();
 					continue;
-				} else {
-					return null;
 				}
+
+				return null;
 			}
 			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FeedInputStream.stream.still.open"));
@@ -282,23 +267,23 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 		}
 	}
 
-	private void resetDataStream() throws Exception {
+	private void resetDataStream() {
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FeedInputStream.resetting.stream"),
-				socket);
+				feedInput);
 
 		cleanupStreamInternals();
 
-		initializeStreamInternals();
-
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FeedInputStream.stream.reset"),
-				socketPort);
+				getName());
 	}
 
 	@Override
 	protected void cleanup() {
 		cleanupStreamInternals();
+
+		feedInput.shutdown();
 
 		super.cleanup();
 	}
@@ -306,19 +291,152 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	private void cleanupStreamInternals() {
 		Utils.close(rawInputSource);
 		Utils.close(dataFeed);
-		Utils.close(socket);
-		Utils.close(svrSocket);
 
 		rawInputSource = null;
 		dataFeed = null;
-		socket = null;
-		svrSocket = null;
+
+		feedInput.cleanup();
 	}
 
 	private class StreamFeedsListener implements Feed.FeedListener {
 		@Override
 		public void bytesReadFromInput(int bCount) {
 			addStreamedBytesCount(bCount);
+		}
+	}
+
+	private interface FeedInput {
+		/**
+		 * Opens input stream from available input resource.
+		 *
+		 * @return opened input stream to feed data from
+		 * @throws IOException
+		 *             if fails to open input stream to reed feeds data
+		 */
+		InputStream getInputStream() throws IOException;
+
+		/**
+		 * Checks there is more input resources available or input can be restored.
+		 *
+		 * @return {@code true} if there is more input resources available or input can be restored, {@code false} -
+		 *         otherwise.
+		 */
+		boolean canContinue();
+
+		/**
+		 * Cleans or closes opened input resources, but does not destroy this feed input.
+		 */
+		void cleanup();
+
+		/**
+		 * Shuts down this feed input by destroying it.
+		 */
+		void shutdown();
+	}
+
+	private class SocketInput implements FeedInput {
+		private ServerSocket svrSocket = null;
+		private Socket socket = null;
+
+		private int socketPort;
+
+		public SocketInput(int socketPort) {
+			this.socketPort = socketPort;
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			svrSocket = new ServerSocket(socketPort);
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.waiting.for.connection"), socketPort);
+			socket = svrSocket.accept();
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.accepted.connection"), socket);
+			// only accept one connection, close down server socket
+			Utils.close(svrSocket);
+			svrSocket = null;
+
+			return socket.getInputStream();
+		}
+
+		@Override
+		public boolean canContinue() {
+			return restartOnInputClose;
+		}
+
+		@Override
+		public void cleanup() {
+			Utils.close(socket);
+			Utils.close(svrSocket);
+
+			socket = null;
+			svrSocket = null;
+		}
+
+		@Override
+		public void shutdown() {
+
+		}
+
+		@Override
+		public String toString() {
+			return socket == null ? String.valueOf(socketPort) : socket.toString();
+		}
+	}
+
+	private class FileInput implements FeedInput {
+		private Iterator<File> files;
+		private File file;
+
+		private String fileName;
+
+		public FileInput(String fileName) {
+			this.fileName = fileName;
+
+			files = Arrays.asList(Utils.listFilesByName(fileName)).iterator();
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			while (true) {
+				if (files.hasNext()) {
+					file = files.next();
+					if (file.exists()) {
+						try {
+							FileInputStream fis = new FileInputStream(file);
+							logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"FeedInputStream.opening.file"), file);
+							return fis;
+						} finally {
+						}
+					}
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"FeedInputStream.file.not.found"), file);
+				} else {
+					throw new IOException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"FeedInputStream.no.more.files"));
+				}
+			}
+		}
+
+		@Override
+		public boolean canContinue() {
+			return files != null && files.hasNext();
+		}
+
+		@Override
+		public void cleanup() {
+			file = null;
+		}
+
+		@Override
+		public void shutdown() {
+
+		}
+
+		@Override
+		public String toString() {
+			return file == null ? fileName : file.toString();
 		}
 	}
 }

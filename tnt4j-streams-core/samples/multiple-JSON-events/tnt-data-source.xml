@@ -27,7 +27,7 @@
     </parser>
 
     <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value="C:\workspace\tnt4j-streams\tnt4j-streams-core\samples\multiple-JSON-events\message.json"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/multiple-JSON-events/message.json"/>
 
         <parser-ref name="ResponseParser"/>
         <reference name="JKoolCloudOutput"/>

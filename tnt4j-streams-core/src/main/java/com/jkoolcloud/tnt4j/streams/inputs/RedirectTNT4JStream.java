@@ -450,7 +450,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				srvSocket = new ServerSocket(srvSocketPort);
 
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.stream.reset"), srvSocketPort);
+						"RedirectTNT4JStream.stream.reset"), srvSocketPort);
 			} catch (Exception exc) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"RedirectTNT4JStream.resetting.failed"), getName(), exc);
