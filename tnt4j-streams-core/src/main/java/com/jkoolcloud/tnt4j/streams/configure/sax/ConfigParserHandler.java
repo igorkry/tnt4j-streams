@@ -507,8 +507,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		// make sure required fields are present
 		notEmpty(field, FIELD_ELMT, NAME_ATTR);
 
-		if (value == null) {
-			notEmpty(locator, FIELD_ELMT, LOCATOR_ATTR);
+		if (StringUtils.isNotEmpty(locator)) {
 			notEmpty(locatorType, FIELD_ELMT, LOC_TYPE_ATTR);
 		}
 
