@@ -16,15 +16,39 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -333,7 +357,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param str
 	 *            string to check and transform
 	 * @return regex ready string
-	 * 
+	 *
 	 * @see #wildcardToRegex(String)
 	 */
 	public static String wildcardToRegex2(String str) {
@@ -450,7 +474,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *             if there was a problem reading from the Reader
 	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
-	 * 
+	 *
 	 * @see com.google.gson.Gson#fromJson(String, Class)
 	 * @see com.google.gson.Gson#fromJson(java.io.Reader, Class)
 	 */
@@ -461,19 +485,19 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		if (jsonAsLine) {
 			try {
-				map = (Map<String, ?>) gson.fromJson(getStringLine(jsonData), map.getClass());
+				map = gson.fromJson(getStringLine(jsonData), map.getClass());
 			} catch (IOException ioe) {
 				throw new JsonIOException(ioe);
 			}
 		} else {
 			if (jsonData instanceof String) {
-				map = (Map<String, ?>) gson.fromJson((String) jsonData, map.getClass());
+				map = gson.fromJson((String) jsonData, map.getClass());
 			} else if (jsonData instanceof byte[]) {
-				map = (Map<String, ?>) gson.fromJson(getString((byte[]) jsonData), map.getClass());
+				map = gson.fromJson(getString((byte[]) jsonData), map.getClass());
 			} else if (jsonData instanceof Reader) {
-				map = (Map<String, ?>) gson.fromJson((Reader) jsonData, map.getClass());
+				map = gson.fromJson((Reader) jsonData, map.getClass());
 			} else if (jsonData instanceof InputStream) {
-				map = (Map<String, ?>) gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
+				map = gson.fromJson(new BufferedReader(new InputStreamReader((InputStream) jsonData)),
 						map.getClass());
 			}
 		}
@@ -607,7 +631,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
 	 * @return string constructed from specified byte array
-	 * 
+	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
@@ -760,7 +784,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param separateLines
 	 *            flag indicating whether to make string lines separated
 	 * @return string read from input stream
-	 * 
+	 *
 	 * @see #readInput(java.io.BufferedReader, boolean)
 	 */
 	public static String readInput(InputStream is, boolean separateLines) {
@@ -1106,7 +1130,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
 	 * {@link #toHexDump(byte[], int, int)} setting {@code len} parameter to {@code 0}.
-	 * 
+	 *
 	 * @param b
 	 *            bytes array make HEX dump
 	 * @param offset
@@ -1257,7 +1281,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Loads properties from resource with given name.
-	 * 
+	 *
 	 * @param name
 	 *            the resource name
 	 * @return properties loaded from resource
@@ -1284,7 +1308,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Loads properties from all resource with given name.
-	 * 
+	 *
 	 * @param name
 	 *            the resource name
 	 * @return properties loaded from all found resources
@@ -1426,7 +1450,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Casts provided number value to desired number type.
-	 * 
+	 *
 	 * @param num
 	 *            number value to cast
 	 * @param clazz
@@ -1542,7 +1566,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Splits string contained values delimited using '|' delimiter into array of separate values.
-	 * 
+	 *
 	 * @param value
 	 *            string contained values to split
 	 * @return array of split string values
@@ -1551,4 +1575,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return StringUtils.isEmpty(value) ? new String[] { value } : value.split(VALUE_DELIM);
 	}
 
+	// FIXME TEMPORARY TO FIX BUILD ERROR
+	public static File[] listFilesByName(String name) {
+		return new File[0];
+	}
 }
