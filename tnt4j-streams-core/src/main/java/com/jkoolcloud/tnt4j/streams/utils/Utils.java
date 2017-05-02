@@ -40,6 +40,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.HexDump;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -360,7 +361,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			// NOTE: Add 1 because line index starts at 0
 			lCount = lineReader.getLineNumber() + 1;
 		} finally {
-			Utils.close(lineReader);
+			close(lineReader);
 		}
 
 		return lCount;
@@ -394,7 +395,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			}
 			return count;
 		} finally {
-			Utils.close(bis);
+			close(bis);
 		}
 	}
 
@@ -657,7 +658,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
-		transformer.setOutputProperty(OutputKeys.ENCODING, Utils.UTF8);
+		transformer.setOutputProperty(OutputKeys.ENCODING, UTF8);
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
@@ -770,7 +771,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			text = readInput(reader, separateLines);
 		} catch (IOException exc) {
 		} finally {
-			Utils.close(reader);
+			close(reader);
 		}
 
 		return text;
@@ -1249,7 +1250,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			is = new FileInputStream(new File(propFile));
 			fProps.load(is);
 		} finally {
-			Utils.close(is);
+			close(is);
 		}
 
 		return fProps;
@@ -1276,7 +1277,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		try {
 			rProps.load(ins);
 		} finally {
-			Utils.close(ins);
+			close(ins);
 		}
 
 		return rProps;
@@ -1306,7 +1307,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			try {
 				rProps.load(ins);
 			} finally {
-				Utils.close(ins);
+				close(ins);
 			}
 		}
 
@@ -1551,4 +1552,55 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return StringUtils.isEmpty(value) ? new String[] { value } : value.split(VALUE_DELIM);
 	}
 
+	/**
+	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
+	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
+	 * modification timestamp in ascending order.
+	 *
+	 * @param namePattern
+	 *            name pattern to find files
+	 *
+	 * @return array of found files
+	 *
+	 * @see WildcardFileFilter#WildcardFileFilter(String)
+	 * @see File#listFiles(FilenameFilter)
+	 */
+	public static File[] searchFiles(String namePattern) {
+		File f = new File(namePattern);
+		File dir = f.getAbsoluteFile().getParentFile();
+		File[] activityFiles = dir.listFiles((FilenameFilter) new WildcardFileFilter(f.getName()));
+
+		if (activityFiles != null) {
+			Arrays.sort(activityFiles, new Comparator<File>() {
+				@Override
+				public int compare(File o1, File o2) {
+					long f1ct = o1.lastModified();
+					long f2ct = o2.lastModified();
+					// NOTE: we want files to be sorted oldest->newest (ASCENDING)
+					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
+				}
+			});
+		}
+
+		return activityFiles;
+	}
+
+	/**
+	 * Returns list of files matching provided file name. If file name contains wildcard symbols, then
+	 * {@link #searchFiles(String)} is invoked.
+	 *
+	 * @param fileName
+	 *            file name pattern to list matching files
+	 * @return array of files matching file name
+	 *
+	 * @see #searchFiles(String)
+	 */
+	public static File[] listFilesByName(String fileName) {
+		if (isWildcardString(fileName)) {
+			return searchFiles(fileName);
+		} else {
+			return new File[] { new File(fileName) };
+		}
+	}
 }
