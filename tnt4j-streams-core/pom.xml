@@ -102,10 +102,47 @@
 
     <dependencies>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons.codec.version}</version>
+            <groupId>com.jkoolcloud</groupId>
+            <artifactId>tnt4j</artifactId>
+            <version>${tnt4j.version}</version>
+            <!-- streams uses slf4j-log4j as default -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>slf4j-api</artifactId>
+                	<groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.jkoolcloud</groupId>
+            <artifactId>jesl</artifactId>
+            <version>${jesl.version}</version>
+            <scope>runtime</scope>
+            <!-- streams uses newer version of those -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.jkoolcloud.jesl.net</groupId>
+                    <artifactId>tnt4j-syslogd</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
@@ -117,19 +154,9 @@
             <version>${commons.io.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -187,43 +214,15 @@
             <artifactId>zookeeper</artifactId>
             <version>3.4.9</version>
             <!--<optional>true</optional>-->
-        </dependency>
-
-        <dependency>
-            <groupId>com.jkoolcloud</groupId>
-            <artifactId>tnt4j</artifactId>
-            <version>${tnt4j.version}</version>
-            <!-- streams uses slf4j-log4j as default -->
             <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-lang</groupId>
-                    <artifactId>commons-lang</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud</groupId>
-            <artifactId>jesl</artifactId>
-            <version>${jesl.version}</version>
-            <scope>runtime</scope>
-            <!-- streams uses newer version of those -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.jkoolcloud.jesl.net</groupId>
-                    <artifactId>tnt4j-syslogd</artifactId>
-                </exclusion>
+            	<exclusion>
+            		<artifactId>log4j</artifactId>
+            		<groupId>log4j</groupId>
+            	</exclusion>
+            	<exclusion>
+            		<artifactId>slf4j-api</artifactId>
+            		<groupId>org.slf4j</groupId>
+            	</exclusion>
             </exclusions>
         </dependency>
 
@@ -246,6 +245,16 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${org.slf4j.version}</version>
             <scope>runtime</scope>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>log4j</artifactId>
+            		<groupId>log4j</groupId>
+            	</exclusion>
+            	<exclusion>
+            		<artifactId>slf4j-api</artifactId>
+            		<groupId>org.slf4j</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <!-- uncomment if slf4j-simple logger shall be used -->
