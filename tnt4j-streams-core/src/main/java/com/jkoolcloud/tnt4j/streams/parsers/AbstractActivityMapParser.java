@@ -53,6 +53,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
+	/**
+	 * Constant for locator path node token meaning complete map.
+	 */
+	protected static final String MAP_NODE_TOKEN = "*"; // NON-NLS
 
 	/**
 	 * Constant for map entry locator path delimiter.
@@ -159,6 +163,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
 		if (ArrayUtils.isEmpty(path) || dataMap == null) {
 			return null;
+		}
+
+		if (MAP_NODE_TOKEN.equals(path[i])) {
+			return dataMap;
 		}
 
 		Object val = dataMap.get(path[i]);
