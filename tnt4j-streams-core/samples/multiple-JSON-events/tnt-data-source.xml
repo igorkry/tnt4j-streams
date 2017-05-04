@@ -11,10 +11,8 @@
         <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="EVENT"/>
-        <field name="EventName" locator="Symbol" locator-type="Label"/>
-        <field name="Ask" locator="Ask" locator-type="Label"/>
-        <field name="Bid" locator="Bid" locator-type="Label"/>
-        <field name="Change" locator="Change" locator-type="Label"/>
+
+        <field name="QuoteProperties" locator="*" locator-type="Label"/>
     </parser>
 
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
