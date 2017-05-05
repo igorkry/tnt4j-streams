@@ -18,7 +18,7 @@
     <artifactId>tnt4j-streams-wmq</artifactId>
 
     <properties>
-        <ibm.mq.version>7.5</ibm.mq.version>
+        <ibm.mq.version>8.0</ibm.mq.version>
     </properties>
 
     <build>
@@ -89,29 +89,10 @@
 
         <dependency>
             <groupId>com.ibm</groupId>
-            <artifactId>com.ibm.mq</artifactId>
+            <artifactId>mq</artifactId>
             <version>${ibm.mq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>com.ibm.mq.commonservices</artifactId>
-            <version>${ibm.mq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>com.ibm.mq.headers</artifactId>
-            <version>${ibm.mq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>com.ibm.mq.jmqi</artifactId>
-            <version>${ibm.mq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>com.ibm.mq.pcf</artifactId>
-            <version>${ibm.mq.version}</version>
-        </dependency>
+            <type>pom</type>
+        </dependency>        
         <dependency>
             <groupId>javax.resource</groupId>
             <artifactId>javax.resource-api</artifactId>
