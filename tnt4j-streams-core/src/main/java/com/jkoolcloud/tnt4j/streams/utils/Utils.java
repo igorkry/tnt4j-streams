@@ -1581,9 +1581,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
 				}
 			});
-		}
 
-		return activityFiles;
+			return activityFiles;
+		} else {
+			return new File[0];
+		}
 	}
 
 	/**
