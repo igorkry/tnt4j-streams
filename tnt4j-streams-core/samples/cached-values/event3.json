@@ -1,5 +1,6 @@
 {
-    "event": "Event3",
-    "message": "Third event",
-    "resource": "eventThird.json"
+    "event": "Event12",
+    "message": "Second event",
+    "resource": "event3.json",
+    "transaction": "1"
 }

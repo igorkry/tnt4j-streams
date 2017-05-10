@@ -109,7 +109,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length); // NON-NLS
 
 		ActivityInfo ai = parsePreparedItem(stream, dataStr, fields);
-		postParse(ai, stream, data);
+		postParse(ai, stream, fields);
 
 		return ai;
 	}

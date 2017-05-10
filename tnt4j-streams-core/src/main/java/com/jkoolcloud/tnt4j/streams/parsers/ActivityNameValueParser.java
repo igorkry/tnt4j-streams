@@ -185,7 +185,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		}
 
 		ActivityInfo ai = parsePreparedItem(stream, dataStr, nameValues);
-		postParse(ai, stream, data);
+		postParse(ai, stream, nameValues);
 
 		return ai;
 	}

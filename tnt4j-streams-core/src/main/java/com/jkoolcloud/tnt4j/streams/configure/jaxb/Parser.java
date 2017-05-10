@@ -23,6 +23,11 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
+ *
+ * Defines a parser to extract activity elements from a string identifying an activity.
+ *
+ *
+ * <p>
  * Java class for Parser complex type.
  * 
  * <p>

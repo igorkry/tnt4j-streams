@@ -167,7 +167,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				jsonString);
 
 		ActivityInfo ai = parsePreparedItem(stream, jsonString, jsonDoc);
-		postParse(ai, stream, data);
+		postParse(ai, stream, jsonDoc);
 
 		return ai;
 	}

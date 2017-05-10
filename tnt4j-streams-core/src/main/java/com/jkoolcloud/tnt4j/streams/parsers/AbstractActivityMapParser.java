@@ -123,7 +123,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		}
 
 		ActivityInfo ai = parsePreparedItem(stream, dataMap.toString(), dataMap);
-		postParse(ai, stream, data);
+		postParse(ai, stream, dataMap);
 
 		return ai;
 	}

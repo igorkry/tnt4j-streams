@@ -43,7 +43,7 @@ import org.apache.commons.io.HexDump;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -651,7 +651,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @throws javax.xml.transform.TransformerException
 	 *             If an exception occurs while transforming XML DOM document to string
 	 */
-	public static String documentToString(Document doc) throws TransformerException {
+	public static String documentToString(Node doc) throws TransformerException {
 		StringWriter sw = new StringWriter();
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();

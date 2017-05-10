@@ -184,7 +184,15 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 		}
 
-		fieldList.add(field);
+		int idx = -1;
+		for (int i = 0; i < fieldList.size(); i++) {
+			ActivityField af = fieldList.get(i);
+			if (af.hasCacheLocators()) {
+				idx = i;
+				break;
+			}
+		}
+		fieldList.add(idx >= 0 ? idx : fieldList.size(), field);
 	}
 
 	/**
@@ -302,7 +310,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		ItemToParse item = prepareItem(data);
 
 		ActivityInfo ai = parsePreparedItem(stream, String.valueOf(item.message), item.item);
-		postParse(ai, stream, data);
+		postParse(ai, stream, item.item);
 
 		return ai;
 	}
@@ -353,14 +361,22 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @param stream
 	 *            stream providing activity data
 	 * @param data
-	 *            raw activity data
+	 *            prepared activity data item to parse
+	 * @throws java.text.ParseException
+	 *             if exception occurs applying field locator resolved cached value
 	 */
-	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, Object data) {
+	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
+		resolveCachedValues(stream, ai, data);
+
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
 			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityParser.activity.filtering.failed"), ai, exc);
+		}
+
+		if (!ai.isFilteredOut()) {
+			StreamsCache.cacheValues(ai, getName());
 		}
 	}
 
@@ -390,6 +406,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			// apply fields for parser
 			Object value;
 			for (ActivityField aField : fieldList) {
+				if (aField.hasCacheLocators()) {
+					continue;
+				}
+
 				field = aField;
 				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
 
@@ -622,8 +642,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			if (StringUtils.isNotEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
 					val = stream.getProperty(locStr);
-				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
-					val = StreamsCache.getValue(locStr);
 				} else {
 					val = resolveLocatorValue(locator, data, formattingNeeded);
 					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
@@ -741,6 +759,44 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return data;
+	}
+
+	/**
+	 * Resolves activity item fields values from streams cache stored data.
+	 *
+	 * @param stream
+	 *            stream providing activity data
+	 * @param ai
+	 *            converted activity info
+	 * @param data
+	 *            prepared activity data item to parse
+	 * @throws ParseException
+	 *             if exception occurs applying field locator resolved cached value
+	 */
+	protected void resolveCachedValues(TNTInputStream<?, ?> stream, ActivityInfo ai, T data) throws ParseException {
+		for (ActivityField aField : fieldList) {
+			if (!aField.hasCacheLocators()) {
+				continue;
+			}
+
+			List<ActivityFieldLocator> locators = aField.getLocators();
+			Object[] values = new Object[locators.size()];
+			if (locators != null) {
+				for (int li = 0; li < locators.size(); li++) {
+					ActivityFieldLocator locator = locators.get(li);
+					if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
+						String locStr = locator.getLocator();
+						if (StringUtils.isNotEmpty(locStr)) {
+							values[li] = Utils.simplifyValue(StreamsCache.getValue(ai, locStr, getName()));
+						}
+					} else {
+						values[li] = getLocatorValue(stream, locator, data);
+					}
+
+					applyFieldValue(stream, ai, aField, values, data);
+				}
+			}
+		}
 	}
 
 	/**

@@ -34,6 +34,7 @@ import javax.xml.xpath.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
@@ -64,7 +65,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  *
  * @version $Revision: 1 $
  */
-public class ActivityXmlParser extends GenericActivityParser<Document> {
+public class ActivityXmlParser extends GenericActivityParser<Node> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
 
 	/**
@@ -162,7 +163,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
-	 * <li>{@link org.w3c.dom.Document}</li>
 	 * <li>{@link org.w3c.dom.Node}</li>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
@@ -177,8 +177,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 */
 	@Override
 	protected boolean isDataClassSupportedByParser(Object data) {
-		return Document.class.isInstance(data) || Node.class.isInstance(data)
-				|| super.isDataClassSupportedByParser(data);
+		return Node.class.isInstance(data) || super.isDataClassSupportedByParser(data);
 	}
 
 	@Override
@@ -194,18 +193,13 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 
 		data = preParse(stream, data);
 
-		Document xmlDoc = null;
+		Node xmlDoc = null;
 		String xmlString = null;
 		try {
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
 			} else if (data instanceof Node) {
-				xmlDoc = builder.newDocument();
-				Node importedNode = xmlDoc.importNode((Node) data, true);
-				if (importedNode == null) {
-					return null;
-				}
-				xmlDoc.appendChild(importedNode);
+				xmlDoc = (Node) data;
 			} else {
 				xmlString = getNextActivityString(data);
 				if (StringUtils.isEmpty(xmlString)) {
@@ -234,13 +228,13 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), xmlString);
 
 		ActivityInfo ai = parsePreparedItem(stream, xmlString, xmlDoc);
-		postParse(ai, stream, data);
+		postParse(ai, stream, xmlDoc);
 
 		return ai;
 	}
 
 	@Override
-	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, Document xmlDoc)
+	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, Node xmlDoc)
 			throws ParseException {
 		if (xmlDoc == null) {
 			return null;
@@ -255,13 +249,17 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			// apply fields for parser
 			Object[] values;
 			for (ActivityField aField : fieldList) {
+				if (aField.hasCacheLocators()) {
+					continue;
+				}
+
 				values = null;
 				field = aField;
 				List<ActivityFieldLocator> locators = field.getLocators();
 				if (locators != null) {
 					// need to save format and units specification from config
 					// in case individual entry in activity data overrides it
-					if (savedFormats == null || savedFormats.length < locators.size()) {
+					if (ArrayUtils.getLength(savedFormats) < locators.size()) {
 						savedFormats = new String[locators.size()];
 						savedUnits = new String[locators.size()];
 						savedLocales = new String[locators.size()];
@@ -330,31 +328,21 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Document xmlDoc, AtomicBoolean formattingNeeded)
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, Node xmlDoc, AtomicBoolean formattingNeeded)
 			throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
 
 		if (StringUtils.isNotEmpty(locStr)) {
+			Document nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
 				XPathExpression expr = xPath.compile(locStr);
-				NodeList nodes = null;
-				try {
-					nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
-				} catch (XPathException exc) {
-					val = expr.evaluate(xmlDoc);
+
+				if (nodeDocument != null) { // try expression relative to node
+					val = resolveValueOverXPath(nodeDocument, expr, formattingNeeded);
 				}
-				int length = nodes == null ? 0 : nodes.getLength();
-
-				if (length > 0) {
-					List<Object> valuesList = new ArrayList<>(length);
-					for (int i = 0; i < length; i++) {
-						Node node = nodes.item(i);
-						valuesList.add(node);
-					}
-
-					val = Utils.simplifyValue(valuesList);
-					formattingNeeded.set(false);
+				if (val == null) { // otherwise try on complete document
+					val = resolveValueOverXPath(xmlDoc, expr, formattingNeeded);
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -366,6 +354,52 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		}
 
 		return val;
+	}
+
+	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr, AtomicBoolean formattingNeeded)
+			throws XPathExpressionException {
+		Object val = null;
+		NodeList nodes = null;
+		try {
+			nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+		} catch (XPathException exc) {
+			val = expr.evaluate(xmlDoc);
+		}
+
+		int length = nodes == null ? 0 : nodes.getLength();
+
+		if (length > 0) {
+			List<Object> valuesList = new ArrayList<>(length);
+			for (int i = 0; i < length; i++) {
+				Node node = nodes.item(i);
+				valuesList.add(node);
+			}
+
+			val = Utils.simplifyValue(valuesList);
+			formattingNeeded.set(false);
+		}
+
+		return val;
+	}
+
+	private Document cropDocumentForNode(Node xmlDoc) throws ParseException {
+		if (xmlDoc.getParentNode() != null) { // if node is not document root node
+			try {
+				Document nodeXmlDoc = builder.newDocument();
+				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
+				nodeXmlDoc.appendChild(importedNode);
+
+				return nodeXmlDoc;
+			} catch (Exception exc) {
+				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityXmlParser.xmlDocument.parse.error"), 0);
+				pe.initCause(exc);
+
+				throw pe;
+			}
+		}
+
+		return null;
 	}
 
 	/**

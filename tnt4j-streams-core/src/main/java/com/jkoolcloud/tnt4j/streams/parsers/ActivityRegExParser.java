@@ -56,8 +56,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	protected Pattern pattern = null;
 
 	/**
-	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data from which to
-	 * extract its value.
+	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data, cached
+	 * activity data or stream properties from which to extract its value.
 	 */
 	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<>();
 
@@ -229,7 +229,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			throw pe;
 		}
 
-		postParse(ai, stream, data);
+		postParse(ai, stream, matcher);
 
 		return ai;
 	}

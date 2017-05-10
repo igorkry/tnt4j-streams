@@ -707,6 +707,87 @@
                 </xs:annotation>
             </xs:enumeration>
 
+            <xs:enumeration value="ArchType">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define zipped stream processed archive type (i.e. ZIP, GZIP, JAR).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="BufferSize">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define buffered stream buffer max. capacity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="BufferOfferTimeout">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define buffered stream buffer element offer timeout value in seconds.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="FilePolling">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that stream should run in file polling mode.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="RestoreState">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that stream should restore streaming state after (re)start (i.e continue from last streamed
+                        file line).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="StartServer">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that stream should start as server (i.e. Kafka server) if stream supports both client and server
+                        modes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="InputCloseable">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that stream should close input after streaming is complete.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="RangeToStream">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define streamed activity data range (i.e. file lines or sheet rows) from:to.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="StreamCacheMaxSize">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define stream used cache max. capacity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="StreamCacheExpireDuration">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to define stream used cache entries expiration duration in minutes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
@@ -790,6 +871,22 @@
                 </xs:annotation>
             </xs:enumeration>
 
+            <xs:enumeration value="LocPathDelim">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property to defile locator path delimiter for a nested structures (i.e. maps).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="UseActivityDataAsMessageForUnset">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that activity RAW data shall be put into 'Message' field of activity entity if no custom mapping
+                        for that field is defined.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
@@ -1484,6 +1581,14 @@
             </xs:annotation>
         </xs:attribute>
 
+        <xs:attribute name="formattingPattern" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    String representation formatting pattern of multiple raw activity values concatenated into field.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
         <xs:attribute name="transparent" use="optional" type="xs:boolean">
             <xs:annotation>
                 <xs:documentation>
@@ -1626,6 +1731,12 @@
 
     <!-- Element <parser> definition -->
     <xs:complexType name="Parser">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a parser to extract activity elements from a string identifying an activity.
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:sequence>
             <xs:element name="property" type="ParserProperty" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
@@ -1684,8 +1795,73 @@
         </xs:attribute>
     </xs:complexType>
 
+    <!-- Element <cache> definition -->
+    <xs:complexType name="Cache">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a stream cache entries patterns.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:sequence>
+            <xs:element name="entry" type="CacheEntry" minOccurs="1" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines a stream cache entry key and values patterns.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Element <entry> definition -->
+    <xs:complexType name="CacheEntry">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a stream cache entry key and values patterns.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:sequence>
+            <xs:element name="key" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines cache entry key pattern.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string"/>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="value" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines cache entry value pattern.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string"/>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="id" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Cache entry identifier.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
     <!-- Element <stream> definition -->
     <xs:complexType name="Stream">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a activity elements RAW data input stream.
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:sequence>
             <xs:element name="property" type="StreamProperty" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
@@ -1732,6 +1908,15 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+
+            <xs:element name="cache" type="Cache" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines a stream cache entries patterns.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
         </xs:sequence>
 
         <xs:attributeGroup ref="EntityAttributeGroup">
@@ -1888,6 +2073,18 @@
             <xs:selector xpath="stream/reference"/>
             <xs:field xpath="@name"/>
         </xs:keyref>
+
+        <!-- Make sure <cache> entries identifiers are unique -->
+        <xs:key name="UniqueCacheEntryId">
+            <xs:selector xpath="cache/entry"/>
+            <xs:field xpath="@id"/>
+        </xs:key>
+
+        <!-- Make sure Cache type <locator> points to valid <entry> id -->
+        <!--<xs:keyref name="ValidFieldCacheLocatorRef" refer="UniqueCacheEntryId">-->
+        <!--<xs:selector xpath="parser/field[@locator-type='Cache']"/>-->
+        <!--<xs:field xpath="@locator"/>-->
+        <!--</xs:keyref>-->
     </xs:element>
 
 </xs:schema>

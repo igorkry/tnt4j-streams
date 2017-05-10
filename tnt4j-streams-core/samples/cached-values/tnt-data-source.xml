@@ -7,8 +7,16 @@
         <property name="ReadLines" value="false"/>
 
         <field name="EventType" value="EVENT"/>
-        <field name="LastEvent" locator="EventName" locator-type="Cache"/>
-        <field name="EventName" locator="$.event" locator-type="Label" cacheKey="EventName"/>
+
+        <field name="EventName" locator="$.event" locator-type="Label"/>
+        <field name="LastEvent" locator="CachedEventName" locator-type="Cache"/>
+
+        <field name="Corelator" locator="$.transaction" locator-type="Label"/>
+        <field name="Transaction" locator="$.transaction" locator-type="Label"/>
+
+        <field name="SecretValue" locator="$.secret" locator-type="Label"/>
+        <field name="LastSecret" locator="SecretCache" locator-type="Cache"/>
+
         <field name="Message" locator="$.message" locator-type="Label"/>
         <field name="Resource" locator="$.resource" locator-type="Label"/>
     </parser>
@@ -20,6 +28,17 @@
         <property name="StreamCacheExpireDuration" value="15"/>
 
         <parser-ref name="EventParser"/>
+
+        <cache>
+            <entry id="CachedEventName">
+                <key>EventName</key>
+                <value>${EventName} in ${Transaction}</value>
+            </entry>
+            <entry id="SecretCache">
+                <key>${Transaction}Secret</key>
+                <value>${SecretValue}</value>
+            </entry>
+        </cache>
     </stream>
 
 </tnt-data-source>

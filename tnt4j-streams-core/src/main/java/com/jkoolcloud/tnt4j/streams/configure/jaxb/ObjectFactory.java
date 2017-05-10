@@ -119,6 +119,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link CacheEntry }
+	 *
+	 */
+	public CacheEntry createCacheEntry() {
+		return new CacheEntry();
+	}
+
+	/**
 	 * Create an instance of {@link FieldMap }
 	 * 
 	 */
@@ -132,6 +140,14 @@ public class ObjectFactory {
 	 */
 	public FieldTransform createFieldTransform() {
 		return new FieldTransform();
+	}
+
+	/**
+	 * Create an instance of {@link Cache }
+	 *
+	 */
+	public Cache createCache() {
+		return new Cache();
 	}
 
 	/**

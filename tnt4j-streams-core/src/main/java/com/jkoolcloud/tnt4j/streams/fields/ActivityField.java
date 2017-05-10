@@ -51,12 +51,12 @@ public class ActivityField extends AbstractFieldEntity {
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String separator = DEFAULT_FIELD_VALUES_DELIM;
+	private String formattingPattern = null;
 	private Set<ParserReference> stackedParsers;
 	private boolean transparent = false;
 	private boolean splitCollection = false;
 	private String valueType = null;
-	private String cacheEntryKey = null;
-	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
+	private Map<String, ActivityFieldLocator> dynamicLocators = null;
 
 	private ActivityFieldLocator groupLocator;
 
@@ -183,11 +183,11 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	private void addDynamicLocator(String id, ActivityFieldLocator locator) {
-		if (dynamicAttrLocators == null) {
-			dynamicAttrLocators = new HashMap<>();
+		if (dynamicLocators == null) {
+			dynamicLocators = new HashMap<>();
 		}
 
-		dynamicAttrLocators.put(id, locator);
+		dynamicLocators.put(id, locator);
 	}
 
 	private void addStaticLocator(ActivityFieldLocator locator) {
@@ -196,6 +196,34 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		locators.add(locator);
+	}
+
+	/**
+	 * Checks whether any of field static or dynamic locators has type 'Cache'.
+	 *
+	 * @return {@code true} if any of field static or dynamic locators has type 'Cache', {@code false} - otherwise.
+	 */
+	public boolean hasCacheLocators() {
+		return hasCacheLocators(locators) || (dynamicLocators != null && hasCacheLocators(dynamicLocators.values()));
+	}
+
+	/**
+	 * Checks whether any locator form from provided collection has type 'Cache'.
+	 *
+	 * @param locators
+	 *            collection of locators to check
+	 * @return {@code true} if any of locators has type 'Cache', {@code false} - otherwise.
+	 */
+	protected static boolean hasCacheLocators(Collection<ActivityFieldLocator> locators) {
+		if (locators != null) {
+			for (ActivityFieldLocator afl : locators) {
+				if (afl.getBuiltInType() == ActivityFieldLocatorType.Cache) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -278,6 +306,31 @@ public class ActivityField extends AbstractFieldEntity {
 	 */
 	public ActivityField setSeparator(String locatorSep) {
 		this.separator = locatorSep;
+
+		return this;
+	}
+
+	/**
+	 * Gets the string representation formatting pattern of multiple raw activity values concatenated into the converted
+	 * value for this field.
+	 *
+	 * @return the string being used to format raw values
+	 */
+	public String getFormattingPattern() {
+		return formattingPattern;
+	}
+
+	/**
+	 * Sets the string representation formatting pattern of multiple raw activity values concatenated into the converted
+	 * value for this field.
+	 *
+	 * @param pattern
+	 *            the string to use to format raw values
+	 *
+	 * @return instance of this activity field
+	 */
+	public ActivityField setFormattingPattern(String pattern) {
+		this.formattingPattern = pattern;
 
 		return this;
 	}
@@ -434,7 +487,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return the dynamic attribute values locators map
 	 */
 	public Map<String, ActivityFieldLocator> getDynamicLocators() {
-		return dynamicAttrLocators;
+		return dynamicLocators;
 	}
 
 	/**
@@ -443,7 +496,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return {@code true} if field has any dynamic locators defined, {@code false} - otherwise
 	 */
 	public boolean isDynamic() {
-		return MapUtils.isNotEmpty(dynamicAttrLocators);
+		return MapUtils.isNotEmpty(dynamicLocators);
 	}
 
 	/**
@@ -497,7 +550,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 *         otherwise
 	 */
 	public boolean hasDynamicLocator(String dLocIdVar) {
-		return dynamicAttrLocators != null && dynamicAttrLocators.containsKey(dLocIdVar);
+		return dynamicLocators != null && dynamicLocators.containsKey(dLocIdVar);
 	}
 
 	/**
@@ -539,7 +592,7 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	private static List<ActivityFieldLocator> getTempFieldLocators(List<ActivityFieldLocator> locators, int index) {
-		if (CollectionUtils.isEmpty(locators) || locators.size() == 1) {
+		if (CollectionUtils.size(locators) <= 1) {
 			return locators;
 		}
 
@@ -578,34 +631,6 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		return value;
-	}
-
-	/**
-	 * Sets cache entry key to store resolved field value.
-	 * 
-	 * @param cacheKey
-	 *            cache entry key
-	 */
-	public void setCached(String cacheKey) {
-		this.cacheEntryKey = cacheKey;
-	}
-
-	/**
-	 * Gets cache entry key to store resolved field value.
-	 * 
-	 * @return cache entry key
-	 */
-	public String getCacheEntryKey() {
-		return cacheEntryKey;
-	}
-
-	/**
-	 * Checks if field has cache entry key defined to store resolved value.
-	 * 
-	 * @return {@code true} if field has cache entry key defined to store resolved value, {@code false} - otherwise
-	 */
-	public boolean isCached() {
-		return !StringUtils.isEmpty(cacheEntryKey);
 	}
 
 	public static class ParserReference {

@@ -159,7 +159,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 				fields.length);
 
 		ActivityInfo ai = parsePreparedItem(stream, dataStr, fields);
-		postParse(ai, stream, data);
+		postParse(ai, stream, fields);
 
 		return ai;
 	}

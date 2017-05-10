@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.net.InetAddress;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +33,10 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
-import com.jkoolcloud.tnt4j.streams.utils.*;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
@@ -50,6 +54,7 @@ public class ActivityInfo {
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<>();
 	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
 	private static final String LOCAL_SERVER_IP_KEY = "LOCAL_SERVER_IP_KEY"; // NON-NLS
+	private static final String TRANSPARENT_PROP_TYPE = "<TRANSPARENT>"; // NON-NLS
 
 	private String serverName = null;
 	private String serverIp = null;
@@ -160,16 +165,10 @@ public class ActivityInfo {
 		fieldValue = transform(field, fieldValue);
 		fieldValue = filterFieldValue(field, fieldValue);
 
-		if (field.isCached()) {
-			StreamsCache.cacheValue(field.getCacheEntryKey(), fieldValue);
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.caching.field.value"),
-					field, field.getCacheEntryKey(), Utils.toString(fieldValue));
-		}
-
 		if (!field.isTransparent()) {
 			setFieldValue(field, fieldValue);
+		} else {
+			addActivityProperty(field.getFieldTypeName(), fieldValue, TRANSPARENT_PROP_TYPE);
 		}
 	}
 
@@ -259,9 +258,6 @@ public class ActivityInfo {
 					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
 				} catch (Exception e) {
 				}
-				break;
-			case ResourceName:
-				value = getStringValue(value, field);
 				break;
 			case ServerIp:
 				if (value instanceof InetAddress) {
@@ -474,7 +470,20 @@ public class ActivityInfo {
 
 	private static String getStringValue(Object value, ActivityField field) {
 		if (value instanceof Object[]) {
-			Object[] vArray = (Object[]) value;
+			return formatValuesArray((Object[]) value, field);
+		} else if (value instanceof byte[]) {
+			Utils.encodeHex((byte[]) value);
+		} else if (value != null && value.getClass().isArray()) {
+			return ArrayUtils.toString(value);
+		}
+
+		return Utils.toString(value);
+	}
+
+	private static String formatValuesArray(Object[] vArray, ActivityField field) {
+		if (StringUtils.isNotEmpty(field.getFormattingPattern())) {
+			return MessageFormat.format(field.getFormattingPattern(), vArray);
+		} else {
 			StringBuilder sb = new StringBuilder();
 			for (int v = 0; v < vArray.length; v++) {
 				if (v > 0) {
@@ -495,13 +504,7 @@ public class ActivityInfo {
 			}
 
 			return sb.toString();
-		} else if (value instanceof byte[]) {
-			Utils.encodeHex((byte[]) value);
-		} else if (value != null && value.getClass().isArray()) {
-			return ArrayUtils.toString(value);
 		}
-
-		return Utils.toString(value);
 	}
 
 	/**
@@ -770,11 +773,13 @@ public class ActivityInfo {
 		event.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				if (ape.getValue().getValue() instanceof Snapshot) {
-					event.getOperation().addSnapshot((Snapshot) ape.getValue().getValue());
-				} else {
-					event.getOperation().addProperty(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					if (ap.getValue() instanceof Snapshot) {
+						event.getOperation().addSnapshot((Snapshot) ap.getValue());
+					} else {
+						event.getOperation().addProperty(ap);
+					}
 				}
 			}
 		}
@@ -861,11 +866,13 @@ public class ActivityInfo {
 		activity.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				if (ape.getValue().getValue() instanceof Trackable) {
-					activity.add((Trackable) ape.getValue().getValue());
-				} else {
-					activity.addProperty(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					if (ap.getValue() instanceof Trackable) {
+						activity.add((Trackable) ap.getValue());
+					} else {
+						activity.addProperty(ap);
+					}
 				}
 			}
 		}
@@ -1011,12 +1018,18 @@ public class ActivityInfo {
 		}
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				snapshot.add(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					snapshot.add(ap);
+				}
 			}
 		}
 
 		return snapshot;
+	}
+
+	private static boolean isNotTransparentProperty(Property prop) {
+		return prop != null && !prop.getValueType().equals(TRANSPARENT_PROP_TYPE);
 	}
 
 	/**
@@ -1608,7 +1621,7 @@ public class ActivityInfo {
 		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
 		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
 		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
-		sb.append('}');
+		sb.append('}'); // NON-NLS
 		return sb.toString();
 	}
 
@@ -1684,7 +1697,7 @@ public class ActivityInfo {
 						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", fieldName));
 			}
 		} catch (IllegalArgumentException exc) {
-			Property p = activityProperties.get(fieldName);
+			Property p = activityProperties == null ? null : activityProperties.get(fieldName);
 
 			return p == null ? null : p.getValue();
 		}

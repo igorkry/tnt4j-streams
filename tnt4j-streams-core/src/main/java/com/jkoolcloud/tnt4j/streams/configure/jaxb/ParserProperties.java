@@ -40,6 +40,8 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="StripHeaders"/>
  *     &lt;enumeration value="Namespace"/>
  *     &lt;enumeration value="ReadLines"/>
+ *     &lt;enumeration value="LocPathDelim"/>
+ *     &lt;enumeration value="UseActivityDataAsMessageForUnset"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -47,7 +49,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "ParserProperties")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 public enum ParserProperties {
 
 	/**
@@ -129,7 +131,26 @@ public enum ParserProperties {
 	 * 
 	 */
 	@XmlEnumValue("ReadLines")
-	READ_LINES("ReadLines");
+	READ_LINES("ReadLines"),
+
+	/**
+	 *
+	 * Property to defile locator path delimiter for a nested structures (i.e. maps).
+	 *
+	 *
+	 */
+	@XmlEnumValue("LocPathDelim")
+	LOC_PATH_DELIM("LocPathDelim"),
+
+	/**
+	 *
+	 * Property indicates that activity RAW data shall be put into 'Message' field of activity entity if no custom
+	 * mapping for that field is defined.
+	 *
+	 *
+	 */
+	@XmlEnumValue("UseActivityDataAsMessageForUnset")
+	USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET("UseActivityDataAsMessageForUnset");
 	private final String value;
 
 	ParserProperties(String v) {

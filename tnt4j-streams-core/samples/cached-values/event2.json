@@ -1,5 +1,7 @@
 {
-    "event": "Event2",
-    "message": "Second event",
-    "resource": "eventSecond.json"
+    "event": "Event21",
+    "message": "First event",
+    "resource": "event2.json",
+    "secret": "do not tell anyone about me either",
+    "transaction": "2"
 }

@@ -50,6 +50,7 @@ import javax.xml.bind.annotation.XmlType;
  *                     &lt;/complexContent>
  *                   &lt;/complexType>
  *                 &lt;/element>
+ *                 &lt;element name="cache" type="{}Cache" maxOccurs="unbounded" minOccurs="0"/>
  *               &lt;/sequence>
  *               &lt;attGroup ref="{}EntityAttributeGroup"/>
  *             &lt;/restriction>
@@ -68,10 +69,10 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Stream", propOrder = { "scenario" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 public class Stream extends OriginalStream {
 
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Scenario scenario;
 
 	/**
@@ -80,7 +81,7 @@ public class Stream extends OriginalStream {
 	 * @return possible object is {@link Scenario }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	public Scenario getScenario() {
 		return scenario;
 	}
@@ -92,7 +93,7 @@ public class Stream extends OriginalStream {
 	 *            allowed object is {@link Scenario }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setScenario(Scenario value) {
 		this.scenario = value;
 	}

@@ -47,6 +47,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;attGroup ref="{}FieldLocatorAttributes"/>
  *       &lt;attribute name="name" use="required" type="{}FieldNamesAll" />
  *       &lt;attribute name="separator" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="formattingPattern" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="transparent" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="value-type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="split" type="{http://www.w3.org/2001/XMLSchema}boolean" />
@@ -82,6 +83,9 @@ public class Field {
 	@XmlAttribute(name = "separator")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String separator;
+	@XmlAttribute(name = "formattingPattern")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String formattingPattern;
 	@XmlAttribute(name = "transparent")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Boolean transparent;
@@ -390,6 +394,29 @@ public class Field {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setSeparator(String value) {
 		this.separator = value;
+	}
+
+	/**
+	 * Gets the value of the formattingPattern property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getFormatPattern() {
+		return formattingPattern;
+	}
+
+	/**
+	 * Sets the value of the formattingPattern property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setFormatPattern(String value) {
+		this.formattingPattern = value;
 	}
 
 	/**
