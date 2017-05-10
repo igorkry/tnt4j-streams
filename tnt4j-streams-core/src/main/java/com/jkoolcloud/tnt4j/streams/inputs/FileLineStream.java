@@ -266,7 +266,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
-				File prevFile = availableFiles == null || availableFiles.length < 2 ? null
+				File prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
 				if (prevFile != null) {

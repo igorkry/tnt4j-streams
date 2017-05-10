@@ -344,7 +344,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				availableFiles = searchFiles(filePath, fs);
 				updateDataTotals(availableFiles, fs);
 
-				Path prevFile = availableFiles == null || availableFiles.length < 2 ? null
+				Path prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
 				if (prevFile != null) {

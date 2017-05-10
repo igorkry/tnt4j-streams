@@ -92,7 +92,7 @@
             <artifactId>mq</artifactId>
             <version>${ibm.mq.version}</version>
             <type>pom</type>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>javax.resource</groupId>
             <artifactId>javax.resource-api</artifactId>
