@@ -366,6 +366,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *             if exception occurs applying field locator resolved cached value
 	 */
 	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
+		if(ai == null) return;
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
