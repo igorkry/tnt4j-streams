@@ -195,18 +195,18 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param nameValues
+	 * @param cData
 	 *            activity object name/value pairs map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, String> nameValues,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		val = nameValues.get(locStr); // NOTE: locStr == null?
+		val = cData.getData().get(locStr); // NOTE: locStr == null?
 
 		return val;
 	}

@@ -220,7 +220,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param jsonDocContext
+	 * @param cData
 	 *            {@link JsonPath} document context to read
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -234,7 +234,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, DocumentContext jsonDocContext,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
@@ -246,7 +246,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 			Object jsonValue = null;
 			try {
-				jsonValue = jsonDocContext.read(locStr);
+				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
 				logger().log(
 						!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources

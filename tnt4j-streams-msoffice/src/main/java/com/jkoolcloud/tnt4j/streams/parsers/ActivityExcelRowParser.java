@@ -99,7 +99,7 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param row
+	 * @param cData
 	 *            MS Excel document row representing activity object data fields
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -109,10 +109,11 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Row row, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Row row = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			int cellIndex = CellReference.convertColStringToIndex(locStr);

@@ -204,20 +204,34 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return {@code true} if any of field static or dynamic locators has type 'Cache', {@code false} - otherwise.
 	 */
 	public boolean hasCacheLocators() {
-		return hasCacheLocators(locators) || (dynamicLocators != null && hasCacheLocators(dynamicLocators.values()));
+		return hasLocatorsOfType(ActivityFieldLocatorType.Cache);
 	}
 
 	/**
-	 * Checks whether any locator form from provided collection has type 'Cache'.
+	 * Checks whether any of field static or dynamic locators has type {@code lType}.
 	 *
-	 * @param locators
-	 *            collection of locators to check
-	 * @return {@code true} if any of locators has type 'Cache', {@code false} - otherwise.
+	 * @param lType
+	 *            locator type
+	 * @return {@code true} if any of field static or dynamic locators has type {@code lType}, {@code false} -
+	 *         otherwise.
 	 */
-	protected static boolean hasCacheLocators(Collection<ActivityFieldLocator> locators) {
+	public boolean hasLocatorsOfType(ActivityFieldLocatorType lType) {
+		return hasLocatorsOfType(locators, lType)
+				|| (dynamicLocators != null && hasLocatorsOfType(dynamicLocators.values(), lType));
+	}
+
+	/**
+	 * Checks whether any of provided locators has type {@code lType}.
+	 *
+	 * @param lType
+	 *            locator type
+	 * @return {@code true} if any of provided locators has type {@code lType}, {@code false} - otherwise.
+	 */
+	protected static boolean hasLocatorsOfType(Collection<ActivityFieldLocator> locators,
+			ActivityFieldLocatorType lType) {
 		if (locators != null) {
 			for (ActivityFieldLocator afl : locators) {
-				if (afl.getBuiltInType() == ActivityFieldLocatorType.Cache) {
+				if (afl.getBuiltInType() == lType) {
 					return true;
 				}
 			}

@@ -169,17 +169,18 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param fields
+	 * @param cData
 	 *            activity object data fields array
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
+		String[] fields = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			int loc = Integer.parseInt(locStr);

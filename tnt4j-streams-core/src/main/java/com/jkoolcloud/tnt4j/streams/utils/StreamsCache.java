@@ -38,8 +38,6 @@ public class StreamsCache {
 	private static final long DEFAULT_CACHE_MAX_SIZE = 100;
 	private static final long DEFAULT_CACHE_EXPIRE_IN_MINUTES = 10;
 
-	private static final String PARSER_NAME_VAR = "${ParserName}"; // NON-NLS
-
 	private static Cache<String, Object> valuesCache;
 	private static Map<String, CacheEntry> cacheEntries = new HashMap<>();
 
@@ -87,36 +85,18 @@ public class StreamsCache {
 		List<String> vars = new ArrayList<>();
 		Utils.resolveCfgVariables(vars, pattern);
 
-		return fillInPattern(pattern, vars, ai, parserName);
+		return Utils.fillInPattern(pattern, vars, ai, parserName);
 	}
 
 	private static Object fillInValuePattern(String pattern, ActivityInfo ai, String parserName) {
 		List<String> vars = new ArrayList<>();
 		Utils.resolveCfgVariables(vars, pattern);
 
-		return vars.size() == 1 ? getActivityValue(vars.get(0), ai) : fillInPattern(pattern, vars, ai, parserName);
+		return vars.size() == 1 ? getActivityValue(vars.get(0), ai)
+				: Utils.fillInPattern(pattern, vars, ai, parserName);
 	}
 
-	private static String fillInPattern(String pattern, List<String> vars, ActivityInfo ai, String parserName) {
-		String filledInValue = pattern;
-
-		for (String var : vars) {
-			Object fieldValue;
-			if (var.equals(PARSER_NAME_VAR)) {
-				fieldValue = parserName;
-			} else {
-				fieldValue = getActivityValue(var, ai);
-			}
-
-			if (fieldValue != null) {
-				filledInValue = filledInValue.replace(var, Utils.toString(fieldValue));
-			}
-		}
-
-		return filledInValue;
-	}
-
-	private static Object getActivityValue(String var, ActivityInfo ai) {
+	static Object getActivityValue(String var, ActivityInfo ai) {
 		String varKey = var.substring(2, var.length() - 1);
 		return ai.getFieldValue(varKey);
 	}

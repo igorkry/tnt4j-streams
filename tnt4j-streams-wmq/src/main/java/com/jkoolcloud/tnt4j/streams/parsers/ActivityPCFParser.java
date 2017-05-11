@@ -121,7 +121,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param data
+	 * @param cData
 	 *            PCF message representing activity object data
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -131,12 +131,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, PCFContent data, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getParamValue(locator.getDataType(), path, data, 0);
+		val = getParamValue(locator.getDataType(), path, cData.getData(), 0);
 
 		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 				"ActivityPCFParser.resolved.pcf.value"), locStr, toString(val));

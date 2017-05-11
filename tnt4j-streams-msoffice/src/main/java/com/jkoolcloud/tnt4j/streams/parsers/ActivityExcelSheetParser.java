@@ -101,7 +101,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param sheet
+	 * @param cData
 	 *            MS Excel document sheet representing activity object data fields
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -111,10 +111,11 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Sheet sheet, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Sheet sheet = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			CellReference ref = new CellReference(locStr);

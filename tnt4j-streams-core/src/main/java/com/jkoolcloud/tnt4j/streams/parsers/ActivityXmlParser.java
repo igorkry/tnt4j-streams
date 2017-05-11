@@ -242,6 +242,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
+		ContextData cData = new ContextData(xmlDoc, stream, ai);
 		try {
 			String[] savedFormats = null;
 			String[] savedUnits = null;
@@ -249,10 +250,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			// apply fields for parser
 			Object[] values;
 			for (ActivityField aField : fieldList) {
-				if (aField.hasCacheLocators()) {
-					continue;
-				}
-
 				values = null;
 				field = aField;
 				List<ActivityFieldLocator> locators = field.getLocators();
@@ -265,7 +262,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						savedLocales = new String[locators.size()];
 					}
 
-					values = parseLocatorValues(locators, stream, xmlDoc);
+					values = parseLocatorValues(locators, cData);
 					for (int li = 0; li < locators.size(); li++) {
 						ActivityFieldLocator loc = locators.get(li);
 						savedFormats[li] = loc.getFormat();
@@ -286,7 +283,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						}
 					}
 				}
-				applyFieldValue(stream, ai, field, Utils.simplifyValue(values), xmlDoc);
+				applyFieldValue(field, Utils.simplifyValue(values), cData);
 				if (locators != null && savedFormats != null) {
 					for (int li = 0; li < locators.size(); li++) {
 						ActivityFieldLocator loc = locators.get(li);
@@ -315,7 +312,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param xmlDoc
+	 * @param cData
 	 *            activity object XML DOM document
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -328,10 +325,18 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Node xmlDoc, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Node xmlDoc = cData.getData();
+
+		if (ActivityField.isDynamicAttr(locStr)) {
+			ActivityInfo ai = cData.getActivity();
+			List<String> vars = new ArrayList<>();
+			Utils.resolveCfgVariables(vars, locStr);
+			locStr = Utils.fillInPattern(locStr, vars, ai, this.getName());
+		}
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			Document nodeDocument = cropDocumentForNode(xmlDoc);

@@ -180,19 +180,20 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				}
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.found.matches"), matches.size());
+				ContextData cData = new ContextData(matches, stream, ai);
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-					value = Utils.simplifyValue(parseLocatorValues(locations, stream, matches));
+					value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 					if (value != null) {
 						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityRegExParser.setting.field"), field);
 					}
 
-					applyFieldValue(stream, ai, field, value, data);
+					applyFieldValue(field, value, cData);
 				}
 			}
 		} catch (Exception e) {
@@ -203,18 +204,19 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		}
 		try {
 			Object value;
+			ContextData cData = new ContextData(matcher, stream, ai);
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
 				field = fieldMapEntry.getKey();
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-				value = Utils.simplifyValue(parseLocatorValues(locations, stream, matcher));
+				value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 				if (value != null) {
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.setting.group.field"), field);
 				}
 
-				applyFieldValue(stream, ai, field, value, data);
+				applyFieldValue(field, value, cData);
 			}
 
 			if (useActivityAsMessage && ai.getMessage() == null) {
@@ -239,7 +241,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param regexData
+	 * @param cData
 	 *            RegEx data package - {@link Matcher} or {@link ArrayList} of matches
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -247,10 +249,11 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object regexData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Object regexData = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			int loc = Integer.parseInt(locStr);

@@ -125,18 +125,19 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param dataObj
+	 * @param cData
 	 *            activity data carrier object
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object dataObj, AtomicBoolean formattingNeeded) {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getFieldValue(path, dataObj, 0);
+		val = getFieldValue(path, cData.getData(), 0);
 
 		return val;
 	}

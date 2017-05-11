@@ -142,19 +142,19 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * 
 	 * @param locator
 	 *            activity field locator
-	 * @param dataMap
+	 * @param cData
 	 *            activity object data map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, ?> dataMap,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, nodePathDelim);
-		val = getNode(path, dataMap, 0);
+		val = getNode(path, cData.getData(), 0);
 
 		return val;
 	}

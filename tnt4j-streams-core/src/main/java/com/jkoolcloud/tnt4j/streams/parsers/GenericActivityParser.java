@@ -366,8 +366,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *             if exception occurs applying field locator resolved cached value
 	 */
 	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
-		resolveCachedValues(stream, ai, data);
-
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
@@ -402,18 +400,15 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
+		ContextData cData = new ContextData(data, stream, ai);
 		try {
 			// apply fields for parser
 			Object value;
 			for (ActivityField aField : fieldList) {
-				if (aField.hasCacheLocators()) {
-					continue;
-				}
-
 				field = aField;
-				value = Utils.simplifyValue(parseLocatorValues(field, stream, data));
+				value = Utils.simplifyValue(parseLocatorValues(field, cData));
 
-				applyFieldValue(stream, ai, field, value, data);
+				applyFieldValue(field, value, cData);
 			}
 
 			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
@@ -434,33 +429,30 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	/**
 	 * Sets the value for the field in the specified activity entity. Depending on field definition if it is dynamic or
 	 * resolved collection value has to be split, value is applied in dynamic manner using
-	 * {@link #applyDynamicValue(TNTInputStream, Object, ActivityInfo, ActivityField, Object)} method. In all other
-	 * cases {@link #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)} is invoked.
+	 * {@link #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData, com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object)}
+	 * method. In all other cases {@link #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)} is
+	 * invoked.
 	 *
-	 * @param stream
-	 *            parent stream
-	 * @param ai
-	 *            activity object whose field is to be set
 	 * @param field
 	 *            field to apply value to
 	 * @param value
 	 *            value to apply for this field
-	 * @param data
-	 *            prepared activity data item to parse dynamic values
+	 * @param cData
+	 *            parsing context data package
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 *
-	 * @see #applyDynamicValue(TNTInputStream, Object, ActivityInfo, ActivityField, Object)
+	 * @see #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData,
+	 *      com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object)
 	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
 	 */
-	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value,
-			T data) throws ParseException {
+	protected void applyFieldValue(ActivityField field, Object value, ContextData cData) throws ParseException {
 		if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
-			applyDynamicValue(stream, data, ai, field, value);
+			applyDynamicValue(cData, field, value);
 		} else {
-			applyFieldValue(stream, ai, field, value);
+			applyFieldValue(cData.getStream(), cData.getActivity(), field, value);
 		}
 	}
 
@@ -492,12 +484,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * field can be parsed by stacked parser, can be merged or added as a child into specified (parent) activity
 	 * depending on stacked parser reference 'aggregation' attribute value.
 	 *
-	 * @param stream
-	 *            parent stream
-	 * @param data
-	 *            prepared activity data item to parse dynamic values
-	 * @param ai
-	 *            activity object whose field is to be set
+	 * @param cData
+	 *            parsing context data package
 	 * @param field
 	 *            field to apply value to
 	 * @param value
@@ -509,9 +497,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
 	 */
-	protected void applyDynamicValue(TNTInputStream<?, ?> stream, T data, ActivityInfo ai, ActivityField field,
-			Object value) throws ParseException {
-		Map<String, Object> dValMap = parseDynamicValues(stream, data, field.getDynamicLocators());
+	protected void applyDynamicValue(ContextData cData, ActivityField field, Object value) throws ParseException {
+		Map<String, Object> dValMap = parseDynamicValues(cData, field.getDynamicLocators());
 
 		Object[] fValues = Utils.makeArray(value);
 
@@ -527,7 +514,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			ActivityField tField = tFieldsList.get(tfi);
 			Object fValue = fValues[tfi];
 
-			applyFieldValue(stream, ai, tField, Utils.simplifyValue(fValue));
+			applyFieldValue(cData.getStream(), cData.getActivity(), tField, Utils.simplifyValue(fValue));
 		}
 	}
 
@@ -563,18 +550,15 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @param field
 	 *            field instance to get locators
-	 * @param stream
-	 *            stream providing activity data
-	 * @param data
-	 *            prepared activity data item to parse
+	 * @param cData
+	 *            parsing context data package
 	 * @return field locators parsed values array
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
-	 * @see #parseLocatorValues(List, TNTInputStream, Object)
+	 * @see #parseLocatorValues(java.util.List, com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData)
 	 */
-	protected Object[] parseLocatorValues(ActivityField field, TNTInputStream<?, ?> stream, T data)
-			throws ParseException {
-		return parseLocatorValues(field.getLocators(), stream, data);
+	protected Object[] parseLocatorValues(ActivityField field, ContextData cData) throws ParseException {
+		return parseLocatorValues(field.getLocators(), cData);
 	}
 
 	/**
@@ -582,20 +566,18 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @param locators
 	 *            value locators list
-	 * @param stream
-	 *            stream providing activity data
-	 * @param data
-	 *            prepared activity data item to parse
+	 * @param cData
+	 *            parsing context data package
 	 * @return locators parsed values array
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 */
-	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, TNTInputStream<?, ?> stream, T data)
+	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, ContextData cData)
 			throws ParseException {
 		if (locators != null) {
 			Object[] values = new Object[locators.size()];
 			for (int li = 0; li < locators.size(); li++) {
-				values[li] = getLocatorValue(stream, locators.get(li), data);
+				values[li] = getLocatorValue(locators.get(li), cData);
 			}
 			return values;
 		}
@@ -603,12 +585,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return null;
 	}
 
-	private Map<String, Object> parseDynamicValues(TNTInputStream<?, ?> stream, T data,
-			Map<String, ActivityFieldLocator> dynamicLocators) throws ParseException {
+	private Map<String, Object> parseDynamicValues(ContextData cData, Map<String, ActivityFieldLocator> dynamicLocators)
+			throws ParseException {
 		Map<String, Object> dynamicValuesMap = new HashMap<>();
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
-				Object lValue = getLocatorValue(stream, dLocator.getValue(), data);
+				Object lValue = getLocatorValue(dLocator.getValue(), cData);
 				final Object dynamicLocatorValue = Utils.simplifyValue(lValue);
 				if (dynamicLocatorValue != null) {
 					dynamicValuesMap.put(dLocator.getKey(), dynamicLocatorValue);
@@ -635,15 +617,33 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
 			throws ParseException {
+		return getLocatorValue(locator, new ContextData(data, stream, null));
+	}
+
+	/**
+	 * Gets field value from raw data location and formats it according locator definition.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param cData
+	 *            parsing context data package
+	 * @return value formatted based on locator definition or {@code null} if locator is not defined
+	 * @throws ParseException
+	 *             if exception occurs applying locator format properties to specified value
+	 * @see ActivityFieldLocator#formatValue(Object)
+	 */
+	protected Object getLocatorValue(ActivityFieldLocator locator, ContextData cData) throws ParseException {
 		Object val = null;
 		if (locator != null) {
 			String locStr = locator.getLocator();
 			AtomicBoolean formattingNeeded = new AtomicBoolean(true);
 			if (StringUtils.isNotEmpty(locStr)) {
 				if (locator.getBuiltInType() == ActivityFieldLocatorType.StreamProp) {
-					val = stream.getProperty(locStr);
+					val = cData.getStream().getProperty(locStr);
+				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
+					val = Utils.simplifyValue(StreamsCache.getValue(cData.getActivity(), locStr, getName()));
 				} else {
-					val = resolveLocatorValue(locator, data, formattingNeeded);
+					val = resolveLocatorValue(locator, cData, formattingNeeded);
 					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityParser.locator.resolved"), locStr, toString(val));
@@ -680,8 +680,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param data
-	 *            activity object data
+	 * @param cData
+	 *            activity object context data package
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
@@ -689,8 +689,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, T data, AtomicBoolean formattingNeeded)
-			throws ParseException;
+	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+			AtomicBoolean formattingNeeded) throws ParseException;
 
 	/**
 	 * Makes string representation of data package to put into log.
@@ -762,44 +762,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Resolves activity item fields values from streams cache stored data.
-	 *
-	 * @param stream
-	 *            stream providing activity data
-	 * @param ai
-	 *            converted activity info
-	 * @param data
-	 *            prepared activity data item to parse
-	 * @throws ParseException
-	 *             if exception occurs applying field locator resolved cached value
-	 */
-	protected void resolveCachedValues(TNTInputStream<?, ?> stream, ActivityInfo ai, T data) throws ParseException {
-		for (ActivityField aField : fieldList) {
-			if (!aField.hasCacheLocators()) {
-				continue;
-			}
-
-			List<ActivityFieldLocator> locators = aField.getLocators();
-			Object[] values = new Object[locators.size()];
-			if (locators != null) {
-				for (int li = 0; li < locators.size(); li++) {
-					ActivityFieldLocator locator = locators.get(li);
-					if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
-						String locStr = locator.getLocator();
-						if (StringUtils.isNotEmpty(locStr)) {
-							values[li] = Utils.simplifyValue(StreamsCache.getValue(ai, locStr, getName()));
-						}
-					} else {
-						values[li] = getLocatorValue(stream, locator, data);
-					}
-
-					applyFieldValue(stream, ai, aField, values, data);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Activity RAW data item prepared to be parsed.
 	 */
 	protected class ItemToParse {
@@ -812,5 +774,30 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		 * Activity RAW data representation to be used as field 'Message' data.
 		 */
 		Object message;
+	}
+
+	protected class ContextData extends HashMap<String, Object> {
+		private static final String RAW_DATA_KEY = "RAW_ACTIVITY_DATA"; // NON-NLS
+		private static final String STREAM_KEY = "STREAM_DATA"; // NON-NLS
+		private static final String ACTIVITY_DATA_KEY = "ACTIVITY_DATA"; // NON-NLS
+
+		protected ContextData(T rawData, TNTInputStream<?, ?> stream, ActivityInfo ai) {
+			put(RAW_DATA_KEY, rawData);
+			put(STREAM_KEY, stream);
+			put(ACTIVITY_DATA_KEY, ai);
+		}
+
+		@SuppressWarnings("unchecked")
+		public T getData() {
+			return (T) get(RAW_DATA_KEY);
+		}
+
+		public TNTInputStream<?, ?> getStream() {
+			return (TNTInputStream<?, ?>) get(STREAM_KEY);
+		}
+
+		public ActivityInfo getActivity() {
+			return (ActivityInfo) get(ACTIVITY_DATA_KEY);
+		}
 	}
 }

@@ -49,6 +49,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.jkoolcloud.tnt4j.core.OpType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 
 /**
@@ -66,6 +67,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
 	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
 	private static final Pattern EXPR_VAR_PATTERN = CFG_VAR_PATTERN;// Pattern.compile("\\$(\\w+)"); // NON-NLS
+	private static final String PARSER_NAME_VAR = "${ParserName}"; // NON-NLS
 
 	/**
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
@@ -1604,5 +1606,35 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		} else {
 			return new File[] { new File(fileName) };
 		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param pattern
+	 * @param vars
+	 * @param ai
+	 * @param parserName
+	 * @return
+	 */
+	public static String fillInPattern(String pattern, List<String> vars, ActivityInfo ai, String parserName) {
+		String filledInValue = pattern;
+
+		for (String var : vars) {
+			Object fieldValue;
+			if (var.equals(PARSER_NAME_VAR)) {
+				fieldValue = parserName;
+			} else {
+				fieldValue = StreamsCache.getActivityValue(var, ai);
+			}
+
+			if (fieldValue != null) {
+				filledInValue = filledInValue.replace(var, toString(fieldValue));
+			} else {
+				filledInValue = "N/A";
+			}
+		}
+
+		return filledInValue;
 	}
 }

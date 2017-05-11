@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -287,7 +288,7 @@ public class ActivityInfo {
 	 * @throws ParseException
 	 *             if there are any errors with conversion to internal format
 	 */
-	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
+	public void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
 		if (isValueEmpty(fieldValue)) {
 			return;
 		}
@@ -482,7 +483,7 @@ public class ActivityInfo {
 
 	private static String formatValuesArray(Object[] vArray, ActivityField field) {
 		if (StringUtils.isNotEmpty(field.getFormattingPattern())) {
-			return MessageFormat.format(field.getFormattingPattern(), vArray);
+			return formatArrayPattern(field.getFormattingPattern(), vArray);
 		} else {
 			StringBuilder sb = new StringBuilder();
 			for (int v = 0; v < vArray.length; v++) {
@@ -505,6 +506,32 @@ public class ActivityInfo {
 
 			return sb.toString();
 		}
+	}
+
+	private static String formatArrayPattern(String pattern, Object[] vArray) {
+		MessageFormat mf = new MessageFormat(pattern);
+
+		try {
+			Field f = mf.getClass().getDeclaredField("maxOffset");
+			f.setAccessible(true);
+			int maxOffset = f.getInt(mf);
+			if (maxOffset >= 0) {
+				f = mf.getClass().getDeclaredField("argumentNumbers");
+				f.setAccessible(true);
+				int[] ana = (int[]) f.get(mf);
+				int maxIndex = ana[maxOffset];
+
+				if (maxIndex >= vArray.length) {
+					LOGGER.log(OpLevel.WARNING,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityInfo.formatting.arguments.mismatch"),
+							pattern, maxIndex, ArrayUtils.getLength(vArray));
+				}
+			}
+		} catch (Exception exc) {
+		}
+
+		return mf.format(vArray);
 	}
 
 	/**
