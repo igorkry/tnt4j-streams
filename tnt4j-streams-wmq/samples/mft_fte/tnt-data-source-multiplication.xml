@@ -21,7 +21,7 @@
 
         <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
 
-        <field name="ResourceName" formattingPattern="{0}={1}@{2}">
+        <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
             <!--resolves FILE or QUEUE-->
             <field-locator locator="name(//*/*)" locator-type="Label">
                 <field-map source="file" target="FILE"/>
@@ -74,8 +74,8 @@
 
         <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
         <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
-        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
-        <field name="MFT_DST_QUEUE_NAME" locator="ts:getFileName(transaction/transferSet/item/destination/queue)" locator-type="Label"/>
+        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
+        <field name="MFT_DST_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue)" locator-type="Label"/>
 
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
