@@ -26,6 +26,7 @@ import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionResolver;
 
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName;
+import com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName;
 
 /**
  * General XML utility methods used by TNT4J-Streams.
@@ -71,8 +72,9 @@ public final class StreamsXMLUtils {
 	 *
 	 * @return new instance of an {@link XPath}
 	 *
-	 * @see NamespaceMap
-	 * @see FuncGetFileName
+	 * @see com.jkoolcloud.tnt4j.streams.utils.NamespaceMap
+	 * @see com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName
+	 * @see com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName
 	 */
 	public static XPath getStreamsXPath() {
 		XPath xPath = XPathFactory.newInstance().newXPath();
@@ -88,6 +90,7 @@ public final class StreamsXMLUtils {
 
 		static {
 			fMap.put(FuncGetFileName.FUNCTION_NAME, new FuncGetFileName());
+			fMap.put(FuncGetObjectName.FUNCTION_NAME, new FuncGetObjectName());
 		}
 
 		@Override

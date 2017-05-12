@@ -19,7 +19,7 @@
             <field-map source="" target="N/A"/>
         </field>
 
-        <field name="AgentResolver" locator="name(//*[1])" locator-type="Label" transparent="true"/>
+        <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
 
         <field name="ResourceName" formattingPattern="{0}={1}@{2}">
             <!--resolves FILE or QUEUE-->
@@ -28,12 +28,10 @@
                 <field-map source="queue" target="QUEUE"/>
             </field-locator>
             <!--resolves file or queue name -->
-            <field-locator locator="ts:getFileName(source/file)" locator-type="Label" required="false"/>
-            <field-locator locator="ts:getFileName(destination/file)" locator-type="Label" required="false"/>
-            <field-locator locator="/source/queue" locator-type="Label" required="false"/>
-            <field-locator locator="/destination/queue" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getObjectName(/${Direction}/queue, 'BEFORE', '@')" locator-type="Label" required="false"/>
             <!-- agent-->
-            <field-locator locator="/transaction/${AgentResolver}Agent/@agent" locator-type="Label" required="false"/>
+            <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
         </field>
 
         <field name="Size" locator="//*/file/@size" locator-type="Label" required="false"/>
@@ -168,7 +166,7 @@
     </stream>
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
-    <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/file/message_*_progress.xml"/>-->
+    <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/queue/message_*_progress.xml"/>-->
 
     <!--&lt;!&ndash; <parser-ref name="StartedEventParser"/> &ndash;&gt;-->
     <!--<parser-ref name="ProgressEventParser"/>-->
