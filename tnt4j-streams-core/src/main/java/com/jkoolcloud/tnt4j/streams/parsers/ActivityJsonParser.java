@@ -38,7 +38,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -129,13 +128,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		data = preParse(stream, data);
-
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		DocumentContext jsonDoc = null;
 		String jsonString = null;
 		try {
@@ -162,14 +155,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			jsonString = jsonDoc.jsonString();
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				jsonString);
+		ActivityContext cData = new ActivityContext(stream, data, jsonDoc);
+		cData.setMessage(jsonString);
 
-		ActivityInfo ai = parsePreparedItem(stream, jsonString, jsonDoc);
-		postParse(ai, stream, jsonDoc);
-
-		return ai;
+		return cData;
 	}
 
 	/**
@@ -234,7 +223,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();

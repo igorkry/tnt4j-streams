@@ -42,12 +42,12 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.*;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an XML string, with the value for each
@@ -186,13 +186,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		data = preParse(stream, data);
-
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		Node xmlDoc = null;
 		String xmlString = null;
 		try {
@@ -224,25 +218,21 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			}
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), xmlString);
+		ActivityContext cData = new ActivityContext(stream, data, xmlDoc);
+		cData.setMessage(xmlString);
 
-		ActivityInfo ai = parsePreparedItem(stream, xmlString, xmlDoc);
-		postParse(ai, stream, xmlDoc);
-
-		return ai;
+		return cData;
 	}
 
 	@Override
-	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, Node xmlDoc)
-			throws ParseException {
-		if (xmlDoc == null) {
+	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
+		if (cData == null || cData.getData() == null) {
 			return null;
 		}
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
-		ContextData cData = new ContextData(xmlDoc, stream, ai);
+		cData.setActivity(ai);
 		try {
 			String[] savedFormats = null;
 			String[] savedUnits = null;
@@ -279,6 +269,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 											"ActivityXmlParser.required.locator.not.found"),
 									loc, field);
+							cData.setActivity(null);
 							return null;
 						}
 					}
@@ -292,18 +283,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					}
 				}
 			}
-
-			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
-				// save entire activity string as message data
-				field = new ActivityField(StreamFieldType.Message.name());
-				applyFieldValue(stream, ai, field, dataStr);
-			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
 					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
+
 		return ai;
 	}
 
@@ -325,7 +311,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
@@ -333,9 +319,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 		if (ActivityField.isDynamicAttr(locStr)) {
 			ActivityInfo ai = cData.getActivity();
-			List<String> vars = new ArrayList<>();
-			Utils.resolveCfgVariables(vars, locStr);
-			locStr = Utils.fillInPattern(locStr, vars, ai, this.getName());
+			locStr = StreamsCache.fillInKeyPattern(locStr, ai, this.getName());
 		}
 
 		if (StringUtils.isNotEmpty(locStr)) {

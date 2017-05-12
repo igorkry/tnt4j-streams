@@ -89,18 +89,18 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		if (fieldDelim == null) {
 			throw new IllegalStateException("SampleParser: field delimiter not specified or empty"); // NON-NLS
 		}
-		if (data == null) {
-			return null;
-		}
 
-		data = preParse(stream, data);
+		return super.parse(stream, data);
+	}
 
+	@Override
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		// Get next string to parse
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		logger().log(OpLevel.DEBUG, "Parsing: {0}", dataStr); // NON-NLS
+		logger().log(OpLevel.DEBUG, "Input string to split: {0}", dataStr); // NON-NLS
 		String[] fields = dataStr.split(fieldDelim);
 		if (ArrayUtils.isEmpty(fields)) {
 			logger().log(OpLevel.DEBUG, "Did not find any fields in input string"); // NON-NLS
@@ -108,10 +108,10 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		}
 		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length); // NON-NLS
 
-		ActivityInfo ai = parsePreparedItem(stream, dataStr, fields);
-		postParse(ai, stream, fields);
+		ActivityContext cData = new ActivityContext(stream, data, fields);
+		cData.setMessage(getRawDataAsMessage(fields));
 
-		return ai;
+		return cData;
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();

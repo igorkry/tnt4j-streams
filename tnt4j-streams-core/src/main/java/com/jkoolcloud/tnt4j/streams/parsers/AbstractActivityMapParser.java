@@ -28,7 +28,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -104,17 +103,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		data = preParse(stream, data);
-
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				getLogString(data));
-
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
 			logger().log(OpLevel.DEBUG,
@@ -122,10 +111,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			return null;
 		}
 
-		ActivityInfo ai = parsePreparedItem(stream, dataMap.toString(), dataMap);
-		postParse(ai, stream, dataMap);
+		ActivityContext cData = new ActivityContext(stream, data, dataMap);
+		cData.setMessage(getRawDataAsMessage(dataMap));
 
-		return ai;
+		return cData;
 	}
 
 	/**
@@ -149,7 +138,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();

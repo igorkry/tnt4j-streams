@@ -161,7 +161,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return Utils.toHexDump((byte[]) data);
 		}
 
-		return String.valueOf(data);
+		return Utils.toString(data);
 	}
 
 	@Override
@@ -301,16 +301,31 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return null;
 		}
 
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.activity.raw.data"),
+				getLogString(data));
+
 		data = preParse(stream, data);
 
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.preparsed.data"),
 				getLogString(data));
 
-		ItemToParse item = prepareItem(data);
+		ActivityContext cData = prepareItem(stream, data);
 
-		ActivityInfo ai = parsePreparedItem(stream, String.valueOf(item.message), item.item);
-		postParse(ai, stream, item.item);
+		if (cData == null || !cData.isValid()) {
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.nothing.to.parse"));
+			return null;
+		}
+
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.data"),
+				getLogString(cData.getMessage()));
+
+		ActivityInfo ai = parsePreparedItem(cData);
+		fillInMessageData(stream, ai, cData.getMessage());
+		postParse(cData);
 
 		return ai;
 	}
@@ -318,19 +333,20 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	/**
 	 * Prepares RAW activity data to be parsed.
 	 *
+	 * @param stream
+	 *            stream providing activity data
 	 * @param data
 	 *            raw activity data to prepare
-	 * @return activity data item prepared to be parsed
+	 * @return activity data context package
 	 */
 	@SuppressWarnings("unchecked")
-	protected ItemToParse prepareItem(Object data) {
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		T aData = (T) data;
 
-		ItemToParse item = new ItemToParse();
-		item.item = aData;
-		item.message = getRawDataAsMessage(aData);
+		ActivityContext cData = new ActivityContext(stream, data, aData);
+		cData.setMessage(getRawDataAsMessage(aData));
 
-		return item;
+		return cData;
 	}
 
 	/**
@@ -356,17 +372,18 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	/**
 	 * Performs post-parse actions on resolved activity fields data, i.e. filtering.
 	 *
-	 * @param ai
-	 *            converted activity info
-	 * @param stream
-	 *            stream providing activity data
-	 * @param data
-	 *            prepared activity data item to parse
+	 * @param cData
+	 *            prepared activity data item context to parse
 	 * @throws java.text.ParseException
 	 *             if exception occurs applying field locator resolved cached value
 	 */
-	protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
-		if(ai == null) return;
+	protected void postParse(ActivityContext cData) throws ParseException {
+		if (cData == null || cData.getActivity() == null) {
+			return;
+		}
+
+		ActivityInfo ai = cData.getActivity();
+
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
@@ -383,25 +400,20 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * Parse the specified prepared activity data, converting each field in prepared data to its corresponding value of
 	 * activity info item.
 	 *
-	 * @param stream
-	 *            stream providing activity data
-	 * @param dataStr
-	 *            raw activity data string
-	 * @param data
-	 *            prepared activity data item to parse
+	 * @param cData
+	 *            prepared activity data item context to parse
 	 * @return converted activity info, or {@code null} if activity data is {@code null}
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 */
-	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, T data)
-			throws ParseException {
-		if (data == null) {
+	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
+		if (cData == null || cData.getData() == null) {
 			return null;
 		}
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
-		ContextData cData = new ContextData(data, stream, ai);
+		cData.setActivity(ai);
 		try {
 			// apply fields for parser
 			Object value;
@@ -410,12 +422,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				value = Utils.simplifyValue(parseLocatorValues(field, cData));
 
 				applyFieldValue(field, value, cData);
-			}
-
-			if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
-				// save entire activity string as message data
-				field = new ActivityField(StreamFieldType.Message.name());
-				applyFieldValue(stream, ai, field, dataStr);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
@@ -428,9 +434,34 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
+	 * Fills in activity entity 'Message' field with activity RAW data when parser has not resolved value for that
+	 * field.
+	 * <p>
+	 * Parser has to be configured to act this way using parser configuration property
+	 * 'UseActivityDataAsMessageForUnset'.
+	 * 
+	 * @param stream
+	 *            stream providing activity data
+	 * @param ai
+	 *            converted activity info
+	 * @param dataStr
+	 *            raw activity data string
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 */
+	protected void fillInMessageData(TNTInputStream<?, ?> stream, ActivityInfo ai, String dataStr)
+			throws ParseException {
+		if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
+			// save entire activity string as message data
+			ActivityField field = new ActivityField(StreamFieldType.Message.name());
+			applyFieldValue(stream, ai, field, dataStr);
+		}
+	}
+
+	/**
 	 * Sets the value for the field in the specified activity entity. Depending on field definition if it is dynamic or
 	 * resolved collection value has to be split, value is applied in dynamic manner using
-	 * {@link #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData, com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object)}
+	 * {@link #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext, com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object)}
 	 * method. In all other cases {@link #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)} is
 	 * invoked.
 	 *
@@ -445,11 +476,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 *
-	 * @see #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData,
+	 * @see #applyDynamicValue(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext,
 	 *      com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object)
 	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
 	 */
-	protected void applyFieldValue(ActivityField field, Object value, ContextData cData) throws ParseException {
+	protected void applyFieldValue(ActivityField field, Object value, ActivityContext cData) throws ParseException {
 		if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
 			applyDynamicValue(cData, field, value);
 		} else {
@@ -465,8 +496,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity data
 	 * @return data to be used for activity field "Message"
 	 */
-	protected Object getRawDataAsMessage(T data) {
-		return data.toString();
+	protected String getRawDataAsMessage(T data) {
+		return Utils.toString(data);
 	}
 
 	// protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
@@ -498,7 +529,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *
 	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
 	 */
-	protected void applyDynamicValue(ContextData cData, ActivityField field, Object value) throws ParseException {
+	protected void applyDynamicValue(ActivityContext cData, ActivityField field, Object value) throws ParseException {
 		Map<String, Object> dValMap = parseDynamicValues(cData, field.getDynamicLocators());
 
 		Object[] fValues = Utils.makeArray(value);
@@ -556,9 +587,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return field locators parsed values array
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
-	 * @see #parseLocatorValues(java.util.List, com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ContextData)
+	 * @see #parseLocatorValues(java.util.List,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	protected Object[] parseLocatorValues(ActivityField field, ContextData cData) throws ParseException {
+	protected Object[] parseLocatorValues(ActivityField field, ActivityContext cData) throws ParseException {
 		return parseLocatorValues(field.getLocators(), cData);
 	}
 
@@ -573,7 +605,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 */
-	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, ContextData cData)
+	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, ActivityContext cData)
 			throws ParseException {
 		if (locators != null) {
 			Object[] values = new Object[locators.size()];
@@ -586,8 +618,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return null;
 	}
 
-	private Map<String, Object> parseDynamicValues(ContextData cData, Map<String, ActivityFieldLocator> dynamicLocators)
-			throws ParseException {
+	private Map<String, Object> parseDynamicValues(ActivityContext cData,
+			Map<String, ActivityFieldLocator> dynamicLocators) throws ParseException {
 		Map<String, Object> dynamicValuesMap = new HashMap<>();
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
@@ -614,11 +646,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return value formatted based on locator definition or {@code null} if locator is not defined
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
-	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @see #getLocatorValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 * @deprecated used by tests only. Use
+	 *             {@link #getLocatorValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator, com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)}
+	 *             instead.
 	 */
+	@Deprecated
 	protected Object getLocatorValue(TNTInputStream<?, ?> stream, ActivityFieldLocator locator, T data)
 			throws ParseException {
-		return getLocatorValue(locator, new ContextData(data, stream, null));
+		return getLocatorValue(locator, new ActivityContext(stream, null, data));
 	}
 
 	/**
@@ -633,7 +670,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *             if exception occurs applying locator format properties to specified value
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
-	protected Object getLocatorValue(ActivityFieldLocator locator, ContextData cData) throws ParseException {
+	protected Object getLocatorValue(ActivityFieldLocator locator, ActivityContext cData) throws ParseException {
 		Object val = null;
 		if (locator != null) {
 			String locStr = locator.getLocator();
@@ -690,7 +727,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected abstract Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException;
 
 	/**
@@ -763,42 +800,137 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Activity RAW data item prepared to be parsed.
+	 * Activity data context containing all data used by parsers to resolve field values.
 	 */
-	protected class ItemToParse {
-		/**
-		 * Activity RAW data to parse.
-		 */
-		T item;
-
-		/**
-		 * Activity RAW data representation to be used as field 'Message' data.
-		 */
-		Object message;
-	}
-
-	protected class ContextData extends HashMap<String, Object> {
-		private static final String RAW_DATA_KEY = "RAW_ACTIVITY_DATA"; // NON-NLS
+	protected class ActivityContext extends HashMap<String, Object> {
 		private static final String STREAM_KEY = "STREAM_DATA"; // NON-NLS
-		private static final String ACTIVITY_DATA_KEY = "ACTIVITY_DATA"; // NON-NLS
+		private static final String RAW_DATA_KEY = "RAW_ACTIVITY_DATA"; // NON-NLS
 
-		protected ContextData(T rawData, TNTInputStream<?, ?> stream, ActivityInfo ai) {
-			put(RAW_DATA_KEY, rawData);
+		private static final String PREPARED_DATA_KEY = "PREPARED_ACTIVITY_DATA"; // NON-NLS
+		private static final String ACTIVITY_DATA_KEY = "ACTIVITY_DATA"; // NON-NLS
+		private static final String MESSAGE_DATA_KEY = "ACT_MESSAGE_DATA"; // NON-NLS
+
+		private boolean valid = true;
+
+		/**
+		 * Constructs new activity data context.
+		 * 
+		 * @param stream
+		 *            stream providing activity data
+		 * @param rawData
+		 *            stream provided RAW activity data
+		 */
+		public ActivityContext(TNTInputStream<?, ?> stream, Object rawData) {
 			put(STREAM_KEY, stream);
-			put(ACTIVITY_DATA_KEY, ai);
+			put(RAW_DATA_KEY, rawData);
 		}
 
+		/**
+		 * Constructs new activity data context.
+		 *
+		 * @param stream
+		 *            stream providing activity data
+		 * @param rawData
+		 *            stream provided RAW activity data
+		 * @param preparedData
+		 *            parser prepared activity data compatible to locate values
+		 */
+		public ActivityContext(TNTInputStream<?, ?> stream, Object rawData, T preparedData) {
+			put(STREAM_KEY, stream);
+			put(RAW_DATA_KEY, rawData);
+			put(PREPARED_DATA_KEY, preparedData);
+		}
+
+		/**
+		 * Invalidates this activity data context.
+		 */
+		public void invalidate() {
+			valid = true;
+		}
+
+		/**
+		 * Reruns flag indicating whether this activity data context is valid.
+		 *
+		 * @return {@code true} is context is valid, {@code false} - otherwise
+		 */
+		public boolean isValid() {
+			return valid;
+		}
+
+		/**
+		 * Returns stream provided RAW activity data.
+		 *
+		 * @return stream provided RAW activity data
+		 */
+		public Object getRawData() {
+			return get(RAW_DATA_KEY);
+		}
+
+		/**
+		 * Sets parser prepared activity data.
+		 * 
+		 * @param preparedData
+		 *            parser prepared activity data
+		 */
+		public void setData(T preparedData) {
+			put(PREPARED_DATA_KEY, preparedData);
+		}
+
+		/**
+		 * Returns parser prepared activity data.
+		 * 
+		 * @return parser prepared activity data
+		 */
 		@SuppressWarnings("unchecked")
 		public T getData() {
-			return (T) get(RAW_DATA_KEY);
+			return (T) get(PREPARED_DATA_KEY);
 		}
 
+		/**
+		 * Returns instance of stream providing activity data.
+		 *
+		 * @return stream providing activity data
+		 */
 		public TNTInputStream<?, ?> getStream() {
 			return (TNTInputStream<?, ?>) get(STREAM_KEY);
 		}
 
+		/**
+		 * Sets resolved activity entity data.
+		 *
+		 * @param ai
+		 *            resolved activity entity data
+		 */
+		public void setActivity(ActivityInfo ai) {
+			put(ACTIVITY_DATA_KEY, ai);
+		}
+
+		/**
+		 * Returns resolved activity entity data.
+		 *
+		 * @return resolved activity entity data
+		 */
 		public ActivityInfo getActivity() {
 			return (ActivityInfo) get(ACTIVITY_DATA_KEY);
+		}
+
+		/**
+		 * Sets activity data string representation to be used as 'Message' field data.
+		 *
+		 * @param message
+		 *            activity data string representation to be used as 'Message' field data
+		 */
+		public void setMessage(String message) {
+			put(MESSAGE_DATA_KEY, message);
+		}
+
+		/**
+		 * Returns activity data string representation to be used as 'Message' field data.
+		 * 
+		 * @return activity data string representation to be used as 'Message' field data
+		 */
+		public String getMessage() {
+			return (String) get(MESSAGE_DATA_KEY);
 		}
 	}
 }

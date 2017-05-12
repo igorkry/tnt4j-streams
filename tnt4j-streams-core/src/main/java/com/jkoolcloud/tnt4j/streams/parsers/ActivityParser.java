@@ -94,7 +94,7 @@ public abstract class ActivityParser {
 	 * @throws ParseException
 	 *             if an error parsing raw data string
 	 * @see #isDataClassSupported(Object)
-	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String, Object)
+	 * @see GenericActivityParser#parsePreparedItem(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	public abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
 			throws IllegalStateException, ParseException;

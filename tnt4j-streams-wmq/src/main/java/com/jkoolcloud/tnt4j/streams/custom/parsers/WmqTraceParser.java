@@ -59,7 +59,7 @@ public class WmqTraceParser extends ActivityPCFParser {
 	}
 
 	@Override
-	protected Object getRawDataAsMessage(PCFContent pcfContent) {
+	protected String getRawDataAsMessage(PCFContent pcfContent) {
 		PCFContent traceContent = strip(pcfContent, getTraceMarker(pcfContent));
 
 		return traceContent.toString();

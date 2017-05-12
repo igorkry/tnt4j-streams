@@ -140,18 +140,19 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityNameValueParser.no.value.delimiter"));
 		}
-		if (data == null) {
-			return null;
-		}
 
-		data = preParse(stream, data);
+		return super.parse(stream, data);
+	}
 
+	@Override
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.splitting.string"),
+				dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
@@ -184,10 +185,10 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			}
 		}
 
-		ActivityInfo ai = parsePreparedItem(stream, dataStr, nameValues);
-		postParse(ai, stream, nameValues);
+		ActivityContext cData = new ActivityContext(stream, data, nameValues);
+		cData.setMessage(getRawDataAsMessage(nameValues));
 
-		return ai;
+		return cData;
 	}
 
 	/**
@@ -202,7 +203,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();

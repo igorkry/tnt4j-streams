@@ -111,7 +111,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();

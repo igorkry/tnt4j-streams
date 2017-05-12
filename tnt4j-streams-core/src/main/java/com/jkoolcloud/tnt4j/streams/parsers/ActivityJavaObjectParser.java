@@ -30,7 +30,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -102,22 +101,16 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
+		ActivityContext cData = new ActivityContext(stream, data, data);
+		cData.setMessage(getRawDataAsMessage(data));
 
-		data = preParse(stream, data);
+		return cData;
+	}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				getLogString(data));
-
-		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
-		ActivityInfo ai = parsePreparedItem(stream, dataStr, data);
-		postParse(ai, stream, data);
-
-		return ai;
+	@Override
+	protected String getRawDataAsMessage(Object data) {
+		return ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 	}
 
 	/**
@@ -132,7 +125,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, ContextData cData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
