@@ -9,7 +9,7 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>TNT4J-Streams-WMQ-dep-install</name>
+    <name>tnt4j-streams-wmq-dep-install</name>
     <description>Installs TNT4J-Streams-WMQ 3rd party dependencies</description>
 
     <prerequisites>

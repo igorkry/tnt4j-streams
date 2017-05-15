@@ -369,6 +369,11 @@ To use TNT4J-Streams predefined functions namespace `ts:` shall be used.
 Streams predefined custom XPath functions to be used in transformation expressions:                 
 * `ts:getFileName(filePath)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName`. Retrieves file 
 name from provided file path.
+* `ts:getObjectName(objectFQN, options)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName`. 
+Retrieves desired object name from provided fully qualified object name. Function supported options:
+    * resolution options: `DEFAULT`, `BEFORE`, `AFTER`, `REPLACE`, `FULL`. (Optional)
+    * search symbols. (Optional)
+    * replacement symbols. (Optional)
 
 You may also define your own customized XPath functions. To do this Your API has to:
 * implement interface `javax.xml.xpath.XPathFunction`
@@ -403,6 +408,24 @@ field locators. For example:
         <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
         <.../>
     </parser>    
+```
+
+Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/item/source/queue` points to queue named `SomeQueueName@Agent1`):
+```xml
+    <parser name="XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <.../>
+        <!-- to get queue name without agent: 'SomeQueueName' -->
+        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
+        <!-- to get queue name without agent (part before FQN delimiter): 'SomeQueueName'-->
+        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'BEFORE', '@')" locator-type="Label"/>
+        <!-- to get agent name (part after FQN delimiter): 'Agent1'-->
+        <field name="MFT_SRC_AGENT_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'AFTER', '@')" locator-type="Label"/>
+        <!-- to get queue fully qualified name with '@' replaced to '_': 'SomeQueueName_Agent1' -->
+        <field name="MFT_SRC_QUEUE_FQN_REPLACED" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'REPLACE', '@', '_')" locator-type="Label"/>
+        <!-- to get queue fully qualified: 'SomeQueueName@Agent1'-->
+        <field name="MFT_SRC_QUEUE_FQN" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"/>
+        <.../>
+    </parser>   
 ```
 
 #### Stream elements transformations 
@@ -3387,7 +3410,7 @@ These parameters are applicable to all types of streams.
         * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if
         max. queue size is reached. Default value - `20sec`. (Optional)
            Actual only if `ExecutorsBoundedModel` is set to `true`.
-  * StreamCacheMaxSize - max. size of stream resolved values cache. Default value - `100`. (Optional)
+  * StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
   * StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)          
 
     sample:
