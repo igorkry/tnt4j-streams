@@ -31,7 +31,13 @@ import org.w3c.dom.NodeList;
  * <li>'ts:' is function namespace</li>
  * <li>'getObjectName' - function name</li>
  * <li>'object' - function argument defining object name</li>
- * <li>'options' - object name resolution options</li>
+ * <li>'options' - object name resolution options:
+ * <ul>
+ * <li>resolution options: DEFAULT, BEFORE, AFTER, REPLACE, FULL. Optional.</li>
+ * <li>search symbols. Optional.</li>
+ * <li>replacement symbols. Optional</li>
+ * </ul>
+ * </li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -41,6 +47,8 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 	 * Constant for name of the function used in code: {@value}.
 	 */
 	public static final String FUNCTION_NAME = "getObjectName"; // NON-NLS
+
+	private static final String OBJ_NAME_TOKEN_DELIMITERS = "@#$"; // NON-NLS
 
 	/**
 	 * Constructs a new getObjectName() function instance.
@@ -56,7 +64,7 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 	 * function arguments sequence:
 	 * <ul>
 	 * <li>1 - object name to resolve. Required.</li>
-	 * <li>2 - resolution options: DIRECT, BEFORE, AFTER, REPLACE. Optional.</li>
+	 * <li>2 - resolution options: DEFAULT, BEFORE, AFTER, REPLACE, FULL. Optional.</li>
 	 * <li>3 - search symbols. Optional.</li>
 	 * <li>4 - replacement symbols. Optional</li>
 	 * </ul>
@@ -100,40 +108,48 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 
 	private static String resolveObjectName(String objectName, List<?> args) {
 		String option = args.size() > 1 ? (String) args.get(1) : null;
+		Options opt;
 
-		if (StringUtils.isNotEmpty(option)) {
-			try {
-				Options opt = Options.valueOf(option.toUpperCase());
-				String sSymbol = args.size() > 2 ? (String) args.get(2) : null;
-				String rSymbol = args.size() > 3 ? (String) args.get(3) : null;
+		try {
+			opt = StringUtils.isEmpty(option) ? Options.DEFAULT : Options.valueOf(option.toUpperCase());
+		} catch (IllegalArgumentException exc) {
+			opt = Options.DEFAULT;
+		}
 
-				switch (opt) {
-				case BEFORE:
-					if (StringUtils.isNotEmpty(sSymbol)) {
-						objectName = StringUtils.substringBefore(objectName, sSymbol);
-					}
-					break;
-				case AFTER:
-					if (StringUtils.isNotEmpty(sSymbol)) {
-						objectName = StringUtils.substringAfter(objectName, sSymbol);
-					}
-					break;
-				case REPLACE:
-					if (StringUtils.isNotEmpty(sSymbol)) {
-						objectName = StringUtils.replaceChars(objectName, sSymbol, rSymbol == null ? "" : rSymbol);
-					}
-					break;
-				default:
-					break;
-				}
-			} catch (IllegalArgumentException exc) {
+		String sSymbol = args.size() > 2 ? (String) args.get(2) : null;
+		String rSymbol = args.size() > 3 ? (String) args.get(3) : null;
+
+		switch (opt) {
+		case FULL:
+			break;
+		case BEFORE:
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				objectName = StringUtils.substringBefore(objectName, sSymbol);
 			}
+			break;
+		case AFTER:
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				objectName = StringUtils.substringAfter(objectName, sSymbol);
+			}
+			break;
+		case REPLACE:
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				objectName = StringUtils.replaceChars(objectName, sSymbol, rSymbol == null ? "" : rSymbol);
+			}
+			break;
+		case DEFAULT:
+		default:
+			int idx = StringUtils.indexOfAny(objectName, OBJ_NAME_TOKEN_DELIMITERS);
+			if (idx > 0) {
+				objectName = StringUtils.substring(objectName, 0, idx);
+			}
+			break;
 		}
 
 		return objectName;
 	}
 
 	enum Options {
-		DIRECT, BEFORE, AFTER, REPLACE
+		DEFAULT, BEFORE, AFTER, REPLACE, FULL
 	}
 }

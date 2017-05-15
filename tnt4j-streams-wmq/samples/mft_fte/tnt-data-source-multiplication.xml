@@ -29,7 +29,7 @@
             </field-locator>
             <!--resolves file or queue name -->
             <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
-            <field-locator locator="ts:getObjectName(/${Direction}/queue, 'BEFORE', '@')" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
             <!-- agent-->
             <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
         </field>
@@ -74,8 +74,10 @@
 
         <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
         <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
-        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
-        <field name="MFT_DST_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue)" locator-type="Label"/>
+        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')"
+               locator-type="Label"/>
+        <field name="MFT_DST_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
+               locator-type="Label"/>
 
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
