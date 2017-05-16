@@ -43,6 +43,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 
 	private boolean resolveServer = false;
 	private boolean turnOutActivityChildren = false;
+	private boolean buildFQNFromData = true;
 
 	/**
 	 * Constructs a new JKCloudActivityOutput.
@@ -64,6 +65,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			resolveServer = Boolean.parseBoolean((String) value);
 		} else if (OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
 			turnOutActivityChildren = Boolean.parseBoolean((String) value);
+		} else if (OutputProperties.PROP_BUILD_FQN_FROM_DATA.equalsIgnoreCase(name)) {
+			buildFQNFromData = Boolean.parseBoolean((String) value);
 		}
 	}
 
@@ -75,7 +78,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		String fqn = ai.getSourceFQN(resolveServer);
+		String fqn = buildFQNFromData ? ai.getSourceFQN(resolveServer) : null;
 		Tracker tracker = getTracker(fqn, Thread.currentThread());
 
 		if (turnOutActivityChildren && ai.hasChildren()) {

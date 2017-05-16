@@ -148,14 +148,14 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	@Override
 	public void handleConsumerThread(Thread t) throws IllegalStateException {
-		TrackingLogger tracker = TrackingLogger.getInstance(trackerConfig.build());
-		checkTrackerState(tracker);
+		// Tracker tracker = TrackingLogger.getInstance(trackerConfig.build());
+		// checkTrackerState(tracker);
+		Tracker tracker = getTracker(null, t);
 		synchronized (trackersMap) {
-			trackersMap.put(getTrackersMapKey(t, defaultSource.getFQName()), tracker);
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"TNTStreamOutput.default.tracker"),
-					(t == null ? "null" : t.getName()), defaultSource.getFQName());
+			String fqn = defaultSource.getFQName();
+			trackersMap.put(getTrackersMapKey(t, fqn), tracker);
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTStreamOutput.default.tracker"), (t == null ? "null" : t.getName()), fqn);
 		}
 	}
 
@@ -219,17 +219,18 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 */
 	protected Tracker getTracker(String aiSourceFQN, Thread t) throws IllegalStateException {
 		synchronized (trackersMap) {
-			Tracker tracker = trackersMap
-					.get(getTrackersMapKey(t, aiSourceFQN == null ? defaultSource.getFQName() : aiSourceFQN));
+			String sourceFQN = StringUtils.isEmpty(aiSourceFQN) ? defaultSource.getFQName() : aiSourceFQN;
+			Tracker tracker = trackersMap.get(getTrackersMapKey(t, sourceFQN));
 			if (tracker == null) {
-				Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(aiSourceFQN);
+				Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(sourceFQN);
 				aiSource.setSSN(defaultSource.getSSN());
 				trackerConfig.setSource(aiSource);
 				tracker = TrackingLogger.getInstance(trackerConfig.build());
 				checkTrackerState((TrackingLogger) tracker);
-				trackersMap.put(getTrackersMapKey(t, aiSource.getFQName()), tracker);
+				String asFQN = aiSource.getFQName();
+				trackersMap.put(getTrackersMapKey(t, asFQN), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTStreamOutput.build.new.tracker"), aiSource.getFQName());
+						"TNTStreamOutput.build.new.tracker"), asFQN);
 			}
 
 			return tracker;

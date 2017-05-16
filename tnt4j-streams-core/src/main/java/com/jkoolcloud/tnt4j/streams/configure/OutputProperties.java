@@ -45,5 +45,10 @@ public interface OutputProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
+	String PROP_BUILD_FQN_FROM_DATA = "BuildSourceFQNFromStreamedData"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
 	String PROP_TNT4J_CONFIG_ZK_NODE = "TNT4JConfigZKNode"; // NON-NLS
 }
