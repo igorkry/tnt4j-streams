@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
  * queue size is reached. Default value - {@code 20}. (Optional, actual only if {@code ExecutorsBoundedModel} is set to
  * {@code true})</li>
- * <li>StreamCacheMaxSize - max. size of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
+ * <li>StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
  * <li>StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value -
  * {@code 10}. (Optional)</li>
  * </ul>
@@ -213,6 +213,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				cacheExpireDuration = Integer.parseInt(value);
 			}
 		}
+
+		output().setProperties(props);
 	}
 
 	/**

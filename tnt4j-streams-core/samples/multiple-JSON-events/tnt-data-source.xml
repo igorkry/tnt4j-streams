@@ -3,10 +3,6 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <java-object name="JKoolCloudOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
-        <property name="TurnOutActivityChildren" value="false"/>
-    </java-object>
-
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <property name="ReadLines" value="false"/>
 
@@ -26,9 +22,9 @@
 
     <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/multiple-JSON-events/message.json"/>
+        <property name="TurnOutActivityChildren" value="false"/>
 
         <parser-ref name="ResponseParser"/>
-        <reference name="JKoolCloudOutput"/>
     </stream>
 
 </tnt-data-source>
