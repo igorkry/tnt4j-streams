@@ -590,13 +590,10 @@ public class ConfigParserHandler extends DefaultHandler {
 		// make sure required fields are present
 		notEmpty(field, FIELD_ELMT, NAME_ATTR);
 
-		if (value == null) {
-			notEmpty(locator, FIELD_ELMT, LOCATOR_ATTR);
-		}
-
 		if (separator != null && pattern != null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.cannot.contain", FIELD_LOC_ELMT, SEPARATOR_ATTR, FORMATTING_PATTERN_ATTR),
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.cannot.contain", FIELD_ELMT, SEPARATOR_ATTR, FORMATTING_PATTERN_ATTR),
 					currParseLocation);
 		}
 
