@@ -104,6 +104,10 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *             if parser can't be added to stream
 	 */
 	public void addParser(ActivityParser parser) throws IllegalStateException {
+		if (parser == null) {
+			return;
+		}
+
 		String[] tags = parser.getTags();
 
 		if (ArrayUtils.isNotEmpty(tags)) {
@@ -112,6 +116,40 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			}
 		} else {
 			addTaggedParser(parser.getName(), parser);
+		}
+	}
+
+	/**
+	 * Adds specified parsers array to the list of parsers being used by this stream.
+	 *
+	 * @param parsers
+	 *            array of parsers to add
+	 * @throws IllegalStateException
+	 *             if parser can't be added to stream
+	 */
+	public void addParser(ActivityParser... parsers) throws IllegalStateException {
+		if (parsers == null) {
+			return;
+		}
+
+		addParsers(Arrays.asList(parsers));
+	}
+
+	/**
+	 * Adds specified parsers collection to the list of parsers being used by this stream.
+	 *
+	 * @param parsers
+	 *            collection of parsers to add
+	 * @throws IllegalArgumentException
+	 *             if parser can't be added to stream
+	 */
+	public void addParsers(Iterable<ActivityParser> parsers) throws IllegalArgumentException {
+		if (parsers == null) {
+			return;
+		}
+
+		for (ActivityParser parser : parsers) {
+			addParser(parser);
 		}
 	}
 

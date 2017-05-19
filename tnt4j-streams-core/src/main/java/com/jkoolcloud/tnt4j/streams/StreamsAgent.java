@@ -486,11 +486,7 @@ public final class StreamsAgent {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"StreamsAgent.no.piped.activity.parsers"));
 		}
-		for (ActivityParser parser : parsers) {
-			if (parser != null) {
-				pipeStream.addParser(parser);
-			}
-		}
+		pipeStream.addParsers(parsers);
 
 		streams.add(pipeStream);
 

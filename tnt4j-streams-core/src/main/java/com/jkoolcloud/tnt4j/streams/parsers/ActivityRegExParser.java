@@ -202,6 +202,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
+					cData.setField(field);
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
 					value = Utils.simplifyValue(parseLocatorValues(locations, cData));
@@ -225,6 +226,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			Object value;
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
 				field = fieldMapEntry.getKey();
+				cData.setField(field);
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
 				value = Utils.simplifyValue(parseLocatorValues(locations, cData));

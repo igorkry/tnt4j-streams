@@ -187,7 +187,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		int idx = -1;
 		for (int i = 0; i < fieldList.size(); i++) {
 			ActivityField af = fieldList.get(i);
-			if (af.hasCacheLocators()) {
+			if (af.hasCacheLocators() || af.hasActivityLocators()) {
 				idx = i;
 				break;
 			}
@@ -419,6 +419,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			Object value;
 			for (ActivityField aField : fieldList) {
 				field = aField;
+				cData.setField(aField);
 				value = Utils.simplifyValue(parseLocatorValues(field, cData));
 
 				applyFieldValue(field, value, cData);
@@ -680,6 +681,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					val = cData.getStream().getProperty(locStr);
 				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
 					val = Utils.simplifyValue(StreamsCache.getValue(cData.getActivity(), locStr, getName()));
+				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Activity) {
+					val = cData.getActivity().getFieldValue(locator.getLocator());
 				} else {
 					val = resolveLocatorValue(locator, cData, formattingNeeded);
 					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
@@ -810,6 +813,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		private static final String ACTIVITY_DATA_KEY = "ACTIVITY_DATA"; // NON-NLS
 		private static final String MESSAGE_DATA_KEY = "ACT_MESSAGE_DATA"; // NON-NLS
 
+		private static final String FIELD_KEY = "PARSED_FIELD"; // NON-NLS
+
 		private boolean valid = true;
 
 		/**
@@ -931,6 +936,25 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		 */
 		public String getMessage() {
 			return (String) get(MESSAGE_DATA_KEY);
+		}
+
+		/**
+		 * Sets currently parsed field instance.
+		 *
+		 * @param field
+		 *            currently parsed field instance
+		 */
+		public void setField(ActivityField field) {
+			put(FIELD_KEY, field);
+		}
+
+		/**
+		 * Gets currently parsed field instance.
+		 * 
+		 * @return currently parsed field instance
+		 */
+		public ActivityField getField() {
+			return (ActivityField) get(FIELD_KEY);
 		}
 	}
 }

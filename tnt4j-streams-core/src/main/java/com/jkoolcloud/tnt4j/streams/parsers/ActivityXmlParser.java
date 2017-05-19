@@ -241,6 +241,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			Object[] values;
 			for (ActivityField aField : fieldList) {
 				values = null;
+				cData.setField(aField);
 				field = aField;
 				List<ActivityFieldLocator> locators = field.getLocators();
 				if (locators != null) {
@@ -259,11 +260,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
 
-						if (CollectionUtils.isEmpty(aField.getStackedParsers())) {
-							if (values[li] instanceof Node) {
-								values[li] = getTextContent(loc, (Node) values[li]);
-							}
-						}
 						if (values[li] == null && requireAll && !loc.isOptional()) { // NON-NLS
 							logger().log(OpLevel.WARNING,
 									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -332,6 +328,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 				if (val == null) { // otherwise try on complete document
 					val = resolveValueOverXPath(xmlDoc, expr, formattingNeeded);
+				}
+
+				if (val != null) {
+					final ActivityField afield = cData.getField();
+					if (CollectionUtils.isEmpty(afield.getStackedParsers())) {
+						if (val instanceof Node) {
+							val = getTextContent(locator, (Node) val);
+						}
+					}
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

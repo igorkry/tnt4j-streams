@@ -208,6 +208,15 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	/**
+	 * Checks whether any of field static or dynamic locators has type 'Activity'.
+	 *
+	 * @return {@code true} if any of field static or dynamic locators has type 'Activity', {@code false} - otherwise.
+	 */
+	public boolean hasActivityLocators() {
+		return hasLocatorsOfType(ActivityFieldLocatorType.Activity);
+	}
+
+	/**
 	 * Checks whether any of field static or dynamic locators has type {@code lType}.
 	 *
 	 * @param lType

@@ -56,9 +56,21 @@ public enum ActivityFieldLocatorType {
 	REMatchNum(Integer.class),
 
 	/**
-	 * Indicates that data value is the value from stream stored cache with specified name as cache entry key.
+	 * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the
+	 * raw activity data using a regular expression pattern defined as a sequence of groups.
 	 */
-	Cache(String.class);
+	REGroupName(String.class),
+
+	/**
+	 * Indicates that data value is the value from stream stored cache with specified cache entry key.
+	 */
+	Cache(String.class),
+
+	/**
+	 * Indicates that data value is the value from currently processed activity data entity with specified entity field
+	 * name.
+	 */
+	Activity(String.class);
 
 	private final Class<?> dataType;
 

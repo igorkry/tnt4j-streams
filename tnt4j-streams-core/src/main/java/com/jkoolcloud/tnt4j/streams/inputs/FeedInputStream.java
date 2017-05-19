@@ -148,6 +148,24 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	}
 
 	@Override
+	public void addParsers(Iterable<ActivityParser> parsers) throws IllegalArgumentException {
+		if (!parsersMap.isEmpty()) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.cannot.have.multiple.parsers"));
+		}
+
+		Iterator<ActivityParser> pi = parsers.iterator();
+		while (parsersMap.isEmpty()) {
+			addParser(pi.next());
+		}
+
+		if (pi.hasNext()) {
+			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"FeedInputStream.skipping.remaining.parsers"));
+		}
+	}
+
+	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
