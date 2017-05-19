@@ -326,13 +326,13 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			}
 		}
 
-		// Append this new node onto current stack node
+		// Append this new node into current stack node
 		Node last = _nodeStk.peek();
 		last.appendChild(tmp);
 
 		markLastGoodPosition();
 
-		// Push this node onto stack
+		// Push this node into stack
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"XMLFromBinDataPreParser.found.element"), qName);
 		_nodeStk.push(tmp);

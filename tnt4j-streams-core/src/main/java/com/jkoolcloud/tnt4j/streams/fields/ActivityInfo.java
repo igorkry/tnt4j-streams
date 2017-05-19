@@ -42,7 +42,6 @@ import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
-import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
  * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKool Cloud.
@@ -699,8 +698,7 @@ public class ActivityInfo {
 		resolveServer(false);
 		determineTimes();
 
-		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
-		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
+		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
 
 		if (eventType == OpType.ACTIVITY) {
 			return buildActivity(tracker, eventName, trackId, chTrackables);

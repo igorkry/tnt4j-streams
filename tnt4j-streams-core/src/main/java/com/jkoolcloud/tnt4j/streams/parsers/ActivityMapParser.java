@@ -25,7 +25,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements default activity data parser that assumes each activity data item is an {@link Map} data structure, where
- * each field is represented by a key/value pair and the name is used to map each field onto its corresponding activity
+ * each field is represented by a key/value pair and the name is used to map each field into its corresponding activity
  * field.
  * <p>
  * Additionally this parser makes activity data transformation from {@code byte[]} to {@link String}.

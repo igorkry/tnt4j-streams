@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
 /**
  * Implements an activity data parser that assumes each activity data item is an {@link PCFContent} ({@link PCFMessage}
  * or {@link MQCFGR}) where each field is represented by a PCF parameter and the PCF parameter MQ constant name/value is
- * used to map each field onto its corresponding activity field.
+ * used to map each field into its corresponding activity field.
  * <p>
  * PCF message can have grouped parameters - all message will have header {@link MQCFH} and may have {@link MQCFGR} type
  * parameters. To access PCF message header fields use 'MQCFH' expression with header field name separated using

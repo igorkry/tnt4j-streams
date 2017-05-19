@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Base class for abstract activity data parser that assumes each activity data item can be transformed into an
  * {@link Map} data structure, where each field is represented by a key/value pair and the name is used to map each
- * field onto its corresponding activity field.
+ * field into its corresponding activity field.
  * <p>
  * If map entry value is inner map, entries of that map can be accessed using
  * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e.

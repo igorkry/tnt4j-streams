@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} data
- * structure, where each field is represented by declared class field and the field name is used to map each field onto
+ * structure, where each field is represented by declared class field and the field name is used to map each field into
  * its corresponding activity field.
  * <p>
  * If field is complex object, sub-fields can be accessed using
