@@ -17,8 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,11 +34,11 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 /**
  * Implements activity data parser that assumes each activity data item is an MS Excel
  * {@link org.apache.poi.ss.usermodel.Workbook} {@link Row} data structure, where each field is represented by a row
- * column reference (i.e B, C, AB) and the name is used to map each field onto its corresponding activity field.
+ * column reference (i.e B, C, AB) and the name is used to map each field into its corresponding activity field.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
-public class ActivityExcelRowParser extends GenericActivityParser<Row> {
+public class ActivityExcelRowParser extends AbstractExcelParser<Row> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelRowParser.class);
 
 	/**
@@ -71,27 +69,6 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 	@Override
 	protected boolean isDataClassSupportedByParser(Object data) {
 		return Row.class.isInstance(data);
-	}
-
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
-		if (props == null) {
-			return;
-		}
-
-		super.setProperties(props);
-
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
-		// // no any additional properties are required yet.
-		// if (false) {
-		// logger().log(OpLevel.DEBUG,
-		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-		// name, value);
-		// }
-		// }
 	}
 
 	/**
@@ -126,7 +103,7 @@ public class ActivityExcelRowParser extends GenericActivityParser<Row> {
 			Cell cell = row.getCell(cellIndex);
 			boolean cellFound = false;
 			if (cell != null) {
-				val = cell.toString();
+				val = getCellValue(cell);
 				cellFound = true;
 			}
 
