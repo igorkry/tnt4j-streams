@@ -79,7 +79,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
 		String fqn = buildFQNFromData ? ai.getSourceFQN(resolveServer) : null;
-		Tracker tracker = getTracker(fqn, Thread.currentThread());
+		Tracker tracker = getTracker(null, Thread.currentThread());
 
 		if (turnOutActivityChildren && ai.hasChildren()) {
 			for (ActivityInfo cai : ai.getChildren()) {
