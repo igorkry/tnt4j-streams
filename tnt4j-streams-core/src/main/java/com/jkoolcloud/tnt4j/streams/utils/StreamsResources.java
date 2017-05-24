@@ -61,6 +61,14 @@ public final class StreamsResources {
 		}
 	}
 
+	private static String getResourceString(String bundleName, String key) {
+		try {
+			return getBundle(bundleName).getString(key);
+		} catch (MissingResourceException mre) {
+			return getBundle(RESOURCE_BUNDLE_NAME).getString(key);
+		}
+	}
+
 	/**
 	 * Returns localized string for the given key.
 	 *
@@ -76,7 +84,7 @@ public final class StreamsResources {
 		}
 
 		try {
-			return getBundle(bundleName).getString(key);
+			return getResourceString(bundleName, key);
 		} catch (MissingResourceException mre) {
 			return key;
 		}
@@ -100,7 +108,7 @@ public final class StreamsResources {
 		}
 
 		try {
-			return MessageFormat.format(getBundle(bundleName).getString(key), args);
+			return MessageFormat.format(getResourceString(bundleName, key), args);
 		} catch (MissingResourceException mre) {
 			return key;
 		}
@@ -121,7 +129,7 @@ public final class StreamsResources {
 		}
 
 		try {
-			return getBundle(bundleName).getString(String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
+			return getResourceString(bundleName, String.format("%s.%s", key.getClass().getName(), key.name())); // NON-NLS
 		} catch (MissingResourceException mre) {
 			return key.name();
 		}

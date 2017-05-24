@@ -34,7 +34,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
@@ -235,7 +234,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			Object obj = f.get(null);
 
 			Method m = obj.getClass().getMethod(off ? "add" : "remove", Object.class);
-			m.invoke(obj, "01");
+			m.invoke(obj, "01"); // NON-NLS
 		} catch (Exception exc) {
 			logger().log(OpLevel.DEBUG, "traceOff(boolean) failed", exc); // NON-NLS
 		}
@@ -336,74 +335,86 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	@Override
 	public T getNextItem() throws Exception {
-		while (!isHalted() && !isConnectedToQmgr(null)) {
-			try {
-				connectToQmgr();
-			} catch (MQException mqe) {
-				if (isConnectedToQmgr(mqe)) {
-					// connection to qmgr was successful, so we were not able to open/subscribe to required queue/topic,
-					// so exit
+		while (true) {
+			while (!isHalted() && !isConnectedToQmgr(null)) {
+				try {
+					connectToQmgr();
+				} catch (MQException mqe) {
+					if (isConnectedToQmgr(mqe)) {
+						// connection to qmgr was successful, so we were not able to open/subscribe to required
+						// queue/topic, so exit
+						logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"WmqStream.failed.opening"), formatMqException(mqe));
+						return null;
+					}
 					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.failed.opening"), formatMqException(mqe));
-					return null;
-				}
-				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"WmqStream.failed.to.connect"), formatMqException(mqe));
-				logger().log(OpLevel.INFO,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"TNTInputStream.will.retry"),
-						TimeUnit.MILLISECONDS.toSeconds(QMGR_CONN_RETRY_INTERVAL));
-				if (!isHalted()) {
-					StreamsThread.sleep(QMGR_CONN_RETRY_INTERVAL);
+							"WmqStream.failed.to.connect"), formatMqException(mqe));
+					if (!isHalted()) {
+						sleep(QMGR_CONN_RETRY_INTERVAL);
+					}
 				}
 			}
-		}
 
-		if (isHalted() || !isConnectedToQmgr(null)) {
-			// stream is halted or not connected to qmgr, so exit
-			return null;
-		}
-
-		try {
-			MQMessage mqMsg = new MQMessage();
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqStream.waiting.for.message"), dest.getName().trim());
-			dest.get(mqMsg, gmo);
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
-					dest.getName().trim(), mqMsg.getMessageLength());
-			// TODO: MQCFH mqcfh = new MQCFH(mqMsg); mqcfh.control != MQConstants.MQCFC_LAST;
-			if (stripHeaders) {
-				MQHeaderIterator hdrIt = new MQHeaderIterator(mqMsg);
-				hdrIt.skipHeaders();
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.stripped.wmq"));
-			}
-			T msgData = getActivityDataFromMessage(mqMsg);
-			qmgr.commit();
-			curFailCount = 0;
-			addStreamedBytesCount(mqMsg.getMessageLength());
-			// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
-			return msgData;
-		} catch (MQException mqe) {
-			if (isHalted() && mqe.getReason() == CMQC.MQRC_UNEXPECTED_ERROR) {
-				// stream is halted and most likely dest.get(MQMessage) was interrupted by stream stop method invoking
-				// dest.close()
+			if (isHalted() || !isConnectedToQmgr(null)) {
+				// stream is halted or not connected to qmgr, so exit
 				return null;
 			}
 
-			curFailCount++;
-			logger().log(OpLevel.ERROR,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),
-					dest.getName().trim(), formatMqException(mqe));
-			if (curFailCount >= MAX_CONSECUTIVE_FAILURES) {
-				logger().log(OpLevel.ERROR,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.reached.limit"),
-						MAX_CONSECUTIVE_FAILURES);
-				closeQmgrConnection();
+			try {
+				MQMessage mqMsg = new MQMessage();
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+						"WmqStream.waiting.for.message"), dest.getName().trim());
+				dest.get(mqMsg, gmo);
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
+						dest.getName().trim(), mqMsg.getMessageLength());
+				// TODO: MQCFH mqcfh = new MQCFH(mqMsg); mqcfh.control != MQConstants.MQCFC_LAST;
+				if (stripHeaders) {
+					MQHeaderIterator hdrIt = new MQHeaderIterator(mqMsg);
+					hdrIt.skipHeaders();
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqStream.stripped.wmq"));
+				}
+				T msgData = getActivityDataFromMessage(mqMsg);
+				qmgr.commit();
 				curFailCount = 0;
+				addStreamedBytesCount(mqMsg.getMessageLength());
+				// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
+				return msgData;
+			} catch (MQException mqe) {
+				if (isHalted() && mqe.getReason() == CMQC.MQRC_UNEXPECTED_ERROR) {
+					// stream is halted and most likely dest.get(MQMessage) was interrupted by stream stop method
+					// invoking dest.close()
+					return null;
+				}
+
+				curFailCount++;
+				logger().log(OpLevel.ERROR,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),
+						dest.getName().trim(), formatMqException(mqe));
+				boolean throwException = true;
+				if (curFailCount >= MAX_CONSECUTIVE_FAILURES) {
+					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqStream.reached.limit"), MAX_CONSECUTIVE_FAILURES);
+					closeQmgrConnection();
+					curFailCount = 0;
+				} else {
+					if (!isHalted()) {
+						switch (mqe.getReason()) {
+						case CMQC.MQRC_GET_INHIBITED:
+							sleep(QMGR_CONN_RETRY_INTERVAL);
+							throwException = false;
+							break;
+						default:
+							break;
+						}
+					}
+				}
+
+				if (throwException) {
+					throw mqe;
+				}
 			}
-			throw mqe;
 		}
 	}
 

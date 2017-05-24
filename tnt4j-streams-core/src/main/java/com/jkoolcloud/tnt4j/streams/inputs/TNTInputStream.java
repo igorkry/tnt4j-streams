@@ -609,6 +609,19 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
+	 * Causes stream owner thread to sleep for a defined period of time.
+	 *
+	 * @param period
+	 *            sleep period in milliseconds
+	 */
+	protected void sleep(long period) {
+		logger().log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.will.retry"),
+				TimeUnit.MILLISECONDS.toSeconds(period));
+		StreamsThread.sleep(period);
+	}
+
+	/**
 	 * Cleanup the stream.
 	 * <p>
 	 * This method is called by default {@link #run()} method to perform any necessary cleanup before the stream stops
