@@ -57,12 +57,12 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * This activity stream supports the following properties (in addition to those supported by {@link WmqStreamPCF}):
  * <ul>
  * <li>TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ
- * operations which names matches this mask. Default value - '*'. (Optional)</li>
+ * operations which names matches this mask. Default value - {@code "*"}. (Optional)</li>
  * <li>ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using '|' character) to process only
  * MQ trace events having reason codes not contained in this set. Set entries may be defined using both numeric and MQ
- * constant name values. Default value - ''. (Optional)</li>
+ * constant name values. Default value - {@code ""}. (Optional)</li>
  * <li>SuppressBrowseGets - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming.
- * Default value - 'false'. (Optional)</li>
+ * Default value - {@code false}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

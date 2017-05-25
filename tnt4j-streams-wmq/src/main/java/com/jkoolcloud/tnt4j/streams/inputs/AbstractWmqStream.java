@@ -46,18 +46,21 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * This activity stream supports the following properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
- * <li>QueueManager - Queue manager name. (Optional)</li>
+ * <li>QueueManager - Queue manager name. Default value - {@code null}. (Optional)</li>
  * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Topic - Topic name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Subscription - Subscription name. (Required - at least one of 'Queue', 'Topic', 'Subscription',
  * 'TopicString')</li>
  * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
- * <li>Host - WMQ connection host name. (Optional)</li>
- * <li>Port - WMQ connection port number. (Optional)</li>
- * <li>UserName - WMQ user identifier. (Optional)</li>
- * <li>Password - WMQ user password. (Optional)</li>
- * <li>Channel - Server connection channel name. (Optional)</li>
- * <li>StripHeaders - identifies whether stream should strip WMQ message headers. (Optional)</li>
+ * <li>Host - WMQ connection host name. Default value - {@code null}. (Optional)</li>
+ * <li>Port - WMQ connection port number. Default value - {@code 1414}. (Optional)</li>
+ * <li>UserName - WMQ user identifier. Default value - {@code null}. (Optional)</li>
+ * <li>Password - WMQ user password. Default value - {@code null}. (Optional)</li>
+ * <li>Channel - Server connection channel name. Default value - {@code "SYSTEM.DEF.SVRCONN"}. (Optional)</li>
+ * <li>StripHeaders - identifies whether stream should strip WMQ message headers. Default value - {@code true}.
+ * (Optional)</li>
+ * <li>StreamReconnectDelay - delay in seconds between queue manager reconnection or failed queue GET iterations.
+ * Default value - {@code 15sec}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -112,6 +115,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private String userName;
 	private String userPass;
 
+	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -145,6 +150,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				userName = value;
 			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 				userPass = value;
+			} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
+				reconnectDelay = Integer.valueOf(value);
 			}
 		}
 	}
@@ -183,6 +190,9 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		}
 		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 			return userPass;
+		}
+		if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
+			return reconnectDelay;
 		}
 
 		return super.getProperty(name);
@@ -350,7 +360,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 							"WmqStream.failed.to.connect"), formatMqException(mqe));
 					if (!isHalted()) {
-						sleep(QMGR_CONN_RETRY_INTERVAL);
+						sleep(reconnectDelay);
 					}
 				}
 			}
@@ -402,7 +412,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					if (!isHalted()) {
 						switch (mqe.getReason()) {
 						case CMQC.MQRC_GET_INHIBITED:
-							sleep(QMGR_CONN_RETRY_INTERVAL);
+							sleep(reconnectDelay);
 							throwException = false;
 							break;
 						default:

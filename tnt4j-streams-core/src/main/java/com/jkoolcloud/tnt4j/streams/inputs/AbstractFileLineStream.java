@@ -50,8 +50,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
  * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual only if 'FilePolling' property is set to
- * {@code true}. Default value - 15sec. (Optional)</li>
+ * <li>FileReadDelay - delay in seconds between file reading iterations. Actual only if 'FilePolling' property is set to
+ * {@code true}. Default value - {@code 15sec}. (Optional)</li>
  * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
  * on stream restart. Note, if 'StartFromLatest' is set to {@code false} - read state storing stays turned on, but
  * previous stored read state is reset (no need to delete state file manually). Default value - {@code false}.

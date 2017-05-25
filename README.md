@@ -3401,15 +3401,14 @@ These parameters are applicable to all types of streams.
 
  * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously
  or not. Default value - `false`. (Optional)
-    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only
-    if `UseExecutors` is set to `true`
-    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value -
-    `20sec`. (Optional) Actual only if `UseExecutors` is set to `true`
-    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value -
-    `false`. (Optional)  Actual only if `UseExecutors` is set to `true`
-        * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if
-        max. queue size is reached. Default value - `20sec`. (Optional)
-           Actual only if `ExecutorsBoundedModel` is set to `true`.
+    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only if `UseExecutors` 
+    is set to `true`
+    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) 
+    Actual only if `UseExecutors` is set to `true`
+    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional) 
+    Actual only if `UseExecutors` is set to `true`
+        * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is 
+        reached. Default value - `20sec`. (Optional) Actual only if `ExecutorsBoundedModel` is set to `true`.
   * StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
   * StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)          
 
@@ -3441,7 +3440,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 
  * BufferSize - maximal buffer queue capacity. Default value - `512`. (Optional)
  * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
- queue. Default value - 45sec. (Optional)
+ queue. Default value - `45sec`. (Optional)
 
      sample:
  ```xml
@@ -3454,8 +3453,8 @@ These parameters are applicable to streams which uses parsers to parse incoming 
  * FileName - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
  * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
  are read from oldest to newest sequentially one single time. Default value - `false`. (Optional)
-    * FileReadDelay - delay is seconds between file reading iterations. Actual only if `FilePolling` property is set to
-    `true`. Default value - 15sec. (Optional)
+    * FileReadDelay - delay in seconds between file reading iterations. Actual only if `FilePolling` property is set to `true`. Default 
+    value - `15sec`. (Optional)
  * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart. Note, if 
  `StartFromLatest` is set to `false` - read state storing stays turned on, but previous stored read state is reset (no need to delete state 
  file manually). Default value - `false`. (Optional)
@@ -3616,6 +3615,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * Password - WMQ user password. (Optional)
  * Channel - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
  * StripHeaders - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
+ * StreamReconnectDelay - delay in seconds between queue manager reconnection or failed queue GET iterations. Default value - `15sec`. 
+ (Optional)
 
     sample:
 ```xml
@@ -3736,7 +3737,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  connection. (Optional)
  * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
  * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer queue. Default value - 
- 45sec. (Optional)
+ `45sec`. (Optional)
  
     sample:
 ```xml

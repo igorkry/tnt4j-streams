@@ -192,7 +192,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property identifies delay is seconds between file reading iterations.
+	 * Property defines delay in seconds between file reading iterations.
 	 * 
 	 * 
 	 */

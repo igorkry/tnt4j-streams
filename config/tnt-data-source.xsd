@@ -580,7 +580,7 @@
             <xs:enumeration value="FileReadDelay">
                 <xs:annotation>
                     <xs:documentation>
-                        Property identifies delay is seconds between file reading iterations.
+                        Property defines delay in seconds between file reading iterations.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -802,6 +802,14 @@
                 <xs:annotation>
                     <xs:documentation>
                         Property to define stream used cache entries expiration duration in minutes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="StreamReconnectDelay">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property defines delay in seconds between queue manager reconnection or failed queue GET iterations.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
