@@ -3429,11 +3429,11 @@ These parameters are applicable to all types of streams.
 These parameters are applicable to streams which uses parsers to parse incoming RAW activity data.
 
  * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
- If set to `false` - puts log entry and continues. Default value - `true`. (Optional)
+ If set to `false` - puts log entry and continues. Default value - `false`. (Optional)
 
     sample:
 ```xml
-    <property name="HaltIfNoParser" value="false"/>
+    <property name="HaltIfNoParser" value="true"/>
 ```
 
 ##### Buffered streams parameters

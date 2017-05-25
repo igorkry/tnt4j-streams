@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * This activity stream supports the following properties (in addition to those supported by {@link TNTInputStream}):
  * <ul>
  * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the parsers can parse activity object RAW
- * data. If set to {@code false} - puts log entry and continues. (Optional)</li>
+ * data. If set to {@code false} - puts log entry and continues. Default value - {@code false}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -52,7 +52,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 */
 	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<>();
 
-	private boolean haltIfNoParser = true;
+	private boolean haltIfNoParser = false;
 
 	@Override
 	protected void setDefaultStreamOutput() {
