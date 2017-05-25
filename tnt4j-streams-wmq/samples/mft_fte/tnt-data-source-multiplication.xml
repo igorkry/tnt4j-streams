@@ -180,6 +180,7 @@
         <property name="QueueManager" value="QMGR.NAME"/>
         <property name="Queue" value="FTE.TRANSFER.LOG"/>
 
+        <property name="HaltIfNoParser" value="false"/>
         <property name="TurnOutActivityChildren" value="true"/>
 
         <parser-ref name="StartedEventParser"/>
