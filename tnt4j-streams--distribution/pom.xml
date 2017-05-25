@@ -22,7 +22,7 @@
         <release.deploy.dir>../../build/${release.deploy.name}</release.deploy.dir>
         <release.deploy.finalName>${release.deploy.name}-${project.version}</release.deploy.finalName>
         <release.deploy.assembly>src/assembly/deployAssembly.xml</release.deploy.assembly>
-        <build.assemblies.phase>package</build.assemblies.phase>
+        <build.assemblies.attach>false</build.assemblies.attach>
     </properties>
 
     <profiles>
@@ -31,7 +31,6 @@
 
             <properties>
                 <release.deploy.assembly>src/assembly/deployAssembly_dev.xml</release.deploy.assembly>
-                <build.assemblies.phase>deploy</build.assemblies.phase>
             </properties>
         </profile>
     </profiles>
@@ -63,7 +62,7 @@
                 <executions>
                     <execution>
                         <id>make-deploy-assembly</id>
-                        <phase>${build.assemblies.phase}</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
@@ -73,7 +72,7 @@
                                 <descriptor>${release.deploy.assembly}</descriptor>
                             </descriptors>
                             <outputDirectory>${release.deploy.dir}</outputDirectory>
-                            <attach>true</attach>
+                            <attach>${build.assemblies.attach}</attach>
                             <finalName>${release.deploy.finalName}</finalName>
                         </configuration>
                     </execution>
