@@ -59,7 +59,7 @@
     </dependencies>
 
     <build>
-        <defaultGoal>package</defaultGoal>
+        <defaultGoal>initialize</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -68,7 +68,7 @@
                 <executions>
                     <execution>
                         <id>install-com.ibm.mq.allclient</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -83,7 +83,7 @@
                     </execution>
                     <execution>
                         <id>install-com.ibm.mq.traceControl</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -98,7 +98,7 @@
                     </execution>
                     <execution>
                         <id>install-fscontext</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -113,7 +113,7 @@
                     </execution>
                     <execution>
                         <id>install-jms</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -128,7 +128,7 @@
                     </execution>
                     <execution>
                         <id>install-JSON4J</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -143,7 +143,7 @@
                     </execution>
                     <execution>
                         <id>install-providerutil</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -158,7 +158,7 @@
                     </execution>
                     <execution>
                         <id>install-bcpkix-jdk15on-152</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
@@ -173,7 +173,7 @@
                     </execution>
                     <execution>
                         <id>install-bcprov-jdk15on-152</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>install-file</goal>
                         </goals>

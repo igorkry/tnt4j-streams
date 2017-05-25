@@ -4140,7 +4140,7 @@ online mode it should download these defined dependencies automatically.
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public [Maven Repository](http://repo.maven.apache.org/maven2/). In this 
 case we would recommend to download those dependencies manually into module's `lib` directory and install into local maven repository by 
-running maven script `lib/pom.xml` with `package` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
+running maven script `lib/pom.xml` with `initialize` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
 how to do this.
 
 #### `WMQ` module
@@ -4149,18 +4149,28 @@ how to do this.
 default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
 libraries will be installed to local maven repository.    
 
-What to download manually:
-* IBM MQ 7.5
+What to download manually or copy from your existing IBM MQ installation:
+* IBM MQ 8.0 or 9.0
 
 Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq/lib` directory like this:
 ```
     lib
-     + ibm.mq
-         |- com.ibm.mq.commonservices.jar
-         |- com.ibm.mq.headers.jar
-         |- com.ibm.mq.jar
-         |- com.ibm.mq.jmqi.jar
-         |- com.ibm.mq.pcf.jar
+     + ibm.mq-v8.0
+         |- com.ibm.mq.allclient.jar
+         |- com.ibm.mq.traceControl.jar
+         |- fscontext.jar
+         |- jms.jar
+         |- JSON4J.jar
+         |- providerutil.jar
+     + ibm.mq-v9.0
+         |- bcpkix-jdk15on-152.jar
+         |- bcprov-jdk15on-152.jar
+         |- com.ibm.mq.allclient.jar
+         |- com.ibm.mq.traceControl.jar
+         |- fscontext.jar
+         |- jms.jar
+         |- JSON4J.jar
+         |- providerutil.jar
 ```
 (O) marked libraries are optional
 

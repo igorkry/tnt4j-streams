@@ -24,7 +24,7 @@
     </properties>
 
     <build>
-        <defaultGoal>install</defaultGoal>
+        <defaultGoal>initialize</defaultGoal>
     </build>
 
     <modules>
