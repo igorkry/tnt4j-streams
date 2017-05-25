@@ -260,7 +260,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
 
-						if (values[li] == null && requireAll && !loc.isOptional()) { // NON-NLS
+						if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
 							logger().log(OpLevel.WARNING,
 									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 											"ActivityXmlParser.required.locator.not.found"),

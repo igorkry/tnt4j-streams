@@ -38,11 +38,11 @@
 
     <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
-        <property name="RequireDefault" value="false"/>
+        <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="NOOP"/>
 
-        <field name="Filter" locator="/transaction/action/text()[. = 'progress']" locator-type="Label" required="true"/>
+        <field name="Filter" locator="/transaction/action[text() = 'progress']" locator-type="Label" required="true" transparent="true"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
         <field name="ApplName" separator=":">
@@ -89,7 +89,7 @@
 
         <field name="EventType" value="EVENT"/>
 
-        <field name="Filter" locator="/transaction/action/text()[. = 'started']" locator-type="Label" required="true"/>
+        <field name="Filter" locator="/transaction/action[text() = 'started']" locator-type="Label" required="true" transparent="true"/>
         <field name="EventName" value="Started"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -103,6 +103,7 @@
         <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
         <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
     </parser>
 
     <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
@@ -111,7 +112,7 @@
 
         <field name="EventType" value="END"/>
 
-        <field name="Filter" locator="/transaction/action/text()[. = 'completed']" locator-type="Label" required="true"/>
+        <field name="Filter" locator="/transaction/action[text() = 'completed']" locator-type="Label" required="true" transparent="true"/>
         <field name="EventName" value="completed"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -149,6 +150,27 @@
         </field>
     </parser>
 
+    <parser name="FallbackParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <property name="SignatureDelim" value="#!#"/>
+        <property name="RequireDefault" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="/transaction/action/text()" locator-type="Label"/>
+        <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
+        <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ApplName" separator=":">
+            <field-locator value="JOB"/>
+            <field-locator locator="/transaction/job/name" locator-type="Label" required="false"/>
+        </field>
+        <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+        <field name="ServerName" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
+        <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+    </parser>
+
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="Host" value="localhost"/>
         <property name="Port" value="1414"/>
@@ -161,14 +183,16 @@
         <parser-ref name="StartedEventParser"/>
         <parser-ref name="ProgressEventParser"/>
         <parser-ref name="CompletedEventParser"/>
+        <parser-ref name="FallbackParser"/>
     </stream>
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/queue/message_*_progress.xml"/>-->
     <!--<property name="TurnOutActivityChildren" value="true"/>-->
 
-    <!--&lt;!&ndash; <parser-ref name="StartedEventParser"/> &ndash;&gt;-->
-    <!--<parser-ref name="ProgressEventParser"/>-->
+    <!--&lt;!&ndash;<parser-ref name="StartedEventParser"/>&ndash;&gt;-->
+    <!--&lt;!&ndash;<parser-ref name="ProgressEventParser"/>&ndash;&gt;-->
     <!--&lt;!&ndash;<parser-ref name="CompletedEventParser"/>&ndash;&gt;-->
+    <!--<parser-ref name="FallbackParser"/>-->
     <!--</stream>-->
 </tnt-data-source>
