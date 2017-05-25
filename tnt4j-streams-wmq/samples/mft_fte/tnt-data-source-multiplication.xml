@@ -154,6 +154,8 @@
         <property name="SignatureDelim" value="#!#"/>
         <property name="RequireDefault" value="false"/>
 
+        <!-- DO THERE WHATEVER YOU WANT -->
+        <!-- If do not want to send to JKoolCloud - set "EventType" value to NOOP -->
         <field name="EventType" value="EVENT"/>
 
         <field name="EventName" locator="/transaction/action/text()" locator-type="Label"/>
