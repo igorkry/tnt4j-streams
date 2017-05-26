@@ -37,6 +37,15 @@
         <field name="Correlator" locator="Checksum" locator-type="Activity" required="false"/>
     </parser>
 
+    <parser name="JobNameParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
+
+        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
+        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
+        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
+        <field name="CoId" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
     <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="RequireDefault" value="true"/>
@@ -69,18 +78,23 @@
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
 
-        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"
+        <field name="Source_Filename" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"
                required="false"/>
-        <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"
+        <field name="Destination_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"
                required="false"/>
-        <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')"
-               locator-type="Label" required="false"/>
-        <field name="MFT_DST_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
+        <field name="Source_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"
+               required="false"/>
+        <field name="Destination_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
                locator-type="Label" required="false"/>
 
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
+
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="JobNameParser" aggregation="Merge"/>
+        </field>
+
         <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
             <parser-ref name="TransferSetParser" aggregation="Join"/>
         </embedded-activity>
@@ -161,7 +175,7 @@
         <!-- If do not want to send to JKoolCloud - set "EventType" value to NOOP -->
         <field name="EventType" value="EVENT"/>
 
-        <field name="EventName" locator="/transaction/action/text()" locator-type="Label"/>
+        <field name="EventName" locator="/transaction/action" locator-type="Label"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
         <field name="ApplName" separator=":">
