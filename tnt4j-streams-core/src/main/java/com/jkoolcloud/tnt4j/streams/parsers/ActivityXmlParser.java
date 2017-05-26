@@ -32,7 +32,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -330,12 +329,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					val = resolveValueOverXPath(xmlDoc, expr, formattingNeeded);
 				}
 
-				if (val != null) {
-					final ActivityField afield = cData.getField();
-					if (CollectionUtils.isEmpty(afield.getStackedParsers())) {
-						if (val instanceof Node) {
-							val = getTextContent(locator, (Node) val);
-						}
+				if (val instanceof Node) {
+					Node node = (Node) val;
+
+					if (!isNodeSupportedByStackedParser(cData.getField(), node)) {
+						val = getTextContent(locator, node);
 					}
 				}
 			} catch (XPathExpressionException exc) {
@@ -348,6 +346,20 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		return val;
+	}
+
+	private static boolean isNodeSupportedByStackedParser(ActivityField field, Node node) throws ParseException {
+		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
+
+		if (stackedParsers != null) {
+			for (ActivityField.ParserReference pRef : stackedParsers) {
+				if (pRef.getParser().isDataClassSupported(node)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr, AtomicBoolean formattingNeeded)
