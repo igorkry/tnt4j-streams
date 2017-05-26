@@ -543,11 +543,19 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		reviewTempFieldsNames(tFieldsList);
 
-		for (int tfi = 0; tfi < tFieldsList.size(); tfi++) {
-			ActivityField tField = tFieldsList.get(tfi);
-			Object fValue = fValues[tfi];
+		ActivityField tField = null;
+		try {
+			for (int tfi = 0; tfi < tFieldsList.size(); tfi++) {
+				tField = tFieldsList.get(tfi);
+				Object fValue = fValues[tfi];
 
-			applyFieldValue(cData.getStream(), cData.getActivity(), tField, Utils.simplifyValue(fValue));
+				applyFieldValue(cData.getStream(), cData.getActivity(), tField, Utils.simplifyValue(fValue));
+			}
+		} catch (Exception e) {
+			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", tField), 0);
+			pe.initCause(e);
+			throw pe;
 		}
 	}
 
