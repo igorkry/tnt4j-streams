@@ -3340,7 +3340,14 @@ sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `K
 Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration
 can be found in `tnt-data-source.xsd` file located in project `config` directory.
 
-To define `tnt-data-source.xml` file location use program argument `-f:` i.e. `-f:./tnt4j-streams-core/samples/single-log/tnt-data-source.xml`.
+To define streams data source configuration file location, use program argument `-f:` i.e.:
+```cmd
+     tnt4j-streams -f:./tnt4j-streams-core/samples/single-log/tnt-data-source.xml     
+```
+Or you can refer streams data source configuration file over System property named `tnt4j.streams.config` i.e.:
+```properties
+    -Dtnt4j.streams.config=./tnt4j-streams-core/samples/single-log/tnt-data-source.xml
+```
 
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
 [OS piped stream](#os-piped-stream).  

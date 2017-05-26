@@ -22,6 +22,7 @@ import java.util.Collection;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser;
@@ -37,6 +38,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class StreamsConfigLoader {
 
+	/**
+	 * Name of default streams configuration file referring system property name ({@value})
+	 */
+	public static final String STREAMS_CONFIG_KEY = "tnt4j.streams.config"; // NON-NLS
 	/**
 	 * Name of default configuration file name ({@value})
 	 */
@@ -62,13 +67,26 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the file
 	 */
 	public StreamsConfigLoader() throws SAXException, ParserConfigurationException, IOException {
-		InputStream config = openCfgFile(DFLT_CONFIG_FILE_PATH);
-		if (config == null) {
-			config = openCfgFile(DFLT_CONFIG_FILE_PATH2);
-		}
-		if (config == null) {
-			throw new FileNotFoundException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"StreamsConfig.file.not.found", DFLT_CONFIG_FILE_PATH, DFLT_CONFIG_FILE_PATH2));
+		InputStream config;
+		String cfgPath = System.getProperty(STREAMS_CONFIG_KEY);
+		if (StringUtils.isNotEmpty(cfgPath)) {
+			config = openCfgFile(cfgPath);
+
+			if (config == null) {
+				throw new FileNotFoundException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsConfig.file.not.found", cfgPath));
+			}
+		} else {
+			config = openCfgFile(DFLT_CONFIG_FILE_PATH);
+			if (config == null) {
+				config = openCfgFile(DFLT_CONFIG_FILE_PATH2);
+			}
+
+			if (config == null) {
+				throw new FileNotFoundException(
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"StreamsConfig.files.not.found", DFLT_CONFIG_FILE_PATH, DFLT_CONFIG_FILE_PATH2));
+			}
 		}
 
 		load(config);

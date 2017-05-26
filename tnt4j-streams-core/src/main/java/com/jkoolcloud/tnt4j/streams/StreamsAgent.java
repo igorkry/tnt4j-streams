@@ -136,9 +136,38 @@ public final class StreamsAgent {
 
 	/**
 	 * Main entry point for running as a API integration.
+	 * <p>
+	 * Requires streams data source configuration to be referenced over system property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader#STREAMS_CONFIG_KEY}.
+	 */
+	public static void runFromAPI() {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		loadConfigAndRun((Reader) null);
+	}
+
+	/**
+	 * Main entry point for running as a API integration.
+	 * <p>
+	 * Requires streams data source configuration to be referenced over system property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader#STREAMS_CONFIG_KEY}.
+	 *
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 */
+	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener) {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		loadConfigAndRun((Reader) null, streamListener, streamTasksListener);
+	}
+
+	/**
+	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFileName
-	 *            stream configuration file name
+	 *            stream data source configuration file name
 	 */
 	public static void runFromAPI(String cfgFileName) {
 		runFromAPI(cfgFileName, null, null);
@@ -148,7 +177,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFileName
-	 *            stream configuration file name
+	 *            stream data source configuration file name
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
@@ -165,7 +194,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFile
-	 *            stream configuration file
+	 *            stream data source configuration file
 	 */
 	public static void runFromAPI(File cfgFile) {
 		runFromAPI(cfgFile, null, null);
@@ -175,7 +204,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFile
-	 *            stream configuration file
+	 *            stream data source configuration file
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
@@ -189,7 +218,7 @@ public final class StreamsAgent {
 	}
 
 	/**
-	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 * Main entry point for running as a API integration without using stream data source configuration XML file.
 	 *
 	 * @param streams
 	 *            streams to run
@@ -199,7 +228,7 @@ public final class StreamsAgent {
 	}
 
 	/**
-	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 * Main entry point for running as a API integration without using stream data source configuration XML file.
 	 *
 	 * @param streamListener
 	 *            input stream listener
@@ -268,7 +297,7 @@ public final class StreamsAgent {
 	 * Configure streams and parsers, and run each stream in its own thread.
 	 *
 	 * @param cfg
-	 *            stream configuration
+	 *            stream data source configuration
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
