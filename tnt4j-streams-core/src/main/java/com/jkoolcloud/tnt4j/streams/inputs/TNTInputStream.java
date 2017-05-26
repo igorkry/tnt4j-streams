@@ -739,9 +739,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (!failureFlag.get()) {
 			notifyStreamSuccess();
 		}
-		notifyFinished();
 
 		cleanup();
+
+		notifyFinished();
 
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
