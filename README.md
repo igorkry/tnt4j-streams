@@ -4141,7 +4141,7 @@ online mode it should download these defined dependencies automatically.
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public [Maven Repository](http://repo.maven.apache.org/maven2/). In this 
 case we would recommend to download those dependencies manually into module's `lib` directory and install into local maven repository by 
-running maven script `lib/pom.xml` with `initialize` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
+running maven script `lib/pom.xml` with `install` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
 how to do this.
 
 #### `WMQ` module
