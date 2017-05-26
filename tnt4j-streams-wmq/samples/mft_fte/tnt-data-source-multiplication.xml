@@ -34,6 +34,7 @@
         <field name="LastModified" locator="//*/file/@last-modified" locator-type="Label" required="false"/>
         <field name="Checksum" locator="//*/checksum" locator-type="Label" required="false"/>
         <field name="ChecksumMethod" locator="//*/checksum/@method" locator-type="Label" required="false"/>
+        <field name="Correlator" locator="Checksum" locator-type="Activity" required="false"/>
     </parser>
 
     <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
@@ -68,12 +69,14 @@
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
 
-        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
-        <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
+        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"
+               required="false"/>
+        <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"
+               required="false"/>
         <field name="MFT_SRC_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')"
-               locator-type="Label"/>
+               locator-type="Label" required="false"/>
         <field name="MFT_DST_QUEUE_NAME" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
-               locator-type="Label"/>
+               locator-type="Label" required="false"/>
 
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
