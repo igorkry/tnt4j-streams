@@ -162,7 +162,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (matcher == null || !matcher.matches()) {
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.input.not.match"),
-					getName());
+					getName(), pattern.pattern());
 			return null;
 		}
 
@@ -267,10 +267,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		String locStr = locator.getLocator();
 
 		if (StringUtils.isNotEmpty(locStr)) {
-			int loc = Integer.parseInt(locStr);
-
 			if (cData.containsKey(MATCHES_KEY)) {
 				ArrayList<String> matches = (ArrayList<String>) cData.get(MATCHES_KEY);
+				int loc = Integer.parseInt(locStr);
 
 				if (loc >= 0 && loc < matches.size()) {
 					val = matches.get(loc);
@@ -278,8 +277,13 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			} else {
 				Matcher matcher = (Matcher) cData.getData();
 
-				if (loc >= 0 && loc <= matcher.groupCount()) {
-					val = matcher.group(loc);
+				if (locator.getBuiltInType() == ActivityFieldLocatorType.REGroupNum) {
+					int loc = Integer.parseInt(locStr);
+					if (loc >= 0 && loc <= matcher.groupCount()) {
+						val = matcher.group(loc);
+					}
+				} else {
+					val = matcher.group(locStr);
 				}
 			}
 		}

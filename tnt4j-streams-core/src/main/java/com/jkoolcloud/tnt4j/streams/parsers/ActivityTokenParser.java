@@ -141,7 +141,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.input.not.match"), getName());
+						"ActivityParser.input.not.match"), getName(), pattern.pattern());
 				return null;
 			}
 		}

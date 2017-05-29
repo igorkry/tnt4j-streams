@@ -263,31 +263,47 @@ sample:
     /**
      * Indicates that raw data value is the value of a named property of the current stream.
      */
-    StreamProp,
+    StreamProp(String.class),
 
     /**
      * Indicates that raw data value is at a specified index location, offset, etc. This is a generic index/offset value whose 
      * interpretation is up to the specific parser applying the locator.
      */
-    Index,
+   	Index(Integer.class),
 
     /**
      * Indicates that raw data value is the value of a particular key or label. Examples of this are XPath expressions for XML elements, 
      * and where each element of a raw activity data string is a name/value pair.
      */
-    Label,
+    Label(String.class),
 
     /**
      * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the raw activity data 
      * using a regular expression pattern defined as a sequence of groups.
      */
-    REGroupNum,
+    REGroupNum(Integer.class),
 
     /**
      * Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the raw activity data 
      * using a regular expression pattern defined as a sequence of repeating match patterns.
      */
-    REMatchNum
+    REMatchNum(Integer.class),
+
+    /**
+     * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the raw activity data 
+     * using a regular expression pattern defined as a sequence of groups.
+     */
+    REGroupName(String.class),
+
+    /**
+     * Indicates that data value is the value from stream stored cache with specified cache entry key.
+     */
+    Cache(String.class),
+
+    /**
+     * Indicates that data value is the value from currently processed activity data entity with specified entity field name.
+     */
+    Activity(String.class);
 ```
 
 **NOTE:** `Index` is default value and may be suppressed in field/locator definition:
@@ -3823,9 +3839,16 @@ Also see [Generic parser parameters](#generic-parser-parameters).
  * Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)
 
     sample:
+* index-capturing groups:
 ```xml
-    <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
+    <property name="Pattern" value="((\S+) (\S+) (\S+))"/>    
 ```
+* named-capturing groups:
+```xml
+    <property name="Pattern"><![CDATA[
+        (?<CoID>.*)\.(?<ProcessArea>.*)\.(?<InterfaceID>.*)\.(?<HopNr>.*)
+    ]]></property>
+```    
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 

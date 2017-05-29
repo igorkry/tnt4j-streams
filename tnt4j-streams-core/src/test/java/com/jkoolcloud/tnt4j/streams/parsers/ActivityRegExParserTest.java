@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -96,7 +97,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	}
 
 	@Test
-	public void maches() {
+	public void matches() {
 		Pattern pattern = Pattern.compile(TEST_PATTERN);
 		Matcher matcher = pattern.matcher(TEST_STRING);
 		assertTrue(matcher.matches());
@@ -221,5 +222,34 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 		parser.addField(af);
 		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
 		parser.parse(stream, "1111555999"); // NON-NLS
+	}
+
+	@Test
+	public void parseNamedLocatorTest() throws Exception {
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "CoID"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "ProcessArea"); // NON-NLS
+		ActivityFieldLocator locator3 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "InterfaceID"); // NON-NLS
+		ActivityFieldLocator locator4 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "HopNr"); // NON-NLS
+		ActivityField af1 = new ActivityField("test1"); // NON-NLS
+		ActivityField af2 = new ActivityField("test2"); // NON-NLS
+		ActivityField af3 = new ActivityField("test3"); // NON-NLS
+		ActivityField af4 = new ActivityField("test4"); // NON-NLS
+		af1.addLocator(locator1);
+		af2.addLocator(locator2);
+		af3.addLocator(locator3);
+		af4.addLocator(locator4);
+		parser.addField(af1);
+		parser.addField(af2);
+		parser.addField(af3);
+		parser.addField(af4);
+
+		setProperty(parser, ParserProperties.PROP_PATTERN,
+				"(?<CoID>.*)\\.(?<ProcessArea>.*)\\.(?<InterfaceID>.*)\\.(?<HopNr>.*)"); // NON-NLS
+		ActivityInfo ai = parser.parse(stream, "MON.WHL.10232.006"); // NON-NLS
+
+		assertEquals(ai.getFieldValue("test1"), ("MON")); // NON-NLS
+		assertEquals(ai.getFieldValue("test2"), ("WHL")); // NON-NLS
+		assertEquals(ai.getFieldValue("test3"), ("10232")); // NON-NLS
+		assertEquals(ai.getFieldValue("test4"), ("006")); // NON-NLS
 	}
 }
