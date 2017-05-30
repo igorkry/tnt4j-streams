@@ -987,6 +987,80 @@ should be able to handle whole log file with no problems.
 **NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `CompCode` uses manual
 field string mapping to TNT4J event field value.
 
+#### Apache Access log single file - named RegEx groups mappings
+
+Sample does all the same as [Apache Access log single file](#apache-access-log-single-file), but uses named RegEx group mapping for a 
+parser defined fields.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b %D"/>
+        <property name="ConfRegexMapping"><![CDATA[%*r=(?<request>((?<method>\S+) (?<uri>.*?)( (?<version>\S+))?)|(-))]]></property>
+
+        <field name="Location" locator="hostname" locator-type="REGroupName"/>
+        <field name="UserName" locator="user" locator-type="REGroupName"/>
+        <field name="StartTime" locator="time" locator-type="REGroupName" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="method" locator-type="REGroupName"/>
+        <field name="ResourceName" locator="uri" locator-type="REGroupName"/>
+        <field name="CompCode" locator="status" locator-type="REGroupName">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="status" locator-type="REGroupName"/>
+        <field name="MsgValue" locator="sizeClf" locator-type="REGroupName"/>
+        <field name="ElapsedTime" locator="reqTime" locator-type="REGroupName" datatype="Number" format="#####0.000" locale="en-US"
+               units="Seconds"/>
+    </parser>
+
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+        <property name="ConfRegexMapping"><![CDATA[%*r=(?<request>((?<method>\S+) (?<uri>.*?)( (?<version>\S+))?)|(-))]]></property>
+
+        <field name="Location" locator="hostname" locator-type="REGroupName"/>
+        <field name="UserName" locator="user" locator-type="REGroupName"/>
+        <field name="StartTime" locator="time" locator-type="REGroupName" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="method" locator-type="REGroupName"/>
+        <field name="ResourceName" locator="uri" locator-type="REGroupName"/>
+        <field name="CompCode" locator="status" locator-type="REGroupName">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="status" locator-type="REGroupName"/>
+        <field name="MsgValue" locator="sizeClf" locator-type="REGroupName"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/apache-access-single-log/access.log"/>
+        <property name="RestoreState" value="false"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+
+        <!--<property name="UseExecutors" value="true"/>-->
+        <!--<property name="ExecutorThreadsQuantity" value="5"/>-->
+        <!--<property name="ExecutorsTerminationTimeout" value="20"/>-->
+        <!--<property name="ExecutorsBoundedModel" value="false"/>-->
+        <!--<property name="ExecutorRejectedTaskOfferTimeout" value="20"/>-->
+
+        <parser-ref name="AccessLogParserExt"/>
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>
+```
+See parsers configuration section ['Apache access log parser'](#apache-access-log-parser) for a default RegEx group names used by 
+`ApacheAccessLogParser`. 
+
 #### Apache Access log multiple files
 
 This sample shows how to stream Apache access log records as activity events from multiple log files using file name
@@ -2178,7 +2252,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
 
-    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser">
+    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
 
         <field name="EventType" value="EVENT"/>
@@ -3909,11 +3983,51 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
     <property name="ConfRegexMapping" value="%*r=(((\S+) (.*?)( (\S+)|()))|(-))"/>
     <property name="ConfRegexMapping" value="%*i=(.*?)"/>
 ```
- or
+ or defining complete RegEx pattern to match log lines:
 ```xml
     <property name="Pattern"
               value="^(\S+) (\S+) (\S+) \[([\w:/]+\s[+\-]\d{4})\] &quot;(((\S+) (.*?)( (\S+)|()))|(-))&quot; (\d{3}) (\d+|-)( (\S+)|$)"/>
 ```
+ or defining named RegEx group mapping for log pattern token:
+```xml
+    <property name="ConfRegexMapping"><![CDATA[%*r=(?<request>((?<method>\S+) (?<uri>.*?)( (?<version>\S+))?)|(-))]]></property>
+```
+
+RegEx group names and log pattern tokens mapping:
+
+|	REGroupName	|	Format String	|	Description	|
+|	---	|	---	|	---	|
+|	address	|	%a	|	Client IP address of the request (see the mod_remoteip module).	|
+|	local_address	|	%A	|	Local IP-address.	|
+|	size	|	%B	|	Size of response in bytes, excluding HTTP headers.	|
+|	size_clf	|	%b	|	Size of response in bytes, excluding HTTP headers. In CLF format, i.e. a '-' rather than a 0 when no bytes are sent.	|
+|	cookie	|	%{VARNAME}C	|	The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.	|
+|	req_time	|	%D	|	The time taken to serve the request, in microseconds.	|
+|	env_variable	|	%{VARNAME}e	|	The contents of the environment variable VARNAME.	|
+|	filename	|	%f	|	Filename.	|
+|	hostname	|	%h	|	Remote hostname. Will log the IP address if HostnameLookups is set to Off, which is the default. If it logs the hostname for only a few hosts, you probably have access control directives mentioning them by name. See the Require host documentation.	|
+|	protocol	|	%H	|	The request protocol.	|
+|	variable	|	%{VARNAME}i	|	The contents of VARNAME: header line(s) in the request sent to the server. Changes made by other modules (e.g. mod_headers) affect this. If you're interested in what the request header was prior to when most modules would have modified it, use mod_setenvif to copy the header into an internal environment variable and log that value with the %{VARNAME}edescribed above.	|
+|	keep_alive	|	%k	|	Number of keepalive requests handled on this connection. Interesting if KeepAlive is being used, so that, for example, a '1' means the first keepalive request after the initial one, '2' the second, etc...; otherwise this is always 0 (indicating the initial request).	|
+|	logname	|	%l	|	Remote logname (from identd, if supplied). This will return a dash unless mod_ident is present and IdentityCheck is set On.	|
+|	method	|	%m	|	The request method.	|
+|	note	|	%{VARNAME}n	|	The contents of note VARNAME from another module.	|
+|	header_var	|	%{VARNAME}o	|	The contents of VARNAME: header line(s) in the reply.	|
+|	port	|	%{format}p	|	The canonical port of the server serving the request, or the server's actual port, or the client's actual port. Valid formats are canonical, local, or remote.	|
+|	process	|	%{format}P	|	The process ID or thread ID of the child that serviced the request. Valid formats are pid, tid, and hextid. hextid requires APR 1.2.0 or higher.	|
+|	query	|	%q	|	The query string (prepended with a ? if a query string exists, otherwise an empty string).	|
+|	line	|	%r	|	First line of request.	|
+|	resp_handler	|	%R	|	The handler generating the response (if any).	|
+|	status	|	%s	|	Status. For requests that have been internally redirected, this is the status of the original request. Use %>s for the final status.	|
+|	time	|	%{format}t	|	The time, in the form given by format, which should be in an extended strftime(3) format (potentially localized). If the format starts with begin: (default) the time is taken at the beginning of the request processing. If it starts with end: it is the time when the log entry gets written, close to the end of the request processing. In addition to the formats supported by strftime(3), the following format tokens are supported:	|
+|	req_time_ext	|	%{UNIT}T	|	The time taken to serve the request, in a time unit given by UNIT. Valid units are ms for milliseconds, us for microseconds, and s for seconds. Using s gives the same result as %Twithout any format; using us gives the same result as %D. Combining %T with a unit is available in 2.4.13 and later.	|
+|	user	|	%u	|	Remote user if the request was authenticated. May be bogus if return status (%s) is 401 (unauthorized).	|
+|	uri	|	%U	|	The URL path requested, not including any query string.	|
+|	server_name	|	%v	|	The canonical ServerName of the server serving the request.	|
+|	server_name_ext	|	%V	|	The server name according to the UseCanonicalName setting.	|
+|	con_status	|	%X	|	Connection status when response is completed:	|
+|	received	|	%I	|	Bytes received, including request and headers. Cannot be zero. You need to enable mod_logio to use this.	|
+|	sent	|	%O	|	Bytes sent, including headers. May be zero in rare cases such as when a request is aborted before a response is sent. You need to enable mod_logio to use this.	|
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 

@@ -43,8 +43,65 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if {@code LogPattern}
  * property is used)</li>
  * </ul>
+ * <p>
+ * RegEx group names and log pattern tokens mapping:
+ * <table summary="RegEx group names and log pattern tokens mapping">
+ * <tr><th>RegEx group name</th><th>Format String</th><th>Description</th></tr>
+ * <tr><td>address</td><td>%a</td><td>Client IP address of the request (see the mod_remoteip module).</td></tr>
+ * <tr><td>localAddress</td><td>%A</td><td>Local IP-address.</td></tr>
+ * <tr><td>size</td><td>%B</td><td>Size of response in bytes, excluding HTTP headers.</td></tr>
+ * <tr><td>sizeClf</td><td>%b</td><td>Size of response in bytes, excluding HTTP headers. In CLF format, i.e. a '-' rather than a 0 when no bytes are
+ * sent.</td></tr>
+ * <tr><td>cookie</td><td>%{VARNAME}C</td><td>The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully
+ * supported.</td></tr>
+ * <tr><td>reqTime</td><td>%D</td><td>The time taken to serve the request, in microseconds.</td></tr>
+ * <tr><td>envVariable</td><td>%{VARNAME}e</td><td>The contents of the environment variable VARNAME.</td></tr>
+ * <tr><td>filename</td><td>%f</td><td>Filename.</td></tr>
+ * <tr><td>hostname</td><td>%h</td><td>Remote hostname. Will log the IP address if HostnameLookups is set to Off, which is the default. If it logs the
+ * hostname for only a few hosts, you probably have access control directives mentioning them by name. See the Require
+ * host documentation.</td></tr>
+ * <tr><td>protocol</td><td>%H</td><td>The request protocol.</td></tr>
+ * <tr><td>variable</td><td>%{VARNAME}i</td><td>The contents of VARNAME: header line(s) in the request sent to the server. Changes made by other modules
+ * (e.g. mod_headers) affect this. If you're interested in what the request header was prior to when most modules would
+ * have modified it, use mod_setenv if to copy the header into an internal environment variable and log that value with
+ * the %{VARNAME}edescribed above.</td></tr>
+ * <tr><td>keepAlive</td><td>%k</td><td>Number of keepalive requests handled on this connection. Interesting if KeepAlive is being used, so that, for
+ * example, a '1' means the first keepalive request after the initial one, '2' the second, etc...; otherwise this is
+ * always 0 (indicating the initial request).</td></tr>
+ * <tr><td>logname</td><td>%l</td><td>Remote logname (from identd, if supplied). This will return a dash unless mod_ident is present
+ * and IdentityCheck is set On.</td></tr>
+ * <tr><td>method</td><td>%m</td><td>The request method.</td></tr>
+ * <tr><td>note</td><td>%{VARNAME}n</td><td>The contents of note VARNAME from another module.</td></tr>
+ * <tr><td>headerVar</td><td>%{VARNAME}o</td><td>The contents of VARNAME: header line(s) in the reply.</td></tr>
+ * <tr><td>port</td><td>%{format}p</td><td>The canonical port of the server serving the request, or the server's actual port, or the client's actual port.
+ * Valid formats are canonical, local, or remote.</td></tr>
+ * <tr><td>process</td><td>%{format}P</td><td>The process ID or thread ID of the child that serviced the request. Valid formats are pid, tid,
+ * and hextid. hextid requires APR 1.2.0 or higher.</td></tr>
+ * <tr><td>query</td><td>%q</td><td>The query string (prepended with a ? if a query string exists, otherwise an empty string).</td></tr>
+ * <tr><td>line</td><td>%r</td><td>First line of request.</td></tr>
+ * <tr><td>respHandler</td><td>%R</td><td>The handler generating the response (if any).</td></tr>
+ * <tr><td>status</td><td>%s</td><td>Status. For requests that have been internally redirected, this is the status of the original request.
+ * Use %>s for the final status.</td></tr>
+ * <tr><td>time</td><td>%{format}t</td><td>The time, in the form given by format, which should be in an extended strftime(3) format (potentially localized).
+ * If the format starts with begin: (default) the time is taken at the beginning of the request processing. If it starts
+ * with end: it is the time when the log entry gets written, close to the end of the request processing. In addition to
+ * the formats supported by strftime(3), the following format tokens are supported:</td></tr>
+ * <tr><td>reqTimeExt</td><td>%{UNIT}T</td><td>The time taken to serve the request, in a time unit given by UNIT. Valid units are ms for milliseconds, us for
+ * microseconds, and s for seconds. Using s gives the same result as %Twithout any format; using us gives the same
+ * result as %D. Combining %T with a unit is available in 2.4.13 and later.</td></tr>
+ * <tr><td>user</td><td>%u</td><td>Remote user if the request was authenticated. May be bogus if return status (%s) is 401 (unauthorized).</td></tr>
+ * <tr><td>uri</td><td>%U</td><td>The URL path requested, not including any query string.</td></tr>
+ * <tr><td>serverName</td><td>%v</td><td>The canonical ServerName of the server serving the request.</td></tr>
+ * <tr><td>serverNameExt</td><td>%V</td><td>The server name according to the UseCanonicalName setting.</td></tr>
+ * <tr><td>conStatus</td><td>%X</td><td>Connection status when response is completed:</td></tr>
+ * <tr><td>received</td><td>%I</td><td>Bytes received, including request and headers. Cannot be zero. You need to enable mod_logio to use this.</td></tr>
+ * <tr><td>sent</td><td>%O</td><td>Bytes sent, including headers. May be zero in rare cases such as when a request is aborted before a response is
+ * sent. You need to enable mod_logio to use this.</td></tr>
+ * </table>
+ * <p>
+ * NOTE: See {@link Pattern} documentation section "Group name" regarding groups naming conventions!
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class ApacheAccessLogParser extends ActivityRegExParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ApacheAccessLogParser.class);
@@ -62,21 +119,16 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	private static final String APACHE_LOG_CONFIG_TOKEN_REPLACEMENT_REGEX = "%\\S*(%|\\w)"; // NON-NLS
 
 	private static final String DEFAULT_LOG_TOKEN_REGEX = "(\\S+)"; // NON-NLS
-	private static final String STATUS_LOG_TOKEN_REGEX = "(\\d{3})"; // NON-NLS
-	private static final String REQUEST_LOG_TOKEN_REGEX = "(((\\S+) (.*?)( (\\S+))?)|(-))"; // NON-NLS
+	private static final String STATUS_LOG_TOKEN_REGEX = "(?<status>\\d{3})"; // NON-NLS
+	private static final String REQUEST_LOG_TOKEN_REGEX = "(?<request>((?<method>\\S+) (?<uri>.*?)( (?<version>\\S+))?)|(-))"; // NON-NLS
 
-	// NOTE: RegEx matcher with group names available since Java 1.7
 	// static final String REGEX_TOKENS = "(?<address>\\S+)
 	// (?<user>.*?)\\[(?<when>.*?)\\] \"(?<request>.*?)\"
 	// (?<status>[\\d\\-]+)(?<length>[\\d\\-]+) \"(?<referer>.*?)\"
 	// \"(?<agent>.*?)\".*";
-	// static final Pattern PATTERN_TOKENS = Pattern.compile(REGEX_TOKENS,
-	// Pattern.CASE_INSENSITIVE);
 	//
 	// static final String REGEX_CLIENT_REQUEST =
 	// "(?<method>\\S+)\\s+?(?<uri>.*?)\\s+?(?<version>HTTP.*)";
-	// static final Pattern PATTERN_CLIENT_REQUEST =
-	// Pattern.compile(REGEX_CLIENT_REQUEST, Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Apache access log configuration pattern string.
@@ -110,39 +162,38 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 	 * Fills default Apache access log configuration to RegEx mappings.
 	 */
 	private void fillDefaultConfigRegexMappings() {
-		configRegexMappings.put("%%", "%"); // NON-NLS NON-NLS
-		configRegexMappings.put("%a", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%A", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%B", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%b", "(\\d+|-)"); // NON-NLS NON-NLS
-		configRegexMappings.put("%*C", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*D", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*e", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%f", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%h", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%H", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*i", "(.*?)"); // NON-NLS
-		configRegexMappings.put("%k", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%l", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%m", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*n", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*o", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*p", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*P", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%q", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%%", "%"); // NON-NLS %% The percent sign.
+		configRegexMappings.put("%a", makeNamedGroup("address")); // NON-NLS
+		configRegexMappings.put("%A", makeNamedGroup("localAddress")); // NON-NLS
+		configRegexMappings.put("%B", makeNamedGroup("size")); // NON-NLS
+		configRegexMappings.put("%b", "(?<sizeClf>\\d+|-)"); // NON-NLS
+		configRegexMappings.put("%*C", makeNamedGroup("cookie")); // NON-NLS
+		configRegexMappings.put("%*D", makeNamedGroup("reqTime")); // NON-NLS
+		configRegexMappings.put("%*e", makeNamedGroup("envVariable")); // NON-NLS
+		configRegexMappings.put("%f", makeNamedGroup("filename")); // NON-NLS
+		configRegexMappings.put("%h", makeNamedGroup("hostname")); // NON-NLS
+		configRegexMappings.put("%H", makeNamedGroup("protocol")); // NON-NLS
+		configRegexMappings.put("%*i", "(?<variable>.*?)"); // NON-NLS
+		configRegexMappings.put("%k", makeNamedGroup("keepAlive")); // NON-NLS
+		configRegexMappings.put("%l", makeNamedGroup("logname")); // NON-NLS
+		configRegexMappings.put("%m", makeNamedGroup("method")); // NON-NLS
+		configRegexMappings.put("%*n", makeNamedGroup("note")); // NON-NLS
+		configRegexMappings.put("%*o", makeNamedGroup("headerVar")); // NON-NLS
+		configRegexMappings.put("%*p", makeNamedGroup("port")); // NON-NLS
+		configRegexMappings.put("%*P", makeNamedGroup("process")); // NON-NLS
+		configRegexMappings.put("%q", makeNamedGroup("query")); // NON-NLS
 		configRegexMappings.put("%*r", REQUEST_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%R", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%R", makeNamedGroup("respHandler")); // NON-NLS
 		configRegexMappings.put("%*s", STATUS_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*t", "\\[([\\w:/]+\\s[+\\-]\\d{4})\\]"); // NON-NLS
-																			// NON-NLS
-		configRegexMappings.put("%*T", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*u", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%*U", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%v", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%V", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%X", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%I", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
-		configRegexMappings.put("%O", DEFAULT_LOG_TOKEN_REGEX); // NON-NLS
+		configRegexMappings.put("%*t", "\\[(?<time>[\\w:/]+\\s[+\\-]\\d{4})\\]"); // NON-NLS
+		configRegexMappings.put("%*T", makeNamedGroup("reqTimeExt")); // NON-NLS
+		configRegexMappings.put("%*u", makeNamedGroup("user")); // NON-NLS
+		configRegexMappings.put("%*U", makeNamedGroup("uri")); // NON-NLS
+		configRegexMappings.put("%v", makeNamedGroup("serverName")); // NON-NLS
+		configRegexMappings.put("%V", makeNamedGroup("serverNameExt")); // NON-NLS
+		configRegexMappings.put("%X", makeNamedGroup("conStatus")); // NON-NLS
+		configRegexMappings.put("%I", makeNamedGroup("received")); // NON-NLS
+		configRegexMappings.put("%O", makeNamedGroup("sent")); // NON-NLS
 	}
 
 	@Override
@@ -302,5 +353,9 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		String p = pattern.replace("*", "\\S*"); // NON-NLS
 
 		return configToken.matches(p);
+	}
+
+	private static String makeNamedGroup(String name) {
+		return "(?<" + name + ">\\S+)"; // NON-NLS
 	}
 }
