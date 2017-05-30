@@ -37,6 +37,8 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 
 	private FormulaEvaluator evaluator;
 
+	protected final Object EVALUATOR_LOCK = new Object();
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -66,12 +68,15 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	 * @return evaluated cell value
 	 */
 	protected Object getCellValue(Cell cell) {
-		if (evaluator == null) {
-			Workbook workbook = cell.getSheet().getWorkbook();
-			evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-		}
+		CellValue cellValue;
+		synchronized (EVALUATOR_LOCK) {
+			if (evaluator == null) {
+				Workbook workbook = cell.getSheet().getWorkbook();
+				evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+			}
 
-		CellValue cellValue = evaluator.evaluate(cell);
+			cellValue = evaluator.evaluate(cell);
+		}
 
 		if (cellValue == null) {
 			return cell.toString();
@@ -88,5 +93,4 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 			return cellValue.formatAsString();
 		}
 	}
-
 }

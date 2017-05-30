@@ -22,10 +22,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.pcf.MQCFGR;
-import com.ibm.mq.pcf.MQCFIN;
-import com.ibm.mq.pcf.PCFMessage;
-import com.ibm.mq.pcf.PCFParameter;
+import com.ibm.mq.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -37,7 +34,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
- * Implements a WebSphere MQ activity traces stream, where activity data is {@link PCFMessage} contained PCF parameters
+ * Implements a WebSphere MQ activity traces stream, where activity data is {@link PCFContent} contained PCF parameters
  * and MQ activity trace entries (as {@link MQCFGR}). Same PCF message will be returned as next item until all trace
  * entries are processed (message gets 'consumed') and only then new PCF message is retrieved from MQ server. Stream
  * 'marks' PCF message contained trace entry as 'processed' by setting custom PCF parameter
@@ -51,8 +48,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * traces when there was no messages available in queue.</li>
  * </ul>
  * <p>
- * This activity stream requires parsers that can support {@link PCFMessage} data. But primarily it is meant to be used
- * in common with {@link com.jkoolcloud.tnt4j.streams.custom.parsers.WmqTraceParser}.
+ * This activity stream requires parsers that can support {@link PCFContent} data like
+ * {@link com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser}.
  * <p>
  * This activity stream supports the following properties (in addition to those supported by {@link WmqStreamPCF}):
  * <ul>
@@ -65,12 +62,12 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * Default value - {@code false}. (Optional)</li>
  * </ul>
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class WmqTraceStream extends WmqStreamPCF {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqTraceStream.class);
 
-	private PCFMessage pcfMessage;
+	private PCFContent pcfMessage;
 
 	private String opName = null;
 	private Pattern opNameMatcher = null;
@@ -156,7 +153,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 	}
 
 	@Override
-	public PCFMessage getNextItem() throws Exception {
+	public PCFContent getNextItem() throws Exception {
 		while (true) {
 			if (isPCFMessageConsumed(pcfMessage)) {
 				pcfMessage = super.getNextItem();
@@ -171,19 +168,18 @@ public class WmqTraceStream extends WmqStreamPCF {
 				}
 			}
 
-			return pcfMessage;
+			return strip(pcfMessage);
 		}
 	}
 
-	private boolean isPCFMessageConsumed(PCFMessage pcfMsg) {
+	private boolean isPCFMessageConsumed(PCFContent pcfMsg) {
 		if (pcfMsg == null) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 					"WmqTraceStream.msg.consumption.null"));
 			return true;
 		}
 
-		MQCFIN tcp = (MQCFIN) pcfMsg.getParameter(WmqStreamConstants.TRACES_COUNT);
-		int tc = tcp == null ? 0 : tcp.getIntValue();
+		int tc = getIntParam(pcfMsg, WmqStreamConstants.TRACES_COUNT);
 		MQCFIN tmp = (MQCFIN) pcfMsg.getParameter(WmqStreamConstants.TRACE_MARKER);
 		int ti = tmp == null ? 0 : tmp.getIntValue();
 
@@ -208,7 +204,12 @@ public class WmqTraceStream extends WmqStreamPCF {
 		}
 	}
 
-	private boolean initTrace(PCFMessage pcfMsg) {
+	private static int getIntParam(PCFContent pcf, int param) {
+		MQCFIN pv = (MQCFIN) pcf.getParameter(param);
+		return pv == null ? 0 : pv.getIntValue();
+	}
+
+	private boolean initTrace(PCFContent pcfMsg) {
 		int trC = 0;
 		int trM = 0;
 		boolean opFound = false;
@@ -226,7 +227,6 @@ public class WmqTraceStream extends WmqStreamPCF {
 					trM = trC;
 				}
 			}
-
 		}
 
 		if (opFound) {
@@ -247,7 +247,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 		return opFound;
 	}
 
-	private int getNextMatchingTrace(PCFMessage pcfMsg, int marker) {
+	private int getNextMatchingTrace(PCFContent pcfMsg, int marker) {
 		Enumeration<?> prams = pcfMsg.getParameters();
 		int trI = 0;
 		while (prams.hasMoreElements()) {
@@ -332,5 +332,46 @@ public class WmqTraceStream extends WmqStreamPCF {
 		}
 
 		return browseGet;
+	}
+
+	/**
+	 * Strips off PCF message MQ activity trace parameters leaving only one - corresponding trace marker value.
+	 *
+	 * @param pcfContent
+	 *            PCF message containing MQ activity traces
+	 * @return PCF message copy containing only one MQ activity trace marked by trace marker
+	 */
+	private static PCFContent strip(PCFContent pcfContent) {
+		if (pcfContent instanceof PCFMessage) {
+			PCFMessage pcfMsg = (PCFMessage) pcfContent;
+			PCFMessage msgCpy = new PCFMessage(pcfMsg.getType(), pcfMsg.getCommand(), pcfMsg.getMsgSeqNumber(),
+					pcfMsg.getControl() == 1);
+
+			int traceMarker = getIntParam(pcfContent, WmqStreamConstants.TRACE_MARKER);
+
+			Enumeration<?> params = pcfContent.getParameters();
+			int trI = 0;
+			while (params.hasMoreElements()) {
+				PCFParameter param = (PCFParameter) params.nextElement();
+
+				if (param.getParameter() == WmqStreamConstants.TRACE_MARKER
+						|| param.getParameter() == WmqStreamConstants.TRACES_COUNT) {
+					continue;
+				}
+
+				if (WmqUtils.isTraceParameter(param)) {
+					trI++;
+					if (trI != traceMarker) {
+						continue;
+					}
+				}
+
+				msgCpy.addParameter(param);
+			}
+
+			return msgCpy;
+		} else {
+			return pcfContent;
+		}
 	}
 }

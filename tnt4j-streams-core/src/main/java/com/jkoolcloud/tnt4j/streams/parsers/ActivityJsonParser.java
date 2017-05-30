@@ -129,7 +129,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
-		DocumentContext jsonDoc = null;
+		DocumentContext jsonDoc;
 		String jsonString = null;
 		try {
 			if (data instanceof DocumentContext) {
@@ -171,24 +171,25 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 */
 	@Override
 	protected String readNextActivity(BufferedReader rdr) {
-		StringBuilder jsonStringBuilder = new StringBuilder();
+		StringBuilder jsonStringBuilder = new StringBuilder(1024);
 		String line;
 
-		try {
-			while ((line = rdr.readLine()) != null) {
-				jsonStringBuilder.append(line);
-				if (jsonAsLine) {
-					break;
+		synchronized (NEXT_LOCK) {
+			try {
+				while ((line = rdr.readLine()) != null) {
+					jsonStringBuilder.append(line);
+					if (jsonAsLine) {
+						break;
+					}
 				}
+			} catch (EOFException eof) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+						getActivityDataType(), eof);
+			} catch (IOException ioe) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-					getActivityDataType(), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					getActivityDataType(), ioe);
 		}
 
 		return jsonStringBuilder.toString();

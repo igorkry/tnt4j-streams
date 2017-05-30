@@ -73,6 +73,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private List<ActivityDataPreParser<?>> preParsers;
 
+	protected final Object NEXT_LOCK = new Object();
+	protected final Object FILTER_LOCK = new Object();
+	protected final Object PRE_PARSER_LOCK = new Object();
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -270,16 +274,18 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected String readNextActivity(BufferedReader rdr) {
 		String str = null;
-		try {
-			str = Utils.getNonEmptyLine(rdr);
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-					getActivityDataType(), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					getActivityDataType(), ioe);
+
+		synchronized (NEXT_LOCK) {
+			try {
+				str = Utils.getNonEmptyLine(rdr);
+			} catch (EOFException eof) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+						getActivityDataType(), eof);
+			} catch (IOException ioe) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.error.reading"), getActivityDataType(), ioe);
+			}
 		}
 
 		return str;
@@ -767,7 +773,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		activityFilter.doFilter(ai);
+		synchronized (FILTER_LOCK) {
+			activityFilter.doFilter(ai);
+		}
 	}
 
 	@Override
@@ -795,14 +803,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityParser.data.before.pre.parsing"), getLogString(data));
 
-			for (ActivityDataPreParser<?> preParser : preParsers) {
-				boolean validData = preParser.isDataClassSupported(data);
-				if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
-					data = preParser.preParse(data);
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.data.after.pre.parsing"), getLogString(data));
+			synchronized (PRE_PARSER_LOCK) {
+				for (ActivityDataPreParser<?> preParser : preParsers) {
+					boolean validData = preParser.isDataClassSupported(data);
+					if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
+						data = preParser.preParse(data);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.data.after.pre.parsing"), getLogString(data));
+					}
 				}
 			}
 		}

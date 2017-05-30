@@ -91,7 +91,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 	private final XPath xPath;
 	private final DocumentBuilder builder;
-	private final StringBuilder xmlBuffer;
 
 	/**
 	 * Property indicating that all attributes are required by default.
@@ -109,7 +108,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		domFactory.setNamespaceAware(true);
 		builder = domFactory.newDocumentBuilder();
 		xPath = StreamsXMLUtils.getStreamsXPath();
-		xmlBuffer = new StringBuilder(1024);
 
 		if (namespaces == null) {
 			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
@@ -186,7 +184,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
-		Node xmlDoc = null;
+		Node xmlDoc;
 		String xmlString = null;
 		try {
 			if (data instanceof Document) {
@@ -198,7 +196,9 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				synchronized (builder) {
+					xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				}
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -320,7 +320,10 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		if (StringUtils.isNotEmpty(locStr)) {
 			Document nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
-				XPathExpression expr = xPath.compile(locStr);
+				XPathExpression expr;
+				synchronized (xPath) {
+					expr = xPath.compile(locStr);
+				}
 
 				if (nodeDocument != null) { // try expression relative to node
 					val = resolveValueOverXPath(nodeDocument, expr, formattingNeeded);
@@ -391,7 +394,10 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	private Document cropDocumentForNode(Node xmlDoc) throws ParseException {
 		if (xmlDoc.getParentNode() != null) { // if node is not document root node
 			try {
-				Document nodeXmlDoc = builder.newDocument();
+				Document nodeXmlDoc;
+				synchronized (builder) {
+					nodeXmlDoc = builder.newDocument();
+				}
 				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
 				nodeXmlDoc.appendChild(importedNode);
 
@@ -474,29 +480,31 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	@Override
 	protected String readNextActivity(BufferedReader rdr) {
 		String xmlString = null;
-		try {
-			for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
-				if (line.startsWith("<?xml")) { // NON-NLS
-					if (xmlBuffer.length() > 0) {
-						xmlString = xmlBuffer.toString();
-						xmlBuffer.setLength(0);
+		StringBuilder xmlBuffer = new StringBuilder(1024);
+
+		synchronized (NEXT_LOCK) {
+			try {
+				for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
+					if (line.startsWith("<?xml")) { // NON-NLS
+						if (xmlBuffer.length() > 0) {
+							xmlString = xmlBuffer.toString();
+							xmlBuffer.setLength(0);
+						}
 					}
+					xmlBuffer.append(line);
 				}
-				xmlBuffer.append(line);
+			} catch (EOFException eof) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+						getActivityDataType(), eof);
+			} catch (IOException ioe) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-					getActivityDataType(), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					getActivityDataType(), ioe);
 		}
 
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();
-			xmlBuffer.setLength(0);
 		}
 
 		return xmlString;
