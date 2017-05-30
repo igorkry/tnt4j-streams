@@ -11,7 +11,7 @@
         <field name="EventName" locator="$.event" locator-type="Label"/>
         <field name="LastEvent" locator="CachedEventName" locator-type="Cache"/>
 
-        <field name="Corelator" locator="$.transaction" locator-type="Label"/>
+        <field name="Correlator" locator="$.transaction" locator-type="Label"/>
         <field name="Transaction" locator="$.transaction" locator-type="Label"/>
 
         <field name="SecretValue" locator="$.secret" locator-type="Label"/>
