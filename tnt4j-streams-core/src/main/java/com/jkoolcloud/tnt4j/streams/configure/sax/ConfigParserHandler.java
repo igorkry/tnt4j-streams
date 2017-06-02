@@ -1061,7 +1061,14 @@ public class ConfigParserHandler extends DefaultHandler {
 					is = new FileInputStream(uri);
 				}
 
-				resourcesMap.put(id, Utils.fromJsonToMap(is, false));
+				if (uri.toLowerCase().endsWith(".json")) { // NON-NLS
+					resourcesMap.put(id, Utils.fromJsonToMap(is, false));
+				} else {
+					throw new SAXParseException(
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ConfigParserHandler.invalidResource", id, uri),
+							currParseLocation);
+				}
 				Utils.close(is);
 			} catch (Exception e) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
