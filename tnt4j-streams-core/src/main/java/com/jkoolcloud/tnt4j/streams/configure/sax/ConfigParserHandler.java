@@ -16,6 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -23,10 +27,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
+import com.jkoolcloud.tnt4j.streams.configure.jaxb.ResourceReferenceType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
@@ -87,6 +93,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String FIELD_MAP_ELMT = "field-map"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String FIELD_MAP_REF_ELMT = "field-map-ref"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -151,6 +161,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String CACHE_KEY_ELMT = "key"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String RESOURCE_REF_ELMT = "resource-ref"; // NON-NLS
 
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -260,7 +274,14 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String FORMATTING_PATTERN_ATTR = "formattingPattern"; // NON-NLS
-
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String URI_ATTR = "uri"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String RESOURCE_ATTR = "resource"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
@@ -282,6 +303,8 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private StreamsConfigData streamsConfigData = null;
 	private Map<String, Object> javaObjectsMap = null;
+
+	private Map<String, Map<String, ?>> resourcesMap;
 
 	/**
 	 * Configuration parsing locator.
@@ -343,6 +366,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	@Override
 	public void endDocument() throws SAXException {
 		javaObjectsMap.clear();
+		if (resourcesMap != null) {
+			resourcesMap.clear();
+		}
 	}
 
 	@Override
@@ -390,6 +416,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			processCacheEntry(attributes);
 		} else if (CACHE_KEY_ELMT.equals(qName)) {
 			processKey(attributes);
+		} else if (FIELD_MAP_REF_ELMT.equals(qName)) {
+			processFieldMapReference(attributes);
+		} else if (RESOURCE_REF_ELMT.equals(qName)) {
+			processResourceReference(attributes);
 		}
 	}
 
@@ -936,6 +966,110 @@ public class ConfigParserHandler extends DefaultHandler {
 							StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type));
 				}
 			}
+		}
+	}
+
+	/**
+	 * Processes a {@code <field-map-ref>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	@SuppressWarnings("unchecked")
+	private void processFieldMapReference(Attributes attrs) throws SAXException {
+		if (currField == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration3", FIELD_MAP_REF_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
+					currParseLocation);
+		}
+
+		if (CollectionUtils.isEmpty(currField.getLocators()) && currLocatorData == null) {
+			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.element.no.binding", FIELD_MAP_REF_ELMT, FIELD_LOC_ELMT, getLocationInfo()));
+		}
+
+		String reference = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (RESOURCE_ATTR.equals(attName)) {
+				reference = attValue;
+			}
+		}
+
+		notEmpty(reference, FIELD_MAP_REF_ELMT, RESOURCE_ATTR);
+
+		Object val = Utils.getMapValueByPath(reference, resourcesMap);
+
+		if (val instanceof Map) {
+			AttributesImpl mappingAttrs = new AttributesImpl();
+			for (Map.Entry<String, ?> entry : ((Map<String, ?>) val).entrySet()) {
+				mappingAttrs.clear();
+				mappingAttrs.addAttribute(null, null, SOURCE_ATTR, null, entry.getKey());
+				mappingAttrs.addAttribute(null, null, TARGET_ATTR, null, String.valueOf(entry.getValue()));
+
+				processFieldMap(mappingAttrs);
+			}
+		}
+	}
+
+	/**
+	 * Processes a {@code <resource-ref>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processResourceReference(Attributes attrs) throws SAXException {
+		String id = null;
+		String type = null;
+		String uri = null;
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
+			} else if (URI_ATTR.equals(attName)) {
+				uri = attValue;
+			} else if (ID_ATTR.equals(attName)) {
+				id = attValue;
+			}
+		}
+
+		notEmpty(id, RESOURCE_REF_ELMT, ID_ATTR);
+		notEmpty(type, RESOURCE_REF_ELMT, TYPE_ATTR);
+		notEmpty(uri, RESOURCE_REF_ELMT, URI_ATTR);
+
+		if (type.equals(ResourceReferenceType.VALUES_MAP.value())) {
+			try {
+				if (resourcesMap == null) {
+					resourcesMap = new HashMap<>(5);
+				}
+
+				InputStream is;
+
+				try {
+					URL url = new URL(uri);
+					is = url.openStream();
+				} catch (MalformedURLException exc) {
+					is = new FileInputStream(uri);
+				}
+
+				resourcesMap.put(id, Utils.fromJsonToMap(is, false));
+				Utils.close(is);
+			} catch (Exception e) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.jsonParseException", id, uri), e);
+			}
+		} else {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.invalidRefType", id, type), currParseLocation);
 		}
 	}
 

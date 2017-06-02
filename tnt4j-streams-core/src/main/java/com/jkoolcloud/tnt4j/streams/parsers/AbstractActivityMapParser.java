@@ -18,12 +18,10 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
@@ -52,11 +50,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
-	/**
-	 * Constant for locator path node token meaning complete map.
-	 */
-	protected static final String MAP_NODE_TOKEN = "*"; // NON-NLS
-
 	/**
 	 * Constant for map entry locator path delimiter.
 	 */
@@ -142,39 +135,9 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		String[] path = Utils.getNodePath(locStr, nodePathDelim);
-		val = getNode(path, cData.getData(), 0);
+		val = Utils.getMapValueByPath(locStr, nodePathDelim, cData.getData());
 
 		return val;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
-		if (ArrayUtils.isEmpty(path) || dataMap == null) {
-			return null;
-		}
-
-		if (MAP_NODE_TOKEN.equals(path[i])) {
-			return dataMap;
-		}
-
-		Object val = dataMap.get(path[i]);
-
-		if (i < path.length - 1 && val instanceof Map) {
-			val = getNode(path, (Map<String, ?>) val, ++i);
-		} else if (i < path.length - 2 && val instanceof List) {
-			try {
-				int lii = Integer.parseInt(getItemIndexStr(path[i + 1]));
-				val = getNode(path, (Map<String, ?>) ((List<?>) val).get(lii), i + 2);
-			} catch (NumberFormatException exc) {
-			}
-		}
-
-		return val;
-	}
-
-	private static String getItemIndexStr(String indexToken) {
-		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 
 	/**

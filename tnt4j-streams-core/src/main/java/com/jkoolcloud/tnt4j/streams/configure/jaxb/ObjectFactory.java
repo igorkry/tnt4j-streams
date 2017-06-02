@@ -36,6 +36,7 @@ public class ObjectFactory {
 
 	private final static QName _FieldLocatorFieldTransform_QNAME = new QName("", "field-transform");
 	private final static QName _FieldLocatorFieldMap_QNAME = new QName("", "field-map");
+	private final static QName _FieldLocatorFieldMapRef_QNAME = new QName("", "field-map-ref");
 	private final static QName _FieldLocatorFilter_QNAME = new QName("", "filter");
 
 	/**
@@ -68,6 +69,14 @@ public class ObjectFactory {
 	 */
 	public TntDataSource createTntDataSource() {
 		return new TntDataSource();
+	}
+
+	/**
+	 * Create an instance of {@link ResourceReference }
+	 * 
+	 */
+	public ResourceReference createResourceReference() {
+		return new ResourceReference();
 	}
 
 	/**
@@ -167,6 +176,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link FieldMapRef }
+	 * 
+	 */
+	public FieldMapRef createFieldMapRef() {
+		return new FieldMapRef();
+	}
+
+	/**
 	 * Create an instance of {@link Reference }
 	 * 
 	 */
@@ -231,6 +248,16 @@ public class ObjectFactory {
 	@XmlElementDecl(namespace = "", name = "field-map", scope = FieldLocator.class)
 	public JAXBElement<FieldMap> createFieldLocatorFieldMap(FieldMap value) {
 		return new JAXBElement<FieldMap>(_FieldLocatorFieldMap_QNAME, FieldMap.class, FieldLocator.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldMapRef }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-map-ref", scope = FieldLocator.class)
+	public JAXBElement<FieldMapRef> createFieldLocatorFieldMapRef(FieldMapRef value) {
+		return new JAXBElement<FieldMapRef>(_FieldLocatorFieldMapRef_QNAME, FieldMapRef.class, FieldLocator.class,
+				value);
 	}
 
 	/**

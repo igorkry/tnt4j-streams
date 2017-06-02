@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;sequence>
  *         &lt;element name="field-locator" type="{}FieldLocator" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-map" type="{}FieldMap" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="field-map-ref" type="{}FieldMapRef" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-transform" type="{}FieldTransform" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="parser-ref" type="{}FieldParserReference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="filter" type="{}Filter" minOccurs="0"/>
@@ -59,78 +60,82 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Field", propOrder = { "fieldLocator", "fieldMap", "fieldTransform", "parserRef", "filter" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+@XmlType(name = "Field", propOrder = { "fieldLocator", "fieldMap", "fieldMapRef", "fieldTransform", "parserRef",
+		"filter" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 public class Field {
 
 	@XmlElement(name = "field-locator")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<FieldLocator> fieldLocator;
 	@XmlElement(name = "field-map")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<FieldMap> fieldMap;
+	@XmlElement(name = "field-map-ref")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<FieldMapRef> fieldMapRef;
 	@XmlElement(name = "field-transform")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<FieldTransform> fieldTransform;
 	@XmlElement(name = "parser-ref")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<FieldParserReference> parserRef;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Filter filter;
 	@XmlAttribute(name = "name", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 	@XmlAttribute(name = "separator")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String separator;
 	@XmlAttribute(name = "formattingPattern")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String formattingPattern;
 	@XmlAttribute(name = "transparent")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Boolean transparent;
 	@XmlAttribute(name = "value-type")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String valueType;
 	@XmlAttribute(name = "split")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Boolean split;
 	@XmlAttribute(name = "locator")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String locator;
 	@XmlAttribute(name = "locator-type")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String locatorType;
 	@XmlAttribute(name = "datatype")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected DataTypes datatype;
 	@XmlAttribute(name = "radix")
 	@XmlSchemaType(name = "nonNegativeInteger")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected BigInteger radix;
 	@XmlAttribute(name = "units")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String units;
 	@XmlAttribute(name = "timezone")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String timezone;
 	@XmlAttribute(name = "format")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String format;
 	@XmlAttribute(name = "locale")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String locale;
 	@XmlAttribute(name = "value")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String value;
 	@XmlAttribute(name = "required")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String required;
 	@XmlAttribute(name = "id")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String id;
 	@XmlAttribute(name = "cacheKey")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String cacheKey;
 
 	public Field() {
@@ -190,7 +195,7 @@ public class Field {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<FieldLocator> getFieldLocator() {
 		if (fieldLocator == null) {
 			fieldLocator = new ArrayList<FieldLocator>();
@@ -229,7 +234,7 @@ public class Field {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<FieldMap> getFieldMap() {
 		if (fieldMap == null) {
 			fieldMap = new ArrayList<FieldMap>();
@@ -247,6 +252,43 @@ public class Field {
 
 	public void addFieldMap(String source, String target, FieldMapTypes type) {
 		getFieldMap().add(new FieldMap(source, target, type));
+	}
+
+	/**
+	 * Gets the value of the fieldMapRef property.
+	 * 
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the fieldMapRef property.
+	 * 
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 * 
+	 * <pre>
+	 * getFieldMapRef().add(newItem);
+	 * </pre>
+	 * 
+	 * 
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link FieldMapRef }
+	 * 
+	 * 
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<FieldMapRef> getFieldMapRef() {
+		if (fieldMapRef == null) {
+			fieldMapRef = new ArrayList<FieldMapRef>();
+		}
+		return this.fieldMapRef;
+	}
+
+	public void addFieldMapRef(FieldMapRef fmr) {
+		getFieldMapRef().add(fmr);
+	}
+
+	public void addFieldMapRef(String resource) {
+		getFieldMapRef().add(new FieldMapRef(resource));
 	}
 
 	/**
@@ -270,7 +312,7 @@ public class Field {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<FieldTransform> getFieldTransform() {
 		if (fieldTransform == null) {
 			fieldTransform = new ArrayList<FieldTransform>();
@@ -311,7 +353,7 @@ public class Field {
 	 * 
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public List<FieldParserReference> getParserRef() {
 		if (parserRef == null) {
 			parserRef = new ArrayList<FieldParserReference>();
@@ -333,7 +375,7 @@ public class Field {
 	 * @return possible object is {@link Filter }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public Filter getFilter() {
 		return filter;
 	}
@@ -345,7 +387,7 @@ public class Field {
 	 *            allowed object is {@link Filter }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setFilter(Filter value) {
 		this.filter = value;
 	}
@@ -356,7 +398,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
@@ -368,7 +410,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}
@@ -379,7 +421,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getSeparator() {
 		return separator;
 	}
@@ -391,7 +433,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setSeparator(String value) {
 		this.separator = value;
 	}
@@ -402,8 +444,8 @@ public class Field {
 	 * @return possible object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
-	public String getFormatPattern() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getFormattingPattern() {
 		return formattingPattern;
 	}
 
@@ -414,8 +456,8 @@ public class Field {
 	 *            allowed object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setFormatPattern(String value) {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setFormattingPattern(String value) {
 		this.formattingPattern = value;
 	}
 
@@ -425,7 +467,7 @@ public class Field {
 	 * @return possible object is {@link Boolean }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public Boolean isTransparent() {
 		return transparent;
 	}
@@ -437,7 +479,7 @@ public class Field {
 	 *            allowed object is {@link Boolean }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTransparent(Boolean value) {
 		this.transparent = value;
 	}
@@ -448,7 +490,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getValueType() {
 		return valueType;
 	}
@@ -460,7 +502,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setValueType(String value) {
 		this.valueType = value;
 	}
@@ -471,7 +513,7 @@ public class Field {
 	 * @return possible object is {@link Boolean }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public Boolean isSplit() {
 		return split;
 	}
@@ -483,7 +525,7 @@ public class Field {
 	 *            allowed object is {@link Boolean }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setSplit(Boolean value) {
 		this.split = value;
 	}
@@ -494,7 +536,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getLocator() {
 		return locator;
 	}
@@ -506,7 +548,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setLocator(String value) {
 		this.locator = value;
 	}
@@ -517,7 +559,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getLocatorType() {
 		return locatorType;
 	}
@@ -529,7 +571,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setLocatorType(String value) {
 		this.locatorType = value;
 	}
@@ -540,7 +582,7 @@ public class Field {
 	 * @return possible object is {@link DataTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public DataTypes getDatatype() {
 		if (datatype == null) {
 			return DataTypes.STRING;
@@ -556,7 +598,7 @@ public class Field {
 	 *            allowed object is {@link DataTypes }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setDatatype(DataTypes value) {
 		this.datatype = value;
 	}
@@ -567,7 +609,7 @@ public class Field {
 	 * @return possible object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public BigInteger getRadix() {
 		return radix;
 	}
@@ -579,7 +621,7 @@ public class Field {
 	 *            allowed object is {@link BigInteger }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setRadix(BigInteger value) {
 		this.radix = value;
 	}
@@ -590,7 +632,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getUnits() {
 		return units;
 	}
@@ -602,7 +644,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setUnits(String value) {
 		this.units = value;
 	}
@@ -613,7 +655,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getTimezone() {
 		return timezone;
 	}
@@ -625,7 +667,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTimezone(String value) {
 		this.timezone = value;
 	}
@@ -636,7 +678,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getFormat() {
 		return format;
 	}
@@ -648,7 +690,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setFormat(String value) {
 		this.format = value;
 	}
@@ -659,7 +701,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getLocale() {
 		return locale;
 	}
@@ -671,7 +713,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setLocale(String value) {
 		this.locale = value;
 	}
@@ -682,7 +724,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getValue() {
 		return value;
 	}
@@ -694,7 +736,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setValue(String value) {
 		this.value = value;
 	}
@@ -705,7 +747,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getRequired() {
 		return required;
 	}
@@ -717,7 +759,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setRequired(String value) {
 		this.required = value;
 	}
@@ -728,7 +770,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getId() {
 		return id;
 	}
@@ -740,7 +782,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setId(String value) {
 		this.id = value;
 	}
@@ -751,7 +793,7 @@ public class Field {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getCacheKey() {
 		return cacheKey;
 	}
@@ -763,7 +805,7 @@ public class Field {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setCacheKey(String value) {
 		this.cacheKey = value;
 	}

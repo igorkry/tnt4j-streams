@@ -334,7 +334,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param str
 	 *            string to check and transform
 	 * @return regex ready string
-	 * 
+	 *
 	 * @see #wildcardToRegex(String)
 	 */
 	public static String wildcardToRegex2(String str) {
@@ -385,8 +385,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			boolean endsWithoutNewLine = false;
 			while ((readChars = bis.read(c)) != -1) {
 				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n')
+					if (c[i] == '\n') {
 						++count;
+					}
 				}
 				endsWithoutNewLine = (c[readChars - 1] != '\n');
 			}
@@ -608,7 +609,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
 	 * @return string constructed from specified byte array
-	 * 
+	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
@@ -761,7 +762,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param separateLines
 	 *            flag indicating whether to make string lines separated
 	 * @return string read from input stream
-	 * 
+	 *
 	 * @see #readInput(java.io.BufferedReader, boolean)
 	 */
 	public static String readInput(InputStream is, boolean separateLines) {
@@ -1073,19 +1074,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return string representation of array
 	 */
 	public static String toStringDeep(Object[] a) {
-		if (a == null)
+		if (a == null) {
 			return "null"; // NON-NLS
+		}
 
 		int iMax = a.length - 1;
-		if (iMax == -1)
+		if (iMax == -1) {
 			return "[]"; // NON-NLS
+		}
 
 		StringBuilder b = new StringBuilder();
 		b.append('[');
 		for (int i = 0;; i++) {
 			b.append(toString(a[i]));
-			if (i == iMax)
+			if (i == iMax) {
 				return b.append(']').toString();
+			}
 			b.append(", "); // NON-NLS
 		}
 	}
@@ -1107,7 +1111,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
 	 * {@link #toHexDump(byte[], int, int)} setting {@code len} parameter to {@code 0}.
-	 * 
+	 *
 	 * @param b
 	 *            bytes array make HEX dump
 	 * @param offset
@@ -1258,7 +1262,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Loads properties from resource with given name.
-	 * 
+	 *
 	 * @param name
 	 *            the resource name
 	 * @return properties loaded from resource
@@ -1285,7 +1289,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Loads properties from all resource with given name.
-	 * 
+	 *
 	 * @param name
 	 *            the resource name
 	 * @return properties loaded from all found resources
@@ -1427,7 +1431,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Casts provided number value to desired number type.
-	 * 
+	 *
 	 * @param num
 	 *            number value to cast
 	 * @param clazz
@@ -1543,7 +1547,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Splits string contained values delimited using '|' delimiter into array of separate values.
-	 * 
+	 *
 	 * @param value
 	 *            string contained values to split
 	 * @return array of split string values
@@ -1604,5 +1608,141 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		} else {
 			return new File[] { new File(fileName) };
 		}
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} and path
+	 * level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap, int level) {
+		return getMapValueByPath(path, StreamsConstants.DEFAULT_PATH_DELIM, dataMap, level);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param pathDelim
+	 *            path delimiter
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, pathDelim, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param pathDelim
+	 *            path delimiter
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String[], Map, int)
+	 */
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap, int level) {
+		return getMapValueByPath(getNodePath(path, pathDelim), dataMap, level);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path tokens array referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 * 
+	 * @see #getMapValueByPath(String[], Map, int)
+	 */
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * 
+	 * @param path
+	 *            map keys path tokens array referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap, int level) {
+		if (ArrayUtils.isEmpty(path) || dataMap == null) {
+			return null;
+		}
+
+		if (StreamsConstants.MAP_NODE_TOKEN.equals(path[level])) {
+			return dataMap;
+		}
+
+		Object val = dataMap.get(path[level]);
+
+		if (level < path.length - 1 && val instanceof Map) {
+			val = getMapValueByPath(path, (Map<String, ?>) val, ++level);
+		} else if (level < path.length - 2 && val instanceof List) {
+			try {
+				int lii = Integer.parseInt(getItemIndexStr(path[level + 1]));
+				val = getMapValueByPath(path, (Map<String, ?>) ((List<?>) val).get(lii), level + 2);
+			} catch (NumberFormatException exc) {
+			}
+		}
+
+		return val;
+	}
+
+	private static String getItemIndexStr(String indexToken) {
+		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 }

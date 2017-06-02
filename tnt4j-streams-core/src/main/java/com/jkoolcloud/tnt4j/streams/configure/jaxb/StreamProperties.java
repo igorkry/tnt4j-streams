@@ -71,6 +71,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="RangeToStream"/>
  *     &lt;enumeration value="StreamCacheMaxSize"/>
  *     &lt;enumeration value="StreamCacheExpireDuration"/>
+ *     &lt;enumeration value="StreamReconnectDelay"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -78,7 +79,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "StreamProperties")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 public enum StreamProperties {
 
 	/**
@@ -445,7 +446,16 @@ public enum StreamProperties {
 	 *
 	 */
 	@XmlEnumValue("StreamCacheExpireDuration")
-	STREAM_CACHE_EXPIRE_DURATION("StreamCacheExpireDuration");
+	STREAM_CACHE_EXPIRE_DURATION("StreamCacheExpireDuration"),
+
+	/**
+	 *
+	 * Property defines delay in seconds between queue manager reconnection or failed queue GET iterations.
+	 *
+	 *
+	 */
+	@XmlEnumValue("StreamReconnectDelay")
+	STREAM_RECONNECT_DELAY("StreamReconnectDelay");
 	private final String value;
 
 	StreamProperties(String v) {

@@ -3,16 +3,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
+    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
+
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="EventType" locator="name(//*[1])" locator-type="Label">
-            <field-map source="destination" target="SEND"/>
-            <field-map source="source" target="RECEIVE"/>
-            <field-map source="" target="NOOP"/>
+            <field-map-ref resource="MFT_MAPPINGS.EventType"/>
         </field>
         <field name="EventName" locator="name(//*[1])" locator-type="Label">
-            <field-map source="destination" target="process_destination"/>
-            <field-map source="source" target="process_source"/>
-            <field-map source="" target="N/A"/>
+            <field-map-ref resource="MFT_MAPPINGS.EventName"/>
         </field>
 
         <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
@@ -20,8 +18,7 @@
         <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
             <!--resolves FILE or QUEUE-->
             <field-locator locator="name(//*/*)" locator-type="Label">
-                <field-map source="file" target="FILE"/>
-                <field-map source="queue" target="QUEUE"/>
+                <field-map-ref resource="MFT_MAPPINGS.Resource"/>
             </field-locator>
             <!--resolves file or queue name -->
             <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
@@ -67,9 +64,7 @@
             <field-locator locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label" datatype="Number"/>
         </field>
         <field name="CompCode" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
-            <field-map source="0" target="SUCCESS"/>
-            <field-map source="40" target="WARNING"/>
-            <field-map source="" target="ERROR"/>
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
         </field>
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" separator="">
@@ -152,15 +147,10 @@
             <field-locator locator="/transaction/status/@resultCode" locator-type="Label" datatype="Number"/>
         </field>
         <field name="CompCode" locator="/transaction/status/@resultCode" locator-type="Label">
-            <field-map source="0" target="SUCCESS"/>
-            <field-map source="40" target="WARNING"/>
-            <field-map source="" target="ERROR"/>
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
         </field>
         <field name="CompCode2" locator="/transaction/status/@resultCode" locator-type="Label">
-            <field-map source="0" target="SUCCESS"/>
-            <field-map source="40" target="WARNING"/>
-            <field-map source="1" target="FAILURE"/>
-            <field-map source="" target="ERROR"/>
+            <field-map-ref resource="MFT_MAPPINGS.CompCode2"/>
         </field>
         <field name="Exception" separator="">
             <field-locator locator="/transaction/status/supplement" locator-type="Label" required="false"/>
@@ -190,29 +180,29 @@
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
     </parser>
 
-    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
-        <property name="Host" value="localhost"/>
-        <property name="Port" value="1414"/>
-        <property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
-        <property name="QueueManager" value="QMGR.NAME"/>
-        <property name="Queue" value="FTE.TRANSFER.LOG"/>
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">-->
+    <!--<property name="Host" value="localhost"/>-->
+    <!--<property name="Port" value="1414"/>-->
+    <!--<property name="Channel" value="SYSTEM.DEF.SVRCONN"/>-->
+    <!--<property name="QueueManager" value="QMGR.NAME"/>-->
+    <!--<property name="Queue" value="FTE.TRANSFER.LOG"/>-->
 
-        <property name="HaltIfNoParser" value="false"/>
-        <property name="TurnOutActivityChildren" value="true"/>
-
-        <parser-ref name="StartedEventParser"/>
-        <parser-ref name="ProgressEventParser"/>
-        <parser-ref name="CompletedEventParser"/>
-        <parser-ref name="FallbackParser"/>
-    </stream>
-
-    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
-    <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/queue/message_*_progress.xml"/>-->
+    <!--<property name="HaltIfNoParser" value="false"/>-->
     <!--<property name="TurnOutActivityChildren" value="true"/>-->
 
-    <!--&lt;!&ndash;<parser-ref name="StartedEventParser"/>&ndash;&gt;-->
-    <!--&lt;!&ndash;<parser-ref name="ProgressEventParser"/>&ndash;&gt;-->
-    <!--&lt;!&ndash;<parser-ref name="CompletedEventParser"/>&ndash;&gt;-->
+    <!--<parser-ref name="StartedEventParser"/>-->
+    <!--<parser-ref name="ProgressEventParser"/>-->
+    <!--<parser-ref name="CompletedEventParser"/>-->
     <!--<parser-ref name="FallbackParser"/>-->
     <!--</stream>-->
+
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/queue/message_*_progress.xml"/>
+        <property name="TurnOutActivityChildren" value="true"/>
+
+        <!--<parser-ref name="StartedEventParser"/>-->
+        <parser-ref name="ProgressEventParser"/>
+        <!--<parser-ref name="CompletedEventParser"/>-->
+        <!--<parser-ref name="FallbackParser"/>-->
+    </stream>
 </tnt-data-source>

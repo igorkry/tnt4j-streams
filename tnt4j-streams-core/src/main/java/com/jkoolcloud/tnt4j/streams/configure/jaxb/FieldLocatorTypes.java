@@ -35,7 +35,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="Label"/>
  *     &lt;enumeration value="REGroupNum"/>
  *     &lt;enumeration value="REMatchNum"/>
+ *     &lt;enumeration value="REGroupName"/>
  *     &lt;enumeration value="Cache"/>
+ *     &lt;enumeration value="Activity"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -43,12 +45,12 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "FieldLocatorTypes")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Field value is the value for the specified stream property.
+	 * Locator value is the value for the specified stream property.
 	 * 
 	 * 
 	 */
@@ -57,7 +59,7 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Field value is the value at the specified index/offset/position.
+	 * Locator value is the value at the specified index/offset/position.
 	 * 
 	 * 
 	 */
@@ -66,7 +68,8 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Field value is the value for the specified label (e.g. name/value pairs like label=value).
+	 * Locator value is the value for the specified label/expression (e.g. name/value pairs like label=value, XPath
+	 * expression, etc.).
 	 * 
 	 * 
 	 */
@@ -75,7 +78,7 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Field value is the value for the specified regular expression group.
+	 * Locator value is the value for the specified regular expression group number.
 	 * 
 	 * 
 	 */
@@ -84,7 +87,7 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Field value is the value for the specified regular expression match sequence position.
+	 * Locator value is the value for the specified regular expression match sequence position.
 	 * 
 	 * 
 	 */
@@ -92,13 +95,31 @@ public enum FieldLocatorTypes {
 	RE_MATCH_NUM("REMatchNum"),
 
 	/**
-	 *
-	 * Field value is the value for stream stored cache key.
-	 *
-	 *
+	 * 
+	 * Locator value is the value for the specified regular expression group name.
+	 * 
+	 * 
+	 */
+	@XmlEnumValue("REGroupName")
+	RE_GROUP_NAME("REGroupName"),
+
+	/**
+	 * 
+	 * Locator value is the value for stream stored cache key.
+	 * 
+	 * 
 	 */
 	@XmlEnumValue("Cache")
-	CACHE("Cache");
+	CACHE("Cache"),
+
+	/**
+	 * 
+	 * Locator value is the value for streamed activity entity field name.
+	 * 
+	 * 
+	 */
+	@XmlEnumValue("Activity")
+	ACTIVITY("Activity");
 	private final String value;
 
 	FieldLocatorTypes(String v) {
