@@ -36,6 +36,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" use="required" type="{}ResourceReferenceType" />
  *       &lt;attribute name="uri" use="required" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
+ *       &lt;attribute name="separator" use="optional" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -58,6 +59,9 @@ public class ResourceReference {
 	@XmlSchemaType(name = "anyURI")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String uri;
+	@XmlAttribute(name = "separator", required = true)
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String separator;
 
 	public ResourceReference() {
 	}
@@ -70,6 +74,11 @@ public class ResourceReference {
 		this.id = id;
 		this.type = type;
 		this.uri = uri;
+	}
+
+	public ResourceReference(String id, ResourceReferenceType type, String uri, String separator) {
+		this(id, type, uri);
+		this.separator = separator;
 	}
 
 	/**
@@ -139,6 +148,29 @@ public class ResourceReference {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setUri(String value) {
 		this.uri = value;
+	}
+
+	/**
+	 * Gets the value of the separator property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getSeparator() {
+		return separator;
+	}
+
+	/**
+	 * Sets the value of the separator property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setSeparator(String value) {
+		this.separator = value;
 	}
 
 }

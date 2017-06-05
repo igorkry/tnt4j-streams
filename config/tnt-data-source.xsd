@@ -2019,6 +2019,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attribute name="separator" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    String to use as mapping key value delimiter.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Resource reference types enumeration definition -->

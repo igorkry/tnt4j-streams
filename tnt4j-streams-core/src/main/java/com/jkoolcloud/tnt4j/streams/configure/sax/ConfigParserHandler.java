@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -1029,16 +1028,19 @@ public class ConfigParserHandler extends DefaultHandler {
 		String id = null;
 		String type = null;
 		String uri = null;
+		String delim = null;
 
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
-			if (TYPE_ATTR.equals(attName)) {
+			if (ID_ATTR.equals(attName)) {
+				id = attValue;
+			} else if (TYPE_ATTR.equals(attName)) {
 				type = attValue;
 			} else if (URI_ATTR.equals(attName)) {
 				uri = attValue;
-			} else if (ID_ATTR.equals(attName)) {
-				id = attValue;
+			} else if (SEPARATOR_ATTR.equals(attName)) {
+				delim = attValue;
 			}
 		}
 
@@ -1063,6 +1065,10 @@ public class ConfigParserHandler extends DefaultHandler {
 
 				if (uri.toLowerCase().endsWith(".json")) { // NON-NLS
 					resourcesMap.put(id, Utils.fromJsonToMap(is, false));
+				} else if (uri.toLowerCase().endsWith(".csv")) { // NON-NLS
+					resourcesMap.put(id, fromPropsToMap(is, StringUtils.isEmpty(delim) ? "," : delim)); // NON-NLS
+				} else if (uri.toLowerCase().endsWith(".properties")) { // NON-NLS
+					resourcesMap.put(id, fromPropsToMap(is, StringUtils.isEmpty(delim) ? "=" : delim)); // NON-NLS
 				} else {
 					throw new SAXParseException(
 							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1078,6 +1084,23 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.invalidRefType", id, type), currParseLocation);
 		}
+	}
+
+	private static Map<String, ?> fromPropsToMap(InputStream is, String delim) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		Map<String, String> propsMap = new HashMap<>(10);
+
+		String line;
+		while ((line = br.readLine()) != null) {
+			String[] tokens = line.split(delim); // StringUtils.split (line, delim);
+
+			String key = tokens.length > 0 ? tokens[0] : "";
+			String value = tokens.length > 1 ? tokens[1] : "";
+
+			propsMap.put(tokens[0].trim(), tokens[1].trim());
+		}
+
+		return propsMap;
 	}
 
 	/**
