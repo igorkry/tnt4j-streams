@@ -120,7 +120,6 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null) {
 			switch (fieldType) {
-			case Correlator:
 			case TrackingId:
 				Object[] sigItems = null;
 				if (value instanceof Object[]) {
