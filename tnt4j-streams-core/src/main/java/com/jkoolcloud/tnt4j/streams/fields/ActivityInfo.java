@@ -33,7 +33,6 @@ import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -683,7 +682,7 @@ public class ActivityInfo {
 	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
 	 * @param chTrackables
 	 *            collection to add built child trackables, not included into parent trackable and transmitted
-	 *            separately, i.e. activity child events
+	 *            separately, e.g., activity child events
 	 *
 	 * @return trackable instance made from this activity entity data
 	 * @throws java.lang.IllegalArgumentException
@@ -700,14 +699,13 @@ public class ActivityInfo {
 		determineTimes();
 
 		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
-		Source dataSource = tracker.getConfiguration().getSourceFactory().newFromFQN(getSourceFQN(false));
 
 		if (eventType == OpType.ACTIVITY) {
-			return buildActivity(tracker, eventName, trackId, chTrackables, dataSource);
+			return buildActivity(tracker, eventName, trackId, chTrackables);
 		} else if (eventType == OpType.SNAPSHOT) {
-			return buildSnapshot(tracker, eventName, trackId, dataSource);
+			return buildSnapshot(tracker, eventName, trackId);
 		} else {
-			return buildEvent(tracker, eventName, trackId, chTrackables, dataSource);
+			return buildEvent(tracker, eventName, trackId, chTrackables);
 		}
 	}
 
@@ -745,10 +743,9 @@ public class ActivityInfo {
 	 * @return tracking event instance
 	 */
 	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId,
-			Collection<Trackable> chTrackables, Source source) {
+			Collection<Trackable> chTrackables) {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, trackName, (String) null,
 				(String) null, (Object[]) null);
-		event.setSource(source);
 		event.setTrackingId(trackId);
 		event.setParentId(parentId);
 		// event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
@@ -840,9 +837,8 @@ public class ActivityInfo {
 	 * @return tracking activity instance
 	 */
 	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
-			Collection<Trackable> chTrackables, Source source) {
+			Collection<Trackable> chTrackables) {
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
-		activity.setSource(source);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
 		// activity.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) :
@@ -991,10 +987,9 @@ public class ActivityInfo {
 	 *            identifier (signature) of snapshot
 	 * @return snapshot instance
 	 */
-	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId, Source source) {
+	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
 		PropertySnapshot snapshot = category != null ? (PropertySnapshot) tracker.newSnapshot(category, trackName)
 				: (PropertySnapshot) tracker.newSnapshot(trackName);
-		snapshot.setSource(source);
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
 		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);
@@ -1549,7 +1544,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets activity category (i.e. snapshot category).
+	 * Gets activity category (e.g., snapshot category).
 	 *
 	 * @return the activity category
 	 */

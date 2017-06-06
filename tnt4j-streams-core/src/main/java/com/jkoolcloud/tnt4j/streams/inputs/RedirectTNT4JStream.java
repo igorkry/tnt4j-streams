@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements a redirecting activity stream, where activity data is prepared by other TNT4J based streaming libraries
- * (i.e. tnt4j-stream-jmx, tnt4j-stream-gc) using {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
+ * (e.g., tnt4j-stream-jmx, tnt4j-stream-gc) using {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
  * data. Redirected activities JSON data ban be read from the specified InputStream-based stream or Reader-based reader.
  * This class wraps the raw {@link InputStream} or {@link Reader} with a {@link BufferedReader}. Input source also can
  * be {@link File} descriptor or {@link ServerSocket} connections.

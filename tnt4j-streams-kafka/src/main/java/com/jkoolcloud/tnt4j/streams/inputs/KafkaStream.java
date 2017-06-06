@@ -71,9 +71,9 @@ import kafka.utils.SystemTime$;
  * (Optional)</li>
  * <li>StartZooKeeper - flag indicating if stream has to start ZooKeeper server on startup. Default value -
  * {@code false}. (Optional)</li>
- * <li>List of properties used by Kafka API. i.e zookeeper.connect, group.id. See {@link kafka.consumer.ConsumerConfig}
- * for more details on Kafka consumer properties. @see <a href="https://kafka.apache.org/08/configuration.html">Kafka
- * configuration reference</a></li>.
+ * <li>List of properties used by Kafka API, e.g., zookeeper.connect, group.id. See
+ * {@link kafka.consumer.ConsumerConfig} for more details on Kafka consumer properties. @see
+ * <a href="https://kafka.apache.org/08/configuration.html">Kafka configuration reference</a></li>.
  * </ul>
  *
  * Default ZooKeeper and Kafka server configuration properties are loaded from configuration files referenced by Java

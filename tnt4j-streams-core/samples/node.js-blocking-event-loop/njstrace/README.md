@@ -79,7 +79,7 @@ The inject method can get a configuration object with the following:
 * `files {string|string[]}` - A glob file pattern(s) that matches the files to instrument,
 this can be any pattern that is supported by `minimatch` npm module.
 The matching is case-insensitive. Patterns are processed in-order with an 'or' operator, unless it's a
-negative pattern (i.e starts with "!") which negates (if matches) all matches up to it.
+negative pattern (e.g., starts with "!") which negates (if matches) all matches up to it.
 All file paths are processed **relative** to the process working directory.
 `default: All .js files EXCLUDING node_modules ['**/*.js', '!**/node_modules/**']`
 

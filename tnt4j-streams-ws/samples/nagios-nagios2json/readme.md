@@ -13,7 +13,7 @@ Build and install as described in documentation:
 1. Fallow the instruction on TNT4J-Streams
 
 2. Edit `tnt-data-source.xml` parser configuration file and change: your Nagios server IP (url), username and password and `nagios2json`
-parameters i.e. `servicestatustypes=31`
+parameters, e.g., `servicestatustypes=31`
 
 ```xml
     <step name="Step 1"

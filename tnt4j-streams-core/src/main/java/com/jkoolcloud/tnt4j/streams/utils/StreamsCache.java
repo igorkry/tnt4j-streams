@@ -29,7 +29,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 /**
  * Utility class to support TNT4J-Streams streamed data values caching.
  * <p>
- * Cache entries are defined using static or dynamic (i.e. patterns having field name variable to fill in data from
+ * Cache entries are defined using static or dynamic (e.g., patterns having field name variable to fill in data from
  * activity entity) values.
  *
  * @version $Revision: 2 $

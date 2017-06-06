@@ -146,7 +146,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Sets default stream output handler. It may happen when stream configuration does not define particular output
-	 * handler reference (i.e. from older TNT4J-Streams API versions).
+	 * handler reference (e.g., from older TNT4J-Streams API versions).
 	 */
 	protected abstract void setDefaultStreamOutput();
 
@@ -423,7 +423,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Get the position in the source activity data currently being processed. For line-based data sources, this is
-	 * generally the line number of currently processed file or other text source. If activity items source (i.e. file)
+	 * generally the line number of currently processed file or other text source. If activity items source (e.g., file)
 	 * changes - activity position gets reset.
 	 * <p>
 	 * Subclasses should override this to provide meaningful information, if relevant. The default implementation just
@@ -442,7 +442,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * Returns currently streamed activity item index. Index is constantly incremented when streaming begins and
 	 * activity items gets available to stream.
 	 * <p>
-	 * It does not matter if activity item source changes (i.e. file). To get actual source dependent position see
+	 * It does not matter if activity item source changes (e.g., file). To get actual source dependent position see
 	 * {@link #getActivityPosition()}.
 	 *
 	 * @return currently processed activity item index
@@ -515,7 +515,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Updates activities skipped and total counts and fires progress update notification when activity data gets
-	 * filtered out by streaming settings (i.e. file lines range).
+	 * filtered out by streaming settings (e.g., file lines range).
 	 */
 	protected void skipFilteredActivities() {
 		incrementSkippedActivitiesCount();

@@ -300,7 +300,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Shifts {@link TimeUnit} enum value to next lower scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * Shifts {@link TimeUnit} enum value to next lower scale value, e.g., {@link TimeUnit#SECONDS} ->
 	 * {@link TimeUnit#MILLISECONDS}.
 	 * 
 	 * @param units
@@ -314,7 +314,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Shifts {@link TimeUnit} enum value to next upper scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * Shifts {@link TimeUnit} enum value to next upper scale value, e.g., {@link TimeUnit#SECONDS} ->
 	 * {@link TimeUnit#MINUTES}.
 	 * 
 	 * @param units

@@ -108,7 +108,7 @@ public enum ParserProperties {
 
 	/**
 	 * 
-	 * Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
+	 * Property identifies whether stream should strip RAW activity data (e.g., WMQ message) headers.
 	 * 
 	 * 
 	 */
@@ -126,7 +126,7 @@ public enum ParserProperties {
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (i.e. JSON) package is single line.
+	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line.
 	 * 
 	 * 
 	 */
@@ -135,7 +135,7 @@ public enum ParserProperties {
 
 	/**
 	 *
-	 * Property to defile locator path delimiter for a nested structures (i.e. maps).
+	 * Property to defile locator path delimiter for a nested structures (e.g., maps).
 	 *
 	 *
 	 */

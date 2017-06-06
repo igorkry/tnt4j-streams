@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * <ul>
  * <li>setting 'TraceOperations' property value to 'MQXF_(GET|PUT|CLOSE)' will stream only traces for 'MQXF_GET',
  * 'MQXF_PUT' and 'MQXF_CLOSE' MQ operations.</li>
- * <li>setting 'ExcludedRC' property value to 'MQRC_NO_MSG_AVAILABLE' will not stream MQ operations (i.e. 'MQXF_GET')
+ * <li>setting 'ExcludedRC' property value to 'MQRC_NO_MSG_AVAILABLE' will not stream MQ operations (e.g., 'MQXF_GET')
  * traces when there was no messages available in queue.</li>
  * </ul>
  * <p>

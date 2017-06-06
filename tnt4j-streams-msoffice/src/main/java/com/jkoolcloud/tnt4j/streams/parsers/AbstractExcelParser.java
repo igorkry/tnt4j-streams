@@ -26,10 +26,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * Base class for abstract activity data parser that assumes each activity data item can MS Excel
- * {@link org.apache.poi.ss.usermodel.Workbook} contained data structure (i.e. {@link org.apache.poi.ss.usermodel.Sheet}
- * or {@link org.apache.poi.ss.usermodel.Row}), where each field is represented by a
- * {@link org.apache.poi.ss.usermodel.Cell} and the sheet name and cell identifier (row number and column letter) is
- * used to map cell(s) contained data into its corresponding activity field.
+ * {@link org.apache.poi.ss.usermodel.Workbook} contained data structure (e.g.,
+ * {@link org.apache.poi.ss.usermodel.Sheet} or {@link org.apache.poi.ss.usermodel.Row}), where each field is
+ * represented by a {@link org.apache.poi.ss.usermodel.Cell} and the sheet name and cell identifier (row number and
+ * column letter) is used to map cell(s) contained data into its corresponding activity field.
  *
  * @version $Revision: 1 $
  */

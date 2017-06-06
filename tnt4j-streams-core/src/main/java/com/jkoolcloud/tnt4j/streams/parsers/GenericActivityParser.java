@@ -356,7 +356,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Performs pre-parse actions on RAW activity data, i.e. conversion using pre-parsers.
+	 * Performs pre-parse actions on RAW activity data, e.g., conversion using pre-parsers.
 	 * 
 	 * @param stream
 	 *            stream providing activity data
@@ -376,7 +376,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Performs post-parse actions on resolved activity fields data, i.e. filtering.
+	 * Performs post-parse actions on resolved activity fields data, e.g., filtering.
 	 *
 	 * @param cData
 	 *            prepared activity data item context to parse

@@ -1315,7 +1315,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Process parser {@code <reference>} element, i.e. pre-parser.
+	 * Process parser {@code <reference>} element, e.g., pre-parser.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -1339,7 +1339,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Process stream {@code <reference>} element, i.e. parser, output, etc.
+	 * Process stream {@code <reference>} element, e.g., parser, output, etc.
 	 *
 	 * @param attrs
 	 *            List of element attributes

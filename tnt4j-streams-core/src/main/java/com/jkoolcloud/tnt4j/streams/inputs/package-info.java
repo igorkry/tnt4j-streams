@@ -15,7 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams inputs: i.e. file, socket, java input
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams inputs: e.g., file, socket, java input
  * stream, etc.
  *
  * @author akausinis

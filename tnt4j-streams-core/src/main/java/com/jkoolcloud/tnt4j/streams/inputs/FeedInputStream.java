@@ -34,7 +34,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Base class for feeds based activity stream, where activity data is read from the specified raw input source (i.e.
+ * Base class for feeds based activity stream, where activity data is read from the specified raw input source (e.g.,
  * {@link InputStream} or {@link Reader}). This class wraps the raw input source with a {@link Feed}. RAW input source
  * also can be {@link File} descriptor or {@link ServerSocket} accepted {@link Socket} connection.
  * <p>
@@ -77,7 +77,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	private FeedInput feedInput;
 
 	/**
-	 * RAW input source (i.e. {@link java.io.Reader} or {@link InputStream}) from which activity data is read.
+	 * RAW input source (e.g., {@link java.io.Reader} or {@link InputStream}) from which activity data is read.
 	 */
 	private R rawInputSource = null;
 

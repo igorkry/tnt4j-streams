@@ -34,7 +34,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 /**
  * Implements activity data parser that assumes each activity data item is an MS Excel
  * {@link org.apache.poi.ss.usermodel.Workbook} {@link Row} data structure, where each field is represented by a row
- * column reference (i.e B, C, AB) and the name is used to map each field into its corresponding activity field.
+ * column reference (e.g., B, C, AB) and the name is used to map each field into its corresponding activity field.
  *
  * @version $Revision: 2 $
  */

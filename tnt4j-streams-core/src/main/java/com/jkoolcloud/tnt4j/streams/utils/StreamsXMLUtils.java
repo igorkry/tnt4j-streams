@@ -53,7 +53,7 @@ public final class StreamsXMLUtils {
 	/**
 	 * Adds XPath function to custom functions registry.
 	 * <p>
-	 * To call these functions from script code use 'ts:' prefix: i.e. 'ts:getFileName()'
+	 * To call these functions from script code use 'ts:' prefix: e.g., 'ts:getFileName()'
 	 *
 	 * @param functionName
 	 *            name of custom function to be used

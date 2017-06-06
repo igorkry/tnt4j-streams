@@ -88,7 +88,7 @@ Allow CORS access:
 
 * Allow CORS in browser:
 
-    i.e. in Chrome add [plugin](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
+    e.g., in Chrome add [plugin](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
 	
 ## Step 9
 	

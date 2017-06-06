@@ -558,7 +558,7 @@
             <xs:enumeration value="StripHeaders">
                 <xs:annotation>
                     <xs:documentation>
-                        Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
+                        Property identifies whether stream should strip RAW activity data (e.g., WMQ message) headers.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -706,7 +706,7 @@
             <xs:enumeration value="ReadLines">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that complete activity RAW data (i.e. JSON) package is single line.
+                        Property indicates that complete activity RAW data (e.g., JSON) package is single line.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -722,7 +722,7 @@
             <xs:enumeration value="ArchType">
                 <xs:annotation>
                     <xs:documentation>
-                        Property to define zipped stream processed archive type (i.e. ZIP, GZIP, JAR).
+                        Property to define zipped stream processed archive type (e.g., ZIP, GZIP, JAR).
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -754,7 +754,7 @@
             <xs:enumeration value="RestoreState">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that stream should restore streaming state after (re)start (i.e continue from last streamed
+                        Property indicates that stream should restore streaming state after (re)start (i.e., continue from last streamed
                         file line).
                     </xs:documentation>
                 </xs:annotation>
@@ -763,7 +763,7 @@
             <xs:enumeration value="StartServer">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that stream should start as server (i.e. Kafka server) if stream supports both client and server
+                        Property indicates that stream should start as server (e.g., Kafka server) if stream supports both client and server
                         modes.
                     </xs:documentation>
                 </xs:annotation>
@@ -780,7 +780,7 @@
             <xs:enumeration value="RangeToStream">
                 <xs:annotation>
                     <xs:documentation>
-                        Property to define streamed activity data range (i.e. file lines or sheet rows) from:to.
+                        Property to define streamed activity data range (i.e., file lines or sheet rows) from:to.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -870,7 +870,7 @@
             <xs:enumeration value="StripHeaders">
                 <xs:annotation>
                     <xs:documentation>
-                        Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
+                        Property identifies whether stream should strip RAW activity data (e.g., WMQ message) headers.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -886,7 +886,7 @@
             <xs:enumeration value="ReadLines">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that complete activity RAW data (i.e. JSON) package is single line.
+                        Property indicates that complete activity RAW data (e.g., JSON) package is single line.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -894,7 +894,7 @@
             <xs:enumeration value="LocPathDelim">
                 <xs:annotation>
                     <xs:documentation>
-                        Property to defile locator path delimiter for a nested structures (i.e. maps).
+                        Property to defile locator path delimiter for a nested structures (e.g., maps).
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -1637,7 +1637,7 @@
         <xs:attribute name="value-type" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Defines field resolved user defined value type i.e. size, age, speed.
+                    Defines field resolved user defined value type, e.g., size, age, speed.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

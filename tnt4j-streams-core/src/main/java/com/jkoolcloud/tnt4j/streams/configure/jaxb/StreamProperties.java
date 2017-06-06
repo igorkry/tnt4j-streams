@@ -174,7 +174,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
+	 * Property identifies whether stream should strip RAW activity data (e.g., WMQ message) headers.
 	 * 
 	 * 
 	 */
@@ -340,7 +340,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (i.e. JSON) package is single line.
+	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line.
 	 * 
 	 * 
 	 */
@@ -358,7 +358,7 @@ public enum StreamProperties {
 
 	/**
 	 *
-	 * Property to define zipped stream processed archive type (i.e. ZIP, GZIP, JAR).
+	 * Property to define zipped stream processed archive type (e.g., ZIP, GZIP, JAR).
 	 *
 	 *
 	 */
@@ -404,7 +404,7 @@ public enum StreamProperties {
 
 	/**
 	 *
-	 * Property indicates that stream should start as server (i.e. Kafka server) if stream supports both client and
+	 * Property indicates that stream should start as server (e.g., Kafka server) if stream supports both client and
 	 * server modes.
 	 *
 	 *

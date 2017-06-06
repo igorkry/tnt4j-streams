@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <tr><td>address</td><td>%a</td><td>Client IP address of the request (see the mod_remoteip module).</td></tr>
  * <tr><td>localAddress</td><td>%A</td><td>Local IP-address.</td></tr>
  * <tr><td>size</td><td>%B</td><td>Size of response in bytes, excluding HTTP headers.</td></tr>
- * <tr><td>sizeClf</td><td>%b</td><td>Size of response in bytes, excluding HTTP headers. In CLF format, i.e. a '-' rather than a 0 when no bytes are
+ * <tr><td>sizeClf</td><td>%b</td><td>Size of response in bytes, excluding HTTP headers. In CLF format, e.g., a '-' rather than a 0 when no bytes are
  * sent.</td></tr>
  * <tr><td>cookie</td><td>%{VARNAME}C</td><td>The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully
  * supported.</td></tr>

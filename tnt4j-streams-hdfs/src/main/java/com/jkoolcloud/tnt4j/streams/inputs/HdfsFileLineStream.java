@@ -74,7 +74,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 	/**
 	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
-	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * should be performed, e.g., C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
 	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file create
 	 * timestamp in descending order.
 	 *

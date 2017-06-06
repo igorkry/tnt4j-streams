@@ -16,7 +16,7 @@
 
 /**
  * Contains the API (classes and interfaces) for extended default Java Input/Output (IO) API used by jKool LLC
- * TNT4J-Streams: i.e. input streams, readers, etc.
+ * TNT4J-Streams: e.g., input streams, readers, etc.
  *
  * @author akausinis
  * @version 1.0

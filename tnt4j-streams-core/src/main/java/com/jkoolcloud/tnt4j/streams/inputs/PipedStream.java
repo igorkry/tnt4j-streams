@@ -30,7 +30,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * NOTE: this stream just pipe input from RAW input source (i.e. System.in) and does not open it. This way when closing
+ * NOTE: this stream just pipe input from RAW input source (e.g., System.in) and does not open it. This way when closing
  * this stream, RAW {@link InputStream} or {@link Reader} is not closed and left to be closed by opener.
  * <p>
  * This activity stream supports properties from {@link JavaInputStream} (and higher hierarchy streams).

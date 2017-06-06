@@ -255,7 +255,7 @@ module.exports = new NJSTrace();
  * @property {string|string[]} [files=<see description>] - A glob file pattern(s) that matches the files to instrument,
  * this supports any pattern supported by "minimatch" npm module.
  * The matching is case-insensitive. Patterns are processed in-order with an 'or' operator, unless it's a
- * negative pattern (i.e starts with "!") which negates (if match) all matches up to it.
+ * negative pattern (e.g., starts with "!") which negates (if match) all matches up to it.
  * All file paths are processed RELATIVE to the process working directory.
  * DEFAULT = All .js files EXCLUDING everything under node_modules (['**\/*.js', '!**\/node_modules\/**'])
  *
