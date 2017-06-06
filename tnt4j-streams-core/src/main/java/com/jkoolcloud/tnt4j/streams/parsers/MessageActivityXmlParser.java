@@ -39,8 +39,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This class extends the basic activity XML parser for handling data specific to messaging operations. It provides
  * additional transformations of the raw activity data collected for specific fields.
  * <p>
- * In particular, this class will convert the signature and correlation field values from a tokenized list of items into
- * a value in the appropriate form required by the JKool Cloud.
+ * In particular, this class will convert the {@link StreamFieldType#TrackingId} field value from a tokenized list of
+ * items into a value in the appropriate form required by the JKool Cloud.
  * <p>
  * This parser supports the following properties (in addition to those supported by {@link ActivityXmlParser}):
  * <ul>
@@ -120,6 +120,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null) {
 			switch (fieldType) {
+			// case Correlator:
 			case TrackingId:
 				Object[] sigItems = null;
 				if (value instanceof Object[]) {
