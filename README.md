@@ -44,7 +44,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * AJAX
     * Node.js
     * Collectd
-    * Nagios    
+    * Nagios
     * Fluentd
 
     just by applying configuration and without additional coding.
@@ -310,7 +310,7 @@ sample:
 
 this:
 ```xml
-    <field name="UserName" locator="4"/>    
+    <field name="UserName" locator="4"/>
 ```
 is same as:
 ```xml
@@ -363,7 +363,7 @@ After processing one JMS message TNT4J activity event will contain fields mapped
 ### Field value transformations
 
 In streams configuration You can define field or locator resolved values transformations. In general transformations performs resolved 
-activity value post-processing before sending it to JKool Cloud: i.e. extracts file name from resolved activity file path.
+activity value post-processing before sending it to JKool Cloud: e.g., extracts file name from resolved activity file path.
 
 To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`.
 
@@ -377,12 +377,12 @@ To define transformations stream configuration token `<field-transform>` shall b
 Token body is used to define transformation script/expression code.
 
 Valid transformation configuration should define `beanRef`, or have script/expression code defined in token body data (`<![CDATA[]]>`).
-     
+
 ##### TNT4J-Streams predefined custom XPath functions 
 
 To use TNT4J-Streams predefined functions namespace `ts:` shall be used.
-   
-Streams predefined custom XPath functions to be used in transformation expressions:                 
+
+Streams predefined custom XPath functions to be used in transformation expressions:
 * `ts:getFileName(filePath)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName`. Retrieves file 
 name from provided file path.
 * `ts:getObjectName(objectFQN, options)` - implemented by transformation bean `com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName`. 
@@ -395,7 +395,7 @@ You may also define your own customized XPath functions. To do this Your API has
 * implement interface `javax.xml.xpath.XPathFunction`
 * register function by invoking `com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils.registerCustomFunction(functionName, function)`.
 
-i.e.:
+e.g.:
 ```java
 public class YourTransform implements XPathFunction {
   @Override
@@ -406,7 +406,7 @@ public class YourTransform implements XPathFunction {
 ...
 StreamsXMLUtils.registerCustomFunction("yourTransformation", new YourTransform());
 ...
-```  
+```
 then You can use it from stream configuration:
 ```xml
 <field name="InvoiceFileFromFunction" locator="7">
@@ -423,7 +423,7 @@ field locators. For example:
         <.../>
         <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
         <.../>
-    </parser>    
+    </parser>
 ```
 
 Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/item/source/queue` points to queue named `SomeQueueName@Agent1`):
@@ -441,11 +441,11 @@ Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/it
         <!-- to get queue fully qualified: 'SomeQueueName@Agent1'-->
         <field name="MFT_SRC_QUEUE_FQN" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"/>
         <.../>
-    </parser>   
+    </parser>
 ```
 
 #### Stream elements transformations 
-  
+
 * Field value transformation
 ```xml
 <field name="Field" separator=",">
@@ -462,8 +462,8 @@ aggregated field value.
 
 Sample above states that field value combined from locators `loc1` and `loc2` and separated by `,` should be upper cased. For example 
 locator `loc1` resolves value `value1`, locator `loc2` resolves value `vaLue2`. Then field value before transformations is `value1,vaLue2` 
-and field value after transformation is `VALUE1,VALUE2`.   
-   
+and field value after transformation is `VALUE1,VALUE2`.
+
 * Field locator value transformation
 ```xml
 <field name="Field" separator=",">
@@ -483,7 +483,7 @@ Sample above states that locator `loc1` resolved value should be upper cased and
 concatenated with string `_transformed`. Then those transformed values should be aggregated to field value separated by `,` symbol. For 
 example locator `loc1` resolved value `value1`, then after transformation value is changed to `VALUE1`. Locator `loc2` resolved value 
 `value2`, then after transformation value is changed to `VALIUE2_transformed`. Field aggregates those locators values to 
-`VALUE1,VALUE2_transformed`.    
+`VALUE1,VALUE2_transformed`.
 
 **NOTE:** 
 * transformations are applied after field/locator value formatting.
@@ -492,7 +492,7 @@ example locator `loc1` resolved value `value1`, then after transformation value 
 sequentially where input of applied transformation is output of previous transformation. 
 * it is allowed to combine field and locators transformations within same stream field scope setting transformations for both field and 
 locators independently.
-* when "short form" of field-locator configuration is used, transformation is bound to locator (because field-locator relation is  1:1 and 
+* when "short form" of field-locator configuration is used, transformation is bound to locator (because field-locator relation is 1:1 and 
 resolved value is same for locator and for field). Example:
 ```xml
 <field name="Correlator" locator="3">
@@ -500,7 +500,7 @@ resolved value is same for locator and for field). Example:
         "corel_" + $fieldValue
     </field-transform>
 </field>
-```    
+```
 
 #### Transformation definition samples
 
@@ -512,7 +512,7 @@ resolved value is same for locator and for field). Example:
     </field-transform>
 </field>
 ```
-This sample upper case resolved value and makes "centred" (padded and tailed with space symbols) 30 symbols length string.   
+This sample upper case resolved value and makes "centred" (padded and tailed with space symbols) 30 symbols length string.
 
 * JavaScript script/expression
 ```xml
@@ -564,7 +564,7 @@ To make custom Java Bean based transformations Your API should implement interfa
 ```
 This sample shows how to invoke Java Bean defined transformation. Class `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName` implements 
 custom XPath function to get file name from provided file path. Field/locator value mapping to function arguments is performed automatically 
-and there is no need to define additional mapping.   
+and there is no need to define additional mapping.
 
 ### Stream elements filtering
  
@@ -574,11 +574,81 @@ TODO
  
 TODO 
 
+##### Use of dynamic locators
+
+TODO
+
+### Caching of streamed data field values
+
+`TNT4J-Streams` provides temporary storage i.e., cache for a resolved activity fields values. It is useful when there are some related 
+activities streamed and particular JKool prepared activity entity requires data values form previously streamed activities.
+
+Sample streamed values caching configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="$.event" locator-type="Label"/>
+        <field name="LastEvent" locator="CachedEventName" locator-type="Cache"/>
+
+        <field name="Correlator" locator="$.transaction" locator-type="Label"/>
+        <field name="Transaction" locator="$.transaction" locator-type="Label"/>
+
+        <field name="SecretValue" locator="$.secret" locator-type="Label"/>
+        <field name="LastSecret" locator="SecretCache" locator-type="Cache"/>
+
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Resource" locator="$.resource" locator-type="Label"/>
+    </parser>
+
+    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
+
+        <property name="StreamCacheMaxSize" value="300"/>
+        <property name="StreamCacheExpireDuration" value="15"/>
+
+        <parser-ref name="EventParser"/>
+
+        <cache>
+            <entry id="CachedEventName">
+                <key>EventName</key>
+                <value>${EventName} in ${Transaction}</value>
+            </entry>
+            <entry id="SecretCache">
+                <key>${Transaction}Secret</key>
+                <value>${SecretValue}</value>
+            </entry>
+        </cache>
+    </stream>
+
+</tnt-data-source>
+```
+
+Sample configuration defines stream `MultipleEvents` reading data from JSON files using filename mask `event*.json` and referencing parser 
+`EventParser`. Stream defines two cache related properties `StreamCacheMaxSize` and `StreamCacheExpireDuration`. Definitions of those 
+properties can be found in chapter [Stream cache related parameters](#stream-cache-related-parameters). 
+
+Stream definition has `cache` section, defining stored cache entries. Entry key and value can be configured using static values (e.g, 
+`<key>EventName</key>`), dynamic activity value references (e.g., `<value>${SecretValue}</value>`) referencing activity entity field name, 
+or combined static and dynamic values (e.g., `<value>${EventName} in ${Transaction}</value>`). Using dynamic value references in `<key>` 
+definition will result having multiple cache entries filled in with values resolved from streamed activity data.
+
+Parser `EventParser` has two fields having `locator-type="Cache"`. This means that values from those fields are resolved from stream cache 
+entries referenced by `locator="SecretCache"` where locator value points to cache entry identifier. Having reference to cache entry, stream 
+takes entry key definition and pre-fills it with current activity entity fields values making actual cache key value and thus mapping to 
+particular cached value.
+
 ## Samples
 
 ### Running samples
-When release assemblies are built, samples are located in `samples` directory i.e.
-`../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
+When release assemblies are built, samples are located in `samples` directory, e.g., `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
 To run particular sample:
 * go to sample directory
 * run `run.bat` or `run.sh` depending on Your OS
@@ -594,7 +664,7 @@ Sample files can be found in `samples/single-log` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -625,7 +695,7 @@ Sample stream configuration:
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
         <!--<property name="RangeToStream" value="1:"/>-->
-        
+
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -650,7 +720,7 @@ Sample files can be found in `samples/multiple-logs` directory.
 `orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
 single order activity event.
 
-**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Single Log file'](#single-log-file) with one single difference:
@@ -668,11 +738,11 @@ Sample files can be found in `samples/piping-stream` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-**NOTE:** records in this file are from year `2011` i.e. `12 Jul 2011`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 `jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
- you need is to pass file name of stream parsers configuration i.e. `parsers.xml`
+ you need is to pass file name of stream parsers configuration, e.g., `parsers.xml`
 
 `run.bat` or `run.sh` files uses OS piping to run sample.
 
@@ -781,7 +851,7 @@ used.
 
 `ZipLineStream` reads all entries lines from `sample.zip` file.
 
-To filter zip file entries use zip entry name wildcard pattern i.e. `sample.zip!2/*.txt`. In this case stream will read
+To filter zip file entries use zip entry name wildcard pattern, e.g., `sample.zip!2/*.txt`. In this case stream will read
 just zipped files having extension `txt` from internal zip directory named `2` (from sub-directories also).
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
@@ -890,7 +960,7 @@ Sample files can be found in `samples/apache-access-single-log` directory.
 
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
-**NOTE:** records in this file are from year `2004` i.e. `07/Mar/2004`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2004` e.g., `07/Mar/2004`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -1829,11 +1899,11 @@ Sample stream configuration:
     <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
             <property name="HaltIfNoParser" value="false"/>
             <property name="Topic" value="TNT4JStreams"/>
-    
+
             <!-- Kafka consumer properties -->
             <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
             <property name="group.id" value="TNT4JStreams"/>
-    
+
             <parser-ref name="KafkaMessageParser"/>
         </stream>
 </tnt-data-source>
@@ -2038,16 +2108,16 @@ Sample stream configuration:
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
-        
-    <java-object name="MQMsgToStringPreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.MQMessageToStringPreParser"/>    
+
+    <java-object name="MQMsgToStringPreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.MQMessageToStringPreParser"/>
 
     <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace"
                   value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
-        
-        <reference name="MQMsgToStringPreParser"/>          
-                  
+
+        <reference name="MQMsgToStringPreParser"/>
+
         <!--field name="ServerName" value="host-name-for-broker"/--> <!-- defaults to host name where jKool LLC TNT4J-Streams is running -->
         <!--field name="ServerName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:hostName" locator-type="Label"/--> <!-- when broker supports this -->
         <!--field name="ServerIp" locator="/wmb:event/wmb:eventPointData/ServerIp" locator-type="Label"/-->
@@ -2363,7 +2433,7 @@ Sample stream configuration:
 
         <property name="TraceOperations" value="*"/>
         <!--<property name="TraceOperations" value="MQXF_*"/>-->
-        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->    
+        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
         <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
         <property name="SuppressBrowseGets" value="true"/>
 
@@ -2383,7 +2453,7 @@ be made from it.
 `StripHeaders` property states that MQ message headers shall be preserved.
  
 `TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Trace Events referencing operations not 
-covered by this set will be filtered out from activities stream.   
+covered by this set will be filtered out from activities stream.
 
 `ExcludedRC` property defines set of excluded MQ traces reason codes (delimited using `|` character). MQ Trace Events having reason codes 
  defined by this set will be filtered out from activities stream. Set entries may be defined using both numeric and MQ constant name values.
@@ -2962,7 +3032,7 @@ accept inbound connection.
 Stream referenced object `JMXRedirectOutput` sends JSON formatted data to JKool Cloud.
 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
-additional JSON reformatting in default TNT4J data flow.  
+additional JSON reformatting in default TNT4J data flow.
 
 **NOTE:** you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
 format. 
@@ -2971,8 +3041,8 @@ To do re-streaming from file, change sample configuration by replacing `SampleJM
 referring file containing logged trackables in JSON format:
 ```xml
     <stream name="SampleJMXRoutingStream" class="com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream">
-        <property name="FileName" value="tnt4j-stream-activities.log"/>    
-        
+        <property name="FileName" value="tnt4j-stream-activities.log"/>
+
         <reference name="JMXRedirectOutput"/>
 
         <tnt4j-properties>
@@ -2989,7 +3059,7 @@ This sample shows how to stream MS Excel workbook rows as activity events.
 
 Sample files can be found in `samples/xlsx-rows` directory.
 
-**NOTE:** records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2010` e.g., `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -3039,7 +3109,7 @@ workbook sheet row and passes it to parser.
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
 
-`ExcelRowParser` parser uses literal sheet column indicators as locators (i.e. `A`, `D`, `AB`).
+`ExcelRowParser` parser uses literal sheet column indicators as locators (e.g., `A`, `D`, `AB`).
 
 **NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
@@ -3050,7 +3120,7 @@ This sample shows how to stream MS Excel workbook sheets as activity events.
 
 Sample files can be found in `samples/xlsx-sheets` directory.
 
-**NOTE:** records in this file are from year `2010` i.e. `12 Jul 2010`, so then getting events data in JKool Cloud
+**NOTE:** records in this file are from year `2010` e.g., `12 Jul 2010`, so then getting events data in JKool Cloud
 please do not forget to just to dashboard time frame to that period!
 
 Sample stream configuration:
@@ -3097,7 +3167,7 @@ workbook sheet and passes it to parser.
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
 
-`ExcelSheetParser` parser uses literal sheet cell indicators as locators (i.e. `A1`, `D5`, `AB12` where letters
+`ExcelSheetParser` parser uses literal sheet cell indicators as locators (e.g., `A1`, `D5`, `AB12` where letters
 identifies column and number identifies row).
 
 **NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
@@ -3158,7 +3228,7 @@ Sample stream configuration:
         <property name="Port" value="9595"/>
 
         <parser-ref name="CollectdReqParser"/>
-    </stream>    
+    </stream>
 </tnt-data-source>
 ```
 
@@ -3179,7 +3249,7 @@ already made map data structures from RAW `collectd` report JSON data).
 dynamic field named `${FieldNameLoc}`. Attribute values containing variable expressions `${}` indicates that these attributes can have 
 dynamic values resolved from streamed data. Such variable expressions has to reference locators identifiers (`field-locator` attribute `id`) 
 to resolve and fill actual data. Field attribute `split`, that if field value locator resolves collection (list or array) of values, values 
-of that collection should be split into separate fields of produced activity.     
+of that collection should be split into separate fields of produced activity.
 
 #### Nagios reports streaming
 
@@ -3254,21 +3324,21 @@ received JSON string and passes it to parser.
 `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 
 Streaming scenario step defines:
- * Nagios service request URL and `nagios2json` parameters (i.e. `servicestatustypes=31`) 
+ * Nagios service request URL and `nagios2json` parameters (e.g., `servicestatustypes=31`) 
  * request method `GET` to comply `cgi`.
  * Nagios service user credentials - user name and password
  * Scheduler is set to `Cron` expression `every 15 seconds`.
  
 You may also add additional steps to retrieve different reports defining different `nagios2json` parameters.
  
-Nagios sends report as activity wrapping multiple metrics (snapshots).  
+Nagios sends report as activity wrapping multiple metrics (snapshots).
 
 `ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
 state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser because parent JSON parser already made map 
 data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
-`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.   
+`Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.
  
 #### Fluentd logs streaming
  
@@ -3294,8 +3364,8 @@ See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` mo
         <scope>runtime</scope>
     </dependency>
 ```
-* when running `TNT4J-Streams` use system property `-Dlog4j.configuration` to define `log4j.properties` file location i.e.: 
-`-Dlog4j.configuration="file:./config/log4j.properties"`.  
+* when running `TNT4J-Streams` use system property `-Dlog4j.configuration` to define `log4j.properties` file location, e.g.: 
+`-Dlog4j.configuration="file:./config/log4j.properties"`.
 
 ### tnt4j-logback
 
@@ -3310,7 +3380,7 @@ See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` mo
     </dependency>
 ```
 and comment out log4j dependencies
-* when running `TNT4J-Streams` use system property `-Dlogback.configurationFile` to define `logback.xml` file location i.e.:
+* when running `TNT4J-Streams` use system property `-Dlogback.configurationFile` to define `logback.xml` file location, e.g.:
 `-Dlog4j.configuration="file:./config/logback.xml"`. Change `bin/tnt-streams.bat` or `bin/tnt-streams.sh` file to pass logback configuration 
 to Java:
 
@@ -3332,7 +3402,7 @@ TNT4J-Streams configuration sources may be:
 * configuration files - like `tnt4j.properties`, `log4j.properties`, `tnt-data-source.xml`, etc. 
 * ZooKeeper nodes data - see [ZooKeeper stored configuration](#zookeeper-stored-configuration) chapter for more details.
 
-Configuration data format is same for all sources now.  
+Configuration data format is same for all sources now.
 
 ## TNT4J configuration
 
@@ -3340,7 +3410,7 @@ Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if ha
 Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
 `event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with JKool Cloud token assigned for You.
 
-To define `tnt4j.properties` file location use system property `-Dtnt4j.config` i.e. `-Dtnt4j.config="./config/tnt4j.properties"`.
+To define `tnt4j.properties` file location use system property `-Dtnt4j.config`, e.g., `-Dtnt4j.config="./config/tnt4j.properties"`.
 
 For more information on TNT4J and `tnt4j.properties` see [TNT4J Wiki page](https://github.com/Nastel/TNT4J/wiki/Getting-Started) and 
 [TNT4J README](https://github.com/Nastel/TNT4J/blob/master/README.md).
@@ -3351,10 +3421,10 @@ Details on JESL related configuration can be found in [JESL README](https://gith
 
 Filling in configuration template:
 * Replace `<YOUR XXXX>` value placeholder with actual value corresponding to your environment.
-* Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.  
+* Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.
 
 **NOTE:** It is **NOT RECOMMENDED** to use `BufferedEventSinkFactory` (or any other asynchronous sinks) with TNT4J-Streams. Streams and 
-sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `Kafka`) consumer uses network communication. 
+sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `Kafka`) consumer uses network communication. 
 
 ```properties
 # Stanza used for TNT4J-Streams sources
@@ -3399,7 +3469,7 @@ sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `K
     event.sink.factory.Url: http://data.jkoolcloud.com:6580
     #event.sink.factory.Url: https://data.jkoolcloud.com:6585
     #event.sink.factory.Url: https://data.jkoolcloud.com
-    event.sink.factory.Token: <YOUR TOKEN>    
+    event.sink.factory.Token: <YOUR TOKEN>
     #### JKool Cloud event sink factory configuration end ####
 ```
 
@@ -3430,17 +3500,17 @@ sinks are meant to act in sync, especially when sink (i.e. `JKCloud`, `Mqtt`, `K
 Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration
 can be found in `tnt-data-source.xsd` file located in project `config` directory.
 
-To define streams data source configuration file location, use program argument `-f:` i.e.:
+To define streams data source configuration file location, use program argument `-f:` e.g.:
 ```cmd
-     tnt4j-streams -f:./tnt4j-streams-core/samples/single-log/tnt-data-source.xml     
+     tnt4j-streams -f:./tnt4j-streams-core/samples/single-log/tnt-data-source.xml
 ```
-Or you can refer streams data source configuration file over System property named `tnt4j.streams.config` i.e.:
+Or you can refer streams data source configuration file over System property named `tnt4j.streams.config` e.g.:
 ```properties
     -Dtnt4j.streams.config=./tnt4j-streams-core/samples/single-log/tnt-data-source.xml
 ```
 
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
-[OS piped stream](#os-piped-stream).  
+[OS piped stream](#os-piped-stream).
 
 Program argument `-z:` is used to define configuration file for ZooKeeper based TNT4J-Streams configuration. 
 See [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data) and [Streams registry](#streams-registry).
@@ -3473,7 +3543,7 @@ sample stream configuration:
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="orders.log"/>
         <!--<property name="RangeToStream" value="1:"/>-->
-        
+
         <parser-ref name="TokenParser"/>
     </stream>
 </tnt-data-source>
@@ -3498,7 +3568,7 @@ These parameters are applicable to all types of streams.
 
  * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously
  or not. Default value - `false`. (Optional)
-    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional)  Actual only if `UseExecutors` 
+    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional) Actual only if `UseExecutors` 
     is set to `true`
     * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) 
     Actual only if `UseExecutors` is set to `true`
@@ -3506,8 +3576,6 @@ These parameters are applicable to all types of streams.
     Actual only if `UseExecutors` is set to `true`
         * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is 
         reached. Default value - `20sec`. (Optional) Actual only if `ExecutorsBoundedModel` is set to `true`.
-  * StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
-  * StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)          
 
     sample:
 ```xml
@@ -3516,7 +3584,15 @@ These parameters are applicable to all types of streams.
     <property name="ExecutorsTerminationTimeout" value="20"/>
     <property name="ExecutorsBoundedModel" value="true"/>
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
-    
+```
+
+##### Stream cache related parameters
+
+* StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
+* StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)
+
+    sample:
+```xml
     <property name="StreamCacheMaxSize" value="500"/>
     <property name="StreamCacheExpireDuration" value="30"/>
 ```
@@ -3600,7 +3676,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
  
     sample:
 ```xml
-    <property name="InputCloseable" value="false"/>    
+    <property name="InputCloseable" value="false"/>
 ``` 
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
@@ -3662,7 +3738,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * Topic - topic name to listen. (Required)
  * StartServer - flag indicating if stream has to start Kafka server on startup. Default value - `false`. (Optional)
  * StartZooKeeper - flag indicating if stream has to start ZooKeeper server on startup. Default value - `false`. (Optional)
- * List of properties used by Kafka API. i.e zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
+ * List of properties used by Kafka API, e.g., zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
  details on Kafka consumer properties.
 
     sample:
@@ -3780,7 +3856,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         * `schedule-simple` tag has required attribute `interval` (positive integer numeric value) and optional
         attributes `units` (time units - default value `MILLISECONDS`), `repeatCount` (integer numeric value - default
         value `1`, `-1` means endless).
-        * `request` is XML tag to define string represented request data (i.e. system command with parameters). To
+        * `request` is XML tag to define string represented request data (e.g., system command with parameters). To
         define XML contents it is recommended to use `CDATA`.
 
     sample:
@@ -3886,7 +3962,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
  
     sample:
 ```xml
-    <property name="UseActivityDataAsMessageForUnset" value="true"/>    
+    <property name="UseActivityDataAsMessageForUnset" value="true"/>
 ``` 
 
 #### Activity Name-Value parser
@@ -3915,14 +3991,14 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     sample:
 * index-capturing groups:
 ```xml
-    <property name="Pattern" value="((\S+) (\S+) (\S+))"/>    
+    <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
 ```
 * named-capturing groups:
 ```xml
     <property name="Pattern"><![CDATA[
         (?<CoID>.*)\.(?<ProcessArea>.*)\.(?<InterfaceID>.*)\.(?<HopNr>.*)
     ]]></property>
-```    
+```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
@@ -4000,7 +4076,7 @@ RegEx group names and log pattern tokens mapping:
 |	address	|	%a	|	Client IP address of the request (see the mod_remoteip module).	|
 |	local_address	|	%A	|	Local IP-address.	|
 |	size	|	%B	|	Size of response in bytes, excluding HTTP headers.	|
-|	size_clf	|	%b	|	Size of response in bytes, excluding HTTP headers. In CLF format, i.e. a '-' rather than a 0 when no bytes are sent.	|
+|	size_clf	|	%b	|	Size of response in bytes, excluding HTTP headers. In CLF format, e.g., a '-' rather than a 0 when no bytes are sent.	|
 |	cookie	|	%{VARNAME}C	|	The contents of cookie VARNAME in the request sent to the server. Only version 0 cookies are fully supported.	|
 |	req_time	|	%D	|	The time taken to serve the request, in microseconds.	|
 |	env_variable	|	%{VARNAME}e	|	The contents of the environment variable VARNAME.	|
@@ -4062,7 +4138,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     sample:
 ```xml
     <property name="ConvertToString" value="true"/>
-```  
+```
  
 Also see ['Activity map parser'](#activity-map-parser) and [Generic parser parameters](#generic-parser-parameters).
 
@@ -4070,7 +4146,7 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
 
  * TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible and 
  field/locator data type is `String` (meaning translated value can be assigned to field). If value of particular field should be left as 
- number (i.e. `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
+ number (e.g., `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
  
     sample:
 ```xml
@@ -4081,22 +4157,178 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 ### Pre-parsers
 
-TODO
+`TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, supported by 
+stream used parser. Pre-parsers shall implement [`ActivityDataPreParser`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/preparsers/ActivityDataPreParser.java) 
+interface. 
+
+Sample stream configuration using pre-parsers:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+        <!--IF RAW ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. SEE BELOW -->
+        <!--<param name="format" value="base64Binary" type="com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType"/>-->
+        <!--<param name="format" value="base64Binary" type="java.lang.String"/>-->
+    </java-object>
+
+    <parser name="RFH2XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <reference name="XMLFromRFH2PreParser"/>
+
+        <field name="EventType" value="Event"/>
+        <field name="ApplName" value="Sample"/>
+        <field name="ADPCount" locator="/root/usr/ADPSegCont" locator-type="Label"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/XML-from-bin-data/RFH2.dump"/>
+        <property name="RestoreState" value="false"/>
+
+        <parser-ref name="RFH2XMLParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Sample configuration defines `FileStream` reading binary data from `RFH2.dump` file. Stream refers activity xml parser `RFH2XMLParser`.
+
+`RFH2XMLParser` parser has reference to `XMLFromRFH2PreParser`. This pre-parser builds valid XML from provided binary data having fragmented 
+XML data like `RFH2` structure from IBM MQ.
+
+**NOTE:** If RAW activity data is not `byte[]` but appears to be encoded (e.g., BASE64), use pre-parser property `foramat` to define RAW activity data 
+format. It may be one of [`ActivityFieldFormatType`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/fields/ActivityFieldFormatType.java) 
+enumeration values: 
+* `base64Binary` - BASE64 encoded binary data
+* `hexBinary` - binary data represented as bytes HEX codes sequence 
+* `string` - binary data represented as plain string
+* `bytes` - binary data as `byte[]` (default format value).
+
+### External resources import into stream configuration
+
+`TNT4J-Streams` allows to have external resources importer to stream data source configuration.
+
+External values mapping resources import sample:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
+    <!--<resource-ref id="MFT_MAPPINGS_COMPCODE" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/CompCode.csv" separator=","/>-->
+
+    <parser name="ResMappingParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="EventType" locator="name(//*[1])" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.EventType"/>
+        </field>
+        <field name="EventName" locator="name(//*[1])" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.EventName"/>
+        </field>
+
+        <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
+
+        <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
+            <!--resolves FILE or QUEUE-->
+            <field-locator locator="name(//*/*)" locator-type="Label">
+                <field-map-ref resource="MFT_MAPPINGS.Resource"/>
+            </field-locator>
+            <!--resolves file or queue name -->
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
+            <!-- agent-->
+            <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
+        </field>
+        <field name="CompCode" locator="/transaction/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
+        </field>
+        <field name="CompCode2" locator="/transaction/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode2"/>
+        </field>
+        ...
+    </parser>
+
+    <stream name="ResMappingStream">
+        ...
+        <parser-ref name="ResMappingParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Sample shows how stream data source configuration imports (over `resource-ref` tag) external resource file 
+`./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json` using relative file path.
+
+`resource-ref` tag attributes:
+* `id` - is resource identifier and mus be unique. Required.
+* `type` - defines type of imported resource, and currently there is only one available value - `ValuesMap` meaning resource file defines 
+source-target values mapping. Required.
+* `uri` - defines absolute URL or relative path of referenced resource. Required. Supported external resource values mapping definition 
+formats:
+    * JSON
+    ```json
+    {
+        "EventType": {
+            "destination": "SEND",
+            "source": "RECEIVE",
+            "": "NOOP"
+        },
+
+        "EventName": {
+            "destination": "process_destination",
+            "source": "process_source",
+            "": "N/A"
+        },
+
+        "Resource": {
+            "file": "FILE",
+            "queue": "QUEUE"
+        },
+
+        "CompCode": {
+            "0": "SUCCESS",
+            "40": "WARNING",
+            "": "ERROR"
+        },
+
+        "CompCode2": {
+            "0": "SUCCESS",
+            "40": "WARNING",
+            "1": "FAILURE",
+            "": "ERROR"
+        }
+    }
+    ```
+    * CSV
+    ```csv
+    0,SUCCESS
+    40,WARNING
+    , ERROR
+    ```
+    * Properties 
+    ```properties
+    0:SUCCESS
+    40:WARNING
+    : ERROR
+    ```
+
+    **NOTE:** `JSON` can have multiple mapping definition sets, while `CSV` and `Properties` formats supports only one mapping set definition.
+
+* `separator` - defines source and target values delimiter and is applicable to `CSV` and `Properties` formatted resources. Optional.
 
 ## ZooKeeper stored configuration
 
 `TNT4J-Streams` has ability to load configuration not only from configuration files, but either from ZooKeeper nodes stored data. ZooKeeper 
-allows handle configuration data in more centralized way.  
+allows handle configuration data in more centralized way.
 
 `TNT4J-Streams` is able to load ZooKeeper stored configuration on application startup and also to monitor referenced ZooKeeper nodes for 
 configuration data changes, making it possible to apply new configuration on runtime.
-    
+
 ### Uploading configuration data to ZooKeeper
 
 To upload files contained `TNT4J-Streams` configuration to ZooKeeper nodes there is utility called `ZKConfigInit`. It has those program 
 arguments:
 * `-f:` - defines file reference containing uploader utility configuration. (Required)
-* `-c` - indicates to clean ZooKeeper nodes contained TNT4J-Streams configuration. (Optional)  
+* `-c` - indicates to clean ZooKeeper nodes contained TNT4J-Streams configuration. (Optional)
 
 To run it use `./bin/zk-init-cfg.bat` or `./bin/zk-init-cfg.sh` files. It uses uploader configuration file `./config/zk-init-cfg.properties`.
  
@@ -4117,7 +4349,7 @@ samples.core.ajax=../samples/ajax/tnt-data-source.xml
 samples.core.angular-js-tracing=../samples/angular-js-tracing/tnt-data-source.xml
 samples.core.single-log=../samples/single-log/tnt-data-source.xml
 ...
-```    
+```
 
 `zk.*` properties defines ZK connection configuration settings. 
 
@@ -4134,12 +4366,12 @@ property value is reference to a file containing configuration data to be upload
 
 So in upload process property name like `samples.core.single-log` turns to ZK node path `/samples/core/single-log` (full upload ZK path 
 would be `/tnt4j-streams/samples/core/single-log`). You can freely name properties according to your environment organization, but it must 
-comply properties naming specification to handle it as property and also must comply ZK node path specification after "translation".  
+comply properties naming specification to handle it as property and also must comply ZK node path specification after "translation".
 
 ### Loading ZooKeeper stored configuration data
 
 To make `TNT4J-Streams` load configuration from ZooKeeper use program argument `-z:` referencing `TNT4J-Streams` ZooKeeper configuration 
-file i.e. `-z:./tnt4j-streams-core/samples/zookeeper-cfg/stream-zk.properties`. 
+file, e.g., `-z:./tnt4j-streams-core/samples/zookeeper-cfg/stream-zk.properties`. 
 
 Program argument `-z:` can be used in common with `-f:` argument. Then streams will try to load ZooKeeper stored configuration first and if
 fails - then loads configuration from file referenced by `-f:` argument.
@@ -4239,9 +4471,9 @@ samples.core.single-log.cfg.file=../samples/single-log/tnt-data-source.xml
 Also see [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored-configuration-data).
 
 When using registry style ZooKeeper configuration, missing configuration entities ZK nodes data is automatically uploaded on demand from 
-entity configuration file property (ending `.cfg.file`) referenced file.      
+entity configuration file property (ending `.cfg.file`) referenced file.
 
-To run `TNT4J-Streams` using registry style ZooKeeper configuration define those program arguments: `-z:<cfg_file> -sid:<stream_id>` i.e.
+To run `TNT4J-Streams` using registry style ZooKeeper configuration define those program arguments: `-z:<cfg_file> -sid:<stream_id>`, e.g.,
 ```cmd
 -z:.\config\streams-zk.properties -sid:samples.core.single-log
 ```
@@ -4253,7 +4485,7 @@ How to Build TNT4J-Streams
 
 * (M) marked modules are mandatory 
 * (O) marked modules are optional 
-* (U) marked modules are utility modules (i.e. performs compiled assemblies packaging)
+* (U) marked modules are utility modules (e.g., performs compiled assemblies packaging)
 
 Modules list:
    * `Core` (M)
@@ -4271,7 +4503,7 @@ Modules list:
 All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
 **NOTE:** `Samples` module provides no additional features to TNT4J streaming framework. It contains only streams API use samples.
-**NOTE:** `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.  
+**NOTE:** `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.
 
 ## Requirements
 * JDK 1.7+
@@ -4279,8 +4511,8 @@ All optional modules (extensions) depends to `core` module and can't be build an
 * [TNT4J](https://github.com/Nastel/TNT4J)
 * [JESL](https://github.com/Nastel/JESL)
 
-All other required dependencies are defined in project modules `pom.xml` files. If maven is running
-online mode it should download these defined dependencies automatically.
+All other required dependencies are defined in project modules `pom.xml` files. If maven is running online mode it should download these 
+defined dependencies automatically.
 
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public [Maven Repository](http://repo.maven.apache.org/maven2/). In this 
@@ -4292,7 +4524,7 @@ how to do this.
 
 **NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
 default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
-libraries will be installed to local maven repository.    
+libraries will be installed to local maven repository.
 
 What to download manually or copy from your existing IBM MQ installation:
 * IBM MQ 8.0 or 9.0
@@ -4322,11 +4554,11 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 ## Building
    * to build project and make release assemblies run maven goals `clean package`
    * to build project, make release assemblies and install to local repo run maven goals `clean install`
-   
+
 By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
 
 If You do not want to build some of optional modules, comment those out like `WMQ` module is. Or You can define maven to build your 
-preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, i.e.:
+preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, e.g.:
 
 ```cmd
 mvn -pl tnt4j-streams-core,tnt4j-streams-samples,tnt4j-streams--distribution -am clean install
@@ -4342,9 +4574,9 @@ Issuing these commands, maven will build only `tnt4j-streams-core`, `tnt4j-strea
 
 Release assemblies are built to `../build/tnt4j-streams` directory.
 
-**NOTE:** sometimes maven fails to correctly handle dependencies. If dependency configuration looks
-fine, but maven still complains about missing dependencies try to delete local maven repository
-by hand: i.e. delete contents of `c:\Users\[username]\.m2\repository` directory.
+**NOTE:** sometimes maven fails to correctly handle dependencies. If dependency configuration looks fine, but maven still complains about 
+missing dependencies try to delete local maven repository by hand: e.g., on MS Windows delete contents of `c:\Users\[username]\.m2\repository` 
+directory.
 
 ## Running samples
 
@@ -4376,3 +4608,4 @@ Known Projects Using TNT4J
 ===============================================
 * [TNT4J-Streams-Zorka](https://github.com/Nastel/tnt4j-streams-zorka)
 * [TNT4J-Streams-Syslogd](https://github.com/Nastel/tnt4j-streams-syslogd)
+* [TNT4J-Streams-IBM-B2Bi](https://github.com/Nastel/tnt4j-streams-ibm-b2bi)

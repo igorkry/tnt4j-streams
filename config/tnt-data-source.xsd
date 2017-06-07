@@ -2168,7 +2168,7 @@
 
         <!-- Make sure <cache> entries identifiers are unique -->
         <xs:key name="UniqueCacheEntryId">
-            <xs:selector xpath="cache/entry"/>
+            <xs:selector xpath="stream/cache/entry"/>
             <xs:field xpath="@id"/>
         </xs:key>
 
