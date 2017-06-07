@@ -3,8 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="DatapowerParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="DatapowerParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
 
         <field name="Message" locator="/tracking_event/MsgData" locator-type="Label" datatype="String" format="string"/>
         <field name="EventName" separator=":">

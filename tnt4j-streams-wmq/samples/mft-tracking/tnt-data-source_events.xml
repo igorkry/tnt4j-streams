@@ -23,10 +23,9 @@
         <field name="AdminAction" locator="/XMOFTSFeedBack/sysAdminAction" locator-type="Label"/>
     </parser>
 
-    <parser name="MFTWorkflowParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+    <parser name="MFTWorkflowParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <reference name="XMLFromMsgPreParser"/>
 
-        <property name="SignatureDelim" value="#!#"/>
         <property name="RequireDefault" value="false"/>
 
         <field name="EventType" value="ACTIVITY"/>

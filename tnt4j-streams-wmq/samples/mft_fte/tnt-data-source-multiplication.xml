@@ -43,8 +43,7 @@
         <field name="CoId" locator="1" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="NOOP"/>
@@ -95,8 +94,7 @@
         </embedded-activity>
     </parser>
 
-    <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="EVENT"/>
@@ -118,8 +116,7 @@
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
     </parser>
 
-    <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="END"/>
@@ -157,8 +154,7 @@
         </field>
     </parser>
 
-    <parser name="FallbackParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="FallbackParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="RequireDefault" value="false"/>
 
         <!-- DO THERE WHATEVER YOU WANT -->
