@@ -322,9 +322,10 @@ is same as:
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
 one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
 
-**NOTE:** activity event will contain all fields processed by all stacked parsers.
+To define stacked parser You have to define `parser-ref` tag in parser `field` or `embedded-activity` definition. 
 
-To define stacked parser You have to define `parser-ref` tad in parser `field` definition.
+**NOTE:** `embeded-activity` is tag `field` alias, used to define set of locator resolved data transparent to parent activity, but useful 
+to make separate set of related child activities.
 
 sample:
 ```xml
@@ -333,19 +334,24 @@ sample:
         xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
 
     <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
-        <...>
+        <.../>
     </parser>
 
     <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
-        <...>
+        <.../>
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
-        <...>
+        <.../>
+        <embedded-activity name="InternalActivity" locator="OtherActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon" aggregation="Join"/>
+        </embedded-activity>
+        <.../>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
-        <...>
+        <!--<property name="TurnOutActivityChildren" value="true"/>-->
+        <.../>
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -359,6 +365,45 @@ named `AccessLogParserCommon`.
 
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
+
+#### Resolved activity entities aggregation
+ 
+Stacked parsers sample configuration tag `<parser-ref>` has attribute `aggregation`. This attribute defines method of resolved activity 
+data aggregation into parent activity. Attribute has two possible values:
+* `Merge` - resolved activity entity fields are merged into parent activity. **NOTE:** Parent activity entity will contain all fields 
+processed by all stacked parsers. This is default value when attribute `aggregation` definition is missing in configuration. 
+* `Join` - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity 
+having collection of child activities resolved by stacked parsers. 
+
+For a `Join` type aggregation there is related stream output parameter `TurnOutActivityChildren`:
+```xml
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
+        <property name="TurnOutActivityChildren" value="true"/>
+        <.../>
+        <parser-ref name="SampleJMSParser"/>
+
+    </stream>
+``` 
+or
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <java-object name="StreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
+        <property name="TurnOutActivityChildren" value="true"/>
+    </java-object>
+    <.../>
+    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
+        <.../>
+        <parser-ref name="SampleJMSParser"/>
+        <reference name="StreamOutput"/>
+    </stream>
+</tnt-data-source>
+```
+It allows to sent as many activity entities to JKool as there are child activity entities resolved by stacked parsers, **merging** those 
+child activity entities with data from parent activity entity.
 
 ### Field value transformations
 
@@ -454,7 +499,7 @@ Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/it
     </field-transform>
     <field-locator locator="loc1" locator-type="Label"/>
     <field-locator locator="loc2" locator-type="Label"/>
-    <...>
+    <.../>
 </field>
 ```
 When transformation is defined for a field containing multiple locators, field value transformation is applied to all field locators 
@@ -475,7 +520,7 @@ and field value after transformation is `VALUE1,VALUE2`.
         <field-transform name="toUpperConcat" lang="groovy">
             $fieldValue.toUpperCase() + "_transformed"
         </field-transform>
-    <...>
+    <.../>
 </field>
 ```
 
@@ -552,15 +597,15 @@ To make custom Java Bean based transformations Your API should implement interfa
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
-    <...>
+    <.../>
     <java-object name="getFileNameTransform" class="com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName"/>
-    <...>
+    <.../>
     <field name="InvoiceFileFromBean">
         <field-locator locator="7">
             <field-transform beanRef="getFileNameTransform"/>
         </field-locator>
     </field>
-    <...>
+    <.../>
 ```
 This sample shows how to invoke Java Bean defined transformation. Class `com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName` implements 
 custom XPath function to get file name from provided file path. Field/locator value mapping to function arguments is performed automatically 
@@ -570,17 +615,87 @@ and there is no need to define additional mapping.
  
 TODO
  
-### Resolved activity entities aggregation
- 
-TODO 
-
 ##### Use of dynamic locators
 
-TODO
+`TNT4J-Streams` allows to dynamically define `field`/`field-locator` parameters. Dynamic reference variable placeholder is defined using 
+`${XXXXX}` format, where `XXXXX` is name or identifier of another data source configuration entity.
+
+Defining dynamic `field` parameters sample:
+```xml
+    <.../>
+    <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <property name="ReadLines" value="false"/>
+        <field name="EventType" value="SNAPSHOT"/>
+        <.../>
+        <field name="${FieldNameLoc}" locator="values" locator-type="Label" value-type="${ValueTypeLoc}" split="true">
+            <field-locator id="FieldNameLoc" locator="dsnames" locator-type="Label"/>
+            <field-locator id="ValueTypeLoc" locator="dstypes" locator-type="Label"/>
+        </field>
+        <.../>
+    </parser>
+    <.../>
+``` 
+
+Sample shows how how to dynamically define filed `name` and `value-type` parameters referencing values resolved by `FieldNameLoc` and 
+`ValueTypeLoc` locators. 
+
+There is also field attribute `split` stating that if field/locator resolved value is array/collection, then it should make as many 
+activity fields as there are array/collection items available. In this case if field name is static (or makes same name from dynamically 
+resolved values), name gets appended with sequential numbering to make fields names unique.
+
+Defining combined `field` parameters values:
+```xml
+    <.../>
+    <parser name="AttributesParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="${FieldNameLoc}_attr" locator="/entry/*[2]/text()" locator-type="Label" split="true">
+            <field-locator id="FieldNameLoc" locator="/entry/*[1]/text()" locator-type="Label"/>
+        </field>
+    </parser>
+    <.../>
+``` 
+
+In this sample field name value is combined from dynamic `${FieldNameLoc}` and static `_attr` parts.
+
+Sample of using another `field` resolved value in locator definition:
+```xml
+    <.../>
+     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <.../>
+        <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
+
+        <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
+            <!--resolves FILE or QUEUE-->
+            <field-locator locator="name(//*/*)" locator-type="Label">
+                <field-map-ref resource="MFT_MAPPINGS.Resource"/>
+            </field-locator>
+            <!--resolves file or queue name -->
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
+            <!-- agent-->
+            <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
+        </field>
+    </parser>
+    <.../>
+``` 
+
+Sample configuration defines parser field `Direction` resolving value e.g., `source` or `destination`. Then field `ResourceName` locators 
+use this value when constructing actual XPath expression e.g., `/transaction/${Direction}Agent/@agent` to resolve value from XML data.
+
+**NOTE:** when using `field`/`field-locator` attribute `locator-type="Activity"` define field name as locator value without `${}`, i.e.:
+```xml
+    <.../>
+    <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <.../>
+        <field name="Checksum" locator="//*/checksum" locator-type="Label" required="false"/>
+        <field name="Correlator" locator="Checksum" locator-type="Activity" required="false"/>
+        <.../>
+    </parser>
+    <.../>
+```
 
 ### Caching of streamed data field values
 
-`TNT4J-Streams` provides temporary storage i.e., cache for a resolved activity fields values. It is useful when there are some related 
+`TNT4J-Streams` provides temporary storage (i.e., cache) for a resolved activity fields values. It is useful when there are some related 
 activities streamed and particular JKool prepared activity entity requires data values form previously streamed activities.
 
 Sample streamed values caching configuration:
@@ -1228,7 +1343,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-file
 ```xml
     <stream name="SampleHdfsFileLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">
         <property name="FileName" value="hdfs://127.0.0.1:19000/log.txt*"/>
-        <...>
+        <.../>
     </stream>
 ```
 
@@ -1243,7 +1358,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-log-
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/logs/localhost_access_log.*.txt"/>
         <property name="FilePolling" value="true"/>
-        <...>
+        <.../>
     </stream>
 ```
 
@@ -1261,7 +1376,7 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-zip-
         <property name="FileName"
                   value="hdfs://[host]:[port]/[path]/sample.zip!2/*.txt"/>
         <property name="ArchType" value="ZIP"/>
-        <...>
+        <.../>
     </stream>
 ```
 
@@ -3554,7 +3669,7 @@ Because streams configuration is read using SAX parser referenced entities shoul
 Note that `stream` uses `parser` reference:
 ```xml
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
-        <...>
+        <.../>
         <parser-ref name="TokenParser"/>
     </stream>
 ```
@@ -3868,7 +3983,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
             method="GET" >
             <schedule-cron expression="0/15 * * * * ? *"/>
         </step>
-        <...>
+        <.../>
         <step name="Step Klaipeda"
               url="http://api.openweathermap.org/data/2.5/weather?q=Klaipeda&amp;APPID=fa1fede9cbd6e26efdea1cdcbc714069&amp;units=metric"
               method="GET">
@@ -4245,11 +4360,11 @@ External values mapping resources import sample:
         <field name="CompCode2" locator="/transaction/status/@resultCode" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.CompCode2"/>
         </field>
-        ...
+        <.../>
     </parser>
 
     <stream name="ResMappingStream">
-        ...
+        <.../>
         <parser-ref name="ResMappingParser"/>
     </stream>
 </tnt-data-source>
