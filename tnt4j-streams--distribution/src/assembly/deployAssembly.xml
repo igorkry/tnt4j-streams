@@ -63,10 +63,12 @@
                         <fileMode>0777</fileMode>
                         <lineEnding>unix</lineEnding>
                     </fileSet>
+                    <!-- produced jars -->
                     <fileSet>
                         <outputDirectory></outputDirectory>
                         <directory>${project.build.directory}</directory>
                         <includes>
+                            <include>*.jar</include>
                             <include>*-sources.jar</include>
                             <include>*-tests.jar</include>
                             <include>*-javadoc.jar</include>
