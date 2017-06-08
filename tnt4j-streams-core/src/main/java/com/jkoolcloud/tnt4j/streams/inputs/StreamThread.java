@@ -36,7 +36,7 @@ public class StreamThread extends StreamsThread {
 	 */
 	protected final TNTInputStream<?, ?> target;
 
-	private Set<CountDownLatch> completionLatchSet = new HashSet<>();
+	private final Set<CountDownLatch> completionLatchSet = new HashSet<>(5);
 
 	/**
 	 * Creates thread to run specified TNTInputStream.
