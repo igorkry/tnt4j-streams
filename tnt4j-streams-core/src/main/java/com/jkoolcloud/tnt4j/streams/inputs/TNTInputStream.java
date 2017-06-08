@@ -634,6 +634,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			out.cleanup();
 		}
 
+		StreamsCache.cleanup();
+	}
+
+	private void removeListeners() {
 		if (CollectionUtils.isNotEmpty(streamListeners)) {
 			streamListeners.clear();
 		}
@@ -641,8 +645,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (CollectionUtils.isNotEmpty(streamTasksListeners)) {
 			streamTasksListeners.clear();
 		}
-
-		StreamsCache.cleanup();
 	}
 
 	private synchronized void shutdownExecutors() {
@@ -740,7 +742,14 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			notifyStreamSuccess();
 		}
 
-		cleanup();
+		try {
+			cleanup();
+		} catch (Throwable exc) {
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.failed.cleanup.stream"), exc.getLocalizedMessage(), exc);
+			notifyStreamEvent(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.failed.cleanup.stream", exc.getLocalizedMessage()), name);
+		}
 
 		notifyFinished();
 
@@ -750,6 +759,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.statistics"),
 				name, getStreamStatistics());
+
+		removeListeners();
 
 		if (isOwned()) {
 			ownerThread.notifyCompleted();
