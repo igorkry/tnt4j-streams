@@ -276,8 +276,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				}
 			} else {
 				Matcher matcher = (Matcher) cData.getData();
+				ActivityFieldLocatorType locType = locator.getBuiltInType();
 
-				if (locator.getBuiltInType() == ActivityFieldLocatorType.REGroupNum) {
+				if (locType != null && locType.getDataType() == Integer.class) {
 					int loc = Integer.parseInt(locStr);
 					if (loc >= 0 && loc <= matcher.groupCount()) {
 						val = matcher.group(loc);
