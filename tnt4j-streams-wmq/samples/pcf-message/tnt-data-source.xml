@@ -51,10 +51,12 @@
     </parser>
 
     <stream name="WmqStreamPCF" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF">
-        <property name="Host" value="172.16.6.54"/>
-        <property name="Port" value="1420"/>
-        <property name="QueueManager" value="TT1"/>
-        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+        <property name="Host" value="[HOST|IP]"/>
+        <property name="Port" value="1414"/>
+        <property name="QueueManager" value="[QMGR_NAME]"/>
+        <property name="Queue" value="[Q_NAME]"/>
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
         <property name="StripHeaders" value="false"/>
 
         <parser-ref name="PCFEventsParser"/>

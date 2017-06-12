@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
@@ -40,12 +41,12 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.*;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an XML string, with the value for each
@@ -55,7 +56,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * containing multiple XML documents. If there are multiple XML documents, each document must start with
  * {@code "<?xml ...>"}, and be separated by a new line.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
  * <li>RequireDefault - indicates that all attributes are required by default. (Optional)</li>
@@ -63,7 +64,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  *
  * @version $Revision: 1 $
  */
-public class ActivityXmlParser extends GenericActivityParser<Document> {
+public class ActivityXmlParser extends GenericActivityParser<Node> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
 
 	/**
@@ -90,7 +91,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 
 	private final XPath xPath;
 	private final DocumentBuilder builder;
-	private final StringBuilder xmlBuffer;
 
 	/**
 	 * Property indicating that all attributes are required by default.
@@ -108,7 +108,6 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		domFactory.setNamespaceAware(true);
 		builder = domFactory.newDocumentBuilder();
 		xPath = StreamsXMLUtils.getStreamsXPath();
-		xmlBuffer = new StringBuilder(1024);
 
 		if (namespaces == null) {
 			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
@@ -156,20 +155,26 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
-	 * <li>{@link org.w3c.dom.Document}</li>
+	 * <li>{@link org.w3c.dom.Node}</li>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.nio.ByteBuffer}</li>
 	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@link java.io.InputStream}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
-		return Document.class.isInstance(data) || super.isDataClassSupported(data);
+	protected boolean isDataClassSupportedByParser(Object data) {
+		return Node.class.isInstance(data) || super.isDataClassSupportedByParser(data);
 	}
 
 	@Override
@@ -178,22 +183,22 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		Document xmlDoc = null;
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
+		Node xmlDoc;
 		String xmlString = null;
 		try {
 			if (data instanceof Document) {
 				xmlDoc = (Document) data;
+			} else if (data instanceof Node) {
+				xmlDoc = (Node) data;
 			} else {
 				xmlString = getNextActivityString(data);
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				synchronized (builder) {
+					xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				}
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -212,66 +217,62 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			}
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), xmlString);
+		ActivityContext cData = new ActivityContext(stream, data, xmlDoc);
+		cData.setMessage(xmlString);
 
-		return parsePreparedItem(stream, xmlString, xmlDoc);
+		return cData;
 	}
 
 	@Override
-	protected ActivityInfo parsePreparedItem(TNTInputStream<?, ?> stream, String dataStr, Document xmlDoc)
-			throws ParseException {
-		if (xmlDoc == null) {
+	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
+		if (cData == null || cData.getData() == null) {
 			return null;
 		}
 
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
+		cData.setActivity(ai);
 		try {
-			if (dataStr != null) {
-				// save entire activity string as message data
-				field = new ActivityField(StreamFieldType.Message.name());
-				applyFieldValue(stream, ai, field, dataStr);
-			}
-
 			String[] savedFormats = null;
 			String[] savedUnits = null;
 			String[] savedLocales = null;
 			// apply fields for parser
 			Object[] values;
-			for (ActivityField aFieldList : fieldList) {
+			for (ActivityField aField : fieldList) {
 				values = null;
-				field = aFieldList;
-				List<ActivityFieldLocator> locations = field.getLocators();
-				if (locations != null) {
+				cData.setField(aField);
+				field = aField;
+				List<ActivityFieldLocator> locators = field.getLocators();
+				if (locators != null) {
 					// need to save format and units specification from config
 					// in case individual entry in activity data overrides it
-					if (savedFormats == null || savedFormats.length < locations.size()) {
-						savedFormats = new String[locations.size()];
-						savedUnits = new String[locations.size()];
-						savedLocales = new String[locations.size()];
+					if (ArrayUtils.getLength(savedFormats) < locators.size()) {
+						savedFormats = new String[locators.size()];
+						savedUnits = new String[locators.size()];
+						savedLocales = new String[locators.size()];
 					}
 
-					values = new Object[locations.size()];
-					for (int li = 0; li < locations.size(); li++) {
-						ActivityFieldLocator loc = locations.get(li);
+					values = parseLocatorValues(locators, cData);
+					for (int li = 0; li < locators.size(); li++) {
+						ActivityFieldLocator loc = locators.get(li);
 						savedFormats[li] = loc.getFormat();
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
-						values[li] = getLocatorValue(stream, loc, xmlDoc);
-						if (values[li] == null && requireAll && !loc.isOptional()) { // NON-NLS
+
+						if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
 							logger().log(OpLevel.WARNING,
 									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 											"ActivityXmlParser.required.locator.not.found"),
 									loc, field);
+							cData.setActivity(null);
 							return null;
 						}
 					}
 				}
-				applyFieldValue(stream, ai, field, Utils.simplifyValue(values));
-				if (locations != null && savedFormats != null) {
-					for (int li = 0; li < locations.size(); li++) {
-						ActivityFieldLocator loc = locations.get(li);
+				applyFieldValue(field, Utils.simplifyValue(values), cData);
+				if (locators != null && savedFormats != null) {
+					for (int li = 0; li < locators.size(); li++) {
+						ActivityFieldLocator loc = locators.get(li);
 						loc.setFormat(savedFormats[li], savedLocales[li]);
 						loc.setUnits(savedUnits[li]);
 					}
@@ -283,6 +284,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 			pe.initCause(e);
 			throw pe;
 		}
+
 		return ai;
 	}
 
@@ -291,7 +293,7 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param xmlDoc
+	 * @param cData
 	 *            activity object XML DOM document
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -304,72 +306,38 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	 * @see ActivityFieldLocator#formatValue(Object)
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Document xmlDoc, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Node xmlDoc = cData.getData();
+
+		if (ActivityField.isDynamicAttr(locStr)) {
+			ActivityInfo ai = cData.getActivity();
+			locStr = StreamsCache.fillInKeyPattern(locStr, ai, this.getName());
+		}
 
 		if (StringUtils.isNotEmpty(locStr)) {
+			Document nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
-				XPathExpression expr = xPath.compile(locStr);
-				NodeList nodes = null;
-				try {
-					nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
-				} catch (XPathException exc) {
-					val = expr.evaluate(xmlDoc);
+				XPathExpression expr;
+				synchronized (xPath) {
+					expr = xPath.compile(locStr);
 				}
-				int length = nodes == null ? 0 : nodes.getLength();
 
-				if (length > 0) {
-					List<Object> valuesList = new ArrayList<>(length);
-					for (int i = 0; i < length; i++) {
-						Node node = nodes.item(i);
+				if (nodeDocument != null) { // try expression relative to node
+					val = resolveValueOverXPath(nodeDocument, expr, formattingNeeded);
+				}
+				if (val == null) { // otherwise try on complete document
+					val = resolveValueOverXPath(xmlDoc, expr, formattingNeeded);
+				}
 
-						String strValue = node.getTextContent();
-						Node attrsNode = node;
+				if (val instanceof Node) {
+					Node node = (Node) val;
 
-						if (node instanceof Attr) {
-							Attr attr = (Attr) node;
-
-							attrsNode = attr.getOwnerElement();
-						}
-
-						// Get list of attributes and their values for
-						// current element
-						NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
-
-						Node attr;
-						String attrVal;
-						ActivityFieldLocator locCopy = locator.clone();
-						if (attrsMap != null && attrsMap.getLength() > 0) {
-							attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
-							attrVal = attr == null ? null : attr.getTextContent();
-							if (StringUtils.isNotEmpty(attrVal)) {
-								locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
-							}
-
-							attr = attrsMap.getNamedItem(FORMAT_ATTR);
-							attrVal = attr == null ? null : attr.getTextContent();
-							if (StringUtils.isNotEmpty(attrVal)) {
-								attr = attrsMap.getNamedItem(LOCALE_ATTR);
-								String attrLVal = attr == null ? null : attr.getTextContent();
-
-								locCopy.setFormat(attrVal,
-										StringUtils.isEmpty(attrLVal) ? locCopy.getLocale() : attrLVal);
-							}
-
-							attr = attrsMap.getNamedItem(UNITS_ATTR);
-							attrVal = attr == null ? null : attr.getTextContent();
-							if (StringUtils.isNotEmpty(attrVal)) {
-								locCopy.setUnits(attrVal);
-							}
-						}
-
-						valuesList.add(locCopy.formatValue(strValue.trim()));
+					if (!isNodeSupportedByStackedParser(cData.getField(), node)) {
+						val = getTextContent(locator, node);
 					}
-
-					val = Utils.simplifyValue(valuesList);
-					formattingNeeded.set(false);
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -383,6 +351,124 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 		return val;
 	}
 
+	private static boolean isNodeSupportedByStackedParser(ActivityField field, Node node) throws ParseException {
+		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
+
+		if (stackedParsers != null) {
+			for (ActivityField.ParserReference pRef : stackedParsers) {
+				if (pRef.getParser().isDataClassSupported(node)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr, AtomicBoolean formattingNeeded)
+			throws XPathExpressionException {
+		Object val = null;
+		NodeList nodes = null;
+		try {
+			nodes = (NodeList) expr.evaluate(xmlDoc, XPathConstants.NODESET);
+		} catch (XPathException exc) {
+			val = expr.evaluate(xmlDoc);
+		}
+
+		int length = nodes == null ? 0 : nodes.getLength();
+
+		if (length > 0) {
+			List<Object> valuesList = new ArrayList<>(length);
+			for (int i = 0; i < length; i++) {
+				Node node = nodes.item(i);
+				valuesList.add(node);
+			}
+
+			val = Utils.simplifyValue(valuesList);
+			formattingNeeded.set(false);
+		}
+
+		return val;
+	}
+
+	private Document cropDocumentForNode(Node xmlDoc) throws ParseException {
+		if (xmlDoc.getParentNode() != null) { // if node is not document root node
+			try {
+				Document nodeXmlDoc;
+				synchronized (builder) {
+					nodeXmlDoc = builder.newDocument();
+				}
+				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
+				nodeXmlDoc.appendChild(importedNode);
+
+				return nodeXmlDoc;
+			} catch (Exception exc) {
+				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityXmlParser.xmlDocument.parse.error"), 0);
+				pe.initCause(exc);
+
+				throw pe;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolves DOM node contained textual data and formats it using provided locator.
+	 *
+	 * @param locator
+	 *            locator instance to alter using XML attributes contained data type, format and units used to format
+	 *            resolved value
+	 * @param node
+	 *            DOM node to collect textual data
+	 * @return resolved textual value formatted based on the locator's formatting properties
+	 * @throws ParseException
+	 *             if exception occurs applying locator format properties to specified value
+	 */
+	protected static Object getTextContent(ActivityFieldLocator locator, Node node) throws ParseException {
+		String strValue = node.getTextContent();
+		Node attrsNode = node;
+
+		if (node instanceof Attr) {
+			Attr attr = (Attr) node;
+
+			attrsNode = attr.getOwnerElement();
+		}
+
+		// Get list of attributes and their values for
+		// current element
+		NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
+
+		Node attr;
+		String attrVal;
+		ActivityFieldLocator locCopy = locator.clone();
+		if (attrsMap != null && attrsMap.getLength() > 0) {
+			attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+			attrVal = attr == null ? null : attr.getTextContent();
+			if (StringUtils.isNotEmpty(attrVal)) {
+				locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
+			}
+
+			attr = attrsMap.getNamedItem(FORMAT_ATTR);
+			attrVal = attr == null ? null : attr.getTextContent();
+			if (StringUtils.isNotEmpty(attrVal)) {
+				attr = attrsMap.getNamedItem(LOCALE_ATTR);
+				String attrLVal = attr == null ? null : attr.getTextContent();
+
+				locCopy.setFormat(attrVal, StringUtils.isEmpty(attrLVal) ? locator.getLocale() : attrLVal);
+			}
+
+			attr = attrsMap.getNamedItem(UNITS_ATTR);
+			attrVal = attr == null ? null : attr.getTextContent();
+			if (StringUtils.isNotEmpty(attrVal)) {
+				locCopy.setUnits(attrVal);
+			}
+		}
+
+		return locCopy.formatValue(strValue.trim());
+	}
+
 	/**
 	 * Reads RAW activity data XML package string from {@link BufferedReader}. If the data input source contains
 	 * multiple XML documents, then each document must start with "&lt;?xml", and be separated by a new line.
@@ -394,29 +480,31 @@ public class ActivityXmlParser extends GenericActivityParser<Document> {
 	@Override
 	protected String readNextActivity(BufferedReader rdr) {
 		String xmlString = null;
-		try {
-			for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
-				if (line.startsWith("<?xml")) { // NON-NLS
-					if (xmlBuffer.length() > 0) {
-						xmlString = xmlBuffer.toString();
-						xmlBuffer.setLength(0);
+		StringBuilder xmlBuffer = new StringBuilder(1024);
+
+		synchronized (NEXT_LOCK) {
+			try {
+				for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
+					if (line.startsWith("<?xml")) { // NON-NLS
+						if (xmlBuffer.length() > 0) {
+							xmlString = xmlBuffer.toString();
+							xmlBuffer.setLength(0);
+						}
 					}
+					xmlBuffer.append(line);
 				}
-				xmlBuffer.append(line);
+			} catch (EOFException eof) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+						getActivityDataType(), eof);
+			} catch (IOException ioe) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-					getActivityDataType(), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					getActivityDataType(), ioe);
 		}
 
 		if (xmlString == null && xmlBuffer.length() > 0) {
 			xmlString = xmlBuffer.toString();
-			xmlBuffer.setLength(0);
 		}
 
 		return xmlString;

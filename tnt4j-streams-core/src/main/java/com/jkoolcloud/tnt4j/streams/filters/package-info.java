@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for streamed activities filters: deny streaming, alter streamed data and so
- * on.
+ * Contains the API (classes and interfaces) for streamed activities filters: include/exclude streamed activity data,
+ * alter streamed data and so on.
  *
  * @author akausinis
  * @version 1.0

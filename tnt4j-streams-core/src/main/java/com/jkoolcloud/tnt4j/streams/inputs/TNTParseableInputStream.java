@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * This activity stream supports the following properties (in addition to those supported by {@link TNTInputStream}):
  * <ul>
  * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the parsers can parse activity object RAW
- * data. If set to {@code false} - puts log entry and continues. (Optional)</li>
+ * data. If set to {@code false} - puts log entry and continues. Default value - {@code false}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -52,7 +52,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 */
 	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<>();
 
-	private boolean haltIfNoParser = true;
+	private boolean haltIfNoParser = false;
 
 	@Override
 	protected void setDefaultStreamOutput() {
@@ -104,6 +104,10 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *             if parser can't be added to stream
 	 */
 	public void addParser(ActivityParser parser) throws IllegalStateException {
+		if (parser == null) {
+			return;
+		}
+
 		String[] tags = parser.getTags();
 
 		if (ArrayUtils.isNotEmpty(tags)) {
@@ -112,6 +116,40 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			}
 		} else {
 			addTaggedParser(parser.getName(), parser);
+		}
+	}
+
+	/**
+	 * Adds specified parsers array to the list of parsers being used by this stream.
+	 *
+	 * @param parsers
+	 *            array of parsers to add
+	 * @throws IllegalStateException
+	 *             if parser can't be added to stream
+	 */
+	public void addParser(ActivityParser... parsers) throws IllegalStateException {
+		if (parsers == null) {
+			return;
+		}
+
+		addParsers(Arrays.asList(parsers));
+	}
+
+	/**
+	 * Adds specified parsers collection to the list of parsers being used by this stream.
+	 *
+	 * @param parsers
+	 *            collection of parsers to add
+	 * @throws IllegalArgumentException
+	 *             if parser can't be added to stream
+	 */
+	public void addParsers(Iterable<ActivityParser> parsers) throws IllegalArgumentException {
+		if (parsers == null) {
+			return;
+		}
+
+		for (ActivityParser parser : parsers) {
+			addParser(parser);
 		}
 	}
 
@@ -137,26 +175,29 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *             if parser fails to run
 	 * @throws ParseException
 	 *             if any parser encounters an error parsing the activity data
+	 *
+	 * @see #getDataTags(Object)
+	 * @see #applyParsers(Object, String...)
 	 */
 	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
-		return applyParsers(null, data);
+		return applyParsers(data, getDataTags(data));
 	}
 
 	/**
 	 * Applies all defined parsers for this stream that support the format that the raw activity data is in the order
 	 * added until one successfully matches the specified activity data item.
 	 *
-	 * @param tags
-	 *            array of tag strings to map activity data with parsers. Can be {@code null}.
 	 * @param data
 	 *            activity data item to process
+	 * @param tags
+	 *            array of tag strings to map activity data with parsers. Can be {@code null}.
 	 * @return processed activity data item, or {@code null} if activity data item does not match rules for any parsers
 	 * @throws IllegalStateException
 	 *             if parser fails to run
 	 * @throws ParseException
 	 *             if any parser encounters an error parsing the activity data
 	 */
-	protected ActivityInfo applyParsers(String[] tags, Object data) throws IllegalStateException, ParseException {
+	protected ActivityInfo applyParsers(Object data, String... tags) throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
 		}
@@ -175,6 +216,19 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 				}
 			}
 		}
+		return null;
+	}
+
+	/**
+	 * Resolves RAW activity data tag strings array to be used for activity data and parsers mapping.
+	 *
+	 * @param data
+	 *            activity data item to get tags
+	 * @return array of activity data found tag strings
+	 *
+	 * @see #applyParsers(Object, String...)
+	 */
+	protected String[] getDataTags(Object data) {
 		return null;
 	}
 
@@ -235,7 +289,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 * {@inheritDoc}
 	 * <p>
 	 * Performs parsing of raw activity data to {@link ActivityInfo} data package, which can be transformed to
-	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to jKoolCloud service using TNT4J and JESL APIs.
+	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to JKool Cloud using TNT4J and JESL APIs.
 	 */
 	@Override
 	protected void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {
@@ -259,6 +313,9 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		} else {
 			if (!ai.isFilteredOut()) {
 				getOutput().logItem(ai);
+			} else {
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTInputStream.activity.filtered.out"), ai);
 			}
 		}
 	}

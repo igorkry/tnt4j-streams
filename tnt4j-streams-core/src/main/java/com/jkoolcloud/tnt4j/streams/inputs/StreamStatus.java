@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public enum StreamStatus implements StreamingStatus {
 	FAILURE,
 
 	/**
-	 * Indicates streaming process is canceled.
+	 * Indicates streaming process was stopped from stream outside.
 	 */
-	CANCEL,
+	STOP,
 }

@@ -33,22 +33,22 @@
     <stream name="WsSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
         <property name="HaltIfNoParser" value="false"/>
 
+        <parser-ref name="WsResponseParser"/>
+
         <scenario name="Sample WS stream scenario">
             <step name="Step 1"
                   url="http://wsdot.wa.gov/traffic/api/WeatherInformation/WeatherInformation.svc">
                 <schedule-simple interval="35" units="Seconds" repeatCount="10"/>
                 <request>
                     <![CDATA[
-                        SOAPAction:http://tempuri.org/IWeatherInformation/GetCurrentWeatherInformationByStationID
-                        <tem:GetCurrentWeatherInformationByStationID xmlns:tem="http://tempuri.org/">
-                            <tem:AccessCode>aeb652b7-f6f5-49e6-9bdb-e2b737ebd507</tem:AccessCode>
-                            <tem:StationID>1909</tem:StationID>
-                        </tem:GetCurrentWeatherInformationByStationID>
-                    ]]>
+                                SOAPAction:http://tempuri.org/IWeatherInformation/GetCurrentWeatherInformationByStationID
+                                <tem:GetCurrentWeatherInformationByStationID xmlns:tem="http://tempuri.org/">
+                                    <tem:AccessCode>aeb652b7-f6f5-49e6-9bdb-e2b737ebd507</tem:AccessCode>
+                                    <tem:StationID>1909</tem:StationID>
+                                </tem:GetCurrentWeatherInformationByStationID>
+                            ]]>
                 </request>
             </step>
         </scenario>
-
-        <parser-ref name="WsResponseParser"/>
     </stream>
 </tnt-data-source>

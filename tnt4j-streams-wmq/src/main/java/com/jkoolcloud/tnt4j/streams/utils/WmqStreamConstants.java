@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,15 @@ public final class WmqStreamConstants {
 	 */
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-wmq"; // NON-NLS
 
-	private WmqStreamConstants() {
+	/**
+	 * Custom PCF parameter identifier to store PCF message contained traces count.
+	 */
+	public static final int TRACES_COUNT = 919191919;
+	/**
+	 * Custom PCF parameter identifier to store processed PCF message trace entry index.
+	 */
+	public static final int TRACE_MARKER = 929292929;
 
+	private WmqStreamConstants() {
 	}
 }

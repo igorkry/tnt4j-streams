@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -81,7 +82,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
-	 * to jKool Cloud Service.
+	 * to JKool Cloud.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -93,7 +94,7 @@ public abstract class ActivityParser {
 	 * @throws ParseException
 	 *             if an error parsing raw data string
 	 * @see #isDataClassSupported(Object)
-	 * @see GenericActivityParser#parsePreparedItem(TNTInputStream, String, Object)
+	 * @see GenericActivityParser#parsePreparedItem(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	public abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
 			throws IllegalStateException, ParseException;
@@ -121,15 +122,15 @@ public abstract class ActivityParser {
 	 *             if an error parsing the specified value
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		if (!field.isTransparent()) {
-			ai.applyField(field, value);
-		}
+		ai.applyField(field, value);
 	}
 
 	/**
-	 * Sets the value for the field in the specified activity. If field has stacked parser defined, then field value is
-	 * parsed into separate activity using stacked parser. If field can be parsed by stacked parser, produced activity
-	 * is merged into specified (parent) activity.
+	 * Sets the value for the field in the specified activity entity.
+	 * <p>
+	 * If field has stacked parser defined, then field value is parsed into separate activity using stacked parser. If
+	 * field can be parsed by stacked parser, produced activity can be merged or added as a child into specified
+	 * (parent) activity depending on stacked parser reference 'aggregation' attribute value.
 	 *
 	 * @param stream
 	 *            parent stream
@@ -152,18 +153,34 @@ public abstract class ActivityParser {
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			value = Utils.cleanActivityData(value);
-			for (ActivityParser stackedParser : field.getStackedParsers()) {
+			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
-				if (stackedParser.isDataClassSupported(value)) {
-					ActivityInfo sai = stackedParser.parse(stream, value);
+				boolean applied = applyStackedParser(stream, ai, parserRef, value);
 
-					if (sai != null) {
-						ai.merge(sai);
-						break;
-					}
+				if (applied) {
+					break;
 				}
 			}
 		}
+	}
+
+	private static boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai,
+			ActivityField.ParserReference parserRef, Object value) throws ParseException {
+		if (parserRef.getParser().isDataClassSupported(value)) {
+			ActivityInfo sai = parserRef.getParser().parse(stream, value);
+
+			if (sai != null) {
+				if (parserRef.getAggregationType() == AggregationType.Join) {
+					ai.addChild(sai);
+				} else {
+					ai.mergeAll(sai);
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -218,4 +235,21 @@ public abstract class ActivityParser {
 	public boolean canHaveDelimitedLocators() {
 		return true;
 	}
+
+	/**
+	 * Adds reference to specified entity object being used by this parser.
+	 *
+	 * @param refObject
+	 *            entity object to reference
+	 * @throws IllegalStateException
+	 *             if referenced object can't be linked to parser
+	 */
+	public abstract void addReference(Object refObject) throws IllegalStateException;
+
+	/**
+	 * Returns type of RAW activity data entries.
+	 *
+	 * @return type of RAW activity data entries
+	 */
+	protected abstract Object getActivityDataType();
 }

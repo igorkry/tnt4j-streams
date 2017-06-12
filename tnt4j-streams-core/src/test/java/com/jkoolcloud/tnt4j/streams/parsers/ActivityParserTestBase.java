@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void parserNameTest() {
-		final String name = "Test";
+		final String name = "Test"; // NON-NLS
 		parser.setName(name);
 		assertEquals(name, parser.getName());
 	}
@@ -73,7 +73,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void tagsTest() {
-		final String tag = "Test";
+		final String tag = "Test"; // NON-NLS
 		parser.setTags(tag);
 		assertEquals(tag, parser.getTags()[0]);
 	}

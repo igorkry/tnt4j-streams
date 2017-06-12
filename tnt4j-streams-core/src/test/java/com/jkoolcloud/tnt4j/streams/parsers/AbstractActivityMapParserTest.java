@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class AbstractActivityMapParserTest {
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333.555"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
-		myMap.put("333", new HashMap<String, String>());
+		myMap.put("333", new HashMap<String, String>()); // NON-NLS
 		myMap.put("555", Arrays.asList("test1")); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}

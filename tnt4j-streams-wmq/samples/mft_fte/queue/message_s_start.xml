@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<transaction version="6.00" ID="414d5120434f524420202020202020207423d558201c5c04" agentRole="sourceAgent"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd" xmlns="">
+    <action time="2017-04-07T16:19:01.571Z">started</action>
+    <sourceAgent agent="AGNT1A" QMgr="AGNT1" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </sourceAgent>
+    <destinationAgent agent="AGNT2A" QMgr="AGNT2"/>
+    <originator>
+        <hostName>192.168.188.1</hostName>
+        <userID>user</userID>
+        <mqmdUserID>user</mqmdUserID>
+    </originator>
+    <transferSet startTime="2017-04-07T16:19:01.571Z" total="1" bytesSent="0">
+        <metaDataSet>
+            <metaData key="source">BankRequestQueue</metaData>
+            <metaData key="destination">SUNGUARD.txt</metaData>
+            <metaData key="com.ibm.wmqfte.SourceAgent">AGNT1A</metaData>
+            <metaData key="com.ibm.wmqfte.DestinationAgent">AGNT2A</metaData>
+            <metaData key="com.ibm.wmqfte.MqmdUser">user</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingUser">user</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingHost">192.168.188.1</metaData>
+            <metaData key="com.ibm.wmqfte.TransferId">414d5120434f524420202020202020207423d558201c5c04</metaData>
+            <metaData key="com.ibm.wmqfte.JobName">MON.WHL.10232.006</metaData>
+            <metaData key="com.ibm.wmqfte.Priority">0</metaData>
+        </metaDataSet>
+    </transferSet>
+    <job>
+        <name>MON.WHL.10232.006</name>
+    </job>
+</transaction>

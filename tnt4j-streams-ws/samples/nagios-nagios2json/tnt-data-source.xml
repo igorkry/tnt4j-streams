@@ -3,8 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-    <parser name="SnapshotParser"
-            class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+    <parser name="SnapshotParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
 
         <field name="EventType" value="Snapshot"/>
         <field name="ApplName" value="Nagios"/>
@@ -16,14 +15,12 @@
         <field name="StartTime" locator="last_state_change" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
-    <parser name="ResponseParser"
-            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+    <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
-        <property name="ChildrenField" value="MsgBody"/>
 
-        <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true">
-            <parser-ref name="SnapshotParser"/>
-        </field>
+        <embedded-activity name="MsgBody" locator="$.data" locator-type="Label">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
+        </embedded-activity>
 
         <field name="EventType" value="Activity"/>
         <field name="StartTime" locator="$.created" locator-type="Label" datatype="Timestamp" units="Seconds"/>
@@ -39,6 +36,8 @@
     <stream name="RESTfulSampleNagiosStream" class="com.jkoolcloud.tnt4j.streams.inputs.RestStream">
         <property name="HaltIfNoParser" value="false"/>
 
+        <parser-ref name="ResponseParser"/>
+
         <scenario name="Nagios2JSON stream scenario">
             <step name="Step 1"
                   url="http://[YOUR_NAGIOS_SERVER_IP]/nagios/cgi-bin/nagios2json.cgi?servicestatustypes=31"
@@ -48,8 +47,6 @@
                 <schedule-cron expression="0/15 * * * * ? *"/>
             </step>
         </scenario>
-
-        <parser-ref name="ResponseParser"/>
     </stream>
 
     <!-- TO STREAM FROM SAMPLE REPORT JSON FILE-->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -38,12 +37,12 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} data
- * structure, where each field is represented by declared class field and the field name is used to map each field onto
+ * structure, where each field is represented by declared class field and the field name is used to map each field into
  * its corresponding activity field.
  * <p>
- * If field is complex object, subfields can be accessed using
- * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator: i.e.
- * 'header.author.name'.
+ * If field is complex object, sub-fields can be accessed using
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator:
+ * e.g., 'header.author.name'.
  *
  * @version $Revision: 1 $
  */
@@ -52,7 +51,6 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 	/**
 	 * Constructs a new ActivityJavaObjectParser.
-	 *
 	 */
 	public ActivityJavaObjectParser() {
 		super();
@@ -69,6 +67,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 			return;
 		}
 
+		super.setProperties(props);
+
 		// for (Map.Entry<String, String> prop : props) {
 		// String name = prop.getKey();
 		// String value = prop.getValue();
@@ -83,29 +83,34 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.lang.Object}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return Object.class.isInstance(data);
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				getLogString(data));
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
+		ActivityContext cData = new ActivityContext(stream, data, data);
+		cData.setMessage(getRawDataAsMessage(data));
 
-		String dataStr = ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
-		return parsePreparedItem(stream, dataStr, data);
+		return cData;
+	}
+
+	@Override
+	protected String getRawDataAsMessage(Object data) {
+		return ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 	}
 
 	/**
@@ -113,18 +118,19 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param dataObj
+	 * @param cData
 	 *            activity data carrier object
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object dataObj, AtomicBoolean formattingNeeded) {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
+			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getFieldValue(path, dataObj, 0);
+		val = getFieldValue(path, cData.getData(), 0);
 
 		return val;
 	}

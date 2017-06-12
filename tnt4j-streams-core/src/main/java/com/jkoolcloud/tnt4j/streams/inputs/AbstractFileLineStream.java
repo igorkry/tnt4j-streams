@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>FilePolling - flag {@code true}/{@code false} indicating whether files should be polled for changes or not. If
  * not, then files are read from oldest to newest sequentially one single time. Default value - {@code false}.
  * (Optional)</li>
- * <li>FileReadDelay - delay is seconds between file reading iterations. Actual only if 'FilePolling' property is set to
- * {@code true}. Default value - 15sec. (Optional)</li>
+ * <li>FileReadDelay - delay in seconds between file reading iterations. Actual only if 'FilePolling' property is set to
+ * {@code true}. Default value - {@code 15sec}. (Optional)</li>
  * <li>RestoreState - flag {@code true}/{@code false} indicating whether files read state should be stored and restored
  * on stream restart. Note, if 'StartFromLatest' is set to {@code false} - read state storing stays turned on, but
  * previous stored read state is reset (no need to delete state file manually). Default value - {@code false}.
@@ -211,6 +211,11 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 
 		super.cleanup();
+	}
+
+	@Override
+	protected ActivityInfo applyParsers(Object data, String... tags) throws IllegalStateException, ParseException {
+		return super.applyParsers(data instanceof Line ? ((Line) data).text : data, tags);
 	}
 
 	@Override
@@ -393,11 +398,6 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 			return lrt < 0 ? "UNKNOWN" : TimeUnit.MILLISECONDS.toSeconds(fat - lrt); // NON-NLS
 		}
-	}
-
-	@Override
-	protected ActivityInfo applyParsers(String[] tags, Object data) throws IllegalStateException, ParseException {
-		return super.applyParsers(tags, data instanceof Line ? ((Line) data).text : data);
 	}
 
 	/**

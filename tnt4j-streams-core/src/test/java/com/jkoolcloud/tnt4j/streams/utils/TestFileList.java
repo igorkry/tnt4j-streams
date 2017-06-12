@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.ArrayList;
  */
 public class TestFileList extends ArrayList<File> {
 
-	private static final String SUFFIX = ".TST";
+	private static final String SUFFIX = ".TST"; // NON-NLS
 	public static final int TEST_FILE_LIST_SIZE = 5;
 	private static final long serialVersionUID = 1L;
 
@@ -40,13 +40,13 @@ public class TestFileList extends ArrayList<File> {
 	public TestFileList(boolean fill) throws IOException, InterruptedException {
 		super();
 		final int count = TEST_FILE_LIST_SIZE;
-		prefix = "TEST" + String.valueOf(System.currentTimeMillis()).substring(5);
+		prefix = "TEST" + String.valueOf(System.currentTimeMillis()).substring(5); // NON-NLS
 
 		for (Integer i = 0; i < count; i++) {
 			File tempFile = File.createTempFile(prefix, SUFFIX);
 			if (fill) {
 				FileOutputStream fos = new FileOutputStream(tempFile);
-				fos.write("TEST".getBytes());
+				fos.write("TEST".getBytes()); // NON-NLS
 				fos.write(String.valueOf(i).getBytes());
 				fos.close();
 			}
@@ -70,7 +70,7 @@ public class TestFileList extends ArrayList<File> {
 	}
 
 	public String getWildcardName() {
-		return this.get(0).getParent() + File.separator + prefix + "*" + SUFFIX;
+		return this.get(0).getParent() + File.separator + prefix + "*" + SUFFIX; // NON-NLS
 
 	}
 }

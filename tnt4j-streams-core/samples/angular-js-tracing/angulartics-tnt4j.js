@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,16 +16,16 @@
 
 'use strict';
 
-var plugin = angular.module('angulartics.tnt4j', ['angulartics']);
+var plugin = angular.module ('angulartics.tnt4j', ['angulartics']);
 
 plugin.factory('Tnt4jStreamsService', function ($http, $document) {
     return {
         sendPath: function (path) {
-            this.sendEventToStream(this.event(path, null, null));
+            this.sendEventToStream (this.event (path, null, null));
         },
 
         sendAction: function (action, properties) {
-            this.sendEventToStream(this.event(null, action, properties));
+            this.sendEventToStream (this.event (null, action, properties));
         },
 
         event: function (path, action, properties) {
@@ -37,7 +37,7 @@ plugin.factory('Tnt4jStreamsService', function ($http, $document) {
                 rid: ((document.getElementById('corrid') || {}).value) || "",
                 sid: ((document.getElementById('rcorrid') || {}).value) || "",
                 pageLoad: (window.performance.timing.domComplete - window.performance.timing.fetchStart),
-                timestamp: Date.now()
+                timestamp: Date.now ()
             };
             ret.url = path || "";
             ret.eventName = action || "";
@@ -46,27 +46,27 @@ plugin.factory('Tnt4jStreamsService', function ($http, $document) {
         },
 
         sendEventToStream: function (dataM) {
-            console.log(dataM);
-            console.log(JSON.stringify(dataM));
-            return $http({
-                url: "http://localhost:9595",
-                data: JSON.stringify(dataM),
-                method: "POST",
-                headers: {"Content-Type": "text/plain"}
-            });
+            console.log (dataM);
+            console.log (JSON.stringify (dataM));
+            return $http ({
+                              url: "http://localhost:9595",
+                              data: JSON.stringify (dataM),
+                              method: "POST",
+                              headers: {"Content-Type": "text/plain"}
+                          });
         }
     }
 });
 
 plugin.config(['$analyticsProvider', 'Tnt4jStreamsServiceProvider', function ($analyticsProvider, Tnt4jStreamsServiceProvider) {
-    var Tnt4jStreamsService = Tnt4jStreamsServiceProvider.$get();
+        var Tnt4jStreamsService = Tnt4jStreamsServiceProvider.$get ();
     $analyticsProvider.registerPageTrack(function (path) {
-        Tnt4jStreamsService.sendPath(path);
-    });
+                                                  Tnt4jStreamsService.sendPath (path);
+                                              });
 
     $analyticsProvider.registerEventTrack(function (action, properties) {
-        Tnt4jStreamsService.sendAction(action, properties);
-    });
-}]);
+                                                   Tnt4jStreamsService.sendAction (action, properties);
+                                               });
+    }]);
 
  

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
@@ -27,11 +29,11 @@ import com.ibm.mq.*;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.MQHeaderIterator;
+import com.ibm.msg.client.commonservices.trace.Trace;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
@@ -44,16 +46,21 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * This activity stream supports the following properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
- * <li>QueueManager - Queue manager name. (Optional)</li>
+ * <li>QueueManager - Queue manager name. Default value - {@code null}. (Optional)</li>
  * <li>Queue - Queue name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Topic - Topic name. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
  * <li>Subscription - Subscription name. (Required - at least one of 'Queue', 'Topic', 'Subscription',
  * 'TopicString')</li>
  * <li>TopicString - Topic string. (Required - at least one of 'Queue', 'Topic', 'Subscription', 'TopicString')</li>
- * <li>Host - WMQ connection host name. (Optional)</li>
- * <li>Port - WMQ connection port number. (Optional)</li>
- * <li>Channel - Server connection channel name. (Optional)</li>
- * <li>StripHeaders - identifies whether stream should strip WMQ message headers. (Optional)</li>
+ * <li>Host - WMQ connection host name. Default value - {@code null}. (Optional)</li>
+ * <li>Port - WMQ connection port number. Default value - {@code 1414}. (Optional)</li>
+ * <li>UserName - WMQ user identifier. Default value - {@code null}. (Optional)</li>
+ * <li>Password - WMQ user password. Default value - {@code null}. (Optional)</li>
+ * <li>Channel - Server connection channel name. Default value - {@code "SYSTEM.DEF.SVRCONN"}. (Optional)</li>
+ * <li>StripHeaders - identifies whether stream should strip WMQ message headers. Default value - {@code true}.
+ * (Optional)</li>
+ * <li>StreamReconnectDelay - delay in seconds between queue manager reconnection or failed queue GET iterations.
+ * Default value - {@code 15sec}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -105,6 +112,10 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private int qmgrPort = 1414;
 	private String qmgrChannelName = "SYSTEM.DEF.SVRCONN"; // NON-NLS
 	private boolean stripHeaders = true;
+	private String userName;
+	private String userPass;
+
+	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
@@ -135,6 +146,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				qmgrChannelName = value;
 			} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 				stripHeaders = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+				userName = value;
+			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+				userPass = value;
+			} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
+				reconnectDelay = Integer.valueOf(value);
 			}
 		}
 	}
@@ -168,6 +185,15 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 			return stripHeaders;
 		}
+		if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+			return userName;
+		}
+		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+			return userPass;
+		}
+		if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
+			return reconnectDelay;
+		}
 
 		return super.getProperty(name);
 	}
@@ -188,6 +214,40 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		gmo.waitInterval = CMQC.MQWI_UNLIMITED;
 		gmo.options &= ~CMQC.MQGMO_NO_SYNCPOINT;
 		gmo.options |= CMQC.MQGMO_SYNCPOINT | CMQC.MQGMO_WAIT;
+	}
+
+	/**
+	 * Interrupts owner thread to interrupt sleep between QM reconnect attempts and closes target {@link #dest} if
+	 * opened.
+	 *
+	 * @see #closeDestination()
+	 */
+	@Override
+	protected void stopInternals() {
+		// Prevents generating FDC trace files for waiting MQGET interrupt.
+		traceOff(true);
+
+		if (isOwned()) {
+			getOwnerThread().interrupt();
+		}
+
+		closeDestination();
+
+		// Restore WMQ tracing.
+		traceOff(false);
+	}
+
+	private void traceOff(boolean off) {
+		try {
+			Field f = Trace.class.getDeclaredField("ffstSuppressionProbeIDs");
+			f.setAccessible(true);
+			Object obj = f.get(null);
+
+			Method m = obj.getClass().getMethod(off ? "add" : "remove", Object.class);
+			m.invoke(obj, "01"); // NON-NLS
+		} catch (Exception exc) {
+			logger().log(OpLevel.DEBUG, "traceOff(boolean) failed", exc); // NON-NLS
+		}
 	}
 
 	/**
@@ -235,6 +295,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			props.put(CMQC.PORT_PROPERTY, qmgrPort);
 			props.put(CMQC.CHANNEL_PROPERTY, qmgrChannelName);
 		}
+		if (StringUtils.isNotEmpty(userName)) {
+			props.put(CMQC.USER_ID_PROPERTY, userName);
+		}
+		if (StringUtils.isNotEmpty(userPass)) {
+			props.put(CMQC.PASSWORD_PROPERTY, userPass);
+		}
 		if (StringUtils.isEmpty(qmgrName)) {
 			logger().log(OpLevel.INFO,
 					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.connecting.default"),
@@ -279,62 +345,86 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	@Override
 	public T getNextItem() throws Exception {
-		while (!isHalted() && !isConnectedToQmgr(null)) {
-			try {
-				connectToQmgr();
-			} catch (MQException mqe) {
-				if (isConnectedToQmgr(mqe)) {
-					// connection to qmgr was successful, so we were not able to open/subscribe to required queue/topic,
-					// so exit
+		while (true) {
+			while (!isHalted() && !isConnectedToQmgr(null)) {
+				try {
+					connectToQmgr();
+				} catch (MQException mqe) {
+					if (isConnectedToQmgr(mqe)) {
+						// connection to qmgr was successful, so we were not able to open/subscribe to required
+						// queue/topic, so exit
+						logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"WmqStream.failed.opening"), formatMqException(mqe));
+						return null;
+					}
 					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.failed.opening"), formatMqException(mqe));
+							"WmqStream.failed.to.connect"), formatMqException(mqe));
+					if (!isHalted()) {
+						sleep(reconnectDelay);
+					}
+				}
+			}
+
+			if (isHalted() || !isConnectedToQmgr(null)) {
+				// stream is halted or not connected to qmgr, so exit
+				return null;
+			}
+
+			try {
+				MQMessage mqMsg = new MQMessage();
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+						"WmqStream.waiting.for.message"), dest.getName().trim());
+				dest.get(mqMsg, gmo);
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
+						dest.getName().trim(), mqMsg.getMessageLength());
+				// TODO: MQCFH mqcfh = new MQCFH(mqMsg); mqcfh.control != MQConstants.MQCFC_LAST;
+				if (stripHeaders) {
+					MQHeaderIterator hdrIt = new MQHeaderIterator(mqMsg);
+					hdrIt.skipHeaders();
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqStream.stripped.wmq"));
+				}
+				T msgData = getActivityDataFromMessage(mqMsg);
+				qmgr.commit();
+				curFailCount = 0;
+				addStreamedBytesCount(mqMsg.getMessageLength());
+				// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
+				return msgData;
+			} catch (MQException mqe) {
+				if (isHalted() && mqe.getReason() == CMQC.MQRC_UNEXPECTED_ERROR) {
+					// stream is halted and most likely dest.get(MQMessage) was interrupted by stream stop method
+					// invoking dest.close()
 					return null;
 				}
-				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"WmqStream.failed.to.connect"), formatMqException(mqe));
-				logger().log(OpLevel.INFO,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"TNTInputStream.will.retry"),
-						TimeUnit.MILLISECONDS.toSeconds(QMGR_CONN_RETRY_INTERVAL));
-				if (!isHalted()) {
-					StreamsThread.sleep(QMGR_CONN_RETRY_INTERVAL);
+
+				curFailCount++;
+				logger().log(OpLevel.ERROR,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),
+						dest.getName().trim(), formatMqException(mqe));
+				boolean throwException = true;
+				if (curFailCount >= MAX_CONSECUTIVE_FAILURES) {
+					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqStream.reached.limit"), MAX_CONSECUTIVE_FAILURES);
+					closeQmgrConnection();
+					curFailCount = 0;
+				} else {
+					if (!isHalted()) {
+						switch (mqe.getReason()) {
+						case CMQC.MQRC_GET_INHIBITED:
+							sleep(reconnectDelay);
+							throwException = false;
+							break;
+						default:
+							break;
+						}
+					}
+				}
+
+				if (throwException) {
+					throw mqe;
 				}
 			}
-		}
-		try {
-			MQMessage mqMsg = new MQMessage();
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqStream.waiting.for.message"), dest.getName().trim());
-			dest.get(mqMsg, gmo); // TODO: interrupt on halt
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
-					dest.getName().trim(), mqMsg.getMessageLength());
-			// TODO: MQCFH mqcfh = new MQCFH(mqMsg); mqcfh.control != MQConstants.MQCFC_LAST;
-			if (stripHeaders) {
-				MQHeaderIterator hdrIt = new MQHeaderIterator(mqMsg);
-				hdrIt.skipHeaders();
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.stripped.wmq"));
-			}
-			T msgData = getActivityDataFromMessage(mqMsg);
-			qmgr.commit();
-			curFailCount = 0;
-			addStreamedBytesCount(mqMsg.getMessageLength());
-			// logger().log(OpLevel.DEBUG, "QUEUE {0} DEPTH: {1}", queueName, ((MQQueue) dest).getCurrentDepth());
-			return msgData;
-		} catch (MQException mqe) {
-			curFailCount++;
-			logger().log(OpLevel.ERROR,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),
-					dest.getName().trim(), formatMqException(mqe));
-			if (curFailCount >= MAX_CONSECUTIVE_FAILURES) {
-				logger().log(OpLevel.ERROR,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.reached.limit"),
-						MAX_CONSECUTIVE_FAILURES);
-				closeQmgrConnection();
-				curFailCount = 0;
-			}
-			throw mqe;
 		}
 	}
 
@@ -351,8 +441,19 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	/**
 	 * Closes open objects and disconnects from queue manager.
+	 *
+	 * @see #closeDestination()
+	 * @see #disconnectQM()
 	 */
 	protected void closeQmgrConnection() {
+		closeDestination();
+		disconnectQM();
+	}
+
+	/**
+	 * Closes opened MQ objects used for retrieving messages.
+	 */
+	protected void closeDestination() {
 		if (dest != null) {
 			try {
 				dest.close();
@@ -367,6 +468,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			}
 			dest = null;
 		}
+	}
+
+	/**
+	 * Disconnects from queue manager if connection is opened.
+	 */
+	protected void disconnectQM() {
 		if (qmgr != null) {
 			try {
 				qmgr.disconnect();

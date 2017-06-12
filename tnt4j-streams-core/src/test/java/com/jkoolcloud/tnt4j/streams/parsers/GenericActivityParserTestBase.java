@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 	@Override
 	@Test
 	public void isDataClassSupportedTest() {
-		assertTrue(parser.isDataClassSupported("TEST"));
-		assertTrue(parser.isDataClassSupported("TEST".getBytes()));
+		assertTrue(parser.isDataClassSupported("TEST")); // NON-NLS
+		assertTrue(parser.isDataClassSupported("TEST".getBytes())); // NON-NLS
 		assertTrue(parser.isDataClassSupported(mock(Reader.class)));
 		assertTrue(parser.isDataClassSupported(mock(InputStream.class)));
 		assertFalse(parser.isDataClassSupported(this.getClass()));
@@ -51,8 +51,8 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 	@Test
 	public void getNextString() throws Exception {
 		GenericActivityParser<?> gParser = (GenericActivityParser<?>) parser;
-		final String testString = "Test\n";
-		final String expectedString = "Test";
+		final String testString = "Test\n"; // NON-NLS
+		final String expectedString = "Test"; // NON-NLS
 		final StringReader reader = UtilsTest.toReader(testString);
 		final ByteArrayInputStream inputStream = UtilsTest.toInputStream(testString);
 		List<Object> testCases = new ArrayList<Object>() {
@@ -73,7 +73,7 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 	@Test
 	public void getNextStringWhenBufferedReaderInstanceTest() {
 		GenericActivityParser<?> gParser = (GenericActivityParser<?>) parser;
-		InputStream textStream = new ByteArrayInputStream("test".getBytes());
+		InputStream textStream = new ByteArrayInputStream("test".getBytes()); // NON-NLS
 		BufferedReader br = new BufferedReader(new InputStreamReader(textStream));
 		assertEquals("test", gParser.getNextActivityString(br));
 	}
@@ -81,7 +81,7 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 	@Test(expected = IllegalArgumentException.class)
 	public void getNextStringWhenOtherInstanceTest() {
 		GenericActivityParser<?> gParser = (GenericActivityParser<?>) parser;
-		String stringToBeParsed = "Testing some tests";
+		String stringToBeParsed = "Testing some tests"; // NON-NLS
 		gParser.getNextActivityString(555);
 	}
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transaction ID="414d5120434f52442020202020202020d74333582005f304" agentRole="sourceAgent" version="6.00"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd">
+    <action time="2016-11-23T16:16:08.651Z">completed</action>
+    <sourceAgent QMgr="AGNT1" agent="AGNT1A" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </sourceAgent>
+    <destinationAgent QMgr="AGNT2" agent="AGNT2A" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </destinationAgent>
+    <originator>
+        <hostName>192.168.188.1</hostName>
+        <userID>user</userID>
+        <mqmdUserID>user</mqmdUserID>
+    </originator>
+    <status resultCode="40">
+        <supplement>BFGRP0034I: The file transfer request has completed with no files being transferred.</supplement>
+    </status>
+    <transferSet bytesSent="0" startTime="2016-11-23T16:16:08.105Z" total="1">
+        <metaDataSet>
+            <metaData key="account">ADP custom props</metaData>
+            <metaData key="com.ibm.wmqfte.SourceAgent">AGNT1A</metaData>
+            <metaData key="com.ibm.wmqfte.DestinationAgent">AGNT2A</metaData>
+            <metaData key="com.ibm.wmqfte.MqmdUser">user</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingUser">user</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingHost">192.168.188.1</metaData>
+            <metaData key="com.ibm.wmqfte.TransferId">414d5120434f52442020202020202020d74333582005f304</metaData>
+            <metaData key="com.ibm.wmqfte.JobName">File to File transfer</metaData>
+            <metaData key="com.ibm.wmqfte.Priority">0</metaData>
+        </metaDataSet>
+    </transferSet>
+    <job>
+        <name>File to File transfer</name>
+    </job>
+    <statistics>
+        <actualStartTime>2016-11-23T16:16:08.573Z</actualStartTime>
+        <retryCount>0</retryCount>
+        <numFileFailures>1</numFileFailures>
+        <numFileWarnings>0</numFileWarnings>
+    </statistics>
+</transaction>

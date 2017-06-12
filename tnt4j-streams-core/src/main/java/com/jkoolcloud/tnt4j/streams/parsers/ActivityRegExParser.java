@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.*;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -38,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * specified regular expression, with the value for each field being retrieved from either of the 1-based group
  * position, or match position.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
  * </ul>
@@ -48,6 +52,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class ActivityRegExParser extends GenericActivityParser<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
 
+	private static final String MATCHES_KEY = "MATCHES_DATA"; // NON-NLS
+
 	/**
 	 * Contains the regular expression pattern that each data item is assumed to match (set by {@code Pattern}
 	 * property).
@@ -55,8 +61,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	protected Pattern pattern = null;
 
 	/**
-	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data from which to
-	 * extract its value.
+	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data, cached
+	 * activity data or stream properties from which to extract its value.
 	 */
 	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<>();
 
@@ -84,6 +90,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			return;
 		}
 
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -101,18 +109,14 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 
 	@Override
 	public void addField(ActivityField field) {
-		List<ActivityFieldLocator> locations = field.getLocators();
-		if (locations == null) {
+		List<ActivityFieldLocator> locators = field.getLocators();
+		if (CollectionUtils.isEmpty(locators)) {
 			return;
 		}
 		List<ActivityFieldLocator> matchLocs = new ArrayList<>();
 		List<ActivityFieldLocator> groupLocs = new ArrayList<>();
-		for (ActivityFieldLocator locator : locations) {
-			ActivityFieldLocatorType locType = ActivityFieldLocatorType.REGroupNum;
-			try {
-				locType = ActivityFieldLocatorType.valueOf(locator.getType());
-			} catch (Exception e) {
-			}
+		for (ActivityFieldLocator locator : locators) {
+			ActivityFieldLocatorType locType = locator.getBuiltInType();
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
 					field); // Utils.getDebugString(field));
@@ -144,26 +148,40 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityRegExParser.no.regex.pattern"));
 		}
-		if (data == null) {
-			return null;
-		}
+
+		return super.parse(stream, data);
+	}
+
+	@Override
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
 		Matcher matcher = pattern.matcher(dataStr);
 		if (matcher == null || !matcher.matches()) {
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.input.not.match"),
-					getName());
+					getName(), pattern.pattern());
 			return null;
 		}
+
+		ActivityContext cData = new ActivityContext(stream, data, matcher);
+		cData.setMessage(dataStr);
+
+		return cData;
+	}
+
+	@Override
+	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
+		if (cData == null || cData.getData() == null) {
+			return null;
+		}
+
 		ActivityInfo ai = new ActivityInfo();
-		// save entire activity string as message data
-		ActivityField field = new ActivityField(StreamFieldType.Message.name());
-		applyFieldValue(stream, ai, field, dataStr);
+		ActivityField field = null;
+		cData.setActivity(ai);
+		Matcher matcher = (Matcher) cData.getData();
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
@@ -180,20 +198,23 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				}
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.found.matches"), matches.size());
+				cData.put(MATCHES_KEY, matches);
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
 					field = fieldMapEntry.getKey();
+					cData.setField(field);
 					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-					value = Utils.simplifyValue(parseLocatorValues(locations, stream, matches));
+					value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 					if (value != null) {
 						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityRegExParser.setting.field"), field);
 					}
 
-					applyFieldValue(stream, ai, field, value);
+					applyFieldValue(field, value, cData);
 				}
+				cData.remove(MATCHES_KEY);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
@@ -205,16 +226,17 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			Object value;
 			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
 				field = fieldMapEntry.getKey();
+				cData.setField(field);
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-				value = Utils.simplifyValue(parseLocatorValues(locations, stream, matcher));
+				value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 				if (value != null) {
 					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ActivityRegExParser.setting.group.field"), field);
 				}
 
-				applyFieldValue(stream, ai, field, value);
+				applyFieldValue(field, value, cData);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
@@ -222,6 +244,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			pe.initCause(e);
 			throw pe;
 		}
+
 		return ai;
 	}
 
@@ -230,7 +253,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param regexData
+	 * @param cData
 	 *            RegEx data package - {@link Matcher} or {@link ArrayList} of matches
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -238,25 +261,30 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Object regexData,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
 
 		if (StringUtils.isNotEmpty(locStr)) {
-			int loc = Integer.parseInt(locStr);
-
-			if (regexData instanceof Matcher) {
-				Matcher matcher = (Matcher) regexData;
-
-				if (loc >= 0 && loc < matcher.groupCount()) {
-					val = matcher.group(loc);
-				}
-			} else {
-				ArrayList<String> matches = (ArrayList<String>) regexData;
+			if (cData.containsKey(MATCHES_KEY)) {
+				ArrayList<String> matches = (ArrayList<String>) cData.get(MATCHES_KEY);
+				int loc = Integer.parseInt(locStr);
 
 				if (loc >= 0 && loc < matches.size()) {
 					val = matches.get(loc);
+				}
+			} else {
+				Matcher matcher = (Matcher) cData.getData();
+				ActivityFieldLocatorType locType = locator.getBuiltInType();
+
+				if (locType != null && locType.getDataType() == Integer.class) {
+					int loc = Integer.parseInt(locStr);
+					if (loc >= 0 && loc <= matcher.groupCount()) {
+						val = matcher.group(loc);
+					}
+				} else {
+					val = matcher.group(locStr);
 				}
 			}
 		}

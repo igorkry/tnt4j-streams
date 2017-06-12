@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * Transforms locator resolved field value by applying transformation bean defined rules.
+ * Transforms field/locator value by applying transformation bean/script/expression defined rules.
  * 
  * 
  * <p>
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.*;
   *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
   *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
   *       &lt;attribute name="beanRef" type="{http://www.w3.org/2001/XMLSchema}string" />
-  *       &lt;attribute name="lang" type="{}ScriptLang" default="javascript" />
+ *       &lt;attribute name="lang" type="{}ScriptLangs" default="javascript" />
   *     &lt;/extension>
   *   &lt;/simpleContent>
   * &lt;/complexType>
@@ -45,21 +45,21 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FieldTransform", propOrder = { "tScript" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 public class FieldTransform {
 
 	@XmlValue
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String tScript;
 	@XmlAttribute(name = "name")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
 	@XmlAttribute(name = "beanRef")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String beanRef;
 	@XmlAttribute(name = "lang")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
-	protected ScriptLang lang;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	protected ScriptLangs lang;
 
 	public FieldTransform() {
 
@@ -72,7 +72,7 @@ public class FieldTransform {
 
 	public FieldTransform(String name, String lang, String tScript) {
 		this.name = name;
-		this.lang = ScriptLang.fromValue(lang);
+		this.lang = ScriptLangs.fromValue(lang);
 		this.tScript = tScript;
 	}
 
@@ -82,7 +82,7 @@ public class FieldTransform {
 	 * @return possible object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getTSctipt() {
 		return tScript;
 	}
@@ -94,7 +94,7 @@ public class FieldTransform {
 	 *            allowed object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTSctipt(String tScript) {
 		this.tScript = tScript;
 	}
@@ -105,7 +105,7 @@ public class FieldTransform {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getName() {
 		return name;
 	}
@@ -117,7 +117,7 @@ public class FieldTransform {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setName(String value) {
 		this.name = value;
 	}
@@ -128,7 +128,7 @@ public class FieldTransform {
 	 * @return possible object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public String getBeanRef() {
 		return beanRef;
 	}
@@ -140,7 +140,7 @@ public class FieldTransform {
 	 *            allowed object is {@link String }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setBeanRef(String value) {
 		this.beanRef = value;
 	}
@@ -148,13 +148,13 @@ public class FieldTransform {
 	/**
 	 * Gets the value of the lang property.
 	 * 
-	 * @return possible object is {@link ScriptLang }
+	 * @return possible object is {@link ScriptLangs }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
-	public ScriptLang getLang() {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public ScriptLangs getLang() {
 		if (lang == null) {
-			return ScriptLang.JAVASCRIPT;
+			return ScriptLangs.JAVASCRIPT;
 		} else {
 			return lang;
 		}
@@ -164,11 +164,11 @@ public class FieldTransform {
 	 * Sets the value of the lang property.
 	 * 
 	 * @param value
-	 *            allowed object is {@link ScriptLang }
+	 *            allowed object is {@link ScriptLangs }
 	 * 
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-12-08T11:54:46+02:00", comments = "JAXB RI v2.2.4-2")
-	public void setLang(ScriptLang value) {
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setLang(ScriptLangs value) {
 		this.lang = value;
 	}
 

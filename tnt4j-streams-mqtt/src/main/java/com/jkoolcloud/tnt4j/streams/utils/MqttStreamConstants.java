@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,5 @@ public final class MqttStreamConstants {
 	public static final String TRANSPORT_MQTT = "Mqtt"; // NON-NLS
 
 	private MqttStreamConstants() {
-
 	}
 }

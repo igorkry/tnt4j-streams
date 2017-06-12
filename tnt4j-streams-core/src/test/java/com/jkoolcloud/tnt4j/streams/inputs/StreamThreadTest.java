@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,23 +41,23 @@ public class StreamThreadTest {
 	@Test
 	public void testStreamThreadWithName() {
 		streamMock = mock(TNTInputStream.class);
-		StreamThread thread = new StreamThread(streamMock, "NAME");
+		StreamThread thread = new StreamThread(streamMock, "NAME"); // NON-NLS
 		verify(streamMock).setOwnerThread(thread);
 		assertEquals(streamMock, thread.getTarget());
 	}
 
 	@Test
 	public void testStreamThreadWithGroupAndName() {
-		ThreadGroup tgGroup = new ThreadGroup("TG");
+		ThreadGroup tgGroup = new ThreadGroup("TG"); // NON-NLS
 		streamMock = mock(TNTInputStream.class);
-		StreamThread thread = new StreamThread(tgGroup, streamMock, "NAME");
+		StreamThread thread = new StreamThread(tgGroup, streamMock, "NAME"); // NON-NLS
 		verify(streamMock).setOwnerThread(thread);
 		assertEquals(streamMock, thread.getTarget());
 	}
 
 	@Test
 	public void testStreamThreadWithGroup() {
-		ThreadGroup tgGroup = new ThreadGroup("TG");
+		ThreadGroup tgGroup = new ThreadGroup("TG"); // NON-NLS
 		streamMock = mock(TNTInputStream.class);
 		StreamThread thread = new StreamThread(tgGroup, streamMock);
 		verify(streamMock).setOwnerThread(thread);

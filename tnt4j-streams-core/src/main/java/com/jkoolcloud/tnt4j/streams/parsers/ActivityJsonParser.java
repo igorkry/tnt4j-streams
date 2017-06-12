@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -50,9 +49,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * See <a href="https://github.com/jayway/JsonPath">JsonPath API</a> for more details.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
- * <li>ReadLines - indicates that complete JSON data package is single line. (Optional)</li>
+ * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -83,6 +83,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			return;
 		}
 
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -98,20 +100,26 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link com.jayway.jsonpath.DocumentContext}</li>
 	 * <li>{@link java.lang.String}</li>
 	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.nio.ByteBuffer}</li>
 	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@link java.io.InputStream}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
-		return DocumentContext.class.isInstance(data) || super.isDataClassSupported(data);
+	protected boolean isDataClassSupportedByParser(Object data) {
+		return DocumentContext.class.isInstance(data) || super.isDataClassSupportedByParser(data);
 	}
 
 	@Override
@@ -120,12 +128,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-
-		DocumentContext jsonDoc = null;
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
+		DocumentContext jsonDoc;
 		String jsonString = null;
 		try {
 			if (data instanceof DocumentContext) {
@@ -151,11 +155,10 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			jsonString = jsonDoc.jsonString();
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				jsonString);
+		ActivityContext cData = new ActivityContext(stream, data, jsonDoc);
+		cData.setMessage(jsonString);
 
-		return parsePreparedItem(stream, jsonString, jsonDoc);
+		return cData;
 	}
 
 	/**
@@ -168,24 +171,25 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 */
 	@Override
 	protected String readNextActivity(BufferedReader rdr) {
-		StringBuilder jsonStringBuilder = new StringBuilder();
+		StringBuilder jsonStringBuilder = new StringBuilder(1024);
 		String line;
 
-		try {
-			while ((line = rdr.readLine()) != null) {
-				jsonStringBuilder.append(line);
-				if (jsonAsLine) {
-					break;
+		synchronized (NEXT_LOCK) {
+			try {
+				while ((line = rdr.readLine()) != null) {
+					jsonStringBuilder.append(line);
+					if (jsonAsLine) {
+						break;
+					}
 				}
+			} catch (EOFException eof) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
+						getActivityDataType(), eof);
+			} catch (IOException ioe) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
-		} catch (EOFException eof) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-					getActivityDataType(), eof);
-		} catch (IOException ioe) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.error.reading"),
-					getActivityDataType(), ioe);
 		}
 
 		return jsonStringBuilder.toString();
@@ -206,7 +210,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param jsonDocContext
+	 * @param cData
 	 *            {@link JsonPath} document context to read
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -220,7 +224,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, DocumentContext jsonDocContext,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
@@ -232,7 +236,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 			Object jsonValue = null;
 			try {
-				jsonValue = jsonDocContext.read(locStr);
+				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
 				logger().log(
 						!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources

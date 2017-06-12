@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 	/**
 	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
-	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * should be performed, e.g., C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
 	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file create
 	 * timestamp in descending order.
 	 *
@@ -124,7 +124,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				try {
 					ContentSummary cSummary = fs.getContentSummary(f);
 					tbc += cSummary.getLength();
-					tlc += Utils.countLines(new InputStreamReader(fs.open(f)));
+					tlc += Utils.countLines(fs.open(f));
 				} catch (IOException exc) {
 				}
 			}
@@ -189,7 +189,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 			if (startFromLatestActivity && fileToRead != null) {
 				lastModifTime = getModificationTime(fileToRead, fs);
-				lineNumber = Utils.countLines(new InputStreamReader(fs.open(fileToRead)));
+				lineNumber = Utils.countLines(fs.open(fileToRead));
 			}
 		}
 
@@ -344,7 +344,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				availableFiles = searchFiles(filePath, fs);
 				updateDataTotals(availableFiles, fs);
 
-				Path prevFile = availableFiles == null || availableFiles.length < 2 ? null
+				Path prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
 				if (prevFile != null) {
@@ -421,7 +421,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean canRead(FileStatus fs) {
-			return fs != null && ((fs.getPermission().toShort() & 0444) == 0444);
+			return fs != null && Utils.matchMask(fs.getPermission().toShort(), 0444);
 		}
 
 		private void updateDataTotals(Path[] activityFiles, FileSystem fs) {

@@ -1,0 +1,6 @@
+{
+    "event": "Event12",
+    "message": "Second event",
+    "resource": "event3.json",
+    "transaction": "1"
+}

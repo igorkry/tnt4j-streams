@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -363,33 +363,6 @@ public enum StreamFieldType {
 					(enums.length - 1), StreamFieldType.class.getSimpleName()));
 		}
 		return enums[ordinal];
-	}
-
-	/**
-	 * Gets the field enumeration object based on enumeration object name value ignoring case.
-	 *
-	 * @param name
-	 *            name of field type
-	 * @return field type enumeration object
-	 * @throws IllegalArgumentException
-	 *             if name is not a valid enumeration object name
-	 */
-	public static StreamFieldType valueOfIgnoreCase(String name) throws IllegalArgumentException {
-		if (StringUtils.isEmpty(name)) {
-			throw new IllegalArgumentException(
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamFieldType.name.empty"));
-		}
-
-		StreamFieldType[] enumConstants = StreamFieldType.values();
-
-		for (StreamFieldType ec : enumConstants) {
-			if (ec.name().equalsIgnoreCase(name)) {
-				return ec;
-			}
-		}
-
-		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"StreamFieldType.no.enum.constant", name, StreamFieldType.class.getSimpleName()));
 	}
 
 	private static final Map<String, Object> CACHE = new HashMap<>();

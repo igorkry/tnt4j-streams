@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 * @return created transformation instance
 	 *
 	 * @throws IllegalArgumentException
-	 *             if transformation can not be breaded for provided language
+	 *             if transformation can not be created for provided language
 	 */
 	public static ValueTransformation<Object, Object> createScriptTransformation(String name, String lang, String code)
 			throws IllegalArgumentException {

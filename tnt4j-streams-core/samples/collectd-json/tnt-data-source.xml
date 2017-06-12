@@ -18,14 +18,12 @@
         <field name="StartTime" locator="time" locator-type="Label" datatype="Timestamp" units="Seconds"/>
     </parser>
 
-    <parser name="CollectdReqBodyParser"
-            class="com.jkoolcloud.tnt4j.streams.custom.parsers.SnapshotsJsonParser">
+    <parser name="CollectdReqBodyParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ReadLines" value="false"/>
-        <property name="ChildrenField" value="MsgBody"/>
 
-        <field name="MsgBody" locator="$" locator-type="Label" transparent="true">
-            <parser-ref name="CollectdStatsDataParser"/>
-        </field>
+        <embedded-activity name="MsgBody" locator="$" locator-type="Label">
+            <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
+        </embedded-activity>
         <field name="EventType" value="Activity"/>
         <field name="ApplName" value="collectd"/>
     </parser>

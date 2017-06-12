@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class AbstractBufferedStreamTest {
 	public void getNextItemTest() throws Exception {
 		abs.startStream();
 		abs.setOwnerThread(mock(StreamThread.class));
-		abs.addInputToBuffer("TEST");
+		abs.addInputToBuffer("TEST"); // NON-NLS
 		assertEquals("TEST", abs.getNextItem());
 	}
 
@@ -59,7 +59,7 @@ public class AbstractBufferedStreamTest {
 			public void run() {
 				try {
 					abs.startStream();
-					abs.addInputToBuffer("TEST");
+					abs.addInputToBuffer("TEST"); // NON-NLS
 					// abs.setProperties(ActivityParserTestBase.makeProperty(StreamProperties.PROP_HALT_ON_PARSER,
 					// "false"));
 					assertNotNull(abs.getNextItem());
@@ -103,7 +103,7 @@ public class AbstractBufferedStreamTest {
 
 	}
 
-	int overflowRecordCount = 1024 * 10 + 1;
+	private int overflowRecordCount = 1024 * 10 + 1;
 
 	@Test(timeout = 5000)
 	public void addInputToBufferOverflowTest() throws Exception {
@@ -113,7 +113,7 @@ public class AbstractBufferedStreamTest {
 			@Override
 			public void run() {
 				for (; overflowRecordCount >= 0; overflowRecordCount--) {
-					abs.addInputToBuffer("T");
+					abs.addInputToBuffer("T"); // NON-NLS
 					System.out.println(overflowRecordCount);
 
 				}

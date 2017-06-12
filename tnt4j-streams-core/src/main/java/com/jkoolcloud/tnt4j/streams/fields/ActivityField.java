@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -30,9 +32,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Represents a specific activity field, containing the necessary information on how to extract its value from the raw
  * activity data.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 3 $
  */
-public class ActivityField {
+public class ActivityField extends AbstractFieldEntity {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
 	/**
 	 * Activity field attribute dynamic value variable definition start token.
@@ -48,12 +51,12 @@ public class ActivityField {
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
 	private String separator = DEFAULT_FIELD_VALUES_DELIM;
-	private String reqValue = ""; /* string to allow no value */
-	private Collection<ActivityParser> stackedParsers;
+	private String formattingPattern = null;
+	private Set<ParserReference> stackedParsers;
 	private boolean transparent = false;
 	private boolean splitCollection = false;
 	private String valueType = null;
-	private Map<String, ActivityFieldLocator> dynamicAttrLocators = null;
+	private Map<String, ActivityFieldLocator> dynamicLocators = null;
 
 	private ActivityFieldLocator groupLocator;
 
@@ -91,6 +94,11 @@ public class ActivityField {
 		loc.setDataType(dataType);
 		locators = new ArrayList<>(1);
 		locators.add(loc);
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -175,11 +183,11 @@ public class ActivityField {
 	}
 
 	private void addDynamicLocator(String id, ActivityFieldLocator locator) {
-		if (dynamicAttrLocators == null) {
-			dynamicAttrLocators = new HashMap<>();
+		if (dynamicLocators == null) {
+			dynamicLocators = new HashMap<>();
 		}
 
-		dynamicAttrLocators.put(id, locator);
+		dynamicLocators.put(id, locator);
 	}
 
 	private void addStaticLocator(ActivityFieldLocator locator) {
@@ -188,6 +196,57 @@ public class ActivityField {
 		}
 
 		locators.add(locator);
+	}
+
+	/**
+	 * Checks whether any of field static or dynamic locators has type 'Cache'.
+	 *
+	 * @return {@code true} if any of field static or dynamic locators has type 'Cache', {@code false} - otherwise.
+	 */
+	public boolean hasCacheLocators() {
+		return hasLocatorsOfType(ActivityFieldLocatorType.Cache);
+	}
+
+	/**
+	 * Checks whether any of field static or dynamic locators has type 'Activity'.
+	 *
+	 * @return {@code true} if any of field static or dynamic locators has type 'Activity', {@code false} - otherwise.
+	 */
+	public boolean hasActivityLocators() {
+		return hasLocatorsOfType(ActivityFieldLocatorType.Activity);
+	}
+
+	/**
+	 * Checks whether any of field static or dynamic locators has type {@code lType}.
+	 *
+	 * @param lType
+	 *            locator type
+	 * @return {@code true} if any of field static or dynamic locators has type {@code lType}, {@code false} -
+	 *         otherwise.
+	 */
+	public boolean hasLocatorsOfType(ActivityFieldLocatorType lType) {
+		return hasLocatorsOfType(locators, lType)
+				|| (dynamicLocators != null && hasLocatorsOfType(dynamicLocators.values(), lType));
+	}
+
+	/**
+	 * Checks whether any of provided locators has type {@code lType}.
+	 *
+	 * @param lType
+	 *            locator type
+	 * @return {@code true} if any of provided locators has type {@code lType}, {@code false} - otherwise.
+	 */
+	protected static boolean hasLocatorsOfType(Collection<ActivityFieldLocator> locators,
+			ActivityFieldLocatorType lType) {
+		if (locators != null) {
+			for (ActivityFieldLocator afl : locators) {
+				if (afl.getBuiltInType() == lType) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -275,26 +334,28 @@ public class ActivityField {
 	}
 
 	/**
-	 * Sets the required flag indicates where field is required or optional.
+	 * Gets the string representation formatting pattern of multiple raw activity values concatenated into the converted
+	 * value for this field.
 	 *
-	 * @param reqValue
-	 *            string representing flag value
-	 *
-	 * @return instance of this activity field
+	 * @return the string being used to format raw values
 	 */
-	public ActivityField setRequired(String reqValue) {
-		this.reqValue = reqValue;
-
-		return this;
+	public String getFormattingPattern() {
+		return formattingPattern;
 	}
 
 	/**
-	 * Determines whether field value is optional for activity.
+	 * Sets the string representation formatting pattern of multiple raw activity values concatenated into the converted
+	 * value for this field.
 	 *
-	 * @return flag indicating field value is optional for activity.
+	 * @param pattern
+	 *            the string to use to format raw values
+	 *
+	 * @return instance of this activity field
 	 */
-	public boolean isOptional() {
-		return "false".equalsIgnoreCase(reqValue); // NON-NLS
+	public ActivityField setFormattingPattern(String pattern) {
+		this.formattingPattern = pattern;
+
+		return this;
 	}
 
 	/**
@@ -343,7 +404,7 @@ public class ActivityField {
 	}
 
 	/**
-	 * Returns hash code for this filed object.
+	 * Returns hash code for this field object.
 	 *
 	 * @return a hash code value for this field.
 	 */
@@ -367,16 +428,18 @@ public class ActivityField {
 	 *
 	 * @param parser
 	 *            the stacked parser to add
+	 * @param aggregationType
+	 *            resolved activity entities aggregation type
 	 *
 	 * @return instance of this activity field
 	 */
-	public ActivityField addStackedParser(ActivityParser parser) {
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType) {
 		if (parser != null) {
 			if (stackedParsers == null) {
-				stackedParsers = new ArrayList<>();
+				stackedParsers = new HashSet<>(5);
 			}
 
-			stackedParsers.add(parser);
+			stackedParsers.add(new ParserReference(parser, aggregationType));
 		}
 
 		return this;
@@ -387,7 +450,7 @@ public class ActivityField {
 	 *
 	 * @return stacked parsers collection
 	 */
-	public Collection<ActivityParser> getStackedParsers() {
+	public Collection<ParserReference> getStackedParsers() {
 		return stackedParsers;
 	}
 
@@ -447,7 +510,7 @@ public class ActivityField {
 	 * @return the dynamic attribute values locators map
 	 */
 	public Map<String, ActivityFieldLocator> getDynamicLocators() {
-		return dynamicAttrLocators;
+		return dynamicLocators;
 	}
 
 	/**
@@ -456,7 +519,7 @@ public class ActivityField {
 	 * @return {@code true} if field has any dynamic locators defined, {@code false} - otherwise
 	 */
 	public boolean isDynamic() {
-		return MapUtils.isNotEmpty(dynamicAttrLocators);
+		return MapUtils.isNotEmpty(dynamicLocators);
 	}
 
 	/**
@@ -510,7 +573,7 @@ public class ActivityField {
 	 *         otherwise
 	 */
 	public boolean hasDynamicLocator(String dLocIdVar) {
-		return dynamicAttrLocators != null && dynamicAttrLocators.containsKey(dLocIdVar);
+		return dynamicLocators != null && dynamicLocators.containsKey(dLocIdVar);
 	}
 
 	/**
@@ -528,9 +591,10 @@ public class ActivityField {
 		ActivityField tField = new ActivityField(fillDynamicAttr(fieldTypeName, dValues, valueIndex));
 		tField.locators = getTempFieldLocators(locators, valueIndex);
 		tField.separator = separator;
-		tField.reqValue = reqValue;
+		tField.requiredVal = requiredVal;
 		tField.stackedParsers = stackedParsers;
 		tField.valueType = fillDynamicAttr(valueType, dValues, valueIndex);
+		tField.transparent = transparent;
 
 		return tField;
 	}
@@ -540,7 +604,7 @@ public class ActivityField {
 
 		if (isDynamicAttr(dAttr) && MapUtils.isNotEmpty(dValMap)) {
 			List<String> vars = new ArrayList<>();
-			Utils.resolveVariables(vars, dAttr);
+			Utils.resolveCfgVariables(vars, dAttr);
 
 			for (String var : vars) {
 				tAttr = tAttr.replace(var, String.valueOf(Utils.getItem(dValMap.get(var), valueIndex)));
@@ -551,7 +615,7 @@ public class ActivityField {
 	}
 
 	private static List<ActivityFieldLocator> getTempFieldLocators(List<ActivityFieldLocator> locators, int index) {
-		if (CollectionUtils.isEmpty(locators) || locators.size() == 1) {
+		if (CollectionUtils.size(locators) <= 1) {
 			return locators;
 		}
 
@@ -561,5 +625,61 @@ public class ActivityField {
 		}
 
 		return fLocators;
+	}
+
+	/**
+	 * Applies field master locator filters on provided value to check if value should be filtered out from streaming.
+	 * 
+	 * @param ai
+	 *            activity info instance to alter "filtered out" flag
+	 * @param value
+	 *            value to apply filters
+	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
+	 *         passed over parameters - otherwise
+	 * @throws Exception
+	 *             if evaluation of filter fails
+	 *
+	 * @see #filterValue(Object)
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityInfo#setFiltered(boolean)
+	 */
+	public Object filterValue(ActivityInfo ai, Object value) throws Exception {
+		boolean filteredOut = filterValue(value);
+
+		if (filteredOut) {
+			if (isOptional()) {
+				return null;
+			} else {
+				ai.setFiltered(true);
+			}
+		}
+
+		return value;
+	}
+
+	public static class ParserReference {
+		private ActivityParser parser;
+		private AggregationType aggregationType;
+
+		ParserReference(ActivityParser parser) {
+			this(parser, AggregationType.Merge);
+		}
+
+		ParserReference(ActivityParser parser, String aggregationType) {
+			this(parser, StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
+					: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType));
+		}
+
+		ParserReference(ActivityParser parser, AggregationType aggregationType) {
+			this.parser = parser;
+			this.aggregationType = aggregationType;
+		}
+
+		public ActivityParser getParser() {
+			return parser;
+		}
+
+		public AggregationType getAggregationType() {
+			return aggregationType;
+		}
 	}
 }

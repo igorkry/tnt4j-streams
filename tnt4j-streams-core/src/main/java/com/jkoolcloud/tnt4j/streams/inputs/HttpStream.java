@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Implements a Http requests transmitted activity stream, where each request body is assumed to represent:
  * <ul>
  * <li>a single activity event sent as form data (parameters keys/values set)</li>
- * <li>a byte array as request payload data(i.e. log file contents)</li>
+ * <li>a byte array as request payload data (e.g., log file contents)</li>
  * </ul>
  * Running this stream Http server is started on configuration defined port.
  * <p>

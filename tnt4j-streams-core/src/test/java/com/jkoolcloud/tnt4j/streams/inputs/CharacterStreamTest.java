@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class CharacterStreamTest {
 	@Test
 	public void startDataStreamTest() throws Exception {
 		CharacterStream cStream = new CharacterStream();
-		cStream.setName("TEST_CHAR_STREAM");
+		cStream.setName("TEST_CHAR_STREAM"); // NON-NLS
 
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
@@ -75,7 +75,7 @@ public class CharacterStreamTest {
 		thread.start();
 
 		Thread.sleep(250);
-		Socket socket = new Socket("localhost", PORT);
+		Socket socket = new Socket("localhost", PORT); // NON-NLS
 		final OutputStream outputStream = socket.getOutputStream();
 		outputStream.write(55);
 		outputStream.flush();

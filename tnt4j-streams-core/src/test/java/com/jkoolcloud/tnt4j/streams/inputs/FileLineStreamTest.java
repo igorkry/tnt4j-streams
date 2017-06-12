@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class FileLineStreamTest {
 		fls = new FileLineStream();
 
 		StreamThread st = mock(StreamThread.class);
-		st.setName("FileLineStreamTestThreadName");
+		st.setName("FileLineStreamTestThreadName"); // NON-NLS
 		fls.setOwnerThread(st);
 	}
 
@@ -58,7 +58,7 @@ public class FileLineStreamTest {
 		props.put(StreamProperties.PROP_RESTORE_STATE, String.valueOf(false));
 		fls.setProperties(props.entrySet());
 		fls.startStream();
-		final AbstractFileLineStream.FileWatcher fileWatcher = fls.createFileWatcher();
+		final AbstractFileLineStream<File>.FileWatcher fileWatcher = fls.createFileWatcher();
 		// TODO assert smth
 		fileWatcher.shutdown();
 

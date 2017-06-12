@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.transform;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -48,7 +49,7 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	public Object transform(Object value) throws TransformationException {
 		Binding binding = new Binding();
 		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
-		GroovyShell shell = new GroovyShell(binding);
+		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
 			return shell.evaluate(getScriptCode(),

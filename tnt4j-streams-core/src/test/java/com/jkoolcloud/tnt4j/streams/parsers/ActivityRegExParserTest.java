@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -41,8 +42,8 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  */
 public class ActivityRegExParserTest extends ActivityParserTestBase {
 
-	private static final String TEST_STRING = "TEST_STRING";
-	private static final String TEST_PATTERN = "(\\S+)";
+	private static final String TEST_STRING = "TEST_STRING"; // NON-NLS
+	private static final String TEST_PATTERN = "(\\S+)"; // NON-NLS
 	private TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 
 	@Override
@@ -60,8 +61,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	@Test
 	@Override
 	public void isDataClassSupportedTest() {
-		assertTrue(parser.isDataClassSupported("TEST"));
-		assertTrue(parser.isDataClassSupported("TEST".getBytes()));
+		assertTrue(parser.isDataClassSupported("TEST")); // NON-NLS
+		assertTrue(parser.isDataClassSupported("TEST".getBytes())); // NON-NLS
 		assertTrue(parser.isDataClassSupported(mock(Reader.class)));
 		assertTrue(parser.isDataClassSupported(mock(InputStream.class)));
 		assertFalse(parser.isDataClassSupported(this.getClass()));
@@ -69,7 +70,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void addField() {
-		final ActivityField field = new ActivityField("Test");
+		final ActivityField field = new ActivityField("Test"); // NON-NLS
 		final ActivityFieldLocator locator = mock(ActivityFieldLocator.class);
 		when(locator.getType()).thenReturn(ActivityFieldLocatorType.REMatchNum.name());
 		field.addLocator(locator);
@@ -78,7 +79,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void addGroupField() {
-		final ActivityField field = new ActivityField("TestGroup");
+		final ActivityField field = new ActivityField("TestGroup"); // NON-NLS
 		final ActivityFieldLocator locator = mock(ActivityFieldLocator.class);
 		when(locator.getType()).thenReturn(ActivityFieldLocatorType.REGroupNum.name());
 		field.addLocator(locator);
@@ -96,7 +97,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	}
 
 	@Test
-	public void maches() {
+	public void matches() {
 		Pattern pattern = Pattern.compile(TEST_PATTERN);
 		Matcher matcher = pattern.matcher(TEST_STRING);
 		assertTrue(matcher.matches());
@@ -104,7 +105,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void setPropertiesNotEqualsPropNameTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_SIG_DELIM, "test");
+		setProperty(parser, ParserProperties.PROP_SIG_DELIM, "test"); // NON-NLS
 	}
 
 	@Test
@@ -114,15 +115,15 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void addFieldWhenDataIsNullTest() {
-		ActivityField af = new ActivityField("Test");
+		ActivityField af = new ActivityField("Test"); // NON-NLS
 		parser.addField(af);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFieldExceptionTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum");
-		ActivityField af = new ActivityField("test");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum"); // NON-NLS
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
 		af.addLocator(locator2);
@@ -131,9 +132,9 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFieldExceptionOtherTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum");
-		ActivityField af = new ActivityField("test");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum"); // NON-NLS
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator2);
 		parser.addField(af);
 		af.addLocator(locator);
@@ -147,79 +148,108 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void parseWhenWhenDataIsNullTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_PATTERN, "test");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "test"); // NON-NLS
 		assertNull(parser.parse(stream, null));
 	}
 
 	@Test
 	public void parseWhenWhenDataIsEmptyTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_PATTERN, "test");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "test"); // NON-NLS
 		assertNull(parser.parse(stream, ""));
 	}
 
 	@Test
 	public void parseWhenNoMatchesTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
-		assertNull(parser.parse(stream, "test"));
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)"); // NON-NLS
+		assertNull(parser.parse(stream, "test")); // NON-NLS
 	}
 
 	@Test(expected = ParseException.class)
 	public void parseWhenMatchMapExceptionTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum");
-		ActivityField af = new ActivityField("test");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum"); // NON-NLS
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
-		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
-		parser.parse(stream, "1111");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)"); // NON-NLS
+		parser.parse(stream, "1111"); // NON-NLS
 	}
 
 	@Test
 	public void parseWhenMatchMapIsEmptyTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)");
-		parser.parse(stream, "1111");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)"); // NON-NLS
+		parser.parse(stream, "1111"); // NON-NLS
 	}
 
 	@Test
 	public void parseMatchMapOneEntryTest() throws Exception {
 		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, null);
-		ActivityField af = new ActivityField("test");
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
-		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
-		parser.parse(stream, "1111555999");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
+		parser.parse(stream, "1111555999"); // NON-NLS
 	}
 
 	@Test
 	public void parseMatchMapTwoEntriesTest() throws Exception {
 		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "0");
 		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "2");
-		ActivityField af = new ActivityField("test");
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		af.addLocator(locator1);
 		parser.addField(af);
-		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
-		parser.parse(stream, "1111555999");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
+		parser.parse(stream, "1111555999"); // NON-NLS
 	}
 
 	@Test
 	public void parseGroupMapOneEntryTest() throws Exception {
 		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, null);
-		ActivityField af = new ActivityField("test");
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
-		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
-		parser.parse(stream, "1111555999");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
+		parser.parse(stream, "1111555999"); // NON-NLS
 	}
 
 	@Test
 	public void parseGroupMapTwoEntriesTest() throws Exception {
 		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupNum, "0");
 		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "2");
-		ActivityField af = new ActivityField("test");
+		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		af.addLocator(locator1);
 		parser.addField(af);
-		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+");
-		parser.parse(stream, "1111555999");
+		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
+		parser.parse(stream, "1111555999"); // NON-NLS
+	}
+
+	@Test
+	public void parseNamedLocatorTest() throws Exception {
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "CoID"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "ProcessArea"); // NON-NLS
+		ActivityFieldLocator locator3 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "InterfaceID"); // NON-NLS
+		ActivityFieldLocator locator4 = new ActivityFieldLocator(ActivityFieldLocatorType.REGroupName, "HopNr"); // NON-NLS
+		ActivityField af1 = new ActivityField("test1"); // NON-NLS
+		ActivityField af2 = new ActivityField("test2"); // NON-NLS
+		ActivityField af3 = new ActivityField("test3"); // NON-NLS
+		ActivityField af4 = new ActivityField("test4"); // NON-NLS
+		af1.addLocator(locator1);
+		af2.addLocator(locator2);
+		af3.addLocator(locator3);
+		af4.addLocator(locator4);
+		parser.addField(af1);
+		parser.addField(af2);
+		parser.addField(af3);
+		parser.addField(af4);
+
+		setProperty(parser, ParserProperties.PROP_PATTERN,
+				"(?<CoID>.*)\\.(?<ProcessArea>.*)\\.(?<InterfaceID>.*)\\.(?<HopNr>.*)"); // NON-NLS
+		ActivityInfo ai = parser.parse(stream, "MON.WHL.10232.006"); // NON-NLS
+
+		assertEquals(ai.getFieldValue("test1"), ("MON")); // NON-NLS
+		assertEquals(ai.getFieldValue("test2"), ("WHL")); // NON-NLS
+		assertEquals(ai.getFieldValue("test3"), ("10232")); // NON-NLS
+		assertEquals(ai.getFieldValue("test4"), ("006")); // NON-NLS
 	}
 }

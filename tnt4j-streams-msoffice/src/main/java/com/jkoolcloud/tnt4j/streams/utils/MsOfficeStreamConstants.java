@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,6 @@ public final class MsOfficeStreamConstants {
 	 */
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-msoffice"; // NON-NLS
 
-	/**
-	 * Constant for name of built-in stream {@value} property.
-	 */
-	public static final String PROP_SHEETS = "SheetsToProcess"; // NON-NLS
-
 	private MsOfficeStreamConstants() {
-
 	}
 }

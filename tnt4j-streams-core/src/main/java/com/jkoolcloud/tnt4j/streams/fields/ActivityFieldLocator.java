@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,27 @@
 package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw
- * activity data item field for its corresponding activity item value, as well as any transformations that are
+ * activity data item field for its corresponding activity item value, as well any transformations and filters that are
  * necessary.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
-public class ActivityFieldLocator implements Cloneable {
+public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneable {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
 
 	private String type = null;
@@ -49,7 +49,6 @@ public class ActivityFieldLocator implements Cloneable {
 	private String locale = null;
 	private String timeZone = null;
 	private Object cfgValue = null;
-	private String requiredVal = ""; /* string to allow no value */
 	private String id = null;
 
 	private ActivityFieldLocatorType builtInType = null;
@@ -60,8 +59,6 @@ public class ActivityFieldLocator implements Cloneable {
 
 	private NumericFormatter numberParser = null;
 	private TimestampFormatter timeParser = null;
-
-	private List<ValueTransformation<Object, Object>> transformations;
 
 	/**
 	 * Constructs a new activity field locator for either a built-in type or a custom type.
@@ -81,7 +78,7 @@ public class ActivityFieldLocator implements Cloneable {
 			builtInType = ActivityFieldLocatorType.valueOf(this.type);
 		} catch (Exception e) {
 		}
-		if (builtInType != ActivityFieldLocatorType.Label && builtInType != ActivityFieldLocatorType.StreamProp) {
+		if (builtInType != null && builtInType.getDataType() == Integer.class) {
 			int loc = Integer.parseInt(locator);
 			if (loc <= 0) {
 				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -119,6 +116,11 @@ public class ActivityFieldLocator implements Cloneable {
 	 * locators values.
 	 */
 	ActivityFieldLocator() {
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
 	}
 
 	/**
@@ -315,44 +317,6 @@ public class ActivityFieldLocator implements Cloneable {
 	}
 
 	/**
-	 * Sets the required option flag to indicator if locator is optional
-	 *
-	 * @param requiredVal
-	 *            {@code true}/{@code false} string
-	 */
-	public void setRequired(String requiredVal) {
-		this.requiredVal = requiredVal;
-	}
-
-	/**
-	 * Determines whether value resolution by locator is optional.
-	 *
-	 * @return flag indicating value resolution by locator is optional
-	 */
-	public boolean isOptional() {
-		return "false".equalsIgnoreCase(requiredVal); // NON-NLS
-	}
-
-	/**
-	 * Determines whether value resolution by locator is required.
-	 *
-	 * @return flag indicating value resolution by locator is required
-	 */
-	public boolean isRequired() {
-		return "true".equalsIgnoreCase(requiredVal); // NON-NLS
-	}
-
-	/**
-	 * Determines whether value resolution by locator is required depending on stream context. For example XML/JSON
-	 * parser context may require all locators to resolve non {@code null} values by default.
-	 *
-	 * @return flag indicating value resolution by locator is required depending on stream context
-	 */
-	public boolean isDefaultRequire() {
-		return StringUtils.isEmpty(requiredVal); // NON-NLS
-	}
-
-	/**
 	 * Gets field locator identifier.
 	 *
 	 * @return field locator identifier
@@ -441,7 +405,7 @@ public class ActivityFieldLocator implements Cloneable {
 		if (source == null) {
 			target = mapCatchAll;
 		} else {
-			String srcString = String.valueOf(source);
+			String srcString = Utils.toString(source);
 			if (valueMap != null) {
 				target = valueMap.get(srcString);
 			}
@@ -455,41 +419,6 @@ public class ActivityFieldLocator implements Cloneable {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityFieldLocator.mapped.result"),
 				source, target, type);
 		return target;
-	}
-
-	/**
-	 * Adds data value transformation instance to locator transformations list.
-	 *
-	 * @param transformation
-	 *            transformation to add
-	 */
-	public void addTransformation(ValueTransformation<Object, Object> transformation) {
-		if (transformations == null) {
-			transformations = new ArrayList<>();
-		}
-
-		transformations.add(transformation);
-	}
-
-	/**
-	 * Transforms provided object value using defined transformations. If more than one transformation defined,
-	 * transformations are applied sequentially where transformation input data is output of previous transformation.
-	 * 
-	 * @param fieldValue
-	 *            value to transform
-	 * @return transformed value
-	 */
-	public Object transformValue(Object fieldValue) throws Exception {
-		if (CollectionUtils.isEmpty(transformations)) {
-			return fieldValue;
-		}
-
-		Object tValue = fieldValue;
-		for (ValueTransformation<Object, Object> vt : transformations) {
-			tValue = vt.transform(tValue);
-		}
-
-		return tValue;
 	}
 
 	/**
@@ -515,11 +444,11 @@ public class ActivityFieldLocator implements Cloneable {
 			return getMappedValue(formatNumericValue(value));
 		case Binary:
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
-				value = Utils.base64Decode(value.toString().getBytes());
+				value = Utils.base64Decode(String.valueOf(value));
 			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
-				value = Utils.decodeHex(value.toString());
+				value = Utils.decodeHex(String.valueOf(value));
 			} else if (builtInFormat == ActivityFieldFormatType.string) {
-				value = value.toString().getBytes();
+				value = String.valueOf(value).getBytes();
 			}
 			break;
 		case DateTime:
@@ -628,10 +557,10 @@ public class ActivityFieldLocator implements Cloneable {
 			cafl.valueMap = valueMap;
 			cafl.mapCatchAll = mapCatchAll;
 			cafl.transformations = transformations;
+			cafl.filter = filter;
 
 			return cafl;
 		} catch (CloneNotSupportedException exc) {
-
 		}
 
 		return null;

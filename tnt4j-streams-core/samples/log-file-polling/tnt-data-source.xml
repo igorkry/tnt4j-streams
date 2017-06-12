@@ -22,7 +22,6 @@
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
         <field name="ElapsedTime" locator="14" locator-type="REGroupNum" datatype="Number" format="#####0.000"
                locale="en-US" units="Seconds"/>
-
     </parser>
 
     <stream name="SampleFilePollingStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">

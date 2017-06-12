@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,17 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 		inputBuffer = new ArrayBlockingQueue<>(bufferSize, true);
 		// inputBuffer = new SynchronousQueue<Object>(true);
+	}
+
+	/**
+	 * Adds terminator object to input buffer.
+	 */
+	@Override
+	protected void stopInternals() {
+		if (inputBuffer != null) {
+			// inputBuffer.clear(); //???
+			inputBuffer.offer(DIE_MARKER);
+		}
 	}
 
 	/**

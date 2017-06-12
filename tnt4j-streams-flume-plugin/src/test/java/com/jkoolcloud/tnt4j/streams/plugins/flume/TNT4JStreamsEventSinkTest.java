@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ public class TNT4JStreamsEventSinkTest {
 		TNT4JStreamsEventSink flumeSink = new TNT4JStreamsEventSink();
 		Context context = new Context() {
 			{
-				put(TNT4JStreamsEventSink.PROP_HOST, "localhost");
-				put(TNT4JStreamsEventSink.PROP_PORT, "8528");
-				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "");
+				put(TNT4JStreamsEventSink.PROP_HOST, "localhost"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_PORT, "8528"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, ""); // NON-NLS
 			}
 		};
 		flumeSink.configure(context);
@@ -58,8 +58,8 @@ public class TNT4JStreamsEventSinkTest {
 		TNT4JStreamsEventSink flumeSink = new TNT4JStreamsEventSink();
 		Context context = new Context() {
 			{
-				put(TNT4JStreamsEventSink.PROP_HOST, "localhost");
-				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "");
+				put(TNT4JStreamsEventSink.PROP_HOST, "localhost"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, ""); // NON-NLS
 			}
 		};
 		flumeSink.configure(context);
@@ -70,8 +70,8 @@ public class TNT4JStreamsEventSinkTest {
 		TNT4JStreamsEventSink flumeSink = new TNT4JStreamsEventSink();
 		Context context = new Context() {
 			{
-				put(TNT4JStreamsEventSink.PROP_PORT, "8528");
-				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "");
+				put(TNT4JStreamsEventSink.PROP_PORT, "8528"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, ""); // NON-NLS
 			}
 		};
 		flumeSink.configure(context);
@@ -82,9 +82,9 @@ public class TNT4JStreamsEventSinkTest {
 		TNT4JStreamsEventSink flumeSink = new TNT4JStreamsEventSink();
 		Context context = new Context() {
 			{
-				put(TNT4JStreamsEventSink.PROP_HOST, "localhost");
-				put(TNT4JStreamsEventSink.PROP_PORT, "TEST");
-				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "");
+				put(TNT4JStreamsEventSink.PROP_HOST, "localhost"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_PORT, "TEST"); // NON-NLS
+				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, ""); // NON-NLS
 			}
 		};
 		flumeSink.configure(context);
@@ -97,9 +97,9 @@ public class TNT4JStreamsEventSinkTest {
 
 		Context context = new Context() {
 			{
-				put(TNT4JStreamsEventSink.PROP_HOST, "localhost");
+				put(TNT4JStreamsEventSink.PROP_HOST, "localhost"); // NON-NLS
 				put(TNT4JStreamsEventSink.PROP_PORT, String.valueOf(PORT));
-				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "config.xml");
+				put(TNT4JStreamsEventSink.PROP_STREAM_CONFIG, "config.xml"); // NON-NLS
 			}
 		};
 		flumeSink.configure(context);
@@ -131,8 +131,8 @@ public class TNT4JStreamsEventSinkTest {
 
 	@Test
 	public void testRB() {
-		String keyModule = "TNT4JStreamsEventSink.streams.starting";
-		String keyCore = "ActivityField.field.type.name.empty";
+		String keyModule = "TNT4JStreamsEventSink.streams.starting"; // NON-NLS
+		String keyCore = "ActivityField.field.type.name.empty"; // NON-NLS
 
 		String rbs1 = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME, keyModule);
 		assertNotEquals("Flume resource bundle entry not found", keyModule, rbs1);

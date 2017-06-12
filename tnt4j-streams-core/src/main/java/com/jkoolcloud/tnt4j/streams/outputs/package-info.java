@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams outputs: i.e. JKoolCloud.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams outputs: e.g., JKoolCloud.
  * 
  * @author akausinis
  * @version 1.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -55,13 +56,13 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void recordActivityTest() throws Exception {
+	public void streamFlowTest() throws Exception {
 		ts.addParser(parser);
 		streamThread.start();
 		when(ai.isFilteredOut()).thenReturn(false);
 
 		Thread.sleep(500);
-		verify(ai).recordActivity(any(Tracker.class), any(Long.class));
+		Trackable trackable = verify(ai).buildTrackable(any(Tracker.class));
 		ts.halt(true);
 		ts.cleanup();
 	}
@@ -118,7 +119,7 @@ public class TNTInputStreamTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void runTest() {
-		ts.ownerThread = null;
+		ts.setOwnerThread(null);
 		ts.run();
 	}
 
@@ -154,10 +155,10 @@ public class TNTInputStreamTest {
 		ActivityInfo ai = ts.applyParsers("TEST"); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(tags, "TEST"); // NON-NLS
+		ts.applyParsers("TEST", tags); // NON-NLS
 		assertNotNull(ai);
 
-		ts.applyParsers(falseTags, "TEST"); // NON-NLS
+		ts.applyParsers("TEST", falseTags); // NON-NLS
 
 		verify(parser, times(3)).parse(any(TNTInputStream.class), any());
 
@@ -248,7 +249,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void getOwnerThreadTest() {
-		ts.ownerThread.setName("TEST_STREAM"); // NON-NLS
+		ts.getOwnerThread().setName("TEST_STREAM"); // NON-NLS
 		assertEquals("TEST_STREAM", ts.getOwnerThread().getName());
 	}
 
@@ -321,6 +322,16 @@ public class TNTInputStreamTest {
 		@Override
 		public boolean isDataClassSupported(Object data) {
 			return true;
+		}
+
+		@Override
+		public void addReference(Object refObject) {
+
+		}
+
+		@Override
+		protected Object getActivityDataType() {
+			return "TEXT"; // NON-NLS
 		}
 
 	}

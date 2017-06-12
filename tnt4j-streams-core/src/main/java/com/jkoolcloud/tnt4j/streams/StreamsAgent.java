@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -48,14 +49,19 @@ public final class StreamsAgent {
 	private static final String PARAM_STREAM_CFG = "-f:"; // NON-NLS
 	private static final String PARAM_PARSER_CFG = "-p:"; // NON-NLS
 	private static final String PARAM_ZOOKEEPER_CFG = "-z:"; // NON-NLS
+	private static final String PARAM_ZOOKEEPER_STREAM_ID = "-sid:"; // NON-NLS
 	private static final String PARAM_SKIP_UNPARSED = "-s"; // NON-NLS
 	private static final String PARAM_HELP1 = "-h"; // NON-NLS
 	private static final String PARAM_HELP2 = "-?"; // NON-NLS
 
 	private static String cfgFileName = null;
 	private static String zookeeperCfgFile = null;
+	private static String zookeeperStreamId = null;
 	private static boolean noStreamConfig = false;
 	private static boolean haltOnUnparsed = true;
+
+	private static ThreadGroup streamThreads;
+	private static boolean restarting = true;
 
 	private StreamsAgent() {
 	}
@@ -84,7 +90,12 @@ public final class StreamsAgent {
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
 	 *            <td>&nbsp;-z:&lt;cfg_file_name&gt;</td>
-	 *            <td>(optional) Load ZooKeeper configuration from &lt;cfg_file_name&gt;</td>
+	 *            <td>(optional) Load TNT4J-Streams ZooKeeper configuration from &lt;cfg_file_name&gt;</td>
+	 *            </tr>
+	 *            <tr>
+	 *            <td>&nbsp;&nbsp;</td>
+	 *            <td>&nbsp;&nbsp;&nbsp;-sid:</td>
+	 *            <td>(optional) Stream identifier to use form ZooKeeper configuration</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>&nbsp;&nbsp;</td>
@@ -98,21 +109,65 @@ public final class StreamsAgent {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.main"));
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
-			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile);
+			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile, zookeeperStreamId);
 
 			if (!loadedZKConfig) {
 				loadConfigAndRun(cfgFileName);
 				// DefaultTNTStreamListener dsl = new DefaultTNTStreamListener (LOGGER);
 				// loadConfigAndRun(cfgFileName, dsl, dsl);
 			}
+
+			if (streamThreads != null) {
+				boolean complete = false;
+				while (!complete) {
+					try {
+						synchronized (streamThreads) {
+							streamThreads.wait();
+							if (restarting) {
+								complete = true;
+							}
+						}
+					} catch (InterruptedException exc) {
+					}
+				}
+			}
 		}
+	}
+
+	/**
+	 * Main entry point for running as a API integration.
+	 * <p>
+	 * Requires streams data source configuration to be referenced over system property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader#STREAMS_CONFIG_KEY}.
+	 */
+	public static void runFromAPI() {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		loadConfigAndRun((Reader) null);
+	}
+
+	/**
+	 * Main entry point for running as a API integration.
+	 * <p>
+	 * Requires streams data source configuration to be referenced over system property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader#STREAMS_CONFIG_KEY}.
+	 *
+	 * @param streamListener
+	 *            input stream listener
+	 * @param streamTasksListener
+	 *            stream tasks listener
+	 */
+	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener) {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		loadConfigAndRun((Reader) null, streamListener, streamTasksListener);
 	}
 
 	/**
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFileName
-	 *            stream configuration file name
+	 *            stream data source configuration file name
 	 */
 	public static void runFromAPI(String cfgFileName) {
 		runFromAPI(cfgFileName, null, null);
@@ -122,7 +177,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFileName
-	 *            stream configuration file name
+	 *            stream data source configuration file name
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
@@ -139,7 +194,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFile
-	 *            stream configuration file
+	 *            stream data source configuration file
 	 */
 	public static void runFromAPI(File cfgFile) {
 		runFromAPI(cfgFile, null, null);
@@ -149,7 +204,7 @@ public final class StreamsAgent {
 	 * Main entry point for running as a API integration.
 	 *
 	 * @param cfgFile
-	 *            stream configuration file
+	 *            stream data source configuration file
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
@@ -163,7 +218,7 @@ public final class StreamsAgent {
 	}
 
 	/**
-	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 * Main entry point for running as a API integration without using stream data source configuration XML file.
 	 *
 	 * @param streams
 	 *            streams to run
@@ -173,7 +228,7 @@ public final class StreamsAgent {
 	}
 
 	/**
-	 * Main entry point for running as a API integration without using stream configuration XML file.
+	 * Main entry point for running as a API integration without using stream data source configuration XML file.
 	 *
 	 * @param streamListener
 	 *            input stream listener
@@ -193,7 +248,8 @@ public final class StreamsAgent {
 
 	private static void loadConfigAndRun(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		loadConfigAndRun(new File(cfgFileName), streamListener, streamTasksListener);
+		loadConfigAndRun(StringUtils.isEmpty(cfgFileName) ? null : new File(cfgFileName), streamListener,
+				streamTasksListener);
 	}
 
 	private static void loadConfigAndRun(File cfgFile) {
@@ -202,8 +258,11 @@ public final class StreamsAgent {
 
 	private static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
+		LOGGER.log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.loading.config.file"),
+				cfgFile == null ? StreamsConfigLoader.getDefaultFile() : cfgFile);
 		try {
-			loadConfigAndRun(new FileReader(cfgFile), streamListener, streamTasksListener);
+			loadConfigAndRun(cfgFile == null ? null : new FileReader(cfgFile), streamListener, streamTasksListener);
 		} catch (FileNotFoundException e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
@@ -227,6 +286,8 @@ public final class StreamsAgent {
 		try {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
 					streamTasksListener);
+		} catch (SAXException e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}
@@ -236,7 +297,7 @@ public final class StreamsAgent {
 	 * Configure streams and parsers, and run each stream in its own thread.
 	 *
 	 * @param cfg
-	 *            stream configuration
+	 *            stream data source configuration
 	 * @param streamListener
 	 *            input stream listener
 	 * @param streamTasksListener
@@ -262,14 +323,42 @@ public final class StreamsAgent {
 		run(streams, streamListener, streamTasksListener);
 	}
 
-	private static boolean loadZKConfig(String zookeeperCfgFile) {
+	private static boolean loadZKConfig(String zookeeperCfgFile, String zookeeperStreamId) {
 		Properties zooProps = ZKConfigManager.readStreamsZKConfig(zookeeperCfgFile);
 
 		if (MapUtils.isNotEmpty(zooProps)) {
 			try {
 				ZKConfigManager.openConnection(zooProps);
+				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+					@Override
+					public void run() {
+						ZKConfigManager.close();
+					}
+				}));
 
-				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
+				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAM);
+				if (StringUtils.isEmpty(path) && StringUtils.isNotEmpty(zookeeperStreamId)) {
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid"), zookeeperStreamId);
+					path = ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid.zk.path"), zookeeperStreamId, path);
+
+					if (StringUtils.isEmpty(path)) {
+						throw new IllegalArgumentException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"StreamsAgent.invalid.stream.id", zookeeperStreamId));
+					}
+
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.streams.registry.sid.setup"), zookeeperStreamId);
+					ZKConfigManager.setupZKNodeData(zooProps, zookeeperStreamId);
+					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_LOGGER);
+					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_TNT4J);
+					// ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_TNT4J_KAFKA);
+				}
+
+				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
 
 				if (StringUtils.isNotEmpty(path)) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -283,7 +372,9 @@ public final class StreamsAgent {
 					});
 				}
 
-				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAMS);
+				path = StringUtils.isEmpty(zookeeperStreamId)
+						? zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAM)
+						: ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
 
 				if (path != null) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -292,7 +383,19 @@ public final class StreamsAgent {
 					ZKConfigManager.handleZKStoredConfiguration(path, new ZKConfigManager.ZKConfigChangeListener() {
 						@Override
 						public void applyConfigurationData(byte[] data) {
-							loadConfigAndRun(Utils.bytesReader(data));
+							if (isStreamsRunning()) {
+								restarting = false;
+								stopStreams();
+								restarting = true;
+							}
+
+							try {
+								loadConfigAndRun(Utils.bytesReader(data));
+							} catch (Exception exc) {
+								synchronized (streamThreads) {
+									streamThreads.notifyAll();
+								}
+							}
 						}
 					});
 					return true;
@@ -307,6 +410,52 @@ public final class StreamsAgent {
 		return false;
 	}
 
+	private static boolean isStreamsRunning() {
+		return streamThreads == null ? false : streamThreads.activeCount() > 0;
+	}
+
+	private static void stopStreams() {
+		if (streamThreads != null) {
+			LOGGER.log(OpLevel.INFO,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.stopping.streams"),
+					streamThreads.getName());
+			Thread[] atl = new Thread[streamThreads.activeCount()];
+			streamThreads.enumerate(atl, false);
+
+			List<StreamThread> stl = new ArrayList<>(atl.length);
+
+			for (Thread t : atl) {
+				if (t instanceof StreamThread) {
+					stl.add((StreamThread) t);
+				}
+			}
+
+			if (stl.isEmpty()) {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.empty"));
+			} else {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.start"), stl.size());
+				CountDownLatch streamsCompletionSignal = new CountDownLatch(stl.size());
+				long t1 = System.currentTimeMillis();
+
+				for (StreamThread st : stl) {
+					st.addCompletionLatch(streamsCompletionSignal);
+
+					st.getTarget().stop();
+				}
+
+				try {
+					streamsCompletionSignal.await();
+				} catch (InterruptedException exc) {
+				}
+
+				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.streams.stop.complete"), (System.currentTimeMillis() - t1));
+			}
+		}
+	}
+
 	/**
 	 * Adds listeners to provided streams and runs streams on separate threads.
 	 *
@@ -319,9 +468,12 @@ public final class StreamsAgent {
 	 */
 	private static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		ThreadGroup streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
+		if (streamThreads == null) {
+			streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
+		}
+
 		StreamThread ft;
-		final CountDownLatch streamsCompletionSignal = new CountDownLatch(streams.size());
+		// final CountDownLatch streamsCompletionSignal = new CountDownLatch(streams.size());
 		for (TNTInputStream<?, ?> stream : streams) {
 			if (streamListener != null) {
 				stream.addStreamListener(streamListener);
@@ -338,16 +490,14 @@ public final class StreamsAgent {
 
 			ft = new StreamThread(streamThreads, stream,
 					String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
-			ft.setCompletionLatch(streamsCompletionSignal);
+			// ft.addCompletionLatch(streamsCompletionSignal);
 			ft.start();
 		}
 
-		try {
-			streamsCompletionSignal.await();
-		} catch (InterruptedException exc) {
-		}
-
-		ZKConfigManager.close();
+		// try {
+		// streamsCompletionSignal.await();
+		// } catch (InterruptedException exc) {
+		// }
 	}
 
 	private static Collection<TNTInputStream<?, ?>> initPiping(StreamsConfigLoader cfg) throws Exception {
@@ -365,11 +515,7 @@ public final class StreamsAgent {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"StreamsAgent.no.piped.activity.parsers"));
 		}
-		for (ActivityParser parser : parsers) {
-			if (parser != null) {
-				pipeStream.addParser(parser);
-			}
-		}
+		pipeStream.addParsers(parsers);
 
 		streams.add(pipeStream);
 
@@ -396,10 +542,10 @@ public final class StreamsAgent {
 					return false;
 				}
 
-				cfgFileName = arg.substring(3);
+				cfgFileName = arg.substring(PARAM_STREAM_CFG.length());
 				if (StringUtils.isEmpty(cfgFileName)) {
 					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+							"StreamsAgent.missing.cfg.file", arg.substring(0, PARAM_STREAM_CFG.length())));
 					printUsage();
 					return false;
 				}
@@ -413,10 +559,25 @@ public final class StreamsAgent {
 					return false;
 				}
 
-				zookeeperCfgFile = arg.substring(3);
+				zookeeperCfgFile = arg.substring(PARAM_ZOOKEEPER_CFG.length());
 				if (StringUtils.isEmpty(zookeeperCfgFile)) {
 					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+							"StreamsAgent.missing.cfg.file", arg.substring(0, PARAM_ZOOKEEPER_CFG.length())));
+					printUsage();
+					return false;
+				}
+			} else if (arg.startsWith(PARAM_ZOOKEEPER_STREAM_ID)) {
+				if (StringUtils.isNotEmpty(zookeeperStreamId)) {
+					System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.invalid.args3"));
+					printUsage();
+					return false;
+				}
+				zookeeperStreamId = arg.substring(PARAM_ZOOKEEPER_STREAM_ID.length());
+				if (StringUtils.isEmpty(zookeeperStreamId)) {
+					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"StreamsAgent.missing.argument.value",
+							arg.substring(0, PARAM_ZOOKEEPER_STREAM_ID.length())));
 					printUsage();
 					return false;
 				}

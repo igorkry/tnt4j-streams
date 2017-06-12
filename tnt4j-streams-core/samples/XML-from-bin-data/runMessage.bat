@@ -1,0 +1,1 @@
+..\..\bin\tnt4j-streams.bat -f:tnt-data-source_msg.xml

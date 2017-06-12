@@ -8,7 +8,6 @@ var TRACE_EXIT = '__njsTraceExit__({entryData: __njsEntryData__, exception: %s, 
 var TIMED_FUNCTION_EXIT = '\n jsProcess.end(); \n';
 var ON_CATCH = 'if (__njsOnCatchClause__) {\n__njsOnCatchClause__({entryData: __njsEntryData__});\n}';
 
-
 /**
  * Creates a new instance of Instrumentation "class"
  * @class Provides instrumentation functionality
@@ -39,7 +38,7 @@ Injector.prototype.getFunctionName = function(node) {
 		return;
 	}
 
-	// Not all functions have ids (i.e Anonymous functions), in case we do have id we can get it and stop.
+	// Not all functions have ids (e.g., Anonymous functions), in case we do have id we can get it and stop.
 	if (node.id) {
 		return node.id.name;
 	}
@@ -92,7 +91,7 @@ Injector.prototype.getFunctionName = function(node) {
  * @param {string} code - The JS code to trace
  * @param {Boolean} wrapFunctions - Whether to wrap functions in try/catch
  * @param {boolean} includeArguments - Whether a traced function arguments and return values should be passed to the tracer
- * @param {boolean} wrappedFile - Whether this entire file is wrapped in a function (i.e like node is wrapping the modules in a function)
+ * @param {boolean} wrappedFile - Whether this entire file is wrapped in a function (e.g., like node is wrapping the modules in a function)
  * @returns {string} The modified JS code text
  */
 Injector.prototype.injectTracing = function(filename, code, wrapFunctions, includeArguments, wrappedFile) {
@@ -139,7 +138,7 @@ Injector.prototype.injectTracing = function(filename, code, wrapFunctions, inclu
 				// Use a random variable name
 				var tmpVar = '__njsTmp' + Math.floor(Math.random()*10000) + '__';
 
-				// We wrap the entire thing in a new block for cases when the return stmt is not in a block (i.e "if (x>0) return;").
+				// We wrap the entire thing in a new block for cases when the return stmt is not in a block (e.g., "if (x>0) return;").
 				traceExit = util.format(TRACE_EXIT, 'false',node.loc.start.line, includeArguments ? tmpVar : 'null');
 				
 				node.update('{\n '+  TIMED_FUNCTION_EXIT  +' var ' + tmpVar + ' = ' + node.argument.source() + ';\n' + traceExit + '\nreturn ' + tmpVar + ';\n}');

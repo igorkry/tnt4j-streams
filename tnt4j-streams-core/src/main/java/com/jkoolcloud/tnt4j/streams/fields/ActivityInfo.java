@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,20 +34,19 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
-import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
- * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKool Cloud Service.
+ * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKool Cloud.
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
@@ -53,6 +54,7 @@ public class ActivityInfo {
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<>();
 	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
 	private static final String LOCAL_SERVER_IP_KEY = "LOCAL_SERVER_IP_KEY"; // NON-NLS
+	private static final String TRANSPARENT_PROP_TYPE = "<TRANSPARENT>"; // NON-NLS
 
 	private String serverName = null;
 	private String serverIp = null;
@@ -99,12 +101,11 @@ public class ActivityInfo {
 	 * Constructs a new ActivityInfo object.
 	 */
 	public ActivityInfo() {
-
 	}
 
 	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
-	 * the jKool Cloud Service.
+	 * the JKool Cloud.
 	 *
 	 * @param field
 	 *            field to apply
@@ -124,18 +125,28 @@ public class ActivityInfo {
 
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (values != null && CollectionUtils.isNotEmpty(locators)) {
-			if (locators.size() > 1 && field.isEnumeration()) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.multiple.locators", field), 0);
-			}
 			if (locators.size() > 1 && locators.size() != values.length) {
 				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityInfo.failed.parsing", field), 0);
 			}
+
 			ActivityFieldLocator locator;
+			Object fValue;
+			List<Object> fvList = new ArrayList<>(locators.size());
 			for (int v = 0; v < values.length; v++) {
 				locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
-				values[v] = formatValue(field, locator, values[v]);
+				fValue = formatValue(field, locator, values[v]);
+				if (fValue == null && locator.isOptional()) {
+					continue;
+				}
+				fvList.add(fValue);
+			}
+
+			values = fvList.toArray();
+
+			if (field.isEnumeration() && values.length > 1) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityInfo.multiple.enum.values", field), 0);
 			}
 		}
 
@@ -143,16 +154,22 @@ public class ActivityInfo {
 
 		if (fieldValue == null) {
 			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.field.null"),
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.field.value.null"),
 					field);
 			return;
 		}
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
-				field, fieldValue);
+				field, Utils.toString(fieldValue));
 
 		fieldValue = transform(field, fieldValue);
-		setFieldValue(field, fieldValue);
+		fieldValue = filterFieldValue(field, fieldValue);
+
+		if (!field.isTransparent()) {
+			setFieldValue(field, fieldValue);
+		} else {
+			addActivityProperty(field.getFieldTypeName(), fieldValue, TRANSPARENT_PROP_TYPE);
+		}
 	}
 
 	/**
@@ -168,20 +185,40 @@ public class ActivityInfo {
 	 * @return transformed field value
 	 */
 	protected Object transform(ActivityField field, Object fieldValue) {
-		ActivityFieldLocator locator = field.getGroupLocator();
-
-		if (locator != null) {
-			try {
-				fieldValue = locator.transformValue(fieldValue);
-			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityInfo.transformation.failed"),
-						field.getFieldTypeName(), Utils.toString(fieldValue), exc);
-			}
+		try {
+			fieldValue = field.transformValue(fieldValue);
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityInfo.transformation.failed"),
+					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 		}
 
 		return fieldValue;
+	}
+
+	/**
+	 * Applies filed defined filtering rules and marks this activity as filtered out or sets field value to
+	 * {@code null}, if field is set as "optional" using attribute {@code required=false}.
+	 * 
+	 * @param field
+	 *            field instance to use filter definition
+	 * @param fieldValue
+	 *            value to apply filters
+	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
+	 *         passed over parameters - otherwise
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityField#filterValue(ActivityInfo, Object)
+	 */
+	protected Object filterFieldValue(ActivityField field, Object fieldValue) {
+		try {
+			return field.filterValue(this, fieldValue);
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.filtering.failed"),
+					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			return fieldValue;
+		}
 	}
 
 	/**
@@ -222,9 +259,6 @@ public class ActivityInfo {
 				} catch (Exception e) {
 				}
 				break;
-			case ResourceName:
-				value = getStringValue(value, field);
-				break;
 			case ServerIp:
 				if (value instanceof InetAddress) {
 					value = ((InetAddress) value).getHostAddress();
@@ -253,7 +287,7 @@ public class ActivityInfo {
 	 * @throws ParseException
 	 *             if there are any errors with conversion to internal format
 	 */
-	private void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
+	public void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
 		if (isValueEmpty(fieldValue)) {
 			return;
 		}
@@ -262,18 +296,18 @@ public class ActivityInfo {
 		if (fieldType != null) {
 			switch (fieldType) {
 			case Message:
-				message = substitute(message, fieldValue, Object.class);
+				message = substitute(message, fieldValue);
 				break;
 			case EventName:
 				eventName = substitute(eventName, getStringValue(fieldValue, field));
 				break;
 			case EventType:
-				eventType = substitute(eventType, Utils.mapOpType(fieldValue), OpType.class);
+				eventType = substitute(eventType, Utils.mapOpType(fieldValue));
 				break;
 			case EventStatus:
 				ActivityStatus as = fieldValue instanceof ActivityStatus ? (ActivityStatus) fieldValue
 						: ActivityStatus.valueOf(fieldValue);
-				eventStatus = substitute(eventStatus, as, ActivityStatus.class);
+				eventStatus = substitute(eventStatus, as);
 			case ApplName:
 				applName = substitute(applName, getStringValue(fieldValue, field));
 				break;
@@ -281,10 +315,10 @@ public class ActivityInfo {
 				addCorrelator(Utils.getTags(fieldValue));
 				break;
 			case ElapsedTime:
-				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class), Long.class);
+				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class));
 				break;
 			case EndTime:
-				endTime = substitute(endTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
+				endTime = substitute(endTime, getTimestampValue(fieldValue, field));
 				break;
 			case Exception:
 				exception = substitute(exception, getStringValue(fieldValue, field));
@@ -293,7 +327,7 @@ public class ActivityInfo {
 				location = substitute(location, getStringValue(fieldValue, field));
 				break;
 			case ReasonCode:
-				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class), Integer.class);
+				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class));
 				break;
 			case ResourceName:
 				resourceName = substitute(resourceName, getStringValue(fieldValue, field));
@@ -306,18 +340,18 @@ public class ActivityInfo {
 				break;
 			case Severity:
 				OpLevel sev = fieldValue instanceof OpLevel ? (OpLevel) fieldValue : OpLevel.valueOf(fieldValue);
-				severity = substitute(severity, sev, OpLevel.class);
+				severity = substitute(severity, sev);
 				break;
 			case TrackingId:
 				trackingId = substitute(trackingId, getStringValue(fieldValue, field));
 				break;
 			case StartTime:
-				startTime = substitute(startTime, getTimestampValue(fieldValue, field), UsecTimestamp.class);
+				startTime = substitute(startTime, getTimestampValue(fieldValue, field));
 				break;
 			case CompCode:
 				OpCompCode cc = fieldValue instanceof OpCompCode ? (OpCompCode) fieldValue
 						: OpCompCode.valueOf(fieldValue);
-				compCode = substitute(compCode, cc, OpCompCode.class);
+				compCode = substitute(compCode, cc);
 				break;
 			case Tag:
 				addTag(Utils.getTags(fieldValue));
@@ -332,16 +366,16 @@ public class ActivityInfo {
 				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue, field));
 				break;
 			case MsgLength:
-				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class), Integer.class);
+				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class));
 				break;
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
 			case ProcessId:
-				processId = substitute(processId, getNumberValue(fieldValue, Integer.class), Integer.class);
+				processId = substitute(processId, getNumberValue(fieldValue, Integer.class));
 				break;
 			case ThreadId:
-				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class), Integer.class);
+				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class));
 				break;
 			case Category:
 				category = substitute(category, getStringValue(fieldValue, field));
@@ -351,7 +385,7 @@ public class ActivityInfo {
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.activity", field));
+						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", field));
 			}
 
 			LOGGER.log(OpLevel.TRACE,
@@ -387,22 +421,22 @@ public class ActivityInfo {
 	}
 
 	private void addPropertiesMap(Map<?, ?> pMap, String propPrefix) {
-		String ppStr = StringUtils.isEmpty(propPrefix) ? "" : propPrefix + '.';
-
 		for (Map.Entry<?, ?> pme : pMap.entrySet()) {
+			String pKey = propPrefix + String.valueOf(pme.getKey());
+
 			if (pme.getValue() instanceof Map) {
-				addPropertiesMap((Map<?, ?>) pme.getValue(), ppStr + pme.getKey());
+				addPropertiesMap((Map<?, ?>) pme.getValue(), pKey + StreamsConstants.DEFAULT_PATH_DELIM);
 			} else {
-				addActivityProperty(ppStr + String.valueOf(pme.getKey()), pme.getValue());
+				addActivityProperty(pKey, pme.getValue());
 			}
 		}
 	}
 
 	private static Object getPropertyValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getMasterLocator();
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
 
-		if (locator != null) {
-			switch (locator.getDataType()) {
+		if (fmLocator != null) {
+			switch (fmLocator.getDataType()) {
 			case Number:
 				return getNumberValue(fieldValue);
 			case DateTime:
@@ -418,46 +452,27 @@ public class ActivityInfo {
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator locator = field.getMasterLocator();
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
 
 		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-				: TimestampFormatter.parse(locator == null ? null : locator.getFormat(),
-						getStringValue(fieldValue, field), locator == null ? null : locator.getTimeZone(),
-						locator == null ? null : locator.getLocale());
+				: TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
+						getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
+						fmLocator == null ? null : fmLocator.getLocale());
 	}
 
 	private static String substitute(String value, String newValue) {
 		return StringUtils.isEmpty(newValue) ? value : newValue;
 	}
 
-	private static <T> T substitute(T value, T newValue, Class<T> clazz) {
+	private static <T> T substitute(T value, T newValue) {
 		return newValue == null ? value : newValue;
 	}
 
 	private static String getStringValue(Object value, ActivityField field) {
 		if (value instanceof Object[]) {
-			Object[] vArray = (Object[]) value;
-			StringBuilder sb = new StringBuilder();
-			ActivityFieldLocator locator;
-			for (int v = 0; v < vArray.length; v++) {
-				locator = field.getLocators().size() == 1 ? field.getLocators().get(0)
-						: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null;
-				String format = locator == null ? null : locator.getFormat();
-
-				if (v > 0) {
-					sb.append(field.getSeparator());
-				}
-
-				if (vArray[v] instanceof UsecTimestamp && StringUtils.isNotEmpty(format)) {
-					sb.append(((UsecTimestamp) vArray[v]).toString(format));
-				} else {
-					sb.append(vArray[v] == null ? "" : Utils.toString(vArray[v])); // NON-NLS
-				}
-			}
-
-			return sb.toString();
+			return formatValuesArray((Object[]) value, field);
 		} else if (value instanceof byte[]) {
-			Utils.toHexString((byte[]) value);
+			Utils.encodeHex((byte[]) value);
 		} else if (value != null && value.getClass().isArray()) {
 			return ArrayUtils.toString(value);
 		}
@@ -465,9 +480,62 @@ public class ActivityInfo {
 		return Utils.toString(value);
 	}
 
+	private static String formatValuesArray(Object[] vArray, ActivityField field) {
+		if (StringUtils.isNotEmpty(field.getFormattingPattern())) {
+			return formatArrayPattern(field.getFormattingPattern(), vArray);
+		} else {
+			StringBuilder sb = new StringBuilder();
+			for (int v = 0; v < vArray.length; v++) {
+				if (v > 0) {
+					sb.append(field.getSeparator());
+				}
+
+				if (vArray[v] instanceof UsecTimestamp) {
+					ActivityFieldLocator locator = field.getLocators().size() == 1 ? field.getLocators().get(0)
+							: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null; // TODO
+
+					String format = locator == null ? null : locator.getFormat();
+					if (StringUtils.isNotEmpty(format)) {
+						sb.append(((UsecTimestamp) vArray[v]).toString(format));
+					}
+				} else {
+					sb.append(vArray[v] == null ? "" : Utils.toString(vArray[v])); // NON-NLS
+				}
+			}
+
+			return sb.toString();
+		}
+	}
+
+	private static String formatArrayPattern(String pattern, Object[] vArray) {
+		MessageFormat mf = new MessageFormat(pattern);
+
+		try {
+			Field f = mf.getClass().getDeclaredField("maxOffset");
+			f.setAccessible(true);
+			int maxOffset = f.getInt(mf);
+			if (maxOffset >= 0) {
+				f = mf.getClass().getDeclaredField("argumentNumbers");
+				f.setAccessible(true);
+				int[] ana = (int[]) f.get(mf);
+				int maxIndex = ana[maxOffset];
+
+				if (maxIndex >= vArray.length) {
+					LOGGER.log(OpLevel.WARNING,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityInfo.formatting.arguments.mismatch"),
+							pattern, maxIndex, ArrayUtils.getLength(vArray));
+				}
+			}
+		} catch (Exception exc) {
+		}
+
+		return mf.format(vArray);
+	}
+
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #recordActivity(Tracker, long)} is invoked. Same as invoking
+	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked. Same as invoking
 	 * {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
 	 *
 	 * @param propName
@@ -478,7 +546,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #recordActivity(Tracker, long)
+	 * @see #buildTrackable(Tracker, Collection)
 	 * @see #addActivityProperty(String, Object, String)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
@@ -487,7 +555,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #recordActivity(Tracker, long)} is invoked.
+	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -499,7 +567,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #recordActivity(Tracker, long)
+	 * @see #buildTrackable(Tracker, Collection)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
@@ -509,11 +577,11 @@ public class ActivityInfo {
 
 		Property p = new Property(propName, wrapPropertyValue(propValue),
 				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType);
-		Object prevValue = activityProperties.put(propName, p);
+		Property prevValue = activityProperties.put(propName, p);
 
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
-				propName, Utils.toString(p.getValue()), p.getValueType(), prevValue);
+				propName, Utils.toString(p.getValue()), p.getValueType(), Utils.toString(prevValue));
 
 		return prevValue;
 	}
@@ -605,78 +673,60 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Creates the appropriate data message to send to jKool Cloud Service and records the activity using the specified
-	 * tracker.
+	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
+	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
+	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
 	 *
 	 * @param tracker
-	 *            communication gateway to use to record activity
-	 * @param retryPeriod
-	 *            period in milliseconds between activity resubmission in case of failure
+	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
+	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent trackable and transmitted
+	 *            separately, e.g., activity child events
 	 *
-	 * @throws Exception
-	 *             indicates an error building data message or sending data to jKool Cloud Service
+	 * @return trackable instance made from this activity entity data
+	 * @throws java.lang.IllegalArgumentException
+	 *             if {@code tracker} is null
+	 * @see com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput#logItem(ActivityInfo)
 	 */
-	public void recordActivity(Tracker tracker, long retryPeriod) throws Exception {
+	public Trackable buildTrackable(Tracker tracker, Collection<Trackable> chTrackables) {
 		if (tracker == null) {
-			LOGGER.log(OpLevel.WARNING,
+			throw new IllegalArgumentException(
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
-			return;
 		}
 
 		resolveServer(false);
 		determineTimes();
 
-		send(tracker, retryPeriod, buildTrackable(tracker));
-	}
-
-	private Trackable buildTrackable(Tracker tracker) {
-		UUIDFactory uuidFactory = tracker.getConfiguration().getUUIDFactory();
-		String trackId = StringUtils.isEmpty(trackingId) ? uuidFactory.newUUID() : trackingId;
+		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
 
 		if (eventType == OpType.ACTIVITY) {
-			return buildActivity(tracker, eventName, trackId);
+			return buildActivity(tracker, eventName, trackId, chTrackables);
 		} else if (eventType == OpType.SNAPSHOT) {
 			return buildSnapshot(tracker, eventName, trackId);
 		} else {
-			return buildEvent(tracker, eventName, trackId);
+			return buildEvent(tracker, eventName, trackId, chTrackables);
 		}
 	}
 
-	private void send(Tracker tracker, long retryPeriod, Trackable trackable) throws Exception {
-		StreamsThread thread = null;
-		if (Thread.currentThread() instanceof StreamsThread) {
-			thread = (StreamsThread) Thread.currentThread();
-		}
-		boolean retryAttempt = false;
-		do {
-			try {
-				if (trackable instanceof TrackingActivity) {
-					tracker.tnt((TrackingActivity) trackable);
-				} else if (trackable instanceof Snapshot) {
-					tracker.tnt((Snapshot) trackable);
-				} else {
-					tracker.tnt((TrackingEvent) trackable);
-				}
-
-				if (retryAttempt) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.retry.successful"));
-				}
-				return;
-			} catch (Exception ioe) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.recording.failed"), ioe);
-				Utils.close(tracker);
-				if (thread == null) {
-					throw ioe;
-				}
-				retryAttempt = true;
-				LOGGER.log(OpLevel.INFO,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.will.retry"),
-						TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
-				StreamsThread.sleep(retryPeriod);
-			}
-		} while (thread != null && !thread.isStopRunning());
+	/**
+	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
+	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
+	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
+	 * <p>
+	 * Does same as {@link #buildTrackable(Tracker, Collection)} where {@code chTrackables} list is {@code null}.
+	 *
+	 * @param tracker
+	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
+	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
+	 * 
+	 * @return trackable instance made from this activity entity data
+	 * @throws java.lang.IllegalArgumentException
+	 *             if {@code tracker} is null
+	 * @see #buildTrackable(Tracker, Collection)
+	 */
+	public Trackable buildTrackable(Tracker tracker) {
+		return buildTrackable(tracker, null);
 	}
 
 	/**
@@ -688,9 +738,12 @@ public class ActivityInfo {
 	 *            name of tracking event
 	 * @param trackId
 	 *            identifier (signature) of tracking event
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent event and transmitted separately
 	 * @return tracking event instance
 	 */
-	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId) {
+	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId,
+			Collection<Trackable> chTrackables) {
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, trackName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
@@ -706,11 +759,13 @@ public class ActivityInfo {
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
 				event.setMessage(binData, (Object[]) null);
-				event.setSize(msgLength == null ? binData.length : msgLength);
 			} else {
 				String strData = Utils.toString(message);
 				event.setMessage(strData, (Object[]) null);
-				event.setSize(msgLength == null ? strData.length() : msgLength);
+			}
+
+			if (msgLength != null) {
+				event.setSize(msgLength);
 			}
 		}
 		if (StringUtils.isNotEmpty(msgMimeType)) {
@@ -743,18 +798,25 @@ public class ActivityInfo {
 		event.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				if (ape.getValue().getValue() instanceof Snapshot) {
-					event.getOperation().addSnapshot((Snapshot) ape.getValue().getValue());
-				} else {
-					event.getOperation().addProperty(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					if (ap.getValue() instanceof Snapshot) {
+						event.getOperation().addSnapshot((Snapshot) ap.getValue());
+					} else {
+						event.getOperation().addProperty(ap);
+					}
 				}
 			}
 		}
 
-		if (CollectionUtils.isNotEmpty(children)) {
+		if (hasChildren()) {
 			for (ActivityInfo child : children) {
-				addTrackableChild(event.getOperation(), buildChild(tracker, child, trackId));
+				Trackable cTrackable = buildChild(tracker, child, trackId);
+				boolean consumed = addTrackableChild(event, cTrackable);
+
+				if (!consumed && chTrackables != null) {
+					chTrackables.add(cTrackable);
+				}
 			}
 		}
 
@@ -770,9 +832,12 @@ public class ActivityInfo {
 	 *            name of tracking activity
 	 * @param trackId
 	 *            identifier (signature) of tracking activity
+	 * @param chTrackables
+	 *            collection to add built child trackables, not included into parent activity and transmitted separately
 	 * @return tracking activity instance
 	 */
-	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId) {
+	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
+			Collection<Trackable> chTrackables) {
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
@@ -826,32 +891,80 @@ public class ActivityInfo {
 		activity.stop(endTime, elapsedTime);
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				if (ape.getValue().getValue() instanceof Trackable) {
-					activity.add((Trackable) ape.getValue().getValue());
-				} else {
-					activity.addProperty(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					if (ap.getValue() instanceof Trackable) {
+						activity.add((Trackable) ap.getValue());
+					} else {
+						activity.addProperty(ap);
+					}
 				}
 			}
 		}
 
-		if (CollectionUtils.isNotEmpty(children)) {
+		if (hasChildren()) {
 			for (ActivityInfo child : children) {
-				addTrackableChild(activity, buildChild(tracker, child, trackId));
+				Trackable cTrackable = buildChild(tracker, child, trackId);
+				boolean consumed = addTrackableChild(activity, cTrackable);
+
+				if (!consumed && chTrackables != null) {
+					chTrackables.add(cTrackable);
+				}
 			}
 		}
 
 		return activity;
 	}
 
-	private static void addTrackableChild(Operation trackableOp, Trackable t) {
-		if (t instanceof Snapshot) {
-			trackableOp.addSnapshot((Snapshot) t);
+	private static boolean addTrackableChild(Trackable pTrackable, Trackable chTrackable) {
+		if (pTrackable instanceof TrackingEvent) {
+			return addEventChild((TrackingEvent) pTrackable, chTrackable);
+		} else if (pTrackable instanceof Activity) {
+			return addActivityChild((Activity) pTrackable, chTrackable);
+		} else if (pTrackable instanceof Snapshot) {
+			return addSnapshotChild((Snapshot) pTrackable, chTrackable);
 		} else {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-					t == null ? null : t.getClass());
+					chTrackable == null ? null : chTrackable.getClass(),
+					pTrackable == null ? null : pTrackable.getClass());
 		}
+
+		return false;
+	}
+
+	private static boolean addEventChild(TrackingEvent event, Trackable chTrackable) {
+		if (chTrackable instanceof Snapshot) {
+			event.getOperation().addSnapshot((Snapshot) chTrackable);
+			return true;
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+					chTrackable == null ? null : chTrackable.getClass(), event.getClass());
+		}
+
+		return false;
+	}
+
+	private static boolean addActivityChild(Activity activity, Trackable chTrackable) {
+		if (chTrackable != null) {
+			activity.add(chTrackable);
+			return chTrackable instanceof Snapshot;
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+					chTrackable == null ? null : chTrackable.getClass(), activity.getClass());
+		}
+
+		return false;
+	}
+
+	private static boolean addSnapshotChild(Snapshot snapshot, Trackable chTrackable) {
+		LOGGER.log(OpLevel.WARNING,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
+				chTrackable == null ? null : chTrackable.getClass(), snapshot.getClass());
+
+		return false;
 	}
 
 	private static Trackable buildChild(Tracker tracker, ActivityInfo child, String parentId) {
@@ -930,12 +1043,18 @@ public class ActivityInfo {
 		}
 
 		if (activityProperties != null) {
-			for (Map.Entry<String, Property> ape : activityProperties.entrySet()) {
-				snapshot.add(ape.getValue());
+			for (Property ap : activityProperties.values()) {
+				if (isNotTransparentProperty(ap)) {
+					snapshot.add(ap);
+				}
 			}
 		}
 
 		return snapshot;
+	}
+
+	private static boolean isNotTransparentProperty(Property prop) {
+		return prop != null && !prop.getValueType().equals(TRANSPARENT_PROP_TYPE);
 	}
 
 	/**
@@ -1035,27 +1154,10 @@ public class ActivityInfo {
 		return value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 	}
 
-	@SuppressWarnings("unchecked")
 	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {
 		Number num = value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 
-		Number cNum = 0;
-
-		if (clazz.isAssignableFrom(Long.class)) {
-			cNum = num.longValue();
-		} else if (clazz.isAssignableFrom(Integer.class)) {
-			cNum = num.intValue();
-		} else if (clazz.isAssignableFrom(Byte.class)) {
-			cNum = num.byteValue();
-		} else if (clazz.isAssignableFrom(Float.class)) {
-			cNum = num.floatValue();
-		} else if (clazz.isAssignableFrom(Double.class)) {
-			cNum = num.doubleValue();
-		} else if (clazz.isAssignableFrom(Short.class)) {
-			cNum = num.shortValue();
-		}
-
-		return (T) cNum;
+		return Utils.castNumber(num, clazz);
 	}
 
 	/**
@@ -1174,8 +1276,21 @@ public class ActivityInfo {
 
 			activityProperties.putAll(otherAi.activityProperties);
 		}
+	}
 
-		if (CollectionUtils.isNotEmpty(otherAi.children)) {
+	/**
+	 * Merges activity info data fields values and child activity entities. Values of fields are changed only if they
+	 * currently hold default (initial) value.
+	 *
+	 * @param otherAi
+	 *            activity info object to merge into this one
+	 *
+	 * @see #merge(ActivityInfo)
+	 */
+	public void mergeAll(ActivityInfo otherAi) {
+		merge(otherAi);
+
+		if (otherAi.hasChildren()) {
 			if (children == null) {
 				children = new ArrayList<>();
 			}
@@ -1429,7 +1544,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Gets activity category (i.e. snapshot category).
+	 * Gets activity category (e.g., snapshot category).
 	 *
 	 * @return the activity category
 	 */
@@ -1466,10 +1581,10 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Adds child activity info data package.
+	 * Adds child activity entity data package.
 	 *
 	 * @param ai
-	 *            activity info object containing child data
+	 *            activity entity object containing child data
 	 */
 	public void addChild(ActivityInfo ai) {
 		if (children == null) {
@@ -1477,5 +1592,139 @@ public class ActivityInfo {
 		}
 
 		children.add(ai);
+	}
+
+	/**
+	 * Returns list of child activity entities.
+	 *
+	 * @return list of child activity entities
+	 */
+	public List<ActivityInfo> getChildren() {
+		return children;
+	}
+
+	/**
+	 * Checks whether this activity entity has any child activity entities added.
+	 *
+	 * @return {@code false} if children list is {@code null} or empty, {@code true} - otherwise
+	 */
+	public boolean hasChildren() {
+		return CollectionUtils.isNotEmpty(children);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("ActivityInfo{"); // NON-NLS
+		sb.append("serverName=").append(Utils.sQuote(serverName)); // NON-NLS
+		sb.append(", serverIp=").append(Utils.sQuote(serverIp)); // NON-NLS
+		sb.append(", applName=").append(Utils.sQuote(applName)); // NON-NLS
+		sb.append(", userName=").append(Utils.sQuote(userName)); // NON-NLS
+		sb.append(", resourceName=").append(Utils.sQuote(resourceName)); // NON-NLS
+		sb.append(", eventName=").append(Utils.sQuote(eventName)); // NON-NLS
+		sb.append(", eventType=").append(eventType); // NON-NLS
+		sb.append(", eventStatus=").append(eventStatus); // NON-NLS
+		sb.append(", startTime=").append(startTime); // NON-NLS
+		sb.append(", endTime=").append(endTime); // NON-NLS
+		sb.append(", elapsedTime=").append(elapsedTime); // NON-NLS
+		sb.append(", compCode=").append(compCode); // NON-NLS
+		sb.append(", reasonCode=").append(reasonCode); // NON-NLS
+		sb.append(", exception=").append(Utils.sQuote(exception)); // NON-NLS
+		sb.append(", severity=").append(severity); // NON-NLS
+		sb.append(", location=").append(Utils.sQuote(location)); // NON-NLS
+		sb.append(", correlator=").append(correlator); // NON-NLS
+		sb.append(", trackingId=").append(Utils.sQuote(trackingId)); // NON-NLS
+		sb.append(", parentId=").append(Utils.sQuote(parentId)); // NON-NLS
+		sb.append(", tag=").append(tag); // NON-NLS
+		sb.append(", message=").append(message); // NON-NLS
+		sb.append(", msgCharSet=").append(Utils.sQuote(msgCharSet)); // NON-NLS
+		sb.append(", msgEncoding=").append(Utils.sQuote(msgEncoding)); // NON-NLS
+		sb.append(", msgLength=").append(msgLength); // NON-NLS
+		sb.append(", msgMimeType=").append(Utils.sQuote(msgMimeType)); // NON-NLS
+		sb.append(", processId=").append(processId); // NON-NLS
+		sb.append(", threadId=").append(threadId); // NON-NLS
+		sb.append(", category=").append(Utils.sQuote(category)); // NON-NLS
+		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
+		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
+		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
+		sb.append('}'); // NON-NLS
+		return sb.toString();
+	}
+
+	/**
+	 * Returns activity field value.
+	 * 
+	 * @param fieldName
+	 *            field name value to get
+	 * @return field contained value
+	 */
+	public Object getFieldValue(String fieldName) {
+		try {
+			StreamFieldType sft = Utils.valueOfIgnoreCase(StreamFieldType.class, fieldName);
+			switch (sft) {
+			case ApplName:
+				return applName;
+			case Category:
+				return category;
+			case CompCode:
+				return compCode;
+			case Correlator:
+				return correlator;
+			case ElapsedTime:
+				return elapsedTime;
+			case EndTime:
+				return endTime;
+			case EventName:
+				return eventName;
+			case EventStatus:
+				return eventStatus;
+			case EventType:
+				return eventType;
+			case Exception:
+				return exception;
+			case Location:
+				return location;
+			case Message:
+				return message;
+			case MsgCharSet:
+				return msgCharSet;
+			case MsgEncoding:
+				return msgEncoding;
+			case MsgLength:
+				return msgLength;
+			case MsgMimeType:
+				return msgMimeType;
+			case ParentId:
+				return parentId;
+			case ProcessId:
+				return processId;
+			case ReasonCode:
+				return reasonCode;
+			case ResourceName:
+				return resourceName;
+			case ServerIp:
+				return serverIp;
+			case ServerName:
+				return serverName;
+			case Severity:
+				return severity;
+			case StartTime:
+				return startTime;
+			case Tag:
+				return tag;
+			case ThreadId:
+				return threadId;
+			case TrackingId:
+				return trackingId;
+			case UserName:
+				return userName;
+			default:
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", fieldName));
+			}
+		} catch (IllegalArgumentException exc) {
+			Property p = activityProperties == null ? null : activityProperties.get(fieldName);
+
+			return p == null ? null : p.getValue();
+		}
 	}
 }

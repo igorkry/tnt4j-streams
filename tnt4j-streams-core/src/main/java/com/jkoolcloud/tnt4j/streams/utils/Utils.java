@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -40,9 +40,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.HexDump;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -58,10 +59,13 @@ import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	private static final String TAG_DELIM = ","; // NON-NLS
+	private static final String VALUE_DELIM = "\\|"; // NON-NLS
+	private static final String HEX_PREFIX = "0x"; // NON-NLS
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
-	private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
+	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
+	private static final Pattern EXPR_VAR_PATTERN = CFG_VAR_PATTERN;// Pattern.compile("\\$(\\w+)"); // NON-NLS
 
 	/**
 	 * Default floating point numbers equality comparison difference tolerance {@value}.
@@ -110,6 +114,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Base64 decodes the specified encoded data string.
+	 *
+	 * @param src
+	 *            base64 encoded string to decode
+	 * @return decoded byte sequence
+	 */
+	public static byte[] base64Decode(String src) {
+		return Base64.decodeBase64(src);
+	}
+
+	/**
 	 * Converts an array of bytes into a string representing the hexadecimal bytes values.
 	 *
 	 * @param src
@@ -130,6 +145,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static byte[] decodeHex(String str) {
 		byte[] ba = null;
 		try {
+			if (str != null && str.startsWith(HEX_PREFIX)) {
+				str = str.substring(HEX_PREFIX.length());
+			}
 			ba = Hex.decodeHex((str == null ? "" : str).toCharArray());
 		} catch (DecoderException e) {
 		}
@@ -251,8 +269,25 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		try {
 			return OpType.valueOf(opType.toUpperCase());
 		} catch (IllegalArgumentException exc) {
-			if (opType.equalsIgnoreCase("END")) { // NON-NLS
+			if (opType.equalsIgnoreCase("END") || opType.equalsIgnoreCase("FINISH") // NON-NLS
+					|| opType.equalsIgnoreCase("DISCONNECT") || opType.equalsIgnoreCase("COMMIT") // NON-NLS
+					|| opType.equalsIgnoreCase("BACK")) { // NON-NLS
 				return OpType.STOP;
+			}
+			if (opType.equalsIgnoreCase("CONNECT") || opType.equalsIgnoreCase("BEGIN")) { // NON-NLS
+				return OpType.START;
+			}
+			if (opType.equalsIgnoreCase("CALLBACK") || opType.equalsIgnoreCase("GET")) { // NON-NLS
+				return OpType.RECEIVE;
+			}
+			if (opType.equalsIgnoreCase("PUT")) { // NON-NLS
+				return OpType.SEND;
+			}
+			if (StringUtils.endsWithIgnoreCase(opType, "OPEN")) { // NON-NLS
+				return OpType.OPEN;
+			}
+			if (StringUtils.endsWithIgnoreCase(opType, "CLOSE")) { // NON-NLS
+				return OpType.CLOSE;
 			}
 		}
 
@@ -299,6 +334,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param str
 	 *            string to check and transform
 	 * @return regex ready string
+	 *
 	 * @see #wildcardToRegex(String)
 	 */
 	public static String wildcardToRegex2(String str) {
@@ -309,11 +345,13 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Counts text lines available in input.
 	 *
 	 * @param reader
-	 *            a {@link Reader} object to provide the underlying input stream
+	 *            a {@link java.io.Reader} object to provide the underlying input stream
 	 * @return number of lines currently available in input
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             If an I/O error occurs
+	 * @deprecated use {@link #countLines(java.io.InputStream)} instead
 	 */
+	@Deprecated
 	public static int countLines(Reader reader) throws IOException {
 		int lCount = 0;
 		LineNumberReader lineReader = null;
@@ -323,10 +361,43 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			// NOTE: Add 1 because line index starts at 0
 			lCount = lineReader.getLineNumber() + 1;
 		} finally {
-			Utils.close(lineReader);
+			close(lineReader);
 		}
 
 		return lCount;
+	}
+
+	/**
+	 * Counts text lines available in input.
+	 *
+	 * @param is
+	 *            a {@link java.io.InputStream} object to provide the underlying file input stream
+	 * @return number of lines currently available in input
+	 * @throws java.io.IOException
+	 *             If an I/O error occurs
+	 */
+	public static int countLines(InputStream is) throws IOException {
+		InputStream bis = is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is);
+		try {
+			byte[] c = new byte[1024];
+			int count = 0;
+			int readChars = 0;
+			boolean endsWithoutNewLine = false;
+			while ((readChars = bis.read(c)) != -1) {
+				for (int i = 0; i < readChars; ++i) {
+					if (c[i] == '\n') {
+						++count;
+					}
+				}
+				endsWithoutNewLine = (c[readChars - 1] != '\n');
+			}
+			if (endsWithoutNewLine) {
+				++count;
+			}
+			return count;
+		} finally {
+			close(bis);
+		}
 	}
 
 	/**
@@ -369,7 +440,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Deserializes JSON data object ({@link String}, {@link Reader}, {@link InputStream}) into map structured data.
+	 * Deserializes JSON data object ({@link String}, {@link java.io.Reader}, {@link java.io.InputStream}) into map
+	 * structured data.
 	 *
 	 * @param jsonData
 	 *            JSON format data object
@@ -380,8 +452,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *             if there was a problem reading from the Reader
 	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
-	 * @see Gson#fromJson(String, Class)
-	 * @see Gson#fromJson(Reader, Class)
+	 * 
+	 * @see com.google.gson.Gson#fromJson(String, Class)
+	 * @see com.google.gson.Gson#fromJson(java.io.Reader, Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, ?> fromJsonToMap(Object jsonData, boolean jsonAsLine) {
@@ -411,15 +484,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns string line read from data source. Data source object can be {@link String}, {@link Reader} or
-	 * {@link InputStream}.
+	 * Returns string line read from data source. Data source object can be {@link String}, {@link java.io.Reader} or
+	 * {@link java.io.InputStream}.
 	 *
 	 * @param data
 	 *            data source object to read string line
 	 * @return string line read from data source
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             If an I/O error occurs while reading line
-	 * @see BufferedReader#readLine()
+	 *
+	 * @see java.io.BufferedReader#readLine()
 	 */
 	public static String getStringLine(Object data) throws IOException {
 		if (data == null) {
@@ -456,7 +530,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Returns tag strings array retrieved from provided data object. Data object an be string (tags delimiter ','),
+	 * Returns tag strings array retrieved from provided data object. Data object can be string (tags delimiter ','),
 	 * strings collection or strings array.
 	 *
 	 * @param tagsData
@@ -466,7 +540,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
 		if (tagsData instanceof byte[]) {
-			return new String[] { toHexString((byte[]) tagsData) };
+			return new String[] { encodeHex((byte[]) tagsData) };
 		} else if (tagsData instanceof String) {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
@@ -476,6 +550,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			if (!tagsList.isEmpty()) {
 				String[] tags = new String[tagsList.size()];
 				tags = tagsList.toArray(tags);
+
+				return tags;
+			}
+		} else if (tagsData instanceof Object[]) {
+			Object[] tagsArray = (Object[]) tagsData;
+			if (tagsArray.length > 0) {
+				String[] tags = new String[tagsArray.length];
+				for (int i = 0; i < tagsArray.length; i++) {
+					tags[i] = toString(tagsArray[i]);
+				}
 
 				return tags;
 			}
@@ -494,7 +578,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @see #encodeHex(byte[])
 	 */
 	public static String toHexString(byte[] bytes) {
-		return "0x" + encodeHex(bytes); // NON-NLS
+		return HEX_PREFIX + encodeHex(bytes);
 	}
 
 	/**
@@ -525,7 +609,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param strBytes
 	 *            The bytes to be decoded into characters
 	 * @return string constructed from specified byte array
-	 * @see String#String(byte[], Charset)
+	 *
+	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
 	 */
@@ -564,17 +649,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param doc
 	 *            document to transform to string
 	 * @return XML string representation of document
-	 * @throws TransformerException
+	 * @throws javax.xml.transform.TransformerException
 	 *             If an exception occurs while transforming XML DOM document to string
 	 */
-	public static String documentToString(Document doc) throws TransformerException {
+	public static String documentToString(Node doc) throws TransformerException {
 		StringWriter sw = new StringWriter();
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
-		transformer.setOutputProperty(OutputKeys.ENCODING, Utils.UTF8);
+		transformer.setOutputProperty(OutputKeys.ENCODING, UTF8);
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
@@ -653,7 +738,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param reader
 	 *            reader to use for reading
 	 * @return non empty text string, or {@code null} if the end of the stream has been reached
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             If an I/O error occurs
 	 */
 	public static String getNonEmptyLine(BufferedReader reader) throws IOException {
@@ -670,14 +755,15 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Reads text lines into one string from provided {@link InputStream}.
+	 * Reads text lines into one string from provided {@link java.io.InputStream}.
 	 *
 	 * @param is
 	 *            input stream to read
 	 * @param separateLines
 	 *            flag indicating whether to make string lines separated
 	 * @return string read from input stream
-	 * @see #readInput(BufferedReader, boolean)
+	 *
+	 * @see #readInput(java.io.BufferedReader, boolean)
 	 */
 	public static String readInput(InputStream is, boolean separateLines) {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -686,14 +772,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			text = readInput(reader, separateLines);
 		} catch (IOException exc) {
 		} finally {
-			Utils.close(reader);
+			close(reader);
 		}
 
 		return text;
 	}
 
 	/**
-	 * Reads text lines into one string from provided {@link BufferedReader}.
+	 * Reads text lines into one string from provided {@link java.io.BufferedReader}.
 	 *
 	 * @param reader
 	 *            reader to read string
@@ -738,7 +824,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 				String valueStr = toString(valueObjFields[i].get(obj));
 
-				sb.append(fieldName).append("='").append(valueStr).append('\'') // NON-NLS
+				sb.append(fieldName).append("=").append(sQuote(valueStr)) // NON-NLS
 						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
 			}
 		} catch (Exception exc) {
@@ -791,11 +877,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param attrs
 	 *            array of {@link String}s to find variable expressions
 	 */
-	public static void resolveVariables(Collection<String> vars, String... attrs) {
+	public static void resolveCfgVariables(Collection<String> vars, String... attrs) {
 		if (attrs != null) {
 			for (String attr : attrs) {
 				if (StringUtils.isNotEmpty(attr)) {
-					Matcher m = VAR_PATTERN.matcher(attr);
+					Matcher m = CFG_VAR_PATTERN.matcher(attr);
 					while (m.find()) {
 						vars.add(m.group());
 					}
@@ -805,10 +891,27 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Finds variable expressions like '${VarName}' in provided string and puts into collection.
+	 *
+	 * @param vars
+	 *            collection to add resolved variable expression
+	 * @param exprStr
+	 *            expression string
+	 */
+	public static void resolveExpressionVariables(Collection<String> vars, String exprStr) {
+		if (StringUtils.isNotEmpty(exprStr)) {
+			Matcher m = EXPR_VAR_PATTERN.matcher(exprStr);
+			while (m.find()) {
+				vars.add(m.group(0));
+			}
+		}
+	}
+
+	/**
 	 * Makes {@link Object} type array from provided object instance.
 	 * <p>
-	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link Collection}, then method
-	 * {@link Collection#toArray()} is invoked. In all other cases - new single item array is created.
+	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link java.util.Collection}, then method
+	 * {@link java.util.Collection#toArray()} is invoked. In all other cases - new single item array is created.
 	 *
 	 * @param obj
 	 *            object instance to make an array
@@ -824,23 +927,23 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks if provided object is {@link Collection} or {@code Object[]}.
+	 * Checks if provided object is {@link java.util.Collection} or {@code Object[]}.
 	 *
 	 * @param obj
 	 *            object to check
-	 * @return {@code true} if obj is {@link Collection} or {@code Object[]}, {@code false} - otherwise
+	 * @return {@code true} if obj is {@link java.util.Collection} or {@code Object[]}, {@code false} - otherwise
 	 */
 	public static boolean isCollection(Object obj) {
 		return obj instanceof Object[] || obj instanceof Collection;
 	}
 
 	/**
-	 * Checks if provided class represents an array class or is implementation of {@link Collection}.
+	 * Checks if provided class represents an array class or is implementation of {@link java.util.Collection}.
 	 *
 	 * @param cls
 	 *            class to check
-	 * @return {@code true} if cls is implementation of {@link Collection} or represents an array class, {@code false} -
-	 *         otherwise
+	 * @return {@code true} if cls is implementation of {@link java.util.Collection} or represents an array class,
+	 *         {@code false} - otherwise
 	 */
 	public static boolean isCollectionType(Class<?> cls) {
 		return cls != null && (cls.isArray() || Collection.class.isAssignableFrom(cls));
@@ -849,9 +952,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Wraps provided object item seeking by index.
 	 * <p>
-	 * If obj is not {@link Collection} or {@code Object[]}, then same object is returned.
+	 * If obj is not {@link java.util.Collection} or {@code Object[]}, then same object is returned.
 	 * <p>
-	 * In case of {@link Collection} - it is transformed to {@code Object[]}.
+	 * In case of {@link java.util.Collection} - it is transformed to {@code Object[]}.
 	 * <p>
 	 * When obj is {@code Object[]} - array item referenced by index is returned if {@code index < array.length}, first
 	 * array item if {@code array.length == 1} or {@code null} in all other cases.
@@ -885,21 +988,50 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return string representation of object
 	 */
 	public static String toString(Object value) {
+		if (value instanceof int[]) {
+			return Arrays.toString((int[]) value);
+		}
 		if (value instanceof byte[]) {
 			return getString((byte[]) value);
+			// return Arrays.toString((byte[]) value);
 		}
 		if (value instanceof char[]) {
 			return new String((char[]) value);
+			// return Arrays.toString((char[]) value);
+		}
+		if (value instanceof long[]) {
+			return Arrays.toString((long[]) value);
+		}
+		if (value instanceof float[]) {
+			return Arrays.toString((float[]) value);
+		}
+		if (value instanceof short[]) {
+			return Arrays.toString((short[]) value);
+		}
+		if (value instanceof double[]) {
+			return Arrays.toString((double[]) value);
+		}
+		if (value instanceof boolean[]) {
+			return Arrays.toString((boolean[]) value);
 		}
 		if (value instanceof Object[]) {
 			return toStringDeep((Object[]) value);
 		}
+		if (value instanceof Collection) {
+			Collection<?> c = (Collection<?>) value;
+			return toString(c.toArray());
+		}
+		if (value instanceof Map) {
+			Map<?, ?> m = (Map<?, ?>) value;
+			return toString(m.entrySet());
+		}
+
 		return String.valueOf(value);
 	}
 
 	/**
-	 * Returns single object (first item) if list/array contains single item, makes an array from {@link Collection}, or
-	 * returns same value as parameter in all other cases.
+	 * Returns single object (first item) if list/array contains single item, makes an array from
+	 * {@link java.util.Collection}, or returns same value as parameter in all other cases.
 	 *
 	 * @param value
 	 *            object value to simplify
@@ -942,19 +1074,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return string representation of array
 	 */
 	public static String toStringDeep(Object[] a) {
-		if (a == null)
+		if (a == null) {
 			return "null"; // NON-NLS
+		}
 
 		int iMax = a.length - 1;
-		if (iMax == -1)
+		if (iMax == -1) {
 			return "[]"; // NON-NLS
+		}
 
 		StringBuilder b = new StringBuilder();
 		b.append('[');
 		for (int i = 0;; i++) {
 			b.append(toString(a[i]));
-			if (i == iMax)
+			if (i == iMax) {
 				return b.append(']').toString();
+			}
 			b.append(", "); // NON-NLS
 		}
 	}
@@ -976,7 +1111,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
 	 * {@link #toHexDump(byte[], int, int)} setting {@code len} parameter to {@code 0}.
-	 * 
+	 *
 	 * @param b
 	 *            bytes array make HEX dump
 	 * @param offset
@@ -1089,9 +1224,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param propKey
 	 *            system property key referencing properties file path
 	 * @return properties loaded from file
-	 *
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             if an error occurred when reading properties file
+	 *
+	 * @see #loadPropertiesFile(String)
 	 */
 	public static Properties loadPropertiesFor(String propKey) throws IOException {
 		String propFile = System.getProperty(propKey);
@@ -1105,9 +1241,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param propFile
 	 *            properties file path
 	 * @return properties loaded from file
-	 *
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.util.Properties#load(java.io.InputStream)
 	 */
 	public static Properties loadPropertiesFile(String propFile) throws IOException {
 		Properties fProps = new Properties();
@@ -1117,10 +1254,68 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			is = new FileInputStream(new File(propFile));
 			fProps.load(is);
 		} finally {
-			Utils.close(is);
+			close(is);
 		}
 
 		return fProps;
+	}
+
+	/**
+	 * Loads properties from resource with given name.
+	 *
+	 * @param name
+	 *            the resource name
+	 * @return properties loaded from resource
+	 * @throws java.io.IOException
+	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.lang.ClassLoader#getResourceAsStream(String)
+	 * @see java.util.Properties#load(java.io.InputStream)
+	 */
+	public static Properties loadPropertiesResource(String name) throws IOException {
+		Properties rProps = new Properties();
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InputStream ins = loader.getResourceAsStream(name);
+
+		try {
+			rProps.load(ins);
+		} finally {
+			close(ins);
+		}
+
+		return rProps;
+	}
+
+	/**
+	 * Loads properties from all resource with given name.
+	 *
+	 * @param name
+	 *            the resource name
+	 * @return properties loaded from all found resources
+	 * @throws java.io.IOException
+	 *             if an error occurred when reading properties file
+	 *
+	 * @see java.lang.ClassLoader#getResources(String)
+	 * @see java.util.Properties#load(java.io.InputStream)
+	 */
+	public static Properties loadPropertiesResources(String name) throws IOException {
+		Properties rProps = new Properties();
+
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		Enumeration<URL> rEnum = loader.getResources(name);
+
+		while (rEnum.hasMoreElements()) {
+			InputStream ins = rEnum.nextElement().openStream();
+
+			try {
+				rProps.load(ins);
+			} finally {
+				close(ins);
+			}
+		}
+
+		return rProps;
 	}
 
 	/**
@@ -1132,5 +1327,422 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static BufferedReader bytesReader(byte[] data) {
 		return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
+	}
+
+	/**
+	 * Creates file according to provided file descriptor - file path or file URI.
+	 *
+	 * @param fileDescriptor
+	 *            string representing file path or URI
+	 * @return file instance
+	 * @throws IllegalArgumentException
+	 *             if {@code fileDescriptor} is {@code null} or empty
+	 * @throws java.net.URISyntaxException
+	 *             if {@code fileDescriptor} defines malformed URI
+	 */
+	public static File createFile(String fileDescriptor) throws URISyntaxException {
+		if (StringUtils.isEmpty(fileDescriptor)) {
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "Utils.empty.file.descriptor"));
+		}
+
+		if (fileDescriptor.startsWith("file:/")) { // NON-NLS
+			URI fUri = new URI(fileDescriptor);
+			return Paths.get(fUri).toFile();
+		} else {
+			return Paths.get(fileDescriptor).toFile();
+		}
+	}
+
+	/**
+	 * Checks if provided numeric value match the mask.
+	 *
+	 * @param v
+	 *            numeric value
+	 * @param mask
+	 *            mask to check
+	 * @return {@code true} if value match the mask, {@code false} - otherwise
+	 */
+	public static boolean matchMask(int v, int mask) {
+		return (v & mask) == mask;
+	}
+
+	/**
+	 * Checks if provided numeric value match any bit of the mask.
+	 *
+	 * @param v
+	 *            numeric value
+	 * @param mask
+	 *            mask to check
+	 * @return {@code true} if value match any bit from the mask, {@code false} - otherwise
+	 */
+	public static boolean matchAny(int v, int mask) {
+		return (v & mask) != 0;
+	}
+
+	/**
+	 * Removes {@code null} elements from array.
+	 *
+	 * @param array
+	 *            array to cleanup
+	 * @param <T>
+	 *            type of array elements
+	 * @return new array instance without {@code null} elements
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] tidy(T[] array) {
+		if (array == null) {
+			return null;
+		}
+
+		List<T> oList = new ArrayList<>(array.length);
+		for (T obj : array) {
+			if (obj != null) {
+				oList.add(obj);
+			}
+		}
+
+		return (T[]) oList.toArray();
+	}
+
+	/**
+	 * Removes {@code null} elements from collection.
+	 *
+	 * @param coll
+	 *            collection to clean
+	 * @param <T>
+	 *            type of collection elements
+	 * @return new {@link java.util.List} instance without {@code null} elements
+	 */
+	public static <T> List<T> tidy(Collection<T> coll) {
+		if (coll == null) {
+			return null;
+		}
+
+		List<T> oList = new ArrayList<>(coll.size());
+		for (T obj : coll) {
+			if (obj != null) {
+				oList.add(obj);
+			}
+		}
+
+		return oList;
+	}
+
+	/**
+	 * Casts provided number value to desired number type.
+	 *
+	 * @param num
+	 *            number value to cast
+	 * @param clazz
+	 *            number class to cast number to
+	 * @param <T>
+	 *            desired number type
+	 * @return number value cast to desired numeric type
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Number> T castNumber(Number num, Class<T> clazz) {
+		Number cNum = 0;
+
+		if (clazz.isAssignableFrom(Long.class)) {
+			cNum = num.longValue();
+		} else if (clazz.isAssignableFrom(Integer.class)) {
+			cNum = num.intValue();
+		} else if (clazz.isAssignableFrom(Byte.class)) {
+			cNum = num.byteValue();
+		} else if (clazz.isAssignableFrom(Float.class)) {
+			cNum = num.floatValue();
+		} else if (clazz.isAssignableFrom(Double.class)) {
+			cNum = num.doubleValue();
+		} else if (clazz.isAssignableFrom(Short.class)) {
+			cNum = num.shortValue();
+		}
+
+		return (T) cNum;
+	}
+
+	/**
+	 * Sets system property value.
+	 * <p>
+	 * If property name is {@code null} - does nothing. If property value is {@code null} - removes property from system
+	 * properties list.
+	 *
+	 * @param pName
+	 *            the name of the system property
+	 * @param pValue
+	 *            the value of the system property
+	 * @return the previous string value of the system property, or {@code null} if name is {@code null} or there was no
+	 *         property with that name.
+	 */
+	public static String setSystemProperty(String pName, String pValue) {
+		if (StringUtils.isEmpty(pName)) {
+			return null;
+		}
+
+		if (pValue != null) {
+			return System.setProperty(pName, pValue);
+		} else {
+			return System.clearProperty(pName);
+		}
+	}
+
+	/**
+	 * Returns enumeration entry based on entry name value ignoring case.
+	 *
+	 * @param enumClass
+	 *            enumeration instance class
+	 * @param name
+	 *            name of enumeration entry
+	 * @param <E>
+	 *            type of enumeration
+	 * @return enumeration object having provided name
+	 * @throws IllegalArgumentException
+	 *             if name is not a valid enumeration entry name or is {@code null}
+	 */
+	public static <E extends Enum<E>> E valueOfIgnoreCase(Class<E> enumClass, String name)
+			throws IllegalArgumentException {
+		if (StringUtils.isEmpty(name)) {
+			throw new IllegalArgumentException(
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "Utils.name.empty"));
+		}
+
+		E[] enumConstants = enumClass.getEnumConstants();
+
+		for (E ec : enumConstants) {
+			if (ec.name().equalsIgnoreCase(name)) {
+				return ec;
+			}
+		}
+
+		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"Utils.no.enum.constant", name, enumClass.getSimpleName()));
+	}
+
+	/**
+	 * Returns a quoted string, surrounded with single quote.
+	 *
+	 * @param str
+	 *            string handle
+	 * @return a quoted string, surrounded with single quote
+	 *
+	 * @see #surround(String, String)
+	 */
+	public static String sQuote(String str) {
+		return surround(str, "'"); // NON-NLS
+	}
+
+	/**
+	 * Returns a quoted object representation string, surrounded with single quote.
+	 *
+	 * @param obj
+	 *            object handle
+	 * @return a quoted object representation string, surrounded with single quote
+	 *
+	 * @see #sQuote(String)
+	 * @see #toString(Object)
+	 */
+	public static String sQuote(Object obj) {
+		return sQuote(toString(obj));
+	}
+
+	/**
+	 * Splits string contained values delimited using '|' delimiter into array of separate values.
+	 *
+	 * @param value
+	 *            string contained values to split
+	 * @return array of split string values
+	 */
+	public static String[] splitValue(String value) {
+		return StringUtils.isEmpty(value) ? new String[] { value } : value.split(VALUE_DELIM);
+	}
+
+	/**
+	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
+	 * should be performed, e.g., C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
+	 * modification timestamp in ascending order.
+	 *
+	 * @param namePattern
+	 *            name pattern to find files
+	 *
+	 * @return array of found files
+	 *
+	 * @see WildcardFileFilter#WildcardFileFilter(String)
+	 * @see File#listFiles(FilenameFilter)
+	 */
+	public static File[] searchFiles(String namePattern) {
+		File f = new File(namePattern);
+		File dir = f.getAbsoluteFile().getParentFile();
+		File[] activityFiles = dir.listFiles((FilenameFilter) new WildcardFileFilter(f.getName()));
+
+		if (activityFiles != null) {
+			Arrays.sort(activityFiles, new Comparator<File>() {
+				@Override
+				public int compare(File o1, File o2) {
+					long f1ct = o1.lastModified();
+					long f2ct = o2.lastModified();
+					// NOTE: we want files to be sorted oldest->newest (ASCENDING)
+					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
+				}
+			});
+
+			return activityFiles;
+		} else {
+			return new File[0];
+		}
+	}
+
+	/**
+	 * Returns list of files matching provided file name. If file name contains wildcard symbols, then
+	 * {@link #searchFiles(String)} is invoked.
+	 *
+	 * @param fileName
+	 *            file name pattern to list matching files
+	 * @return array of files matching file name
+	 *
+	 * @see #searchFiles(String)
+	 */
+	public static File[] listFilesByName(String fileName) {
+		if (isWildcardString(fileName)) {
+			return searchFiles(fileName);
+		} else {
+			return new File[] { new File(fileName) };
+		}
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} and path
+	 * level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap, int level) {
+		return getMapValueByPath(path, StreamsConstants.DEFAULT_PATH_DELIM, dataMap, level);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param pathDelim
+	 *            path delimiter
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, String, Map, int)
+	 */
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, pathDelim, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param pathDelim
+	 *            path delimiter
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String[], Map, int)
+	 */
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap, int level) {
+		return getMapValueByPath(getNodePath(path, pathDelim), dataMap, level);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path level value is {@code 0}.
+	 *
+	 * @param path
+	 *            map keys path tokens array referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @return path resolved map contained value
+	 * 
+	 * @see #getMapValueByPath(String[], Map, int)
+	 */
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap) {
+		return getMapValueByPath(path, dataMap, 0);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * 
+	 * @param path
+	 *            map keys path tokens array referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param level
+	 *            path level
+	 * @return path resolved map contained value
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap, int level) {
+		if (ArrayUtils.isEmpty(path) || dataMap == null) {
+			return null;
+		}
+
+		if (StreamsConstants.MAP_NODE_TOKEN.equals(path[level])) {
+			return dataMap;
+		}
+
+		Object val = dataMap.get(path[level]);
+
+		if (level < path.length - 1 && val instanceof Map) {
+			val = getMapValueByPath(path, (Map<String, ?>) val, ++level);
+		} else if (level < path.length - 2 && val instanceof List) {
+			try {
+				int lii = Integer.parseInt(getItemIndexStr(path[level + 1]));
+				val = getMapValueByPath(path, (Map<String, ?>) ((List<?>) val).get(lii), level + 2);
+			} catch (NumberFormatException exc) {
+			}
+		}
+
+		return val;
+	}
+
+	private static String getItemIndexStr(String indexToken) {
+		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 }

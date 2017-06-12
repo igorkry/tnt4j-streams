@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,16 @@ public interface OutputProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_RESOLVE_SERVER = "ResolveServerFromDNS"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_TURN_OUT_CHILDREN = "TurnOutActivityChildren"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_BUILD_FQN_FROM_DATA = "BuildSourceFQNFromStreamedData"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.

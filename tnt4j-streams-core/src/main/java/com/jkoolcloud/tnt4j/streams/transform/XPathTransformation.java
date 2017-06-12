@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package com.jkoolcloud.tnt4j.streams.transform;
 
 import javax.xml.namespace.QName;
-import javax.xml.xpath.*;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFunction;
+import javax.xml.xpath.XPathFunctionResolver;
+import javax.xml.xpath.XPathVariableResolver;
 
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
@@ -27,7 +30,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
  *
  * @version $Revision: 1 $
  *
- * @see XPathFactory
+ * @see com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils#getStreamsXPath()
  * @see XPathVariableResolver
  * @see XPathFunctionResolver
  * @see javax.xml.namespace.NamespaceContext

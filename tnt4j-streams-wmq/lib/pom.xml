@@ -6,10 +6,10 @@
 
     <groupId>com.jkoolcloud.tnt4j.streams</groupId>
     <artifactId>tnt4j-streams-wmq-dep-install</artifactId>
-    <version>0.1-beta</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>TNT4J-Streams-WMQ-dep-install</name>
+    <name>tnt4j-streams-wmq-dep-install</name>
     <description>Installs TNT4J-Streams-WMQ 3rd party dependencies</description>
 
     <prerequisites>
@@ -17,95 +17,17 @@
     </prerequisites>
 
     <properties>
-        <ibm.mq.version>7.5</ibm.mq.version>
-        <ibm.mq.libs.path>ibm.mq</ibm.mq.libs.path>
+        <ibm.mq.version>8.0</ibm.mq.version>
+
+        <ibm.mq.libs.path>ibm.mq-v${ibm.mq.version}</ibm.mq.libs.path>
+        <lib.mq.pom.file>${ibm.mq.libs.path}/pom.xml</lib.mq.pom.file>
     </properties>
 
     <build>
-        <defaultGoal>clean package</defaultGoal>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.1</version>
-                <executions>
-                    <execution>
-                        <id>install-com.ibm.mq</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.ibm</groupId>
-                            <artifactId>com.ibm.mq</artifactId>
-                            <version>${ibm.mq.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${ibm.mq.libs.path}/com.ibm.mq.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-com.ibm.mq.commonservices</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.ibm</groupId>
-                            <artifactId>com.ibm.mq.commonservices</artifactId>
-                            <version>${ibm.mq.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${ibm.mq.libs.path}/com.ibm.mq.commonservices.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-com.ibm.mq.headers</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.ibm</groupId>
-                            <artifactId>com.ibm.mq.headers</artifactId>
-                            <version>${ibm.mq.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${ibm.mq.libs.path}/com.ibm.mq.headers.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-com.ibm.mq.jmqi</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.ibm</groupId>
-                            <artifactId>com.ibm.mq.jmqi</artifactId>
-                            <version>${ibm.mq.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${ibm.mq.libs.path}/com.ibm.mq.jmqi.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>install-com.ibm.mq.pcf</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.ibm</groupId>
-                            <artifactId>com.ibm.mq.pcf</artifactId>
-                            <version>${ibm.mq.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${ibm.mq.libs.path}/com.ibm.mq.pcf.jar</file>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        <defaultGoal>install</defaultGoal>
     </build>
+
+    <modules>
+        <module>${ibm.mq.libs.path}</module>
+    </modules>
 </project>

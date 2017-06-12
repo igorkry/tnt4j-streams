@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,11 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 			closeFeed();
 
 			super.close();
+		}
+
+		@Override
+		public boolean markSupported() {
+			return false;
 		}
 	}
 }

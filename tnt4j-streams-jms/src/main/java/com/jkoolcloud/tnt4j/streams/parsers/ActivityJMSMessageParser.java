@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.JMSParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -82,15 +83,20 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link javax.jms.Message}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return Message.class.isInstance(data);
 	}
 
@@ -106,7 +112,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 			String name = prop.getKey();
 			String value = prop.getValue();
 
-			if (JMSStreamConstants.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
+			if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
 				convertToString = Boolean.parseBoolean(value);
 
 				logger().log(OpLevel.DEBUG,

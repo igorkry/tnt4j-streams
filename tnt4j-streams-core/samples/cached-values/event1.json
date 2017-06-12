@@ -1,0 +1,7 @@
+{
+    "event": "Event11",
+    "message": "First event",
+    "resource": "event1.json",
+    "secret": "do not tell anyone about me",
+    "transaction": "1"
+}

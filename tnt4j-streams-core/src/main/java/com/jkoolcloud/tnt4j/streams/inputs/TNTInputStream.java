@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 
@@ -40,12 +41,18 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * <ul>
  * <li>DateTime - default date/time to associate with activities. (Optional)</li>
  * <li>UseExecutors - identifies whether stream should use executor service to process activities data items
- * asynchronously or not. (Optional)</li>
- * <li>ExecutorThreadsQuantity - defines executor service thread pool size. (Optional)</li>
- * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a executor service to terminate. (Optional)</li>
- * <li>ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. (Optional)</li>
+ * asynchronously or not. Default value - {@code false}. (Optional)</li>
+ * <li>ExecutorThreadsQuantity - defines executor service thread pool size. Default value - {@code 4}. (Optional)</li>
+ * <li>ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a executor service to terminate. Default value -
+ * {@code 20}. (Optional)</li>
+ * <li>ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value -
+ * {@code false}. (Optional)</li>
  * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
- * queue size is reached. (Optional, actual only if {@code ExecutorsBoundedModel} is set to {@code true})</li>
+ * queue size is reached. Default value - {@code 20}. (Optional, actual only if {@code ExecutorsBoundedModel} is set to
+ * {@code true})</li>
+ * <li>StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
+ * <li>StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value -
+ * {@code 10}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -53,14 +60,14 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @param <O>
  *            the type of handled output data
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  *
  * @see java.util.concurrent.ExecutorService
  * @see com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput
  */
 public abstract class TNTInputStream<T, O> implements Runnable {
 
-	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = 5 * 1000L;
+	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
 
 	private static final int DEFAULT_EXECUTOR_THREADS_QTY = 4;
 	private static final int DEFAULT_EXECUTORS_TERMINATION_TIMEOUT = 20;
@@ -69,7 +76,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	/**
 	 * StreamThread running this stream.
 	 */
-	protected StreamThread ownerThread = null;
+	private StreamThread ownerThread = null;
 
 	private AtomicInteger currActivityIndex = new AtomicInteger(0);
 	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
@@ -92,6 +99,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private int executorThreadsQty = DEFAULT_EXECUTOR_THREADS_QTY;
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
+
+	// cache related properties
+	private Integer cacheMaxSize;
+	private Integer cacheExpireDuration;
 
 	/**
 	 * Returns logger used by this stream.
@@ -135,7 +146,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Sets default stream output handler. It may happen when stream configuration does not define particular output
-	 * handler reference (i.e. from older TNT4J-Streams API versions).
+	 * handler reference (e.g., from older TNT4J-Streams API versions).
 	 */
 	protected abstract void setDefaultStreamOutput();
 
@@ -156,6 +167,15 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	public void setOwnerThread(StreamThread ownerThread) {
 		this.ownerThread = ownerThread;
+	}
+
+	/**
+	 * Checks whether this stream has owner thread assigned.
+	 *
+	 * @return {@code true} if owner thread is assigned, {@code false} - if owner thread is {@code null}
+	 */
+	protected boolean isOwned() {
+		return ownerThread != null;
 	}
 
 	/**
@@ -187,8 +207,14 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				executorsTerminationTimeout = Integer.parseInt(value);
 			} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
 				boundedExecutorModel = Boolean.parseBoolean(value);
+			} else if (StreamProperties.PROP_CACHE_MAX_SIZE.equalsIgnoreCase(name)) {
+				cacheMaxSize = Integer.parseInt(value);
+			} else if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equalsIgnoreCase(name)) {
+				cacheExpireDuration = Integer.parseInt(value);
 			}
 		}
+
+		output().setProperties(props);
 	}
 
 	/**
@@ -219,6 +245,12 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (StreamProperties.PROP_EXECUTORS_BOUNDED.equals(name)) {
 			return boundedExecutorModel;
 		}
+		if (StreamProperties.PROP_CACHE_MAX_SIZE.equals(name)) {
+			return cacheMaxSize;
+		}
+		if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equals(name)) {
+			return cacheExpireDuration;
+		}
 
 		return null;
 	}
@@ -246,8 +278,12 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					? getBoundedExecutorService(executorThreadsQty, executorRejectedTaskOfferTimeout)
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
-			out.handleConsumerThread(ownerThread == null ? Thread.currentThread() : ownerThread);
-		}		
+			out.handleConsumerThread(isOwned() ? ownerThread : Thread.currentThread());
+		}
+
+		if (cacheMaxSize != null || cacheExpireDuration != null) {
+			StreamsCache.initCache(cacheMaxSize, cacheExpireDuration);
+		}
 	}
 
 	/**
@@ -289,12 +325,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
-				if (!isShotDown()) {
-					halt(false);
-					if (ownerThread != null) {
-						ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
-					}
-				}
+				stop();
 			}
 		}));
 	}
@@ -392,7 +423,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Get the position in the source activity data currently being processed. For line-based data sources, this is
-	 * generally the line number of currently processed file or other text source. If activity items source (i.e. file)
+	 * generally the line number of currently processed file or other text source. If activity items source (e.g., file)
 	 * changes - activity position gets reset.
 	 * <p>
 	 * Subclasses should override this to provide meaningful information, if relevant. The default implementation just
@@ -411,7 +442,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * Returns currently streamed activity item index. Index is constantly incremented when streaming begins and
 	 * activity items gets available to stream.
 	 * <p>
-	 * It does not matter if activity item source changes (i.e. file). To get actual source dependent position see
+	 * It does not matter if activity item source changes (e.g., file). To get actual source dependent position see
 	 * {@link #getActivityPosition()}.
 	 *
 	 * @return currently processed activity item index
@@ -484,7 +515,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	/**
 	 * Updates activities skipped and total counts and fires progress update notification when activity data gets
-	 * filtered out by streaming settings (i.e. file lines range).
+	 * filtered out by streaming settings (e.g., file lines range).
 	 */
 	protected void skipFilteredActivities() {
 		incrementSkippedActivitiesCount();
@@ -563,7 +594,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	public void halt(boolean terminate) {
 		shutdownExecutors();
 
-		if (ownerThread != null) {
+		if (isOwned()) {
 			ownerThread.halt(terminate);
 		}
 	}
@@ -574,7 +605,20 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @return {@code true} if stream has stopped processing, {@code false} - otherwise
 	 */
 	public boolean isHalted() {
-		return ownerThread == null ? false : ownerThread.isStopRunning();
+		return isOwned() ? ownerThread.isStopRunning() : false;
+	}
+
+	/**
+	 * Causes stream owner thread to sleep for a defined period of time.
+	 *
+	 * @param period
+	 *            sleep period in milliseconds
+	 */
+	protected void sleep(long period) {
+		logger().log(OpLevel.INFO,
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.will.retry"),
+				TimeUnit.MILLISECONDS.toSeconds(period));
+		StreamsThread.sleep(period);
 	}
 
 	/**
@@ -590,6 +634,10 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			out.cleanup();
 		}
 
+		StreamsCache.cleanup();
+	}
+
+	private void removeListeners() {
 		if (CollectionUtils.isNotEmpty(streamListeners)) {
 			streamListeners.clear();
 		}
@@ -628,7 +676,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.starting"), name);
-		if (ownerThread == null) {
+		if (!isOwned()) {
 			IllegalStateException e = new IllegalStateException(StreamsResources
 					.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.no.owner.thread"));
 			notifyFailed(null, e, null);
@@ -645,7 +693,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					if (item == null) {
 						logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.data.stream.ended"), name);
-						halt(false); // no more data items to process
+						if (!isHalted()) {
+							halt(false); // no more data items to process
+						}
 					} else {
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
@@ -691,9 +741,17 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (!failureFlag.get()) {
 			notifyStreamSuccess();
 		}
-		notifyFinished();
 
-		cleanup();
+		try {
+			cleanup();
+		} catch (Throwable exc) {
+			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.failed.cleanup.stream"), exc.getLocalizedMessage(), exc);
+			notifyStreamEvent(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.failed.cleanup.stream", exc.getLocalizedMessage()), name);
+		}
+
+		notifyFinished();
 
 		logger().log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.thread.ended"),
@@ -702,7 +760,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.statistics"),
 				name, getStreamStatistics());
 
-		if (ownerThread != null) {
+		removeListeners();
+
+		if (isOwned()) {
 			ownerThread.notifyCompleted();
 		}
 	}
@@ -719,16 +779,28 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
-	// /**
-	// * Signals that streaming process has to be canceled and invokes status change event.
-	// */
-	// public void cancel() { // TODO
-	// halt(false);
-	// ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
-	//
-	// notifyStatusChange(StreamStatus.CANCEL);
-	// // notifyFinished();
-	// }
+	/**
+	 * Signals that streaming process has to be stopped/canceled and invokes status change event.
+	 */
+	public void stop() {
+		if (!isShotDown()) {
+			halt(false);
+
+			stopInternals();
+
+			if (isOwned()) {
+				ownerThread.waitFor(DEFAULT_STREAM_TERMINATION_TIMEOUT);
+			}
+
+			notifyStatusChange(StreamStatus.STOP);
+		}
+	}
+
+	/**
+	 * Performs internal stop actions, like immediately stopping input reading.
+	 */
+	protected void stopInternals() {
+	}
 
 	/**
 	 * Returns stream name value
@@ -1151,7 +1223,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		 */
 		@Override
 		public String toString() {
-			return "StreamStats{" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
+			return "StreamStats {" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
 					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
 					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
 		}

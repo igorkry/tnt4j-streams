@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams inputs: i.e. file, socket, java input
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams inputs: e.g., file, socket, java input
  * stream, etc.
  *
  * @author akausinis

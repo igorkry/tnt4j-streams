@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,8 @@ public class NumericFormatter {
 					numValue = value instanceof Number ? (Number) value : Double.valueOf(value.toString());
 				}
 			}
-			return numValue.doubleValue() * scale.doubleValue();
+			Number scaledValue = numValue.doubleValue() * scale.doubleValue();
+			return Utils.castNumber(scaledValue, numValue.getClass());
 		} catch (NumberFormatException nfe) {
 			throw new ParseException(nfe.getLocalizedMessage(), 0);
 		}

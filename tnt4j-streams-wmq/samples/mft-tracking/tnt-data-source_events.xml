@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <java-object name="XMLFromMsgPreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser"/>
+
+    <parser name="XMOFTSFeedBackParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="EventType" locator="/XMOFTSFeedBack/activity" locator-type="Label">
+            <field-transform name="toUpper" lang="groovy"><![CDATA[
+               $fieldValue.toUpperCase()
+            ]]></field-transform>
+        </field>
+        <field name="TrackingId" locator="/XMOFTSFeedBack/activityId" locator-type="Label"/>
+        <field name="FTFId" locator="/XMOFTSFeedBack/ftfId" locator-type="Label"/>
+        <field name="EventName" locator="/XMOFTSFeedBack/rcTxt" locator-type="Label"/>
+        <field name="RC" locator="/XMOFTSFeedBack/rc" locator-type="Label"/>
+        <field name="RC2" locator="/XMOFTSFeedBack/rc2" locator-type="Label"/>
+        <field name="Message" locator="/XMOFTSFeedBack/message" locator-type="Label"/>
+        <field name="Message2" locator="/XMOFTSFeedBack/message2" locator-type="Label"/>
+        <field name="LocationCode" locator="/XMOFTSFeedBack/locationCode" locator-type="Label"/>
+        <field name="UserAction" locator="/XMOFTSFeedBack/userAction" locator-type="Label"/>
+        <field name="AdminAction" locator="/XMOFTSFeedBack/sysAdminAction" locator-type="Label"/>
+    </parser>
+
+    <parser name="MFTWorkflowParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <reference name="XMLFromMsgPreParser"/>
+
+        <property name="RequireDefault" value="false"/>
+
+        <field name="EventType" value="ACTIVITY"/>
+        <field name="Correlator" value="/Workflow/processId" locator-type="Label"/>
+        <embedded-activity name="Feedback" locator="/Workflow/XMOFTSFeedBackList/XMOFTSFeedBack" locator-type="Label">
+            <parser-ref name="XMOFTSFeedBackParser" aggregation="Join"/>
+        </embedded-activity>
+    </parser>
+
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="Host" value="[HOST|IP]"/>
+        <property name="Port" value="1414"/>
+        <property name="Channel" value="[SVRCONN]"/>
+        <property name="QueueManager" value="[CORD_QMGR]"/>
+        <property name="Queue" value="[QNAME ex:FTE.TRANSFER.LOG]"/>
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
+
+        <property name="TurnOutActivityChildren" value="true"/>
+
+        <parser-ref name="MFTWorkflowParser"/>
+    </stream>
+
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft-tracking/msg_arch_dest_list_fixit.xml"/>-->
+    <!--<property name="TurnOutActivityChildren" value="true"/>-->
+
+    <!--<parser-ref name="MFTWorkflowParser"/>-->
+    <!--</stream>-->
+
+</tnt-data-source>

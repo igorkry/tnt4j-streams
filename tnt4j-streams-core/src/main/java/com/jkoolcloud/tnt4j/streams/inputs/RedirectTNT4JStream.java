@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements a redirecting activity stream, where activity data is prepared by other TNT4J based streaming libraries
- * (i.e. tnt4j-stream-jmx, tnt4j-stream-gc) using {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
+ * (e.g., tnt4j-stream-jmx, tnt4j-stream-gc) using {@link com.jkoolcloud.tnt4j.format.JSONFormatter} to format activity
  * data. Redirected activities JSON data ban be read from the specified InputStream-based stream or Reader-based reader.
  * This class wraps the raw {@link InputStream} or {@link Reader} with a {@link BufferedReader}. Input source also can
  * be {@link File} descriptor or {@link ServerSocket} connections.
@@ -287,6 +287,17 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	}
 
 	/**
+	 * Adds terminator object to input buffer.
+	 */
+	@Override
+	protected void stopInternals() {
+		if (inputBuffer != null) {
+			// inputBuffer.clear(); //???
+			inputBuffer.offer(DIE_MARKER);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * This method does not actually return the next item, but the {@link BufferedReader} from which the next item
@@ -439,7 +450,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				srvSocket = new ServerSocket(srvSocketPort);
 
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.stream.reset"), srvSocketPort);
+						"RedirectTNT4JStream.stream.reset"), srvSocketPort);
 			} catch (Exception exc) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"RedirectTNT4JStream.resetting.failed"), getName(), exc);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,10 +102,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			}
 		}
 
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", SCENARIO_ELMT, NAME_ATTR), currParseLocation);
-		}
+		notEmpty(name, SCENARIO_ELMT, NAME_ATTR);
 
 		currScenario = new WsScenario(name);
 	}
@@ -137,10 +134,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				password = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", STEP_ELMT, NAME_ATTR), currParseLocation);
-		}
+		notEmpty(name, STEP_ELMT, NAME_ATTR);
 
 		currStep = new WsScenarioStep(name);
 		currStep.setUrlStr(url);
@@ -170,12 +164,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				expression = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(expression)) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.missing.attribute", SCHED_CRON_ELMT, EXPRESSION_ATTR),
-					currParseLocation);
-		}
+		notEmpty(expression, SCHED_CRON_ELMT, EXPRESSION_ATTR);
 
 		CronSchedulerData schedData = new CronSchedulerData(expression);
 

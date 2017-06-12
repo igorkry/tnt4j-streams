@@ -2,15 +2,15 @@
 <xs:schema id="TNTDataSourceWS" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:redefine schemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
-        <xs:complexType name="StreamType">
+        <xs:complexType name="Stream">
             <xs:complexContent>
-                <xs:extension base="StreamType">
+                <xs:extension base="Stream">
                     <xs:sequence>
-                        <xs:element name="scenario" type="ScenarioType" minOccurs="0" maxOccurs="1">
+                        <xs:element name="scenario" type="Scenario" minOccurs="0" maxOccurs="1">
                             <xs:annotation>
                                 <xs:documentation>
-                                    Defines scenario steps set for WS type streams to define request/command data
-                                    and request/command invocation schedule expression.
+                                    Defines scenario steps set for WS type streams to define request/command data and request/command
+                                    invocation schedule expression.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:element>
@@ -20,8 +20,8 @@
         </xs:complexType>
     </xs:redefine>
 
-    <!-- Cron scheduler type definition -->
-    <xs:complexType name="ScheduleCronType">
+    <!-- Element <schedule-cron> definition -->
+    <xs:complexType name="ScheduleCron">
         <xs:annotation>
             <xs:documentation>
                 Defines Cron scheduler parameters.
@@ -37,8 +37,8 @@
         </xs:attribute>
     </xs:complexType>
 
-    <!-- Simple scheduler type definition -->
-    <xs:complexType name="ScheduleSimpleType">
+    <!-- Element <schedule-simple> definition -->
+    <xs:complexType name="ScheduleSimple">
         <xs:annotation>
             <xs:documentation>
                 Defines simple scheduler parameters.
@@ -68,8 +68,8 @@
         </xs:attribute>
     </xs:complexType>
 
-    <!-- Scenario step definition -->
-    <xs:complexType name="ScenarioStepType">
+    <!-- Scenario element <step> definition -->
+    <xs:complexType name="ScenarioStep">
         <xs:annotation>
             <xs:documentation>
                 Defines scenario step providing request/command params and scheduler.
@@ -78,14 +78,14 @@
 
         <xs:sequence>
             <xs:choice maxOccurs="1">
-                <xs:element name="schedule-cron" type="ScheduleCronType" maxOccurs="1">
+                <xs:element name="schedule-cron" type="ScheduleCron" maxOccurs="1">
                     <xs:annotation>
                         <xs:documentation>
                             Defines Cron type scheduler.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element name="schedule-simple" type="ScheduleSimpleType" maxOccurs="1">
+                <xs:element name="schedule-simple" type="ScheduleSimple" maxOccurs="1">
                     <xs:annotation>
                         <xs:documentation>
                             Defines simple type scheduler.
@@ -139,11 +139,10 @@
         </xs:attribute>
     </xs:complexType>
 
-    <!-- Scenario definition -->
-    <xs:complexType name="ScenarioType">
+    <!-- Element <scenario> definition -->
+    <xs:complexType name="Scenario">
         <xs:sequence>
-            <xs:element name="step" type="ScenarioStepType" minOccurs="1"
-                        maxOccurs="unbounded">
+            <xs:element name="step" type="ScenarioStep" minOccurs="1" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
                         Defines a scenario step.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,17 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="UseSSL"/>
  *     &lt;enumeration value="ReadLines"/>
  *     &lt;enumeration value="RestartOnInputClose"/>
+ *     &lt;enumeration value="ArchType"/>
+ *     &lt;enumeration value="BufferSize"/>
+ *     &lt;enumeration value="BufferOfferTimeout"/>
+ *     &lt;enumeration value="FilePolling"/>
+ *     &lt;enumeration value="RestoreState"/>
+ *     &lt;enumeration value="StartServer"/>
+ *     &lt;enumeration value="InputCloseable"/>
+ *     &lt;enumeration value="RangeToStream"/>
+ *     &lt;enumeration value="StreamCacheMaxSize"/>
+ *     &lt;enumeration value="StreamCacheExpireDuration"/>
+ *     &lt;enumeration value="StreamReconnectDelay"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -68,7 +79,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "StreamProperties")
 @XmlEnum
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2016-02-22T04:46:33+02:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 public enum StreamProperties {
 
 	/**
@@ -163,7 +174,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property identifies whether stream should strip RAW activity data (i.e. WMQ message) headers.
+	 * Property identifies whether stream should strip RAW activity data (e.g., WMQ message) headers.
 	 * 
 	 * 
 	 */
@@ -182,7 +193,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property identifies delay is seconds between file reading iterations.
+	 * Property defines delay in seconds between file reading iterations.
 	 * 
 	 * 
 	 */
@@ -329,7 +340,7 @@ public enum StreamProperties {
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (i.e. JSON) package is single line.
+	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line.
 	 * 
 	 * 
 	 */
@@ -343,7 +354,108 @@ public enum StreamProperties {
 	 * 
 	 */
 	@XmlEnumValue("RestartOnInputClose")
-	RESTART_ON_INPUT_CLOSE("RestartOnInputClose");
+	RESTART_ON_INPUT_CLOSE("RestartOnInputClose"),
+
+	/**
+	 *
+	 * Property to define zipped stream processed archive type (e.g., ZIP, GZIP, JAR).
+	 *
+	 *
+	 */
+	@XmlEnumValue("ArchType")
+	ARCH_TYPE("ArchType"),
+
+	/**
+	 *
+	 * Property to define buffered stream buffer max. capacity.
+	 *
+	 *
+	 */
+	@XmlEnumValue("BufferSize")
+	BUFFER_SIZE("BufferSize"),
+
+	/**
+	 *
+	 * Property to define buffered stream buffer element offer timeout value in seconds.
+	 *
+	 *
+	 */
+	@XmlEnumValue("BufferOfferTimeout")
+	BUFFER_OFFER_TIMEOUT("BufferOfferTimeout"),
+
+	/**
+	 *
+	 * Property indicates that stream should run in file polling mode.
+	 *
+	 *
+	 */
+	@XmlEnumValue("FilePolling")
+	FILE_POLLING("FilePolling"),
+
+	/**
+	 *
+	 * Property indicates that stream should restore streaming state after (re)start (i.e continue from last streamed
+	 * file line).
+	 *
+	 *
+	 */
+	@XmlEnumValue("RestoreState")
+	RESTORE_STATE("RestoreState"),
+
+	/**
+	 *
+	 * Property indicates that stream should start as server (e.g., Kafka server) if stream supports both client and
+	 * server modes.
+	 *
+	 *
+	 */
+	@XmlEnumValue("StartServer")
+	START_SERVER("StartServer"),
+
+	/**
+	 *
+	 * Property indicates that stream should close input after streaming is complete.
+	 *
+	 *
+	 */
+	@XmlEnumValue("InputCloseable")
+	INPUT_CLOSEABLE("InputCloseable"),
+
+	/**
+	 *
+	 * Property to define streamed activity data range (i.e. file lines or sheet rows) from:to.
+	 *
+	 *
+	 */
+	@XmlEnumValue("RangeToStream")
+	RANGE_TO_STREAM("RangeToStream"),
+
+	/**
+	 *
+	 * Property to define stream used cache max. capacity.
+	 *
+	 *
+	 */
+	@XmlEnumValue("StreamCacheMaxSize")
+	STREAM_CACHE_MAX_SIZE("StreamCacheMaxSize"),
+
+	/**
+	 *
+	 * Property to define stream used cache entries expiration duration in minutes.
+	 *
+	 *
+	 */
+	@XmlEnumValue("StreamCacheExpireDuration")
+	STREAM_CACHE_EXPIRE_DURATION("StreamCacheExpireDuration"),
+
+	/**
+	 *
+	 * Property defines delay in seconds between queue manager reconnection or failed queue GET iterations.
+	 *
+	 *
+	 */
+	@XmlEnumValue("StreamReconnectDelay")
+	STREAM_RECONNECT_DELAY("StreamReconnectDelay");
 	private final String value;
 
 	StreamProperties(String v) {

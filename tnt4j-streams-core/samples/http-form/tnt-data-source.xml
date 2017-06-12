@@ -28,6 +28,7 @@
         <!--<property name="Keystore" value="path_to_keystore_file"/>-->
         <!--<property name="KeystorePass" value="somePassword"/>-->
         <!--<property name="KeyPass" value="somePassword"/>-->
+
         <parser-ref name="SampleFormDataParser"/>
     </stream>
 </tnt-data-source>

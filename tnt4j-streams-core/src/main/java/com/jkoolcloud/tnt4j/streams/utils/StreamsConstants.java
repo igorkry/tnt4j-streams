@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,11 @@ public final class StreamsConstants {
 	 */
 	public static final String DEFAULT_PATH_DELIM = "."; // NON-NLS
 
+	/**
+	 * Constant for locator path node token meaning complete map.
+	 */
+	public static final String MAP_NODE_TOKEN = "*"; // NON-NLS
+
 	private StreamsConstants() {
-
 	}
-
 }

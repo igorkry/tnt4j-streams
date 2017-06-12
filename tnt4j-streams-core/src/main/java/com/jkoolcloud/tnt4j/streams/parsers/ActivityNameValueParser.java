@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * Implements an activity data parser that assumes each activity data item is a token-separated string of fields, where
- * each field is represented by a name/value pair and the name is used to map each field onto its corresponding activity
+ * each field is represented by a name/value pair and the name is used to map each field into its corresponding activity
  * field. The field-separator and the name/value separator can both be customized.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>ValueDelim - value delimiter. (Optional)</li>
@@ -99,6 +99,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			return;
 		}
 
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -138,20 +140,24 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityNameValueParser.no.value.delimiter"));
 		}
-		if (data == null) {
-			return null;
-		}
+
+		return super.parse(stream, data);
+	}
+
+	@Override
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.splitting.string"),
+				dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.input.not.match"), getName());
+						"ActivityParser.input.not.match"), getName(), pattern.pattern());
 				return null;
 			}
 		}
@@ -161,7 +167,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
@@ -179,7 +185,10 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			}
 		}
 
-		return parsePreparedItem(stream, dataStr, nameValues);
+		ActivityContext cData = new ActivityContext(stream, data, nameValues);
+		cData.setMessage(getRawDataAsMessage(nameValues));
+
+		return cData;
 	}
 
 	/**
@@ -187,18 +196,18 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param nameValues
+	 * @param cData
 	 *            activity object name/value pairs map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, String> nameValues,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		val = nameValues.get(locStr); // NOTE: locStr == null?
+		val = cData.getData().get(locStr); // NOTE: locStr == null?
 
 		return val;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class DirStreamingManagerTest {
 		final File tmpFile = File.createTempFile("TEST", ".TST");
 		tmpFile.deleteOnExit();
 		final File parentFile = tmpFile.getParentFile();
-		dsm = new DirStreamingManager(parentFile.getAbsolutePath(), "tnt-data-source*.xml");
+		dsm = new DirStreamingManager(parentFile.getAbsolutePath(), "tnt-data-source*.xml"); // NON-NLS
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,36 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.*;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
+import com.jkoolcloud.tnt4j.streams.configure.jaxb.ResourceReferenceType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldMappingType;
+import com.jkoolcloud.tnt4j.streams.filters.AbstractExpressionFilter;
+import com.jkoolcloud.tnt4j.streams.filters.DefaultValueFilter;
+import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -83,6 +95,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
+	private static final String FIELD_MAP_REF_ELMT = "field-map-ref"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
 	private static final String FIELD_LOC_ELMT = "field-locator"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
@@ -100,14 +116,22 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String FILTER_ELMT = "filter"; // NON-NLS
+	// /**
+	// * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	// */
+	// private static final String RULE_ELMT = "rule"; // NON-NLS
+	// /**
+	// * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	// */
+	// private static final String STEP_ELMT = "step"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String RULE_ELMT = "rule"; // NON-NLS
+	private static final String VALUE_ELMT = "value"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String STEP_ELMT = "step"; // NON-NLS
+	private static final String EXPRESSION_ELMT = "expression"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -120,6 +144,26 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String PARAM_ELMT = "param"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String EMBEDDED_ACTIVITY_ELMT = "embedded-activity"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String CACHE_ELMT = "cache"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String CACHE_ENTRY_ELMT = "entry"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String CACHE_KEY_ELMT = "key"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String RESOURCE_REF_ELMT = "resource-ref"; // NON-NLS
 
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -213,7 +257,33 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String LANG_ATTR = "lang"; // NON-NLS
-
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String HANDLE_ATTR = "handle"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String EVALUATION_ATTR = "evaluation"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String AGGREGATION_ATTR = "aggregation"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String FORMATTING_PATTERN_ATTR = "formattingPattern"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String URI_ATTR = "uri"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String RESOURCE_ATTR = "resource"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
+	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
 
 	/**
@@ -223,6 +293,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	private Map<String, String> currProperties = null;
 	private ActivityParser currParser = null;
 	private ActivityField currField = null;
+	@SuppressWarnings("rawtypes")
+	private StreamFiltersGroup currFilter = null;
 
 	private boolean currFieldHasLocValAttr = false;
 	// private boolean currFieldHasLocElmt = false;
@@ -230,6 +302,8 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private StreamsConfigData streamsConfigData = null;
 	private Map<String, Object> javaObjectsMap = null;
+
+	private Map<String, Map<String, ?>> resourcesMap;
 
 	/**
 	 * Configuration parsing locator.
@@ -241,6 +315,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	private Property currProperty = null;
 	private FieldLocatorData currLocatorData = null;
 	private FieldTransformData currTransform = null;
+	private FilterValueData currFilterValue = null;
+	private FilterExpressionData currFilterExpression = null;
+	private boolean processingCache = false;
+	private CacheEntryData currCacheEntry = null;
 
 	/**
 	 * Buffer to put current configuration element (token) data value
@@ -273,6 +351,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		currProperties = null;
 		currParser = null;
 		currField = null;
+		currFilter = null;
 		currLocatorData = null;
 		currFieldHasLocValAttr = false;
 		// currFieldHasLocElmt = false;
@@ -280,11 +359,15 @@ public class ConfigParserHandler extends DefaultHandler {
 		processingTNT4JProperties = false;
 		streamsConfigData = new StreamsConfigData();
 		javaObjectsMap = new HashMap<>();
+		processingCache = false;
 	}
 
 	@Override
 	public void endDocument() throws SAXException {
 		javaObjectsMap.clear();
+		if (resourcesMap != null) {
+			resourcesMap.clear();
+		}
 	}
 
 	@Override
@@ -310,10 +393,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			processStream(attributes);
 		} else if (FILTER_ELMT.equals(qName)) {
 			processFilter(attributes);
-		} else if (RULE_ELMT.equals(qName)) {
-			processRule(attributes);
-		} else if (STEP_ELMT.equals(qName)) {
-			processStep(attributes);
+		} else if (VALUE_ELMT.equals(qName)) {
+			processValue(attributes);
+		} else if (EXPRESSION_ELMT.equals(qName)) {
+			processFilterExpression(attributes);
 		} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 			processTNT4JProperties(attributes);
 		} else if (REF_ELMT.equals(qName)) {
@@ -324,11 +407,84 @@ public class ConfigParserHandler extends DefaultHandler {
 			processParam(attributes);
 		} else if (FIELD_TRANSFORM_ELMT.equals(qName)) {
 			processFieldTransform(attributes);
+		} else if (EMBEDDED_ACTIVITY_ELMT.equals(qName)) {
+			processEmbeddedActivity(attributes);
+		} else if (CACHE_ELMT.equals(qName)) {
+			processCache(attributes);
+		} else if (CACHE_ENTRY_ELMT.equals(qName)) {
+			processCacheEntry(attributes);
+		} else if (CACHE_KEY_ELMT.equals(qName)) {
+			processKey(attributes);
+		} else if (FIELD_MAP_REF_ELMT.equals(qName)) {
+			processFieldMapReference(attributes);
+		} else if (RESOURCE_REF_ELMT.equals(qName)) {
+			processResourceReference(attributes);
 		}
 	}
 
+	private void processCache(Attributes attributes) {
+		processingCache = true;
+	}
+
 	/**
-	 * Processes a parser element.
+	 * Processes a {@code <key>} element under <entry> element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processCacheEntry(Attributes attrs) throws SAXException {
+		if (currCacheEntry != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", CACHE_ENTRY_ELMT), currParseLocation);
+		}
+
+		if (processingCache == false) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", CACHE_ENTRY_ELMT, CACHE_ELMT),
+					currParseLocation);
+		}
+
+		if (currCacheEntry == null) {
+			currCacheEntry = new CacheEntryData();
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (ID_ATTR.equals(attName)) {
+				currCacheEntry.id = attValue;
+			}
+		}
+
+		notEmpty(currCacheEntry.id, CACHE_ENTRY_ELMT, ID_ATTR);
+	}
+
+	/**
+	 * Processes a {@code <key>} element under <entry> element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processKey(Attributes attrs) throws SAXException {
+		if (currCacheEntry == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", CACHE_KEY_ELMT, CACHE_ENTRY_ELMT),
+					currParseLocation);
+		}
+
+		elementData = new StringBuilder();
+	}
+
+	/**
+	 * Processes a {@code <parser>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -355,14 +511,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				tags = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PARSER_ELMT, NAME_ATTR), currParseLocation);
-		}
-		if (StringUtils.isEmpty(className)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PARSER_ELMT, CLASS_ATTR), currParseLocation);
-		}
+
+		notEmpty(name, PARSER_ELMT, NAME_ATTR);
+		notEmpty(className, PARSER_ELMT, CLASS_ATTR);
 		if (streamsConfigData.getParser(name) != null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.duplicate.parser.definition", name), currParseLocation);
@@ -387,7 +538,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a field element.
+	 * Processes a {@code <field>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -415,6 +566,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String locator = null;
 		String valueType = null;
 		String separator = null;
+		String pattern = null;
 		String units = null;
 		String format = null;
 		String locale = null;
@@ -424,6 +576,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String reqVal = "";
 		boolean transparent = false;
 		boolean split = false;
+		String id = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -439,7 +592,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				valueType = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
 				separator = attValue;
-			} else if (RADIX_ATTR.equals(attName)) {
+			} else if (FORMATTING_PATTERN_ATTR.equals(attName))
+				pattern = attValue;
+			else if (RADIX_ATTR.equals(attName)) {
 				radix = Integer.parseInt(attValue);
 			} else if (UNITS_ATTR.equals(attName)) {
 				units = attValue;
@@ -457,12 +612,18 @@ public class ConfigParserHandler extends DefaultHandler {
 				transparent = Boolean.parseBoolean(attValue);
 			} else if (SPLIT_ATTR.equals(attName)) {
 				split = Boolean.parseBoolean(attValue);
+			} else if (ID_ATTR.equals(attName)) {
+				id = attValue;
 			}
 		}
 		// make sure required fields are present
-		if (StringUtils.isEmpty(field)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", FIELD_ELMT, NAME_ATTR), currParseLocation);
+		notEmpty(field, FIELD_ELMT, NAME_ATTR);
+
+		if (separator != null && pattern != null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.cannot.contain", FIELD_ELMT, SEPARATOR_ATTR, FORMATTING_PATTERN_ATTR),
+					currParseLocation);
 		}
 
 		ActivityFieldLocator afl;
@@ -484,6 +645,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 			if (StringUtils.isNotEmpty(timeZone)) {
 				afl.setTimeZone(timeZone);
+			}
+			if (StringUtils.isNotEmpty(id)) {
+				afl.setId(id);
 			}
 			af.addLocator(afl);
 		} else if (StringUtils.isNotEmpty(locator)) {
@@ -507,6 +671,9 @@ public class ConfigParserHandler extends DefaultHandler {
 					if (StringUtils.isNotEmpty(timeZone)) {
 						afl.setTimeZone(timeZone);
 					}
+					if (StringUtils.isNotEmpty(id)) {
+						afl.setId(id);
+					}
 					af.addLocator(afl);
 				}
 			}
@@ -516,6 +683,9 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		if (separator != null) {
 			af.setSeparator(separator);
+		}
+		if (StringUtils.isNotEmpty(pattern)) {
+			af.setFormattingPattern(pattern);
 		}
 		if (StringUtils.isNotEmpty(valueType)) {
 			af.setValueType(valueType);
@@ -527,7 +697,134 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a field locator element.
+	 * Checks if attribute resolved {@link String} value is not empty.
+	 *
+	 * @param attrValue
+	 *            attribute resolved value
+	 * @param elemName
+	 *            element name
+	 * @param attrName
+	 *            attribute name
+	 * @throws SAXParseException
+	 *             if attribute resolved {@link String} value is {@code null} or {@code ""}
+	 */
+	protected void notEmpty(String attrValue, String elemName, String attrName) throws SAXParseException {
+		if (StringUtils.isEmpty(attrValue)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.missing.attribute", elemName, attrName), currParseLocation);
+		}
+	}
+
+	/**
+	 * Checks if element resolved {@link String} value is not empty.
+	 *
+	 * @param attrValue
+	 *            attribute resolved value
+	 * @param elemName
+	 *            element name
+	 * @throws SAXParseException
+	 *             if attribute resolved {@link String} value is {@code null} or {@code ""}
+	 */
+	protected void notEmpty(String attrValue, String elemName) throws SAXParseException {
+		if (StringUtils.isEmpty(attrValue)) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.missing.element", elemName), currParseLocation);
+		}
+	}
+
+	/**
+	 * Checks if attribute resolved value is not {@code null}.
+	 *
+	 * @param attrValue
+	 *            attribute resolved value
+	 * @param elemName
+	 *            element name
+	 * @param attrName
+	 *            attribute name
+	 *
+	 * @throws SAXParseException
+	 *             if attribute resolved value is {@code null}
+	 */
+	protected void notNull(Object attrValue, String elemName, String attrName) throws SAXParseException {
+		if (attrValue == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.missing.attribute", elemName, attrName), currParseLocation);
+		}
+	}
+
+	/**
+	 * Processes a {@code <embedded-activity>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processEmbeddedActivity(Attributes attrs) throws SAXException {
+		if (currField != null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration5", EMBEDDED_ACTIVITY_ELMT, FIELD_ELMT),
+					currParseLocation);
+		}
+		if (currParser == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT),
+					currParseLocation);
+		}
+		String field = null;
+		String locatorType = null;
+		String locator = null;
+		String reqVal = "";
+		boolean transparent = true;
+		boolean split = true;
+		String id = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				field = attValue;
+			} else if (LOC_TYPE_ATTR.equals(attName)) {
+				locatorType = attValue;
+			} else if (LOCATOR_ATTR.equals(attName)) {
+				locator = attValue;
+			} else if (REQUIRED_ATTR.equals(attName)) {
+				reqVal = attValue;
+			} else if (ID_ATTR.equals(attName)) {
+				id = attValue;
+			}
+		}
+		// make sure required fields are present
+		notEmpty(field, EMBEDDED_ACTIVITY_ELMT, NAME_ATTR);
+		notEmpty(locator, EMBEDDED_ACTIVITY_ELMT, LOCATOR_ATTR);
+		notEmpty(locatorType, EMBEDDED_ACTIVITY_ELMT, LOC_TYPE_ATTR);
+
+		ActivityFieldLocator afl;
+		ActivityField af = new ActivityField(field);
+
+		String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM))
+				: new String[] { locator };
+		for (String loc : locators) {
+			if (StringUtils.isNotEmpty(loc)) {
+				afl = new ActivityFieldLocator(locatorType, loc);
+				afl.setRequired(reqVal);
+				if (StringUtils.isNotEmpty(id)) {
+					afl.setId(id);
+				}
+				af.addLocator(afl);
+			}
+		}
+
+		af.setRequired(reqVal);
+		af.setTransparent(transparent);
+		af.setSplitCollection(split);
+		currField = af;
+	}
+
+	/**
+	 * Processes a {@code <field-locator>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -541,9 +838,8 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.malformed.configuration", FIELD_LOC_ELMT), currParseLocation);
 		}
 		if (currField == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration2", FIELD_LOC_ELMT, FIELD_ELMT),
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration3", FIELD_LOC_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT),
 					currParseLocation);
 		}
 		if (!currField.hasDynamicAttrs() && currFieldHasLocValAttr) {
@@ -611,10 +907,12 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 		// currFieldHasLocElmt = true;
+
+		elementData = new StringBuilder();
 	}
 
 	/**
-	 * Processes a field-map element.
+	 * Processes a {@code <field-map>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -652,14 +950,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				type = attValue;
 			}
 		}
-		if (source == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", FIELD_MAP_ELMT, SOURCE_ATTR), currParseLocation);
-		}
-		if (target == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", FIELD_MAP_ELMT, TARGET_ATTR), currParseLocation);
-		}
+		notNull(source, FIELD_MAP_ELMT, SOURCE_ATTR);
+		notNull(target, FIELD_MAP_ELMT, TARGET_ATTR);
+
 		if (currLocatorData != null) {
 			currLocatorData.valueMapItems.add(new FieldLocatorData.ValueMapData(source, target,
 					StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type)));
@@ -676,10 +969,146 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a field-transform element.
-	 * 
+	 * Processes a {@code <field-map-ref>} element.
+	 *
 	 * @param attrs
 	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	@SuppressWarnings("unchecked")
+	private void processFieldMapReference(Attributes attrs) throws SAXException {
+		if (currField == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration3", FIELD_MAP_REF_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
+					currParseLocation);
+		}
+
+		if (CollectionUtils.isEmpty(currField.getLocators()) && currLocatorData == null) {
+			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.element.no.binding", FIELD_MAP_REF_ELMT, FIELD_LOC_ELMT, getLocationInfo()));
+		}
+
+		String reference = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (RESOURCE_ATTR.equals(attName)) {
+				reference = attValue;
+			}
+		}
+
+		notEmpty(reference, FIELD_MAP_REF_ELMT, RESOURCE_ATTR);
+
+		Object val = Utils.getMapValueByPath(reference, resourcesMap);
+
+		if (val instanceof Map) {
+			AttributesImpl mappingAttrs = new AttributesImpl();
+			for (Map.Entry<String, ?> entry : ((Map<String, ?>) val).entrySet()) {
+				mappingAttrs.clear();
+				mappingAttrs.addAttribute(null, null, SOURCE_ATTR, null, entry.getKey());
+				mappingAttrs.addAttribute(null, null, TARGET_ATTR, null, String.valueOf(entry.getValue()));
+
+				processFieldMap(mappingAttrs);
+			}
+		}
+	}
+
+	/**
+	 * Processes a {@code <resource-ref>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processResourceReference(Attributes attrs) throws SAXException {
+		String id = null;
+		String type = null;
+		String uri = null;
+		String delim = null;
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (ID_ATTR.equals(attName)) {
+				id = attValue;
+			} else if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
+			} else if (URI_ATTR.equals(attName)) {
+				uri = attValue;
+			} else if (SEPARATOR_ATTR.equals(attName)) {
+				delim = attValue;
+			}
+		}
+
+		notEmpty(id, RESOURCE_REF_ELMT, ID_ATTR);
+		notEmpty(type, RESOURCE_REF_ELMT, TYPE_ATTR);
+		notEmpty(uri, RESOURCE_REF_ELMT, URI_ATTR);
+
+		if (type.equals(ResourceReferenceType.VALUES_MAP.value())) {
+			try {
+				if (resourcesMap == null) {
+					resourcesMap = new HashMap<>(5);
+				}
+
+				InputStream is;
+
+				try {
+					URL url = new URL(uri);
+					is = url.openStream();
+				} catch (MalformedURLException exc) {
+					is = new FileInputStream(uri);
+				}
+
+				if (uri.toLowerCase().endsWith(".json")) { // NON-NLS
+					resourcesMap.put(id, Utils.fromJsonToMap(is, false));
+				} else if (uri.toLowerCase().endsWith(".csv")) { // NON-NLS
+					resourcesMap.put(id, fromPropsToMap(is, StringUtils.isEmpty(delim) ? "," : delim)); // NON-NLS
+				} else if (uri.toLowerCase().endsWith(".properties")) { // NON-NLS
+					resourcesMap.put(id, fromPropsToMap(is, StringUtils.isEmpty(delim) ? "=" : delim)); // NON-NLS
+				} else {
+					throw new SAXParseException(
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ConfigParserHandler.invalidResource", id, uri),
+							currParseLocation);
+				}
+				Utils.close(is);
+			} catch (Exception e) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.jsonParseException", id, uri), e);
+			}
+		} else {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.invalidRefType", id, type), currParseLocation);
+		}
+	}
+
+	private static Map<String, ?> fromPropsToMap(InputStream is, String delim) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		Map<String, String> propsMap = new HashMap<>(10);
+
+		String line;
+		while ((line = br.readLine()) != null) {
+			String[] tokens = line.split(delim); // StringUtils.split (line, delim);
+
+			String key = tokens.length > 0 ? tokens[0] : "";
+			String value = tokens.length > 1 ? tokens[1] : "";
+
+			propsMap.put(tokens[0].trim(), tokens[1].trim());
+		}
+
+		return propsMap;
+	}
+
+	/**
+	 * Processes a {@code <field-transform>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
 	 * @throws SAXException
 	 *             if error occurs parsing element
 	 */
@@ -691,8 +1120,8 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		if (currField == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration3", FIELD_TRANSFORM_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
-					currParseLocation);
+					"ConfigParserHandler.malformed.configuration4", FIELD_TRANSFORM_ELMT, FIELD_ELMT,
+					EMBEDDED_ACTIVITY_ELMT, FIELD_LOC_ELMT), currParseLocation);
 		}
 
 		if (currTransform == null) {
@@ -718,11 +1147,13 @@ public class ConfigParserHandler extends DefaultHandler {
 					currParseLocation);
 		}
 
+		handleFieldLocatorCDATA();
+
 		elementData = new StringBuilder();
 	}
 
 	/**
-	 * Processes a stream element.
+	 * Processes a {@code <stream>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -746,14 +1177,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				className = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", STREAM_ELMT, NAME_ATTR), currParseLocation);
-		}
-		if (StringUtils.isEmpty(className)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", STREAM_ELMT, CLASS_ATTR), currParseLocation);
-		}
+		notEmpty(name, STREAM_ELMT, NAME_ATTR);
+		notEmpty(className, STREAM_ELMT, CLASS_ATTR);
 		if (streamsConfigData.getStream(name) != null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.duplicate", STREAM_ELMT, name), currParseLocation);
@@ -778,7 +1203,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a property element.
+	 * Processes a {@code <property>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -787,11 +1212,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processProperty(Attributes attrs) throws SAXException {
-		if (currStream == null && currParser == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT),
-					currParseLocation);
+		if (currStream == null && currParser == null && javaObjectData == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration4", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT,
+					JAVA_OBJ_ELMT), currParseLocation);
 		}
 
 		if (currProperty == null) {
@@ -808,16 +1232,14 @@ public class ConfigParserHandler extends DefaultHandler {
 				currProperty.value = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(currProperty.name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, NAME_ATTR), currParseLocation);
-		}
+
+		notEmpty(currProperty.name, PROPERTY_ELMT, NAME_ATTR);
 
 		elementData = new StringBuilder();
 	}
 
 	/**
-	 * Processes a parser-ref element.
+	 * Processes a {@code <parser-ref>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -827,23 +1249,25 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private void processParserRef(Attributes attrs) throws SAXException {
 		if (currField == null && currStream == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", PARSER_REF_ELMT, FIELD_ELMT, STREAM_ELMT),
-					currParseLocation);
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration4", PARSER_REF_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT,
+					STREAM_ELMT), currParseLocation);
 		}
 		String parserName = null;
+		String aggregationType = null;
+
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				parserName = attValue;
+			} else if (AGGREGATION_ATTR.equals(attName)) {
+				aggregationType = attValue;
 			}
 		}
-		if (StringUtils.isEmpty(parserName)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PARSER_REF_ELMT, NAME_ATTR), currParseLocation);
-		}
+
+		notEmpty(parserName, PARSER_REF_ELMT, NAME_ATTR);
+
 		ActivityParser parser = streamsConfigData.getParser(parserName);
 		if (parser == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -851,7 +1275,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currField != null) {
-			currField.addStackedParser(parser);
+			currField.addStackedParser(parser, aggregationType);
 		} else {
 			try {
 				currStream.addReference(parser);
@@ -865,7 +1289,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a reference element.
+	 * Processes a {@code <reference>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -874,22 +1298,58 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processReference(Attributes attrs) throws SAXException {
-		if (currStream == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration2", REF_ELMT, STREAM_ELMT), currParseLocation);
+		if (currStream == null && currParser == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration3", REF_ELMT, STREAM_ELMT, PARSER_ELMT),
+					currParseLocation);
 		}
-		String refObjName = null;
-		for (int i = 0; i < attrs.getLength(); i++) {
-			String attName = attrs.getQName(i);
-			String attValue = attrs.getValue(i);
-			if (NAME_ATTR.equals(attName)) {
-				refObjName = attValue;
-			}
+
+		if (currStream != null) {
+			processStreamReference(attrs);
 		}
-		if (StringUtils.isEmpty(refObjName)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", REF_ELMT, NAME_ATTR), currParseLocation);
+
+		if (currParser != null) {
+			processParserReference(attrs);
 		}
+	}
+
+	/**
+	 * Process parser {@code <reference>} element, e.g., pre-parser.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXParseException
+	 *             if error occurs parsing element
+	 */
+	private void processParserReference(Attributes attrs) throws SAXParseException {
+		String refObjName = getRefObjectNameFromAttr(attrs);
+		notEmpty(refObjName, REF_ELMT, NAME_ATTR);
+		Object refObject = findReference(refObjName);
+		try {
+			currParser.addReference(refObject);
+		} catch (IllegalStateException exc) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.could.not.add.stream.reference", currStream.getName(), refObjName),
+					currParseLocation, exc);
+		}
+
+	}
+
+	/**
+	 * Process stream {@code <reference>} element, e.g., parser, output, etc.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXParseException
+	 *             if error occurs parsing element
+	 */
+	private void processStreamReference(Attributes attrs) throws SAXParseException {
+		String refObjName = getRefObjectNameFromAttr(attrs);
+		notEmpty(refObjName, REF_ELMT, NAME_ATTR);
 		Object refObject = findReference(refObjName);
 		if (refObject == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -906,6 +1366,18 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
+	private String getRefObjectNameFromAttr(Attributes attrs) {
+		String refObjName = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				refObjName = attValue;
+			}
+		}
+		return refObjName;
+	}
+
 	private Object findReference(String refName) {
 		Object refObject = streamsConfigData == null ? null : streamsConfigData.getParser(refName);
 		if (refObject == null) {
@@ -919,7 +1391,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Processes a java-object element.
+	 * Processes a {@code <java-object>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -944,21 +1416,15 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", JAVA_OBJ_ELMT, NAME_ATTR), currParseLocation);
-		}
-		if (StringUtils.isEmpty(className)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", JAVA_OBJ_ELMT, CLASS_ATTR), currParseLocation);
-		}
+		notEmpty(name, JAVA_OBJ_ELMT, NAME_ATTR);
+		notEmpty(className, JAVA_OBJ_ELMT, CLASS_ATTR);
 
 		javaObjectData.name = name;
 		javaObjectData.className = className;
 	}
 
 	/**
-	 * Processes a param element.
+	 * Processes a {@code <param>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -989,14 +1455,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
-		if (StringUtils.isEmpty(name)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PARAM_ELMT, NAME_ATTR), currParseLocation);
-		}
-		if (StringUtils.isEmpty(type)) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PARAM_ELMT, TYPE_ATTR), currParseLocation);
-		}
+		notEmpty(name, PARAM_ELMT, NAME_ATTR);
+		notEmpty(type, PARAM_ELMT, TYPE_ATTR);
 
 		try {
 			Object obj;
@@ -1019,7 +1479,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * TODO
+	 * Processes a {@code <filter>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -1028,11 +1488,40 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processFilter(Attributes attrs) throws SAXException {
+		if (currFilter != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", FILTER_ELMT), currParseLocation);
+		}
 
+		if (currLocatorData == null && currField == null && currParser == null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration4", FILTER_ELMT, FIELD_LOC_ELMT, FIELD_ELMT,
+					EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT), currParseLocation);
+		}
+
+		String name = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (NAME_ATTR.equals(attName)) {
+				name = attValue;
+			}
+		}
+
+		// make sure required fields are present
+		notEmpty(name, FILTER_ELMT, NAME_ATTR);
+
+		if (currLocatorData != null || currField != null) {
+			currFilter = new StreamFiltersGroup<>(name);
+		} else if (currParser != null) {
+			currFilter = new StreamFiltersGroup<>(name);
+		}
+
+		handleFieldLocatorCDATA();
 	}
 
 	/**
-	 * TODO
+	 * Processes a {@code <value>} element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
@@ -1040,20 +1529,112 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * @throws SAXException
 	 *             if error occurs parsing element
 	 */
-	private void processRule(Attributes attrs) throws SAXException {
-
+	private void processValue(Attributes attrs) throws SAXException {
+		if (processingCache) {
+			processCacheValue(attrs);
+		} else {
+			processFilterValue(attrs);
+		}
 	}
 
 	/**
-	 * TODO
+	 * Processes a {@code <value>} element under <filter> element.
 	 *
 	 * @param attrs
 	 *            List of element attributes
+	 *
 	 * @throws SAXException
 	 *             if error occurs parsing element
 	 */
-	private void processStep(Attributes attrs) throws SAXException {
+	private void processFilterValue(Attributes attrs) throws SAXException {
+		if (currFilterValue != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", VALUE_ELMT), currParseLocation);
+		}
 
+		if (currFilter == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", VALUE_ELMT, FILTER_ELMT),
+					currParseLocation);
+		}
+
+		if (currFilterValue == null) {
+			currFilterValue = new FilterValueData();
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (HANDLE_ATTR.equals(attName)) {
+				currFilterValue.handle = attValue;
+			} else if (EVALUATION_ATTR.equals(attName)) {
+				currFilterValue.evaluation = attValue;
+			} else if (FORMAT_ATTR.equals(attName)) {
+				currFilterValue.format = attValue;
+			}
+		}
+
+		elementData = new StringBuilder();
+	}
+
+	/**
+	 * Processes a {@code <value>} element under <cache> element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processCacheValue(Attributes attrs) throws SAXException {
+		if (currCacheEntry == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", VALUE_ELMT, CACHE_ENTRY_ELMT),
+					currParseLocation);
+		}
+
+		elementData = new StringBuilder();
+	}
+
+	/**
+	 * Processes a {@code <expression>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processFilterExpression(Attributes attrs) throws SAXException {
+		if (currFilterExpression != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", EXPRESSION_ELMT), currParseLocation);
+		}
+
+		if (currFilter == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", EXPRESSION_ELMT, FILTER_ELMT),
+					currParseLocation);
+		}
+
+		if (currFilterExpression == null) {
+			currFilterExpression = new FilterExpressionData();
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (HANDLE_ATTR.equals(attName)) {
+				currFilterExpression.handle = attValue;
+			} else if (LANG_ATTR.equals(attName)) {
+				currFilterExpression.lang = attValue;
+			}
+		}
+
+		elementData = new StringBuilder();
 	}
 
 	private void processTNT4JProperties(Attributes attrs) throws SAXException {
@@ -1101,8 +1682,8 @@ public class ConfigParserHandler extends DefaultHandler {
 					currProperties.clear();
 				}
 				currParser = null;
-			} else if (FIELD_ELMT.equals(qName)) {
-				validateActivityField(currField);
+			} else if (FIELD_ELMT.equals(qName) || EMBEDDED_ACTIVITY_ELMT.equals(qName)) {
+				validateActivityField(currField, qName);
 				currParser.addField(currField);
 				currField = null;
 				currFieldHasLocValAttr = false;
@@ -1113,6 +1694,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleFieldLocator(currLocatorData);
 
 					currLocatorData = null;
+					elementData = null;
 				}
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
 				processingTNT4JProperties = false;
@@ -1136,6 +1718,44 @@ public class ConfigParserHandler extends DefaultHandler {
 					currTransform = null;
 					elementData = null;
 				}
+			} else if (FILTER_ELMT.equals(qName)) {
+				if (currFilter != null) {
+					handleFilter(currFilter);
+
+					currFilter = null;
+				}
+			} else if (VALUE_ELMT.equals(qName)) {
+				if (currFilterValue != null) {
+					handleFilterValue(currFilterValue);
+
+					currFilterValue = null;
+					elementData = null;
+				} else if (currCacheEntry != null) {
+					handleValue(currCacheEntry);
+
+					elementData = null;
+				}
+			} else if (EXPRESSION_ELMT.equals(qName)) {
+				if (currFilterExpression != null) {
+					handleFilterExpression(currFilterExpression);
+
+					currFilterExpression = null;
+					elementData = null;
+				}
+			} else if (CACHE_ELMT.equals(qName)) {
+				processingCache = false;
+			} else if (CACHE_ENTRY_ELMT.equals(qName)) {
+				if (currCacheEntry != null) {
+					handleCacheEntry(currCacheEntry);
+
+					currCacheEntry = null;
+				}
+			} else if (CACHE_KEY_ELMT.equals(qName)) {
+				if (currCacheEntry != null) {
+					handleKey(currCacheEntry);
+
+					elementData = null;
+				}
 			}
 		} catch (SAXException exc) {
 			throw exc;
@@ -1153,6 +1773,14 @@ public class ConfigParserHandler extends DefaultHandler {
 				javaObjectData.getTypes());
 
 		javaObjectsMap.put(javaObjectData.name, obj);
+
+		if (MapUtils.isNotEmpty(currProperties)) {
+			if (obj instanceof TNTStreamOutput) {
+				((TNTStreamOutput<?>) obj).setProperties(currProperties.entrySet());
+			}
+
+			currProperties.clear();
+		}
 	}
 
 	private void handleProperty(Property currProperty) throws SAXException {
@@ -1166,10 +1794,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
-		if (currProperty.value == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.missing.attribute", PROPERTY_ELMT, VALUE_ATTR), currParseLocation);
-		}
+		notNull(currProperty.value, PROPERTY_ELMT, VALUE_ATTR);
 
 		if (processingTNT4JProperties) {
 			Map.Entry<String, String> p = new AbstractMap.SimpleEntry<>(currProperty.name, currProperty.value);
@@ -1183,6 +1808,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleFieldLocator(FieldLocatorData currLocatorData) throws SAXException {
+		handleFieldLocatorCDATA();
+
 		if (currLocatorData.locator != null && currLocatorData.locator.isEmpty()) {
 			currLocatorData.locator = null;
 		}
@@ -1231,7 +1858,28 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
+		if (currLocatorData.filter != null) {
+			afl.setFilter(currLocatorData.filter);
+		}
+
 		currField.addLocator(afl);
+	}
+
+	private void handleFieldLocatorCDATA() throws SAXException {
+		if (currLocatorData == null) {
+			return;
+		}
+
+		String eDataVal = getElementData();
+
+		if (StringUtils.isNotEmpty(eDataVal)) {
+			if (StringUtils.isNotEmpty(currLocatorData.locator) && eDataVal.length() > 0) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.element.has.both3", FIELD_LOC_ELMT, LOCATOR_ATTR, getLocationInfo()));
+			}
+
+			currLocatorData.locator = eDataVal;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1282,11 +1930,71 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currLocatorData != null) {
 			currLocatorData.valueTransforms.add(transform);
 		} else {
-			ActivityFieldLocator locator = currField.getMasterLocator();
-			if (locator != null) {
-				locator.addTransformation(transform);
-			}
+			currField.addTransformation(transform);
 		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void handleFilter(StreamFiltersGroup currFilter) throws SAXException {
+		if (currLocatorData != null) {
+			currLocatorData.filter = currFilter;
+		} else if (currField != null) {
+			currField.setFilter(currFilter);
+		} else if (currParser != null) {
+			((GenericActivityParser<?>) currParser).setActivityFilter(currFilter);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void handleFilterValue(FilterValueData fvData) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			fvData.value = eDataVal;
+		}
+
+		currFilter.addFilter(new DefaultValueFilter(fvData.handle, fvData.evaluation, fvData.format, fvData.value));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void handleFilterExpression(FilterExpressionData feData) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			feData.expression = eDataVal;
+		}
+
+		if (currLocatorData != null || currField != null) {
+			currFilter.addFilter(
+					AbstractExpressionFilter.createExpressionFilter(feData.handle, feData.lang, feData.expression));
+		} else if (currParser != null) {
+			currFilter.addFilter(AbstractExpressionFilter.createActivityExpressionFilter(feData.handle, feData.lang,
+					feData.expression));
+		}
+	}
+
+	private void handleCacheEntry(CacheEntryData currCacheEntry) throws SAXException {
+		StreamsCache.addEntry(currCacheEntry.id, currCacheEntry.key, currCacheEntry.value);
+	}
+
+	private void handleKey(CacheEntryData currCacheEntry) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			currCacheEntry.key = eDataVal;
+		}
+
+		notEmpty(currCacheEntry.key, CACHE_KEY_ELMT);
+	}
+
+	private void handleValue(CacheEntryData currCacheEntry) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			currCacheEntry.value = eDataVal;
+		}
+
+		notEmpty(currCacheEntry.value, VALUE_ELMT);
 	}
 
 	/**
@@ -1303,21 +2011,20 @@ public class ConfigParserHandler extends DefaultHandler {
 		return locInfo;
 	}
 
-	private void validateActivityField(ActivityField aField) throws SAXException {
+	private void validateActivityField(ActivityField aField, String qName) throws SAXException {
 		if (CollectionUtils.isEmpty(aField.getLocators())) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.element.must.have", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
+					"ConfigParserHandler.element.must.have", qName, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
 					getLocationInfo()));
 		}
 
 		List<String> dynamicLocators = new ArrayList<>();
-		Utils.resolveVariables(dynamicLocators, aField.getFieldTypeName(), aField.getValueType());
+		Utils.resolveCfgVariables(dynamicLocators, aField.getFieldTypeName(), aField.getValueType());
 
 		for (String dLoc : dynamicLocators) {
 			if (!aField.hasDynamicLocator(dLoc)) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ConfigParserHandler.element.ref.missing", FIELD_ELMT, FIELD_LOC_ELMT, dLoc,
-						getLocationInfo()));
+						"ConfigParserHandler.element.ref.missing", qName, FIELD_LOC_ELMT, dLoc, getLocationInfo()));
 			}
 		}
 	}
@@ -1351,6 +2058,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		List<ValueMapData> valueMapItems;
 		List<ValueTransformation<Object, Object>> valueTransforms;
+		StreamFiltersGroup<Object> filter;
 
 		private FieldLocatorData() {
 			reset();
@@ -1380,6 +2088,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else {
 				valueTransforms.clear();
 			}
+
+			filter = null;
 		}
 
 		private static class ValueMapData {
@@ -1457,6 +2167,44 @@ public class ConfigParserHandler extends DefaultHandler {
 			beanRef = "";
 			scriptLang = "";
 			scriptCode = "";
+		}
+	}
+
+	private static class FilterValueData {
+		String handle;
+		String evaluation;
+		String format;
+		String value;
+
+		private void reset() {
+			handle = "";
+			evaluation = "";
+			format = "";
+			value = "";
+		}
+	}
+
+	private static class FilterExpressionData {
+		String handle;
+		String lang;
+		String expression;
+
+		private void reset() {
+			handle = "";
+			lang = "";
+			expression = "";
+		}
+	}
+
+	private static class CacheEntryData {
+		String id;
+		String key;
+		String value;
+
+		private void reset() {
+			id = "";
+			key = "";
+			value = "";
 		}
 	}
 }

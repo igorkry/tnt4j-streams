@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import com.ibm.mq.MQMessage;
 import com.ibm.mq.constants.MQConstants;
+import com.ibm.mq.pcf.PCFContent;
 import com.ibm.mq.pcf.PCFMessage;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -27,15 +28,15 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
  * Implements a WebSphere MQ activity stream, where activity data is {@link MQMessage} transformed to
- * {@link PCFMessage}.
+ * {@link PCFContent}.
  * <p>
- * This activity stream requires parsers that can support {@link PCFMessage} data.
+ * This activity stream requires parsers that can support {@link PCFContent} data.
  * <p>
  * This activity stream supports properties from {@link AbstractWmqStream} (and higher hierarchy streams).
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
-public class WmqStreamPCF extends AbstractWmqStream<PCFMessage> {
+public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamPCF.class);
 
 	/**
@@ -51,7 +52,7 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFMessage> {
 	}
 
 	@Override
-	protected PCFMessage getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
+	protected PCFContent getActivityDataFromMessage(MQMessage mqMsg) throws Exception {
 		PCFMessage msgData = new PCFMessage(mqMsg);
 		msgData.addParameter(MQConstants.MQBACF_CORREL_ID, mqMsg.correlationId);
 		logger().log(OpLevel.TRACE,

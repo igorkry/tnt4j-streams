@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class StreamsAgentTest {
 	@Test
 	public void testHelpArgument() throws Exception {
 		interceptConsole();
-		StreamsAgent.main("-h");
+		StreamsAgent.main("-h"); // NON-NLS
 		System.out.flush();
 		final String string = console.getBuffer().toString();
 		final String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help")
@@ -54,7 +54,7 @@ public class StreamsAgentTest {
 	@Test
 	public void testArgumentsFail() throws Exception {
 		interceptConsole();
-		final String argument = "-test";
+		final String argument = "-test"; // NON-NLS
 		StreamsAgent.main(argument);
 		System.out.flush();
 		final String string = console.getBuffer().toString();
@@ -70,7 +70,7 @@ public class StreamsAgentTest {
 	@Test
 	public void testFileEmptyFail() throws Exception {
 		interceptConsole();
-		final String argument = "-f:";
+		final String argument = "-f:"; // NON-NLS
 		StreamsAgent.main(argument);
 		System.out.flush();
 		final String string = console.getBuffer().toString();
@@ -85,17 +85,17 @@ public class StreamsAgentTest {
 
 	@Test
 	public void testRunFromAPI() throws Exception {
-		final String testStreamName = "TestStream";
+		final String testStreamName = "TestStream"; // NON-NLS
 		final File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
 		FileWriter fw = new FileWriter(tempConfFile);
-		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Utils.NEW_LINE + "<tnt-data-source" + Utils.NEW_LINE
-				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + Utils.NEW_LINE
-				+ "        xsi:noNamespaceSchemaLocation=\"https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd\">"
-				+ Utils.NEW_LINE + "    <stream name=\"" + testStreamName
-				+ "\" class=\"com.jkoolcloud.tnt4j.streams.inputs.CharacterStream\">" + Utils.NEW_LINE
-				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + Utils.NEW_LINE
-				+ "        <property name=\"Port\" value=\"9595\"/>" + Utils.NEW_LINE + "    </stream>" + Utils.NEW_LINE
-				+ "</tnt-data-source>";
+		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Utils.NEW_LINE + "<tnt-data-source" + Utils.NEW_LINE // NON-NLS
+				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + Utils.NEW_LINE // NON-NLS
+				+ "        xsi:noNamespaceSchemaLocation=\"https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd\">" // NON-NLS
+				+ Utils.NEW_LINE + "    <stream name=\"" + testStreamName // NON-NLS
+				+ "\" class=\"com.jkoolcloud.tnt4j.streams.inputs.CharacterStream\">" + Utils.NEW_LINE // NON-NLS
+				+ "        <property name=\"HaltIfNoParser\" value=\"false\"/>" + Utils.NEW_LINE // NON-NLS
+				+ "        <property name=\"Port\" value=\"9595\"/>" + Utils.NEW_LINE + "    </stream>" + Utils.NEW_LINE // NON-NLS
+				+ "</tnt-data-source>"; // NON-NLS
 		fw.write(sb);
 		fw.flush();
 		Utils.close(fw);

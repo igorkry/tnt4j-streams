@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -65,41 +63,6 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		return new CommonFileWatcher();
 	}
 
-	/**
-	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
-	 * should be performed i.e. C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
-	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
-	 * modification timestamp in ascending order.
-	 *
-	 * @param namePattern
-	 *            name pattern to find files
-	 *
-	 * @return array of found files.
-	 *
-	 * @see WildcardFileFilter#WildcardFileFilter(String)
-	 * @see File#listFiles(FilenameFilter)
-	 */
-	public static File[] searchFiles(String namePattern) {
-		File f = new File(namePattern);
-		File dir = f.getAbsoluteFile().getParentFile();
-		File[] activityFiles = dir.listFiles((FilenameFilter) new WildcardFileFilter(f.getName()));
-
-		if (activityFiles != null) {
-			Arrays.sort(activityFiles, new Comparator<File>() {
-				@Override
-				public int compare(File o1, File o2) {
-					long f1ct = o1.lastModified();
-					long f2ct = o2.lastModified();
-					// NOTE: we want files to be sorted oldest->newest
-					// (ASCENDING)
-					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
-				}
-			});
-		}
-
-		return activityFiles;
-	}
-
 	private static int[] getFilesTotals(File[] activityFiles) {
 		int tbc = 0;
 		int tlc = 0;
@@ -107,7 +70,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			for (File f : activityFiles) {
 				tbc += f.length();
 				try {
-					tlc += Utils.countLines(new FileReader(f));
+					tlc += Utils.countLines(new FileInputStream(f));
 				} catch (IOException exc) {
 				}
 			}
@@ -142,11 +105,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		 */
 		@Override
 		protected void initialize(Object... params) throws Exception {
-			if (Utils.isWildcardString(fileName)) {
-				availableFiles = searchFiles(fileName);
-			} else {
-				availableFiles = new File[] { new File(fileName) };
-			}
+			availableFiles = Utils.listFilesByName(fileName);
 
 			updateDataTotals(availableFiles);
 
@@ -166,7 +125,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 			if (startFromLatestActivity && fileToRead != null) {
 				lastModifTime = fileToRead.lastModified();
-				lineNumber = Utils.countLines(new FileReader(fileToRead));
+				lineNumber = Utils.countLines(new FileInputStream(fileToRead));
 			}
 		}
 
@@ -304,10 +263,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 		private boolean swapToPrevFile() {
 			if (Utils.isWildcardString(fileName)) {
-				availableFiles = searchFiles(fileName);
+				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
-				File prevFile = availableFiles == null || availableFiles.length < 2 ? null
+				File prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
 				if (prevFile != null) {
@@ -326,7 +285,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 		private boolean swapToNextFile() {
 			if (Utils.isWildcardString(fileName)) {
-				availableFiles = searchFiles(fileName);
+				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
 				File nextFile = Utils.getFirstNewer(availableFiles, lastModifTime);

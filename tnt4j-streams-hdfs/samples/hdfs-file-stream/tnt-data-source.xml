@@ -20,7 +20,6 @@
         </field>
         <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
-
     </parser>
 
     <stream name="SampleHdfsFileLineStream" class="com.jkoolcloud.tnt4j.streams.inputs.HdfsFileLineStream">

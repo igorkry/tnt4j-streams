@@ -1,0 +1,170 @@
+<?xml version='1.0'?>
+<Workflow>
+	<trace />
+	<result>OK</result>
+	<userid />
+	<domain />
+	<processId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</processId>
+	<contextId>1</contextId>
+	<XMOFTSFeedBackList>
+		<XMOFTSFeedBack>
+			<ftfId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</ftfId>
+			<activityId>4bfd9e81-1ed1-11e7-b7f2-f69b351ecdea</activityId>
+			<branchId />
+			<rc>0</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_REQUEST_SUCCESSFUL</rcTxt>
+			<activity>Send</activity>
+			<locationCode />
+			<message>The request has completed successfully</message>
+			<message2>Send operation complete: /home/xmuser/Test/testfile.txt</message2>
+			<userAction />
+			<sysAdminAction />
+		</XMOFTSFeedBack>
+		<XMOFTSFeedBack>
+			<ftfId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</ftfId>
+			<activityId>4bfd9e80-1ed1-11e7-abd4-fa4c422a52ad</activityId>
+			<branchId />
+			<rc>18</rc>
+			<rc2>0</rc2>
+			<rcTxt>XMOFTS_FILE_OPEN_FAILURE</rcTxt>
+			<activity>Receive</activity>
+			<locationCode>FTF::openFileWrite():100</locationCode>
+			<message>An error occurred trying to open a file.  Possible causes are:     1) There may be a problem with the directory name.     2) The file may not exist.     3) The file may be locked.     4) Permissions may be preventing access to the file.     5) The directory may not exist.     See 'message2' for more details.</message>
+			<message2>Unable to open file: C:\temp\rchive\loand-20170411-110953.dat Exception: XMFile I/O Error occurred with driver:file. While accessing:C:\temp\rchive\loand-20170411-110953.dat. Using file mode:write. Using file IO:stream. Failed to open file (CreateFile), reason:'; error 3: The system cannot find the path specified.  . Driver specific error code:3</message2>
+			<userAction>Verify that the file exists and that it can be accessed</userAction>
+			<sysAdminAction>Check permissions of the file and all directories</sysAdminAction>
+		</XMOFTSFeedBack>
+	</XMOFTSFeedBackList>
+	<WfProcess>
+		<process>Transfer_File</process>
+		<priority>0</priority>
+		<next>ControlCenter</next>
+		<replyToQ>TEST.Q</replyToQ>
+		<replyToQmgr>DMFTSUS043</replyToQmgr>
+		<originalmsgid>0t4zdTrBS+qRtYs5CFG53AAAAAAAAAAA</originalmsgid>
+		<activityId>4bfd9e80-1ed1-11e7-b1fc-dd853f2746e7</activityId>
+		<processId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</processId>
+		<activity>XMOFIXIT</activity>
+		<lastActivity>XMOFIXIT</lastActivity>
+		<previous>noFork</previous>
+		<exceptionHandler>ControlCenter</exceptionHandler>
+		<waitFor>0</waitFor>
+		<ForkIDStack itemNumber="2" itemCount="2">
+			<forkID>4bfd9e80-1ed1-11e7-abd2-a1d41c6e7f7d</forkID>
+			<ForkIDStack itemNumber="1" itemCount="1">
+				<forkID>4bfd9e80-1ed1-11e7-abd1-c71125e5e606</forkID>
+				<branchId>4bfd9e81-1ed1-11e7-abd1-b84cb58d4fb0</branchId>
+			</ForkIDStack>
+			<branchId>4bfd9e81-1ed1-11e7-abd3-9d4f489314a2</branchId>
+		</ForkIDStack>
+		<lastExceptionAt>Receive</lastExceptionAt>
+		<Connection>
+			<connectionType>server</connectionType>
+			<queueManager>PMFTEUS000</queueManager>
+		</Connection>
+		<queueManager>PMFTEUS000</queueManager>
+		<messageId>D2DE33753AC14BEA91B58B390851B9DC0000000000000000</messageId>
+		<StatusOverrides>
+			<Activity type="update">
+				<activityId>4bfd9e80-1ed1-11e7-b1fc-dd853f2746e7</activityId>
+				<processId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</processId>
+				<ReferenceList>
+					<Reference type="unknown">
+						<referenceId>4bfd9e80-1ed1-11e7-819a-e90d5b384c64</referenceId>
+						<label>Error received</label>
+						<info>XMOFTSFeedback</info>
+						<type>XML</type>
+						<data>
+							<?xml version='1.0'?>
+							<!--Metastorm V8.6.0.000.20151217-->
+							<XMOFTSFeedBack>
+								<ftfId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</ftfId>
+								<activityId>4bfd9e80-1ed1-11e7-abd4-fa4c422a52ad</activityId>
+								<branchId />
+								<rc>18</rc>
+								<rc2>0</rc2>
+								<rcTxt>XMOFTS_FILE_OPEN_FAILURE</rcTxt>
+								<activity>Receive</activity>
+								<locationCode>FTF::openFileWrite():100</locationCode>
+								<message>An error occurred trying to open a file.  Possible causes are:     1) There may be a problem with the directory name.     2) The file may not exist.     3) The file may be locked.     4) Permissions may be preventing access to the file.     5) The directory may not exist.     See 'message2' for more details.</message>
+								<message2>Unable to open file: C:\temp\rchive\loand-20170411-110953.dat Exception: XMFile I/O Error occurred with driver:file. While accessing:C:\temp\rchive\loand-20170411-110953.dat. Using file mode:write. Using file IO:stream. Failed to open file (CreateFile), reason:'; error 3: The system cannot find the path specified.  . Driver specific error code:3</message2>
+								<userAction>Verify that the file exists and that it can be accessed</userAction>
+								<sysAdminAction>Check permissions of the file and all directories</sysAdminAction>
+							</XMOFTSFeedBack>
+						</data>
+						<referenceTime>2017-04-11 11:09:53</referenceTime>
+					</Reference>
+				</ReferenceList>
+			</Activity>
+			<Activity type="update">
+				<activityId>4bfd9e80-1ed1-11e7-b1fc-dd853f2746e7</activityId>
+				<processId>d2de3375-3ac1-4bea-91b5-8b390851b9dc</processId>
+				<DetailList>
+					<Detail type="insert">
+						<statusText>Request not automatically corrected, sent to Process Monitor for intervention</statusText>
+						<errorCode>0</errorCode>
+						<detailTime>2017-04-11 11:09:53</detailTime>
+					</Detail>
+				</DetailList>
+			</Activity>
+		</StatusOverrides>
+	</WfProcess>
+	<WfDescriptor>
+		<userIdentifier>leachge</userIdentifier>
+	</WfDescriptor>
+	<decisionFlag>0</decisionFlag>
+	<method>XMOFixIt</method>
+	<receiver>XMOFIXIT</receiver>
+	<batchDQMListSize>25</batchDQMListSize>
+	<batchDQMList>true</batchDQMList>
+	<DQMList />
+	<Batch />
+	<XMOFTSReq>
+		<dqm>DMFTCUS102</dqm>
+		<username>admin</username>
+		<destinationName>DMFTCUS102-Test-Archive</destinationName>
+		<dpath>C:\temp\rchive\loand-20170411-110953.dat</dpath>
+		<replyQueue>TEST.Q</replyQueue>
+		<replyQueueManager>DMFTSUS043</replyQueueManager>
+		<label>Test-Archiving-With-MIMVARS</label>
+		<lqm>PMFTEUS000</lqm>
+		<sqm>PMFTEUS000</sqm>
+		<oqm>PMFTEUS000</oqm>
+		<destinationListName>DMFTCUS102-Test-Archve</destinationListName>
+		<spath>/home/xmuser/Test/testfile.txt</spath>
+		<compressionLevel>5</compressionLevel>
+		<ControlCenter>
+			<doStatus>1</doStatus>
+		</ControlCenter>
+		<userid>leachge</userid>
+		<Version>
+			<request>A</request>
+			<transfer>A</transfer>
+		</Version>
+		<ttype>binary</ttype>
+		<chmod>644</chmod>
+		<FileStats>
+			<isCompressed>false</isCompressed>
+			<codePage>ASCII</codePage>
+			<sourceCCSID>819</sourceCCSID>
+			<platform>__UNIX__</platform>
+			<DataMessageList>
+				<DataMessage>
+					<msgId>414D5120504D4654455553303030202058D13F6F26D67D60</msgId>
+				</DataMessage>
+			</DataMessageList>
+			<totalBytes>48159</totalBytes>
+			<messageCount>1</messageCount>
+			<totalRecords>0</totalRecords>
+			<fileAccessMode>xmfile</fileAccessMode>
+			<sourceEOL>Cg==</sourceEOL>
+		</FileStats>
+	</XMOFTSReq>
+	<XMOFTSExit>
+		<exit>1</exit>
+		<exitdll>xmofixit</exitdll>
+		<exitentry>xmoFixIt</exitentry>
+	</XMOFTSExit>
+	<XMOFixitCount>1</XMOFixitCount>
+</Workflow>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,17 +136,17 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "type", "", "java.lang.String"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "Stream attr class"); // NON-NLS
 		attrs.addAttribute("", "", "filter", "", "Stream attr filter"); // NON-NLS
-		attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
-		attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
+		// attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
+		// attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
 		attrs.addAttribute("", "", "tnt4j-properties", "", "Stream attr tnt4j-properties"); // NON-NLS
 		attrs.addAttribute("", "", "java-object", "", "Stream attr java-object"); // NON-NLS
 		attrs.addAttribute("", "", "param", "", "Stream attr param"); // NON-NLS
 		attrs.addAttribute("", "", "tags", "", "Stream attr tags"); // NON-NLS
 		attrs.addAttribute("", "", "value", "", "Stream attr value"); // NON-NLS
 
-		test.startElement("TEST_URL", "TEST_LOCALNAME", "filter", attrs); // NON-NLS
-		test.startElement("TEST_URL", "TEST_LOCALNAME", "rule", attrs); // NON-NLS
-		test.startElement("TEST_URL", "TEST_LOCALNAME", "step", attrs); // NON-NLS
+		// test.startElement("TEST_URL", "TEST_LOCALNAME", "filter", attrs); // NON-NLS
+		// test.startElement("TEST_URL", "TEST_LOCALNAME", "rule", attrs); // NON-NLS
+		// test.startElement("TEST_URL", "TEST_LOCALNAME", "step", attrs); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "java-object", attrs); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "param", attrs); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "tnt-data-source", attrs); // NON-NLS
@@ -159,8 +159,8 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "name", "", "Stream attr name"); // NON-NLS
 		attrs.addAttribute("", "", "type", "", "Stream attr type"); // NON-NLS
 		attrs.addAttribute("", "", "filter", "", "Stream attr filter"); // NON-NLS
-		attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
-		attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
+		// attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
+		// attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
 		attrs.addAttribute("", "", "tnt4j-properties", "", "Stream attr tnt4j-properties"); // NON-NLS
 		attrs.addAttribute("", "", "java-object", "", "Stream attr java-object"); // NON-NLS
 		attrs.addAttribute("", "", "param", "", "Stream attr param"); // NON-NLS
@@ -175,8 +175,8 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "type", "", "Stream attr type"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "Stream attr class"); // NON-NLS
 		attrs.addAttribute("", "", "filter", "", "Stream attr filter"); // NON-NLS
-		attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
-		attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
+		// attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
+		// attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
 		attrs.addAttribute("", "", "tnt4j-properties", "", "Stream attr tnt4j-properties"); // NON-NLS
 		attrs.addAttribute("", "", "java-object", "", "Stream attr java-object"); // NON-NLS
 		attrs.addAttribute("", "", "param", "", "Stream attr param"); // NON-NLS
@@ -193,8 +193,8 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "type", "", "Stream attr type"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "java.lang.String"); // NON-NLS
 		attrs.addAttribute("", "", "filter", "", "Stream attr filter"); // NON-NLS
-		attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
-		attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
+		// attrs.addAttribute("", "", "rule", "", "Stream attr rule"); // NON-NLS
+		// attrs.addAttribute("", "", "step", "", "Stream attr step"); // NON-NLS
 		attrs.addAttribute("", "", "tnt4j-properties", "", "Stream attr tnt4j-properties"); // NON-NLS
 		attrs.addAttribute("", "", "java-object", "", "Stream attr java-object"); // NON-NLS
 		attrs.addAttribute("", "", "param", "", "Stream attr param"); // NON-NLS

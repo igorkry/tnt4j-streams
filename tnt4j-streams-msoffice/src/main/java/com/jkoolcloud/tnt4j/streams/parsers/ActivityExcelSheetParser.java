@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,12 +35,12 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 /**
  * Implements activity data parser that assumes each activity data item is an MS Excel
  * {@link org.apache.poi.ss.usermodel.Workbook} {@link Sheet} data structure, where each field is represented by a sheet
- * cell reference (i.e B12, H12, AA1 where letters identifies column and number identifies row) and the name is used to
- * map each field onto its corresponding activity field.
+ * cell reference (e.g., B12, H12, AA1 where letters identifies column and number identifies row) and the name is used
+ * to map each field into its corresponding activity field.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
-public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
+public class ActivityExcelSheetParser extends AbstractExcelParser<Sheet> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelSheetParser.class);
 
 	/**
@@ -58,35 +56,21 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link org.apache.poi.ss.usermodel.Sheet}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return Sheet.class.isInstance(data);
-	}
-
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
-		if (props == null) {
-			return;
-		}
-
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
-		// // no any additional properties are required yet.
-		// if (false) {
-		// logger().log(OpLevel.DEBUG,
-		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-		// name, value);
-		// }
-		// }
 	}
 
 	/**
@@ -94,7 +78,7 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param sheet
+	 * @param cData
 	 *            MS Excel document sheet representing activity object data fields
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
@@ -104,10 +88,11 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 	 *             if exception occurs while resolving raw data value
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Sheet sheet, AtomicBoolean formattingNeeded)
-			throws ParseException {
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Sheet sheet = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			CellReference ref = new CellReference(locStr);
@@ -122,8 +107,10 @@ public class ActivityExcelSheetParser extends GenericActivityParser<Sheet> {
 			if (row != null) {
 				Cell cell = row.getCell(ref.getCol());
 				if (cell != null) {
-					val = cell.toString();
+					val = getCellValue(cell);
 					cellFound = true;
+				} else {
+					val = row;
 				}
 			}
 

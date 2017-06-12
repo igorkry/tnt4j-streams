@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ public class StreamsResourcesTest {
 
 	@Test
 	public void testGetString() {
-		final String bundleName = "tnt4j-streams-core";
+		final String bundleName = "tnt4j-streams-core"; // NON-NLS
 		final ResourceBundle resourceBundle = ResourceBundle.getBundle(bundleName);
 		final Enumeration<String> keys = resourceBundle.getKeys();
 		while (keys.hasMoreElements()) {
 			final String nextElement = keys.nextElement();
 			final String resource = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, nextElement);
 			assertNotNull(resource);
-			if (resource.contains("{1}") && !resource.contains("{2}")) {
-				final String testVar = "TEST";
+			if (resource.contains("{1}") && !resource.contains("{2}")) { // NON-NLS
+				final String testVar = "TEST"; // NON-NLS
 				final String formatted = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						resource, testVar);
 				MessageFormat.format(resource, testVar);

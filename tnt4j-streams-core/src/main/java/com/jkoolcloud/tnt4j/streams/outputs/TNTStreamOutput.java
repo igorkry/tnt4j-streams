@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package com.jkoolcloud.tnt4j.streams.outputs;
+
+import java.util.Collection;
+import java.util.Map;
 
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -86,4 +89,12 @@ public interface TNTStreamOutput<T> {
 	 *            related input stream instance
 	 */
 	void setStream(TNTInputStream<?, ?> inputStream);
+
+	/**
+	 * Sets output configuration properties collection.
+	 *
+	 * @param props
+	 *            properties to set
+	 */
+	void setProperties(Collection<Map.Entry<String, String>> props);
 }

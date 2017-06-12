@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * the value for each field being retrieved from a specific 1-based numeric token position. The field-separator can be
  * customized.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},
@@ -92,6 +92,8 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 			return;
 		}
 
+		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -122,21 +124,24 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityTokenParser.no.field.delimiter"));
 		}
-		if (data == null) {
-			return null;
-		}
+		return super.parse(stream, data);
+	}
+
+	@Override
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		// Get next string to parse
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"), dataStr);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.splitting.string"),
+				dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.input.not.match"), getName());
+						"ActivityParser.input.not.match"), getName(), pattern.pattern());
 				return null;
 			}
 		}
@@ -146,14 +151,17 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
 			return null;
 		}
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
 				fields.length);
 
-		return parsePreparedItem(stream, dataStr, fields);
+		ActivityContext cData = new ActivityContext(stream, data, fields);
+		cData.setMessage(getRawDataAsMessage(fields));
+
+		return cData;
 	}
 
 	/**
@@ -161,17 +169,18 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	 *
 	 * @param locator
 	 *            activity field locator
-	 * @param fields
+	 * @param cData
 	 *            activity object data fields array
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, String[] fields,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
+		String[] fields = cData.getData();
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			int loc = Integer.parseInt(locStr);

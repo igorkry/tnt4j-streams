@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,7 +300,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Shifts {@link TimeUnit} enum value to next lower scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * Shifts {@link TimeUnit} enum value to next lower scale value, e.g., {@link TimeUnit#SECONDS} ->
 	 * {@link TimeUnit#MILLISECONDS}.
 	 * 
 	 * @param units
@@ -314,7 +314,7 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Shifts {@link TimeUnit} enum value to next upper scale value i.e. {@link TimeUnit#SECONDS} ->
+	 * Shifts {@link TimeUnit} enum value to next upper scale value, e.g., {@link TimeUnit#SECONDS} ->
 	 * {@link TimeUnit#MINUTES}.
 	 * 
 	 * @param units

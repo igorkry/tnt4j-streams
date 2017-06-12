@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
+
+    <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="EventType" locator="name(//*[1])" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.EventType"/>
+        </field>
+        <field name="EventName" locator="name(//*[1])" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.EventName"/>
+        </field>
+
+        <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
+
+        <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
+            <!--resolves FILE or QUEUE-->
+            <field-locator locator="name(//*/*)" locator-type="Label">
+                <field-map-ref resource="MFT_MAPPINGS.Resource"/>
+            </field-locator>
+            <!--resolves file or queue name -->
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
+            <!-- agent-->
+            <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
+        </field>
+
+        <field name="Size" locator="//*/file/@size" locator-type="Label" required="false"/>
+        <field name="LastModified" locator="//*/file/@last-modified" locator-type="Label" required="false"/>
+        <field name="Checksum" locator="//*/checksum" locator-type="Label" required="false"/>
+        <field name="ChecksumMethod" locator="//*/checksum/@method" locator-type="Label" required="false"/>
+        <field name="Correlator" locator="Checksum" locator-type="Activity" required="false"/>
+    </parser>
+
+    <parser name="JobNameParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
+
+        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
+        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
+        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
+        <field name="CoId" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
+    <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="true"/>
+
+        <field name="EventType" value="NOOP"/>
+
+        <field name="Filter" locator="/transaction/action[text() = 'progress']" locator-type="Label" required="true" transparent="true"/>
+        <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
+        <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ApplName" separator=":">
+            <field-locator value="JOB"/>
+            <field-locator locator="/transaction/job/name" locator-type="Label" required="false"/>
+        </field>
+        <field name="ServerName" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
+        <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="ReasonCode" separator="">
+            <field-locator locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label" datatype="Number"/>
+        </field>
+        <field name="CompCode" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
+        </field>
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
+        <field name="Exception" separator="">
+            <field-locator locator="/transaction/transferSet/item/status/supplement" locator-type="Label" required="false"/>
+        </field>
+        <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+
+        <field name="Source_Filename" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"
+               required="false"/>
+        <field name="Destination_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"
+               required="false"/>
+        <field name="Source_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"
+               required="false"/>
+        <field name="Destination_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
+               locator-type="Label" required="false"/>
+
+        <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
+        <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
+        <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
+
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="JobNameParser" aggregation="Merge"/>
+        </field>
+
+        <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
+            <parser-ref name="TransferSetParser" aggregation="Join"/>
+        </embedded-activity>
+    </parser>
+
+    <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="Filter" locator="/transaction/action[text() = 'started']" locator-type="Label" required="true" transparent="true"/>
+        <field name="EventName" value="Started"/>
+        <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
+        <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ApplName" separator=":">
+            <field-locator value="JOB"/>
+            <field-locator locator="/transaction/job/name" locator-type="Label" required="false"/>
+        </field>
+        <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+        <field name="ServerName" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
+        <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
+    </parser>
+
+    <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="true"/>
+
+        <field name="EventType" value="END"/>
+
+        <field name="Filter" locator="/transaction/action[text() = 'completed']" locator-type="Label" required="true" transparent="true"/>
+        <field name="EventName" value="completed"/>
+        <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
+        <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ApplName" separator=":">
+            <field-locator value="JOB"/>
+            <field-locator locator="/transaction/job/name" locator-type="Label" required="false"/>
+        </field>
+        <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+
+        <!-- Map fields from mft_trf status "completed"-->
+        <field name="Message" separator="">
+            <field-locator locator="/transaction/status/supplement" locator-type="Label" required="false"/>
+        </field>
+        <field name="ServerName" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
+        <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="ReasonCode" separator="">
+            <field-locator locator="/transaction/status/@resultCode" locator-type="Label" datatype="Number"/>
+        </field>
+        <field name="CompCode" locator="/transaction/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
+        </field>
+        <field name="CompCode2" locator="/transaction/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode2"/>
+        </field>
+        <field name="Exception" separator="">
+            <field-locator locator="/transaction/status/supplement" locator-type="Label" required="false"/>
+        </field>
+    </parser>
+
+    <parser name="FallbackParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="false"/>
+
+        <!-- DO THERE WHATEVER YOU WANT -->
+        <!-- If do not want to send to JKoolCloud - set "EventType" value to NOOP -->
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="/transaction/action" locator-type="Label"/>
+        <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
+        <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ApplName" separator=":">
+            <field-locator value="JOB"/>
+            <field-locator locator="/transaction/job/name" locator-type="Label" required="false"/>
+        </field>
+        <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
+        <field name="ResMgrType" value="MESSAGING_SERVER"/>
+        <field name="ServerName" locator="/transaction/originator/hostName" locator-type="Label"/>
+        <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
+        <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+    </parser>
+
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">-->
+    <!--<property name="Host" value="localhost"/>-->
+    <!--<property name="Port" value="1414"/>-->
+    <!--<property name="Channel" value="SYSTEM.DEF.SVRCONN"/>-->
+    <!--<property name="QueueManager" value="QMGR.NAME"/>-->
+    <!--<property name="Queue" value="FTE.TRANSFER.LOG"/>-->
+
+    <!--<property name="HaltIfNoParser" value="false"/>-->
+    <!--<property name="TurnOutActivityChildren" value="true"/>-->
+
+    <!--<parser-ref name="StartedEventParser"/>-->
+    <!--<parser-ref name="ProgressEventParser"/>-->
+    <!--<parser-ref name="CompletedEventParser"/>-->
+    <!--<parser-ref name="FallbackParser"/>-->
+    <!--</stream>-->
+
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/mft_fte/queue/message_*_progress.xml"/>
+        <property name="TurnOutActivityChildren" value="true"/>
+
+        <!--<parser-ref name="StartedEventParser"/>-->
+        <parser-ref name="ProgressEventParser"/>
+        <!--<parser-ref name="CompletedEventParser"/>-->
+        <!--<parser-ref name="FallbackParser"/>-->
+    </stream>
+</tnt-data-source>

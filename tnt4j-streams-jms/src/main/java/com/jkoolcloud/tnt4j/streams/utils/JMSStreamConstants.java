@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,10 @@ public final class JMSStreamConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-jms"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in stream {@value} property.
-	 */
-	public static final String PROP_JMS_CONN_FACTORY = "JMSConnFactory"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in parser {@value} property.
-	 */
-	public static final String PROP_CONV_TO_STRING = "ConvertToString"; // NON-NLS
-
-	/**
 	 * The constant to indicate activity transport is JMS.
 	 */
 	public static final String TRANSPORT_JMS = "JMS"; // NON-NLS
 
 	private JMSStreamConstants() {
-
 	}
 }

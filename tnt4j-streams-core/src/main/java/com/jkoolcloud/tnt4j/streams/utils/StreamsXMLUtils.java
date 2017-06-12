@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionResolver;
 
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName;
+import com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName;
 
 /**
  * General XML utility methods used by TNT4J-Streams.
@@ -52,7 +53,7 @@ public final class StreamsXMLUtils {
 	/**
 	 * Adds XPath function to custom functions registry.
 	 * <p>
-	 * To call these functions from script code use 'ts:' prefix: i.e. 'ts:getFileName()'
+	 * To call these functions from script code use 'ts:' prefix: e.g., 'ts:getFileName()'
 	 *
 	 * @param functionName
 	 *            name of custom function to be used
@@ -71,8 +72,9 @@ public final class StreamsXMLUtils {
 	 *
 	 * @return new instance of an {@link XPath}
 	 *
-	 * @see NamespaceMap
-	 * @see FuncGetFileName
+	 * @see com.jkoolcloud.tnt4j.streams.utils.NamespaceMap
+	 * @see com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName
+	 * @see com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName
 	 */
 	public static XPath getStreamsXPath() {
 		XPath xPath = XPathFactory.newInstance().newXPath();
@@ -88,6 +90,7 @@ public final class StreamsXMLUtils {
 
 		static {
 			fMap.put(FuncGetFileName.FUNCTION_NAME, new FuncGetFileName());
+			fMap.put(FuncGetObjectName.FUNCTION_NAME, new FuncGetObjectName());
 		}
 
 		@Override

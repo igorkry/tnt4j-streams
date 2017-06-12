@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="$.event" locator-type="Label"/>
+        <field name="LastEvent" locator="CachedEventName" locator-type="Cache"/>
+
+        <field name="Correlator" locator="$.transaction" locator-type="Label"/>
+        <field name="Transaction" locator="$.transaction" locator-type="Label"/>
+
+        <field name="SecretValue" locator="$.secret" locator-type="Label"/>
+        <field name="LastSecret" locator="SecretCache" locator-type="Cache"/>
+
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Resource" locator="$.resource" locator-type="Label"/>
+    </parser>
+
+    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
+
+        <property name="StreamCacheMaxSize" value="300"/>
+        <property name="StreamCacheExpireDuration" value="15"/>
+
+        <parser-ref name="EventParser"/>
+
+        <cache>
+            <entry id="CachedEventName">
+                <key>EventName</key>
+                <value>${EventName} in ${Transaction}</value>
+            </entry>
+            <entry id="SecretCache">
+                <key>${Transaction}Secret</key>
+                <value>${SecretValue}</value>
+            </entry>
+        </cache>
+    </stream>
+
+</tnt-data-source>

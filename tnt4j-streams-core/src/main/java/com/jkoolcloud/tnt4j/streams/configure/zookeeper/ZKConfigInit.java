@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZKUtil;
+import org.apache.zookeeper.data.Stat;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -101,8 +102,9 @@ public class ZKConfigInit {
 				ZKConfigManager.openConnection(zkup);
 
 				String streamsPath = zkup.getProperty(ZKConfigManager.PROP_ZK_STREAMS_PATH);
+				Stat nodeStat = ZKConfigManager.zk().exists(streamsPath, false);
 
-				if (clean) {
+				if (clean && nodeStat != null) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ZKConfigInit.clearing.zk"), streamsPath);
 					ZKUtil.deleteRecursive(ZKConfigManager.zk(), streamsPath);
@@ -152,10 +154,10 @@ public class ZKConfigInit {
 					return false;
 				}
 
-				cfgFileName = arg.substring(3);
+				cfgFileName = arg.substring(PARAM_CFG_FILE.length());
 				if (StringUtils.isEmpty(cfgFileName)) {
 					System.out.println(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.missing.cfg.file", arg.substring(0, 3)));
+							"StreamsAgent.missing.cfg.file", arg.substring(0, PARAM_CFG_FILE.length())));
 					printUsage();
 					return false;
 				}
@@ -184,12 +186,18 @@ public class ZKConfigInit {
 	 * 
 	 * @param cfgFileName
 	 *            path string of file to read data
-	 * @return a byte array containing the bytes read from the file
+	 * @return a byte array containing the bytes read from the file, or {@code null} if path is {@code null}/empty or
+	 *         {@link java.io.IOException} occurs
 	 */
-	private static byte[] loadDataFromFile(String cfgFileName) {
+	public static byte[] loadDataFromFile(String cfgFileName) {
 		LOGGER.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.loading.cfg.data"),
 				cfgFileName);
+
+		if (StringUtils.isEmpty(cfgFileName)) {
+			return null;
+		}
+
 		try {
 			return Files.readAllBytes(Paths.get(cfgFileName));
 		} catch (IOException exc) {

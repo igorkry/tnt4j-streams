@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<transaction version="6.00" ID="414d5120434f524420202020202020207423d558201c5c04" agentRole="sourceAgent"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd" xmlns="">
+    <action time="2017-04-07T16:19:01.976Z">progress</action>
+    <sourceAgent agent="AGNT1A" QMgr="AGNT1" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </sourceAgent>
+    <destinationAgent agent="AGNT2A" QMgr="AGNT2" agentType="STANDARD">
+        <systemInfo architecture="x86" name="Windows 7" version="6.1 build 7601 Service Pack 1"/>
+    </destinationAgent>
+    <originator>
+        <hostName>192.168.188.1</hostName>
+        <userID>user</userID>
+        <mqmdUserID>user</mqmdUserID>
+    </originator>
+    <transferSet index="0" size="1" startTime="2017-04-07T16:19:01.571Z" total="1" bytesSent="0">
+        <item mode="binary">
+            <source disposition="delete" recursive="false" type="queue">
+                <queue messageCount="1">BankRequestQueue@AGNT1</queue>
+                <checksum method="MD5">d41d8cd98f00b204e9800998ecf8427e</checksum>
+            </source>
+            <destination exist="overwrite" type="file">
+                <file size="0" last-modified="2017-04-07T16:19:01.929Z">C:\Users\user\AMEREN\SUNGUARD.txt</file>
+                <checksum method="MD5">d41d8cd98f00b204e9800998ecf8427e</checksum>
+            </destination>
+            <status resultCode="0"/>
+        </item>
+    </transferSet>
+    <job>
+        <name>MON.WHL.10232.006</name>
+    </job>
+</transaction>

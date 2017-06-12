@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 public class UtilsTest {
 
 	private static final int FILE_WR_LINES = 100;
-	private static final String TEST = "TEST";
+	private static final String TEST = "TEST"; // NON-NLS
 
 	@Test
 	public void testBase64Encode() {
@@ -61,18 +61,18 @@ public class UtilsTest {
 
 	@Test
 	public void testComputeSignature() throws Exception {
-		String sigMD5 = Utils.computeSignature(MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID",
-				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
+		String sigMD5 = Utils.computeSignature(MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID", // NON-NLS
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
 
-		MessageDigest msgDig = MessageDigest.getInstance("SHA1");
-		String sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(),
-				"USER_ID", "APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
+		MessageDigest msgDig = MessageDigest.getInstance("SHA1"); // NON-NLS
+		String sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), // NON-NLS
+				"USER_ID", "APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
 
 		assertNotEquals("Messages signatures should not match", sigMD5, sigOther);
 
-		msgDig = MessageDigest.getInstance("MD5");
-		sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID",
-				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25");
+		msgDig = MessageDigest.getInstance("MD5"); // NON-NLS
+		sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID", // NON-NLS
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
 
 		assertEquals("Messages signatures should match", sigMD5, sigOther);
 	}
@@ -86,7 +86,7 @@ public class UtilsTest {
 			final OpType opType = Utils.mapOpType(i);
 			if (opType == OpType.STOP) {
 				////////////////////////////
-				opTypes.put("END", opType);
+				opTypes.put("END", opType); // NON-NLS
 				///////////////////////////
 			} else {
 				opTypes.put(opType.name(), opType);
@@ -101,10 +101,10 @@ public class UtilsTest {
 
 	@Test
 	public void testIsWildcardFileName() {
-		final String N_WILDC = "c:/Users/Default.migrated/AppData/Local/Microsoft/Windows/INetCache/";
-		final String WILDC = "c:/Windows/schemas/TSWorkSpace/*.*";
-		final String WILDC2 = "c:/Windows/schemas/TSWorkSpace/*.*";
-		final String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*";
+		final String N_WILDC = "c:/Users/Default.migrated/AppData/Local/Microsoft/Windows/INetCache/"; // NON-NLS
+		final String WILDC = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
+		final String WILDC2 = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
+		final String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*"; // NON-NLS
 		final String EMPTY = "";
 
 		assertFalse(Utils.isWildcardString(N_WILDC));
@@ -151,13 +151,12 @@ public class UtilsTest {
 	public void testFromJsonToMap() {
 		Map<String, String> testMap = new HashMap<String, String>() {
 			{
-				put("TEST", "TESTVAL");
-				put("TEST2", "TESTVAL2");
-				put("TEST3", "TESTVAL3");
-
+				put("TEST", "TESTVAL"); // NON-NLS
+				put("TEST2", "TESTVAL2"); // NON-NLS
+				put("TEST3", "TESTVAL3"); // NON-NLS
 			}
 		};
-		String testString = "{\"TEST2\"=\"TESTVAL2\", \"TEST3\"=\"TESTVAL3\", \"TEST\"=\"TESTVAL\"}";
+		String testString = "{\"TEST2\"=\"TESTVAL2\", \"TEST3\"=\"TESTVAL3\", \"TEST\"=\"TESTVAL\"}"; // NON-NLS
 		// Gson gson = new Gson();
 		// final String json = gson.toJson(testMap);
 		Map<String, ?> result = Utils.fromJsonToMap(testString, false);
@@ -181,8 +180,8 @@ public class UtilsTest {
 
 	@Test
 	public void testGetStringLine() throws IOException {
-		String testString = "TEST \n TEST1 \n TEST2 \n TEST3 \n TEST4 \n TEST5 \n";
-		String testStringLine = "TEST ";
+		String testString = "TEST \n TEST1 \n TEST2 \n TEST3 \n TEST4 \n TEST5 \n"; // NON-NLS
+		String testStringLine = "TEST "; // NON-NLS
 		String result = Utils.getStringLine(testString);
 		assertEquals(testStringLine, result);
 
@@ -207,8 +206,8 @@ public class UtilsTest {
 
 	@Test
 	public void testGetTags() {
-		String testStrig = "TAG1,TAG2,TAG3";
-		String[] expected = { "TAG1", "TAG2", "TAG3" };
+		String testStrig = "TAG1,TAG2,TAG3"; // NON-NLS
+		String[] expected = { "TAG1", "TAG2", "TAG3" }; // NON-NLS
 		String[] result = Utils.getTags(testStrig);
 		assertArrayEquals(expected, result);
 
@@ -229,9 +228,9 @@ public class UtilsTest {
 		// {\"sinkName\":\"TNT4JStreams\",\"chanelName\":\"memoryChannel\",\"headers\":{},\"body\":\"127.0.0.1
 		// - - [26/Nov/2015:16:26:21 +0200] \\\"POST
 		// /gvm_java/gvm/services/OperatorWebService HTTP/1.1\\\" 200 380\\r\"}
-		String testStrig = "line\\r";
-		String testStrig2 = "line\\n";
-		String expected = "line";
+		String testStrig = "line\\r"; // NON-NLS
+		String testStrig2 = "line\\n"; // NON-NLS
+		String expected = "line"; // NON-NLS
 		// assertEquals(expected, Utils.cleanActivityData(testStrig));
 		// assertEquals(expected, Utils.cleanActivityData(testStrig2));
 	}

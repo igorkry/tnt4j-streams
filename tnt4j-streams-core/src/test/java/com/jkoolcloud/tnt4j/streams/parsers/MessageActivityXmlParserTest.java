@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
  */
 public class MessageActivityXmlParserTest {
 
-	private static final String DELIM = ",";
+	private static final String DELIM = ","; // NON-NLS
 
 	@Test
 	public void testProperties() throws Exception {
@@ -54,7 +54,7 @@ public class MessageActivityXmlParserTest {
 		MessageActivityXmlParser parser = new MessageActivityXmlParser();
 		ActivityInfo ai = mock(ActivityInfo.class);
 		ActivityField field = mock(ActivityField.class);
-		Object value = "1, TEST, TEST, TEST,TEST, TEST, TEST, TEST";
+		Object value = "1, TEST, TEST, TEST,TEST, TEST, TEST, TEST"; // NON-NLS
 		when(field.getFieldType()).thenReturn(StreamFieldType.Correlator);
 		parser.applyFieldValue(ai, field, value);
 		verify(field).getFieldType();

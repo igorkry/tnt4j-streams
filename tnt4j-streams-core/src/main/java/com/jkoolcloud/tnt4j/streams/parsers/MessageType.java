@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public enum MessageType {
 	public static MessageType valueOf(Object value) {
 		if (value == null) {
 			throw new IllegalArgumentException(
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "MessageType.null.object"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "MessageType.object.null"));
 		}
 		if (value instanceof Number) {
 			return valueOf(((Number) value).intValue());

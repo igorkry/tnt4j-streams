@@ -3,8 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="MQFTEParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
-        <property name="SignatureDelim" value="#!#"/>
+    <parser name="MQFTEParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
 
         <field name="EventName" locator="/transaction/action" locator-type="Label"/>
         <field name="ApplName" separator=":">
@@ -37,12 +36,12 @@
         <field name="Location" locator="substring-before(string(/transaction/@xsi:noNamespaceSchemaLocation),'.xsd')"
                locator-type="Label"/>
         <field name="EventType" value="EVENT"/>
-
     </parser>
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">-->
     <!--<property name="QueueManager" value="MB8QMGR"/>-->
     <!--<property name="Queue" value="NASTEL.FTE.EVENTS"/>-->
+
     <!--<parser-ref name="MQFTEParser"/>-->
     <!--</stream>-->
 

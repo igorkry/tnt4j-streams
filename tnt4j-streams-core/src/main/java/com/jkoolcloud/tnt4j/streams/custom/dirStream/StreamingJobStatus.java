@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public enum StreamingJobStatus implements StreamingStatus {
 	REJECT,
 
 	/**
-	 * Indicates streaming jobs where dropped off from executor queue before executing (i.e. executor was shot down
+	 * Indicates streaming jobs where dropped off from executor queue before executing (e.g., executor was shot down
 	 * before starting to process that job).
 	 */
 	DROP_OFF,

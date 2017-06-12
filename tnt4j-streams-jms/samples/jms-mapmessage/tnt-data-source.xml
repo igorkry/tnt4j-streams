@@ -30,6 +30,7 @@
         <property name="Topic" value="topic.SampleJMSTopic"/>
         <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
         <property name="JMSConnFactory" value="ConnectionFactory"/>
+
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>

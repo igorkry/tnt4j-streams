@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -81,7 +78,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 			String value = prop.getValue();
 			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 				fileName = value;
-			} else if (MsOfficeStreamConstants.PROP_SHEETS.equalsIgnoreCase(name)) {
+			} else if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
 				sheetName = value;
 
 				if (StringUtils.isNotEmpty(sheetName)) {
@@ -96,7 +93,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 			return fileName;
 		}
-		if (MsOfficeStreamConstants.PROP_SHEETS.equalsIgnoreCase(name)) {
+		if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
 			return sheetName;
 		}
 
@@ -122,7 +119,13 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
 
-		workbook = new XSSFWorkbook(new FileInputStream(fileName));
+		File wbFile = new File(fileName);
+		if (!wbFile.exists()) {
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractExcelStream.file.not.exist", fileName));
+		}
+
+		workbook = WorkbookFactory.create(wbFile);
 		sheetIterator = workbook.sheetIterator();
 	}
 
@@ -140,8 +143,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	/**
 	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property
-	 * '{@value com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants#PROP_SHEETS}') sheets name filtering mask. If
-	 * no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
+	 * '{@value com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties#PROP_SHEETS}') sheets name filtering
+	 * mask. If no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
 	 *
 	 * @param countSkips
 	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count
@@ -150,29 +153,31 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	 *         available in this workbook.
 	 */
 	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
-		if (sheetIterator == null || !sheetIterator.hasNext()) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-					"AbstractExcelStream.no.more.sheets"));
+		while (true) {
+			if (sheetIterator == null || !sheetIterator.hasNext()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+						"AbstractExcelStream.no.more.sheets"));
 
-			return null;
-		}
-
-		Sheet sheet = sheetIterator.next();
-		boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
-
-		if (!match) {
-			if (countSkips) {
-				skipFilteredActivities();
+				return null;
 			}
-			return getNextNameMatchingSheet(countSkips);
+
+			Sheet sheet = sheetIterator.next();
+			boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
+
+			if (!match) {
+				if (countSkips) {
+					skipFilteredActivities();
+				}
+				continue;
+			}
+
+			activityPosition = workbook.getSheetIndex(sheet);
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
+					"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
+
+			return sheet;
 		}
-
-		activityPosition = workbook.getSheetIndex(sheet);
-
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-				"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
-
-		return sheet;
 	}
 
 	/**

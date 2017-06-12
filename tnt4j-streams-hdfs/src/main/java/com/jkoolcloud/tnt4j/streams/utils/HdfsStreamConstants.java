@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,5 @@ public final class HdfsStreamConstants {
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-hdfs"; // NON-NLS
 
 	private HdfsStreamConstants() {
-
 	}
 }

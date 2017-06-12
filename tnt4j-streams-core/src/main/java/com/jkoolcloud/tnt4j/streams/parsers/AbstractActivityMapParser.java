@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,14 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -37,13 +34,13 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Base class for abstract activity data parser that assumes each activity data item can be transformed into an
  * {@link Map} data structure, where each field is represented by a key/value pair and the name is used to map each
- * field onto its corresponding activity field.
+ * field into its corresponding activity field.
  * <p>
  * If map entry value is inner map, entries of that map can be accessed using
- * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter: i.e.
- * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
+ * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter:
+ * e.g., 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
  * <ul>
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
  * elements. Default value - '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}'.
@@ -53,19 +50,26 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public abstract class AbstractActivityMapParser extends GenericActivityParser<Map<String, ?>> {
-
-	private String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
+	/**
+	 * Constant for map entry locator path delimiter.
+	 */
+	protected String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
 
 	/**
-	 * {@inheritDoc}
+	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
+	 * determine if the parser can parse the data in the format that the stream has it.
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.util.Map}</li>
 	 * </ul>
+	 *
+	 * @param data
+	 *            data object whose class is to be verified
+	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
 	 */
 	@Override
-	public boolean isDataClassSupported(Object data) {
+	protected boolean isDataClassSupportedByParser(Object data) {
 		return Map.class.isInstance(data);
 	}
 
@@ -74,6 +78,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		if (props == null) {
 			return;
 		}
+
+		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
@@ -90,22 +96,18 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		if (data == null) {
-			return null;
-		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing"),
-				getLogString(data));
-
+	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
 			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.not.find"));
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
 			return null;
 		}
 
-		return parsePreparedItem(stream, dataMap.toString(), dataMap);
+		ActivityContext cData = new ActivityContext(stream, data, dataMap);
+		cData.setMessage(getRawDataAsMessage(dataMap));
+
+		return cData;
 	}
 
 	/**
@@ -122,46 +124,20 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * 
 	 * @param locator
 	 *            activity field locator
-	 * @param dataMap
+	 * @param cData
 	 *            activity object data map
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
-	protected Object resolveLocatorValue(ActivityFieldLocator locator, Map<String, ?> dataMap,
+	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		String[] path = Utils.getNodePath(locStr, nodePathDelim);
-		val = getNode(path, dataMap, 0);
+		val = Utils.getMapValueByPath(locStr, nodePathDelim, cData.getData());
 
 		return val;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Object getNode(String[] path, Map<String, ?> dataMap, int i) {
-		if (ArrayUtils.isEmpty(path) || dataMap == null) {
-			return null;
-		}
-
-		Object val = dataMap.get(path[i]);
-
-		if (i < path.length - 1 && val instanceof Map) {
-			val = getNode(path, (Map<String, ?>) val, ++i);
-		} else if (i < path.length - 2 && val instanceof List) {
-			try {
-				int lii = Integer.parseInt(getItemIndexStr(path[i + 1]));
-				val = getNode(path, (Map<String, ?>) ((List<?>) val).get(lii), i + 2);
-			} catch (NumberFormatException exc) {
-			}
-		}
-
-		return val;
-	}
-
-	private static String getItemIndexStr(String indexToken) {
-		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 
 	/**

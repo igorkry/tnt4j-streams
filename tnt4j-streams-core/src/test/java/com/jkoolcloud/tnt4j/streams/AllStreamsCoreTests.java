@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.jkoolcloud.tnt4j.streams.configure.AllConfigureTests;
 import com.jkoolcloud.tnt4j.streams.fields.AllFieldsTests;
 import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
 import com.jkoolcloud.tnt4j.streams.parsers.AllParsersTests;
+import com.jkoolcloud.tnt4j.streams.preparsers.AllPreparsersTests;
 import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
 
 /**
@@ -31,6 +32,6 @@ import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ StreamsAgentTest.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
-		AllParsersTests.class, AllUtilsTests.class })
+		AllParsersTests.class, AllPreparsersTests.class, AllUtilsTests.class })
 public class AllStreamsCoreTests {
 }

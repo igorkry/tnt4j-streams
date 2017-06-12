@@ -1,0 +1,31 @@
+{
+    "EventType": {
+        "destination": "SEND",
+        "source": "RECEIVE",
+        "": "NOOP"
+    },
+
+    "EventName": {
+        "destination": "process_destination",
+        "source": "process_source",
+        "": "N/A"
+    },
+
+    "Resource": {
+        "file": "FILE",
+        "queue": "QUEUE"
+    },
+
+    "CompCode": {
+        "0": "SUCCESS",
+        "40": "WARNING",
+        "": "ERROR"
+    },
+
+    "CompCode2": {
+        "0": "SUCCESS",
+        "40": "WARNING",
+        "1": "FAILURE",
+        "": "ERROR"
+    }
+}

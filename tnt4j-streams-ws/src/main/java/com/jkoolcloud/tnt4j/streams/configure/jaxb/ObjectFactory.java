@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.namespace.QName;
 
 /**
  * This object contains factory methods for each Java content interface and Java element interface generated in the
@@ -31,6 +34,11 @@ import javax.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
+	private final static QName _FieldLocatorFieldTransform_QNAME = new QName("", "field-transform");
+	private final static QName _FieldLocatorFieldMap_QNAME = new QName("", "field-map");
+	private final static QName _FieldLocatorFieldMapRef_QNAME = new QName("", "field-map-ref");
+	private final static QName _FieldLocatorFilter_QNAME = new QName("", "filter");
+
 	/**
 	 * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package:
 	 * com.jkoolcloud.tnt4j.streams.configure.jaxb
@@ -40,27 +48,19 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link OriginalStreamType }
+	 * Create an instance of {@link Filter }
 	 * 
 	 */
-	public OriginalStreamType createOriginalStreamType() {
-		return new OriginalStreamType();
+	public Filter createFilter() {
+		return new Filter();
 	}
 
 	/**
-	 * Create an instance of {@link ParserType }
+	 * Create an instance of {@link OriginalStream }
 	 * 
 	 */
-	public ParserType createParserType() {
-		return new ParserType();
-	}
-
-	/**
-	 * Create an instance of {@link ParserType.Field }
-	 * 
-	 */
-	public ParserType.Field createParserTypeField() {
-		return new ParserType.Field();
+	public OriginalStream createOriginalStream() {
+		return new OriginalStream();
 	}
 
 	/**
@@ -72,19 +72,43 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link StreamType }
+	 * Create an instance of {@link ResourceReference }
 	 * 
 	 */
-	public StreamType createStreamType() {
-		return new StreamType();
+	public ResourceReference createResourceReference() {
+		return new ResourceReference();
 	}
 
 	/**
-	 * Create an instance of {@link JavaObjectType }
+	 * Create an instance of {@link JavaObject }
 	 * 
 	 */
-	public JavaObjectType createJavaObjectType() {
-		return new JavaObjectType();
+	public JavaObject createJavaObject() {
+		return new JavaObject();
+	}
+
+	/**
+	 * Create an instance of {@link Parser }
+	 *
+	 */
+	public Parser createParser() {
+		return new Parser();
+	}
+
+	/**
+	 * Create an instance of {@link Stream }
+	 * 
+	 */
+	public Stream createStream() {
+		return new Stream();
+	}
+
+	/**
+	 * Create an instance of {@link Field }
+	 *
+	 */
+	public Field createField() {
+		return new Field();
 	}
 
 	/**
@@ -96,11 +120,11 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ParamType }
+	 * Create an instance of {@link ScheduleCron }
 	 * 
 	 */
-	public ParamType createParamType() {
-		return new ParamType();
+	public ScheduleCron createScheduleCron() {
+		return new ScheduleCron();
 	}
 
 	/**
@@ -112,6 +136,30 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link ScheduleSimple }
+	 * 
+	 */
+	public ScheduleSimple createScheduleSimple() {
+		return new ScheduleSimple();
+	}
+
+	/**
+	 * Create an instance of {@link Parameter }
+	 *
+	 */
+	public Parameter createParameter() {
+		return new Parameter();
+	}
+
+	/**
+	 * Create an instance of {@link CacheEntry }
+	 *
+	 */
+	public CacheEntry createCacheEntry() {
+		return new CacheEntry();
+	}
+
+	/**
 	 * Create an instance of {@link FieldMap }
 	 * 
 	 */
@@ -120,11 +168,11 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ScheduleSimpleType }
+	 * Create an instance of {@link Scenario }
 	 * 
 	 */
-	public ScheduleSimpleType createScheduleSimpleType() {
-		return new ScheduleSimpleType();
+	public Scenario createScenario() {
+		return new Scenario();
 	}
 
 	/**
@@ -136,19 +184,43 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ScenarioStepType }
-	 * 
+	 * Create an instance of {@link Cache }
+	 *
 	 */
-	public ScenarioStepType createScenarioStepType() {
-		return new ScenarioStepType();
+	public Cache createCache() {
+		return new Cache();
 	}
 
 	/**
-	 * Create an instance of {@link ScenarioType }
+	 * Create an instance of {@link FieldParserReference }
 	 * 
 	 */
-	public ScenarioType createScenarioType() {
-		return new ScenarioType();
+	public FieldParserReference createFieldParserReference() {
+		return new FieldParserReference();
+	}
+
+	/**
+	 * Create an instance of {@link EmbeddedActivity }
+	 *
+	 */
+	public EmbeddedActivity createEmbeddedActivity() {
+		return new EmbeddedActivity();
+	}
+
+	/**
+	 * Create an instance of {@link ScenarioStep }
+	 * 
+	 */
+	public ScenarioStep createScenarioStep() {
+		return new ScenarioStep();
+	}
+
+	/**
+	 * Create an instance of {@link FieldMapRef }
+	 * 
+	 */
+	public FieldMapRef createFieldMapRef() {
+		return new FieldMapRef();
 	}
 
 	/**
@@ -160,11 +232,11 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link ScheduleCronType }
+	 * Create an instance of {@link FieldLocator }
 	 * 
 	 */
-	public ScheduleCronType createScheduleCronType() {
-		return new ScheduleCronType();
+	public FieldLocator createFieldLocator() {
+		return new FieldLocator();
 	}
 
 	/**
@@ -176,19 +248,65 @@ public class ObjectFactory {
 	}
 
 	/**
-	 * Create an instance of {@link OriginalStreamType.Tnt4JProperties }
+	 * Create an instance of {@link Filter.Value }
 	 * 
 	 */
-	public OriginalStreamType.Tnt4JProperties createOriginalStreamTypeTnt4JProperties() {
-		return new OriginalStreamType.Tnt4JProperties();
+	public Filter.Value createFilterValue() {
+		return new Filter.Value();
 	}
 
 	/**
-	 * Create an instance of {@link ParserType.Field.FieldLocator }
+	 * Create an instance of {@link Filter.Expression }
 	 * 
 	 */
-	public ParserType.Field.FieldLocator createParserTypeFieldFieldLocator() {
-		return new ParserType.Field.FieldLocator();
+	public Filter.Expression createFilterExpression() {
+		return new Filter.Expression();
+	}
+
+	/**
+	 * Create an instance of {@link OriginalStream.Tnt4JProperties }
+	 * 
+	 */
+	public OriginalStream.Tnt4JProperties createOriginalStreamTnt4JProperties() {
+		return new OriginalStream.Tnt4JProperties();
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldTransform }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-transform", scope = FieldLocator.class)
+	public JAXBElement<FieldTransform> createFieldLocatorFieldTransform(FieldTransform value) {
+		return new JAXBElement<FieldTransform>(_FieldLocatorFieldTransform_QNAME, FieldTransform.class,
+				FieldLocator.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldMap }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-map", scope = FieldLocator.class)
+	public JAXBElement<FieldMap> createFieldLocatorFieldMap(FieldMap value) {
+		return new JAXBElement<FieldMap>(_FieldLocatorFieldMap_QNAME, FieldMap.class, FieldLocator.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link FieldMapRef }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "field-map-ref", scope = FieldLocator.class)
+	public JAXBElement<FieldMapRef> createFieldLocatorFieldMapRef(FieldMapRef value) {
+		return new JAXBElement<FieldMapRef>(_FieldLocatorFieldMapRef_QNAME, FieldMapRef.class, FieldLocator.class,
+				value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Filter }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "filter", scope = FieldLocator.class)
+	public JAXBElement<Filter> createFieldLocatorFilter(Filter value) {
+		return new JAXBElement<Filter>(_FieldLocatorFilter_QNAME, Filter.class, FieldLocator.class, value);
 	}
 
 }

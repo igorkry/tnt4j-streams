@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 JKOOL, LLC.
+ * Copyright 2014-2017 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,6 +28,7 @@ import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.*;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
@@ -58,9 +57,8 @@ public class ActivityInfoTest {
 				continue;
 			}
 
-			Method method = ActivityInfo.class.getMethod("get" + field.name());
 			if (test) {
-				final Object result = method.invoke(activityInfo);
+				Object result = activityInfo.getFieldValue(field.name());
 				assertEquals("Value not equal", value.valueExpected, result);
 			}
 		}
@@ -84,35 +82,37 @@ public class ActivityInfoTest {
 			valueT.value = OpLevel.DEBUG.toString();
 			break;
 		case CompCode:
-			valueT.valueExpected = OpCompCode.WARNING;
-			valueT.value = OpCompCode.WARNING.toString();
+			valueT.valueExpected = OpCompCode.SUCCESS;
+			valueT.value = OpCompCode.SUCCESS.toString();
 			break;
 		case Tag:
 		case Correlator:
-			String[] array = { "Cheese", "Pepperoni", "Black Olives" };
+			String[] array = { "Cheese", "Pepperoni", "Black Olives" }; // NON-NLS
 			valueT.value = Arrays.asList(array);
 			break;
 		case ServerIp:
-			valueT.value = "127.0.0.1";
+			valueT.value = "127.0.0.1"; // NON-NLS
 			break;
 		case EventStatus:
 			valueT.valueExpected = ActivityStatus.END;
 			valueT.value = ActivityStatus.END.toString();
+			break;
 		default:
 			// generic cases
 			valueT.value = getTestValueForClass(field.getDataType());
 			break;
 		}
-		if (valueT.valueExpected == null)
+		if (valueT.valueExpected == null) {
 			valueT.valueExpected = valueT.value;
+		}
 
 		activityInfo.applyField(activityField, valueT.value);
-		System.out.println("Setting " + field.name() + " to " + valueT.value);
+		System.out.println("Setting " + field.name() + " to " + valueT.value); // NON-NLS
 		return valueT;
 	}
 
 	@Test
-	public void recordActivityTest() throws Exception {
+	public void buildTrackableTest() throws Exception {
 		Tracker tracker = mock(Tracker.class);
 		UUIDFactory uiFactory = mock(UUIDFactory.class);
 		TrackerConfig tConfig = mock(TrackerConfig.class);
@@ -123,27 +123,32 @@ public class ActivityInfoTest {
 		when(tracker.getConfiguration()).thenReturn(tConfig);
 		when(tracker.newEvent(any(OpLevel.class), any(String.class), any(String.class), any(String.class),
 				any(Object[].class))).thenReturn(tEvent);
+		when(tracker.newEvent(any(OpLevel.class), any(String.class), nullable(String.class), nullable(String.class),
+				nullable(Object[].class))).thenReturn(tEvent);
 		when(tracker.newActivity(any(OpLevel.class), any(String.class))).thenReturn(tActivity);
 		when(tracker.newSnapshot(any(String.class))).thenReturn(snapshot);
 		when(tracker.newSnapshot(any(String.class), any(String.class))).thenReturn(snapshot);
 
 		when(tConfig.getUUIDFactory()).thenReturn(uiFactory);
-		when(uiFactory.newUUID()).thenReturn("TEST");
-		when(tEvent.getOperation()).thenReturn(new Operation("TEST", OpType.SEND));
+		when(uiFactory.newUUID()).thenReturn("TEST"); // NON-NLS
+		when(tEvent.getOperation()).thenReturn(new Operation("TEST", OpType.SEND)); // NON-NLS
 
 		ActivityInfo activityInfo = createTestTrackable(false, OpType.ACTIVITY);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(TrackingActivity.class));
+		TrackingActivity ta = (TrackingActivity) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built tracking activity is null", ta);
+		tracker.tnt(ta);
 
 		activityInfo = createTestTrackable(false, OpType.EVENT);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(TrackingEvent.class));
+		TrackingEvent te = (TrackingEvent) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built tracking event is null", te);
+		tracker.tnt(te);
 
 		activityInfo = createTestTrackable(false, OpType.SNAPSHOT);
-		activityInfo.recordActivity(tracker, 50L);
-		verify(tracker).tnt(any(PropertySnapshot.class));
+		PropertySnapshot ps = (PropertySnapshot) activityInfo.buildTrackable(tracker);
+		assertNotNull("Built property snapshot is null", ps);
+		tracker.tnt(ps);
 
-		// Utils.close(verify(tracker));
+		Utils.close(verify(tracker));
 	}
 
 	@Test
@@ -155,27 +160,28 @@ public class ActivityInfoTest {
 
 			activityInfoToMerge.merge(activityInfo);
 
-			Method method = ActivityInfo.class.getMethod("get" + field.name());
-			assertEquals("Value not equal", method.invoke(activityInfo), method.invoke(activityInfoToMerge));
+			Object v1 = activityInfo.getFieldValue(field.name());
+			Object v2 = activityInfoToMerge.getFieldValue(field.name());
+			assertEquals("Value not equal", v1, v2);
 		}
 	}
 
 	private Object getTestValueForClass(Class<?> clazz) {
 		final String className = clazz.getName();
-		if (className.equals("java.lang.String")) {
-			return "TEST";
-		} else if (className.equals("[Ljava.lang.String;")) {
+		if (className.equals("java.lang.String")) { // NON-NLS
+			return "TEST"; // NON-NLS
+		} else if (className.equals("[Ljava.lang.String;")) { // NON-NLS
 			return TestEnum.Skip;
-		} else if (className.equals("java.lang.Integer")) {
+		} else if (className.equals("java.lang.Integer")) { // NON-NLS
 			return 111;
-		} else if (className.equals("java.lang.Long")) {
+		} else if (className.equals("java.lang.Long")) { // NON-NLS
 			return 111L;
-		} else if (className.equals("java.lang.Enum")) {
+		} else if (className.equals("java.lang.Enum")) { // NON-NLS
 			return TestEnum.Skip;
-		} else if (className.equals("com.jkoolcloud.tnt4j.core.UsecTimestamp")) {
+		} else if (className.equals("com.jkoolcloud.tnt4j.core.UsecTimestamp")) { // NON-NLS
 			return new UsecTimestamp(new Date());
 		} else {
-			fail("No such test case for class: " + className);
+			fail("No such test case for class: " + className); // NON-NLS
 		}
 		return null;
 	}
