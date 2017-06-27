@@ -3455,6 +3455,64 @@ data structures from RAW Nagios report JSON data).
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.
  
+#### IBM MQ error log streaming
+
+This sample shows how to stream IBM MQ error log entries as activity events.
+
+Sample files can be found in `samples/ibm-mq-err-log` directory (`tnt4j-streams-core` module).
+
+Sample error log file is available in `AMQERR01.LOG` file. 
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="MQErrLogParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.IBMMQLogParser">
+        <property name="UseActivityDataAsMessageForUnset" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
+
+        <field name="StartTime" separator=" " format="MM/dd/yyyy HH:mm:ss">
+            <field-locator locator="Date" locator-type="Label"/>
+            <field-locator locator="Time" locator-type="Label"/>
+        </field>
+        <field name="ProcessId" locator="Process" locator-type="Label"/>
+        <field name="UserName" locator="User" locator-type="Label"/>
+        <field name="ApplName" locator="Program" locator-type="Label"/>
+        <field name="ServerName" locator="Host" locator-type="Label"/>
+        <field name="Location" locator="Installation" locator-type="Label"/>
+        <field name="VRMF" locator="VRMF" locator-type="Label"/>
+        <field name="QMGR" locator="QMgr" locator-type="Label"/>
+        <field name="EventName" locator="ErrCode" locator-type="Label"/>
+        <field name="Exception" locator="ErrText" locator-type="Label"/>
+        <field name="Explanation" locator="Explanation" locator-type="Label"/>
+        <field name="Action" locator="Action" locator-type="Label"/>
+        <field name="Where" locator="Where" locator-type="Label"/>
+
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
+        <property name="RestoreState" value="false"/>
+        
+        <parser-ref name="MQErrLogParser"/>
+    </stream>
+</tnt-data-source>
+``` 
+ 
+Stream configuration states that `FileStream` referencing `MQErrLogParser` shall be used. Stream reads IBM MQ error log entries from 
+`./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG` file contents an passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+`MQErrLogParser` maps IBM MQ error log entry resolved fields to activity event fields. There is additional field `ResourceName` resolved 
+from stream configuration data and referring stream input (IBM MQ error log) file name.  
+ 
 #### Fluentd logs streaming
  
 TODO 
@@ -4271,6 +4329,12 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
+
+#### IBM MQ Error log entries parser
+
+This parser has no additional configuration properties. 
+
+Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
 ### Pre-parsers
 
