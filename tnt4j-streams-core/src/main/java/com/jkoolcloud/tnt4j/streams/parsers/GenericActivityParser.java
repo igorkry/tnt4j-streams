@@ -496,12 +496,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Transforms activity data to be put to activity field "Message". This is used when no field "Message" mapping
-	 * defined in parser configuration.
+	 * Transforms activity data to be put to activity field
+	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message}. This is used when no field
+	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message} mapping defined in parser configuration.
 	 * 
 	 * @param data
 	 *            activity data
-	 * @return data to be used for activity field "Message"
+	 * @return data to be used for activity field {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message}
 	 */
 	protected String getRawDataAsMessage(T data) {
 		return Utils.toString(data);
@@ -755,8 +756,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return string representation of data package to be logged
 	 */
 	protected String getLogString(Object data) {
-		return data instanceof String ? data.toString()
-				: logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
+		if (data == null || data instanceof String) {
+			return String.valueOf(data);
+		}
+		return logger().isSet(OpLevel.TRACE) ? toString(data) : data.getClass().getName();
 	}
 
 	/**

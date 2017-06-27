@@ -471,7 +471,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 	/**
 	 * Reads RAW activity data XML package string from {@link BufferedReader}. If the data input source contains
-	 * multiple XML documents, then each document must start with "&lt;?xml", and be separated by a new line.
+	 * multiple XML documents, then each document must start with {@code "&lt;?xml"}, and be separated by a new line.
 	 *
 	 * @param rdr
 	 *            reader to use for reading

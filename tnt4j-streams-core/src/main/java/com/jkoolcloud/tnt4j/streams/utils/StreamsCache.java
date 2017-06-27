@@ -240,9 +240,12 @@ public class StreamsCache {
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder("CacheEntry{"); // NON-NLS
-			sb.append("id=").append(Utils.quote(id)); // NON-NLS
-			sb.append(", key=").append(Utils.quote(key)); // NON-NLS
-			sb.append(", value=").append(Utils.quote(value)); // NON-NLS
+			sb.append("id="); // NON-NLS
+			Utils.quote(id, sb);
+			sb.append(", key="); // NON-NLS
+			Utils.quote(key, sb);
+			sb.append(", value="); // NON-NLS
+			Utils.quote(value, sb);
 			sb.append('}'); // NON-NLS
 			return sb.toString();
 		}

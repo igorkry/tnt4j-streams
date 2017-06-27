@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="MQErrLogParser" class="com.jkoolcloud.tnt4j.streams.custom.parsers.IBMMQLogParser">
+        <property name="UseActivityDataAsMessageForUnset" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
+
+        <field name="StartTime" separator=" " format="MM/dd/yyyy HH:mm:ss">
+            <field-locator locator="Date" locator-type="Label"/>
+            <field-locator locator="Time" locator-type="Label"/>
+        </field>
+        <field name="ProcessId" locator="Process" locator-type="Label"/>
+        <field name="UserName" locator="User" locator-type="Label"/>
+        <field name="ApplName" locator="Program" locator-type="Label"/>
+        <field name="ServerName" locator="Host" locator-type="Label"/>
+        <field name="Location" locator="Installation" locator-type="Label"/>
+        <field name="VRMF" locator="VRMF" locator-type="Label"/>
+        <field name="QMGR" locator="QMgr" locator-type="Label"/>
+        <field name="EventName" locator="ErrCode" locator-type="Label"/>
+        <field name="Exception" locator="ErrText" locator-type="Label"/>
+        <field name="Explanation" locator="Explanation" locator-type="Label"/>
+        <field name="Action" locator="Action" locator-type="Label"/>
+        <field name="Where" locator="Where" locator-type="Label"/>
+
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
+        <property name="RestoreState" value="false"/>
+        <!--<property name="RangeToStream" value="1:"/>-->
+
+        <!--<property name="UseExecutors" value="true"/>-->
+        <!--<property name="ExecutorThreadsQuantity" value="5"/>-->
+        <!--<property name="ExecutorsTerminationTimeout" value="20"/>-->
+        <!--<property name="ExecutorsBoundedModel" value="false"/>-->
+        <!--<property name="ExecutorRejectedTaskOfferTimeout" value="20"/>-->
+
+        <parser-ref name="MQErrLogParser"/>
+    </stream>
+</tnt-data-source>

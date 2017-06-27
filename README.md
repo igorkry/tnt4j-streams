@@ -269,7 +269,7 @@ sample:
      * Indicates that raw data value is at a specified index location, offset, etc. This is a generic index/offset value whose 
      * interpretation is up to the specific parser applying the locator.
      */
-   	Index(Integer.class),
+    Index(Integer.class),
 
     /**
      * Indicates that raw data value is the value of a particular key or label. Examples of this are XPath expressions for XML elements, 
@@ -615,7 +615,7 @@ and there is no need to define additional mapping.
  
 TODO
  
-##### Use of dynamic locators
+### Use of dynamic locators
 
 `TNT4J-Streams` allows to dynamically define `field`/`field-locator` parameters. Dynamic reference variable placeholder is defined using 
 `${XXXXX}` format, where `XXXXX` is name or identifier of another data source configuration entity.
@@ -3610,7 +3610,7 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
     #### MQTT event sink factory configuration end ####
 ```
 
-## Streams configuration
+## Stream data source configuration
 
 Streams can be configured using XML document having root element `tnt-data-source`. Definition of XML configuration
 can be found in `tnt-data-source.xsd` file located in project `config` directory.
@@ -3674,6 +3674,8 @@ Note that `stream` uses `parser` reference:
     </stream>
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
+
+### Streams configuration
 
 #### Generic streams parameters
 
