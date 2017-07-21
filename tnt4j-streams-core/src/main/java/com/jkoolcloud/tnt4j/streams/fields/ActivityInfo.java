@@ -472,7 +472,7 @@ public class ActivityInfo {
 		if (value instanceof Object[]) {
 			return formatValuesArray((Object[]) value, field);
 		} else if (value instanceof byte[]) {
-			Utils.encodeHex((byte[]) value);
+			return Utils.encodeHex((byte[]) value);
 		} else if (value != null && value.getClass().isArray()) {
 			return ArrayUtils.toString(value);
 		}
