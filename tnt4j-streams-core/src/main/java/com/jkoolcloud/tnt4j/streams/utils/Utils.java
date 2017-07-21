@@ -537,7 +537,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            tags data object
 	 * @return tag strings array, or {@code null} if arrays can't be made
 	 */
-	@SuppressWarnings("unchecked")
 	public static String[] getTags(Object tagsData) {
 		if (tagsData instanceof byte[]) {
 			return new String[] { encodeHex((byte[]) tagsData) };
@@ -545,23 +544,20 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			return ((String) tagsData).split(TAG_DELIM);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
-		} else if (tagsData instanceof Collection) {
-			Collection<String> tagsList = (Collection<String>) tagsData;
-			if (!tagsList.isEmpty()) {
-				String[] tags = new String[tagsList.size()];
-				tags = tagsList.toArray(tags);
+		} else if (isCollection(tagsData)) {
+			Object[] tagsArray = makeArray(tagsData);
 
-				return tags;
-			}
-		} else if (tagsData instanceof Object[]) {
-			Object[] tagsArray = (Object[]) tagsData;
-			if (tagsArray.length > 0) {
-				String[] tags = new String[tagsArray.length];
-				for (int i = 0; i < tagsArray.length; i++) {
-					tags[i] = toString(tagsArray[i]);
+			if (ArrayUtils.isNotEmpty(tagsArray)) {
+				List<String> tags = new ArrayList<>(tagsArray.length);
+				for (Object aTagsArray : tagsArray) {
+					String[] ta = getTags(aTagsArray);
+
+					if (ArrayUtils.isNotEmpty(ta)) {
+						Collections.addAll(tags, ta);
+					}
 				}
 
-				return tags;
+				return tags.toArray(new String[tags.size()]);
 			}
 		}
 
