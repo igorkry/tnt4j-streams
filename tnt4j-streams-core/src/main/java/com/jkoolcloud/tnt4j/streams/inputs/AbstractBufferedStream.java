@@ -121,6 +121,15 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 */
 	@Override
 	protected void stopInternals() {
+		offerDieMarker();
+	}
+
+	/**
+	 * Adds "DIE" marker object to input buffer to mark "logical" data flow has ended.
+	 * 
+	 * @see #offerDieMarker(boolean)
+	 */
+	protected void offerDieMarker() {
 		offerDieMarker(false);
 	}
 
@@ -287,7 +296,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				markInputEnd();
 				// add "DIE" marker to buffer (in case producer thread is slower
 				// than waiting consumer).
-				offerDieMarker(false);
+				offerDieMarker();
 			}
 		}
 
