@@ -121,8 +121,20 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 */
 	@Override
 	protected void stopInternals() {
+		offerDieMarker(false);
+	}
+
+	/**
+	 * Adds "DIE" marker object to input buffer to mark "logical" data flow has ended.
+	 *
+	 * @param forceClear
+	 *            flag indicating to clear input buffer contents before putting "DIE" marker object into it
+	 */
+	protected void offerDieMarker(boolean forceClear) {
 		if (inputBuffer != null) {
-			// inputBuffer.clear(); //???
+			if (forceClear) {
+				inputBuffer.clear();
+			}
 			inputBuffer.offer(DIE_MARKER);
 		}
 	}
@@ -190,6 +202,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * @param inputData
 	 *            input data to add to buffer
 	 * @return {@code true} if input data is added to buffer, {@code false} - otherwise
+	 *
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
@@ -216,6 +229,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * Checks if stream data input is ended.
 	 *
 	 * @return {@code true} if stream input ended, {@code false} - otherwise
+	 *
 	 * @see InputProcessor#isInputEnded()
 	 */
 	protected abstract boolean isInputEnded();
@@ -273,7 +287,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				markInputEnd();
 				// add "DIE" marker to buffer (in case producer thread is slower
 				// than waiting consumer).
-				inputBuffer.offer(DIE_MARKER);
+				offerDieMarker(false);
 			}
 		}
 
