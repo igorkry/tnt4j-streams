@@ -434,26 +434,27 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		if (cfgValue != null) {
 			return cfgValue;
 		}
-		if (value == null) {
-			return null;
-		}
 		switch (dataType) {
 		case String:
 			return getMappedValue(value);
 		case Number:
-			return getMappedValue(formatNumericValue(value));
+			return getMappedValue(value == null ? null : formatNumericValue(value));
 		case Binary:
-			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
-				value = Utils.base64Decode(String.valueOf(value));
-			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
-				value = Utils.decodeHex(String.valueOf(value));
-			} else if (builtInFormat == ActivityFieldFormatType.string) {
-				value = String.valueOf(value).getBytes();
+			if (value != null) {
+				if (builtInFormat == ActivityFieldFormatType.base64Binary) {
+					value = Utils.base64Decode(String.valueOf(value));
+				} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
+					value = Utils.decodeHex(String.valueOf(value));
+				} else if (builtInFormat == ActivityFieldFormatType.string) {
+					value = String.valueOf(value).getBytes();
+				}
 			}
 			break;
 		case DateTime:
 		case Timestamp:
-			value = formatDateValue(value);
+			if (value != null) {
+				value = formatDateValue(value);
+			}
 			break;
 		default:
 			break;
