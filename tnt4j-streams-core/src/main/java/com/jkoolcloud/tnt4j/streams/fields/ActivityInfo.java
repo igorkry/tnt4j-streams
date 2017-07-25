@@ -661,7 +661,7 @@ public class ActivityInfo {
 		return StringUtils.isEmpty(fqn) ? null : fqn;
 	}
 
-	private Map<SourceType, String> getFQNMap(String fqnPattern) {
+	private static Map<SourceType, String> getFQNMap(String fqnPattern) {
 		Map<SourceType, String> fqnMap = new LinkedHashMap<>();
 		StringTokenizer tk = new StringTokenizer(fqnPattern, "#");
 		while (tk.hasMoreTokens()) {
@@ -718,6 +718,7 @@ public class ActivityInfo {
 		}
 
 		determineTimes();
+		resolveServer(false);
 
 		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
 
