@@ -56,9 +56,7 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 	 */
 	@Override
 	public void logItem(String ai) throws Exception {
-		Tracker tracker = getTracker(null, Thread.currentThread());
-
-		recordActivity(tracker, CONN_RETRY_INTERVAL, ai);
+		recordActivity(getTracker(), CONN_RETRY_INTERVAL, ai);
 	}
 
 	@Override

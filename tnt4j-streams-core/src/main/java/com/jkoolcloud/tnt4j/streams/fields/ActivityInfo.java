@@ -535,8 +535,8 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked. Same as invoking
-	 * {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 * Same as invoking {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -546,7 +546,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #buildTrackable(Tracker, Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see #addActivityProperty(String, Object, String)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
@@ -555,7 +555,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(Tracker, Collection)} is invoked.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -567,7 +567,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see Map#put(Object, Object)
-	 * @see #buildTrackable(Tracker, Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
@@ -641,30 +641,52 @@ public class ActivityInfo {
 	/**
 	 * Makes fully qualified name of activity source. Name is made from stream parsed data attributes.
 	 *
-	 * @param resolveOverDNS
-	 *            flag indicating whether to use DNS to resolve server names and IP addresses
+	 * @param pattern
+	 *            fqn pattern to fill
 	 *
 	 * @return fully qualified name of this activity source, or {@code null} if no source defining attributes where
 	 *         parsed from stream.
 	 */
-	public String getSourceFQN(boolean resolveOverDNS) {
-		resolveServer(resolveOverDNS);
+	public String getSourceFQN(String pattern) {
+		Map<SourceType, String> fqnMap = getFQNMap(pattern);
 
 		StringBuilder fqnB = new StringBuilder();
 
-		addSourceValue(fqnB, SourceType.APPL, applName);
-		addSourceValue(fqnB, SourceType.USER, userName);
-		addSourceValue(fqnB, SourceType.SERVER, serverName);
-		addSourceValue(fqnB, SourceType.NETADDR, serverIp);
-		addSourceValue(fqnB, SourceType.GEOADDR, location);
+		for (Map.Entry<SourceType, String> fqnE : fqnMap.entrySet()) {
+			addSourceValue(fqnB, fqnE.getKey(), getFQNValue(fqnE.getValue()));
+		}
 
 		String fqn = fqnB.toString();
 
 		return StringUtils.isEmpty(fqn) ? null : fqn;
 	}
 
+	private Map<SourceType, String> getFQNMap(String fqnPattern) {
+		Map<SourceType, String> fqnMap = new LinkedHashMap<>();
+		StringTokenizer tk = new StringTokenizer(fqnPattern, "#");
+		while (tk.hasMoreTokens()) {
+			String sName = tk.nextToken();
+			String[] pair = sName.split("=");
+			SourceType type = SourceType.valueOf(pair[0]);
+			fqnMap.put(type, pair[1]);
+		}
+
+		return fqnMap;
+	}
+
+	private String getFQNValue(String val) {
+		if (val.startsWith("${")) {
+			String varKey = val.substring(2, val.length() - 1);
+			Object fieldValue = getFieldValue(varKey);
+
+			return fieldValue == null ? null : Utils.toString(fieldValue);
+		}
+
+		return val;
+	}
+
 	private static void addSourceValue(StringBuilder sb, SourceType type, String value) {
-		if (StringUtils.isNotEmpty(value)) {
+		if (StringUtils.isNotEmpty(StringUtils.trim(value))) {
 			if (sb.length() > 0) {
 				sb.append('#'); // NON-NLS
 			}
@@ -695,7 +717,6 @@ public class ActivityInfo {
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
 		}
 
-		resolveServer(false);
 		determineTimes();
 
 		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
@@ -714,7 +735,8 @@ public class ActivityInfo {
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
 	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
 	 * <p>
-	 * Does same as {@link #buildTrackable(Tracker, Collection)} where {@code chTrackables} list is {@code null}.
+	 * Does same as {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} where
+	 * {@code chTrackables} list is {@code null}.
 	 *
 	 * @param tracker
 	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
@@ -723,7 +745,7 @@ public class ActivityInfo {
 	 * @return trackable instance made from this activity entity data
 	 * @throws java.lang.IllegalArgumentException
 	 *             if {@code tracker} is null
-	 * @see #buildTrackable(Tracker, Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 */
 	public Trackable buildTrackable(Tracker tracker) {
 		return buildTrackable(tracker, null);
@@ -1063,7 +1085,7 @@ public class ActivityInfo {
 	 * @param resolveOverDNS
 	 *            flag indicating whether to use DNS to resolve server names and IP addresses
 	 */
-	private void resolveServer(boolean resolveOverDNS) {
+	public void resolveServer(boolean resolveOverDNS) {
 		if (StringUtils.isEmpty(serverName) && StringUtils.isEmpty(serverIp)) {
 			serverName = HOST_CACHE.get(LOCAL_SERVER_NAME_KEY);
 			serverIp = HOST_CACHE.get(LOCAL_SERVER_IP_KEY);

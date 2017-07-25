@@ -33,7 +33,6 @@ import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.sink.impl.BufferedEventSink;
-import com.jkoolcloud.tnt4j.source.DefaultSourceFactory;
 import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
@@ -77,6 +76,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	private Map<String, String> tnt4jProperties;
 
 	private TNTInputStream<?, ?> stream;
+	private boolean retryStateCheck = false;
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
@@ -148,14 +148,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	@Override
 	public void handleConsumerThread(Thread t) throws IllegalStateException {
-		Tracker tracker = buildTracker(defaultSource.getFQName());
-		checkTrackerState(tracker);
-		synchronized (trackersMap) {
-			String fqn = defaultSource.getFQName();
-			trackersMap.put(getTrackersMapKey(t, fqn), tracker);
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTStreamOutput.default.tracker"), (t == null ? "null" : t.getName()), fqn);
-		}
+		getTracker(t);
 	}
 
 	private static void checkTrackerState(Tracker tracker) throws IllegalStateException {
@@ -169,6 +162,50 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTStreamOutput.tracker.not.opened"));
 		}
+	}
+
+	private void checkTracker(Tracker tracker) throws IllegalArgumentException {
+		if (retryStateCheck) {
+			checkTrackerWithRetry(tracker, CONN_RETRY_INTERVAL);
+		} else {
+			checkTrackerState(tracker);
+		}
+	}
+
+	private void checkTrackerWithRetry(Tracker tracker, long retryPeriod) throws IllegalStateException {
+		StreamsThread thread = null;
+		if (Thread.currentThread() instanceof StreamsThread) {
+			thread = (StreamsThread) Thread.currentThread();
+		}
+
+		boolean retryAttempt = false;
+		do {
+			try {
+				checkTrackerState(tracker);
+
+				if (retryAttempt) {
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"TNTStreamOutput.check.retry.successful"));
+				}
+
+				return;
+			} catch (IllegalStateException ise) {
+				logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTStreamOutput.check.failed"), ise.getLocalizedMessage());
+				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTStreamOutput.check.failed.trace"), ise);
+				// resetTracker(tracker);
+				if (thread == null) {
+					throw ise;
+				}
+				retryAttempt = true;
+				if (!thread.isStopRunning()) {
+					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"TNTStreamOutput.check.will.retry"), TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
+					StreamsThread.sleep(retryPeriod);
+				}
+			}
+		} while (thread != null && !thread.isStopRunning());
 	}
 
 	@Override
@@ -189,6 +226,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				path = ZK_PREFIX + path;
 			}
 			setTnt4jCfgPath(path);
+		} else if (OutputProperties.PROP_RETRY_STATE_CHECK.equalsIgnoreCase(name)) {
+			retryStateCheck = Boolean.parseBoolean((String) value);
 		}
 	}
 
@@ -204,11 +243,24 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Gets {@link Tracker} instance from {@link #trackersMap} matching provided activity item source FQN and thread on
-	 * which stream is running. If no tracker found in trackers map - new one is created.
+	 * Gets {@link Tracker} instance from {@link #trackersMap} matching {@link Thread#currentThread()} on which stream
+	 * output is running. If no tracker found in trackers map - new one is created.
 	 *
-	 * @param aiSourceFQN
-	 *            activity item source FQN
+	 * @return tracker instance for activity item
+	 *
+	 * @throws IllegalStateException
+	 *             indicates that created tracker is not opened and can not record activity data
+	 *
+	 * @see #getTracker(Thread)
+	 */
+	protected Tracker getTracker() throws IllegalStateException {
+		return getTracker(Thread.currentThread());
+	}
+
+	/**
+	 * Gets {@link Tracker} instance from {@link #trackersMap} matching provided thread on which stream output is
+	 * running. If no tracker found in trackers map - new one is created.
+	 *
 	 * @param t
 	 *            thread on which stream is running
 	 * @return tracker instance for activity item
@@ -216,34 +268,25 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @throws IllegalStateException
 	 *             indicates that created tracker is not opened and can not record activity data
 	 */
-	protected Tracker getTracker(String aiSourceFQN, Thread t) throws IllegalStateException {
+	protected Tracker getTracker(Thread t) throws IllegalStateException {
 		synchronized (trackersMap) {
-			String sourceFQN = StringUtils.isEmpty(aiSourceFQN) ? defaultSource.getFQName() : aiSourceFQN;
-			Tracker tracker = trackersMap.get(getTrackersMapKey(t, sourceFQN));
+			Tracker tracker = trackersMap.get(getTrackersMapKey(t));
 			if (tracker == null) {
-				tracker = buildTracker(sourceFQN);
-				checkTrackerState(tracker);
-				String asFQN = trackerConfig.getSource().getFQName();
-				trackersMap.put(getTrackersMapKey(t, asFQN), tracker);
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTStreamOutput.build.new.tracker"), asFQN);
+				tracker = TrackingLogger.getInstance(trackerConfig.build());
+				checkTracker(tracker);
+				synchronized (trackersMap) {
+					trackersMap.put(getTrackersMapKey(t), tracker);
+					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"TNTStreamOutput.built.new.tracker"), (t == null ? "null" : t.getId()));
+				}
 			}
 
 			return tracker;
 		}
 	}
 
-	private Tracker buildTracker(String sourceFQN) {
-		Source aiSource = DefaultSourceFactory.getInstance().newFromFQN(sourceFQN);
-		aiSource.setSSN(defaultSource.getSSN());
-		trackerConfig.setSource(aiSource);
-		Tracker tracker = TrackingLogger.getInstance(trackerConfig.build());
-
-		return tracker;
-	}
-
-	private static String getTrackersMapKey(Thread t, String sourceFQN) {
-		return (t == null ? "null" : t.getId()) + ":?:" + sourceFQN; // NON-NLS
+	private static String getTrackersMapKey(Thread t) {
+		return t == null ? "null" : String.valueOf(t.getId()); // NON-NLS
 	}
 
 	@Override
@@ -369,10 +412,12 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * Performs default {@link com.jkoolcloud.tnt4j.source.Source} initialization and setup.
 	 */
 	protected void setupDefaultSource() {
-		// NOTE: removing APPL=streams "layer" from default source and copy
-		// SSN=streams value from config
 		trackerConfig = trackerConfig.build();
-		defaultSource = trackerConfig.getSource().getSource();
+		defaultSource = trackerConfig.getSource();
+		// NOTE: removing APPL=streams "layer" from default source and copy SSN=streams value from config
+		if (defaultSource.getSource() != null) {
+			defaultSource = defaultSource.getSource();
+		}
 		defaultSource.setSSN(trackerConfig.getSource().getSSN());
 	}
 
@@ -437,11 +482,12 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		} while (thread != null && !thread.isStopRunning());
 	}
 
-	private void resetTracker(Tracker tracker) throws IOException {
+	private static void resetTracker(Tracker tracker) throws IOException {
 		EventSink eSink = tracker.getEventSink();
 
-		eSink.close();
-		// eSink.open();
+		if (eSink != null) {
+			eSink.reopen();
+		}
 	}
 
 	/**

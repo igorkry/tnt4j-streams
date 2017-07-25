@@ -51,4 +51,14 @@ public interface OutputProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_TNT4J_CONFIG_ZK_NODE = "TNT4JConfigZKNode"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_SOURCE_FQN = "SourceFQN"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_RETRY_STATE_CHECK = "RetryStateCheck"; // NON-NLS
 }

@@ -17,13 +17,17 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.Snapshot;
 import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.source.DefaultSourceFactory;
+import com.jkoolcloud.tnt4j.source.Source;
+import com.jkoolcloud.tnt4j.source.SourceFactory;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
@@ -36,14 +40,16 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  *
  * @version $Revision: 1 $
  *
- * @see ActivityInfo#buildTrackable(Tracker, Collection)
+ * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
+	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}";
 
 	private boolean resolveServer = false;
 	private boolean turnOutActivityChildren = false;
 	private boolean buildFQNFromData = true;
+	private String sourceFQN = null;
 
 	/**
 	 * Constructs a new JKCloudActivityOutput.
@@ -67,6 +73,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			turnOutActivityChildren = Boolean.parseBoolean((String) value);
 		} else if (OutputProperties.PROP_BUILD_FQN_FROM_DATA.equalsIgnoreCase(name)) {
 			buildFQNFromData = Boolean.parseBoolean((String) value);
+		} else if (OutputProperties.PROP_SOURCE_FQN.equalsIgnoreCase(name)) {
+			sourceFQN = (String) value;
 		}
 	}
 
@@ -74,28 +82,53 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 * {@inheritDoc}
 	 * <p>
 	 * 
-	 * @see ActivityInfo#buildTrackable(Tracker, Collection)
+	 * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		String fqn = buildFQNFromData ? ai.getSourceFQN(resolveServer) : null;
-		Tracker tracker = getTracker(null, Thread.currentThread());
+		Tracker tracker = getTracker();
+		ai.resolveServer(resolveServer);
+		String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
 		if (turnOutActivityChildren && ai.hasChildren()) {
 			for (ActivityInfo cai : ai.getChildren()) {
 				cai.merge(ai);
 				Trackable t = cai.buildTrackable(tracker);
+				alterTrackableSource(tracker, t, cai, aiFQN);
 				recordActivity(tracker, CONN_RETRY_INTERVAL, t);
 			}
 		} else {
 			List<Trackable> chTrackables = new ArrayList<>();
 			Trackable t = ai.buildTrackable(tracker, chTrackables);
+			alterTrackableSource(tracker, t, ai, aiFQN);
 			recordActivity(tracker, CONN_RETRY_INTERVAL, t);
 
-			for (Trackable chT : chTrackables) {
+			for (int i = 0; i < chTrackables.size(); i++) {
+				Trackable chT = chTrackables.get(i);
+				ActivityInfo cai = ai.getChildren().get(i);
+				alterTrackableSource(tracker, chT, cai, aiFQN);
 				recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
 			}
 		}
+	}
+
+	private static void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
+		if (StringUtils.isNotEmpty(fqn)) {
+			t.setSource(buildSource(tracker, ai.getSourceFQN(fqn)));
+		}
+	}
+
+	private static Source buildSource(Tracker tracker, String sourceFQN) {
+		if (StringUtils.isEmpty(sourceFQN)) {
+			return null;
+		}
+		SourceFactory sf = tracker == null ? DefaultSourceFactory.getInstance()
+				: tracker.getConfiguration().getSourceFactory();
+		Source source = sf.newFromFQN(sourceFQN);
+		source.setSSN(sf.getSSN());
+
+		return source;
+
 	}
 
 	@Override
