@@ -34,7 +34,7 @@ import com.jkoolcloud.tnt4j.streams.utils.IntRange;
  * <p>
  * This activity stream requires parsers that can support {@link Row} data.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractExcelStream}):
  * <ul>
  * <li>RangeToStream - defines streamed data rows index range. Default value - {@code 1:}. (Optional)</li>

@@ -3795,6 +3795,82 @@ These parameters are applicable to streams which uses parsers to parse incoming 
      <property name="BufferSize" value="1024"/>
      <property name="BufferOfferTimeout" value="90"/>
  ```
+ 
+##### Stream output configuration parameters
+
+Stream output can be configured using these configuration properties:
+
+ * TNT4JConfigFile - path of `tnt4j.properties` file. May be used to override default TNT4J system property `tnt4j.config` defined value. 
+Default value - `null`. (Optional)
+ * TNT4JProperty - defines specific TNT4J configuration properties to be used by stream output. (Optional)
+ * TNT4JConfigZKNode - defines ZooKeeper path where stream configuration is located. Default value - ``. (Optional)
+ * RetryStateCheck - flag indicating whether tracker state check should be perform repeatedly. If `false`, then streaming process exits with 
+ `java.lang.IllegalStateException`. Default value - `false`. (Optional)
+ * ResolveServerFromDNS - flag indicating whether to resolve activity entity host name/IP from DNS server. Default value - `false`. (Optional)
+ * TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging data from both parent and 
+ child entity fields. Default value - `false`. (Optional)
+ * BuildSourceFQNFromStreamedData - flag indicating whether to set streamed activity entity `Source` FQN build from activity fields data 
+ instead of default on configured in `tnt4j.properties`. Default value - `true`. (Optional)
+ * SourceFQN - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
+ Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
+ Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
+ 
+     sample:
+ ```xml
+     <property name="TNT4JConfigFile" value="../../configuration/tnt4j_dev.properties"/>
+     <tnt4j-properties>
+         <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
+     </tnt4j-properties>
+     <property name="TNT4JConfigZKNode" value="/samples/core/logstash"/>
+     <property name="RetryStateCheck" value="true"/>    
+     <property name="ResolveServerFromDNS" value="true"/>
+     <property name="TurnOutActivityChildren" value="true"/>
+     <property name="BuildSourceFQNFromStreamedData" value="false"/>
+     <property name="SourceFQN" value="APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}"/>
+ ``` 
+ 
+**NOTE:** stream output configuration parameters can be defined under `stream` tag (will drill down to default stream output instance), or 
+under `java-object` tag referring output type class and referred from `stream` like this:
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="ProgressEventParser">
+            ...
+        </parser>
+    
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="TurnOutActivityChildren" value="true"/>
+        ...
+                
+        <parser-ref name="ProgressEventParser"/>      
+    </stream>
+</tnt-data-source>
+```    
+or
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
+        <property name="TurnOutActivityChildren" value="true"/>
+    </java-object>
+    
+    <parser name="ProgressEventParser">
+        ...
+    </parser>
+    
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        ...
+        
+        <parser-ref name="ProgressEventParser"/>
+        
+        <reference name="WmqStreamOutput"/>
+    </stream>
+</tnt-data-source>
+```  
 
 #### File line stream parameters (and Hdfs)
 

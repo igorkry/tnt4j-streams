@@ -42,7 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * In particular, this class will convert the {@link StreamFieldType#TrackingId} and {@link StreamFieldType#Correlator}
  * fields values from a tokenized list of items into a value in the appropriate form required by the JKool Cloud.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link ActivityXmlParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link ActivityXmlParser}):
  * <ul>
  * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
  * </ul>

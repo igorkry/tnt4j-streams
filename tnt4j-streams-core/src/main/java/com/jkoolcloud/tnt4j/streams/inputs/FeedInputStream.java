@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * raw input source and parseable value is retrieved inside parser, there is no way to rewind reader position if first
  * parser fails to parse RAW activity data.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.

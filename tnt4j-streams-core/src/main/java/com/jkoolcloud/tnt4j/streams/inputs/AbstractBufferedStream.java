@@ -31,7 +31,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
  * queue to be asynchronously processed by consumer thread(s).
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>

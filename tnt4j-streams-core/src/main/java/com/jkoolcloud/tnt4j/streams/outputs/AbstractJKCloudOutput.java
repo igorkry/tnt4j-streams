@@ -46,6 +46,18 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
 /**
  * Base class for TNT4J-Streams output handler. Handles {@link Tracker} initialization, configuration and caching. Picks
  * tracker to use according streamed data source FQN and stream running {@link Thread}.
+ * <p>
+ * This output supports the following configuration properties:
+ * <ul>
+ * <li>TNT4JConfigFile - path of 'tnt4j.properties' file. May be used to override default TNT4J system property
+ * 'tnt4j.config' defined value. Default value - '{@code null}'. (Optional)</li>
+ * <li>TNT4JProperty - defines specific TNT4J configuration properties to be used by stream output. (Optional)</li>
+ * <li>TNT4JConfigZKNode - defines ZooKeeper path where stream configuration is located. Default value - ''.
+ * (Optional)</li>
+ * <li>RetryStateCheck - flag indicating whether tracker state check should be perform repeatedly. If {@code false},
+ * then streaming process exits with {@link java.lang.IllegalStateException}. Default value - {@code false}.
+ * (Optional)</li>
+ * </ul>
  *
  * @param <T>
  *            the type of incoming activity data from stream

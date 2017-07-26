@@ -37,6 +37,21 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 /**
  * Implements TNT4J-Streams output logger for activities provided as {@link ActivityInfo} entities to be recorded to
  * JKool Cloud over TNT4J and JESL APIs.
+ * <p>
+ * This output supports the following configuration properties (in addition to those supported by
+ * {@link com.jkoolcloud.tnt4j.streams.outputs.AbstractJKCloudOutput}):
+ * <ul>
+ * <li>ResolveServerFromDNS - flag indicating whether to resolve activity entity host name/IP from DNS server. Default
+ * value - {@code false}. (Optional)</li>
+ * <li>TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging
+ * data from both parent and child entity fields. Default value - {@code false}. (Optional)</li>
+ * <li>BuildSourceFQNFromStreamedData - flag indicating whether to set streamed activity entity {@link Source} FQN build
+ * from activity fields data instead of default on configured in 'tnt4j.properties'. Default value - {@code true}.
+ * (Optional)</li>
+ * <li>SourceFQN - {@link Source} FQN pattern to be used when building it from streamed activity entity fields values.
+ * Format is: SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}... . Default value -
+ * 'APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}'. (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  *

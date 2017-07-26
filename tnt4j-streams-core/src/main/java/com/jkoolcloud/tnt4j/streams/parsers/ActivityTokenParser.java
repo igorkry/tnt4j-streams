@@ -42,7 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * the value for each field being retrieved from a specific 1-based numeric token position. The field-separator can be
  * customized.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
  * <ul>
  * <li>FieldDelim - fields separator. (Optional)</li>
  * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},

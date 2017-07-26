@@ -55,7 +55,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} activity data.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by {@link TNTInputStream}):
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link TNTInputStream}):
  * <ul>
  * <li>FileName - the system-dependent file name. (Required - just one 'FileName' or 'Port')</li>
  * <li>Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')</li>

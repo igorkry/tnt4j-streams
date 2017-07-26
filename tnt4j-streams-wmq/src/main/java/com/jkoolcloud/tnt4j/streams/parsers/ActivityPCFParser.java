@@ -47,7 +47,8 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' (e.g.,
  * 'MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE').
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
  * <ul>
  * <li>TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant
  * names if possible and field/locator data type is 'String' (meaning translated value can be assigned to field). If

@@ -55,7 +55,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * NOTE: Custom messages parsing not implemented and puts just log entry.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link AbstractActivityMapParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link AbstractActivityMapParser}):
  * <ul>
  * <li>ConvertToString - flag indicating whether to convert message payload {@code byte[]} data to string. Applicable to
  * {@link BytesMessage} and {@link StreamMessage}. Default value - 'false'. (Optional)</li>

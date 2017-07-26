@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Base class for MS Excel workbook stored activity stream, where each workbook sheet or row is assumed to represent a
  * single activity or event which should be recorded.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>FileName - the system-dependent file name of MS Excel document. (Required)</li>

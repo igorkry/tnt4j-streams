@@ -56,7 +56,8 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * containing multiple XML documents. If there are multiple XML documents, each document must start with
  * {@code "<?xml ...>"}, and be separated by a new line.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
  * <ul>
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
  * <li>RequireDefault - indicates that all attributes are required by default. (Optional)</li>

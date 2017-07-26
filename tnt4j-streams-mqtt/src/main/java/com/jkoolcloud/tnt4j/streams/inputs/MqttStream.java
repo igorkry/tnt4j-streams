@@ -55,7 +55,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>ActivityTransport - activity transport definition: 'Mqtt'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractBufferedStream}):
  * <ul>
  * <li>ServerURI - Mqtt server URI. (Required)</li>

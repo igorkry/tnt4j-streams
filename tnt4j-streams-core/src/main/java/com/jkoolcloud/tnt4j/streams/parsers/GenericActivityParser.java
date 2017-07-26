@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Generic class for common activity parsers. It provides some generic functionality witch is common to most activity
  * parsers.
  * <p>
- * This parser supports the following properties:
+ * This parser supports the following configuration properties:
  * <ul>
  * <li>UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field 'Message' if
  * there is no mapping defined for that field in stream parser configuration or value was not resolved by parser from

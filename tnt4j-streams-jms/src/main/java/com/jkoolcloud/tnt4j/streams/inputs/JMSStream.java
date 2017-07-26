@@ -40,7 +40,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <p>
  * This activity stream requires parsers that can support JMS {@link Message} data.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractBufferedStream}):
  * <ul>
  * <li>ServerURI - JMS server URL. (Required)</li>

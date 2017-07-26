@@ -51,7 +51,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * This activity stream requires parsers that can support {@link PCFContent} data like
  * {@link com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser}.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by {@link WmqStreamPCF}):
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link WmqStreamPCF}):
  * <ul>
  * <li>TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ
  * operations which names matches this mask. Default value - {@code "*"}. (Optional)</li>

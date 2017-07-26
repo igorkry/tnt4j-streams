@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractBufferedStream}):
  * <ul>
  * <li>FileName - the system-dependent file name or file name pattern defined using wildcard characters '*' and '?'.

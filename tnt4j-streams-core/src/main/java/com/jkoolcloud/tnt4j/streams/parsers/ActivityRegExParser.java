@@ -42,7 +42,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * specified regular expression, with the value for each field being retrieved from either of the 1-based group
  * position, or match position.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link GenericActivityParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
  * <ul>
  * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
  * </ul>

@@ -37,7 +37,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * But it is also possible to use Apache access log configuration pattern over LogPattern parameter. Then RegEx is
  * generated from it. Additional config pattern tokens may be mapped to RegEx'es using ConfRegexMapping parameters.
  * <p>
- * This parser supports the following properties (in addition to those supported by {@link ActivityRegExParser}):
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link ActivityRegExParser}):
  * <ul>
  * <li>LogPattern - access log pattern. (Optional, if RegEx {@link Pattern} property is defined)</li>
  * <li>ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if {@code LogPattern}
