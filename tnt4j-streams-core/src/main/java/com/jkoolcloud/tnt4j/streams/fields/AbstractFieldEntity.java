@@ -25,8 +25,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
+import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for common activity field entities: field, field (value) locator, etc.
@@ -121,18 +123,21 @@ public abstract class AbstractFieldEntity {
 	 *
 	 * @param fieldValue
 	 *            value to transform
+	 * @param ai
+	 *            activity entity instance to get additional value for a transformation
+	 *
 	 * @return transformed value
 	 * @throws Exception
 	 *             if transformation operation fails
 	 */
-	public Object transformValue(Object fieldValue) throws Exception {
+	public Object transformValue(Object fieldValue, ActivityInfo ai) throws Exception {
 		if (CollectionUtils.isEmpty(transformations)) {
 			return fieldValue;
 		}
 
 		Object tValue = fieldValue;
 		for (ValueTransformation<Object, Object> vt : transformations) {
-			tValue = vt.transform(tValue);
+			tValue = vt.transform(tValue, ai);
 		}
 
 		return tValue;
@@ -167,5 +172,29 @@ public abstract class AbstractFieldEntity {
 		}
 
 		return filter.doFilter(fieldValue);
+	}
+
+	/**
+	 * Checks if activity field/locator transformation expression contains activity field names variables.
+	 *
+	 * @return {@code true} if activity field/locator transformation expression contains activity field names variables,
+	 *         {@code false} - otherwise
+	 */
+	public boolean hasActivityTransformations() {
+		if (transformations != null) {
+			for (ValueTransformation<?, ?> vt : transformations) {
+				if (vt instanceof AbstractScriptTransformation) {
+					AbstractScriptTransformation<?> st = (AbstractScriptTransformation<?>) vt;
+					String script = st.getScriptCode();
+
+					if (Utils.isVariableExpression(script)) {
+						return true;
+					}
+				}
+			}
+
+		}
+
+		return false;
 	}
 }

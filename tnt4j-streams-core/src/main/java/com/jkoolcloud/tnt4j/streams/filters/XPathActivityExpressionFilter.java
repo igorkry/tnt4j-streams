@@ -24,8 +24,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathVariableResolver;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
@@ -76,26 +76,20 @@ public class XPathActivityExpressionFilter extends AbstractActivityFilter {
 		Map<String, Object> valuesMap = new HashMap<>();
 
 		if (CollectionUtils.isNotEmpty(exprVars)) {
-			Object fValue;
-			String fieldName;
 			for (String eVar : exprVars) {
-				fieldName = eVar.substring(2, eVar.length() - 1);
-				fValue = activityInfo.getFieldValue(fieldName);
-				fieldName = placeHoldersMap.get(eVar);
-				valuesMap.put(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
+				Property eKV = resolveFieldKeyAndValue(eVar, activityInfo);
+
+				valuesMap.put(eKV.getKey(), eKV.getValue());
 			}
 		}
 
 		XPath xPath = StreamsXMLUtils.getStreamsXPath();
-		xPath.setXPathVariableResolver(new XPathActivityExpressionFilter.StreamsVariableResolver(valuesMap));
+		xPath.setXPathVariableResolver(new StreamsVariableResolver(valuesMap));
 
 		try {
 			boolean match = "true".equals(xPath.evaluate(getExpression(), (Object) null)); // NON-NLS
 
-			boolean filteredOut = isFilteredOut(getHandleType(), match);
-			activityInfo.setFiltered(filteredOut);
-
-			return filteredOut;
+			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
 			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ExpressionFilter.filtering.failed", filterExpression), exc);

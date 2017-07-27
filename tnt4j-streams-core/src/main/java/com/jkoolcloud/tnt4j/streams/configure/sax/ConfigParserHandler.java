@@ -2015,7 +2015,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (CollectionUtils.isEmpty(aField.getLocators())) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.must.have", qName, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
-					getLocationInfo()));
+					getLocationInfo(), aField.getFieldTypeName()));
 		}
 
 		List<String> dynamicLocators = new ArrayList<>();

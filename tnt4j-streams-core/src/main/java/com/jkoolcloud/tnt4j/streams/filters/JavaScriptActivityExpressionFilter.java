@@ -20,8 +20,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
@@ -65,23 +65,17 @@ public class JavaScriptActivityExpressionFilter extends AbstractActivityFilter {
 		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
 
 		if (CollectionUtils.isNotEmpty(exprVars)) {
-			Object fValue;
-			String fieldName;
 			for (String eVar : exprVars) {
-				fieldName = eVar.substring(2, eVar.length() - 1);
-				fValue = activityInfo.getFieldValue(fieldName);
-				fieldName = placeHoldersMap.get(eVar);
-				factory.put(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
+				Property eKV = resolveFieldKeyAndValue(eVar, activityInfo);
+
+				factory.put(eKV.getKey(), eKV.getValue());
 			}
 		}
 
 		try {
 			boolean match = (boolean) engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
 
-			boolean filteredOut = isFilteredOut(getHandleType(), match);
-			activityInfo.setFiltered(filteredOut);
-
-			return filteredOut;
+			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
 			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ExpressionFilter.filtering.failed", filterExpression), exc);

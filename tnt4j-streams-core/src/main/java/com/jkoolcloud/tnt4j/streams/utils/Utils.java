@@ -64,7 +64,13 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
 	private static final Pattern UUID_PATTERN = Pattern
 			.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"); // NON-NLS
-	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{(\\w+)\\}"); // NON-NLS
+
+	/**
+	 * Variable expression placeholder definition start token.
+	 */
+	public static final String VAR_EXP_START_TOKEN = "${"; // NON-NLS
+	private static final String VAR_EXP_END_TOKEN = "}"; // NON-NLS
+	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{[\\w\\.]+\\}"); // NON-NLS
 	private static final Pattern EXPR_VAR_PATTERN = CFG_VAR_PATTERN;// Pattern.compile("\\$(\\w+)"); // NON-NLS
 
 	/**
@@ -904,6 +910,28 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Checks provided expression string contains variable placeholders having {@code "${VAR_NAME}"} format.
+	 *
+	 * @param exp
+	 *            expression string to check
+	 * @return {@code true} if expression contains variable placeholders, {@code false} - otherwise
+	 */
+	public static boolean isVariableExpression(String exp) {
+		return exp != null && EXPR_VAR_PATTERN.matcher(exp).matches();
+	}
+
+	/**
+	 * Makes expressions used variable placeholder representation.
+	 *
+	 * @param varName
+	 *            variable name
+	 * @return variable name surround by expression tokens
+	 */
+	public static String makeExpVariable(String varName) {
+		return VAR_EXP_START_TOKEN + varName + VAR_EXP_END_TOKEN;
+	}
+
+	/**
 	 * Makes {@link Object} type array from provided object instance.
 	 * <p>
 	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link java.util.Collection}, then method
@@ -1695,7 +1723,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param dataMap
 	 *            data map to get value from
 	 * @return path resolved map contained value
-	 * 
+	 *
 	 * @see #getMapValueByPath(String[], Map, int)
 	 */
 	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap) {
@@ -1704,7 +1732,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Resolves map contained value by provided map keys path.
-	 * 
+	 *
 	 * @param path
 	 *            map keys path tokens array referencing wanted value
 	 * @param dataMap

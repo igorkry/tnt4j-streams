@@ -20,6 +20,7 @@ import java.util.Collections;
 
 import javax.xml.xpath.XPathFunction;
 
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -37,13 +38,15 @@ public abstract class AbstractFunction<V> extends AbstractValueTransformation<V,
 	 *
 	 * @param value
 	 *            data value to transform
+	 * @param ai
+	 *            activity entity instance
 	 * @return transformed value
 	 *
 	 * @throws com.jkoolcloud.tnt4j.streams.transform.TransformationException
 	 *             if function evaluation fails
 	 */
 	@Override
-	public Object transform(V value) throws TransformationException {
+	public Object transform(V value, ActivityInfo ai) throws TransformationException {
 		try {
 			return evaluate(Collections.singletonList(value));
 		} catch (Exception exc) {

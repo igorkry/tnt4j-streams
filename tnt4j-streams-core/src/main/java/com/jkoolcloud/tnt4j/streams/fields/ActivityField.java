@@ -38,12 +38,6 @@ public class ActivityField extends AbstractFieldEntity {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
 
 	/**
-	 * Activity field attribute dynamic value variable definition start token.
-	 */
-	private static final String FIELD_DYNAMIC_ATTR_START_TOKEN = "${"; // NON-NLS
-	private static final String FIELD_DYNAMIC_ATTR_END_TOKEN = "}"; // NON-NLS
-
-	/**
 	 * Constant for default delimiter symbol used to delimit multiple field values.
 	 */
 	public static final String DEFAULT_FIELD_VALUES_DELIM = ","; // NON-NLS
@@ -166,7 +160,7 @@ public class ActivityField extends AbstractFieldEntity {
 		if (locator != null) {
 			boolean dynamic = false;
 			if (StringUtils.isNotEmpty(locator.getId())) {
-				String did = FIELD_DYNAMIC_ATTR_START_TOKEN + locator.getId() + FIELD_DYNAMIC_ATTR_END_TOKEN;
+				String did = Utils.makeExpVariable(locator.getId());
 
 				if (fieldTypeName.contains(did) || (valueType != null && valueType.contains(did))) {
 					addDynamicLocator(did, locator);
@@ -560,7 +554,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return {@code true} if attribute value string contains variable expression, {@code false} - otherwise
 	 */
 	public static boolean isDynamicAttr(String attrValue) {
-		return attrValue != null && attrValue.contains(FIELD_DYNAMIC_ATTR_START_TOKEN);
+		return Utils.isVariableExpression(attrValue);
 	}
 
 	/**

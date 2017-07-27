@@ -168,7 +168,7 @@ public class ActivityInfo {
 		if (!field.isTransparent()) {
 			setFieldValue(field, fieldValue);
 		} else {
-			addActivityProperty(field.getFieldTypeName(), fieldValue, TRANSPARENT_PROP_TYPE);
+			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), TRANSPARENT_PROP_TYPE);
 		}
 	}
 
@@ -186,7 +186,7 @@ public class ActivityInfo {
 	 */
 	protected Object transform(ActivityField field, Object fieldValue) {
 		try {
-			fieldValue = field.transformValue(fieldValue);
+			fieldValue = field.transformValue(fieldValue, this);
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -454,10 +454,15 @@ public class ActivityInfo {
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
 		ActivityFieldLocator fmLocator = field.getMasterLocator();
 
-		return fieldValue instanceof UsecTimestamp ? (UsecTimestamp) fieldValue
-				: TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
-						getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
-						fmLocator == null ? null : fmLocator.getLocale());
+		if (fieldValue instanceof UsecTimestamp) {
+			return (UsecTimestamp) fieldValue;
+		} else if (fieldValue instanceof Number) {
+			return new UsecTimestamp((Number) fieldValue);
+		} else {
+			return TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
+					getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
+					fmLocator == null ? null : fmLocator.getLocale());
+		}
 	}
 
 	private static String substitute(String value, String newValue) {
@@ -675,9 +680,8 @@ public class ActivityInfo {
 	}
 
 	private String getFQNValue(String val) {
-		if (val.startsWith("${")) {
-			String varKey = val.substring(2, val.length() - 1);
-			Object fieldValue = getFieldValue(varKey);
+		if (val.startsWith(Utils.VAR_EXP_START_TOKEN)) {
+			Object fieldValue = getFieldValue(val);
 
 			return fieldValue == null ? null : Utils.toString(fieldValue);
 		}
@@ -994,7 +998,7 @@ public class ActivityInfo {
 		child.parentId = parentId;
 
 		// child.resolveServer(false);
-		child.determineTimes();
+		// child.determineTimes();
 
 		return child.buildTrackable(tracker);
 	}
@@ -1147,9 +1151,13 @@ public class ActivityInfo {
 	 */
 	private void determineTimes() {
 		if (elapsedTime < 0L) {
-			long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
-					: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
-			elapsedTime = TimestampFormatter.convert(elapsedTimeNano, TimeUnit.NANOSECONDS, TimeUnit.MICROSECONDS);
+			if (startTime != null && endTime != null) {
+				elapsedTime = endTime.difference(startTime);
+			} else {
+				long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
+						: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
+				elapsedTime = TimestampFormatter.convert(elapsedTimeNano, TimeUnit.NANOSECONDS, TimeUnit.MICROSECONDS);
+			}
 		}
 		if (endTime == null) {
 			if (startTime != null) {
@@ -1675,6 +1683,8 @@ public class ActivityInfo {
 
 	/**
 	 * Returns activity field value.
+	 * <p>
+	 * {@code fieldName} can also be as some expression variable having {@code "${FIELD_NAME}"} format.
 	 * 
 	 * @param fieldName
 	 *            field name value to get
@@ -1682,6 +1692,10 @@ public class ActivityInfo {
 	 */
 	public Object getFieldValue(String fieldName) {
 		try {
+			if (fieldName.startsWith(Utils.VAR_EXP_START_TOKEN)) {
+				fieldName = fieldName.substring(2, fieldName.length() - 1);
+			}
+
 			StreamFieldType sft = Utils.valueOfIgnoreCase(StreamFieldType.class, fieldName);
 			switch (sft) {
 			case ApplName:

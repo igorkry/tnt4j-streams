@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+
 /**
  * This interface defines common operations for data value transformations used by TNT4J-Streams.
  *
@@ -39,10 +41,12 @@ public interface ValueTransformation<V, T> {
 	 *
 	 * @param value
 	 *            data value to transform
+	 * @param ai
+	 *            activity entity instance
 	 * @return transformed data value
 	 *
 	 * @throws com.jkoolcloud.tnt4j.streams.transform.TransformationException
 	 *             if transformation operation fails
 	 */
-	T transform(V value) throws TransformationException;
+	T transform(V value, ActivityInfo ai) throws TransformationException;
 }

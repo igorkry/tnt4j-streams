@@ -191,7 +191,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		int idx = -1;
 		for (int i = 0; i < fieldList.size(); i++) {
 			ActivityField af = fieldList.get(i);
-			if (af.hasCacheLocators() || af.hasActivityLocators()) {
+			if (af.hasCacheLocators() || af.hasActivityLocators() || af.hasActivityTransformations()) {
 				idx = i;
 				break;
 			}
@@ -711,7 +711,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 
 			try {
-				val = locator.transformValue(val);
+				val = locator.transformValue(val, cData.getActivity());
 			} catch (Exception exc) {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.transformation.failed"), locStr, toString(val), exc);
@@ -777,7 +777,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		synchronized (FILTER_LOCK) {
-			activityFilter.doFilter(ai);
+			boolean filteredOut = activityFilter.doFilter(ai);
+			ai.setFiltered(filteredOut);
 		}
 	}
 

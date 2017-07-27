@@ -16,8 +16,11 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
@@ -46,9 +49,18 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	}
 
 	@Override
-	public Object transform(Object value) throws TransformationException {
+	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		Binding binding = new Binding();
 		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
+
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+
+				binding.setVariable(eKV.getKey(), eKV.getValue());
+			}
+		}
+
 		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {

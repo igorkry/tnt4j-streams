@@ -17,8 +17,8 @@
 package com.jkoolcloud.tnt4j.streams.filters;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
@@ -64,13 +64,10 @@ public class GroovyActivityExpressionFilter extends AbstractActivityFilter {
 		Binding binding = new Binding();
 
 		if (CollectionUtils.isNotEmpty(exprVars)) {
-			Object fValue;
-			String fieldName;
 			for (String eVar : exprVars) {
-				fieldName = eVar.substring(2, eVar.length() - 1);
-				fValue = activityInfo.getFieldValue(fieldName);
-				fieldName = placeHoldersMap.get(eVar);
-				binding.setVariable(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
+				Property eKV = resolveFieldKeyAndValue(eVar, activityInfo);
+
+				binding.setVariable(eKV.getKey(), eKV.getValue());
 			}
 		}
 		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
@@ -78,10 +75,7 @@ public class GroovyActivityExpressionFilter extends AbstractActivityFilter {
 		try {
 			boolean match = (boolean) shell.evaluate(getExpression());
 
-			boolean filteredOut = isFilteredOut(getHandleType(), match);
-			activityInfo.setFiltered(filteredOut);
-
-			return filteredOut;
+			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
 			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ExpressionFilter.filtering.failed", filterExpression), exc);

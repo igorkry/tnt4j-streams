@@ -105,7 +105,7 @@ public class StreamsCache {
 		List<String> vars = new ArrayList<>();
 		Utils.resolveCfgVariables(vars, pattern);
 
-		return vars.size() == 1 ? getActivityValue(vars.get(0), ai) : fillInPattern(pattern, vars, ai, parserName);
+		return vars.size() == 1 ? ai.getFieldValue(vars.get(0)) : fillInPattern(pattern, vars, ai, parserName);
 	}
 
 	private static String fillInPattern(String pattern, List<String> vars, ActivityInfo ai, String parserName) {
@@ -116,7 +116,7 @@ public class StreamsCache {
 			if (var.equals(PARSER_NAME_VAR)) {
 				fieldValue = parserName;
 			} else {
-				fieldValue = getActivityValue(var, ai);
+				fieldValue = ai.getFieldValue(var);
 			}
 
 			if (fieldValue != null) {
@@ -125,15 +125,6 @@ public class StreamsCache {
 		}
 
 		return filledInValue;
-	}
-
-	private static Object getActivityValue(String var, ActivityInfo ai) {
-		if (ai == null) {
-			return null;
-		}
-
-		String varKey = var.substring(2, var.length() - 1);
-		return ai.getFieldValue(varKey);
 	}
 
 	/**

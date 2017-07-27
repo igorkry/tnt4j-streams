@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -70,15 +71,15 @@ public abstract class AbstractActivityFilter extends AbstractExpressionFilter<Ac
 	}
 
 	/**
-	 * Performs filter initialization: resolves expression variables.
+	 * Performs filter initialization: resolves expression defined variables.
 	 */
 	@Override
 	protected void initFilter() {
 		exprVars = new HashSet<>();
 		placeHoldersMap = new HashMap<>();
-		Utils.resolveExpressionVariables(exprVars, getExpression());
+		Utils.resolveExpressionVariables(exprVars, filterExpression);
 
-		String expString = super.getExpression();
+		String expString = filterExpression;
 		if (CollectionUtils.isNotEmpty(exprVars)) {
 			String varPlh;
 			int idx = 0;
@@ -95,5 +96,21 @@ public abstract class AbstractActivityFilter extends AbstractExpressionFilter<Ac
 	@Override
 	protected String getExpression() {
 		return StringUtils.isEmpty(ppExpression) ? super.getExpression() : ppExpression;
+	}
+
+	/**
+	 * Resolved activity entity field value for a expression variable defined field name.
+	 *
+	 * @param eVar
+	 *            expression variable containing field name
+	 * @param activityInfo
+	 *            activity entity instance to resolve field value
+	 * @return resolved activity entity field value
+	 */
+	protected Property resolveFieldKeyAndValue(String eVar, ActivityInfo activityInfo) {
+		Object fValue = activityInfo.getFieldValue(eVar);
+		String fieldName = placeHoldersMap.get(eVar);
+
+		return new Property(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
 	}
 }

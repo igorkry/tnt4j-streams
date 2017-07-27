@@ -16,9 +16,18 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for abstract script based data value transformation.
@@ -58,6 +67,19 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	private String scriptCode;
 
 	/**
+	 * Set for variables of transformation expression contained activity fields.
+	 */
+	protected Set<String> exprVars;
+	/**
+	 * Pre-processed transformation expression.
+	 */
+	protected String ppExpression;
+	/**
+	 * Map for variable placeholders of transformation expression contained activity fields.
+	 */
+	protected Map<String, String> placeHoldersMap;
+
+	/**
 	 * Constructs a new AbstractScriptTransformation.
 	 *
 	 * @param name
@@ -68,6 +90,8 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	protected AbstractScriptTransformation(String name, String scriptCode) {
 		this.scriptCode = scriptCode;
 		setName(StringUtils.isEmpty(name) ? scriptCode : name);
+
+		initTransformation();
 	}
 
 	/**
@@ -76,7 +100,7 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 * @return transformation script code
 	 */
 	public String getScriptCode() {
-		return scriptCode;
+		return StringUtils.isEmpty(ppExpression) ? scriptCode : ppExpression;
 	}
 
 	/**
@@ -112,5 +136,43 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 
 		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"ScriptTransformation.unknown.language", lang));
+	}
+
+	/**
+	 * Performs transformation initialization: resolves script defined expression variables.
+	 */
+	protected void initTransformation() {
+		exprVars = new HashSet<>();
+		placeHoldersMap = new HashMap<>();
+		Utils.resolveExpressionVariables(exprVars, scriptCode);
+
+		String expString = scriptCode;
+		if (CollectionUtils.isNotEmpty(exprVars)) {
+			String varPlh;
+			int idx = 0;
+			for (String eVar : exprVars) {
+				varPlh = "$TNT4J_ST_TRSF_PLH" + (idx++); // NON-NLS
+				expString = expString.replace(eVar, varPlh);
+				placeHoldersMap.put(eVar, varPlh);
+			}
+		}
+
+		ppExpression = expString;
+	}
+
+	/**
+	 * Resolved activity entity field value for a expression variable defined field name.
+	 *
+	 * @param eVar
+	 *            expression variable containing field name
+	 * @param activityInfo
+	 *            activity entity instance to resolve field value
+	 * @return resolved activity entity field value
+	 */
+	protected Property resolveFieldKeyAndValue(String eVar, ActivityInfo activityInfo) {
+		Object fValue = activityInfo.getFieldValue(eVar);
+		String fieldName = placeHoldersMap.get(eVar);
+
+		return new Property(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
 	}
 }

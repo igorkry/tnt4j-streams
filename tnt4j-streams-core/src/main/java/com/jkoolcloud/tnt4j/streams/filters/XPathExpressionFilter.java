@@ -67,7 +67,7 @@ public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
 		}
 
 		XPath xPath = StreamsXMLUtils.getStreamsXPath();
-		xPath.setXPathVariableResolver(new XPathExpressionFilter.StreamsVariableResolver(value));
+		xPath.setXPathVariableResolver(new StreamsVariableResolver(value));
 
 		try {
 			boolean match = "true".equals(xPath.evaluate(getExpression(), (Object) null)); // NON-NLS

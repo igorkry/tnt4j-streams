@@ -19,6 +19,10 @@ package com.jkoolcloud.tnt4j.streams.transform;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
@@ -45,10 +49,18 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 	}
 
 	@Override
-	public Object transform(Object value) throws TransformationException {
+	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
 		factory.put(FIELD_VALUE_VARIABLE_EXPR, value);
+
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+
+				factory.put(eKV.getKey(), eKV.getValue());
+			}
+		}
 
 		try {
 			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getScriptCode()));
