@@ -162,16 +162,18 @@ public abstract class AbstractFieldEntity {
 	 *
 	 * @param fieldValue
 	 *            value to apply filters
+	 * @param ai
+	 *            activity entity instance to get additional value for a filtering
 	 * @return {@code true} if value is filtered out, {@code false} - otherwise
 	 * @throws Exception
 	 *             if evaluation of filter fails
 	 */
-	public boolean filterValue(Object fieldValue) throws Exception {
+	public boolean filterValue(Object fieldValue, ActivityInfo ai) throws Exception {
 		if (filter == null) {
 			return false;
 		}
 
-		return filter.doFilter(fieldValue);
+		return filter.doFilter(fieldValue, ai);
 	}
 
 	/**

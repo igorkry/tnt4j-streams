@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -35,7 +36,6 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class DefaultValueFilter extends AbstractEntityFilter<Object> {
-	private static final String VALUE_DELIMITER = "\\|"; // NON-NLS
 
 	private String value;
 	private HandleType handleType;
@@ -58,7 +58,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 
 	/**
 	 * Constructs a new DefaultValueFilter.
-	 * 
+	 *
 	 * @param handleType
 	 *            filter {@link com.jkoolcloud.tnt4j.streams.filters.HandleType} name
 	 * @param evalType
@@ -97,7 +97,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 		} else if (evalType == EvaluationType.REGEX) {
 			matchPattern = Pattern.compile(value);
 		} else {
-			String[] va = value.split(VALUE_DELIMITER);
+			String[] va = Utils.splitValue(value);
 
 			valuesSet = new HashSet<>(va.length);
 
@@ -115,7 +115,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 	}
 
 	@Override
-	public boolean doFilter(Object value) {
+	public boolean doFilter(Object value, ActivityInfo ai) {
 		boolean match = false;
 
 		if (matchPattern != null) {
@@ -239,7 +239,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 		if (format != null) {
 			sb.append(", format=").append(format); // NON-NLS
 		}
-		sb.append(", value='").append(value).append('\''); // NON-NLS
+		sb.append(", value=").append(Utils.sQuote(value)); // NON-NLS
 		sb.append('}');
 		return sb.toString();
 	}

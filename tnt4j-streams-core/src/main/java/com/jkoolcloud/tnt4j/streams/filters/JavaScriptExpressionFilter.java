@@ -19,6 +19,10 @@ package com.jkoolcloud.tnt4j.streams.filters;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
@@ -56,10 +60,18 @@ public class JavaScriptExpressionFilter extends AbstractExpressionFilter<Object>
 	}
 
 	@Override
-	public boolean doFilter(Object value) throws FilterException {
+	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
 		factory.put(FIELD_VALUE_VARIABLE_EXPR, value);
+
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+
+				factory.put(eKV.getKey(), eKV.getValue());
+			}
+		}
 
 		try {
 			boolean match = (boolean) engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));

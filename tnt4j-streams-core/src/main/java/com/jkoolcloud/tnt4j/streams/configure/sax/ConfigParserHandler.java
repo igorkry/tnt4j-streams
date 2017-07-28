@@ -1964,13 +1964,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			feData.expression = eDataVal;
 		}
 
-		if (currLocatorData != null || currField != null) {
-			currFilter.addFilter(
-					AbstractExpressionFilter.createExpressionFilter(feData.handle, feData.lang, feData.expression));
-		} else if (currParser != null) {
-			currFilter.addFilter(AbstractExpressionFilter.createActivityExpressionFilter(feData.handle, feData.lang,
-					feData.expression));
-		}
+		currFilter.addFilter(
+				AbstractExpressionFilter.createExpressionFilter(feData.handle, feData.lang, feData.expression));
 	}
 
 	private void handleCacheEntry(CacheEntryData currCacheEntry) throws SAXException {

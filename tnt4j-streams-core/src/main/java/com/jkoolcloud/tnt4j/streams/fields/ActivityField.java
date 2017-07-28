@@ -633,11 +633,11 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @throws Exception
 	 *             if evaluation of filter fails
 	 *
-	 * @see #filterValue(Object)
+	 * @see #filterValue(Object, ActivityInfo)
 	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityInfo#setFiltered(boolean)
 	 */
 	public Object filterValue(ActivityInfo ai, Object value) throws Exception {
-		boolean filteredOut = filterValue(value);
+		boolean filteredOut = filterValue(value, ai);
 
 		if (filteredOut) {
 			if (isOptional()) {

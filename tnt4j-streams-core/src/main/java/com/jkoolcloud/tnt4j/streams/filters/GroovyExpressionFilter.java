@@ -16,6 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
@@ -56,9 +60,18 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	}
 
 	@Override
-	public boolean doFilter(Object value) throws FilterException {
+	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
 		Binding binding = new Binding();
 		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
+
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+
+				binding.setVariable(eKV.getKey(), eKV.getValue());
+			}
+		}
+
 		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {

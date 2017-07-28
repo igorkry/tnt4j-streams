@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+
 /**
  * This interface defines common operations for data value filters used by TNT4J-Streams.
  *
@@ -32,9 +34,11 @@ public interface StreamEntityFilter<T> {
 	 * 
 	 * @param value
 	 *            data value to apply filter
+	 * @param ai
+	 *            activity entity instance
 	 * @return {@code true} if filter matching value should be excluded from streaming, {@code false} - otherwise
 	 * @throws com.jkoolcloud.tnt4j.streams.filters.FilterException
 	 *             if evaluation of filter fails
 	 */
-	boolean doFilter(T value) throws FilterException;
+	boolean doFilter(T value, ActivityInfo ai) throws FilterException;
 }

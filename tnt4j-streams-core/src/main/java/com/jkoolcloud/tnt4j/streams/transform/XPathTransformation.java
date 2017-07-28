@@ -61,10 +61,6 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 
 	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
-		if (value == null) {
-			return value;
-		}
-
 		Map<String, Object> valuesMap = new HashMap<>();
 		valuesMap.put(OWN_FIELD_VALUE_KEY, value);
 

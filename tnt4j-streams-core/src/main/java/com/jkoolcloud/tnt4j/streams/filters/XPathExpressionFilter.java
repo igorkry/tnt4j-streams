@@ -16,10 +16,17 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathVariableResolver;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 
@@ -36,6 +43,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
  * @see XPath#evaluate(String, Object)
  */
 public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
+	private static final String OWN_FIELD_VALUE_KEY = "<!TNT4J_XPATH_FLTR_FLD_VALUE!>"; // NON-NLS;
 
 	/**
 	 * Constructs a new XPathExpressionFilter. Handle type is set to
@@ -61,13 +69,19 @@ public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
 	}
 
 	@Override
-	public boolean doFilter(Object value) throws FilterException {
-		if (value == null) {
-			return false;
+	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
+		Map<String, Object> valuesMap = new HashMap<>();
+
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+
+				valuesMap.put(eKV.getKey(), eKV.getValue());
+			}
 		}
 
 		XPath xPath = StreamsXMLUtils.getStreamsXPath();
-		xPath.setXPathVariableResolver(new StreamsVariableResolver(value));
+		xPath.setXPathVariableResolver(new StreamsVariableResolver(valuesMap));
 
 		try {
 			boolean match = "true".equals(xPath.evaluate(getExpression(), (Object) null)); // NON-NLS
@@ -80,19 +94,21 @@ public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
 	}
 
 	private static class StreamsVariableResolver implements XPathVariableResolver {
-		private Object fieldValue;
+		private Map<String, Object> valuesMap;
 
-		private StreamsVariableResolver(Object fieldValue) {
-			this.fieldValue = fieldValue;
+		private StreamsVariableResolver(Map<String, Object> valuesMap) {
+			this.valuesMap = valuesMap;
 		}
 
 		@Override
 		public Object resolveVariable(QName variableName) {
 			if (variableName.equals(new QName(FIELD_VALUE_VARIABLE_NAME))) {
-				return fieldValue;
+				return valuesMap.get(OWN_FIELD_VALUE_KEY);
 			}
 
-			return null;
+			String varNameStr = "$" + variableName.toString(); // NON-NLS
+
+			return valuesMap.get(varNameStr);
 		}
 	}
 }

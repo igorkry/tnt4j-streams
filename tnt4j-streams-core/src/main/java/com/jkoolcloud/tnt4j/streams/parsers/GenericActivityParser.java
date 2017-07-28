@@ -718,7 +718,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 
 			try {
-				boolean filteredOut = locator.filterValue(val);
+				boolean filteredOut = locator.filterValue(val, cData.getActivity());
 
 				if (filteredOut) {
 					val = null;
@@ -777,7 +777,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		synchronized (FILTER_LOCK) {
-			boolean filteredOut = activityFilter.doFilter(ai);
+			boolean filteredOut = activityFilter.doFilter(null, ai);
 			ai.setFiltered(filteredOut);
 		}
 	}

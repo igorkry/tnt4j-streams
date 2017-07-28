@@ -16,8 +16,16 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -30,11 +38,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  *
  * @see com.jkoolcloud.tnt4j.streams.filters.JavaScriptExpressionFilter
- * @see com.jkoolcloud.tnt4j.streams.filters.JavaScriptActivityExpressionFilter
  * @see com.jkoolcloud.tnt4j.streams.filters.GroovyExpressionFilter
- * @see com.jkoolcloud.tnt4j.streams.filters.GroovyActivityExpressionFilter
  * @see com.jkoolcloud.tnt4j.streams.filters.XPathExpressionFilter
- * @see com.jkoolcloud.tnt4j.streams.filters.XPathActivityExpressionFilter
  */
 public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T> {
 	/**
@@ -64,6 +69,19 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	 */
 	protected String filterExpression;
 	private HandleType handleType;
+
+	/**
+	 * Set for variables of filter expression contained activity fields.
+	 */
+	protected Set<String> exprVars;
+	/**
+	 * Pre-processed filter expression.
+	 */
+	protected String ppExpression;
+	/**
+	 * Map for variable placeholders of filter expression contained activity fields.
+	 */
+	protected Map<String, String> placeHoldersMap;
 
 	/**
 	 * Constructs a new AbstractExpressionFilter. Handle type is set to
@@ -104,7 +122,7 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	 * @return filter expressions string
 	 */
 	protected String getExpression() {
-		return filterExpression;
+		return StringUtils.isEmpty(ppExpression) ? filterExpression : ppExpression;
 	}
 
 	/**
@@ -118,6 +136,22 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 
 	@Override
 	protected void initFilter() {
+		exprVars = new HashSet<>();
+		placeHoldersMap = new HashMap<>();
+		Utils.resolveExpressionVariables(exprVars, filterExpression);
+
+		String expString = filterExpression;
+		if (CollectionUtils.isNotEmpty(exprVars)) {
+			String varPlh;
+			int idx = 0;
+			for (String eVar : exprVars) {
+				varPlh = "$TNT4J_ST_FLTR_PLH" + (idx++); // NON-NLS
+				expString = expString.replace(eVar, varPlh);
+				placeHoldersMap.put(eVar, varPlh);
+			}
+		}
+
+		ppExpression = expString;
 	}
 
 	@Override
@@ -161,38 +195,19 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	}
 
 	/**
-	 * Creates activity data expression filter instance based on provided parameters.
-	 * 
-	 * @param handleType
-	 *            filter {@link com.jkoolcloud.tnt4j.streams.filters.HandleType} name
-	 * @param lang
-	 *            scripting/expression language: '{@value #GROOVY_LANG}', '{@value #JAVA_SCRIPT_LANG}' ('js', 'jscript')
-	 *            or '{@value #XPATH_SCRIPT_LANG}'
-	 * @param expression
-	 *            filter expression string
-	 * @return created activity data expression filter instance
+	 * Resolved activity entity field value for a expression variable defined field name.
 	 *
-	 * @throws IllegalArgumentException
-	 *             if filter can not be created for provided language
+	 * @param eVar
+	 *            expression variable containing field name
+	 * @param activityInfo
+	 *            activity entity instance to resolve field value
+	 * @return resolved activity entity field value
 	 */
-	public static AbstractExpressionFilter<?> createActivityExpressionFilter(String handleType, String lang,
-			String expression) throws IllegalArgumentException {
-		if (StringUtils.isEmpty(lang)) {
-			lang = JAVA_SCRIPT_LANG;
-		}
+	protected Property resolveFieldKeyAndValue(String eVar, ActivityInfo activityInfo) {
+		Object fValue = activityInfo.getFieldValue(eVar);
+		String fieldName = placeHoldersMap.get(eVar);
 
-		if (GROOVY_LANG.equalsIgnoreCase(lang)) {
-			return new GroovyActivityExpressionFilter(handleType, expression);
-		} else if (JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
-				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
-		{
-			return new JavaScriptActivityExpressionFilter(handleType, expression);
-		} else if (XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
-			return new XPathActivityExpressionFilter(handleType, expression);
-		}
-
-		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"ExpressionFilter.unknown.language", lang));
+		return new Property(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
 	}
 
 	@Override
