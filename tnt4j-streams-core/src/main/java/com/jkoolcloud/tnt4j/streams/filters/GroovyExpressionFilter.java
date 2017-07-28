@@ -27,7 +27,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
 /**
- * Data value filtering based on Groovy expressions.
+ * Data value filtering based on Groovy code/expressions.
  *
  * @version $Revision: 1 $
  *

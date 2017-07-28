@@ -31,7 +31,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 
 /**
- * Data value filtering based on XPath expressions.
+ * Data value filtering based on XPath function expressions.
  * 
  * @version $Revision: 1 $
  *
@@ -71,6 +71,7 @@ public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
 	@Override
 	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
 		Map<String, Object> valuesMap = new HashMap<>();
+		valuesMap.put(OWN_FIELD_VALUE_KEY, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
 			for (String eVar : exprVars) {

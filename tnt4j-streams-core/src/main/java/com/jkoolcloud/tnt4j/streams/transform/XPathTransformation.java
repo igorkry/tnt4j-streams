@@ -21,8 +21,6 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFunction;
-import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,9 +37,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
  *
  * @see com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils#getStreamsXPath()
  * @see XPathVariableResolver
- * @see XPathFunctionResolver
+ * @see javax.xml.xpath.XPathFunctionResolver
  * @see javax.xml.namespace.NamespaceContext
- * @see XPathFunction
+ * @see javax.xml.xpath.XPathFunction
  * @see XPath#evaluate(String, Object)
  */
 public class XPathTransformation extends AbstractScriptTransformation<Object> {
