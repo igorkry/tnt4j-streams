@@ -367,7 +367,7 @@ After processing one JMS message TNT4J activity event will contain fields mapped
 `AccessLogParserCommon` in the end.
 
 #### Resolved activity entities aggregation
- 
+
 Stacked parsers sample configuration tag `<parser-ref>` has attribute `aggregation`. This attribute defines method of resolved activity 
 data aggregation into parent activity. Attribute has two possible values:
 * `Merge` - resolved activity entity fields are merged into parent activity. **NOTE:** Parent activity entity will contain all fields 
@@ -410,7 +410,9 @@ child activity entities with data from parent activity entity.
 In streams configuration You can define field or locator resolved values transformations. In general transformations performs resolved 
 activity value post-processing before sending it to JKool Cloud: e.g., extracts file name from resolved activity file path.
 
-To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`.
+To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`. You na also use 
+parser defined field names as script/expression variables having format `${FIELD_NAME}` to access resolved activity entity fields like 
+`${EventType}` or `${Trace.HighResTime}`.
 
 #### Transformation definition
 
@@ -418,7 +420,7 @@ To define transformations stream configuration token `<field-transform>` shall b
  * `name` - name of transformation (optional)
  * `lang` - transformation script/expression language. Can be one of `groovy`, `javascript` or `xpath`. Default value - `javascript`.
  * `beanRef` - transformation implementing bean reference
- 
+
 Token body is used to define transformation script/expression code.
 
 Valid transformation configuration should define `beanRef`, or have script/expression code defined in token body data (`<![CDATA[]]>`).
@@ -512,14 +514,16 @@ and field value after transformation is `VALUE1,VALUE2`.
 * Field locator value transformation
 ```xml
 <field name="Field" separator=",">
-    <field-locator locator="loc1" locator-type="Label"/>
+    <field-locator locator="loc1" locator-type="Label">
         <field-transform name="toUpper" lang="groovy">
             $fieldValue.toUpperCase()
         </field-transform>
-    <field-locator locator="loc2" locator-type="Label"/>
+    </field-locator>
+    <field-locator locator="loc2" locator-type="Label">
         <field-transform name="toUpperConcat" lang="groovy">
             $fieldValue.toUpperCase() + "_transformed"
         </field-transform>
+    </field-locator>
     <.../>
 </field>
 ```
@@ -529,6 +533,24 @@ concatenated with string `_transformed`. Then those transformed values should be
 example locator `loc1` resolved value `value1`, then after transformation value is changed to `VALUE1`. Locator `loc2` resolved value 
 `value2`, then after transformation value is changed to `VALIUE2_transformed`. Field aggregates those locators values to 
 `VALUE1,VALUE2_transformed`.
+
+* Field/locator value transformation using additional activity entity fields
+ ```xml
+ <field name="EventName" locator="enLoc" locator-type="Label"/>
+ <field name="EventType" locator="etLoc" locator-type="Label"/>
+ ... 
+ <field name="Field" value="activity">
+    <field-transform name="toUpperConcat" lang="groovy">
+        $fieldValue.toUpperCase() + "=" + ${EventType} + " : " + ${EventName}
+    </field-transform>
+    <.../>
+ </field>
+ ```
+
+Sample above defines fields `EventName` and `EventType` resolving values from streamed activity data. Then field named `Field` uses 
+transformation to build value from predefined initial value `activity` and fields `EventName`, `EventType` resolved values. For 
+example field `EventName` resolved value `Transcation_X` and `EventType` resolved value is `SEND`. Then after transformation field `Field` 
+value becomes as `ACTIVITY=SEND:Transcation_X`.
 
 **NOTE:** 
 * transformations are applied after field/locator value formatting.
@@ -611,10 +633,44 @@ This sample shows how to invoke Java Bean defined transformation. Class `com.jko
 custom XPath function to get file name from provided file path. Field/locator value mapping to function arguments is performed automatically 
 and there is no need to define additional mapping.
 
+* Building field value from other activity entity fields values using transformations
+
+Sometimes field value may be some combination of other activity entity fields values. To achieve such goal, transformations comes in hand.
+
+```xml
+    <field name="MQTrace.HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
+           units="Microseconds"/>
+    <field name="ElapsedTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label"
+           datatype="Number" units="Microseconds"/>
+    <field name="StartTime" value="">
+        <field-transform lang="groovy" name="StartTimeTransform">
+            ${MQTrace.HighresTime} / 1000
+        </field-transform>
+    </field>
+    <field name="EndTime" value="">
+        <field-transform lang="groovy" name="EndTimeTransform">
+           ${MQTrace.HighresTime} + ${ElapsedTime}
+        </field-transform>
+    </field>
+```
+
+Sample shows how to make activity entity fields `StartTime` and `EndTime` values using IBM MQ trace resolved high resolution values (in 
+microseconds) of operation start and elapsed times.
+
+`StartTime` is evaluated using Groovy transformation making field `MQTrace.HighresTime` field value dividing by `1000` and such getting time 
+value in milliseconds.
+
+`EndTime` is evaluated using Groovy transformation adding `MQTrace.HighresTime` and `ElapsedTime` fields values having final value in 
+microseconds.
+
+**NOTE:** initial value for those fields is set to `value=""`. But it is allowed to set there any default initial value or use value 
+locator(s), if it may be useful for a transformation expression evaluation. In that case to access initial value use expression variable 
+`$fieldValue`.
+
 ### Stream elements filtering
- 
+
 TODO
- 
+
 ### Use of dynamic locators
 
 `TNT4J-Streams` allows to dynamically define `field`/`field-locator` parameters. Dynamic reference variable placeholder is defined using 
@@ -2566,13 +2622,13 @@ be made from it.
 `QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
 
 `StripHeaders` property states that MQ message headers shall be preserved.
- 
+
 `TraceOperations` property defines set of traced operation names (using RegEx or wildcard). MQ Trace Events referencing operations not 
 covered by this set will be filtered out from activities stream.
 
 `ExcludedRC` property defines set of excluded MQ traces reason codes (delimited using `|` character). MQ Trace Events having reason codes 
  defined by this set will be filtered out from activities stream. Set entries may be defined using both numeric and MQ constant name values.
- 
+
 `SuppressBrowseGets` property defines flag indicating whether to exclude WMQ **BROWSE** type **GET** operation traces from streaming.
 
 `TraceEventsParser` is of type `WmqTraceParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
@@ -3443,9 +3499,9 @@ Streaming scenario step defines:
  * request method `GET` to comply `cgi`.
  * Nagios service user credentials - user name and password
  * Scheduler is set to `Cron` expression `every 15 seconds`.
- 
+
 You may also add additional steps to retrieve different reports defining different `nagios2json` parameters.
- 
+
 Nagios sends report as activity wrapping multiple metrics (snapshots).
 
 `ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
@@ -3454,7 +3510,7 @@ data structures from RAW Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.
- 
+
 #### IBM MQ error log streaming
 
 This sample shows how to stream IBM MQ error log entries as activity events.
@@ -3499,22 +3555,22 @@ Sample stream configuration:
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
         <property name="RestoreState" value="false"/>
-        
+
         <parser-ref name="MQErrLogParser"/>
     </stream>
 </tnt-data-source>
 ``` 
- 
+
 Stream configuration states that `FileStream` referencing `MQErrLogParser` shall be used. Stream reads IBM MQ error log entries from 
 `./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG` file contents an passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 
 `MQErrLogParser` maps IBM MQ error log entry resolved fields to activity event fields. There is additional field `ResourceName` resolved 
-from stream configuration data and referring stream input (IBM MQ error log) file name.  
- 
+from stream configuration data and referring stream input (IBM MQ error log) file name.
+
 #### Fluentd logs streaming
- 
+
 TODO 
 
 #### Integrating TNT4J-Streams into custom API
@@ -3795,7 +3851,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
      <property name="BufferSize" value="1024"/>
      <property name="BufferOfferTimeout" value="90"/>
  ```
- 
+
 ##### Stream output configuration parameters
 
 Stream output can be configured using these configuration properties:
@@ -3814,7 +3870,7 @@ Default value - `null`. (Optional)
  * SourceFQN - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
- 
+
      sample:
  ```xml
      <property name="TNT4JConfigFile" value="../../configuration/tnt4j_dev.properties"/>
@@ -3822,13 +3878,13 @@ Default value - `null`. (Optional)
          <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
      </tnt4j-properties>
      <property name="TNT4JConfigZKNode" value="/samples/core/logstash"/>
-     <property name="RetryStateCheck" value="true"/>    
+     <property name="RetryStateCheck" value="true"/>
      <property name="ResolveServerFromDNS" value="true"/>
      <property name="TurnOutActivityChildren" value="true"/>
      <property name="BuildSourceFQNFromStreamedData" value="false"/>
      <property name="SourceFQN" value="APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}"/>
  ``` 
- 
+
 **NOTE:** stream output configuration parameters can be defined under `stream` tag (will drill down to default stream output instance), or 
 under `java-object` tag referring output type class and referred from `stream` like this:
 ```xml
@@ -3839,15 +3895,15 @@ under `java-object` tag referring output type class and referred from `stream` l
     <parser name="ProgressEventParser">
             ...
         </parser>
-    
+
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         <property name="TurnOutActivityChildren" value="true"/>
         ...
-                
-        <parser-ref name="ProgressEventParser"/>      
+
+        <parser-ref name="ProgressEventParser"/>
     </stream>
 </tnt-data-source>
-```    
+```
 or
 ```xml
 <tnt-data-source
@@ -3857,20 +3913,20 @@ or
     <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
         <property name="TurnOutActivityChildren" value="true"/>
     </java-object>
-    
+
     <parser name="ProgressEventParser">
         ...
     </parser>
-    
+
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
         ...
-        
+
         <parser-ref name="ProgressEventParser"/>
-        
+
         <reference name="WmqStreamOutput"/>
     </stream>
 </tnt-data-source>
-```  
+```
 
 #### File line stream parameters (and Hdfs)
 
@@ -3924,7 +3980,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 #### Standard Java input stream parameters
 
  * InputCloseable - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
- 
+
     sample:
 ```xml
     <property name="InputCloseable" value="false"/>
@@ -4065,7 +4121,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
  Default value - ``. (Optional)
  * SuppressBrowseGets - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming. Default value - `false`. 
  (Optional)
- 
+
     sample:
 ```xml
     <property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>
@@ -4162,7 +4218,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
  * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer queue. Default value - 
  `45sec`. (Optional)
- 
+
     sample:
 ```xml
     <property name="FileName" value="tnt4j-stream-activities.log"/>
@@ -4205,12 +4261,12 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 ### Parsers configuration
 
 #### Generic parser parameters
- 
+
  * UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping 
  defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
- 
+
     sample:
 ```xml
     <property name="UseActivityDataAsMessageForUnset" value="true"/>
@@ -4359,17 +4415,17 @@ RegEx group names and log pattern tokens mapping:
 Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity map parser
- 
+
  * LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path elements. 
  Default value - `.`. (Optional)
- 
+
     sample:
 ```xml
     <property name="LocPathDelim" value="/"/>
 ``` 
- 
+
 Also see [Generic parser parameters](#generic-parser-parameters).
- 
+
 #### Activity JSON parser
 
  * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
@@ -4385,12 +4441,12 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
  * ConvertToString - flag indicating whether to convert message payload `byte[]` data to string. Applicable to `BytesMessage` and 
  `StreamMessage`. Default value - `false`. (Optional)
- 
+
     sample:
 ```xml
     <property name="ConvertToString" value="true"/>
 ```
- 
+
 Also see ['Activity map parser'](#activity-map-parser) and [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity PCF parser
@@ -4398,7 +4454,7 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
  * TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible and 
  field/locator data type is `String` (meaning translated value can be assigned to field). If value of particular field should be left as 
  number (e.g., `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
- 
+
     sample:
 ```xml
     <property name="TranslateNumValues" value="false"/>
@@ -4588,7 +4644,7 @@ arguments:
 * `-c` - indicates to clean ZooKeeper nodes contained TNT4J-Streams configuration. (Optional)
 
 To run it use `./bin/zk-init-cfg.bat` or `./bin/zk-init-cfg.sh` files. It uses uploader configuration file `./config/zk-init-cfg.properties`.
- 
+
 Uploader configuration properties file contents:
 ```properties
 # ZooKeeper server parameters
