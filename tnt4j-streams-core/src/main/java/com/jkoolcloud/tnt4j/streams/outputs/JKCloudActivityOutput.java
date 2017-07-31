@@ -59,7 +59,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
-	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}";
+	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}";
 
 	private boolean resolveServer = false;
 	private boolean turnOutActivityChildren = false;
