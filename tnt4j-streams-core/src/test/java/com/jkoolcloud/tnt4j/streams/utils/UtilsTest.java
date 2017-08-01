@@ -62,17 +62,17 @@ public class UtilsTest {
 	@Test
 	public void testComputeSignature() throws Exception {
 		String sigMD5 = Utils.computeSignature(MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID", // NON-NLS
-				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25", "xxxyyyzzz".getBytes()); // NON-NLS
 
 		MessageDigest msgDig = MessageDigest.getInstance("SHA1"); // NON-NLS
 		String sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), // NON-NLS
-				"USER_ID", "APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
+				"USER_ID", "APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25", "xxxyyyzzz".getBytes()); // NON-NLS
 
 		assertNotEquals("Messages signatures should not match", sigMD5, sigOther);
 
 		msgDig = MessageDigest.getInstance("MD5"); // NON-NLS
 		sigOther = Utils.computeSignature(msgDig, MessageType.REQUEST, "MSG_FORMAT", "MSG_ID".getBytes(), "USER_ID", // NON-NLS
-				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25"); // NON-NLS
+				"APPL_TYPE", "APPL_NAME", "2016-04-18", "13:17:25", "xxxyyyzzz".getBytes()); // NON-NLS
 
 		assertEquals("Messages signatures should match", sigMD5, sigOther);
 	}

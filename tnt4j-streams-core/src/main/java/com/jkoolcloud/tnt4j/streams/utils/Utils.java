@@ -70,7 +70,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static final String VAR_EXP_START_TOKEN = "${"; // NON-NLS
 	private static final String VAR_EXP_END_TOKEN = "}"; // NON-NLS
-	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{[\\w\\.]+\\}"); // NON-NLS
+	private static final Pattern CFG_VAR_PATTERN = Pattern.compile("\\$\\{[\\w.]+\\}"); // NON-NLS
 	private static final Pattern EXPR_VAR_PATTERN = CFG_VAR_PATTERN;// Pattern.compile("\\$(\\w+)"); // NON-NLS
 
 	/**
@@ -186,13 +186,15 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            date (GMT) the message was originated
 	 * @param putTime
 	 *            time (GMT) the message was originated
+	 * @param correlId
+	 *            message correlator
 	 * @return unique message signature
 	 */
 	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
-			String putApplType, String putApplName, String putDate, String putTime) {
+			String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
 		synchronized (MSG_DIGEST) {
 			return computeSignature(MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate,
-					putTime);
+					putTime, correlId);
 		}
 	}
 
@@ -222,10 +224,12 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            date (GMT) the message was originated
 	 * @param putTime
 	 *            time (GMT) the message was originated
+	 * @param correlId
+	 *            message correlator
 	 * @return unique message signature
 	 */
 	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
-			String userId, String putApplType, String putApplName, String putDate, String putTime) {
+			String userId, String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
 		_msgDigest.reset();
 		if (msgType != null) {
 			_msgDigest.update(String.valueOf(msgType.value()).getBytes());
@@ -251,6 +255,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (putTime != null) {
 			_msgDigest.update(putTime.trim().getBytes());
 		}
+		if (correlId != null) {
+			_msgDigest.update(correlId);
+		}
+
 		return base64EncodeStr(_msgDigest.digest());
 	}
 
@@ -917,7 +925,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return {@code true} if expression contains variable placeholders, {@code false} - otherwise
 	 */
 	public static boolean isVariableExpression(String exp) {
-		return exp != null && EXPR_VAR_PATTERN.matcher(exp).matches();
+		return exp != null && EXPR_VAR_PATTERN.matcher(exp).find();
 	}
 
 	/**

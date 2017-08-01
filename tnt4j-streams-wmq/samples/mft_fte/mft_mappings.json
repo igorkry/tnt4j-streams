@@ -27,5 +27,12 @@
         "40": "WARNING",
         "1": "FAILURE",
         "": "ERROR"
+    },
+
+    "CompCode3": {
+        "0": "INFO",
+        "40": "WARNING",
+        "1": "FAILURE",
+        "": "ERROR"
     }
 }

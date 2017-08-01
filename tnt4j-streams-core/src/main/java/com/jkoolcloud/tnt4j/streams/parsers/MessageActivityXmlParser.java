@@ -112,6 +112,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * <li>Message Application Name</li>
 	 * <li>Message Date</li>
 	 * <li>Message Time</li>
+	 * <li>Correlator ID</li>
 	 * </ol>
 	 * <p>
 	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
@@ -141,6 +142,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 					String msgApplName = null;
 					String msgPutDate = null;
 					String msgPutTime = null;
+					byte[] correlId = null;
 					for (int i = 0; i < sigItems.length; i++) {
 						Object item = sigItems[i];
 						if (item == null) {
@@ -172,12 +174,15 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 						case 7:
 							msgPutTime = item.toString();
 							break;
+						case 8:
+							correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+							break;
 						default:
 							break;
 						}
 					}
 					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
-							msgPutDate, msgPutTime);
+							msgPutDate, msgPutTime, correlId);
 					logger().log(OpLevel.TRACE,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"MessageActivityXmlParser.msg.signature"),

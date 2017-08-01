@@ -1628,8 +1628,9 @@
         <xs:attribute name="transparent" use="optional" type="xs:boolean">
             <xs:annotation>
                 <xs:documentation>
-                    Specifies whether resolved field value should be added to produced activity data. If some stacked parser is
-                    used for a field it may be desired not to add such field raw data value to produced activity data.
+                    Specifies whether resolved field value should be added to produced JKool activity entity (activity/event/snapshot) data.
+                    If some stacked parser is used for a field it may be desired not to add such field raw data value to produced activity
+                    data.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -1745,8 +1746,9 @@
         <xs:attribute name="transparent" use="prohibited" type="xs:boolean" fixed="true">
             <xs:annotation>
                 <xs:documentation>
-                    Specifies whether resolved field value should be added to produced activity data. If some stacked parser is
-                    used for a field it may be desired not to add such field raw data value to produced activity data.
+                    Specifies whether resolved field value should be added to produced JKool activity entity (activity/event/snapshot) data.
+                    If some stacked parser is used for a field it may be desired not to add such field raw data value to produced activity
+                    data.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

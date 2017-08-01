@@ -5,6 +5,15 @@
 
     <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
 
+    <parser name="JobNameParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
+
+        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
+        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
+        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
+        <field name="CoId" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="EventType" locator="name(//*[1])" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.EventType"/>
@@ -13,8 +22,25 @@
             <field-map-ref resource="MFT_MAPPINGS.EventName"/>
         </field>
 
+        <field name="SourceSystemName" locator="/transaction/sourceAgent/@agent" locator-type="Label">
+            <field-map-ref resource="MFT_SDS_MAPPINGS.SourceSystemName"/>
+        </field>
+        <field name="DestinationSystemName" locator="/transaction/destinationAgent/@agent" locator-type="Label">
+            <field-map-ref resource="MFT_SDS_MAPPINGS.DestinationSystemName"/>
+        </field>
+
         <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
 
+        <field name="Correlator2" separator="#" transparent="true">
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="/${Direction}/checksum/text()" locator-type="Label" required="false"/>
+        </field>
+
+        <!-- correlation ID asssembly //${Direction}/checksum/text()-->
+        <field name="Correlator" datatype="String" format="string" separator=".">
+            <field-locator locator="/transaction/@ID" locator-type="Label"/>
+            <field-locator locator="Correlator2" locator-type="Activity" required="false"/>
+        </field>
         <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
             <!--resolves FILE or QUEUE-->
             <field-locator locator="name(//*/*)" locator-type="Label">
@@ -31,24 +57,14 @@
         <field name="LastModified" locator="//*/file/@last-modified" locator-type="Label" required="false"/>
         <field name="Checksum" locator="//*/checksum" locator-type="Label" required="false"/>
         <field name="ChecksumMethod" locator="//*/checksum/@method" locator-type="Label" required="false"/>
-        <field name="Correlator" locator="Checksum" locator-type="Activity" required="false"/>
     </parser>
 
-    <parser name="JobNameParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
-        <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
-
-        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
-        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
-        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
-        <field name="CoId" locator="1" locator-type="REGroupNum"/>
-    </parser>
-
-    <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-        <property name="RequireDefault" value="true"/>
+    <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <property name="RequireDefault" value="false"/>
 
         <field name="EventType" value="NOOP"/>
 
-        <field name="Filter" locator="/transaction/action[text() = 'progress']" locator-type="Label" required="true" transparent="true"/>
+        <field name="Filter" locator="/transaction/action/text()[. = 'progress']" locator-type="Label" required="true" transparent="true"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
         <field name="ApplName" separator=":">
@@ -65,6 +81,9 @@
         <field name="CompCode" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
         </field>
+        <field name="Severity" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
+        </field>
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" separator="">
             <field-locator locator="/transaction/transferSet/item/status/supplement" locator-type="Label" required="false"/>
@@ -72,34 +91,35 @@
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
 
-        <field name="Source_Filename" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"
-               required="false"/>
-        <field name="Destination_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"
-               required="false"/>
-        <field name="Source_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"
-               required="false"/>
+        <!-- custom properties start -->
+        <field name="Source_Filename" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
+        <field name="Destiation_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
+        <field name="Source_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')" locator-type="Label"/>
         <field name="Destination_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
-               locator-type="Label" required="false"/>
+               locator-type="Label"/>
 
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
-
+        <field name="MFT_SOURCE_FILE" locator="/transaction/transferSet/item/source/file" locator-type="Label" required="false"/>
+        <field name="MFT_DEST_FILE" locator="/transaction/transferSet/item/destination/file" locator-type="Label" required="false"/>
         <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
             <parser-ref name="JobNameParser" aggregation="Merge"/>
         </field>
+        <!-- custom properties end -->
 
         <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
             <parser-ref name="TransferSetParser" aggregation="Join"/>
         </embedded-activity>
     </parser>
 
-    <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="EVENT"/>
 
-        <field name="Filter" locator="/transaction/action[text() = 'started']" locator-type="Label" required="true" transparent="true"/>
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
+        <field name="Filter" locator="/transaction/action/text()[. = 'started']" locator-type="Label" required="true" transparent="true"/>
         <field name="EventName" value="Started"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -113,15 +133,18 @@
         <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
         <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
-        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="JobNameParser" aggregation="Merge"/>
+        </field>
     </parser>
 
-    <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="END"/>
 
-        <field name="Filter" locator="/transaction/action[text() = 'completed']" locator-type="Label" required="true" transparent="true"/>
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
+        <field name="Filter" locator="/transaction/action/text()[. = 'completed']" locator-type="Label" required="true" transparent="true"/>
         <field name="EventName" value="completed"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -146,11 +169,14 @@
         <field name="CompCode" locator="/transaction/status/@resultCode" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
         </field>
-        <field name="CompCode2" locator="/transaction/status/@resultCode" locator-type="Label">
-            <field-map-ref resource="MFT_MAPPINGS.CompCode2"/>
+        <field name="Severity" locator="/transaction/status/@resultCode" locator-type="Label">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
         </field>
         <field name="Exception" separator="">
             <field-locator locator="/transaction/status/supplement" locator-type="Label" required="false"/>
+        </field>
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="JobNameParser" aggregation="Merge"/>
         </field>
     </parser>
 
