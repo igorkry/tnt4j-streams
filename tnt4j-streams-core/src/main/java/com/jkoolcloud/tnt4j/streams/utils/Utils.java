@@ -917,7 +917,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return {@code true} if expression contains variable placeholders, {@code false} - otherwise
 	 */
 	public static boolean isVariableExpression(String exp) {
-		return exp != null && EXPR_VAR_PATTERN.matcher(exp).matches();
+		return exp != null && EXPR_VAR_PATTERN.matcher(exp).find();
 	}
 
 	/**
