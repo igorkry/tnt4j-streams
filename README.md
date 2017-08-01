@@ -4917,7 +4917,7 @@ Maven tests run is disabled by default. To enable Maven to run tests set Maven c
 * in `ws` module run JUnit test suite named `AllWsStreamTests`
 * in `msoffice` module run JUnit test suite named `AllMsOfficeStreamTests`
 
-Known Projects Using TNT4J
+Known Projects Using TNT4J-STREAMS
 ===============================================
 * [TNT4J-Streams-Zorka](https://github.com/Nastel/tnt4j-streams-zorka)
 * [TNT4J-Streams-Syslogd](https://github.com/Nastel/tnt4j-streams-syslogd)
