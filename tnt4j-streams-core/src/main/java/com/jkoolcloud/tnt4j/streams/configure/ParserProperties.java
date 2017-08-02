@@ -45,11 +45,6 @@ public interface ParserProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_SIG_DELIM = "SignatureDelim"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_REQUIRE_ALL = "RequireDefault"; // NON-NLS
 
 	/**

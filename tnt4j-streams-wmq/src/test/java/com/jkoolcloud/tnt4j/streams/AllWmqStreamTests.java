@@ -21,12 +21,14 @@ import org.junit.runners.Suite;
 
 import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
 import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
+import com.jkoolcloud.tnt4j.streams.parsers.AllParsersTests;
+import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllInputsTests.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllInputsTests.class, AllParsersTests.class, AllUtilsTests.class })
 public class AllWmqStreamTests {
 }

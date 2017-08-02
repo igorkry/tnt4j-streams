@@ -105,7 +105,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void setPropertiesNotEqualsPropNameTest() throws Exception {
-		setProperty(parser, ParserProperties.PROP_SIG_DELIM, "test"); // NON-NLS
+		setProperty(parser, ParserProperties.PROP_NAMESPACE, "test"); // NON-NLS
 	}
 
 	@Test

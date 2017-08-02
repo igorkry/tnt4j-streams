@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -28,12 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
  * This class extends the basic activity XML parser for handling data specific to messaging operations. It provides
@@ -83,7 +82,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (ParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+			if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
 					sigDelim = value;
 					logger().log(OpLevel.DEBUG,
@@ -116,6 +115,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * </ol>
 	 * <p>
 	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
+	 *
+	 * @see WmqUtils#computeSignature(Object, String, EventSink)
 	 */
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
@@ -124,77 +125,13 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 			switch (fieldType) {
 			case Correlator:
 			case TrackingId:
-				Object[] sigItems = null;
-				if (value instanceof Object[]) {
-					sigItems = (Object[]) value;
-				} else if (value instanceof String) {
-					String sigStr = (String) value;
-					if (sigStr.contains(sigDelim)) {
-						sigItems = sigStr.split(Pattern.quote(sigDelim));
-					}
-				}
-				if (sigItems != null) {
-					MessageType msgType = null;
-					String msgFormat = null;
-					byte[] msgId = null;
-					String msgUser = null;
-					String msgApplType = null;
-					String msgApplName = null;
-					String msgPutDate = null;
-					String msgPutTime = null;
-					byte[] correlId = null;
-					for (int i = 0; i < sigItems.length; i++) {
-						Object item = sigItems[i];
-						if (item == null) {
-							continue;
-						}
-						switch (i) {
-						case 0:
-							msgType = MessageType.valueOf(item instanceof Number ? ((Number) item).intValue()
-									: Integer.parseInt(item.toString()));
-							break;
-						case 1:
-							msgFormat = item.toString();
-							break;
-						case 2:
-							msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-							break;
-						case 3:
-							msgUser = item.toString();
-							break;
-						case 4:
-							msgApplType = item.toString();
-							break;
-						case 5:
-							msgApplName = item.toString();
-							break;
-						case 6:
-							msgPutDate = item.toString();
-							break;
-						case 7:
-							msgPutTime = item.toString();
-							break;
-						case 8:
-							correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-							break;
-						default:
-							break;
-						}
-					}
-					value = Utils.computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName,
-							msgPutDate, msgPutTime, correlId);
-					logger().log(OpLevel.TRACE,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"MessageActivityXmlParser.msg.signature"),
-							value, msgType, msgFormat, msgId == null ? "null" : Utils.encodeHex(msgId),
-							msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
-							msgPutTime);
-				}
+				value = WmqUtils.computeSignature(value, sigDelim, logger());
 				break;
 			default:
 				break;
 			}
 		}
+
 		super.applyFieldValue(ai, field, value);
 	}
 }

@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +48,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.jkoolcloud.tnt4j.core.OpType;
-import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 
 /**
  * General utility methods used by TNT4J-Streams.
@@ -158,108 +156,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		} catch (DecoderException e) {
 		}
 		return ba;
-	}
-
-	private static final MessageDigest MSG_DIGEST = getMD5Digester();
-
-	/**
-	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
-	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
-	 * <p>
-	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
-	 * identify a message. In order to identify a message within two different transports, the streams for each
-	 * transport must provide the same values.
-	 *
-	 * @param msgType
-	 *            message type
-	 * @param msgFormat
-	 *            message format
-	 * @param msgId
-	 *            message identifier
-	 * @param userId
-	 *            user that originated the message
-	 * @param putApplType
-	 *            type of application that originated the message
-	 * @param putApplName
-	 *            name of application that originated the message
-	 * @param putDate
-	 *            date (GMT) the message was originated
-	 * @param putTime
-	 *            time (GMT) the message was originated
-	 * @param correlId
-	 *            message correlator
-	 * @return unique message signature
-	 */
-	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
-			String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
-		synchronized (MSG_DIGEST) {
-			return computeSignature(MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate,
-					putTime, correlId);
-		}
-	}
-
-	/**
-	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
-	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
-	 * <p>
-	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
-	 * identify a message. In order to identify a message within two different transports, the streams for each
-	 * transport must provide the same values.
-	 *
-	 * @param _msgDigest
-	 *            message type
-	 * @param msgType
-	 *            message type
-	 * @param msgFormat
-	 *            message format
-	 * @param msgId
-	 *            message identifier
-	 * @param userId
-	 *            user that originated the message
-	 * @param putApplType
-	 *            type of application that originated the message
-	 * @param putApplName
-	 *            name of application that originated the message
-	 * @param putDate
-	 *            date (GMT) the message was originated
-	 * @param putTime
-	 *            time (GMT) the message was originated
-	 * @param correlId
-	 *            message correlator
-	 * @return unique message signature
-	 */
-	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
-			String userId, String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
-		_msgDigest.reset();
-		if (msgType != null) {
-			_msgDigest.update(String.valueOf(msgType.value()).getBytes());
-		}
-		if (msgFormat != null) {
-			_msgDigest.update(msgFormat.trim().getBytes());
-		}
-		if (msgId != null) {
-			_msgDigest.update(msgId);
-		}
-		if (userId != null) {
-			_msgDigest.update(userId.trim().toLowerCase().getBytes());
-		}
-		if (putApplType != null) {
-			_msgDigest.update(putApplType.trim().getBytes());
-		}
-		if (putApplName != null) {
-			_msgDigest.update(putApplName.trim().getBytes());
-		}
-		if (putDate != null) {
-			_msgDigest.update(putDate.trim().getBytes());
-		}
-		if (putTime != null) {
-			_msgDigest.update(putTime.trim().getBytes());
-		}
-		if (correlId != null) {
-			_msgDigest.update(correlId);
-		}
-
-		return base64EncodeStr(_msgDigest.digest());
 	}
 
 	/**

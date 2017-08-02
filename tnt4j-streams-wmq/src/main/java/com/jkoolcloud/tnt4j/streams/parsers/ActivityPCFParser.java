@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.*;
@@ -30,8 +31,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
@@ -64,6 +64,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
 
 	private boolean translateNumValues = true;
+	private String sigDelim = DEFAULT_DELIM;
 
 	/**
 	 * Constructs a new ActivityPCFParser.
@@ -95,6 +96,13 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
+			} else if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+				if (StringUtils.isNotEmpty(value)) {
+					sigDelim = value;
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}
@@ -309,5 +317,47 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	@Override
 	protected String getActivityDataType() {
 		return "PCF MESSAGE"; // NON-NLS
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method applies custom handling for setting field values. This method will construct the signature to use for
+	 * the message from the specified value, which is assumed to be a string containing the inputs required for the
+	 * message signature calculation, with each input separated by the delimiter specified in property
+	 * {@code SignatureDelim}.
+	 * <p>
+	 * The signature items MUST be specified in the following order:
+	 * <ol>
+	 * <li>Message Type</li>
+	 * <li>Message Format</li>
+	 * <li>Message ID</li>
+	 * <li>Message User</li>
+	 * <li>Message Application Type</li>
+	 * <li>Message Application Name</li>
+	 * <li>Message Date</li>
+	 * <li>Message Time</li>
+	 * <li>Correlator ID</li>
+	 * </ol>
+	 * <p>
+	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
+	 *
+	 * @see WmqUtils#computeSignature(Object, String, EventSink)
+	 */
+	@Override
+	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
+		StreamFieldType fieldType = field.getFieldType();
+		if (fieldType != null) {
+			switch (fieldType) {
+			case Correlator:
+			case TrackingId:
+				value = WmqUtils.computeSignature(value, sigDelim, logger());
+				break;
+			default:
+				break;
+			}
+		}
+
+		super.applyFieldValue(ai, field, value);
 	}
 }

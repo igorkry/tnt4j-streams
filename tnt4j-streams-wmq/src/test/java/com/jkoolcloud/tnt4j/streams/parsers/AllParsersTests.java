@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.configure;
+package com.jkoolcloud.tnt4j.streams.parsers;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * Lists predefined property names used by TNT4-Streams WMQ RAW data parsers.
- *
- * @version $Revision: 1 $
+ * @author akausinis
+ * @version 1.0
  */
-public interface WmqParserProperties extends ParserProperties {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ MessageActivityXmlParserTest.class, MessageTypeTest.class })
+public class AllParsersTests {
 
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	String PROP_SIG_DELIM = "SignatureDelim"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	String PROP_TRANSLATE_NUM_VALUES = "TranslateNumValues"; // NON-NLS
 }

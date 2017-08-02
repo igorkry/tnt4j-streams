@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
@@ -41,7 +41,7 @@ public class MessageActivityXmlParserTest {
 	public void testProperties() throws Exception {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
-				put(ParserProperties.PROP_SIG_DELIM, DELIM);
+				put(WmqParserProperties.PROP_SIG_DELIM, DELIM);
 			}
 		};
 		MessageActivityXmlParser parser = new MessageActivityXmlParser();

@@ -16,13 +16,18 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
+import java.security.MessageDigest;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.MQCFGR;
 import com.ibm.mq.pcf.MQCFIN;
 import com.ibm.mq.pcf.PCFContent;
 import com.ibm.mq.pcf.PCFParameter;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
 
 /**
  * WMQ utility methods used by TNT4J-Streams-WMQ module.
@@ -30,6 +35,9 @@ import com.ibm.mq.pcf.PCFParameter;
  * @version $Revision: 1 $
  */
 public class WmqUtils {
+
+	private static final MessageDigest MSG_DIGEST = Utils.getMD5Digester();
+
 	// ---- R&D UTILITY CODE ---
 	// private static Map<String, Set<String>> tracesMap = new HashMap<String, Set<String>>();
 	//
@@ -155,5 +163,208 @@ public class WmqUtils {
 		} catch (NumberFormatException nfe) {
 			return MQConstants.getIntValue(paramIdStr);
 		}
+	}
+
+	/**
+	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
+	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
+	 * <p>
+	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
+	 * identify a message. In order to identify a message within two different transports, the streams for each
+	 * transport must provide the same values.
+	 *
+	 * @param msgType
+	 *            message type
+	 * @param msgFormat
+	 *            message format
+	 * @param msgId
+	 *            message identifier
+	 * @param userId
+	 *            user that originated the message
+	 * @param putApplType
+	 *            type of application that originated the message
+	 * @param putApplName
+	 *            name of application that originated the message
+	 * @param putDate
+	 *            date (GMT) the message was originated
+	 * @param putTime
+	 *            time (GMT) the message was originated
+	 * @param correlId
+	 *            message correlator
+	 * @return unique message signature
+	 */
+	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
+			String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
+		synchronized (MSG_DIGEST) {
+			return computeSignature(MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate,
+					putTime, correlId);
+		}
+	}
+
+	/**
+	 * Generates a new unique message signature. This signature is expected to be used for creating a new message
+	 * instance, and is intended to uniquely identify the message regardless of which application is processing it.
+	 * <p>
+	 * It is up to the individual stream to determine which of these attributes is available/required to uniquely
+	 * identify a message. In order to identify a message within two different transports, the streams for each
+	 * transport must provide the same values.
+	 *
+	 * @param _msgDigest
+	 *            message type
+	 * @param msgType
+	 *            message type
+	 * @param msgFormat
+	 *            message format
+	 * @param msgId
+	 *            message identifier
+	 * @param userId
+	 *            user that originated the message
+	 * @param putApplType
+	 *            type of application that originated the message
+	 * @param putApplName
+	 *            name of application that originated the message
+	 * @param putDate
+	 *            date (GMT) the message was originated
+	 * @param putTime
+	 *            time (GMT) the message was originated
+	 * @param correlId
+	 *            message correlator
+	 * @return unique message signature
+	 */
+	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
+			String userId, String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
+		_msgDigest.reset();
+		if (msgType != null) {
+			_msgDigest.update(String.valueOf(msgType.value()).getBytes());
+		}
+		if (msgFormat != null) {
+			_msgDigest.update(msgFormat.trim().getBytes());
+		}
+		if (msgId != null) {
+			_msgDigest.update(msgId);
+		}
+		if (userId != null) {
+			_msgDigest.update(userId.trim().toLowerCase().getBytes());
+		}
+		if (putApplType != null) {
+			_msgDigest.update(putApplType.trim().getBytes());
+		}
+		if (putApplName != null) {
+			_msgDigest.update(putApplName.trim().getBytes());
+		}
+		if (putDate != null) {
+			_msgDigest.update(putDate.trim().getBytes());
+		}
+		if (putTime != null) {
+			_msgDigest.update(putTime.trim().getBytes());
+		}
+		if (correlId != null) {
+			_msgDigest.update(correlId);
+		}
+
+		return Utils.base64EncodeStr(_msgDigest.digest());
+	}
+
+	/**
+	 * This method applies custom handling for setting field values. This method will construct the signature to use for
+	 * the message from the specified value, which is assumed to be a string containing the inputs required for the
+	 * message signature calculation, with each input separated by the delimiter specified using parameter
+	 * {@code sigDelim}.
+	 * <p>
+	 * The signature items MUST be specified in the following order:
+	 * <ol>
+	 * <li>Message Type</li>
+	 * <li>Message Format</li>
+	 * <li>Message ID</li>
+	 * <li>Message User</li>
+	 * <li>Message Application Type</li>
+	 * <li>Message Application Name</li>
+	 * <li>Message Date</li>
+	 * <li>Message Time</li>
+	 * <li>Correlator ID</li>
+	 * </ol>
+	 * <p>
+	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
+	 *
+	 * @param value
+	 *            value object to retrieve signature fields data
+	 * @param sigDelim
+	 *            signature delimiter
+	 * @param logger
+	 *            logger to log result trace messages
+	 * @return unique message signature
+	 *
+	 * @see #computeSignature(MessageType, String, byte[], String, String, String, String, String, byte[])
+	 */
+	public static Object computeSignature(Object value, String sigDelim, EventSink logger) {
+		Object[] sigItems = null;
+		if (value instanceof Object[]) {
+			sigItems = (Object[]) value;
+		} else if (value instanceof String) {
+			String sigStr = (String) value;
+			if (sigStr.contains(sigDelim)) {
+				sigItems = sigStr.split(Pattern.quote(sigDelim));
+			}
+		}
+		if (sigItems != null) {
+			MessageType msgType = null;
+			String msgFormat = null;
+			byte[] msgId = null;
+			String msgUser = null;
+			String msgApplType = null;
+			String msgApplName = null;
+			String msgPutDate = null;
+			String msgPutTime = null;
+			byte[] correlId = null;
+			for (int i = 0; i < sigItems.length; i++) {
+				Object item = sigItems[i];
+				if (item == null) {
+					continue;
+				}
+				switch (i) {
+				case 0:
+					msgType = MessageType.valueOf(
+							item instanceof Number ? ((Number) item).intValue() : Integer.parseInt(item.toString()));
+					break;
+				case 1:
+					msgFormat = item.toString();
+					break;
+				case 2:
+					msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+					break;
+				case 3:
+					msgUser = item.toString();
+					break;
+				case 4:
+					msgApplType = item.toString();
+					break;
+				case 5:
+					msgApplName = item.toString();
+					break;
+				case 6:
+					msgPutDate = item.toString();
+					break;
+				case 7:
+					msgPutTime = item.toString();
+					break;
+				case 8:
+					correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+					break;
+				default:
+					break;
+				}
+			}
+			value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate,
+					msgPutTime, correlId);
+			logger.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"MessageActivityXmlParser.msg.signature"),
+					value, msgType, msgFormat, msgId == null ? "null" : Utils.encodeHex(msgId),
+					msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
+					msgPutTime, correlId == null ? "null" : Utils.encodeHex(correlId),
+					correlId == null ? "null" : new String(correlId));
+		}
+
+		return value;
 	}
 }
