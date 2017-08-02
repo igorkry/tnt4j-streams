@@ -102,11 +102,11 @@
         <field name="ResourceName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
         <field name="ResourceType" locator="MQIACF_RESOLVED_TYPE" locator-type="Label">
             <field-map source="MQOT_Q" target="QUEUE"/>
-            <field-map source="1" target="QUEUE"/>
-            <field-map source="2" target="NAMELIST"/>
-            <field-map source="3" target="PROCESS"/>
-            <field-map source="4" target="STORAGE_CLASS"/>
-            <field-map source="5" target="QMGR"/>
+            <field-map source="MQOT_NAMELIST" target="NAMELIST"/>
+            <field-map source="MQOT_PROCESS" target="PROCESS"/>
+            <field-map source="MQOT_STORAGE_CLASS" target="STORAGE_CLASS"/>
+            <field-map source="MQOT_Q_MGR" target="QMGR"/>
+            <field-map source="" target="GENERIC"/>
         </field>
 
         <!--	 use this cfg to filter data based on the msg payload content:
