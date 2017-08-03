@@ -452,7 +452,27 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		return value;
 	}
 
-	private Object formatStringValue(Object value) {
+	/**
+	 * Formats field value as {@link String} based on the definition of the field locator format.
+	 * <p>
+	 * Formatting is performed if raw field value is of type {@code byte[]}.
+	 * <p>
+	 * {@link ActivityFieldFormatType} formats processed as:
+	 * <ul>
+	 * <li>{@link ActivityFieldFormatType#base64Binary} - {@link Utils#base64EncodeStr(byte[])}</li>
+	 * <li>{@link ActivityFieldFormatType#hexBinary} - {@link Utils#encodeHex(byte[])}</li>
+	 * <li>{@link ActivityFieldFormatType#string} - {@link Utils#getString(byte[])}</li>
+	 * <li>{@link ActivityFieldFormatType#bytes} - {@link Utils#toHexString(byte[])}</li>
+	 * </ul>
+	 *
+	 * @param value
+	 *            raw field value
+	 * @return formatted field value as {@link String} based on locator defined format, or raw value if no matching
+	 *         format is defined or value is not {@code byte[]}.
+	 *
+	 * @see ActivityFieldFormatType
+	 */
+	protected Object formatStringValue(Object value) {
 		if (value instanceof byte[]) {
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
 				return Utils.base64EncodeStr((byte[]) value);
@@ -468,7 +488,24 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		return value;
 	}
 
-	private Object formatBinaryValue(Object value) {
+	/**
+	 * Formats field value as {@code byte[]} based on the definition of the field locator format.
+	 * <p>
+	 * Locator defined formats processed as:
+	 * <ul>
+	 * <li>{@link ActivityFieldFormatType#base64Binary} - {@link Utils#base64Decode(String)}</li>
+	 * <li>{@link ActivityFieldFormatType#hexBinary} - {@link Utils#decodeHex(String)}</li>
+	 * <li>{@link ActivityFieldFormatType#string} - {@link String#getBytes()}</li>
+	 * </ul>
+	 *
+	 * @param value
+	 *            raw field value
+	 * @return formatted field value as {@code byte[]} based on locator defined format, or raw value if no matching
+	 *         format is defined.
+	 *
+	 * @see ActivityFieldFormatType
+	 */
+	protected Object formatBinaryValue(Object value) {
 		if (value != null) {
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
 				value = Utils.base64Decode(String.valueOf(value));
@@ -483,11 +520,11 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
-	 * Formats the value for the specified numeric field based on the definition of the field.
+	 * Formats the value for the specified numeric field based on the definition of the field locator.
 	 *
 	 * @param value
-	 *            raw value of field
-	 * @return formatted value of field in required internal data type
+	 *            raw field value
+	 * @return formatted field value as {@link Number}
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             format, etc.)
@@ -502,8 +539,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		if (value instanceof String) {
 			val = value.toString().trim();
 
-			// TODO: make empty value handling configurable: null, exception,
-			// default
+			// TODO: make empty value handling configurable: null, exception, default
 			if (StringUtils.isEmpty(val.toString())) {
 				return null;
 			}
@@ -513,11 +549,11 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
-	 * Formats the value for the specified date/time field based on the definition of the field.
+	 * Formats the value for the specified date/time field based on the definition of the field locator.
 	 *
 	 * @param value
-	 *            raw value of field
-	 * @return formatted value of field in required internal data type
+	 *            raw field value
+	 * @return formatted field value as {@link UsecTimestamp}
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             format, etc.)
