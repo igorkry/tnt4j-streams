@@ -121,7 +121,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
-		if (fieldType != null) {
+		if (fieldType != null && field.getSeparator().equals(sigDelim)) {
 			switch (fieldType) {
 			case Correlator:
 			case TrackingId:

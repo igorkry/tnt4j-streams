@@ -125,24 +125,28 @@ public class ActivityInfo {
 
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (values != null && CollectionUtils.isNotEmpty(locators)) {
-			if (locators.size() > 1 && locators.size() != values.length) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.failed.parsing", field), 0);
-			}
-
-			ActivityFieldLocator locator;
-			Object fValue;
-			List<Object> fvList = new ArrayList<>(locators.size());
-			for (int v = 0; v < values.length; v++) {
-				locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
-				fValue = formatValue(field, locator, values[v]);
-				if (fValue == null && locator.isOptional()) {
-					continue;
+			if (values.length == 1 && locators.size() > 1) {
+				values[0] = formatValue(field, field.getGroupLocator(), values[0]);
+			} else {
+				if (locators.size() > 1 && locators.size() != values.length) {
+					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityInfo.failed.parsing", field), 0);
 				}
-				fvList.add(fValue);
-			}
 
-			values = fvList.toArray();
+				ActivityFieldLocator locator;
+				Object fValue;
+				List<Object> fvList = new ArrayList<>(locators.size());
+				for (int v = 0; v < values.length; v++) {
+					locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
+					fValue = formatValue(field, locator, values[v]);
+					if (fValue == null && locator.isOptional()) {
+						continue;
+					}
+					fvList.add(fValue);
+				}
+
+				values = fvList.toArray();
+			}
 
 			if (field.isEnumeration() && values.length > 1) {
 				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -250,8 +254,9 @@ public class ActivityInfo {
 			case ElapsedTime:
 				try {
 					// Elapsed time needs to be converted to usec
-					TimeUnit units = StringUtils.isEmpty(locator.getUnits()) ? TimeUnit.MICROSECONDS
-							: TimeUnit.valueOf(locator.getUnits().toUpperCase());
+					String lUnits = locator == null ? null : locator.getUnits();
+					TimeUnit units = StringUtils.isEmpty(lUnits) ? TimeUnit.MICROSECONDS
+							: TimeUnit.valueOf(lUnits.toUpperCase());
 					if (!(value instanceof Number)) {
 						value = Long.valueOf(Utils.toString(value));
 					}

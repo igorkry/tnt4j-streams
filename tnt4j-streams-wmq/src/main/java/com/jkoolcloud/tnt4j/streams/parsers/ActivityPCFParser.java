@@ -347,7 +347,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
-		if (fieldType != null) {
+		if (fieldType != null && field.getSeparator().equals(sigDelim)) {
 			switch (fieldType) {
 			case Correlator:
 			case TrackingId:

@@ -44,7 +44,7 @@ public class ActivityField extends AbstractFieldEntity {
 
 	private String fieldTypeName;
 	private List<ActivityFieldLocator> locators = null;
-	private String separator = DEFAULT_FIELD_VALUES_DELIM;
+	private String separator = null;
 	private String formattingPattern = null;
 	private Set<ParserReference> stackedParsers;
 	private boolean transparent = false;
@@ -309,7 +309,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return the string being used to separate raw values
 	 */
 	public String getSeparator() {
-		return separator;
+		return StringUtils.isEmpty(separator) ? DEFAULT_FIELD_VALUES_DELIM : separator;
 	}
 
 	/**
