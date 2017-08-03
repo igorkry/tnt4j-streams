@@ -436,29 +436,49 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		}
 		switch (dataType) {
 		case String:
-			return getMappedValue(value);
+			value = getMappedValue(value == null ? null : formatStringValue(value));
 		case Number:
-			return getMappedValue(value == null ? null : formatNumericValue(value));
+			value = getMappedValue(value == null ? null : formatNumericValue(value));
 		case Binary:
-			if (value != null) {
-				if (builtInFormat == ActivityFieldFormatType.base64Binary) {
-					value = Utils.base64Decode(String.valueOf(value));
-				} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
-					value = Utils.decodeHex(String.valueOf(value));
-				} else if (builtInFormat == ActivityFieldFormatType.string) {
-					value = String.valueOf(value).getBytes();
-				}
-			}
+			value = formatBinaryValue(value);
 			break;
 		case DateTime:
 		case Timestamp:
-			if (value != null) {
-				value = formatDateValue(value);
-			}
+			value = value == null ? null : formatDateValue(value);
 			break;
 		default:
 			break;
 		}
+		return value;
+	}
+
+	private Object formatStringValue(Object value) {
+		if (value instanceof byte[]) {
+			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
+				return Utils.base64EncodeStr((byte[]) value);
+			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
+				return Utils.encodeHex((byte[]) value);
+			} else if (builtInFormat == ActivityFieldFormatType.string) {
+				return Utils.getString((byte[]) value);
+			} else if (builtInFormat == ActivityFieldFormatType.bytes) {
+				return Utils.toHexString((byte[]) value);
+			}
+		}
+
+		return value;
+	}
+
+	private Object formatBinaryValue(Object value) {
+		if (value != null) {
+			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
+				value = Utils.base64Decode(String.valueOf(value));
+			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
+				value = Utils.decodeHex(String.valueOf(value));
+			} else if (builtInFormat == ActivityFieldFormatType.string) {
+				value = String.valueOf(value).getBytes();
+			}
+		}
+
 		return value;
 	}
 
