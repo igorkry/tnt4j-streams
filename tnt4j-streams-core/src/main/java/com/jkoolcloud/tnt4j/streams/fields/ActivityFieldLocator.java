@@ -437,8 +437,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		switch (dataType) {
 		case String:
 			value = getMappedValue(value == null ? null : formatStringValue(value));
+			break;
 		case Number:
 			value = getMappedValue(value == null ? null : formatNumericValue(value));
+			break;
 		case Binary:
 			value = formatBinaryValue(value);
 			break;
