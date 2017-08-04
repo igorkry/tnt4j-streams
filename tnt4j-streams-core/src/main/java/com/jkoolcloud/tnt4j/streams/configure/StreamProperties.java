@@ -31,6 +31,11 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
+	String PROP_STREAM_NAME = "StreamName"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
 	String PROP_FILENAME = "FileName"; // NON-NLS
 
 	/**

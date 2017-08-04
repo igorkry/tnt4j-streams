@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * Base class that all activity streams must extend. It provides some base functionality useful for all activity
  * streams.
  * <p>
- * All activity streams should support the following properties:
+ * All activity streams should support the following configuration properties:
  * <ul>
  * <li>DateTime - default date/time to associate with activities. (Optional)</li>
  * <li>UseExecutors - identifies whether stream should use executor service to process activities data items
@@ -103,6 +103,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	// cache related properties
 	private Integer cacheMaxSize;
 	private Integer cacheExpireDuration;
+
+	private Thread sh;
 
 	/**
 	 * Returns logger used by this stream.
@@ -251,6 +253,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equals(name)) {
 			return cacheExpireDuration;
 		}
+		if (StreamProperties.PROP_STREAM_NAME.equals(name)) {
+			return this.name;
+		}
 
 		return null;
 	}
@@ -322,12 +327,13 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		initialize();
 		start();
 
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+		sh = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				stop();
 			}
-		}));
+		});
+		Runtime.getRuntime().addShutdownHook(sh);
 	}
 
 	/**
@@ -793,6 +799,14 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			}
 
 			notifyStatusChange(StreamStatus.STOP);
+		}
+
+		if (sh != null) {
+			try {
+				Runtime.getRuntime().removeShutdownHook(sh);
+			} catch (IllegalStateException exc) {
+			}
+			sh = null;
 		}
 	}
 
