@@ -37,6 +37,11 @@ public final class WmqStreamConstants {
 	 */
 	public static final int TRACE_MARKER = 929292929;
 
+	/**
+	 * Field "value type" attribute value identifying to initialize WMQ message signature calculation.
+	 */
+	public static final String VT_SIGNATURE = "signature"; // NON-NLS
+
 	private WmqStreamConstants() {
 	}
 }

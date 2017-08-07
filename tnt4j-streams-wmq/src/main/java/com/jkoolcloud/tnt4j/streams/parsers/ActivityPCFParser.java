@@ -327,6 +327,9 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * message signature calculation, with each input separated by the delimiter specified in property
 	 * {@code SignatureDelim}.
 	 * <p>
+	 * To initiate signature calculation, {@code field} "value type" attribute must be set to
+	 * {@value com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants#VT_SIGNATURE}.
+	 * <p>
 	 * The signature items MUST be specified in the following order:
 	 * <ol>
 	 * <li>Message Type</li>
@@ -347,7 +350,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
-		if (fieldType != null && field.getSeparator().equals(sigDelim)) {
+		if (fieldType != null && WmqStreamConstants.VT_SIGNATURE.equalsIgnoreCase(field.getValueType())) {
 			switch (fieldType) {
 			case Correlator:
 			case TrackingId:

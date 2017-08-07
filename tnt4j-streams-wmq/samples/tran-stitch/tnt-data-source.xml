@@ -36,7 +36,7 @@
         <field name="ReasonCode" locator="/messaging_operation/ReasonCode" locator-type="Label" datatype="Number"/>
         <field name="ServerIp" locator="/messaging_operation/ServerIp" locator-type="Label"/>
         <field name="ServerName" locator="/messaging_operation/ServerName" locator-type="Label"/>
-        <field name="TrackingId" separator="#!#">
+        <field name="TrackingId" separator="#!#" value-type="signature">
             <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/>
             <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/>
             <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary" format="hexBinary"/>
