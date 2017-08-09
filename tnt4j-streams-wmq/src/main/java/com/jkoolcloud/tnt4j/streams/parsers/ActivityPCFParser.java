@@ -879,35 +879,35 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private Object resolveMQCDValue(MQCD mqcd, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqcd; // TODO
 	}
 
 	private Object resolveMQCBDValue(MQCBD mqcbd, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqcbd; // TODO
 	}
 
 	private Object resolveMQCBCValue(MQCBC mqcbc, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqcbc; // TODO
 	}
 
 	private Object resolveMQBOValue(MQBO mqbo, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqbo; // TODO
 	}
 
 	private Object resolveMQSDValue(MQSD mqsd, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqsd; // TODO
 	}
 
 	private Object resolveMQSTSValue(MQSTS mqsts, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqsts; // TODO
 	}
 
 	private Object resolveMQCSPValue(MQCSP mqcsp, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqcsp; // TODO
 	}
 
 	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldDataType fDataType) {
-		return null; // TODO
+		return mqsco; // TODO
 	}
 
 	private static Object resolveObjectValue(Object obj, String[] path, int i) throws Exception {
