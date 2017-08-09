@@ -16,16 +16,23 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
+import com.ibm.mq.exits.MQCD;
+import com.ibm.mq.jmqi.*;
+import com.ibm.mq.jmqi.internal.JmqiStructureFormatter;
+import com.ibm.mq.jmqi.internal.MqiStructure;
+import com.ibm.mq.jmqi.system.JmqiTls;
 import com.ibm.mq.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -62,6 +69,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityPCFParser.class);
 
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
+	private static final Pattern STRUCT_ATTR_PATTERN = Pattern.compile("MQB\\w+_MQ\\w+_STRUCT"); // NON-NLS
+	private static final String MQ_TMP_CTX_STRUCT_PREF = "MQ_TMP_CTX_"; // NON-NLS
 
 	private boolean translateNumValues = true;
 	private String sigDelim = DEFAULT_DELIM;
@@ -131,7 +140,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * @param locator
 	 *            activity field locator
 	 * @param cData
-	 *            PCF message representing activity object data
+	 *            PCF message parsing context data
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
@@ -145,7 +154,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getParamValue(locator.getDataType(), path, cData.getData(), 0);
+		val = getParamValue(locator.getDataType(), path, cData.getData(), 0, cData);
 
 		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 				"ActivityPCFParser.resolved.pcf.value"), locStr, toString(val));
@@ -159,18 +168,20 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * @param fDataType
 	 *            field data type
 	 * @param path
-	 *            parameter path as array of PCF parameter identifiers
+	 *            parameter path as array of MQ PCF/MQI parameter identifiers
 	 * @param pcfContent
 	 *            PCF content data (message or parameters group)
 	 * @param i
-	 *            processed path element index
+	 *            processed locator path element index
+	 * @param cData
+	 *            PCF message parsing context data
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 *
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFContent pcfContent, int i)
-			throws ParseException {
+	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFContent pcfContent, int i,
+			ActivityContext cData) throws ParseException {
 		if (ArrayUtils.isEmpty(path) || pcfContent == null) {
 			return null;
 		}
@@ -183,13 +194,16 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		} else {
 			try {
 				Integer paramId = WmqUtils.getParamId(paramStr);
-
 				PCFParameter param = pcfContent.getParameter(paramId);
 
-				if (i < path.length - 1 && param instanceof MQCFGR) {
-					val = getParamValue(fDataType, path, (MQCFGR) param, ++i);
+				if (!isLastPathToken(path, i) && param instanceof MQCFGR) {
+					val = getParamValue(fDataType, path, (MQCFGR) param, ++i, cData);
 				} else {
-					val = resolvePCFParamValue(fDataType, param);
+					if (isMqiStructParam(paramStr) && !isLastPathToken(path, i)) {
+						val = resolveMqiStructValue(fDataType, param, path, i, pcfContent, cData);
+					} else {
+						val = resolvePCFParamValue(fDataType, param);
+					}
 				}
 			} catch (NoSuchElementException exc) {
 				throw new ParseException(StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -200,9 +214,17 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
+	private static boolean isLastPathToken(String[] path, int i) {
+		return i >= path.length - 1;
+	}
+
+	private static boolean isMqiStructParam(String paramStr) {
+		return STRUCT_ATTR_PATTERN.matcher(paramStr).matches();
+	}
+
 	/**
 	 * Returns PCF content position identifier to know where event has occurred.
-	 * 
+	 *
 	 * @param pcfContent
 	 *            PCF content to get position value
 	 * @return PCF message sequence number or {@link MQCFGR} parameter value
@@ -301,9 +323,502 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				break;
 			case MQConstants.MQIACF_REASON_CODE:
 				val = MQConstants.lookupReasonCode((Integer) val);
+				break;
+			case MQConstants.MQIA_CODED_CHAR_SET_ID:
+				val = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_ENCODING:
+				val = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_EXPIRY:
+				val = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_FEEDBACK:
+				val = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_MSG_FLAGS:
+				val = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_ORIGINAL_LENGTH:
+				val = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_PERSISTENCE:
+				val = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_PRIORITY:
+				val = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_REPORT:
+				val = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_VERSION:
+				val = MQConstants.lookup(val, "MQMD_.*"); // NON-NLS
+				break;
 			default:
 				break;
 			}
+		}
+
+		return val;
+
+	}
+
+	/**
+	 * Builds MQI structure from PCF parameter contained binary data and resolves field locator referenced value from
+	 * that structure.
+	 *
+	 * @param fDataType
+	 *            field data type
+	 * @param param
+	 *            PCF parameter to use raw data to build MQI structure
+	 * @param path
+	 *            parameter path as array of MQ PCF/MQI parameter identifiers
+	 * @param i
+	 *            processed locator path element index
+	 * @param pcfContent
+	 *            PCF content data (message or parameters group)
+	 * @param cData
+	 *            PCF message parsing context data
+	 * @return resolved MQI structure value
+	 * @throws ParseException
+	 *             if exception occurs while resolving raw data value
+	 */
+	protected Object resolveMqiStructValue(ActivityFieldDataType fDataType, PCFParameter param, String[] path, int i,
+			PCFContent pcfContent, ActivityContext cData) throws ParseException {
+		String ctxStructKey = MQ_TMP_CTX_STRUCT_PREF + param.getParameterName();
+		MqiStructure mqiStruct = (MqiStructure) cData.get(ctxStructKey);
+		boolean exception = false;
+		if (mqiStruct == null) {
+			try {
+				mqiStruct = buildMqiStructureFromBinData(param);
+				cData.put(ctxStructKey, mqiStruct);
+			} catch (Exception exc) {
+				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+						"ActivityPCFParser.structure.build.failed"), exc);
+				exception = true;
+			}
+
+			if (mqiStruct == null || exception) {
+				throw new ParseException(
+						StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"ActivityPCFParser.can.not.build.structure", getFullPath(path, i)),
+						getPCFPosition(pcfContent));
+			}
+		}
+
+		return resolveMqiStructParamValue(mqiStruct, path, ++i, param.getJmqiEnv(), fDataType);
+	}
+
+	private MqiStructure buildMqiStructureFromBinData(PCFParameter structParam) throws JmqiException {
+		if (structParam == null) {
+			return null;
+		}
+
+		byte[] structData = (byte[]) structParam.getValue();
+		JmqiEnvironment env = structParam.getJmqiEnv();
+		MqiStructure mqiStruct = null;
+
+		switch (structParam.getParameter()) {
+		case MQConstants.MQBACF_MQBO_STRUCT:
+			mqiStruct = env.newMQBO();
+			break;
+		case MQConstants.MQBACF_MQCBC_STRUCT:
+			mqiStruct = env.newMQCBC();
+			break;
+		case MQConstants.MQBACF_MQCBD_STRUCT:
+			mqiStruct = env.newMQCBD();
+			break;
+		case MQConstants.MQBACF_MQCD_STRUCT:
+			mqiStruct = env.newMQCD();
+			break;
+		case MQConstants.MQBACF_MQCNO_STRUCT:
+			mqiStruct = env.newMQCNO();
+			break;
+		case MQConstants.MQBACF_MQGMO_STRUCT:
+			mqiStruct = env.newMQGMO();
+			break;
+		case MQConstants.MQBACF_MQMD_STRUCT:
+			mqiStruct = env.newMQMD();
+			break;
+		case MQConstants.MQBACF_MQPMO_STRUCT:
+			mqiStruct = env.newMQPMO();
+			break;
+		case MQConstants.MQBACF_MQSD_STRUCT:
+			mqiStruct = env.newMQSD();
+			break;
+		case MQConstants.MQBACF_MQSTS_STRUCT:
+			mqiStruct = env.newMQSTS();
+			break;
+		default:
+		}
+
+		if (mqiStruct != null) {
+			mqiStruct.readFromBuffer(structData, 0, 4, true, env.getNativeCharSet(), new JmqiTls());
+			if (logger().isSet(OpLevel.DEBUG)) {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"ActivityPCFParser.built.structure"),
+						PCFConstants.lookupParameter(structParam.getParameter()), mqiToString(mqiStruct, env));
+			}
+
+			return mqiStruct;
+		}
+
+		return mqiStruct;
+	}
+
+	private static String mqiToString(MqiStructure mqiStruct, JmqiEnvironment env) {
+		JmqiStructureFormatter fmt = new JmqiStructureFormatter(env, 24, 2, "\n"); // NON-NLS
+		mqiStruct.addFieldsToFormatter(fmt);
+
+		return fmt.toString();
+	}
+
+	private static String getFullPath(String[] path, int i) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int pi = 0; pi <= i; i++) {
+			sb.append(path[pi]);
+
+			if (pi < i) {
+				sb.append(StreamsConstants.DEFAULT_PATH_DELIM);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private Object resolveMqiStructParamValue(MqiStructure mqiStruct, String[] path, int i, JmqiEnvironment env,
+			ActivityFieldDataType fDataType) throws ParseException {
+		Object val = null;
+
+		if (path[i].equalsIgnoreCase(mqiStruct.getClass().getSimpleName())) {
+			if (isLastPathToken(path, i)) {
+				val = mqiToString(mqiStruct, env);
+			} else {
+				val = resolveMqiStructParamValue(mqiStruct, path, i + 1, fDataType);
+			}
+		}
+
+		return val;
+	}
+
+	private Object resolveMqiStructParamValue(MqiStructure mqiSruct, String[] path, int i,
+			ActivityFieldDataType fDataType) throws ParseException {
+		if (mqiSruct instanceof MQMD) {
+			return resolveMQMDValue((MQMD) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQPMO) {
+			return resolveMQPMOValue((MQPMO) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQGMO) {
+			return resolveMQGMOValue((MQGMO) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQCNO) {
+			return resolveMQCNOValue((MQCNO) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQCD) {
+			return resolveMQCDValue((MQCD) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQCBD) {
+			return resolveMQCBDValue((MQCBD) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQCBC) {
+			return resolveMQCBCValue((MQCBC) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQBO) {
+			return resolveMQBOValue((MQBO) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQSD) {
+			return resolveMQSDValue((MQSD) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQSTS) {
+			return resolveMQSTSValue((MQSTS) mqiSruct, path[i], fDataType);
+		} else {
+			try {
+				return resolveObjectValue(mqiSruct, path, i);
+			} catch (Exception exc) {
+				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+						"ActivityPCFParser.structure.value.resolution.failed"), exc);
+
+				// throw new ParseException(
+				// StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+				// "ActivityPCFParser.can.not.resolve.structure.value", getFullPath(path, i)),
+				// getPCFPosition(pcfContent));
+			}
+		}
+
+		return null;
+	}
+
+	private Object resolveMQMDValue(MQMD mqmd, String fName, ActivityFieldDataType fDataType) {
+		Object val = null;
+
+		switch (fName.toLowerCase()) {
+		case "accountingtoken": // NON-NLS
+			val = mqmd.getAccountingToken();
+			break;
+		case "applidentitydata": // NON-NLS
+			val = mqmd.getApplIdentityData();
+			break;
+		case "applorigindata": // NON-NLS
+			val = mqmd.getApplOriginData();
+			break;
+		case "backoutcount": // NON-NLS
+			val = mqmd.getBackoutCount();
+			break;
+		case "codedcharsetid": // NON-NLS
+			val = mqmd.getCodedCharSetId();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
+			}
+			break;
+		case "correlid": // NON-NLS
+			val = mqmd.getCorrelId();
+			break;
+		case "encoding": // NON-NLS
+			val = mqmd.getEncoding();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
+			}
+			break;
+		case "expiry": // NON-NLS
+			val = mqmd.getExpiry();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
+			}
+			break;
+		case "feedback": // NON-NLS
+			val = mqmd.getFeedback();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
+			}
+			break;
+		case "format": // NON-NLS
+			val = mqmd.getFormat();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
+			}
+			break;
+		case "groupid": // NON-NLS
+			val = mqmd.getGroupId();
+
+			break;
+		case "msgflags": // NON-NLS
+			val = mqmd.getMsgFlags();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
+			}
+			break;
+		case "msgid": // NON-NLS
+			val = mqmd.getMsgId();
+			break;
+		case "msgseqnumber": // NON-NLS
+			val = mqmd.getMsgSeqNumber();
+			break;
+		case "msgtype": // NON-NLS
+			val = mqmd.getMsgType();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
+			}
+			break;
+		case "offset": // NON-NLS
+			val = mqmd.getOffset();
+			break;
+		case "originallength": // NON-NLS
+			val = mqmd.getOriginalLength();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
+			}
+			break;
+		case "persistence": // NON-NLS
+			val = mqmd.getPersistence();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
+			}
+			break;
+		case "priority": // NON-NLS
+			val = mqmd.getPriority();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
+			}
+			break;
+		case "putapplname": // NON-NLS
+			val = mqmd.getPutApplName();
+			break;
+		case "putappltype": // NON-NLS
+			val = mqmd.getPutApplType();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
+			}
+			break;
+		case "putdate": // NON-NLS
+			val = mqmd.getPutDate();
+			break;
+		case "puttime": // NON-NLS
+			val = mqmd.getPutTime();
+			break;
+		case "replytoq": // NON-NLS
+			val = mqmd.getReplyToQ();
+			break;
+		case "replytoqmgr": // NON-NLS
+			val = mqmd.getReplyToQMgr();
+			break;
+		case "report": // NON-NLS
+			val = mqmd.getReport();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
+			}
+			break;
+		case "useridentifier": // NON-NLS
+			val = mqmd.getUserIdentifier();
+			break;
+		case "version": // NON-NLS
+			val = mqmd.getVersion();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQMD_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		if (val instanceof String) {
+			val = ((String) val).trim();
+		}
+
+		return val;
+	}
+
+	private Object resolveMQPMOValue(MQPMO mqpmo, String fName, ActivityFieldDataType fDataType) {
+		Object val = null;
+
+		switch (fName.toLowerCase()) {
+		case "action": // NON-NLS
+			val = mqpmo.getAction();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
+			}
+			break;
+		case "context": // NON-NLS
+			val = mqpmo.getContext();
+			// if (isValueTranslatable(fDataType)) {
+			// val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
+			// }
+			break;
+		case "invaliddestcount": // NON-NLS
+			val = mqpmo.getInvalidDestCount();
+			break;
+		case "knowndestcount": // NON-NLS
+			val = mqpmo.getKnownDestCount();
+			break;
+		case "newmsghandle": // NON-NLS
+			val = mqpmo.getNewMsgHandle();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+			}
+			break;
+		case "options": // NON-NLS
+			val = mqpmo.getOptions();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
+			}
+			break;
+		case "originalmsghandle": // NON-NLS
+			val = mqpmo.getOriginalMsgHandle();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+			}
+			break;
+		case "sublevel": // NON-NLS
+			val = mqpmo.getSubLevel();
+			break;
+		case "putmsgrecfields": // NON-NLS
+			val = mqpmo.getPutMsgRecFields();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQPMRF_.*"); // NON-NLS
+			}
+			break;
+		case "putmsgrecoffset": // NON-NLS
+			// val = mqpmo.get();
+			// if (isValueTranslatable(fDataType)) {
+			// val = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
+			// }
+			break;
+		case "putmsgrecptr": // NON-NLS
+			// val = mqpmo.get();
+			break;
+		case "recspresent": // NON-NLS
+			val = mqpmo.getRecsPresent();
+			break;
+		case "resolvedqmgrname": // NON-NLS
+			val = mqpmo.getResolvedQMgrName();
+			break;
+		case "resolvedqname": // NON-NLS
+			val = mqpmo.getResolvedQName();
+			break;
+		case "responserecoffset": // NON-NLS
+			// val = mqpmo.get();
+			break;
+		case "responserecptr": // NON-NLS
+			// val = mqpmo.get();
+			break;
+		case "timeout": // NON-NLS
+			// val = mqpmo.get();
+			break;
+		case "unknowndestcount": // NON-NLS
+			val = mqpmo.getUnknownDestCount();
+			break;
+		case "version": // NON-NLS
+			val = mqpmo.getVersion();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQPMO_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		if (val instanceof String) {
+			val = ((String) val).trim();
+		}
+
+		return val;
+	}
+
+	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQCNOValue(MQCNO mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQCDValue(MQCD mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQCBDValue(MQCBD mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQCBCValue(MQCBC mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQBOValue(MQBO mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQSDValue(MQSD mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private Object resolveMQSTSValue(MQSTS mqgmo, String fName, ActivityFieldDataType fDataType) {
+		return null; // TODO
+	}
+
+	private static Object resolveObjectValue(Object obj, String[] path, int i) throws Exception {
+		Object val = null;
+		String fieldName = path[i];
+
+		Field f = obj.getClass().getDeclaredField(fieldName);
+		f.setAccessible(true);
+		val = f.get(obj);
+
+		if (!isLastPathToken(path, i)) {
+			val = resolveObjectValue(val, path, i + 1);
 		}
 
 		return val;
