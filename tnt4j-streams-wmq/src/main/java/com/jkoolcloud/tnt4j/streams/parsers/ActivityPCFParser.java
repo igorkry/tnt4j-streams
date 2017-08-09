@@ -533,6 +533,10 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			val = resolveMQSDValue((MQSD) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQSTS) {
 			val = resolveMQSTSValue((MQSTS) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQCSP) {
+			val = resolveMQCSPValue((MQCSP) mqiSruct, path[i], fDataType);
+		} else if (mqiSruct instanceof MQSCO) {
+			val = resolveMQSCOValue((MQSCO) mqiSruct, path[i], fDataType);
 		} else {
 			try {
 				val = resolveObjectValue(mqiSruct, path, i);
