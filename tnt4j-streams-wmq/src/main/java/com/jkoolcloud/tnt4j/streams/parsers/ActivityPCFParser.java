@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.exits.MQCD;
+import com.ibm.mq.exits.MQCSP;
 import com.ibm.mq.jmqi.*;
 import com.ibm.mq.jmqi.internal.JmqiStructureFormatter;
 import com.ibm.mq.jmqi.internal.MqiStructure;
@@ -497,6 +498,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				val = mqiToString(mqiStruct, env);
 			} else {
 				val = resolveMqiStructParamValue(mqiStruct, path, i + 1, fDataType);
+
+				if (val instanceof String) {
+					val = ((String) val).trim();
+				} else if (val instanceof MqiStructure) {
+					val = mqiToString((MqiStructure) val, env);
+				}
 			}
 		}
 
@@ -505,29 +512,30 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	private Object resolveMqiStructParamValue(MqiStructure mqiSruct, String[] path, int i,
 			ActivityFieldDataType fDataType) throws ParseException {
+		Object val = null;
 		if (mqiSruct instanceof MQMD) {
-			return resolveMQMDValue((MQMD) mqiSruct, path[i], fDataType);
+			val = resolveMQMDValue((MQMD) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQPMO) {
-			return resolveMQPMOValue((MQPMO) mqiSruct, path[i], fDataType);
+			val = resolveMQPMOValue((MQPMO) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQGMO) {
-			return resolveMQGMOValue((MQGMO) mqiSruct, path[i], fDataType);
+			val = resolveMQGMOValue((MQGMO) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQCNO) {
-			return resolveMQCNOValue((MQCNO) mqiSruct, path[i], fDataType);
+			val = resolveMQCNOValue((MQCNO) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQCD) {
-			return resolveMQCDValue((MQCD) mqiSruct, path[i], fDataType);
+			val = resolveMQCDValue((MQCD) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQCBD) {
-			return resolveMQCBDValue((MQCBD) mqiSruct, path[i], fDataType);
+			val = resolveMQCBDValue((MQCBD) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQCBC) {
-			return resolveMQCBCValue((MQCBC) mqiSruct, path[i], fDataType);
+			val = resolveMQCBCValue((MQCBC) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQBO) {
-			return resolveMQBOValue((MQBO) mqiSruct, path[i], fDataType);
+			val = resolveMQBOValue((MQBO) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQSD) {
-			return resolveMQSDValue((MQSD) mqiSruct, path[i], fDataType);
+			val = resolveMQSDValue((MQSD) mqiSruct, path[i], fDataType);
 		} else if (mqiSruct instanceof MQSTS) {
-			return resolveMQSTSValue((MQSTS) mqiSruct, path[i], fDataType);
+			val = resolveMQSTSValue((MQSTS) mqiSruct, path[i], fDataType);
 		} else {
 			try {
-				return resolveObjectValue(mqiSruct, path, i);
+				val = resolveObjectValue(mqiSruct, path, i);
 			} catch (Exception exc) {
 				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
 						"ActivityPCFParser.structure.value.resolution.failed"), exc);
@@ -539,7 +547,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			}
 		}
 
-		return null;
+		return val;
 	}
 
 	private Object resolveMQMDValue(MQMD mqmd, String fName, ActivityFieldDataType fDataType) {
@@ -674,10 +682,6 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		}
 
-		if (val instanceof String) {
-			val = ((String) val).trim();
-		}
-
 		return val;
 	}
 
@@ -730,15 +734,6 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				val = MQConstants.decodeOptions((int) val, "MQPMRF_.*"); // NON-NLS
 			}
 			break;
-		case "putmsgrecoffset": // NON-NLS
-			// val = mqpmo.get();
-			// if (isValueTranslatable(fDataType)) {
-			// val = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
-			// }
-			break;
-		case "putmsgrecptr": // NON-NLS
-			// val = mqpmo.get();
-			break;
 		case "recspresent": // NON-NLS
 			val = mqpmo.getRecsPresent();
 			break;
@@ -747,12 +742,6 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "resolvedqname": // NON-NLS
 			val = mqpmo.getResolvedQName();
-			break;
-		case "responserecoffset": // NON-NLS
-			// val = mqpmo.get();
-			break;
-		case "responserecptr": // NON-NLS
-			// val = mqpmo.get();
 			break;
 		case "timeout": // NON-NLS
 			// val = mqpmo.get();
@@ -770,42 +759,150 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		}
 
-		if (val instanceof String) {
-			val = ((String) val).trim();
+		return val;
+	}
+
+	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldDataType fDataType) {
+		Object val = null;
+
+		switch (fName.toLowerCase()) {
+		case "groupstatus": // NON-NLS
+			val = mqgmo.getGroupStatus();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQGS_.*"); // NON-NLS
+			}
+			break;
+		case "matchoptions": // NON-NLS
+			val = mqgmo.getMatchOptions();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQMO_.*"); // NON-NLS
+			}
+			break;
+		case "msghandle": // NON-NLS
+			val = mqgmo.getMessageHandle();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+			}
+			break;
+		case "msgtoken": // NON-NLS
+			val = mqgmo.getMsgToken();
+			break;
+		case "options": // NON-NLS
+			val = mqgmo.getOptions();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
+			}
+			break;
+		case "resolvedqname": // NON-NLS
+			val = mqgmo.getResolvedQName();
+			break;
+		case "returnedlength": // NON-NLS
+			val = mqgmo.getReturnedLength();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQRL_.*"); // NON-NLS
+			}
+			break;
+		case "segmentation": // NON-NLS
+			val = mqgmo.getSegmentation();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQSEG_.*"); // NON-NLS
+			}
+			break;
+		case "segmentstatus": // NON-NLS
+			val = mqgmo.getSegmentStatus();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQSS_.*"); // NON-NLS
+			}
+			break;
+		case "signal2": // NON-NLS
+			val = mqgmo.getSignal2();
+			break;
+		case "waitinterval": // NON-NLS
+			val = mqgmo.getWaitInterval();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQWI_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqgmo.getVersion();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQGMO_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
 		}
 
 		return val;
 	}
 
-	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCNOValue(MQCNO mqcno, String fName, ActivityFieldDataType fDataType) {
+		Object val = null;
+
+		switch (fName.toLowerCase()) {
+		case "clientconn": // NON-NLS
+			val = mqcno.getClientConn();
+			break;
+		case "securityparams": // NON-NLS
+			val = mqcno.getSecurityParms();
+			break;
+		case "sslconfig": // NON-NLS
+			val = mqcno.getSslConfig();
+			break;
+		case "connectionid": // NON-NLS
+			val = mqcno.getConnectionId();
+			break;
+		case "conntag": // NON-NLS
+			val = mqcno.getConnTag();
+			break;
+		case "options": // NON-NLS
+			val = mqcno.getOptions();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqcno.getVersion();
+			if (isValueTranslatable(fDataType)) {
+				val = MQConstants.lookup(val, "MQCNO_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return val;
+	}
+
+	private Object resolveMQCDValue(MQCD mqcd, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQCNOValue(MQCNO mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCBDValue(MQCBD mqcbd, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQCDValue(MQCD mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCBCValue(MQCBC mqcbc, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQCBDValue(MQCBD mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQBOValue(MQBO mqbo, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQCBCValue(MQCBC mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSDValue(MQSD mqsd, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQBOValue(MQBO mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSTSValue(MQSTS mqsts, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQSDValue(MQSD mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCSPValue(MQCSP mqcsp, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
-	private Object resolveMQSTSValue(MQSTS mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldDataType fDataType) {
 		return null; // TODO
 	}
 
