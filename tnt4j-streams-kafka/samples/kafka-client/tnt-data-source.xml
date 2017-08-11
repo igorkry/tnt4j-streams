@@ -22,39 +22,30 @@
         <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
     </parser>
 
-    <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <field name="Topic" locator="ActivityTopic" locator-type="Label"/>
-        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
-        <field name="MsgBody" locator="ActivityData" locator-type="Label">
+    <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser">
+        <field name="Topic" locator="topic" locator-type="Label"/>
+        <field name="Partition" locator="partition" locator-type="Label" datatype="Number"/>
+        <field name="Offset" locator="offset" locator-type="Label" datatype="Number"/>
+        <field name="Timestamp" locator="timestamp" locator-type="Label" datatype="Timestamp"/>
+        <field name="TimestampType" locator="timestampType" locator-type="Label"/>
+        <field name="Checksum" locator="checksum" locator-type="Label"/>
+        <field name="KeySize" locator="serializedKeySize" locator-type="Label" datatype="Number"/>
+        <field name="ValueSize" locator="serializedValueSize" locator-type="Label" datatype="Number"/>
+        <field name="Key" locator="key" locator-type="Label"/>
+        <field name="MsgBody" locator="value" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
         </field>
     </parser>
 
-    <stream name="SampleKafkaStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStream">
+    <stream name="SampleKafkaClientStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Topic" value="TNT4JStreams"/>
-        <property name="StartServer" value="true"/>
-        <property name="StartZooKeeper" value="true"/>
-
-        <!-- Common Kafka server/consumer properties -->
-        <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-        <property name="zookeeper.connection.timeout.ms" value="5000"/>
 
         <!-- Kafka consumer properties -->
-        <property name="consumer:group.id" value="TNT4JStreams"/>
-        <!--<property name="consumer:zookeeper.connection.timeout.ms" value="6000"/>-->
-        <property name="consumer:consumer.timeout.ms" value="1000"/>
-        <property name="consumer:auto.commit.interval.ms" value="1000"/>
-
-        <!-- Kafka server properties -->
-        <property name="server:broker.id" value="7"/>
-        <property name="server:host.name" value="localhost"/>
-        <property name="server:port" value="9092"/>
-        <!--<property name="server:log.flush.interval.messages" value="1"/>-->
-        <!--<property name="server:log.flush.interval.ms" value="1000"/>-->
-        <property name="server:zookeeper.session.timeout.ms" value="4000"/>
-        <!--<property name="server:zookeeper.connection.timeout.ms" value="3000"/>-->
-        <property name="server:zookeeper.sync.time.ms" value="200"/>
+        <property name="bootstrap.servers" value="localhost:9092"/>
+        <property name="group.id" value="0"/>
+        <property name="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+        <property name="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>

@@ -1,0 +1,75 @@
+{
+    "sendCounter": {},
+    "ackMeter": {
+        "m1Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.07995558537067671,
+            "interval": 5.0E9
+        },
+        "m5Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.01652854617838251,
+            "interval": 5.0E9
+        },
+        "m15Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.005540151995103271,
+            "interval": 5.0E9
+        },
+        "startTime": 2526135285692174,
+        "lastTick": 2526135285692174,
+        "clock": {}
+    },
+    "ackCounter": {},
+    "consumeCounter": {},
+    "commitCounter": {},
+    "sendMeter": {
+        "m1Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.07995558537067671,
+            "interval": 5.0E9
+        },
+        "m5Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.01652854617838251,
+            "interval": 5.0E9
+        },
+        "m15Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.005540151995103271,
+            "interval": 5.0E9
+        },
+        "startTime": 2526135285655754,
+        "lastTick": 2526135285655754,
+        "clock": {}
+    },
+    "consumeMeter": {
+        "m1Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.07995558537067671,
+            "interval": 5.0E9
+        },
+        "m5Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.01652854617838251,
+            "interval": 5.0E9
+        },
+        "m15Rate": {
+            "initialized": false,
+            "rate": 0.0,
+            "alpha": 0.005540151995103271,
+            "interval": 5.0E9
+        },
+        "startTime": 2526135285699856,
+        "lastTick": 2526135285699856,
+        "clock": {}
+    }
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EventName" value="Kafka_interceptor_metrics_snapshot"/>
+
+        <field name="AcknowlageM.m1Rate.initialized" locator="$.ackMeter.m1Rate.initialized" locator-type="Label"/>
+        <field name="AcknowlageM.m1Rate.rate" locator="$.ackMeter.m1Rate.rate" locator-type="Label"/>
+        <field name="AcknowlageM.m1Rate.alpha" locator="$.ackMeter.m1Rate.alpha" locator-type="Label"/>
+        <field name="AcknowlageM.m1Rate.interval" locator="$.ackMeter.m1Rate.interval" locator-type="Label"/>
+
+        <field name="AcknowlageM.m5Rate.initialized" locator="$.ackMeter.m5Rate.initialized" locator-type="Label"/>
+        <field name="AcknowlageM.m5Rate.rate" locator="$.ackMeter.m5Rate.rate" locator-type="Label"/>
+        <field name="AcknowlageM.m5Rate.alpha" locator="$.ackMeter.m5Rate.alpha" locator-type="Label"/>
+        <field name="AcknowlageM.m5Rate.interval" locator="$.ackMeter.m5Rate.interval" locator-type="Label"/>
+
+        <field name="AcknowlageM.m15Rate.initialized" locator="$.ackMeter.m15Rate.initialized" locator-type="Label"/>
+        <field name="AcknowlageM.m15Rate.rate" locator="$.ackMeter.m15Rate.rate" locator-type="Label"/>
+        <field name="AcknowlageM.m15Rate.alpha" locator="$.ackMeter.m15Rate.alpha" locator-type="Label"/>
+        <field name="AcknowlageM.m15Rate.interval" locator="$.ackMeter.m15Rate.interval" locator-type="Label"/>
+
+        <field name="AcknowlageM.startTime" locator="$.ackMeter.startTime" locator-type="Label" datatype="Timestamp"/>
+        <field name="AcknowlageM.lastTick" locator="$.ackMeter.lastTick" locator-type="Label" datatype="Timestamp"/>
+
+    </parser>
+
+    <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ReadLines" value="false"/>
+        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label">
+            <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser">
+        <field name="TNTEventData" locator="value" locator-type="Label">
+            <parser-ref name="TNTJSONParser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <stream name="KafkaMetricsStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="Topic" value="tnt4j_kafka_interceptor_metrics"/>
+
+        <!-- Kafka consumer properties -->
+        <property name="bootstrap.servers" value="localhost:9092"/>
+        <property name="group.id" value="0"/>
+        <property name="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+        <property name="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+
+        <parser-ref name="KafkaMessageParser"/>
+    </stream>
+</tnt-data-source>

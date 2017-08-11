@@ -63,7 +63,7 @@ import kafka.utils.SystemTime$;
  * <li>ActivityTransport - activity transport definition: 'Kafka'.</li>
  * </ul>
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>Topic - topic name to listen. (Required)</li>

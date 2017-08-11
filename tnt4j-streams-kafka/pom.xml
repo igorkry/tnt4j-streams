@@ -17,6 +17,11 @@
 
     <artifactId>tnt4j-streams-kafka</artifactId>
 
+    <properties>
+        <kafka.clients.version>0.10.2.1</kafka.clients.version>
+        <kafka.version>0.8.2.2</kafka.version>
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -76,6 +81,13 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>http://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>
@@ -84,8 +96,23 @@
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.clients.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.10</artifactId>
-            <version>0.8.2.2</version>
+            <version>${kafka.version}</version>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>io.confluent</groupId>-->
+        <!--<artifactId>monitoring-interceptors</artifactId>-->
+        <!--<version>3.2.2</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>3.2.4</version>
         </dependency>
 
         <dependency>
