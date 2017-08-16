@@ -135,6 +135,11 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 		}
 
 		String logEntry = getNextActivityString(data);
+		
+		if (StringUtils.isEmpty(logEntry)) {
+			return null;
+		}
+		
 		Map<String, Object> dataMap = new HashMap<>();
 		dataMap.put(RAW_ERR_LOG_ENTRY_KEY, logEntry);
 
