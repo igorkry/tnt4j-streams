@@ -282,9 +282,15 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private static final String RESOURCE_ATTR = "resource"; // NON-NLS
 	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String AUTO_SORT_ATTR = "manualFieldsOrder"; // NON-NLS
+	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
+	
+	private static final String DEFAULT_ATTR = "default"; // NON-NLS
 
 	/**
 	 * Currently configured TNT input stream.
@@ -500,6 +506,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String name = null;
 		String className = null;
 		String tags = null;
+		boolean autoSort = true;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -509,6 +516,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				className = attValue;
 			} else if (TAGS_ATTR.equals(attName)) {
 				tags = attValue;
+			} else if (AUTO_SORT_ATTR.equals(attName)) {
+				autoSort = !Boolean.parseBoolean(attValue);
 			}
 		}
 
@@ -533,6 +542,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currParser != null) {
 			currParser.setName(name);
 			currParser.setTags(tags);
+			((GenericActivityParser<?>) currParser).setAutoSort(autoSort);
 			streamsConfigData.addParser(currParser);
 		}
 	}
@@ -1094,10 +1104,10 @@ public class ConfigParserHandler extends DefaultHandler {
 		while ((line = br.readLine()) != null) {
 			String[] tokens = line.split(delim); // StringUtils.split (line, delim);
 
-			String key = tokens.length > 0 ? tokens[0] : "";
-			String value = tokens.length > 1 ? tokens[1] : "";
+			String key = tokens.length > 0 ? tokens[0].trim() : "";
+			String value = tokens.length > 1 ? tokens[1].trim() : "";
 
-			propsMap.put(tokens[0].trim(), tokens[1].trim());
+			propsMap.put(key, value);
 		}
 
 		return propsMap;
@@ -1594,6 +1604,14 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration2", VALUE_ELMT, CACHE_ENTRY_ELMT),
 					currParseLocation);
 		}
+		
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (DEFAULT_ATTR.equals(attName)) {
+				currCacheEntry.defaultValue = attValue;
+			} 
+		}
 
 		elementData = new StringBuilder();
 	}
@@ -1803,6 +1821,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (currProperties == null) {
 				currProperties = new HashMap<>();
 			}
+			String cpv = currProperties.get(currProperty.name);
+			if (cpv != null) {
+				currProperty.value = cpv + "&|@" + currProperty.value;
+			}
 			currProperties.put(currProperty.name, currProperty.value);
 		}
 	}
@@ -1969,7 +1991,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleCacheEntry(CacheEntryData currCacheEntry) throws SAXException {
-		StreamsCache.addEntry(currCacheEntry.id, currCacheEntry.key, currCacheEntry.value);
+		StreamsCache.addEntry(currCacheEntry.id, currCacheEntry.key, currCacheEntry.value, currCacheEntry.defaultValue);
 	}
 
 	private void handleKey(CacheEntryData currCacheEntry) throws SAXException {
@@ -2195,11 +2217,13 @@ public class ConfigParserHandler extends DefaultHandler {
 		String id;
 		String key;
 		String value;
+		String defaultValue;
 
 		private void reset() {
 			id = "";
 			key = "";
 			value = "";
+			defaultValue = "";
 		}
 	}
 }

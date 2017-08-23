@@ -77,6 +77,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected final Object FILTER_LOCK = new Object();
 	protected final Object PRE_PARSER_LOCK = new Object();
 
+	private boolean autoSort = true;
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
@@ -168,6 +170,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return Utils.toString(data);
 	}
 
+	public void setAutoSort(boolean autoSort) {
+		this.autoSort = autoSort;
+	}
+
 	@Override
 	public void addField(ActivityField field) {
 		if (field == null) {
@@ -188,15 +194,19 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 		}
 
-		int idx = -1;
-		for (int i = 0; i < fieldList.size(); i++) {
-			ActivityField af = fieldList.get(i);
-			if (af.hasCacheLocators() || af.hasActivityLocators() || af.hasActivityTransformations()) {
-				idx = i;
-				break;
+		if (autoSort) {
+			int idx = -1;
+			for (int i = 0; i < fieldList.size(); i++) {
+				ActivityField af = fieldList.get(i);
+				if (af.hasCacheLocators() || af.hasActivityLocators() || af.hasActivityTransformations()) {
+					idx = i;
+					break;
+				}
 			}
+			fieldList.add(idx >= 0 ? idx : fieldList.size(), field);
+		} else {
+			fieldList.add(field);
 		}
-		fieldList.add(idx >= 0 ? idx : fieldList.size(), field);
 	}
 
 	/**

@@ -139,10 +139,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			String value = prop.getValue();
 			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
-					String[] nsFields = value.split("="); // NON-NLS
-					namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityXmlParser.adding.mapping"), name, value);
+					String[] nSpaces = value.split("\\&\\|\\@"); // NON-NLS
+					for (String nSpace : nSpaces) {
+						String[] nsFields = nSpace.split("="); // NON-NLS
+						namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityXmlParser.adding.mapping"), name, nSpace);
+					}
 				}
 			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {

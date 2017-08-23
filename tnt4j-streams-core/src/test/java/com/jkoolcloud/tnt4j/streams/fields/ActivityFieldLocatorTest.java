@@ -102,9 +102,20 @@ public class ActivityFieldLocatorTest {
 		locator = new ActivityFieldLocator(1);
 		UsecTimestamp ts = new UsecTimestamp(new Date());
 		assertEquals(ts, locator.formatDateValue(ts));
-		locator.setDataType(ActivityFieldDataType.DateTime);
+		locator.setDataType(ActivityFieldDataType.Timestamp);
 		locator.setUnits(TimeUnit.MILLISECONDS.name());
 		locator.formatDateValue(new Date());
+	}
+
+	@Test
+	public void testFormatDateValueFormat() throws ParseException {
+		locator = new ActivityFieldLocator(1);
+		UsecTimestamp ts = new UsecTimestamp(new Date());
+		assertEquals(ts, locator.formatDateValue(ts));
+		locator.setDataType(ActivityFieldDataType.Timestamp);
+		locator.setFormat("HH:mm:ss.SSSSSSSSS", Locale.getDefault().toString());
+		locator.formatDateValue("0:00:04.570829300");
+		System.out.println(locator.formatDateValue(new Date()));
 	}
 
 	@Test
