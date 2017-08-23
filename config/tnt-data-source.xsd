@@ -1828,6 +1828,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attribute name="manualFieldsOrder" use="optional" type="xs:boolean" default="false">
+            <xs:annotation>
+                <xs:documentation>
+                    XXXX
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Element <cache> definition -->
