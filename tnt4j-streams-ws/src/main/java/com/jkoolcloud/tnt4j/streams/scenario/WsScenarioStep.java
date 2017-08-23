@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.scenario;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class defines TNT4J-Streams-WS configuration scenario step.
  *
@@ -24,7 +27,7 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 public class WsScenarioStep {
 	private String name;
 	private String urlStr;
-	private String request;
+	private List<String> requests;
 	private String method;
 	private String username;
 	private String password;
@@ -75,12 +78,12 @@ public class WsScenarioStep {
 	}
 
 	/**
-	 * Returns request/command data.
+	 * Returns requests/commands data.
 	 *
 	 * @return request data
 	 */
-	public String getRequest() {
-		return request;
+	public List<String> getRequests() {
+		return requests;
 	}
 
 	/**
@@ -89,8 +92,12 @@ public class WsScenarioStep {
 	 * @param request
 	 *            request data
 	 */
-	public void setRequest(String request) {
-		this.request = request;
+	public void addRequest(String request) {
+		if (this.requests == null) {
+			this.requests = new ArrayList<>();
+		}
+
+		this.requests.add(request);
 	}
 
 	/**

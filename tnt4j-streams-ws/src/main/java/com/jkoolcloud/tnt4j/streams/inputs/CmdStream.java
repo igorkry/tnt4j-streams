@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
@@ -60,7 +63,7 @@ public class CmdStream extends AbstractWsStream {
 
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
-		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequests());
 
 		return JobBuilder.newJob(CmdCallJob.class).withIdentity(scenario.getName() + ':' + step.getName()) // NON-NLS
 				.usingJobData(jobAttrs).build();
@@ -104,23 +107,28 @@ public class CmdStream extends AbstractWsStream {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String respStr = null;
 
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			String reqData = dataMap.getString(JOB_PROP_REQ_KEY);
+			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
 
-			try {
-				respStr = executeCommand(reqData);
-			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-						"CmdStream.execute.exception"), exc);
-			}
+			if (CollectionUtils.isNotEmpty(reqsData)) {
+				for (String reqData : reqsData) {
+					try {
+						respStr = executeCommand(reqData);
+					} catch (Exception exc) {
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+								"CmdStream.execute.exception"), exc);
+					}
 
-			if (StringUtils.isNotEmpty(respStr)) {
-				stream.addInputToBuffer(respStr);
+					if (StringUtils.isNotEmpty(respStr)) {
+						stream.addInputToBuffer(respStr);
+					}
+				}
 			}
 		}
 	}

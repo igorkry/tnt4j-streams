@@ -93,12 +93,19 @@
                     </xs:annotation>
                 </xs:element>
             </xs:choice>
-            <xs:element name="request" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:element name="request" type="xs:string" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
                         Request (or command) data.
                     </xs:documentation>
                 </xs:annotation>
+				<xs:attribute name="parserTag" use="optional" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>
+							Repeat interval units.
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
             </xs:element>
         </xs:sequence>
 

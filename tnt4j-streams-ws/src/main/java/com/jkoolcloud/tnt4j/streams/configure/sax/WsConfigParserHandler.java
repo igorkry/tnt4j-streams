@@ -61,6 +61,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
+	private String currentParserTag;
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -68,6 +69,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 		currScenario = null;
 		currStep = null;
+		currentParserTag = null;
 	}
 
 	@Override
@@ -245,7 +247,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					}
 				}
 			} else if (STEP_ELMT.equals(qName)) {
-				if (StringUtils.isEmpty(currStep.getRequest()) && StringUtils.isEmpty(currStep.getUrlStr())) {
+				if (CollectionUtils.isEmpty(currStep.getRequests()) && StringUtils.isEmpty(currStep.getUrlStr())) {
 					throw new SAXParseException(
 							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"ConfigParserHandler.must.contain", STEP_ELMT, URL_ATTR, REQ_ELMT),
@@ -256,7 +258,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				currStep = null;
 			} else if (REQ_ELMT.equals(qName)) {
 				if (elementData != null) {
-					currStep.setRequest(getElementData());
+					currStep.addRequest(getElementData());
 					elementData = null;
 				}
 			}

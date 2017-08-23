@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
@@ -38,7 +41,7 @@ import javax.xml.bind.annotation.*;
  *           &lt;element name="schedule-cron" type="{}ScheduleCron"/>
  *           &lt;element name="schedule-simple" type="{}ScheduleSimple"/>
  *         &lt;/choice>
- *         &lt;element name="request" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="request" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="url" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -63,8 +66,8 @@ public class ScenarioStep {
 	@XmlElement(name = "schedule-simple")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected ScheduleSimple scheduleSimple;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
-	protected String request;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-08-10T10:06:43+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<String> request;
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
@@ -87,7 +90,7 @@ public class ScenarioStep {
 
 	public ScenarioStep(String expression, String request, String name, String url, String method) {
 		this.scheduleCron = new ScheduleCron(expression);
-		this.request = request;
+		addRequest(request);
 		this.name = name;
 		this.url = url;
 		this.method = method;
@@ -96,7 +99,7 @@ public class ScenarioStep {
 	public ScenarioStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
 			String method) {
 		this.scheduleSimple = new ScheduleSimple(interval, units, repeatCount);
-		this.request = request;
+		addRequest(request);
 		this.name = name;
 		this.url = url;
 		this.method = method;
@@ -105,7 +108,7 @@ public class ScenarioStep {
 	public ScenarioStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
 			String method, String username, String password) {
 		this.scheduleSimple = new ScheduleSimple(interval, units, repeatCount);
-		this.request = request;
+		addRequest(request);
 		this.name = name;
 		this.url = url;
 		this.method = method;
@@ -161,25 +164,35 @@ public class ScenarioStep {
 
 	/**
 	 * Gets the value of the request property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the request property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getRequest().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link String }
+	 *
+	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
-	public String getRequest() {
-		return request;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-08-10T10:06:43+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<String> getRequest() {
+		if (request == null) {
+			request = new ArrayList<String>();
+		}
+		return this.request;
 	}
 
-	/**
-	 * Sets the value of the request property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setRequest(String value) {
-		this.request = value;
+	public void addRequest(String req) {
+		getRequest().add(req);
 	}
 
 	/**

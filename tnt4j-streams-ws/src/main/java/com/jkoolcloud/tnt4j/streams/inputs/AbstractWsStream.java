@@ -61,6 +61,10 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
 	 */
+	protected static final String JOB_PROP_SEMAPHORE = "semaphore"; // NON-NLS
+	/**
+	 * Constant for name of built-in scheduler job property {@value}.
+	 */
 	protected static final String JOB_PROP_USERNAME_KEY = "username"; // NON-NLS
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
@@ -69,7 +73,15 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	private List<WsScenario> scenarioList;
 
-	private Scheduler scheduler;
+	protected static Scheduler scheduler;
+
+	static {
+		try {
+			scheduler = StdSchedulerFactory.getDefaultScheduler();
+		} catch (Exception e) {
+		}
+
+	}
 
 	// @Override
 	// public Object getProperty(String name) {
@@ -94,11 +106,14 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	// }
 
 	@Override
-	protected void initialize() throws Exception {
+	protected synchronized void initialize() throws Exception {
 		super.initialize();
 
-		scheduler = StdSchedulerFactory.getDefaultScheduler();
-		scheduler.start();
+		synchronized (scheduler) {
+			if (!scheduler.isStarted()) {
+				scheduler.start();
+			}
+		}
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 				"AbstractWsStream.scheduler.started"), getName());

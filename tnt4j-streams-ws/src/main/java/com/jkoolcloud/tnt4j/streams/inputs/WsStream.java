@@ -18,22 +18,34 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
+import javax.net.ssl.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -59,6 +71,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  */
 public class WsStream extends AbstractWsStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsStream.class);
+	private Semaphore semaphore = new Semaphore(1);
 
 	/**
 	 * Constructs an empty WsStream. Requires configuration settings to set input stream source.
@@ -75,7 +88,8 @@ public class WsStream extends AbstractWsStream {
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
 		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
-		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequests());
+		jobAttrs.put(JOB_PROP_SEMAPHORE, semaphore);
 
 		return JobBuilder.newJob(WsCallJob.class).withIdentity(scenario.getName() + ':' + step.getName()) // NON-NLS
 				.usingJobData(jobAttrs).build();
@@ -92,17 +106,13 @@ public class WsStream extends AbstractWsStream {
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-WS service call
 	 */
-	protected static String callWebService(String url, String soapRequestData) throws Exception {
+	protected static String callWebService(String url, String soapRequestData, WsStream stream) throws Exception {
 		if (StringUtils.isEmpty(url)) {
 			LOGGER.log(OpLevel.DEBUG,
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.cant.execute.request"),
 					url);
 			return null;
 		}
-
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.invoking.request"), url,
-				soapRequestData);
 
 		Map<String, String> headers = new HashMap<>();
 		// separate SOAP message header values from request body XML
@@ -128,23 +138,49 @@ public class WsStream extends AbstractWsStream {
 			Utils.close(br);
 		}
 
+		SOAPConnection soapConnection = getSoapConnection();
+
 		soapRequestData = sb.toString();
+		soapRequestData = stream.preProcess(soapRequestData);
 
 		LOGGER.log(OpLevel.DEBUG,
 				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.invoking.request"), url,
 				soapRequestData);
 
-		// Create Request body XML document
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(true);
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(new InputSource(new StringReader(soapRequestData)));
+		// Create SOAP message and set request XML as body
+		SOAPMessage soapRequestMessage = createMessage(soapRequestData, stream, headers, true);
 
+		// Send SOAP Message to SOAP Server
+		stream.postProcess(soapRequestMessage);
+		SOAPMessage soapResponse = soapConnection.call(soapRequestMessage, url);
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "Response: {0}"),
+				stream.convertSoapMessageToXMLString(soapResponse));
+
+		if (soapResponse.getSOAPBody().hasFault()) {
+			LOGGER.log(OpLevel.ERROR, "Failure response: {0} ", soapResponse.getSOAPBody().getFault().getFaultString());
+			stream.handleFault(soapResponse.getSOAPBody().getFault());
+			return null;
+		}
+		return stream.convertSoapMessageToXMLString(soapResponse);
+	}
+
+	protected String preProcess(String soapRequestData) {
+		return soapRequestData;
+	}
+
+	protected void postProcess(SOAPMessage soapRequestMessage) throws Exception {
+	}
+
+	protected static SOAPConnection getSoapConnection() throws SOAPException {
 		// Create SOAP Connection
 		SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
 		SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+		return soapConnection;
+	}
 
-		// Create SOAP message and set request XML as body
+	public static SOAPMessage createMessage(String soapRequestData, WsStream stream, Map<String, String> headers,
+			boolean addSoapHeader) throws SOAPException, SAXException, IOException, ParserConfigurationException {
 		SOAPMessage soapRequest = MessageFactory.newInstance().createMessage();
 
 		// SOAPPart part = soapRequest.getSOAPPart();
@@ -159,18 +195,49 @@ public class WsStream extends AbstractWsStream {
 			}
 		}
 
+		if (addSoapHeader)
+			stream.addSoapHeaders(soapRequest);
+
 		SOAPBody body = soapRequest.getSOAPBody();
-		body.addDocument(doc);
+
+		stream.addBody(soapRequestData, body);
 		soapRequest.saveChanges();
+		return soapRequest;
+	}
 
-		// Send SOAP Message to SOAP Server
-		SOAPMessage soapResponse = soapConnection.call(soapRequest, url);
+	protected void addSoapHeaders(SOAPMessage soapRequest) throws SOAPException {
+	}
 
+	protected void addBody(String soapRequestData, SOAPBody body)
+			throws SAXException, IOException, SOAPException, ParserConfigurationException {
+		// Create Request body XML document
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
+
+		// TODO add catch to warn about bad body
+		Document doc = builder.parse(new InputSource(new StringReader(soapRequestData)));
+		body.addDocument(doc);
+	}
+
+	protected String convertSoapMessageToXMLString(SOAPMessage soapResponse) throws SOAPException, IOException {
 		ByteArrayOutputStream soapResponseBaos = new ByteArrayOutputStream();
 		soapResponse.writeTo(soapResponseBaos);
 		String soapResponseXml = soapResponseBaos.toString();
 
 		return soapResponseXml;
+	}
+
+	protected void handleFault(SOAPFault fault) throws Exception {
+		throw new Exception(fault.getFaultString());
+	}
+
+	@Override
+	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
+		ActivityInfo activityInfo = super.applyParsers(data);
+		semaphore.release();
+		return activityInfo;
+
 	}
 
 	/**
@@ -185,25 +252,85 @@ public class WsStream extends AbstractWsStream {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String respStr = null;
 
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
-			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
+			WsStream stream = (WsStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
-			String reqData = dataMap.getString(JOB_PROP_REQ_KEY);
+			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
+			Semaphore semaphore = (Semaphore) dataMap.get(JOB_PROP_SEMAPHORE);
 
-			try {
-				respStr = callWebService(urlStr, reqData);
-			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-						"WsStream.execute.exception"), exc);
-			}
+			if (CollectionUtils.isNotEmpty(reqsData)) {
+				for (String reqData : reqsData) {
+					try {
+						while (semaphore.tryAcquire()) {
+							Thread.sleep(50);
+						}
+						respStr = callWebService(urlStr, reqData, stream);
+					} catch (Exception exc) {
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+								"WsStream.execute.exception"), exc);
+					} finally {
+						if (StringUtils.isNotEmpty(respStr)) {
+							stream.addInputToBuffer(respStr);
+						} else {
+							if (semaphore.availablePermits() < 1)
+								semaphore.release();
+						}
 
-			if (StringUtils.isNotEmpty(respStr)) {
-				stream.addInputToBuffer(respStr);
+					}
+				}
 			}
+		}
+	}
+
+	static {
+		disableSslVerification();
+	}
+
+	private static void disableSslVerification() {
+		try {
+			// Create a trust manager that does not validate certificate chains
+			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				@Override
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+
+				@Override
+				public void checkClientTrusted(X509Certificate[] certs, String authType) {
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] certs, String authType) {
+				}
+			} };
+
+			// Install the all-trusting trust manager
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+			// Create all-trusting host name verifier
+			HostnameVerifier allHostsValid = new HostnameVerifier() {
+
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			};
+
+			// Install the all-trusting host verifier
+			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+		} catch (
+
+		NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
 		}
 	}
 }

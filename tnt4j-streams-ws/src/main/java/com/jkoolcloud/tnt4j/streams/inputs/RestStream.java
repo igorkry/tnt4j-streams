@@ -17,7 +17,9 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -87,7 +89,7 @@ public class RestStream extends AbstractWsStream {
 	@Override
 	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
 		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
-		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequest());
+		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequests());
 		jobAttrs.put(JOB_PROP_REQ_METHOD_KEY, step.getMethod());
 		jobAttrs.put(JOB_PROP_USERNAME_KEY, step.getUsername());
 		jobAttrs.put(JOB_PROP_PASSWORD_KEY, step.getPassword());
@@ -265,6 +267,7 @@ public class RestStream extends AbstractWsStream {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String respStr = null;
 
@@ -272,7 +275,7 @@ public class RestStream extends AbstractWsStream {
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
-			String reqData = dataMap.getString(JOB_PROP_REQ_KEY);
+			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
 			String reqMethod = dataMap.getString(JOB_PROP_REQ_METHOD_KEY);
 			String username = dataMap.getString(JOB_PROP_USERNAME_KEY);
 			String password = dataMap.getString(JOB_PROP_PASSWORD_KEY);
@@ -281,19 +284,32 @@ public class RestStream extends AbstractWsStream {
 				reqMethod = ReqMethod.GET.name();
 			}
 
-			try {
-				if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
-					respStr = executePOST(urlStr, reqData, username, password);
-				} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
-					respStr = executeGET(urlStr, username, password);
-				}
-			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-						"RestStream.execute.exception"), exc);
-			}
+			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
+				if (CollectionUtils.isNotEmpty(reqsData)) {
+					for (String reqData : reqsData) {
+						try {
+							respStr = executePOST(urlStr, reqData, username, password);
+						} catch (Exception exc) {
+							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
+									WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.execute.exception"), exc);
+						}
 
-			if (StringUtils.isNotEmpty(respStr)) {
-				stream.addInputToBuffer(respStr);
+						if (StringUtils.isNotEmpty(respStr)) {
+							stream.addInputToBuffer(respStr);
+						}
+					}
+				}
+			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
+				try {
+					respStr = executeGET(urlStr, username, password);
+				} catch (Exception exc) {
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+							"RestStream.execute.exception"), exc);
+				}
+
+				if (StringUtils.isNotEmpty(respStr)) {
+					stream.addInputToBuffer(respStr);
+				}
 			}
 		}
 	}
