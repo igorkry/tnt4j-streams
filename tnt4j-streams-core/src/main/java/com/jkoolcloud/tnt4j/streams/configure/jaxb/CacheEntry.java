@@ -47,6 +47,12 @@ import javax.xml.bind.annotation.*;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
+ *         &lt;element name="default">
+  *           &lt;simpleType>
+  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+  *             &lt;/restriction>
+  *           &lt;/simpleType>
+  *         &lt;/element>
  *       &lt;/sequence>
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -57,7 +63,7 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CacheEntry", propOrder = { "key", "value" })
+@XmlType(name = "CacheEntry", propOrder = { "key", "value", "default" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 public class CacheEntry {
 
@@ -67,6 +73,9 @@ public class CacheEntry {
 	@XmlElement(required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String value;
+	@XmlElement(name = "default")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String defaultValue;
 	@XmlAttribute(name = "id", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String id;
@@ -76,9 +85,14 @@ public class CacheEntry {
 	}
 
 	public CacheEntry(String id, String key, String value) {
+		this(id, key, value, null);
+	}
+
+	public CacheEntry(String id, String key, String value, String defaultValue) {
 		this.id = id;
 		this.key = key;
 		this.value = value;
+		this.defaultValue = defaultValue;
 	}
 
 	/**
@@ -125,6 +139,29 @@ public class CacheEntry {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	/**
+	 * Gets the value of the default property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	/**
+	 * Sets the value of the default property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setDefaultValue(String value) {
+		this.defaultValue = value;
 	}
 
 	/**

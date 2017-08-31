@@ -41,7 +41,7 @@ public class StreamsCache {
 	private static final String PARSER_NAME_VAR = "${ParserName}"; // NON-NLS
 
 	private static Cache<String, Object> valuesCache;
-	private static Map<String, CacheEntry> cacheEntries;
+	private static Map<String, CacheEntry> cacheEntries = new HashMap<>();
 
 	private static Cache<String, Object> buildCache(long cSize, long duration) {
 		return CacheBuilder.newBuilder().maximumSize(cSize).expireAfterAccess(duration, TimeUnit.MINUTES).build();
@@ -56,10 +56,8 @@ public class StreamsCache {
 	 *            cache entries expiration duration
 	 */
 	public static void initCache(Integer cSize, Integer duration) {
-		if (valuesCache == null) {
-			valuesCache = buildCache(cSize == null ? DEFAULT_CACHE_MAX_SIZE : cSize,
-					duration == null ? DEFAULT_CACHE_EXPIRE_IN_MINUTES : duration);
-		}
+		valuesCache = buildCache(cSize == null ? DEFAULT_CACHE_MAX_SIZE : cSize,
+				duration == null ? DEFAULT_CACHE_EXPIRE_IN_MINUTES : duration);
 	}
 
 	/**
@@ -71,11 +69,10 @@ public class StreamsCache {
 	 *            parser name
 	 */
 	public static void cacheValues(ActivityInfo ai, String parserName) {
-		if (cacheEntries == null) return;
 		if (valuesCache == null) {
 			valuesCache = buildCache(DEFAULT_CACHE_MAX_SIZE, DEFAULT_CACHE_EXPIRE_IN_MINUTES);
 		}
-		
+
 		for (CacheEntry cacheEntry : cacheEntries.values()) {
 			String resolvedFieldKey = fillInKeyPattern(cacheEntry.getKey(), ai, parserName);
 			Object resolvedFieldValue = fillInValuePattern(cacheEntry.getValue(), ai, parserName);
@@ -146,20 +143,27 @@ public class StreamsCache {
 		if (cacheEntry != null) {
 			String cacheKey = fillInKeyPattern(cacheEntry.getKey(), ai, parserName);
 			if (cacheKey != null) {
-				return getValue(cacheKey);
+				return valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
 			} else {
-				return cacheEntry.defaultValue;
+				return cacheEntry.getDefaultValue();
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Resolves cache stored value identified by cache entry key.
+	 *
+	 * @param cacheKey
+	 *            cache entry key
+	 * @return resolved cached value or {@code null} if there is no such entry or data in cache
+	 */
 	public static Object getValue(String cacheKey) {
 		Object value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
 		if (value == null) {
 			CacheEntry cacheEntry = cacheEntries.get(cacheKey);
 
-			return cacheEntry == null ? null : cacheEntry.defaultValue;
+			return cacheEntry == null ? null : cacheEntry.getDefaultValue();
 		}
 		return value;
 	}
@@ -171,9 +175,7 @@ public class StreamsCache {
 		if (valuesCache != null) {
 			valuesCache.cleanUp();
 		}
-		if (cacheEntries != null) {
-			cacheEntries.clear();
-		}
+		cacheEntries.clear();
 	}
 
 	/**
@@ -185,12 +187,11 @@ public class StreamsCache {
 	 *            entry key pattern
 	 * @param value
 	 *            entry value pattern
+	 * @param defaultValue
+	 *            default entry value
 	 * @return previous cache entry instance stored
 	 */
 	public static CacheEntry addEntry(String entryId, String key, String value, String defaultValue) {
-		if (cacheEntries == null) {
-			cacheEntries = new HashMap<>();
-		}
 		return cacheEntries.put(entryId, new CacheEntry(entryId, key, value, defaultValue));
 	}
 
@@ -248,24 +249,12 @@ public class StreamsCache {
 		}
 
 		/**
-		 * Returns cache entry default value.
+		 * Returns default cache entry value.
 		 *
-		 * @return cache entry default value
+		 * @return default cache entry value
 		 */
-
 		public String getDefaultValue() {
 			return defaultValue;
-		}
-
-
-		/**
-		 * Sets cache entry default value.
-		 *
-		 * @param defaultValue entry's default value
-		 */
-
-		public void setDefaultValue(String defaultValue) {
-			this.defaultValue = defaultValue;
 		}
 
 		@Override
@@ -277,6 +266,8 @@ public class StreamsCache {
 			Utils.quote(key, sb);
 			sb.append(", value="); // NON-NLS
 			Utils.quote(value, sb);
+			sb.append(", defaultValue="); // NON-NLS
+			Utils.quote(defaultValue, sb);
 			sb.append('}'); // NON-NLS
 			return sb.toString();
 		}

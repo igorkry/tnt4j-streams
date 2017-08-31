@@ -164,6 +164,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String RESOURCE_REF_ELMT = "resource-ref"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String CACHE_DEFAULT_VALUE_ELMT = "default"; // NON-NLS
 
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -289,8 +293,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
-	
-	private static final String DEFAULT_ATTR = "default"; // NON-NLS
 
 	/**
 	 * Currently configured TNT input stream.
@@ -425,6 +427,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			processFieldMapReference(attributes);
 		} else if (RESOURCE_REF_ELMT.equals(qName)) {
 			processResourceReference(attributes);
+		} else if (CACHE_DEFAULT_VALUE_ELMT.equals(qName)) {
+			processDefault(attributes);
 		}
 	}
 
@@ -483,6 +487,26 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ConfigParserHandler.malformed.configuration2", CACHE_KEY_ELMT, CACHE_ENTRY_ELMT),
+					currParseLocation);
+		}
+
+		elementData = new StringBuilder();
+	}
+
+	/**
+	 * Processes a {@code <default>} element under <entry> element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processDefault(Attributes attrs) throws SAXException {
+		if (currCacheEntry == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", CACHE_DEFAULT_VALUE_ELMT, CACHE_ENTRY_ELMT),
 					currParseLocation);
 		}
 
@@ -633,6 +657,12 @@ public class ConfigParserHandler extends DefaultHandler {
 			throw new SAXParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ConfigParserHandler.cannot.contain", FIELD_ELMT, SEPARATOR_ATTR, FORMATTING_PATTERN_ATTR),
+					currParseLocation);
+		}
+		if (locator != null && value != null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.cannot.contain", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR),
 					currParseLocation);
 		}
 
@@ -1604,14 +1634,6 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration2", VALUE_ELMT, CACHE_ENTRY_ELMT),
 					currParseLocation);
 		}
-		
-		for (int i = 0; i < attrs.getLength(); i++) {
-			String attName = attrs.getQName(i);
-			String attValue = attrs.getValue(i);
-			if (DEFAULT_ATTR.equals(attName)) {
-				currCacheEntry.defaultValue = attValue;
-			} 
-		}
 
 		elementData = new StringBuilder();
 	}
@@ -1771,6 +1793,12 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (CACHE_KEY_ELMT.equals(qName)) {
 				if (currCacheEntry != null) {
 					handleKey(currCacheEntry);
+
+					elementData = null;
+				}
+			} else if (CACHE_DEFAULT_VALUE_ELMT.equals(qName)) {
+				if (currCacheEntry != null) {
+					handleDefault(currCacheEntry);
 
 					elementData = null;
 				}
@@ -2002,6 +2030,16 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		notEmpty(currCacheEntry.key, CACHE_KEY_ELMT);
+	}
+
+	private void handleDefault(CacheEntryData currCacheEntry) throws SAXException {
+		String eDataVal = getElementData();
+
+		if (eDataVal != null) {
+			currCacheEntry.defaultValue = eDataVal;
+		}
+
+		notEmpty(currCacheEntry.defaultValue, CACHE_KEY_ELMT);
 	}
 
 	private void handleValue(CacheEntryData currCacheEntry) throws SAXException {

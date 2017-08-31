@@ -275,7 +275,7 @@ public class RestStream extends AbstractWsStream {
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
-			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
+			List<String> requests = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
 			String reqMethod = dataMap.getString(JOB_PROP_REQ_METHOD_KEY);
 			String username = dataMap.getString(JOB_PROP_USERNAME_KEY);
 			String password = dataMap.getString(JOB_PROP_PASSWORD_KEY);
@@ -285,10 +285,10 @@ public class RestStream extends AbstractWsStream {
 			}
 
 			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
-				if (CollectionUtils.isNotEmpty(reqsData)) {
-					for (String reqData : reqsData) {
+				if (CollectionUtils.isNotEmpty(requests)) {
+					for (String request : requests) {
 						try {
-							respStr = executePOST(urlStr, reqData, username, password);
+							respStr = executePOST(urlStr, request, username, password);
 						} catch (Exception exc) {
 							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
 									WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.execute.exception"), exc);

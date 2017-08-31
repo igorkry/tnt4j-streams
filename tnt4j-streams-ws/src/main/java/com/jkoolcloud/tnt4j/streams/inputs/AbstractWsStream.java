@@ -80,7 +80,6 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			scheduler = StdSchedulerFactory.getDefaultScheduler();
 		} catch (Exception e) {
 		}
-
 	}
 
 	// @Override

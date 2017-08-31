@@ -95,4 +95,8 @@ public class Cache {
 	public void addEntry(String id, String key, String value) {
 		getEntry().add(new CacheEntry(id, key, value));
 	}
+
+	public void addEntry(String id, String key, String value, String defaultValue) {
+		getEntry().add(new CacheEntry(id, key, value, defaultValue));
+	}
 }

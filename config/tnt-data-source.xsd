@@ -1884,6 +1884,16 @@
                     <xs:restriction base="xs:string"/>
                 </xs:simpleType>
             </xs:element>
+            <xs:element name="default" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Defines cache entry default value.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string"/>
+                </xs:simpleType>
+            </xs:element>
         </xs:sequence>
 
         <xs:attribute name="id" use="required" type="xs:string">

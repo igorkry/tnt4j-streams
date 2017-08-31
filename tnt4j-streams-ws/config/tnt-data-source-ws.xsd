@@ -99,13 +99,6 @@
                         Request (or command) data.
                     </xs:documentation>
                 </xs:annotation>
-				<xs:attribute name="parserTag" use="optional" type="xs:string">
-					<xs:annotation>
-						<xs:documentation>
-							Repeat interval units.
-						</xs:documentation>
-					</xs:annotation>
-				</xs:attribute>
             </xs:element>
         </xs:sequence>
 

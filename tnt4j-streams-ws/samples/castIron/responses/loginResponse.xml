@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
-   <S:Body>
-      <ns2:loginResponse xmlns:ns3="http://www.approuter.com/schema/router/1000/security/03" xmlns:ns2="http://www.approuter.com/schemas/2008/1/security">
-         <ns2:sessionId>B56288F5D2BA021E2E9EEE89D78C45F1</ns2:sessionId>
-      </ns2:loginResponse>
-   </S:Body>
+    <S:Body>
+        <ns2:loginResponse xmlns:ns3="http://www.approuter.com/schema/router/1000/security/03"
+                           xmlns:ns2="http://www.approuter.com/schemas/2008/1/security">
+            <ns2:sessionId>B56288F5D2BA021E2E9EEE89D78C45F1</ns2:sessionId>
+        </ns2:loginResponse>
+    </S:Body>
 </S:Envelope>

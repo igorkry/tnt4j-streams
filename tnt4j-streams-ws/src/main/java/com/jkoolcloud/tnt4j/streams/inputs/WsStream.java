@@ -236,8 +236,8 @@ public class WsStream extends AbstractWsStream {
 	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
 		ActivityInfo activityInfo = super.applyParsers(data);
 		semaphore.release();
-		return activityInfo;
 
+		return activityInfo;
 	}
 
 	/**
@@ -260,16 +260,16 @@ public class WsStream extends AbstractWsStream {
 
 			WsStream stream = (WsStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
-			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
+			List<String> requests = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
 			Semaphore semaphore = (Semaphore) dataMap.get(JOB_PROP_SEMAPHORE);
 
-			if (CollectionUtils.isNotEmpty(reqsData)) {
-				for (String reqData : reqsData) {
+			if (CollectionUtils.isNotEmpty(requests)) {
+				for (String request : requests) {
 					try {
 						while (semaphore.tryAcquire()) {
 							Thread.sleep(50);
 						}
-						respStr = callWebService(urlStr, reqData, stream);
+						respStr = callWebService(urlStr, request, stream);
 					} catch (Exception exc) {
 						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 								"WsStream.execute.exception"), exc);

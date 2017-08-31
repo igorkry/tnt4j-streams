@@ -1,223 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-		
-	<parser name="LogsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-		<property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
-		<property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
-		<property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif"/>
+    <parser name="LogsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
+        <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+        <property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif"/>
 
-		<field name="EventType" value="Event"/>
+        <field name="EventType" value="Event"/>
 
-		<!-- System: hardware, resources,network,security,orchestration,deployment -->
-		<field	name="EventName" locator="/*[local-name() = 'logs']/*[local-name() = 'system']" locator-type="Label"/>
-				
-		<field	name="Message" locator="/*[local-name() = 'logs']/*[local-name() = 'message']" locator-type="Label"/>
-		<field	name="ID" locator="/*[local-name() = 'logs']/*[local-name() = 'id']" locator-type="Label"/>
+        <!-- System: hardware, resources,network,security,orchestration,deployment -->
+        <field name="EventName" locator="/*[local-name() = 'logs']/*[local-name() = 'system']" locator-type="Label"/>
 
-		<field	name="Severity" locator="/*[local-name() = 'logs']/*[local-name() = 'level']" locator-type="Label">
-			 <field-map source="critical" target="CRITICAL"/>
-			 <field-map source="error" target="ERROR"/>
-			 <field-map source="warning" target="WARNING"/>
-			 <field-map source="info" target="ERROR"/>	
-		</field>
-		
-		<field	name="StartTime" locator="/*[local-name() = 'logs']/*[local-name() = 'timestamp']" locator-type="Label" datatype="DateTime"
-			   format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="Message" locator="/*[local-name() = 'logs']/*[local-name() = 'message']" locator-type="Label"/>
+        <field name="ID" locator="/*[local-name() = 'logs']/*[local-name() = 'id']" locator-type="Label"/>
 
-	</parser> 
-	
-	
-		<parser name="JobEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-		<property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
-		<property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
-		<property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
+        <field name="Severity" locator="/*[local-name() = 'logs']/*[local-name() = 'level']" locator-type="Label">
+            <field-map source="critical" target="CRITICAL"/>
+            <field-map source="error" target="ERROR"/>
+            <field-map source="warning" target="WARNING"/>
+            <field-map source="info" target="ERROR"/>
+        </field>
 
-		<field name="EventType" value="Event"/>
+        <field name="StartTime" locator="/*[local-name() = 'logs']/*[local-name() = 'timestamp']" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
 
-		<!-- System: hardware, resources,network,security,orchestration,deployment -->
-		<field	name="EventName" locator="name(/*/*/*)" locator-type="Label"/>
+    </parser>
 
-		
-		<field	name="Correlator" locator="/*/*/*/ns4:taskId" locator-type="Label"/>
-		<field	name="SeqenceNr" locator="/*/*/*/ns4:sequenceNumber" locator-type="Label"/>
-		
-		<field	name="Severity" locator="/*/*/*/ns4:status" locator-type="Label">
-			 <field-map source="0" target="INFO"/><!-- SUCCESS = 0 -->
-			 <field-map source="1" target="ERROR"/><!-- ERRORED = 1 -->
-			 <field-map source="2" target="INFO"/><!-- RUNNING = 2 -->
-			 <field-map source="3" target="WARNING"/><!-- CANCELLING = 3 -->
-			 <field-map source="4" target="WARNING"/><!-- TERMINATED = 4 -->
-			 <field-map source="5" target="ERROR"/><!-- CANCELLED = 5 -->
-			 <field-map source="6" target="WARNING"/><!-- SUSPENDED = 6 -->
-			 <field-map source="7" target="ERROR"/><!-- CRASHED = 7 -->
-			 <field-map source="8" target="WARNING"/><!-- SUSPENDING = 8 -->
-			 <field-map source="101" target="WARNING"/><!-- UNKNOWN = 101 -->
-			 <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
-		</field>
-		
-		<field	name="StartTime" locator="/ns3:logs/ns2:timestamp" locator-type="Label" datatype="DateTime"
-			   format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT" required="false"/>
+    <parser name="JobEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
+        <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+        <property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
 
-	</parser> 
-	 
-		
-	<parser name="searchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="searchLogs">
-		<property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
-<!--		 <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/> -->
+        <field name="EventType" value="Event"/>
 
+        <!-- System: hardware, resources,network,security,orchestration,deployment -->
+        <field name="EventName" locator="name(/*/*/*)" locator-type="Label"/>
 
-		<field name="EventType" value="Activity"/>
-		<field name="ApplName" value="CastIron"/>
+        <field name="Correlator" locator="/*/*/*/ns4:taskId" locator-type="Label"/>
+        <field name="SeqenceNr" locator="/*/*/*/ns4:sequenceNumber" locator-type="Label"/>
 
-		<embedded-activity	name="Logs"
-			   locator="/S:Envelope/S:Body/*/*" locator-type="Label">
-			   <parser-ref name="LogsParser" aggregation="Join"/>
-		</embedded-activity>
+        <field name="Severity" locator="/*/*/*/ns4:status" locator-type="Label">
+            <field-map source="0" target="INFO"/><!-- SUCCESS = 0 -->
+            <field-map source="1" target="ERROR"/><!-- ERRORED = 1 -->
+            <field-map source="2" target="INFO"/><!-- RUNNING = 2 -->
+            <field-map source="3" target="WARNING"/><!-- CANCELLING = 3 -->
+            <field-map source="4" target="WARNING"/><!-- TERMINATED = 4 -->
+            <field-map source="5" target="ERROR"/><!-- CANCELLED = 5 -->
+            <field-map source="6" target="WARNING"/><!-- SUSPENDED = 6 -->
+            <field-map source="7" target="ERROR"/><!-- CRASHED = 7 -->
+            <field-map source="8" target="WARNING"/><!-- SUSPENDING = 8 -->
+            <field-map source="101" target="WARNING"/><!-- UNKNOWN = 101 -->
+            <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
+        </field>
 
-	</parser>
-	
-	<parser name="JobsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-		<property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
-		<property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
-		<property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/orcmon"/>
-		<property name="Namespace" value="ns5=http://www.approuter.com/schema/router/1000/logging.xsd"/>
-		<property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
-		
-		<field name="EventType" value="Activity"/>
+        <field name="StartTime" locator="/ns3:logs/ns2:timestamp" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT" required="false"/>
 
-		<field	name="StartTime" locator="/*[local-name() = 'jobs']/@startTime" locator-type="Label" datatype="DateTime"
-			   format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
-		<field	name="EndTime" locator="/*[local-name() = 'jobs']/@endTime" locator-type="Label" datatype="DateTime"
-			   format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
-			   
-		<field	name="ResourceName" locator="/*[local-name() = 'jobs']/@path" locator-type="Label"/>
-		<field	name="Correlator" locator="/*[local-name() = 'jobs']/@id" locator-type="Label"/>
-			   
-			   
-				<!-- System: hardware, resources,network,security,orchestration,deployment -->
-		<field	name="EventName" locator="/*[local-name() = 'jobs']/@id" locator-type="Label"/>
-				
-				
-		<field	name="Severity" locator="/*[local-name() = 'jobs']/@status" locator-type="Label">
-			 <field-map source="0" target="INFO"/><!-- SUCCESS = 0 -->
-			 <field-map source="1" target="ERROR"/><!-- ERRORED = 1 -->
-			 <field-map source="2" target="INFO"/><!-- RUNNING = 2 -->
-			 <field-map source="3" target="WARNING"/><!-- CANCELLING = 3 -->
-			 <field-map source="4" target="HALT"/><!-- TERMINATED = 4 -->
-			 <field-map source="5" target="ERROR"/><!-- CANCELLED = 5 -->
-			 <field-map source="6" target="WARNING"/><!-- SUSPENDED = 6 -->
-			 <field-map source="7" target="FATAL"/><!-- CRASHED = 7 -->
-			 <field-map source="8" target="WARNING"/><!-- SUSPENDING = 8 -->
-			 <field-map source="101" target="WARNING"/><!-- UNKNOWN = 101 -->
-			 <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
-		</field>
-		
-		<embedded-activity	name="JobEvents"
-			   locator="/S:Envelope/S:Body/*/*/*" locator-type="Label">
-			   <parser-ref name="JobEventsParser" aggregation="Join"/>
-		</embedded-activity>
-			   
+    </parser>
 
-	</parser> 
-	
-	<parser name="searchJobsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-		<property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
+    <parser name="searchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="searchLogs">
+        <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
+        <!--		 <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+                <property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/> -->
 
-		<field name="EventType" value="Activity"/>
-		<field name="ApplName" value="CastIron"/>
+        <field name="EventType" value="Activity"/>
+        <field name="ApplName" value="CastIron"/>
 
-		<embedded-activity	name="Jobs"
-			   locator="/S:Envelope/S:Body/*/*" locator-type="Label">
-			   <parser-ref name="JobsParser" aggregation="Join"/>
-		</embedded-activity>
+        <embedded-activity name="Logs"
+                           locator="/S:Envelope/S:Body/*/*" locator-type="Label">
+            <parser-ref name="LogsParser" aggregation="Join"/>
+        </embedded-activity>
 
-	</parser>
-	
-	<parser name="loginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser"  tags="login">
-		<property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
-		
-		<field name="EventType" value="NOOP"/>
-		<field name="Token" locator="/S:Envelope/S:Body/*/*" locator-type="Label"/>
-	</parser>
-	
-	<parser name="logsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser"  tags="getLogCount" manualFieldsOrder="true">
-		<property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
-		
-		<field name="EventType" value="NOOP"/>
-		<field name="LastLogCount" locator="CurrentLogCount" locator-type="Cache" datatype="Number"/>
-		<field name="CurrentLogCount" locator="/S:Envelope/S:Body/*/*" locator-type="Label" datatype="Number"/>
-		
-		<field name="LogCountDiff" value="">
-			<field-transform lang="groovy" name="DiffTransform"><![CDATA[ 
+    </parser>
+
+    <parser name="JobsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="log=http://www.approuter.com/schemas/2008/1/lognotif"/>
+        <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+        <property name="Namespace" value="orc=http://www.approuter.com/schemas/2008/1/orcmon"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/orcmon"/>
+        <property name="Namespace" value="ns5=http://www.approuter.com/schema/router/1000/logging.xsd"/>
+        <property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
+
+        <field name="EventType" value="Activity"/>
+
+        <field name="StartTime" locator="/*[local-name() = 'jobs']/@startTime" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="EndTime" locator="/*[local-name() = 'jobs']/@endTime" locator-type="Label" datatype="DateTime"
+               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+
+        <field name="ResourceName" locator="/*[local-name() = 'jobs']/@path" locator-type="Label"/>
+        <field name="Correlator" locator="/*[local-name() = 'jobs']/@id" locator-type="Label"/>
+
+        <!-- System: hardware, resources,network,security,orchestration,deployment -->
+        <field name="EventName" locator="/*[local-name() = 'jobs']/@id" locator-type="Label"/>
+
+        <field name="Severity" locator="/*[local-name() = 'jobs']/@status" locator-type="Label">
+            <field-map source="0" target="INFO"/><!-- SUCCESS = 0 -->
+            <field-map source="1" target="ERROR"/><!-- ERRORED = 1 -->
+            <field-map source="2" target="INFO"/><!-- RUNNING = 2 -->
+            <field-map source="3" target="WARNING"/><!-- CANCELLING = 3 -->
+            <field-map source="4" target="HALT"/><!-- TERMINATED = 4 -->
+            <field-map source="5" target="ERROR"/><!-- CANCELLED = 5 -->
+            <field-map source="6" target="WARNING"/><!-- SUSPENDED = 6 -->
+            <field-map source="7" target="FATAL"/><!-- CRASHED = 7 -->
+            <field-map source="8" target="WARNING"/><!-- SUSPENDING = 8 -->
+            <field-map source="101" target="WARNING"/><!-- UNKNOWN = 101 -->
+            <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
+        </field>
+
+        <embedded-activity name="JobEvents"
+                           locator="/S:Envelope/S:Body/*/*/*" locator-type="Label">
+            <parser-ref name="JobEventsParser" aggregation="Join"/>
+        </embedded-activity>
+
+    </parser>
+
+    <parser name="searchJobsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
+
+        <field name="EventType" value="Activity"/>
+        <field name="ApplName" value="CastIron"/>
+
+        <embedded-activity name="Jobs"
+                           locator="/S:Envelope/S:Body/*/*" locator-type="Label">
+            <parser-ref name="JobsParser" aggregation="Join"/>
+        </embedded-activity>
+
+    </parser>
+
+    <parser name="loginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="login">
+        <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
+
+        <field name="EventType" value="NOOP"/>
+        <field name="Token" locator="/S:Envelope/S:Body/*/*" locator-type="Label"/>
+    </parser>
+
+    <parser name="logsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getLogCount"
+            manualFieldsOrder="true">
+        <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
+
+        <field name="EventType" value="NOOP"/>
+        <field name="LastLogCount" locator="CurrentLogCount" locator-type="Cache" datatype="Number"/>
+        <field name="CurrentLogCount" locator="/S:Envelope/S:Body/*/*" locator-type="Label" datatype="Number"/>
+
+        <field name="LogCountDiff" value="">
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
 			   (${LastLogCount} != null && ${CurrentLogCount} != null) ? (${CurrentLogCount} - ${LastLogCount}) as Integer : 2
-			]]> 
-			</field-transform> 
-		</field>
+			]]>
+            </field-transform>
+        </field>
 
-	</parser>
-	
-	<parser name="JobsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser"  tags="getJobCount" manualFieldsOrder="true">
-	
-		<property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
-		<property name="Namespace" value="ns5=http://www.approuter.com/schema/router/1000/logging.xsd"/>
-		<property name="Namespace" value="ns4=http://www.approuter.com/schemas/2004/1/orcmon/"/>
-		<property name="Namespace" value="ns3=http://www.approuter.com/schemas/2005/1/monitoringProps/"/>
-		<property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/orcmon"/>
-		
-		<field name="EventType" value="NOOP"/>
-		<field name="LastJobsCount" locator="CurrentJobsCount" locator-type="Cache" datatype="Number"/>
-		<field name="CurrentJobsCount" locator="/S:Envelope/S:Body/*/*" locator-type="Label" datatype="Number"/>
-		
-		<field name="JobsCountDiff" value="">
-			<field-transform lang="groovy" name="DiffTransform"><![CDATA[ 
+    </parser>
+
+    <parser name="JobsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getJobCount"
+            manualFieldsOrder="true">
+
+        <property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
+        <property name="Namespace" value="ns5=http://www.approuter.com/schema/router/1000/logging.xsd"/>
+        <property name="Namespace" value="ns4=http://www.approuter.com/schemas/2004/1/orcmon/"/>
+        <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2005/1/monitoringProps/"/>
+        <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/orcmon"/>
+
+        <field name="EventType" value="NOOP"/>
+        <field name="LastJobsCount" locator="CurrentJobsCount" locator-type="Cache" datatype="Number"/>
+        <field name="CurrentJobsCount" locator="/S:Envelope/S:Body/*/*" locator-type="Label" datatype="Number"/>
+
+        <field name="JobsCountDiff" value="">
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
 			   (${LastJobsCount} != null && ${CurrentJobsCount} != null) ? (${CurrentJobsCount} - ${LastJobsCount}) as Integer : 2
-			]]> 
-			</field-transform> 
-		</field>
+			]]>
+            </field-transform>
+        </field>
 
-	</parser>
+    </parser>
 
-<stream name="CastIronStreamSearchLogs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
-		<property name="HaltIfNoParser" value="false"/>
-		<property name="UserName" value="admin"/>
-		<property name="Password" value="slabs123!"/>
-		<property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
-		<property name="SecurityResponseParserTag" value="login"/>
-		<property name="SecurityCachedTokenKey" value="Token"/>
-		
-		<property name="StreamCacheMaxSize" value="300"/>
-		<property name="StreamCacheExpireDuration" value="55"/>
+    <stream name="CastIronStreamSearchLogs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="UserName" value="admin"/>
+        <property name="Password" value="slabs123!"/>
+        <property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
+        <property name="SecurityResponseParserTag" value="login"/>
+        <property name="SecurityCachedTokenKey" value="Token"/>
 
-		<parser-ref name="searchLogsResponseParser"/>
-		<parser-ref name="loginParser"/>
-		<parser-ref name="logsCountParser"/>
+        <property name="StreamCacheMaxSize" value="300"/>
+        <property name="StreamCacheExpireDuration" value="55"/>
 
-		<scenario name="Sample log poll scenario">
-			<step name="Step 1"
-				  url="https://192.168.3.3/ws/lognotif">
-				<schedule-simple interval="6" units="Seconds" repeatCount="2147483647"/>
-				<request parserTag="LOGCOUNT">
-					<![CDATA[
+        <parser-ref name="searchLogsResponseParser"/>
+        <parser-ref name="loginParser"/>
+        <parser-ref name="logsCountParser"/>
+
+        <scenario name="Sample log poll scenario">
+            <step name="Step 1"
+                  url="https://192.168.3.3/ws/lognotif">
+                <schedule-simple interval="6" units="Seconds" repeatCount="2147483647"/>
+                <request>
+                    <![CDATA[
 							  SOAPAction:https://192.168.3.3/ws/lognotif
 							  <log:getLogCount xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
 								 <log:logComponent>all</log:logComponent>
@@ -226,71 +220,72 @@
 								 <log:status>all</log:status>
 							  </log:getLogCount>
 					]]>
-				</request>
-				<request>
-					 <![CDATA[
+                </request>
+                <request>
+                    <![CDATA[
 							  SOAPAction:https://192.168.3.3/ws/lognotif
-							   <log:searchLogs xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
-								  <log:logComponent>all</log:logComponent>
-								  <log:logLevel>all</log:logLevel>
-								  <log:maxDaysOld>-1</log:maxDaysOld>
-								  <log:status>all</log:status>
-								  <log:page>0</log:page>
-								  <log:pageSize>${LogCountDiff}</log:pageSize>
-							   </log:searchLogs>
+							  <log:searchLogs xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
+							     <log:logComponent>all</log:logComponent>
+								 <log:logLevel>all</log:logLevel>
+								 <log:maxDaysOld>-1</log:maxDaysOld>
+								 <log:status>all</log:status>
+								 <log:page>0</log:page>
+								 <log:pageSize>${LogCountDiff}</log:pageSize>
+							  </log:searchLogs>
 					]]>
-				</request>
-			</step>
-			
-		</scenario>
-		
-		<cache>
-			<entry id="Token">
-				<key>Token</key>
-				<value>${Token}</value>
-			</entry>
-			<entry id="CurrentLogCount">
-				<key>CurrentLogCount</key>
-				<value>${CurrentLogCount}</value>
-			</entry>
-			<entry id="LogCountDiff">
-				<key>LogCountDiff</key>
-				<value default="1">${LogCountDiff}</value>
-			</entry>
-			<entry id="CurrentJobsCount">
-				<key>CurrentJobsCount</key>
-				<value>${CurrentJobsCount}</value>
-			</entry>
-			<entry id="JobsCountDiff">
-				<key>JobsCountDiff</key>
-				<value default="1">${JobsCountDiff}</value>
-			</entry>
-		</cache>
-		
-		
-	</stream>
-	
-	<stream name="CastIronStreamSearchJobs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
-		<property name="HaltIfNoParser" value="false"/>
-		<property name="UserName" value="admin"/>
-		<property name="Password" value="slabs123!"/>
-		<property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
-		<property name="SecurityResponseParserTag" value="LOGIN"/>
-		<property name="SecurityCachedTokenKey" value="TOKEN"/>
-		
-				<property name="StreamCacheMaxSize" value="300"/>
-		<property name="StreamCacheExpireDuration" value="55"/>
+                </request>
+            </step>
 
-		<parser-ref name="searchJobsResponseParser"/>
-		<parser-ref name="loginParser"/>
-		<parser-ref name="JobsCountParser"/>
+        </scenario>
 
-		<scenario name="Sample job poll scenario">
-			<step name="Step 1"
-				  url="https://192.168.3.3/ws/orcmon">
-				<schedule-simple interval="35" units="Seconds" repeatCount="2147483647"/>
-				<request>
-					 <![CDATA[
+        <cache>
+            <entry id="Token">
+                <key>Token</key>
+                <value>${Token}</value>
+            </entry>
+            <entry id="CurrentLogCount">
+                <key>CurrentLogCount</key>
+                <value>${CurrentLogCount}</value>
+            </entry>
+            <entry id="LogCountDiff">
+                <key>LogCountDiff</key>
+                <value>${LogCountDiff}</value>
+                <default>1</default>
+            </entry>
+            <entry id="CurrentJobsCount">
+                <key>CurrentJobsCount</key>
+                <value>${CurrentJobsCount}</value>
+            </entry>
+            <entry id="JobsCountDiff">
+                <key>JobsCountDiff</key>
+                <value>${JobsCountDiff}</value>
+                <default>1</default>
+            </entry>
+        </cache>
+
+    </stream>
+
+    <stream name="CastIronStreamSearchJobs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="UserName" value="admin"/>
+        <property name="Password" value="slabs123!"/>
+        <property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
+        <property name="SecurityResponseParserTag" value="LOGIN"/>
+        <property name="SecurityCachedTokenKey" value="TOKEN"/>
+
+        <property name="StreamCacheMaxSize" value="300"/>
+        <property name="StreamCacheExpireDuration" value="55"/>
+
+        <parser-ref name="searchJobsResponseParser"/>
+        <parser-ref name="loginParser"/>
+        <parser-ref name="JobsCountParser"/>
+
+        <scenario name="Sample job poll scenario">
+            <step name="Step 1"
+                  url="https://192.168.3.3/ws/orcmon">
+                <schedule-simple interval="35" units="Seconds" repeatCount="2147483647"/>
+                <request>
+                    <![CDATA[
 								SOAPAction:https://192.168.3.3/ws/orcmon
 								<orc:getJobCount xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
 									<orc:projectName>Test</orc:projectName>
@@ -300,10 +295,10 @@
 									<orc:status>all</orc:status>
 								</orc:getJobCount>
 					  ]]>
-				</request>
-				
-				<request>
-					<![CDATA[
+                </request>
+
+                <request>
+                    <![CDATA[
 								SOAPAction:https://192.168.3.3/ws/orcmon
 								<orc:searchJobs xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
 									<orc:projectName>Test</orc:projectName>
@@ -315,46 +310,47 @@
 									<orc:pageSize>${JobsCountDiff}</orc:pageSize>
 								</orc:searchJobs>
 					]]>
-				</request>
-			</step>
-		</scenario>
-		
-		<cache>
-			<entry id="Token">
-				<key>Token</key>
-				<value>${Token}</value>
-			</entry>
-			<entry id="CurrentLogCount">
-				<key>CurrentLogCount</key>
-				<value>${CurrentLogCount}</value>
-			</entry>
-			<entry id="LogCountDiff">
-				<key>LogCountDiff</key>
-				<value default="1">${LogCountDiff}</value>
-			</entry>
-			<entry id="CurrentJobsCount">
-				<key>CurrentJobsCount</key>
-				<value>${CurrentJobsCount}</value>
-			</entry>
-			<entry id="JobsCountDiff">
-				<key>JobsCountDiff</key>
-				<value default="1">${JobsCountDiff}</value>
-			</entry>
-		</cache>
+                </request>
+            </step>
+        </scenario>
 
-	</stream>
-	
-	
-<!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-		<property name="FileName" value=".//samples/castIron/responses/searchJobsResponse.xml"/>
-		<property name="TurnOutActivityChildren" value="False"/>
-		<parser-ref name="searchJobsResponseParser"/>
-	
-	 </stream> -->
-<!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-		<property name="FileName" value=".//samples/castIron/responses/searchLogsResponse.xml"/>
-		<property name="TurnOutActivityChildren" value="true"/>
-		<parser-ref name="searchLogsResponseParser"/>
-	
-	</stream> -->
+        <cache>
+            <entry id="Token">
+                <key>Token</key>
+                <value>${Token}</value>
+            </entry>
+            <entry id="CurrentLogCount">
+                <key>CurrentLogCount</key>
+                <value>${CurrentLogCount}</value>
+            </entry>
+            <entry id="LogCountDiff">
+                <key>LogCountDiff</key>
+                <value>${LogCountDiff}</value>
+                <default>1</default>
+            </entry>
+            <entry id="CurrentJobsCount">
+                <key>CurrentJobsCount</key>
+                <value>${CurrentJobsCount}</value>
+            </entry>
+            <entry id="JobsCountDiff">
+                <key>JobsCountDiff</key>
+                <value>${JobsCountDiff}</value>
+                <default>1</default>
+            </entry>
+        </cache>
+
+    </stream>
+
+    <!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+            <property name="FileName" value=".//samples/castIron/responses/searchJobsResponse.xml"/>
+            <property name="TurnOutActivityChildren" value="False"/>
+            <parser-ref name="searchJobsResponseParser"/>
+
+         </stream> -->
+    <!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+            <property name="FileName" value=".//samples/castIron/responses/searchLogsResponse.xml"/>
+            <property name="TurnOutActivityChildren" value="true"/>
+            <parser-ref name="searchLogsResponseParser"/>
+
+        </stream> -->
 </tnt-data-source>

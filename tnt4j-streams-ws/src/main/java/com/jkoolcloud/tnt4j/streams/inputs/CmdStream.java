@@ -114,12 +114,12 @@ public class CmdStream extends AbstractWsStream {
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			List<String> reqsData = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
+			List<String> requests = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
 
-			if (CollectionUtils.isNotEmpty(reqsData)) {
-				for (String reqData : reqsData) {
+			if (CollectionUtils.isNotEmpty(requests)) {
+				for (String request : requests) {
 					try {
-						respStr = executeCommand(reqData);
+						respStr = executeCommand(request);
 					} catch (Exception exc) {
 						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 								"CmdStream.execute.exception"), exc);
