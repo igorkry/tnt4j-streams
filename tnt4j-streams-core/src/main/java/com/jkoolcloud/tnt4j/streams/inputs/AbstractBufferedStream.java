@@ -226,6 +226,10 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData, long timeout, TimeUnit tunit) {
+		if (inputBuffer == null) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"AbstractBufferedStream.changes.buffer.uninitialized"));
+		}
 		if (inputData != null && !isHalted()) {
 			try {
 				boolean added = timeout > 0? inputBuffer.offer(inputData, timeout, tunit): inputBuffer.offer(inputData);
