@@ -115,7 +115,6 @@ public class AbstractBufferedStreamTest {
 				for (; overflowRecordCount >= 0; overflowRecordCount--) {
 					abs.addInputToBuffer("T"); // NON-NLS
 					System.out.println(overflowRecordCount);
-
 				}
 			}
 		});
