@@ -200,7 +200,6 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		if (inputBuffer != null) {
 			inputBuffer.clear();
 		}
-
 		super.cleanup();
 	}
 
@@ -215,25 +214,35 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
 	protected boolean addInputToBuffer(T inputData) {
+		return addInputToBuffer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
+	}
+
+	/**
+	 * Adds input data to buffer for asynchronous processing. Input data may not be added if buffer size limit and offer
+	 * timeout is exceeded.
+	 *
+	 * @param inputData
+	 *            input data to add to buffer
+	 * @return {@code true} if input data is added to buffer, {@code false} - otherwise
+	 *
+	 * @see BlockingQueue#offer(Object, long, TimeUnit)
+	 */
+	protected boolean addInputToBuffer(T inputData, long timeout, TimeUnit tunit) {
 		if (inputData != null && !isHalted()) {
 			try {
-				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
-
+				boolean added = timeout > 0? inputBuffer.offer(inputData, timeout, tunit): inputBuffer.offer(inputData);
 				if (!added) {
 					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
+							"AbstractBufferedStream.changes.buffer.limit"), timeout, inputData);
 				}
-
 				return added;
 			} catch (InterruptedException exc) {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"AbstractBufferedStream.offer.interrupted"), inputData);
 			}
 		}
-
 		return false;
 	}
-
 	/**
 	 * Checks if stream data input is ended.
 	 *
