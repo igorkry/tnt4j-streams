@@ -111,9 +111,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	@Override
 	protected void initialize() throws Exception {
 		super.initialize();
-
 		inputBuffer = new ArrayBlockingQueue<>(bufferSize, true);
-		// inputBuffer = new SynchronousQueue<Object>(true);
 	}
 
 	/**
