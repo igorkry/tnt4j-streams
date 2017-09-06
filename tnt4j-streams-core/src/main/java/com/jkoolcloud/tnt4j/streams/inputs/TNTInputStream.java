@@ -80,6 +80,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 
 	private AtomicInteger currActivityIndex = new AtomicInteger(0);
 	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
+	private AtomicInteger lostActivitiesCount = new AtomicInteger(0);
 	private AtomicLong streamedBytesCount = new AtomicLong(0);
 	private AtomicBoolean failureFlag = new AtomicBoolean(false);
 	private long startTime = -1;
@@ -517,6 +518,25 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 */
 	protected int incrementSkippedActivitiesCount() {
 		return skippedActivitiesCount.incrementAndGet();
+	}
+
+	/**
+	 * Returns number of activity data items lost while streaming. Item may be lost if stream gets lack of storage
+	 * resources or some critical exception occurs.
+	 *
+	 * @return number of lost activities
+	 */
+	public int getLostActivitiesCount() {
+		return lostActivitiesCount.get();
+	}
+
+	/**
+	 * Increments processing skipped lost activity items count.
+	 *
+	 * @return new value of lost items count
+	 */
+	protected int incrementLostActivitiesCount() {
+		return lostActivitiesCount.incrementAndGet();
 	}
 
 	/**
@@ -1148,6 +1168,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		private long bytesStreamed;
 
 		private long skippedActivities;
+		private long lostActivities;
 
 		private long elapsedTime;
 
@@ -1163,6 +1184,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			this.totalBytes = stream.getTotalBytes();
 			this.bytesStreamed = stream.getStreamedBytesCount();
 			this.skippedActivities = stream.getSkippedActivitiesCount();
+			this.lostActivities = stream.getLostActivitiesCount();
 			this.elapsedTime = stream.getElapsedTime();
 
 			if (activitiesTotal == -1) {
@@ -1188,7 +1210,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		/**
 		 * Returns number of currently streamed activity data item.
 		 *
-		 * @return activity data item number.
+		 * @return activity data item number
 		 */
 		public int getCurrActivity() {
 			return currActivity;
@@ -1224,10 +1246,19 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		/**
 		 * Returns number of activities skipped by stream.
 		 *
-		 * @return number of skipped activities.
+		 * @return number of skipped activities
 		 */
 		public long getSkippedActivities() {
 			return skippedActivities;
+		}
+
+		/**
+		 * Returns number of activities lost by stream due to lack of resources.
+		 *
+		 * @return number of lost activities
+		 */
+		public long getLostActivities() {
+			return lostActivities;
 		}
 
 		/**
@@ -1239,7 +1270,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		public String toString() {
 			return "StreamStats {" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
 					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
-					+ skippedActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
+					+ skippedActivities + ", lost activities=" + lostActivities + ", elapsed time="
+					+ DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
 		}
 	}
 }

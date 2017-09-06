@@ -164,27 +164,27 @@ public interface StreamProperties {
 	String PROP_BUFFER_SIZE = "BufferSize"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property. Value in seconds.
+	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_OFFER_TIMEOUT = "BufferOfferTimeout"; // NON-NLS
+	String PROP_BUFFER_DROP_WHEN_FULL = "BufferDropWhenFull"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property. Value in seconds.
+	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_FILE_POLLING = "FilePolling"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property. Value in seconds.
+	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_RESTORE_STATE = "RestoreState"; // NON-NLS
 
 	/**
-	 * Constant for name of built-in {@value} property. Value in seconds.
+	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_START_SERVER = "StartServer"; // NON-NLS //used only by Kafka
 
 	/**
-	 * Constant for name of built-in {@value} property. Value in seconds.
+	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_INPUT_CLOSEABLE = "InputCloseable"; // NON-NLS
 

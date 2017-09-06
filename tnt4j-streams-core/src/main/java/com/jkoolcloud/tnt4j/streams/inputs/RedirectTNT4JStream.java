@@ -63,8 +63,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>RestartOnInputClose - flag indicating to restart {@link ServerSocket} (open new {@link ServerSocket} instance) if
  * listened server socked gets closed or fails to accept connection. (Optional)</li>
  * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
- * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
- * queue. Default value - 45sec. (Optional)</li>
+ * <li>BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full.
+ * Default value - {@code false}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -78,12 +78,11 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RedirectTNT4JStream.class);
 
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
-	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE:
-																			// sec.
+
 	private static final Object DIE_MARKER = new Object();
 
 	private int bufferSize = DEFAULT_INPUT_BUFFER_SIZE;
-	private int bufferOfferTimeout = DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT;
+	private boolean dropDataWhenBufferFull = false;
 	private boolean restartOnInputClose = false;
 
 	private Reader rawReader;
@@ -182,8 +181,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				restartOnInputClose = Boolean.parseBoolean(value);
 			} else if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 				bufferSize = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-				bufferOfferTimeout = Integer.parseInt(value);
+			} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
+				dropDataWhenBufferFull = Boolean.parseBoolean(value);
 			}
 		}
 	}
@@ -202,8 +201,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 			return bufferSize;
 		}
-		if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-			return bufferOfferTimeout;
+		if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
+			return dropDataWhenBufferFull;
 		}
 
 		return super.getProperty(name);
@@ -267,23 +266,31 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		feedsProducer.start();
 	}
 
-	private boolean addInputToBuffer(String inputData) {
+	private boolean addInputToBuffer(String inputData) throws IllegalStateException {
+		if (inputBuffer == null) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"AbstractBufferedStream.changes.buffer.uninitialized"));
+		}
 		if (inputData != null && !isHalted()) {
-			try {
-				boolean added = inputBuffer.offer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
-
+			if (dropDataWhenBufferFull) {
+				boolean added = inputBuffer.offer(inputData);
 				if (!added) {
 					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.changes.buffer.limit"), bufferOfferTimeout, inputData);
+							"AbstractBufferedStream.changes.buffer.limit"), inputData);
+					incrementLostActivitiesCount();
 				}
-
 				return added;
-			} catch (InterruptedException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractBufferedStream.offer.interrupted"), inputData);
+			} else {
+				try {
+					inputBuffer.put(inputData);
+					return true;
+				} catch (InterruptedException exc) {
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"AbstractBufferedStream.put.interrupted"), inputData);
+					incrementLostActivitiesCount();
+				}
 			}
 		}
-
 		return false;
 	}
 

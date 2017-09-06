@@ -63,7 +63,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="RestartOnInputClose"/>
  *     &lt;enumeration value="ArchType"/>
  *     &lt;enumeration value="BufferSize"/>
- *     &lt;enumeration value="BufferOfferTimeout"/>
+ *     &lt;enumeration value="BufferDropWhenFull"/>
  *     &lt;enumeration value="FilePolling"/>
  *     &lt;enumeration value="RestoreState"/>
  *     &lt;enumeration value="StartServer"/>
@@ -380,8 +380,8 @@ public enum StreamProperties {
 	 *
 	 *
 	 */
-	@XmlEnumValue("BufferOfferTimeout")
-	BUFFER_OFFER_TIMEOUT("BufferOfferTimeout"),
+	@XmlEnumValue("BufferDropWhenFull")
+	BUFFER_DROP_WHEN_FULL("BufferDropWhenFull"),
 
 	/**
 	 *

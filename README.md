@@ -3843,13 +3843,13 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 ##### Buffered streams parameters
 
  * BufferSize - maximal buffer queue capacity. Default value - `512`. (Optional)
- * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
- queue. Default value - `45sec`. (Optional)
+ * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ Default value - `false`. (Optional)
 
      sample:
  ```xml
      <property name="BufferSize" value="1024"/>
-     <property name="BufferOfferTimeout" value="90"/>
+     <property name="BufferDropWhenFull" value="true"/>
  ```
 
 ##### Stream output configuration parameters
@@ -4216,8 +4216,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
  connection. (Optional)
  * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
- * BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer queue. Default value - 
- `45sec`. (Optional)
+ * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ Default value - `false`. (Optional)
 
     sample:
 ```xml
@@ -4228,7 +4228,7 @@ or
     <property name="Port" value="9009"/>
     <property name="RestartOnInputClose" value="true"/>
     <property name="BufferSize" value="1024"/>
-    <property name="BufferOfferTimeout" value="65"/>
+    <property name="BufferDropWhenFull" value="true"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
