@@ -450,7 +450,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	}
 
 	private static class Position {
-		int line;
+		@SuppressWarnings("unused")
+        int line;
 		int column;
 
 		public void reset() {
