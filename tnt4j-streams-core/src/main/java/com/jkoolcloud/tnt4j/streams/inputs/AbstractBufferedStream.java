@@ -35,8 +35,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
- * <li>BufferOfferTimeout - how long to wait if necessary for space to become available when adding data item to buffer
- * queue. Default value - 45sec. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -48,12 +46,10 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @see BlockingQueue#offer(Object, long, TimeUnit)
  */
 public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<T> {
-	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
-	private static final int DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT = 3 * 15; // NOTE: sec.
+	private static final int DEFAULT_INPUT_BUFFER_SIZE = 1024;
 	private static final Object DIE_MARKER = new Object();
 
 	private int bufferSize;
-	private int bufferOfferTimeout = DEFAULT_INPUT_BUFFER_OFFER_TIMEOUT;
 
 	/**
 	 * RAW activity data items buffer queue. Items in this queue are processed asynchronously by consumer thread(s).
@@ -82,7 +78,6 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		if (props == null) {
 			return;
 		}
-
 		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
@@ -90,8 +85,6 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			String value = prop.getValue();
 			if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 				bufferSize = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-				bufferOfferTimeout = Integer.parseInt(value);
 			}
 		}
 	}
@@ -101,10 +94,6 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 			return bufferSize;
 		}
-		if (StreamProperties.PROP_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-			return bufferOfferTimeout;
-		}
-
 		return super.getProperty(name);
 	}
 
