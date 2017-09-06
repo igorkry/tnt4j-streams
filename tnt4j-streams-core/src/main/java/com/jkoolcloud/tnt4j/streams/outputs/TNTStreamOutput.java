@@ -31,7 +31,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @see TNTInputStream#setOutput(TNTStreamOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
- * @see com.jkoolcloud.tnt4j.streams.inputs.TNTStreamInput
+ * @see com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream
  */
 public interface TNTStreamOutput<T> {
 
