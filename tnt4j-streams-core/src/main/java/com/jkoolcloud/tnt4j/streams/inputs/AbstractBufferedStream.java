@@ -149,7 +149,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	public T getNextItem() throws Exception {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.changes.buffer.uninitialized"));
+			        "AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 
 		// Buffer is empty and producer input is ended. No more items going to
@@ -197,12 +197,24 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 *            input data to add to buffer
 	 * @return {@code true} if input data is added to buffer, {@code false} - otherwise
 	 *
+	 * @throws IllegalStateException
+	 *             if buffer queue is not initialized
 	 * @see #addInputToBuffer(Object, long, TimeUnit)
 	 */
-	protected boolean addInputToBuffer(T inputData) {
-		try {
-			return addInputToBuffer(inputData, bufferOfferTimeout, TimeUnit.SECONDS);
-		} catch (InterruptedException exc) {
+	protected boolean addInputToBuffer(T inputData) throws IllegalStateException {
+		if (inputBuffer == null) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			        "AbstractBufferedStream.changes.buffer.uninitialized"));
+		}
+		if (inputData != null && !isHalted()) {
+			boolean added = inputBuffer.offer(inputData);
+			if (!added) {
+				logger().log(
+				        OpLevel.WARNING,
+				        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				                "AbstractBufferedStream.changes.buffer.limit"), 0, inputData);
+			}
+			return added;
 		}
 		return false;
 	}
@@ -225,24 +237,28 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * 
 	 * @see BlockingQueue#offer(Object, long, TimeUnit)
 	 */
-	protected boolean addInputToBuffer(T inputData, long timeout, TimeUnit tUnit)
-			throws InterruptedException, IllegalStateException {
+	protected boolean addInputToBuffer(T inputData, long timeout, TimeUnit tUnit) throws InterruptedException,
+	        IllegalStateException {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.changes.buffer.uninitialized"));
+			        "AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 		if (inputData != null && !isHalted()) {
 			try {
-				boolean added = timeout > 0 ? inputBuffer.offer(inputData, timeout, tUnit)
-						: inputBuffer.offer(inputData);
+				boolean added = timeout > 0 ? inputBuffer.offer(inputData, timeout, tUnit) : inputBuffer
+				        .offer(inputData);
 				if (!added) {
-					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.changes.buffer.limit"), timeout, inputData);
+					logger().log(
+					        OpLevel.WARNING,
+					        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					                "AbstractBufferedStream.changes.buffer.limit"), timeout, inputData);
 				}
 				return added;
 			} catch (InterruptedException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractBufferedStream.offer.interrupted"), inputData);
+				logger().log(
+				        OpLevel.WARNING,
+				        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				                "AbstractBufferedStream.offer.interrupted"), inputData);
 				throw exc;
 			}
 		}
@@ -264,13 +280,15 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	protected boolean offerInputToBuffer(T inputData) throws IllegalStateException {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.changes.buffer.uninitialized"));
+			        "AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 		if (inputData != null && !isHalted()) {
 			boolean added = inputBuffer.offer(inputData);
 			if (!added) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractBufferedStream.changes.buffer.limit"), 0, inputData);
+				logger().log(
+				        OpLevel.WARNING,
+				        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				                "AbstractBufferedStream.changes.buffer.limit"), 0, inputData);
 			}
 			return added;
 		}
@@ -292,7 +310,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	protected void putInputToBuffer(T inputData) throws InterruptedException, IllegalStateException {
 		if (inputBuffer == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.changes.buffer.uninitialized"));
+			        "AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 		if (inputData != null && !isHalted()) {
 			inputBuffer.put(inputData);
@@ -377,8 +395,10 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.input.shutdown"), AbstractBufferedStream.this.getName(), getName());
+			logger().log(
+			        OpLevel.DEBUG,
+			        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+			                "AbstractBufferedStream.input.shutdown"), AbstractBufferedStream.this.getName(), getName());
 			if (isStopRunning() && inputEnd) {
 				// shot down already.
 				return;
@@ -388,8 +408,10 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				close();
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractBufferedStream.input.close.error"), exc);
+				logger().log(
+				        OpLevel.WARNING,
+				        StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				                "AbstractBufferedStream.input.close.error"), exc);
 			}
 		}
 
