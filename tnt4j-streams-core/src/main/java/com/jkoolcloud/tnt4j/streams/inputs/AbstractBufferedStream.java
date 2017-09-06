@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -34,7 +33,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
- * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - {@code 1024}. (Optional)</li>
  * <li>BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full.
  * Default value - {@code false}. (Optional)</li>
  * </ul>

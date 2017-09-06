@@ -62,7 +62,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>Port - port number to accept character stream over TCP/IP. (Required - just one 'FileName' or 'Port')</li>
  * <li>RestartOnInputClose - flag indicating to restart {@link ServerSocket} (open new {@link ServerSocket} instance) if
  * listened server socked gets closed or fails to accept connection. (Optional)</li>
- * <li>BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)</li>
+ * <li>BufferSize - maximal buffer queue capacity. Default value - {@code 1024}. (Optional)</li>
  * <li>BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full.
  * Default value - {@code false}. (Optional)</li>
  * </ul>
@@ -77,7 +77,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RedirectTNT4JStream.class);
 
-	private static final int DEFAULT_INPUT_BUFFER_SIZE = 512;
+	private static final int DEFAULT_INPUT_BUFFER_SIZE = 1024;
 
 	private static final Object DIE_MARKER = new Object();
 

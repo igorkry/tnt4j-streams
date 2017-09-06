@@ -3842,13 +3842,13 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 
 ##### Buffered streams parameters
 
- * BufferSize - maximal buffer queue capacity. Default value - `512`. (Optional)
+ * BufferSize - maximal buffer queue capacity. Default value - `1024`. (Optional)
  * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
      sample:
  ```xml
-     <property name="BufferSize" value="1024"/>
+     <property name="BufferSize" value="2048"/>
      <property name="BufferDropWhenFull" value="true"/>
  ```
 
@@ -4215,7 +4215,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
  * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
  connection. (Optional)
- * BufferSize - maximal buffer queue capacity. Default value - 512. (Optional)
+ * BufferSize - maximal buffer queue capacity. Default value - `1024`. (Optional)
  * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
@@ -4227,7 +4227,7 @@ or
 ```xml
     <property name="Port" value="9009"/>
     <property name="RestartOnInputClose" value="true"/>
-    <property name="BufferSize" value="1024"/>
+    <property name="BufferSize" value="2048"/>
     <property name="BufferDropWhenFull" value="true"/>
 ```
 
