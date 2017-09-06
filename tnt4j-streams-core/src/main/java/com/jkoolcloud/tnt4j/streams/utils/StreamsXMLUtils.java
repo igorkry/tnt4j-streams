@@ -63,7 +63,7 @@ public final class StreamsXMLUtils {
 	 *         registered.
 	 */
 	public static XPathFunction registerCustomFunction(String functionName, XPathFunction function) {
-		return tsFunctionResolver.fMap.put(functionName, function);
+		return StreamsFunctionResolver.fMap.put(functionName, function);
 	}
 
 	/**

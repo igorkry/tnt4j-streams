@@ -242,21 +242,21 @@ public final class StreamsAgent {
 		run(Arrays.asList(streams), streamListener, streamTasksListener);
 	}
 
-	private static void loadConfigAndRun(String cfgFileName) {
+	protected static void loadConfigAndRun(String cfgFileName) {
 		loadConfigAndRun(cfgFileName, null, null);
 	}
 
-	private static void loadConfigAndRun(String cfgFileName, InputStreamListener streamListener,
+	protected static void loadConfigAndRun(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		loadConfigAndRun(StringUtils.isEmpty(cfgFileName) ? null : new File(cfgFileName), streamListener,
 				streamTasksListener);
 	}
 
-	private static void loadConfigAndRun(File cfgFile) {
+	protected static void loadConfigAndRun(File cfgFile) {
 		loadConfigAndRun(cfgFile, null, null);
 	}
 
-	private static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
+	protected static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.loading.config.file"),
@@ -268,20 +268,20 @@ public final class StreamsAgent {
 		}
 	}
 
-	private static void loadConfigAndRun(InputStream is) {
+	protected static void loadConfigAndRun(InputStream is) {
 		loadConfigAndRun(is, null, null);
 	}
 
-	private static void loadConfigAndRun(InputStream is, InputStreamListener streamListener,
+	protected static void loadConfigAndRun(InputStream is, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		loadConfigAndRun(new InputStreamReader(is), streamListener, streamTasksListener);
 	}
 
-	private static void loadConfigAndRun(Reader reader) {
+	protected static void loadConfigAndRun(Reader reader) {
 		loadConfigAndRun(reader, null, null);
 	}
 
-	private static void loadConfigAndRun(Reader reader, InputStreamListener streamListener,
+	protected static void loadConfigAndRun(Reader reader, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		try {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
@@ -303,7 +303,7 @@ public final class StreamsAgent {
 	 * @param streamTasksListener
 	 *            stream tasks listener
 	 */
-	private static void initAndRun(StreamsConfigLoader cfg, InputStreamListener streamListener,
+	protected static void initAndRun(StreamsConfigLoader cfg, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) throws Exception {
 		if (cfg == null) {
 			return;
@@ -323,7 +323,7 @@ public final class StreamsAgent {
 		run(streams, streamListener, streamTasksListener);
 	}
 
-	private static boolean loadZKConfig(String zookeeperCfgFile, String zookeeperStreamId) {
+	protected static boolean loadZKConfig(String zookeeperCfgFile, String zookeeperStreamId) {
 		Properties zooProps = ZKConfigManager.readStreamsZKConfig(zookeeperCfgFile);
 
 		if (MapUtils.isNotEmpty(zooProps)) {
@@ -410,11 +410,11 @@ public final class StreamsAgent {
 		return false;
 	}
 
-	private static boolean isStreamsRunning() {
+	protected static boolean isStreamsRunning() {
 		return streamThreads == null ? false : streamThreads.activeCount() > 0;
 	}
 
-	private static void stopStreams() {
+	protected static void stopStreams() {
 		if (streamThreads != null) {
 			LOGGER.log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.stopping.streams"),
@@ -466,7 +466,7 @@ public final class StreamsAgent {
 	 * @param streamTasksListener
 	 *            stream tasks listener
 	 */
-	private static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
+	protected static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		if (streamThreads == null) {
 			streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
@@ -500,7 +500,7 @@ public final class StreamsAgent {
 		// }
 	}
 
-	private static Collection<TNTInputStream<?, ?>> initPiping(StreamsConfigLoader cfg) throws Exception {
+	protected static Collection<TNTInputStream<?, ?>> initPiping(StreamsConfigLoader cfg) throws Exception {
 		Collection<TNTInputStream<?, ?>> streams = new ArrayList<>(1);
 
 		Map<String, String> props = new HashMap<>(1);
@@ -600,7 +600,7 @@ public final class StreamsAgent {
 	/**
 	 * Prints short standalone application usage manual.
 	 */
-	private static void printUsage() {
+	protected static void printUsage() {
 		System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help"));
 	}
 }

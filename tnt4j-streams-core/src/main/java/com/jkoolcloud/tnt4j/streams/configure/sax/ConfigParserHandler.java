@@ -2216,13 +2216,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		String beanRef;
 		String scriptLang;
 		String scriptCode;
-
-		private void reset() {
-			name = "";
-			beanRef = "";
-			scriptLang = "";
-			scriptCode = "";
-		}
 	}
 
 	private static class FilterValueData {
@@ -2230,25 +2223,12 @@ public class ConfigParserHandler extends DefaultHandler {
 		String evaluation;
 		String format;
 		String value;
-
-		private void reset() {
-			handle = "";
-			evaluation = "";
-			format = "";
-			value = "";
-		}
 	}
 
 	private static class FilterExpressionData {
 		String handle;
 		String lang;
 		String expression;
-
-		private void reset() {
-			handle = "";
-			lang = "";
-			expression = "";
-		}
 	}
 
 	private static class CacheEntryData {
@@ -2256,12 +2236,5 @@ public class ConfigParserHandler extends DefaultHandler {
 		String key;
 		String value;
 		String defaultValue;
-
-		private void reset() {
-			id = "";
-			key = "";
-			value = "";
-			defaultValue = "";
-		}
 	}
 }

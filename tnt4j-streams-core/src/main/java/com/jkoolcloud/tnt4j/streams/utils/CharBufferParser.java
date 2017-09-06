@@ -154,12 +154,9 @@ public abstract class CharBufferParser<I, O> {
 	 * @see #unread(CharBuffer)
 	 */
 	protected static void skipSpaces(CharBuffer cb) {
-		int c;
-
-		while ((c = read(cb)) == SPACE) {
+		while (read(cb) == SPACE) {
 			continue;
 		}
-
 		unread(cb);
 	}
 
@@ -174,9 +171,7 @@ public abstract class CharBufferParser<I, O> {
 	 */
 	protected static int peek(CharBuffer cb) {
 		int c = read(cb);
-
 		unread(cb);
-
 		return c;
 	}
 

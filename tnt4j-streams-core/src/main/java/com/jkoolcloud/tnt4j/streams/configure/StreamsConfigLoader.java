@@ -93,17 +93,11 @@ public class StreamsConfigLoader {
 	}
 
 	private static InputStream openCfgFile(String path) {
-		InputStream config = null;
 		try {
-			config = new FileInputStream(path);
+			return new FileInputStream(path);
 		} catch (FileNotFoundException e) {
 		}
-		// if could not locate file on file system, try classpath
-		if (config == null) {
-			config = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-		}
-
-		return config;
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
 	}
 
 	/**
