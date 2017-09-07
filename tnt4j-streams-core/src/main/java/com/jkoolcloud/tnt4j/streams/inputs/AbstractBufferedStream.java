@@ -76,12 +76,11 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
 		super.setProperties(props);
-
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();

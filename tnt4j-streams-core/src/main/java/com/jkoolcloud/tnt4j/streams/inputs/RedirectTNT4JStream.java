@@ -153,7 +153,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
