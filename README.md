@@ -4435,7 +4435,8 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity JSON parser
 
- * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional)
+ * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional, deprecated - use `ActivityDelim`
+  of [Generic parser](#generic-parser-parameters) instead)
 
     sample:
 ```xml

@@ -52,8 +52,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
  * <ul>
- * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'.
- * (Optional)</li>
+ * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'. (Optional,
+ * deprected - use 'ActivityDelim' instead)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -63,8 +63,6 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 	private static final String JSON_PATH_ROOT = "$";// NON-NLS
 	private static final String JSON_PATH_SEPARATOR = StreamsConstants.DEFAULT_PATH_DELIM;
-
-	private boolean jsonAsLine = true;
 
 	/**
 	 * Constructs a new ActivityJsonParser.
@@ -91,7 +89,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			String value = prop.getValue();
 
 			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
-				jsonAsLine = Boolean.parseBoolean(value);
+				activityDelim = Boolean.parseBoolean(value) ? "EOL" : "EOF";
 
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -179,7 +177,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			try {
 				while ((line = rdr.readLine()) != null) {
 					jsonStringBuilder.append(line);
-					if (jsonAsLine) {
+					if (activityDelim.equals("EOL")) {
 						break;
 					}
 				}
