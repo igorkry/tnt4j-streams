@@ -118,7 +118,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
