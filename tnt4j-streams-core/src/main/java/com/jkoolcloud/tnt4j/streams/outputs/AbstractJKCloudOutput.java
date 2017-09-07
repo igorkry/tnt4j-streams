@@ -108,10 +108,11 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		this.stream = inputStream;
 	}
 
+	@Override
 	public TNTInputStream<?, ?> getStream() {
 		return stream;
 	}
-	
+
 	/**
 	 * Gets path string of TNT4J configuration resource: file, ZooKeeper node.
 	 *
@@ -169,11 +170,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	private static void checkTrackerState(Tracker tracker) throws IllegalStateException {
 		boolean tOpen = tracker != null && tracker.isOpen();
-		@SuppressWarnings("resource")
-        Tracker logger = tracker == null ? null : ((TrackingLogger) tracker).getTracker();
+		Tracker logger = tracker == null ? null : ((TrackingLogger) tracker).getTracker();
 		boolean lOpen = logger != null && logger.isOpen();
-		@SuppressWarnings("resource")
-        EventSink eSink = logger == null ? null : logger.getEventSink();
+		EventSink eSink = logger == null ? null : logger.getEventSink();
 		boolean esOpen = eSink != null && eSink.isOpen();
 
 		if (!tOpen || !lOpen || !esOpen) {
@@ -292,11 +291,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			if (tracker == null) {
 				tracker = TrackingLogger.getInstance(trackerConfig.build());
 				checkTracker(tracker);
-				synchronized (trackersMap) {
-					trackersMap.put(getTrackersMapKey(t), tracker);
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"TNTStreamOutput.built.new.tracker"), (t == null ? "null" : t.getId()));
-				}
+				trackersMap.put(getTrackersMapKey(t), tracker);
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"TNTStreamOutput.built.new.tracker"), (t == null ? "null" : t.getId()));
 			}
 
 			return tracker;

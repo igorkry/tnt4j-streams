@@ -31,7 +31,6 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @see TNTInputStream#setOutput(TNTStreamOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
- * @see com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream
  */
 public interface TNTStreamOutput<T> {
 
@@ -89,6 +88,13 @@ public interface TNTStreamOutput<T> {
 	 *            related input stream instance
 	 */
 	void setStream(TNTInputStream<?, ?> inputStream);
+
+	/**
+	 * Gets related {@link TNTInputStream} instance.
+	 *
+	 * @return related input stream instance
+	 */
+	TNTInputStream<?, ?> getStream();
 
 	/**
 	 * Sets output configuration properties collection.
