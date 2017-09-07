@@ -170,12 +170,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	private static void checkTrackerState(Tracker tracker) throws IllegalStateException {
 		boolean tOpen = tracker != null && tracker.isOpen();
-		Tracker logger = tracker == null ? null : ((TrackingLogger) tracker).getTracker();
-		boolean lOpen = logger != null && logger.isOpen();
-		EventSink eSink = logger == null ? null : logger.getEventSink();
-		boolean esOpen = eSink != null && eSink.isOpen();
-
-		if (!tOpen || !lOpen || !esOpen) {
+		if (!tOpen) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTStreamOutput.tracker.not.opened"));
 		}

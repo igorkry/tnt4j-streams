@@ -76,7 +76,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		return LOGGER;
 	}
 
-	@Override
+	@SuppressWarnings("deprecation")
+    @Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
 		if (props == null) {
 			return;
