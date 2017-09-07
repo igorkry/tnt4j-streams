@@ -72,4 +72,13 @@ public interface ParserProperties {
 	 */
 	String PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET = "UseActivityDataAsMessageForUnset"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_ENTRY_PATTERN = "EntryPattern"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_ACTIVITY_DELIM = "ActivityDelim"; // NON-NLS
 }

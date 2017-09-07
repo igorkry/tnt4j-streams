@@ -661,6 +661,29 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Reads all text availalbe to read from defined <tt>reader</tt>.
+	 * 
+	 * @param reader
+	 *            reader to use for reading
+	 * @return tests string raed from <tt>reader</tt>
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public static String readAll(BufferedReader reader) throws IOException {
+		StringBuilder sb = new StringBuilder();
+
+		String line;
+		while ((line = reader.readLine()) != null) {
+			if (sb.length() != 0) {
+				sb.append("\n");
+			}
+			sb.append(line);
+		}
+
+		return sb.toString();
+	}
+
+	/**
 	 * Reads text lines into one string from provided {@link java.io.InputStream}.
 	 *
 	 * @param is

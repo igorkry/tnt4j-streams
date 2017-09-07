@@ -45,6 +45,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * there is no mapping defined for that field in stream parser configuration or value was not resolved by parser from
  * RAW activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
  * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
+ * <li>ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: {@code "EOL"} - end of
+ * line or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -54,7 +56,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	/**
-	 * Constant for default delimiter symbol used by parsers.
+	 * Constant for default values delimiter symbol used by parsers.
 	 */
 	protected static final String DEFAULT_DELIM = ","; // NON-NLS
 
@@ -68,6 +70,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * that field in stream parser configuration or value was not resolved by parser from RAW activity data.
 	 */
 	protected boolean useActivityAsMessage = false;
+
+	/**
+	 * Parameter defining activities delimiter symbol used by parsers. Default value is {@code "EOL"} - end of line.
+	 * Also can be {@code "EOF"} - end of file/stream.
+	 */
+	protected String activityDelim = "EOL";
 
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
@@ -95,6 +103,14 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
+			} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+				if (StringUtils.isNotEmpty(value)) {
+					activityDelim = value;
+
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}
@@ -287,7 +303,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		synchronized (NEXT_LOCK) {
 			try {
-				str = Utils.getNonEmptyLine(rdr);
+				str = activityDelim.equals("EOL") ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
 			} catch (EOFException eof) {
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),

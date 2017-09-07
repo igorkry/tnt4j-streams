@@ -51,6 +51,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>Pattern - pattern used to determine which types of activity data string this parser supports. When {@code null},
  * all strings are assumed to match the format supported by this parser. (Optional)</li>
  * <li>StripQuotes - whether surrounding double quotes should be stripped from extracted data values. (Optional)</li>
+ * <li>EntryPattern - pattern used to to split data into name/value pairs. It should define two RegEx groups named
+ * {@code "key"} and {@code "value"} used to map data contained values to name/value pair. NOTE: this parameter takes
+ * preference on {@code "FieldDelim"} and {@code "ValueDelim"} parameters. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -83,6 +86,13 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	protected boolean stripQuotes = true;
 
 	/**
+	 * Contains the pattern used to to split data into name/value pairs. It should define two RegEx groups named
+	 * {@code "key"} and {@code "value"} used to map data contained values to name/value pair. NOTE: this parameter
+	 * takes preference on {@link #fieldDelim} and {@link #valueDelim} parameters.
+	 */
+	protected Pattern entryPattern = null;
+
+	/**
 	 * Constructs a new ActivityNameValueParser.
 	 */
 	public ActivityNameValueParser() {
@@ -105,28 +115,35 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
-			if (ParserProperties.PROP_FLD_DELIM.equals(name)) {
+			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
-			} else if (ParserProperties.PROP_VAL_DELIM.equals(name)) {
+			} else if (ParserProperties.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
 				valueDelim = value;
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
-			} else if (ParserProperties.PROP_PATTERN.equals(name)) {
+			} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
 					pattern = Pattern.compile(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
-			} else if (ParserProperties.PROP_STRIP_QUOTES.equals(name)) {
+			} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
 				stripQuotes = Boolean.parseBoolean(value);
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 						name, value);
+			} else if (ParserProperties.PROP_ENTRY_PATTERN.equalsIgnoreCase(name)) {
+				if (StringUtils.isNotEmpty(value)) {
+					entryPattern = Pattern.compile(value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}
@@ -162,6 +179,15 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				return null;
 			}
 		}
+
+		Map<String, String> nameValues = entryPattern == null ? delimit(dataStr) : regex(dataStr);
+		ActivityContext cData = new ActivityContext(stream, data, nameValues);
+		cData.setMessage(getRawDataAsMessage(nameValues));
+
+		return cData;
+	}
+
+	private Map<String, String> delimit(String dataStr) {
 		StrTokenizer tk = stripQuotes ? new StrTokenizer(dataStr, fieldDelim, StrMatcher.doubleQuoteMatcher())
 				: new StrTokenizer(dataStr, fieldDelim);
 		tk.setIgnoreEmptyTokens(false);
@@ -182,14 +208,25 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}
 				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityNameValueParser.found"), field);
+						"ActivityNameValueParser.found.delim"), field);
 			}
 		}
 
-		ActivityContext cData = new ActivityContext(stream, data, nameValues);
-		cData.setMessage(getRawDataAsMessage(nameValues));
+		return nameValues;
+	}
 
-		return cData;
+	private Map<String, String> regex(String dataStr) {
+		Matcher matcher = entryPattern.matcher(dataStr);
+		Map<String, String> nameValues = new HashMap<>();
+		while (matcher.find()) {
+			String key = matcher.group("key");
+			String value = matcher.group("value");
+			nameValues.put(key, value == null ? "" : value.trim());
+			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityNameValueParser.found.regex"), key, value);
+		}
+
+		return nameValues;
 	}
 
 	/**

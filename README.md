@@ -4266,10 +4266,13 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
  defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
+ * ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line or `EOF` - end of 
+ file/stream. Default value - `EOL`. (Optional)
 
     sample:
 ```xml
     <property name="UseActivityDataAsMessageForUnset" value="true"/>
+    <property name="ActivityDelim" value="EOF"/>
 ``` 
 
 #### Activity Name-Value parser
@@ -4280,6 +4283,9 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
  strings are assumed to match the format supported by this parser. Default value - `null`. (Optional)
  * StripQuotes - whether surrounding double quotes should be stripped from extracted data values. Default value -
  `true`. (Optional)
+ * EntryPattern - pattern used to to split data into name/value pairs. It should define two RegEx groups named `key` and `value` used to 
+ map data contained values to name/value pair. **NOTE:** this parameter takes preference on `FieldDelim` and `ValueDelim` parameters. 
+ (Optional)
 
     sample:
 ```xml
@@ -4287,6 +4293,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
     <property name="ValueDelim" value="-"/>
     <property name="Pattern" value="(\S+)"/>
     <property name="StripQuotes" value="false"/>
+    <property name="EntryPattern"><![CDATA[:(?<key>.*?):(?<value>.[^:]+)]]></property>
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
