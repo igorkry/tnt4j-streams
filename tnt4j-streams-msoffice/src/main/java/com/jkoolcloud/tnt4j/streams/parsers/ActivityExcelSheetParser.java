@@ -96,7 +96,6 @@ public class ActivityExcelSheetParser extends AbstractExcelParser<Sheet> {
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			CellReference ref = new CellReference(locStr);
-			boolean cellFound = false;
 			if (ref.getRow() < 0 || ref.getCol() < 0) {
 				throw new ParseException(
 						StreamsResources.getStringFormatted(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -108,7 +107,6 @@ public class ActivityExcelSheetParser extends AbstractExcelParser<Sheet> {
 				Cell cell = row.getCell(ref.getCol());
 				if (cell != null) {
 					val = getCellValue(cell);
-					cellFound = true;
 				} else {
 					val = row;
 				}

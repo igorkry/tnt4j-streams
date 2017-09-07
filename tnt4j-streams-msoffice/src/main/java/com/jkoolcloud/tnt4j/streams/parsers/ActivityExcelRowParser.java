@@ -101,12 +101,9 @@ public class ActivityExcelRowParser extends AbstractExcelParser<Row> {
 						row.getRowNum());
 			}
 			Cell cell = row.getCell(cellIndex);
-			boolean cellFound = false;
 			if (cell != null) {
 				val = getCellValue(cell);
-				cellFound = true;
 			}
-
 			logger().log(OpLevel.TRACE,
 					StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
 							"ActivityExcelRowParser.resolved.cell.value"),

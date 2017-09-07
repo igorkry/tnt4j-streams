@@ -67,7 +67,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	protected int activityPosition = -1;
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
