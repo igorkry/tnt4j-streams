@@ -839,7 +839,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected class ActivityContext extends HashMap<String, Object> {
 		private static final long serialVersionUID = 702832545435507437L;
-        
+
 		private static final String STREAM_KEY = "STREAM_DATA"; // NON-NLS
 		private static final String RAW_DATA_KEY = "RAW_ACTIVITY_DATA"; // NON-NLS
 

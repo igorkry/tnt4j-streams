@@ -46,6 +46,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -1851,7 +1852,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 			String cpv = currProperties.get(currProperty.name);
 			if (cpv != null) {
-				currProperty.value = cpv + "&|@" + currProperty.value;
+				currProperty.value = cpv + StreamsConstants.MULTI_PROPS_DELIMITER + currProperty.value;
 			}
 			currProperties.put(currProperty.name, currProperty.value);
 		}

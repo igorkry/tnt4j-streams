@@ -28,6 +28,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -217,16 +218,21 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 				}
 			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
-					int idx = value.indexOf('=');
-					if (idx > 0) {
-						String confKey = value.substring(0, idx);
-						String regex = value.substring(idx + 1);
+					String[] uMappings = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
+					for (String uMapping : uMappings) {
+						int idx = uMapping.indexOf('=');
+						if (idx > 0) {
+							String confKey = uMapping.substring(0, idx);
+							String regex = uMapping.substring(idx + 1);
 
-						String oldRegex = userRegexMappings.put(confKey, regex);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ApacheAccessLogParser.setting.regex.mapping"), confKey, oldRegex, regex);
+							String oldRegex = userRegexMappings.put(confKey, regex);
+							logger().log(OpLevel.DEBUG, StreamsResources.getString(
+									StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"), name, uMapping);
+							logger().log(OpLevel.DEBUG,
+									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+											"ApacheAccessLogParser.setting.regex.mapping"),
+									confKey, oldRegex, regex);
+						}
 					}
 				}
 			}

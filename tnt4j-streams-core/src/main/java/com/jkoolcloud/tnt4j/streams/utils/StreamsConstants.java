@@ -47,9 +47,15 @@ public final class StreamsConstants {
 	public static final String DEFAULT_PATH_DELIM = "."; // NON-NLS
 
 	/**
-	 * Constant for locator path node token meaning complete map.
+	 * The constant for locator path node token meaning complete map.
 	 */
 	public static final String MAP_NODE_TOKEN = "*"; // NON-NLS
+
+	/**
+	 * The constant defininf string delimiting multiple values of stream entity configuration properties having same
+	 * name: e.g.: Namespace, ConfRegexMapping.
+	 */
+	public static final String MULTI_PROPS_DELIMITER = "&|@"; // NON-NLS
 
 	private StreamsConstants() {
 	}

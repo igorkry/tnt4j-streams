@@ -139,7 +139,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			String value = prop.getValue();
 			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
 				if (StringUtils.isNotEmpty(value)) {
-					String[] nSpaces = value.split("\\&\\|\\@"); // NON-NLS
+					String[] nSpaces = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
 					for (String nSpace : nSpaces) {
 						String[] nsFields = nSpace.split("="); // NON-NLS
 						namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
