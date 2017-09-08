@@ -17,10 +17,10 @@
 package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Utility class to support I18N of TNT4J-Streams.
@@ -33,10 +33,9 @@ public final class StreamsResources {
 	 */
 	public static final String RESOURCE_BUNDLE_NAME = "tnt4j-streams-core"; // NON-NLS
 
-	private static final Map<String, ResourceBundle> resBundlesMap = new HashMap<>(8);
+	private static final ConcurrentMap<String, ResourceBundle> resBundlesMap = new ConcurrentHashMap<>(8);
 
 	private StreamsResources() {
-
 	}
 
 	/**
@@ -50,15 +49,12 @@ public final class StreamsResources {
 	 * @see ResourceBundle#getBundle(String)
 	 */
 	public static ResourceBundle getBundle(String bundleName) {
-		synchronized (resBundlesMap) {
-			ResourceBundle resBundle = resBundlesMap.get(bundleName);
-			if (resBundle == null) {
-				resBundle = ResourceBundle.getBundle(bundleName);
-				resBundlesMap.put(bundleName, resBundle);
-			}
-
-			return resBundle;
+		ResourceBundle resBundle = resBundlesMap.get(bundleName);
+		if (resBundle == null) {
+			resBundle = ResourceBundle.getBundle(bundleName);
+			resBundlesMap.putIfAbsent(bundleName, resBundle);
 		}
+		return resBundle;
 	}
 
 	private static String getResourceString(String bundleName, String key) {
