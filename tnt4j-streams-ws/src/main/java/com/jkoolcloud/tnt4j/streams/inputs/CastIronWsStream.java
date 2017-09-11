@@ -11,7 +11,11 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.utils.*;
+import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
  * Class for IBM Cast Iron Logs and Jobs streaming. It handles login to Cast Iron and determine witch parser should be
@@ -21,17 +25,17 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  */
 
 public class CastIronWsStream extends WsStream {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CastIronWsStream.class);
 
-	private String securityUserName = "";
-	private String securityPassword = "";
 	private String securityResponseParserTag = "login";
-	private String loginUrl = "";
 	private static final String tokenCacheKey = "Token";
 	private static final String loginRequestS = "<sec:login xmlns:sec=\"http://www.approuter.com/schemas/2008/1/security\"><sec:username>";
 	private static final String loginRequestM = "</sec:username><sec:password>";
 	private static final String loginRequestE = "</sec:password></sec:login>";
 
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CastIronWsStream.class);
+	private String loginUrl = "";
+	private String securityUserName = "";
+	private String securityPassword = "";
 
 	@Override
 	protected EventSink logger() {
@@ -45,16 +49,14 @@ public class CastIronWsStream extends WsStream {
 	 *            SOAP request from configuration
 	 *
 	 * @return altered SOAP request
-	 *
 	 */
-
 	@Override
 	protected String preProcess(String soapRequestData) {
 		String resp = resolveRequestCacheEntries(soapRequestData);
 		return resp;
 	}
 
-	private String resolveRequestCacheEntries(String soapRequestData) {
+	private static String resolveRequestCacheEntries(String soapRequestData) {
 		List<String> vars = new ArrayList<>();
 		Utils.resolveCfgVariables(vars, soapRequestData);
 
@@ -76,7 +78,7 @@ public class CastIronWsStream extends WsStream {
 	 *            current SOAP request message
 	 * @return message with token in SOAP header
 	 */
-
+	@Override
 	protected void addSoapHeaders(SOAPMessage soapRequest) throws SOAPException {
 		SOAPFactory soapFactory = SOAPFactory.newInstance();
 		SOAPElement securityElem = soapFactory.createElement("sessionId", "log",
@@ -89,7 +91,7 @@ public class CastIronWsStream extends WsStream {
 	}
 
 	@Override
-	public void setProperties(Collection<Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Entry<String, String>> props) {
 		super.setProperties(props);
 
 		for (Map.Entry<String, String> prop : props) {
@@ -100,9 +102,9 @@ public class CastIronWsStream extends WsStream {
 				securityUserName = value;
 			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 				securityPassword = value;
-			} else if (CastIronWsStreamConstants.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
+			} else if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
 				securityResponseParserTag = value;
-			} else if (CastIronWsStreamConstants.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
+			} else if (WsStreamProperties.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
 				loginUrl = value;
 			}
 		}
@@ -116,12 +118,10 @@ public class CastIronWsStream extends WsStream {
 		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
 			return securityPassword;
 		}
-
-		if (CastIronWsStreamConstants.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
+		if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
 			return securityResponseParserTag;
 		}
-
-		if (CastIronWsStreamConstants.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
+		if (WsStreamProperties.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
 			return loginUrl;
 		}
 
@@ -135,19 +135,17 @@ public class CastIronWsStream extends WsStream {
 	 *            Soap fault
 	 * @throws Exception
 	 */
-
 	@Override
 	protected synchronized void handleFault(SOAPFault fault) throws Exception {
 		if (fault.getFaultString().equals("Expired or invalid session ID")) {
 			login();
-			throw new Exception("Loged in!");
+			throw new Exception("Logged in!");
 		} else {
 			super.handleFault(fault);
 		}
 	}
 
 	private void login() {
-
 		final String soapRequestData = loginRequestS + securityUserName + loginRequestM + securityPassword
 				+ loginRequestE;
 		try {
@@ -175,7 +173,6 @@ public class CastIronWsStream extends WsStream {
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.login.Failed"),
 					e.getMessage());
 		}
-
 	}
 
 	/**
@@ -186,15 +183,14 @@ public class CastIronWsStream extends WsStream {
 	 *            activity data item to get tags
 	 * @return
 	 */
-
 	@Override
 	protected String[] getDataTags(Object data) {
 		InputStream is = new ByteArrayInputStream(data.toString().getBytes());
 		SOAPMessage request;
-		String currentmethod = null;
+		String currentMethod = null;
 		try {
 			request = MessageFactory.newInstance().createMessage(null, is);
-			currentmethod = request.getSOAPBody().getFirstChild().getLocalName().replace("Response", "");
+			currentMethod = request.getSOAPBody().getFirstChild().getLocalName().replace("Response", "");
 		} catch (Exception e) {
 			logger().log(OpLevel.ERROR,
 					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.failed.parser"),
@@ -202,8 +198,8 @@ public class CastIronWsStream extends WsStream {
 		}
 		logger().log(OpLevel.DEBUG,
 				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.apply.parser"),
-				currentmethod);
-		return new String[] { currentmethod };
+				currentMethod);
+		return new String[] { currentMethod };
 	}
 
 }
