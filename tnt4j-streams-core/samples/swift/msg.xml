@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Request xmlns="http://www.mybank.com/EPH/BankRequest">
+    <header>
+        <amount>TEST30-0.01</amount>
+        <sender>HISBANK</sender>
+        <currency>USD</currency>
+    </header>
+    <genericTransFields>
+        <type>SWF202 OUTBOUND</type>
+        <receiver>MYBANK FRANKFURT FRANKFURT BRANCH</receiver>
+        <userRef>TEST30-QT06171612-1</userRef>
+    </genericTransFields>
+</Request>
