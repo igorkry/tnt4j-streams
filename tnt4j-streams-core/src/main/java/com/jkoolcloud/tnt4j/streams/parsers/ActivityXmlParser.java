@@ -20,11 +20,9 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -60,7 +58,10 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * {@link GenericActivityParser}):
  * <ul>
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
- * <li>RequireDefault - indicates that all attributes are required by default. (Optional)</li>
+ * <li>RequireDefault - indicates that all attributes are required by default. Default value - {@code false}.
+ * (Optional)</li>
+ * <li>NamespaceAware - indicates that parser has to provide support for XML namespaces. Default value - {@code true}.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -90,23 +91,37 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 */
 	protected NamespaceMap namespaces = null;
 
-	private final XPath xPath;
-	private final DocumentBuilder builder;
+	private XPath xPath;
+	private DocumentBuilder builder;
+
+	private final ReentrantLock xPathLock = new ReentrantLock();
+	private final ReentrantLock builderLock = new ReentrantLock();
 
 	/**
 	 * Property indicating that all attributes are required by default.
 	 */
 	protected boolean requireAll = false;
+	/**
+	 * Property indicating that parser shall be namespace aware.
+	 */
+	protected boolean namespaceAware = true;
 
 	/**
 	 * Constructs a new activity XML string parser.
-	 *
+	 */
+	public ActivityXmlParser() {
+		super();
+	}
+
+	/**
+	 * Initiates XPath
+	 * 
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser
 	 */
-	public ActivityXmlParser() throws ParserConfigurationException {
+	protected void intXPath(Map<String, String> uNamespaces) throws ParserConfigurationException {
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-		domFactory.setNamespaceAware(true);
+		domFactory.setNamespaceAware(namespaceAware);
 		builder = domFactory.newDocumentBuilder();
 		xPath = StreamsXMLUtils.getStreamsXPath();
 
@@ -121,6 +136,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 		namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 		namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
+
+		namespaces.addPrefixUriMappings(uNamespaces);
 	}
 
 	@Override
@@ -134,6 +151,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			return;
 		}
 
+		Map<String, String> uNamespaces = new HashMap<>();
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();
@@ -142,7 +161,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					String[] nSpaces = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
 					for (String nSpace : nSpaces) {
 						String[] nsFields = nSpace.split("="); // NON-NLS
-						namespaces.addPrefixUriMapping(nsFields[0], nsFields[1]);
+						uNamespaces.put(nsFields[0], nsFields[1]);
 						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityXmlParser.adding.mapping"), name, nSpace);
 					}
@@ -154,7 +173,20 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
 				}
+			} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
+				if (StringUtils.isNotEmpty(value)) {
+					namespaceAware = Boolean.parseBoolean(value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
+		}
+
+		try {
+			intXPath(uNamespaces);
+		} catch (ParserConfigurationException exc) {
+			throw new RuntimeException(exc);
 		}
 	}
 
@@ -200,8 +232,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				synchronized (builder) {
+				builderLock.lock();
+				try {
 					xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				} finally {
+					builderLock.unlock();
 				}
 			}
 		} catch (Exception e) {
@@ -325,8 +360,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			Document nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
 				XPathExpression expr;
-				synchronized (xPath) {
+				xPathLock.lock();
+				try {
 					expr = xPath.compile(locStr);
+				} finally {
+					xPathLock.unlock();
 				}
 
 				if (nodeDocument != null) { // try expression relative to node
@@ -399,8 +437,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		if (xmlDoc.getParentNode() != null) { // if node is not document root node
 			try {
 				Document nodeXmlDoc;
-				synchronized (builder) {
+				builderLock.lock();
+				try {
 					nodeXmlDoc = builder.newDocument();
+				} finally {
+					builderLock.unlock();
 				}
 				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
 				nodeXmlDoc.appendChild(importedNode);
@@ -486,7 +527,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		String xmlString = null;
 		StringBuilder xmlBuffer = new StringBuilder(1024);
 
-		synchronized (NEXT_LOCK) {
+		nextLock.lock();
+		try {
 			try {
 				for (String line; xmlString == null && (line = rdr.readLine()) != null;) {
 					if (line.startsWith("<?xml")) { // NON-NLS
@@ -505,6 +547,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
+		} finally {
+			nextLock.unlock();
 		}
 
 		if (xmlString == null && xmlBuffer.length() > 0) {

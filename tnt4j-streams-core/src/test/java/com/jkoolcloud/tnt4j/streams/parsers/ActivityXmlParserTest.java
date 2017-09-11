@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,10 +51,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 	@Before
 	@SuppressWarnings("unchecked")
 	public void prepare() {
-		try {
-			parser = new ActivityXmlParser();
-		} catch (ParserConfigurationException e) {
-		}
+		parser = new ActivityXmlParser();
 		is = mock(TNTInputStream.class);
 		final ActivityField field = mock(ActivityField.class);
 		final ActivityFieldLocator locator = mock(ActivityFieldLocator.class);

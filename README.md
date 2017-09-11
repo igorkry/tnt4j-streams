@@ -4339,12 +4339,14 @@ This parser uses XPath expressions as field locators. You may also use [TNT4J-St
 
  * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
  * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
+ * NamespaceAware - indicates that parser has to provide support for XML namespaces. Default value - `true`. (Optional)
 
     sample:
 ```xml
     <property name="Namespace" value="xsi=http://www.w3.org/2001/XMLSchema-instance"/>
     <property name="Namespace" value="tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
     <property name="RequireDefault" value="true"/>
+    <property name="NamespaceAware" value="false"/>
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).

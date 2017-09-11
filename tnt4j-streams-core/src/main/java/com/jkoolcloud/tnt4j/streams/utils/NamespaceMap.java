@@ -50,6 +50,16 @@ public final class NamespaceMap implements NamespaceContext {
 		map.put(prefix, uri);
 	}
 
+	/**
+	 * Adds mappings of namespace prefix to namespace URI.
+	 *
+	 * @param nsMap
+	 *            map containing namespace prefix to namespace URI mappings
+	 */
+	public void addPrefixUriMappings(Map<String, String> nsMap) {
+		map.putAll(nsMap);
+	}
+
 	@Override
 	public String getNamespaceURI(String prefix) {
 		String uri = map.get(prefix);

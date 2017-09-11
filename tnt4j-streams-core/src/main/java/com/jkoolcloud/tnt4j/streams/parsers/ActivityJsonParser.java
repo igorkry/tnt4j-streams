@@ -174,7 +174,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		StringBuilder jsonStringBuilder = new StringBuilder(1024);
 		String line;
 
-		synchronized (NEXT_LOCK) {
+		nextLock.lock();
+		try {
 			try {
 				while ((line = rdr.readLine()) != null) {
 					jsonStringBuilder.append(line);
@@ -190,6 +191,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
+		} finally {
+			nextLock.unlock();
 		}
 
 		return jsonStringBuilder.toString();

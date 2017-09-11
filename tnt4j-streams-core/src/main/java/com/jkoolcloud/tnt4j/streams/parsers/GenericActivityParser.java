@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,9 +83,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private List<ActivityDataPreParser<?>> preParsers;
 
-	protected final Object NEXT_LOCK = new Object();
-	protected final Object FILTER_LOCK = new Object();
-	protected final Object PRE_PARSER_LOCK = new Object();
+	protected final Lock nextLock = new ReentrantLock();
+	protected final Lock filterLock = new ReentrantLock();
+	protected final Lock preParserLock = new ReentrantLock();
 
 	private boolean autoSort = true;
 
@@ -301,7 +303,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected String readNextActivity(BufferedReader rdr) {
 		String str = null;
 
-		synchronized (NEXT_LOCK) {
+		nextLock.lock();
+		try {
 			try {
 				str = ActivityDelim.EOL.name().equals(activityDelim) ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
 			} catch (EOFException eof) {
@@ -312,6 +315,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
+		} finally {
+			nextLock.unlock();
 		}
 
 		return str;
@@ -802,9 +807,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		synchronized (FILTER_LOCK) {
+		filterLock.lock();
+		try {
 			boolean filteredOut = activityFilter.doFilter(null, ai);
 			ai.setFiltered(filteredOut);
+		} finally {
+			filterLock.unlock();
 		}
 	}
 
@@ -833,7 +841,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityParser.data.before.pre.parsing"), getLogString(data));
 
-			synchronized (PRE_PARSER_LOCK) {
+			preParserLock.lock();
+			try {
 				for (ActivityDataPreParser<?> preParser : preParsers) {
 					boolean validData = preParser.isDataClassSupported(data);
 					if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
@@ -844,6 +853,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 								"ActivityParser.data.after.pre.parsing"), getLogString(data));
 					}
 				}
+			} finally {
+				preParserLock.unlock();
 			}
 		}
 

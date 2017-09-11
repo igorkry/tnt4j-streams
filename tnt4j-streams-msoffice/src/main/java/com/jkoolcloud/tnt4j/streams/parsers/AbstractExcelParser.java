@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
@@ -37,7 +38,7 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 
 	private FormulaEvaluator evaluator;
 
-	protected final Object EVALUATOR_LOCK = new Object();
+	protected final ReentrantLock evaluationLock = new ReentrantLock();
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
@@ -69,13 +70,16 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	 */
 	protected Object getCellValue(Cell cell) {
 		CellValue cellValue;
-		synchronized (EVALUATOR_LOCK) {
+		evaluationLock.lock();
+		try {
 			if (evaluator == null) {
 				Workbook workbook = cell.getSheet().getWorkbook();
 				evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 			}
 
 			cellValue = evaluator.evaluate(cell);
+		} finally {
+			evaluationLock.unlock();
 		}
 
 		if (cellValue == null) {

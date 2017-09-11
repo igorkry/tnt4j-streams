@@ -20,8 +20,6 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -60,11 +58,9 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 
 	/**
 	 * Constructs a new MessageActivityXmlParser.
-	 *
-	 * @throws ParserConfigurationException
-	 *             if any errors configuring the parser
 	 */
-	public MessageActivityXmlParser() throws ParserConfigurationException {
+	public MessageActivityXmlParser() {
+		super();
 	}
 
 	@Override

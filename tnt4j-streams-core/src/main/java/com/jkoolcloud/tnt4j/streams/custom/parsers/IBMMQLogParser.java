@@ -180,7 +180,8 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 		String entryString = null;
 		StringBuilder entryBuffer = new StringBuilder(1024);
 
-		synchronized (NEXT_LOCK) {
+		nextLock.lock();
+		try {
 			try {
 				for (String line; entryString == null && (line = rdr.readLine()) != null;) {
 					entryBuffer.append(line);
@@ -199,6 +200,8 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.error.reading"), getActivityDataType(), ioe);
 			}
+		} finally {
+			nextLock.unlock();
 		}
 
 		if (entryString == null && entryBuffer.length() > 0) {

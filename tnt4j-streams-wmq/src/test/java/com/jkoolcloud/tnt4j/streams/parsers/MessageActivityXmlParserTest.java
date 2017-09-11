@@ -38,7 +38,7 @@ public class MessageActivityXmlParserTest {
 	private static final String DELIM = ","; // NON-NLS
 
 	@Test
-	public void testProperties() throws Exception {
+	public void testProperties() {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
 				put(WmqParserProperties.PROP_SIG_DELIM, DELIM);
