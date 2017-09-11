@@ -34,7 +34,7 @@ public class AbstractFileLineStreamTest {
 	private FileLineStream afls = new FileLineStream();
 
 	@Test
-	public void setPropertiesTest() throws Exception {
+	public void setPropertiesTest() {
 		final String fileName = "c:/Windows/schemas/TSWorkSpace/tswcx.xml"; // NON-NLS
 		Map<String, String> props = new HashMap<>(1);
 		props.put(StreamProperties.PROP_FILENAME, fileName);

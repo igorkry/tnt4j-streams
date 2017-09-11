@@ -29,6 +29,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
+
 /**
  * @author akausinis
  * @version 1.0
@@ -77,7 +79,7 @@ public class InterceptionsManagerTest {
 	}
 
 	private Producer<String, String> initProducer() throws Exception {
-		System.setProperty("tnt4j.config", "./config/tnt4j_dev.properties");
+		System.setProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY, "./config/tnt4j_dev.properties");
 		System.setProperty("log4j.configuration", "file:../config/log4j_dev.properties");
 
 		Properties props = new Properties();
@@ -104,7 +106,7 @@ public class InterceptionsManagerTest {
 	}
 
 	private Consumer<String, String> initConsumer() throws Exception {
-		System.setProperty("tnt4j.config", "./config/tnt4j_dev.properties");
+		System.setProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY, "./config/tnt4j_dev.properties");
 		System.setProperty("log4j.configuration", "file:../config/log4j_dev.properties");
 
 		Properties props = new Properties();

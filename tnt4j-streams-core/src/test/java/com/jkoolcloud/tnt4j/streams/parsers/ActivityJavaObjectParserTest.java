@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 public class ActivityJavaObjectParserTest {
 
 	@Test
-	public void setPropertiesTest() throws Exception {
+	public void setPropertiesTest() {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		HashMap<String, String> myMap = new HashMap<>();
 		myMap.put(ParserProperties.PROP_LOC_PATH_DELIM, "TEST_DELIM"); // NON-NLS
@@ -48,7 +48,7 @@ public class ActivityJavaObjectParserTest {
 	}
 
 	@Test
-	public void setPropertiesWhenNullTest() throws Exception {
+	public void setPropertiesWhenNullTest() {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		testParser.setProperties(null);
 	}

@@ -63,11 +63,9 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 *
 	 * @param props
 	 *            properties to set
-	 * @throws Exception
-	 *             indicates error with properties
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}

@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  */
 public class AbstractActivityMapParserTest {
 	@Test
-	public void setPropertiesTest() throws Exception {
+	public void setPropertiesTest() {
 		AbstractActivityMapParser testParser = Mockito.mock(ActivityMapParser.class, Mockito.CALLS_REAL_METHODS);
 		HashMap<String, String> myMap = new HashMap<>();
 		myMap.put(ParserProperties.PROP_VAL_DELIM, ";");

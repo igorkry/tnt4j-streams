@@ -35,7 +35,7 @@ public class MqttStreamTest {
 	MqttStream input;
 
 	@Test
-	public void testProperties() throws Exception {
+	public void testProperties() {
 		input = new MqttStream();
 		input.setName("MQTTTestStream"); // NON-NLS
 		Map<String, String> props = new HashMap<>(7);

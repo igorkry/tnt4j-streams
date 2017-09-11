@@ -34,7 +34,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * Base class that all activity streams performing RAW activity data parsing must extend. It maps RAW activities data to
  * related parsers and controls generic parsing process.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by {@link TNTInputStream}):
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link TNTInputStream}):
  * <ul>
  * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the parsers can parse activity object RAW
  * data. If set to {@code false} - puts log entry and continues. Default value - {@code false}. (Optional)</li>
@@ -65,6 +66,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			return;
 		}
 		super.setProperties(props);
+
 		for (Map.Entry<String, String> prop : props) {
 			String name = prop.getKey();
 			String value = prop.getValue();

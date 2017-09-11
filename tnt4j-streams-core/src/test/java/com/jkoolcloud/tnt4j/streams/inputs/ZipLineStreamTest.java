@@ -48,7 +48,7 @@ public class ZipLineStreamTest {
 	}
 
 	@Test
-	public void testProperties() throws Exception {
+	public void testProperties() {
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, "test.zip"); // NON-NLS
 		props.put(StreamProperties.PROP_ARCH_TYPE, "ZIP"); // NON-NLS

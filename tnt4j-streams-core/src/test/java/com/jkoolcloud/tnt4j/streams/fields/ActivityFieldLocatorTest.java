@@ -99,23 +99,35 @@ public class ActivityFieldLocatorTest {
 
 	@Test
 	public void testFormatDateValue() throws ParseException {
+		Date time = new Date();
 		locator = new ActivityFieldLocator(1);
-		UsecTimestamp ts = new UsecTimestamp(new Date());
-		assertEquals(ts, locator.formatDateValue(ts));
-		locator.setDataType(ActivityFieldDataType.Timestamp);
-		locator.setUnits(TimeUnit.MILLISECONDS.name());
-		locator.formatDateValue(new Date());
+		UsecTimestamp ts = new UsecTimestamp(time);
+		assertEquals(ts, locator.formatDateValue(time));
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(2);
+		locator2.setDataType(ActivityFieldDataType.Timestamp);
+		locator2.setUnits(TimeUnit.MILLISECONDS.name());
+		UsecTimestamp fts = locator2.formatDateValue(time.getTime());
+		assertEquals(ts, fts);
 	}
 
 	@Test
 	public void testFormatDateValueFormat() throws ParseException {
 		locator = new ActivityFieldLocator(1);
-		UsecTimestamp ts = new UsecTimestamp(new Date());
-		assertEquals(ts, locator.formatDateValue(ts));
-		locator.setDataType(ActivityFieldDataType.Timestamp);
-		locator.setFormat("HH:mm:ss.SSSSSSSSS", Locale.getDefault().toString());
-		locator.formatDateValue("0:00:04.570829300");
-		System.out.println(locator.formatDateValue(new Date()));
+		locator.setDataType(ActivityFieldDataType.DateTime);
+		locator.setFormat("HH:mm:ss.SSSSSS", null);
+		locator.setTimeZone("UTC");
+		UsecTimestamp fts = locator.formatDateValue("0:00:04.570829");
+		assertEquals(4570829, fts.getTimeUsec());
+	}
+
+	@Test(expected = ParseException.class)
+	public void testFormatDateValueFormatExc() throws ParseException {
+		locator = new ActivityFieldLocator(1);
+		locator.setDataType(ActivityFieldDataType.DateTime);
+		locator.setFormat("HH:mm:ss.SSSSSSSSS", null);
+		locator.setTimeZone("UTC");
+		UsecTimestamp fts = locator.formatDateValue("0:00:04.570829300");
+		assertEquals(4570829300L, fts.getTimeUsec());
 	}
 
 	@Test

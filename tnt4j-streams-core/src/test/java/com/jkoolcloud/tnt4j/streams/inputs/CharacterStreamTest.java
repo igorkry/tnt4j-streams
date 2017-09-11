@@ -40,7 +40,7 @@ public class CharacterStreamTest {
 	private static final int PORT = (int) (Math.random() * (1 << 16));
 
 	@Test
-	public void settingsTest() throws Exception {
+	public void settingsTest() {
 		CharacterStream cStream = new CharacterStream();
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_PORT, String.valueOf(PORT));
@@ -51,7 +51,7 @@ public class CharacterStreamTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void settingsFailToSetBothTest() throws Exception {
+	public void settingsFailToSetBothTest() {
 		CharacterStream cStream = new CharacterStream();
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, "TestFileName"); // NON-NLS

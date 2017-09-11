@@ -148,7 +148,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
@@ -169,10 +169,13 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 				boolean streamsProperty = false;
 				for (Field pf : propFields) {
-					pf.setAccessible(true);
-					if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-						streamsProperty = true;
-						break;
+					try {
+						pf.setAccessible(true);
+						if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+							streamsProperty = true;
+							break;
+						}
+					} catch (Exception exc) {
 					}
 				}
 

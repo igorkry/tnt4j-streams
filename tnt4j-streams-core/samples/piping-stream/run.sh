@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /bin/bash
 tail -f orders.log | jk-pipe.sh parsers.xml -s
 
 read -p "Press [Enter] key to exit..."

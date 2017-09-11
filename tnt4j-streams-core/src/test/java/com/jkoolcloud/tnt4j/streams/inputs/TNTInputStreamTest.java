@@ -68,7 +68,7 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void setPropertiesTest() throws Exception {
+	public void setPropertiesTest() {
 		Map<String, String> props = new HashMap<>(8);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, String.valueOf(5));
@@ -82,7 +82,7 @@ public class TNTInputStreamTest {
 	}
 
 	@Test
-	public void setPropertiesIfNullTest() throws Exception {
+	public void setPropertiesIfNullTest() {
 		TNTInputStream<?, ?> my = Mockito.mock(TNTInputStream.class, Mockito.CALLS_REAL_METHODS);
 		my.setProperties(null);
 		assertNull(my.getProperty("PROP_EXECUTORS_BOUNDED")); // NON-NLS
@@ -305,7 +305,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+		public void setProperties(Collection<Map.Entry<String, String>> props) {
 		}
 
 		@Override

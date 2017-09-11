@@ -45,12 +45,12 @@ public abstract class ActivityParserTestBase {
 		return props.entrySet();
 	}
 
-	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) throws Exception {
+	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) {
 		parser.setProperties(makeProperty(propertyName, testValue.toString()));
 	}
 
 	@Test
-	public void setPropertiesNullFailTest() throws Exception {
+	public void setPropertiesNullFailTest() {
 		parser.setProperties(null);
 	}
 

@@ -189,8 +189,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @param props
 	 *            properties to set
-	 * @throws Exception
-	 *             indicates error with properties
 	 */
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
@@ -216,6 +214,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				cacheExpireDuration = Integer.parseInt(value);
 			}
 		}
+
 		output().setProperties(props);
 	}
 

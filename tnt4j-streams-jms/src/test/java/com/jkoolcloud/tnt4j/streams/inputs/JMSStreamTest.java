@@ -34,7 +34,7 @@ public class JMSStreamTest {
 	JMSStream input;
 
 	@Test
-	public void testProperties() throws Exception {
+	public void testProperties() {
 		input = new JMSStream();
 		Map<String, String> props = new HashMap<>(4);
 		props.put(StreamProperties.PROP_SERVER_URI, "localhost"); // NON-NLS

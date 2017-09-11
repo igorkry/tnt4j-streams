@@ -39,7 +39,7 @@ public class ActivityNameValueParserTest {
 	private TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
 
 	@Test
-	public void testSetProperties() throws Exception {
+	public void testSetProperties() {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
 			{
 				put(ParserProperties.PROP_FLD_DELIM, "\n");
@@ -102,12 +102,12 @@ public class ActivityNameValueParserTest {
 	}
 
 	@Test
-	public void setPropertiesWhenNullTest() throws Exception {
+	public void setPropertiesWhenNullTest() {
 		activityNameValueParser.setProperties(null);
 	}
 
 	@Test
-	public void setPropertiesWhenValueEmptyTest() throws Exception {
+	public void setPropertiesWhenValueEmptyTest() {
 		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_FLD_DELIM, "");
 		activityNameValueParser.setProperties(props.entrySet());
@@ -115,7 +115,7 @@ public class ActivityNameValueParserTest {
 	}
 
 	@Test
-	public void setPropertiesWhenOtherValueEmptyTest() throws Exception {
+	public void setPropertiesWhenOtherValueEmptyTest() {
 		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_PATTERN, "");
 		activityNameValueParser.setProperties(props.entrySet());
@@ -123,7 +123,7 @@ public class ActivityNameValueParserTest {
 	}
 
 	@Test
-	public void setPropertiesWhenNotEqualsNameTest() throws Exception {
+	public void setPropertiesWhenNotEqualsNameTest() {
 		Map<String, String> props = new HashMap<>(1);
 		props.put(ParserProperties.PROP_NAMESPACE, "Test"); // NON-NLS
 		activityNameValueParser.setProperties(props.entrySet());

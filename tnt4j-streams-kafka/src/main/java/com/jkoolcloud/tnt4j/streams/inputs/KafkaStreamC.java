@@ -70,7 +70,7 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
@@ -87,10 +87,13 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 
 				boolean streamsProperty = false;
 				for (Field pf : propFields) {
-					pf.setAccessible(true);
-					if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-						streamsProperty = true;
-						break;
+					try {
+						pf.setAccessible(true);
+						if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+							streamsProperty = true;
+							break;
+						}
+					} catch (Exception exc) {
 					}
 				}
 

@@ -63,7 +63,7 @@ public class RedirectTNT4JStreamTest {
 	}
 
 	@Test(expected = IllegalStateException.class)
-	public void setPropertiesSetShouldFailTest() throws Exception {
+	public void setPropertiesSetShouldFailTest() {
 		Map<String, String> props = new HashMap<>(3);
 		props.put(StreamProperties.PROP_FILENAME, "TestFile"); // NON-NLS
 		props.put(StreamProperties.PROP_RESTART_ON_CLOSE, String.valueOf(true));

@@ -40,7 +40,7 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	protected final Object EVALUATOR_LOCK = new Object();
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}

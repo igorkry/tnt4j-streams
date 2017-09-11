@@ -75,7 +75,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * Parameter defining activities delimiter symbol used by parsers. Default value is {@code "EOL"} - end of line.
 	 * Also can be {@code "EOF"} - end of file/stream.
 	 */
-	protected String activityDelim = "EOL";
+	protected String activityDelim = ActivityDelim.EOL.name();
 
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
@@ -88,7 +88,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	private boolean autoSort = true;
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
@@ -303,7 +303,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		synchronized (NEXT_LOCK) {
 			try {
-				str = activityDelim.equals("EOL") ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
+				str = ActivityDelim.EOL.name().equals(activityDelim) ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
 			} catch (EOFException eof) {
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
@@ -1006,5 +1006,20 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		public ActivityField getField() {
 			return (ActivityField) get(FIELD_KEY);
 		}
+	}
+
+	/**
+	 * List built-in types of activity data delimiters within RAW data.
+	 */
+	protected enum ActivityDelim {
+		/**
+		 * Activity data delimiter is end-of-line.
+		 */
+		EOL,
+
+		/**
+		 * Activity data delimiter is end-of-file.
+		 */
+		EOF,
 	}
 }

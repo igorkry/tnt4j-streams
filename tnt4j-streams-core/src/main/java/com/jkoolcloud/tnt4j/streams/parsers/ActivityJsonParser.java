@@ -76,9 +76,9 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		return LOGGER;
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
-    @Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) throws Exception {
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (props == null) {
 			return;
 		}
@@ -90,7 +90,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			String value = prop.getValue();
 
 			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
-				activityDelim = Boolean.parseBoolean(value) ? "EOL" : "EOF";
+				activityDelim = Boolean.parseBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
 
 				logger().log(OpLevel.DEBUG,
 						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
@@ -178,7 +178,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			try {
 				while ((line = rdr.readLine()) != null) {
 					jsonStringBuilder.append(line);
-					if (activityDelim.equals("EOL")) {
+					if (ActivityDelim.EOL.name().equals(activityDelim)) {
 						break;
 					}
 				}

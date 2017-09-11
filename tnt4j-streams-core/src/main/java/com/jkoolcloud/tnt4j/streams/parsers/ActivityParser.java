@@ -67,10 +67,8 @@ public abstract class ActivityParser {
 	 *
 	 * @param props
 	 *            properties to set
-	 * @throws Exception
-	 *             indicates error with properties
 	 */
-	public abstract void setProperties(Collection<Map.Entry<String, String>> props) throws Exception;
+	public abstract void setProperties(Collection<Map.Entry<String, String>> props);
 
 	/**
 	 * Add an activity field definition to the set of fields supported by this parser.

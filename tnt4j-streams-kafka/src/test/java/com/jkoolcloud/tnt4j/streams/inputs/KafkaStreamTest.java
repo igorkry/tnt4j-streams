@@ -51,7 +51,7 @@ public class KafkaStreamTest {
 	KafkaStream input;
 
 	@Test
-	public void testProperties() throws Exception {
+	public void testProperties() {
 		input = new KafkaStream();
 
 		Map<String, String> props = new HashMap<>(3);
