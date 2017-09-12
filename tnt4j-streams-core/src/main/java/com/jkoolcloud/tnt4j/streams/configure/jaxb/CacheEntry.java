@@ -63,7 +63,7 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CacheEntry", propOrder = { "key", "value", "default" })
+@XmlType(name = "CacheEntry", propOrder = { "key", "value", "defaultValue" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 public class CacheEntry {
 

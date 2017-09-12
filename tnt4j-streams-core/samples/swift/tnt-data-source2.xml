@@ -3,8 +3,19 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="MYBANK_XML_Msg_Data_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-        <!--<property name="Namespace" value="=http://www.mybank.com/EPH/BankRequest"/>-->
+    <parser name="MYBANK_XML_Msg_Data_parser_namespace" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="Namespace" value="mb=http://www.mybank.com/EPH/BankRequest"/>
+
+        <field name="EventName" value="MYBANK XML Transaction"/>
+        <field name="TransID" locator="/mb:Request/mb:genericTransFields/mb:userRef" locator-type="Label"/>
+        <field name="TransType" locator="/mb:Request/mb:genericTransFields/mb:type" locator-type="Label"/>
+        <field name="TransValue" separator=":">
+            <field-locator locator="/mb:Request/mb:header/mb:amount" locator-type="Label"/>
+            <field-locator locator="/mb:Request/mb:header/mb:currency" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <parser name="MYBANK_XML_Msg_Data_parser_nonamespace" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="NamespaceAware" value="false"/>
 
         <field name="EventName" value="MYBANK XML Transaction"/>
@@ -19,6 +30,6 @@
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/swift/msg.xml"/>
 
-        <parser-ref name="MYBANK_XML_Msg_Data_parser"/>
+        <parser-ref name="MYBANK_XML_Msg_Data_parser_nonamespace"/>
     </stream>
 </tnt-data-source>
