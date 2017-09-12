@@ -116,6 +116,9 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 	/**
 	 * Initiates DOM document builder and XPath compiler.
+	 *
+	 * @param uNamespaces
+	 *            custom namespace prefix and URI mappings
 	 * 
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser
