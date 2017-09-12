@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 
 import javax.xml.soap.*;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -94,18 +96,20 @@ public class CastIronWsStream extends WsStream {
 	public void setProperties(Collection<Entry<String, String>> props) {
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-			if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
-				securityUserName = value;
-			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
-				securityPassword = value;
-			} else if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
-				securityResponseParserTag = value;
-			} else if (WsStreamProperties.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
-				loginUrl = value;
+				if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+					securityUserName = value;
+				} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+					securityPassword = value;
+				} else if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER.equalsIgnoreCase(name)) {
+					securityResponseParserTag = value;
+				} else if (WsStreamProperties.PROP_LOGIN_URL.equalsIgnoreCase(name)) {
+					loginUrl = value;
+				}
 			}
 		}
 	}

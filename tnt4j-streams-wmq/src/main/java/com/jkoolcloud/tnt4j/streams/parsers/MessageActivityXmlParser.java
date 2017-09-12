@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -70,21 +71,18 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					sigDelim = value;
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						sigDelim = value;
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -69,16 +70,15 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
-				rangeValue = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+					rangeValue = value;
+				}
 			}
 		}
 	}

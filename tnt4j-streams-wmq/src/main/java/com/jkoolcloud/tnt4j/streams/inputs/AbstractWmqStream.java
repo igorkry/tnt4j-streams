@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.*;
@@ -43,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * It currently does not strip off any WMQ headers, assuming that the message data only contains the actual input for
  * the configured parsers.
  * <p>
- * This activity stream supports the following properties (in addition to those supported by
+ * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
  * <li>QueueManager - Queue manager name. Default value - {@code null}. (Optional)</li>
@@ -119,39 +120,37 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (WmqStreamProperties.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
-				qmgrName = value;
-			} else if (WmqStreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
-				queueName = value;
-			} else if (WmqStreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				topicName = value;
-			} else if (WmqStreamProperties.PROP_SUB_NAME.equalsIgnoreCase(name)) {
-				subName = value;
-			} else if (WmqStreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
-				topicString = value;
-			} else if (WmqStreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
-				qmgrHostName = value;
-			} else if (WmqStreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-				qmgrPort = Integer.valueOf(value);
-			} else if (WmqStreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
-				qmgrChannelName = value;
-			} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
-				stripHeaders = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
-				userName = value;
-			} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
-				userPass = value;
-			} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
-				reconnectDelay = Integer.valueOf(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (WmqStreamProperties.PROP_QMGR_NAME.equalsIgnoreCase(name)) {
+					qmgrName = value;
+				} else if (WmqStreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+					queueName = value;
+				} else if (WmqStreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+					topicName = value;
+				} else if (WmqStreamProperties.PROP_SUB_NAME.equalsIgnoreCase(name)) {
+					subName = value;
+				} else if (WmqStreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+					topicString = value;
+				} else if (WmqStreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
+					qmgrHostName = value;
+				} else if (WmqStreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+					qmgrPort = Integer.valueOf(value);
+				} else if (WmqStreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
+					qmgrChannelName = value;
+				} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
+					stripHeaders = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+					userName = value;
+				} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+					userPass = value;
+				} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
+					reconnectDelay = Integer.valueOf(value);
+				}
 			}
 		}
 	}

@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -90,28 +91,25 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-			if (WmqParserProperties.PROP_TRANSLATE_NUM_VALUES.equalsIgnoreCase(name)) {
-				translateNumValues = Boolean.parseBoolean(value);
+				if (WmqParserProperties.PROP_TRANSLATE_NUM_VALUES.equalsIgnoreCase(name)) {
+					translateNumValues = Boolean.parseBoolean(value);
 
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
-			} else if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					sigDelim = value;
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
+				} else if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						sigDelim = value;
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}

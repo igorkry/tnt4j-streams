@@ -189,29 +189,29 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @param props
 	 *            properties to set
+	 *
+	 * @see #initialize()
 	 */
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
-				useExecutorService = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
-				executorThreadsQty = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-				executorRejectedTaskOfferTimeout = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
-				executorsTerminationTimeout = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
-				boundedExecutorModel = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_CACHE_MAX_SIZE.equalsIgnoreCase(name)) {
-				cacheMaxSize = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equalsIgnoreCase(name)) {
-				cacheExpireDuration = Integer.parseInt(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
+					useExecutorService = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
+					executorThreadsQty = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+					executorRejectedTaskOfferTimeout = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
+					executorsTerminationTimeout = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
+					boundedExecutorModel = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_CACHE_MAX_SIZE.equalsIgnoreCase(name)) {
+					cacheMaxSize = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equalsIgnoreCase(name)) {
+					cacheExpireDuration = Integer.parseInt(value);
+				}
 			}
 		}
 
@@ -271,6 +271,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *             indicates that stream is not configured properly and cannot continue
 	 *
 	 * @see #ensureOutputSet()
+	 * @see #setProperties(Collection)
 	 */
 	protected void initialize() throws Exception {
 		ensureOutputSet();

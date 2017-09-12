@@ -28,6 +28,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -154,35 +155,33 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-				if (socketPort != null) {
-					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					if (socketPort != null) {
+						throw new IllegalStateException(StreamsResources.getStringFormatted(
+								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
+					}
+					fileName = value;
+				} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(fileName)) {
+						throw new IllegalStateException(StreamsResources.getStringFormatted(
+								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
+					}
+					socketPort = Integer.valueOf(value);
+				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+					restartOnInputClose = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
+					bufferSize = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
+					dropDataWhenBufferFull = Boolean.parseBoolean(value);
 				}
-				fileName = value;
-			} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(fileName)) {
-					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-							StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
-				}
-				socketPort = Integer.valueOf(value);
-			} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-				restartOnInputClose = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
-				bufferSize = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-				dropDataWhenBufferFull = Boolean.parseBoolean(value);
 			}
 		}
 	}

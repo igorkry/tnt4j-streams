@@ -25,6 +25,7 @@ import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -101,35 +102,33 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
-				serverURL = value;
-			} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(topicName)) {
-					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+					serverURL = value;
+				} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(topicName)) {
+						throw new IllegalStateException(StreamsResources.getStringFormatted(
+								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
+					}
+					queueName = value;
+				} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(queueName)) {
+						throw new IllegalStateException(StreamsResources.getStringFormatted(
+								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
+					}
+					topicName = value;
+				} else if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
+					jndiFactory = value;
+				} else if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
+					jmsConnFactory = value;
 				}
-				queueName = value;
-			} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(queueName)) {
-					throw new IllegalStateException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-							StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
-				}
-				topicName = value;
-			} else if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
-				jndiFactory = value;
-			} else if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
-				jmsConnFactory = value;
 			}
 		}
 	}

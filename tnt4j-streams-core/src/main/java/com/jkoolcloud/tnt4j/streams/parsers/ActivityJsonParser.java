@@ -79,22 +79,20 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	@Override
 	@SuppressWarnings("deprecation")
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-			if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
-				activityDelim = Boolean.parseBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
+				if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
+					activityDelim = Boolean.parseBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
 
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}

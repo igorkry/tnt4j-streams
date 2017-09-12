@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -107,27 +108,25 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-				fileName = value;
-			} else if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
-				startFromLatestActivity = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
-				fileWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
-			} else if (StreamProperties.PROP_FILE_POLLING.equalsIgnoreCase(name)) {
-				pollingOn = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
-				storeState = Boolean.parseBoolean(value);
-			} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
-				rangeValue = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					fileName = value;
+				} else if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
+					startFromLatestActivity = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
+					fileWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
+				} else if (StreamProperties.PROP_FILE_POLLING.equalsIgnoreCase(name)) {
+					pollingOn = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
+					storeState = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+					rangeValue = value;
+				}
 			}
 		}
 	}

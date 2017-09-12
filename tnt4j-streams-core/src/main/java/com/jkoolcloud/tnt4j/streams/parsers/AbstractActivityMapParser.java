@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -76,22 +77,20 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-			if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
-				nodePathDelim = value;
+				if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
+					nodePathDelim = value;
 
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}

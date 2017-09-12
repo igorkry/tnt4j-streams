@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
@@ -106,43 +107,39 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
-				fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
-			} else if (ParserProperties.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
-				valueDelim = value;
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
-			} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					pattern = Pattern.compile(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
+					fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
-				}
-			} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
-				stripQuotes = Boolean.parseBoolean(value);
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
-			} else if (ParserProperties.PROP_ENTRY_PATTERN.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					entryPattern = Pattern.compile(value);
+				} else if (ParserProperties.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
+					valueDelim = value;
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
+				} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						pattern = Pattern.compile(value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
+				} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
+					stripQuotes = Boolean.parseBoolean(value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				} else if (ParserProperties.PROP_ENTRY_PATTERN.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						entryPattern = Pattern.compile(value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}

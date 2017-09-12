@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.jms.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -103,22 +104,20 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-			if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
-				convertToString = Boolean.parseBoolean(value);
+				if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
+					convertToString = Boolean.parseBoolean(value);
 
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
 			}
 		}
 	}

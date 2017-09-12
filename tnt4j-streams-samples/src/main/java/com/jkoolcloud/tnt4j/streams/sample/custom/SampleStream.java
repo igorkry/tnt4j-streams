@@ -22,6 +22,8 @@ import java.io.LineNumberReader;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -75,17 +77,15 @@ public class SampleStream extends TNTParseableInputStream<String> {
 	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-				fileName = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					fileName = value;
+				}
 			}
 		}
 	}

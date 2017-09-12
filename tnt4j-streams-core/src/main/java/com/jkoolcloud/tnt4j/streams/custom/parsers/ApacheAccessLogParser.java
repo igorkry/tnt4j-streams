@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -200,38 +201,36 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					apacheLogPattern = value;
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
-				}
-			} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					String[] uMappings = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
-					for (String uMapping : uMappings) {
-						int idx = uMapping.indexOf('=');
-						if (idx > 0) {
-							String confKey = uMapping.substring(0, idx);
-							String regex = uMapping.substring(idx + 1);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						apacheLogPattern = value;
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
+				} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						String[] uMappings = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
+						for (String uMapping : uMappings) {
+							int idx = uMapping.indexOf('=');
+							if (idx > 0) {
+								String confKey = uMapping.substring(0, idx);
+								String regex = uMapping.substring(idx + 1);
 
-							String oldRegex = userRegexMappings.put(confKey, regex);
-							logger().log(OpLevel.DEBUG, StreamsResources.getString(
-									StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"), name, uMapping);
-							logger().log(OpLevel.DEBUG,
-									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-											"ApacheAccessLogParser.setting.regex.mapping"),
-									confKey, oldRegex, regex);
+								String oldRegex = userRegexMappings.put(confKey, regex);
+								logger().log(OpLevel.DEBUG, StreamsResources
+										.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+										name, uMapping);
+								logger().log(OpLevel.DEBUG,
+										StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+												"ApacheAccessLogParser.setting.regex.mapping"),
+										confKey, oldRegex, regex);
+							}
 						}
 					}
 				}

@@ -84,23 +84,19 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	// @Override
 	// public Object getProperty(String name) {
-	//
 	// return super.getProperty(name);
 	// }
 	//
 	// @Override
-	// public void setProperties(Collection<Map.Entry<String, String>> props)
-	// throws Exception {
-	// if (props == null) {
-	// return;
-	// }
-	//
+	// public void setProperties(Collection<Map.Entry<String, String>> props) {
 	// super.setProperties(props);
 	//
+	// if (CollectionUtils.isNotEmpty(props)) {
 	// for (Map.Entry<String, String> prop : props) {
 	// String name = prop.getKey();
 	// String value = prop.getValue();
 	//
+	// }
 	// }
 	// }
 

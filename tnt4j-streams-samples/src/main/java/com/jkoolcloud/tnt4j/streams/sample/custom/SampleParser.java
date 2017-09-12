@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -66,18 +67,16 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 */
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value); // NON-NLS
-			if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
-				fieldDelim = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				logger().log(OpLevel.DEBUG, "Setting {0} to ''{1}''", name, value); // NON-NLS
+				if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
+					fieldDelim = value;
+				}
 			}
 		}
 	}

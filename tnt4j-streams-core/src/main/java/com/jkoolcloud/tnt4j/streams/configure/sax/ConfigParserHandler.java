@@ -1712,14 +1712,14 @@ public class ConfigParserHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
 			if (STREAM_ELMT.equals(qName)) {
+				currStream.setProperties(currProperties == null ? null : currProperties.entrySet());
 				if (currProperties != null) {
-					currStream.setProperties(currProperties.entrySet());
 					currProperties.clear();
 				}
 				currStream = null;
 			} else if (PARSER_ELMT.equals(qName)) {
+				currParser.setProperties(currProperties == null ? null : currProperties.entrySet());
 				if (currProperties != null) {
-					currParser.setProperties(currProperties.entrySet());
 					currProperties.clear();
 				}
 				currParser = null;

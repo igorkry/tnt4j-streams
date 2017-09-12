@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -77,18 +79,17 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
-				bufferSize = Integer.parseInt(value);
-			} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-				dropDataWhenBufferFull = Boolean.parseBoolean(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
+					bufferSize = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
+					dropDataWhenBufferFull = Boolean.parseBoolean(value);
+				}
 			}
 		}
 	}

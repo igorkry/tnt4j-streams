@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -71,34 +72,34 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-		userKafkaProps = new HashMap<>(3);
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				topicName = value;
-			} else {
-				Field[] propFields = StreamProperties.class.getDeclaredFields();
+		userKafkaProps = new HashMap<>(3);
 
-				boolean streamsProperty = false;
-				for (Field pf : propFields) {
-					try {
-						pf.setAccessible(true);
-						if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-							streamsProperty = true;
-							break;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+					topicName = value;
+				} else {
+					Field[] propFields = StreamProperties.class.getDeclaredFields();
+
+					boolean streamsProperty = false;
+					for (Field pf : propFields) {
+						try {
+							pf.setAccessible(true);
+							if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+								streamsProperty = true;
+								break;
+							}
+						} catch (Exception exc) {
 						}
-					} catch (Exception exc) {
 					}
-				}
 
-				if (!streamsProperty) {
-					addUserKafkaProperty(name, value);
+					if (!streamsProperty) {
+						addUserKafkaProperty(name, value);
+					}
 				}
 			}
 		}

@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,16 +63,15 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
-				haltIfNoParser = Boolean.parseBoolean(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
+					haltIfNoParser = Boolean.parseBoolean(value);
+				}
 			}
 		}
 	}

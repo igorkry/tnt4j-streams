@@ -30,6 +30,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -114,7 +115,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	/**
-	 * Initiates XPath
+	 * Initiates DOM document builder and XPath compiler.
 	 * 
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser
@@ -147,38 +148,38 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
+		super.setProperties(props);
 
 		Map<String, String> uNamespaces = new HashMap<>();
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					String[] nSpaces = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
-					for (String nSpace : nSpaces) {
-						String[] nsFields = nSpace.split("="); // NON-NLS
-						uNamespaces.put(nsFields[0], nsFields[1]);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityXmlParser.adding.mapping"), name, nSpace);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						String[] nSpaces = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
+						for (String nSpace : nSpaces) {
+							String[] nsFields = nSpace.split("="); // NON-NLS
+							uNamespaces.put(nsFields[0], nsFields[1]);
+							logger().log(OpLevel.DEBUG,
+									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+											"ActivityXmlParser.adding.mapping"),
+									name, nSpace);
+						}
 					}
-				}
-			} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					requireAll = Boolean.parseBoolean(value);
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
-				}
-			} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					namespaceAware = Boolean.parseBoolean(value);
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						requireAll = Boolean.parseBoolean(value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
+				} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						namespaceAware = Boolean.parseBoolean(value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}

@@ -91,27 +91,24 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-
-			if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
-				useActivityAsMessage = Boolean.parseBoolean(value);
-
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-						name, value);
-			} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
-				if (StringUtils.isNotEmpty(value)) {
-					activityDelim = value;
+				if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
+					useActivityAsMessage = Boolean.parseBoolean(value);
 
 					logger().log(OpLevel.DEBUG,
 							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 							name, value);
+				} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						activityDelim = value;
+
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}

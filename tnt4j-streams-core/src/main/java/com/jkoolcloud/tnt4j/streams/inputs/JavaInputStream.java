@@ -20,6 +20,8 @@ import java.io.*;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -92,17 +94,15 @@ public class JavaInputStream extends TNTParseableInputStream<String> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_INPUT_CLOSEABLE.equalsIgnoreCase(name)) {
-				inputCloseable = Boolean.parseBoolean(value);
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_INPUT_CLOSEABLE.equalsIgnoreCase(name)) {
+					inputCloseable = Boolean.parseBoolean(value);
+				}
 			}
 		}
 	}

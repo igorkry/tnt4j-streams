@@ -26,6 +26,7 @@ import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -86,36 +87,34 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-				zipFileName = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					zipFileName = value;
 
-				if (StringUtils.isNotEmpty(zipFileName)) {
-					String zdp[] = zipFileName.split(Pattern.quote(ZIP_PATH_SEPARATOR));
+					if (StringUtils.isNotEmpty(zipFileName)) {
+						String zdp[] = zipFileName.split(Pattern.quote(ZIP_PATH_SEPARATOR));
 
-					if (zdp != null) {
-						if (zdp.length > 0) {
-							zipPath = zdp[0];
-						}
-						if (zdp.length > 1) {
-							zipEntriesMask = StringUtils.isEmpty(zdp[1]) ? null
-									: Utils.wildcardToRegex2(zdp[1].replace("\\", "/")); // NON-NLS
-							if (zipEntriesMask != null) {
-								zipEntriesMask = '^' + zipEntriesMask + '$'; // NON-NLS
+						if (zdp != null) {
+							if (zdp.length > 0) {
+								zipPath = zdp[0];
+							}
+							if (zdp.length > 1) {
+								zipEntriesMask = StringUtils.isEmpty(zdp[1]) ? null
+										: Utils.wildcardToRegex2(zdp[1].replace("\\", "/")); // NON-NLS
+								if (zipEntriesMask != null) {
+									zipEntriesMask = '^' + zipEntriesMask + '$'; // NON-NLS
+								}
 							}
 						}
 					}
+				} else if (StreamProperties.PROP_ARCH_TYPE.equalsIgnoreCase(name)) {
+					archType = value;
 				}
-			} else if (StreamProperties.PROP_ARCH_TYPE.equalsIgnoreCase(name)) {
-				archType = value;
 			}
 		}
 	}

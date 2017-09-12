@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.custom.inputs;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
@@ -94,44 +95,42 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (WmqStreamProperties.PROP_TRACE_OPERATIONS.equalsIgnoreCase(name)) {
-				opName = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (WmqStreamProperties.PROP_TRACE_OPERATIONS.equalsIgnoreCase(name)) {
+					opName = value;
 
-				if (StringUtils.isNotEmpty(value)) {
-					opNameMatcher = Pattern.compile(Utils.wildcardToRegex2(opName));
-				}
-			} else if (WmqStreamProperties.PROP_EXCLUDED_REASON_CODES.equalsIgnoreCase(name)) {
-				rcExclude = value;
-
-				if (StringUtils.isNotEmpty(value)) {
-					String[] erca = Utils.splitValue(rcExclude);
-
-					excludedRCs = new HashSet<>(erca.length);
-
-					Integer eRC;
-					for (String erc : erca) {
-						try {
-							eRC = WmqUtils.getParamId(erc);
-						} catch (NoSuchElementException exc) {
-							logger().log(OpLevel.WARNING, StreamsResources.getString(
-									WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
-							continue;
-						}
-
-						excludedRCs.add(eRC);
+					if (StringUtils.isNotEmpty(value)) {
+						opNameMatcher = Pattern.compile(Utils.wildcardToRegex2(opName));
 					}
+				} else if (WmqStreamProperties.PROP_EXCLUDED_REASON_CODES.equalsIgnoreCase(name)) {
+					rcExclude = value;
+
+					if (StringUtils.isNotEmpty(value)) {
+						String[] erca = Utils.splitValue(rcExclude);
+
+						excludedRCs = new HashSet<>(erca.length);
+
+						Integer eRC;
+						for (String erc : erca) {
+							try {
+								eRC = WmqUtils.getParamId(erc);
+							} catch (NoSuchElementException exc) {
+								logger().log(OpLevel.WARNING, StreamsResources.getString(
+										WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
+								continue;
+							}
+
+							excludedRCs.add(eRC);
+						}
+					}
+				} else if (WmqStreamProperties.PROP_SUPPRESS_BROWSE_GETS.equalsIgnoreCase(name)) {
+					suppressBrowseGets = Boolean.parseBoolean(value);
 				}
-			} else if (WmqStreamProperties.PROP_SUPPRESS_BROWSE_GETS.equalsIgnoreCase(name)) {
-				suppressBrowseGets = Boolean.parseBoolean(value);
 			}
 		}
 	}

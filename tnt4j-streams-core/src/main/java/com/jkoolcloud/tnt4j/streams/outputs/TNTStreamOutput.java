@@ -50,6 +50,8 @@ public interface TNTStreamOutput<T> {
 	 * 
 	 * @throws Exception
 	 *             indicates that stream output handler is not configured properly
+	 *
+	 * @see #setProperties(Collection)
 	 */
 	void initialize() throws Exception;
 
@@ -101,6 +103,8 @@ public interface TNTStreamOutput<T> {
 	 *
 	 * @param props
 	 *            properties to set
+	 *
+	 * @see #initialize()
 	 */
 	void setProperties(Collection<Map.Entry<String, String>> props);
 }

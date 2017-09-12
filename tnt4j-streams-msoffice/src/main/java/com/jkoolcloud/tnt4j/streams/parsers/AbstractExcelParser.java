@@ -42,12 +42,9 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-
 		super.setProperties(props);
 
+		// if (CollectionUtils.isNotEmpty(props)) {
 		// for (Map.Entry<String, String> prop : props) {
 		// String name = prop.getKey();
 		// String value = prop.getValue();
@@ -57,6 +54,7 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		// logger().log(OpLevel.DEBUG,
 		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 		// name, value);
+		// }
 		// }
 		// }
 	}

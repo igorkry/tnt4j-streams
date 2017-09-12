@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -149,38 +150,38 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
-		userKafkaProps = new HashMap<>(3);
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-				topicName = value;
-			} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
-				startServer = Boolean.parseBoolean(value);
-			} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
-				startZooKeeper = Boolean.parseBoolean(value);
-			} else {
-				Field[] propFields = StreamProperties.class.getDeclaredFields();
+		userKafkaProps = new HashMap<>(3);
 
-				boolean streamsProperty = false;
-				for (Field pf : propFields) {
-					try {
-						pf.setAccessible(true);
-						if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-							streamsProperty = true;
-							break;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+					topicName = value;
+				} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
+					startServer = Boolean.parseBoolean(value);
+				} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
+					startZooKeeper = Boolean.parseBoolean(value);
+				} else {
+					Field[] propFields = StreamProperties.class.getDeclaredFields();
+
+					boolean streamsProperty = false;
+					for (Field pf : propFields) {
+						try {
+							pf.setAccessible(true);
+							if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+								streamsProperty = true;
+								break;
+							}
+						} catch (Exception exc) {
 						}
-					} catch (Exception exc) {
 					}
-				}
 
-				if (!streamsProperty) {
-					addUserKafkaProperty(name, value);
+					if (!streamsProperty) {
+						addUserKafkaProperty(name, value);
+					}
 				}
 			}
 		}

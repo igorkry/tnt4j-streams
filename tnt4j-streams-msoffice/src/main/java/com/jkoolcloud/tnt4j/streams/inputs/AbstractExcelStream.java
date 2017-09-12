@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
@@ -68,21 +69,20 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (props == null) {
-			return;
-		}
 		super.setProperties(props);
 
-		for (Map.Entry<String, String> prop : props) {
-			String name = prop.getKey();
-			String value = prop.getValue();
-			if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-				fileName = value;
-			} else if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
-				sheetName = value;
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					fileName = value;
+				} else if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
+					sheetName = value;
 
-				if (StringUtils.isNotEmpty(sheetName)) {
-					sheetNameMatcher = Pattern.compile(Utils.wildcardToRegex2(sheetName));
+					if (StringUtils.isNotEmpty(sheetName)) {
+						sheetNameMatcher = Pattern.compile(Utils.wildcardToRegex2(sheetName));
+					}
 				}
 			}
 		}
