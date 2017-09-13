@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Request xmlns="http://www.mybank.com/EPH/BankRequest">
+<Request xmlns="http://www.mybankcom/EPH/Request" xmlns:ns2="http://www.mybank.com/EPH/Response">
     <header>
+        <messageId>ABC1506170075211-1951317824-0</messageId>
+        <entity>XYZ1234</entity>
+        <currency>EUR</currency>
         <amount>TEST30-0.01</amount>
-        <sender>HISBANK</sender>
-        <currency>USD</currency>
+        <currency2>USD</currency2>
+        <receiver>MYBANK FRANKFURT</receiver>
     </header>
     <genericTransFields>
         <type>SWF202 OUTBOUND</type>
-        <receiver>MYBANK FRANKFURT FRANKFURT BRANCH</receiver>
+        <sender>OTHER_BANK_XXX</sender>
+        <reference>QT06171612-1</reference>
         <userRef>TEST30-QT06171612-1</userRef>
     </genericTransFields>
+    <messageDetails>
+        <tag20>QT06171612-1</tag20>
+        <tag21>QAVOLUME</tag21>
+    </messageDetails>
+    <sourceMessage>{1:DEFAXXX6952}{2:abcd902N}{3:{108:QT06171612-1}}{4:
+        :20:QT06171612-1
+        :21:QAVOLUME
+        :32A:150617EUR0,01
+        :52A:HIS_BANK
+        :53B:/0049609710
+        :57A:LONDON
+        :58A:/11548432050460
+        LONDON
+        :72:/ABC/DEF-TEST
+        -}
+    </sourceMessage>
 </Request>
