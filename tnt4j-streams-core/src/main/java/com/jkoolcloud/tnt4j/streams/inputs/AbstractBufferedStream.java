@@ -46,7 +46,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * @version $Revision: 1 $
  *
  * @see ArrayBlockingQueue
- * @see BlockingQueue#offer(Object, long, TimeUnit)
  */
 public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<T> {
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 1024;

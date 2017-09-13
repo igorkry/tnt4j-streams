@@ -61,7 +61,6 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
-	private String currentParserTag;
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -69,7 +68,6 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 		currScenario = null;
 		currStep = null;
-		currentParserTag = null;
 	}
 
 	@Override
