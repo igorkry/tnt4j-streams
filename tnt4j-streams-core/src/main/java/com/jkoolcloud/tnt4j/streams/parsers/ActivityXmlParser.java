@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -161,7 +162,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				String value = prop.getValue();
 				if (ParserProperties.PROP_NAMESPACE.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
-						String[] nSpaces = value.split(StreamsConstants.MULTI_PROPS_DELIMITER);
+						String[] nSpaces = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
 						for (String nSpace : nSpaces) {
 							String[] nsFields = nSpace.split("="); // NON-NLS
 							uNamespaces.put(nsFields[0], nsFields[1]);
