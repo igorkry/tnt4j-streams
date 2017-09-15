@@ -17,3 +17,13 @@ interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKa
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor
 ```
+
+Set TNT4J to use Kafka sink to send interceptors collected statistics to dedicated Kafka topic (e.g. `tnt4j_kafka_interceptor_metrics`):
+
+```properties
+  #### Kafka event sink factory configuration ####
+	event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.kafka.KafkaEventSinkFactory
+	event.sink.factory.propFile: ../config/tnt4j-kafka.properties
+	event.sink.factory.topic: tnt4j_kafka_interceptor_metrics
+	#### Kafka event sink factory configuration end ####
+```
