@@ -7,6 +7,10 @@ InterceptionsManager has bound two InterceptionReporters:
 
 To stream Kafka topic contained metrics run "kafka-intercept" sample.
 
+## Interceptors configuration 
+
+### Interceptors binding
+
 To bind interceptors to any producer/consumer alter configuration properties:
 * producer: 
 ```properties
@@ -17,6 +21,7 @@ interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKa
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor
 ```
+### Interceptors collected metrics streaming to Kafka configuration
 
 Set TNT4J to use Kafka sink to send interceptors collected statistics to dedicated Kafka topic (e.g. `tnt4j_kafka_interceptor_metrics`):
 
