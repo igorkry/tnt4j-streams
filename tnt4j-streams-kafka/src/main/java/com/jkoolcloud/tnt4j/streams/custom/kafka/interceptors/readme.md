@@ -22,8 +22,8 @@ Set TNT4J to use Kafka sink to send interceptors collected statistics to dedicat
 
 ```properties
   #### Kafka event sink factory configuration ####
-	event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.kafka.KafkaEventSinkFactory
-	event.sink.factory.propFile: ../config/tnt4j-kafka.properties
-	event.sink.factory.topic: tnt4j_kafka_interceptor_metrics
-	#### Kafka event sink factory configuration end ####
+  event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.kafka.KafkaEventSinkFactory
+  event.sink.factory.propFile: ../config/tnt4j-kafka.properties
+  event.sink.factory.topic: tnt4j_kafka_interceptor_metrics
+  #### Kafka event sink factory configuration end ####
 ```
