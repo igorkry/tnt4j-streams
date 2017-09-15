@@ -21,9 +21,9 @@ interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKa
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor
 ```
-### Interceptors collected metrics streaming to Kafka configuration
+### Interceptors collected metrics streaming
 
-Set TNT4J to use Kafka sink to send interceptors collected statistics to dedicated Kafka topic (e.g. `tnt4j_kafka_interceptor_metrics`):
+Set TNT4J to use `KafkaSink` to send interceptors collected statistics to dedicated Kafka topic (e.g. `tnt4j_kafka_interceptor_metrics`):
 
 ```properties
   #### Kafka event sink factory configuration ####
