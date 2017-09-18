@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -45,13 +47,32 @@ public class InterceptionsManager {
 
 	private static InterceptionsManager instance;
 
-	private InterceptionsManager() {
+	public static String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties";
+	private String interceptorsPropFile = DEFAULT_INTERCEPTORS_PROP_FILE;
 
+	private Properties interceptorProps = new Properties();
+
+	private InterceptionsManager() {
+	}
+
+	private void loadProperties() {
+		interceptorsPropFile = System.getProperty("interceptors.config", DEFAULT_INTERCEPTORS_PROP_FILE);
+
+		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
+			interceptorProps.load(fis);
+		} catch (IOException exc) {
+			LOGGER.log(OpLevel.ERROR, "Failed loading interceptors configuration properties", exc);
+		}
 	}
 
 	private void initialize() {
+		loadProperties();
+
 		addReporter(new TNTInterceptionsReporter());
-		addReporter(new StreamsInterceptionsReporter());
+		boolean traceMessages = Boolean.parseBoolean(interceptorProps.getProperty("trace.kafka.messages", "true"));
+		if (traceMessages) {
+			addReporter(new StreamsInterceptionsReporter());
+		}
 	}
 
 	public static synchronized InterceptionsManager getInstance() {
