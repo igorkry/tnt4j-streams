@@ -53,7 +53,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link GenericActivityParser}):
  * <ul>
  * <li>ReadLines - indicates that complete JSON data package is single line. Default value - '{@code true}'. (Optional,
- * deprected - use 'ActivityDelim' instead)</li>
+ * deprecated - use 'ActivityDelim' instead)</li>
  * </ul>
  *
  * @version $Revision: 2 $

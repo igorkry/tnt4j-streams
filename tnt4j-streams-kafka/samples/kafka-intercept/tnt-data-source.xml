@@ -4,7 +4,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="EventType" value="EVENT"/>
         <field name="EventName" value="Kafka_interceptor_metrics_snapshot"/>
@@ -30,7 +30,8 @@
     </parser>
 
     <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
+
         <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label">
             <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge"/>
         </field>

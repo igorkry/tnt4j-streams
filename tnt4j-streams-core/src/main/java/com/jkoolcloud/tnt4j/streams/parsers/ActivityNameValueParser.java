@@ -54,7 +54,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>StripQuotes - whether surrounding double quotes should be stripped from extracted data values. (Optional)</li>
  * <li>EntryPattern - pattern used to to split data into name/value pairs. It should define two RegEx groups named
  * {@code "key"} and {@code "value"} used to map data contained values to name/value pair. NOTE: this parameter takes
- * preference on {@code "FieldDelim"} and {@code "ValueDelim"} parameters. (Optional)</li>
+ * preference on {@code "FieldDelim"} and {@code "ValueDelim"} properties. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $

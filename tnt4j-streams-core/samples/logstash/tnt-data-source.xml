@@ -24,7 +24,7 @@
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <!--<property name="ReadLines" value="false"/>-->
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="MsgBody" locator="$.message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>

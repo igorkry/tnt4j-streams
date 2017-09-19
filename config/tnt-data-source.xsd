@@ -703,14 +703,6 @@
                 </xs:annotation>
             </xs:enumeration>
 
-            <xs:enumeration value="ReadLines">
-                <xs:annotation>
-                    <xs:documentation>
-                        Property indicates that complete activity RAW data (e.g., JSON) package is single line.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
             <xs:enumeration value="RestartOnInputClose">
                 <xs:annotation>
                     <xs:documentation>
@@ -886,7 +878,8 @@
             <xs:enumeration value="ReadLines">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that complete activity RAW data (e.g., JSON) package is single line.
+                        Property indicates that complete activity RAW data (e.g., JSON) package is single line. Deprecated - use
+                        "ActivityDelim" instead.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -904,6 +897,33 @@
                     <xs:documentation>
                         Property indicates that activity RAW data shall be put into 'Message' field of activity entity if no custom mapping
                         for that field is defined.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="EntryPattern">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property defines pattern used to to split data into name/value pairs. It should define two RegEx groups named "key"
+                        and "value" used to map data contained values to name/value pair. NOTE: this parameter takes preference on
+                        "FieldDelim" and "ValueDelim" properties.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ActivityDelim">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates the delimiter of activity RAW data entries. It can be "EOL" (end-of-line) or "EOF"
+                        (end-of-file/stream).
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="NamespaceAware">
+                <xs:annotation>
+                    <xs:documentation>
+                        Property indicates that parser has to provide support for XML namespaces.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -1328,6 +1348,14 @@
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+
+                <xs:attribute name="phase" use="optional" type="ValueResolutionPhases" default="formatted">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Activity data resolution phase when transformation has to be applied.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
             </xs:extension>
         </xs:simpleContent>
         <!--<xs:assert test="(@bean and not(@lang)) or (not(@bean) and @lang)"/>-->
@@ -1359,6 +1387,38 @@
                 <xs:annotation>
                     <xs:documentation>
                         XPath syntax and functions used to script.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Value resolution phases definition -->
+    <xs:simpleType name="ValueResolutionPhases">
+        <xs:annotation>
+            <xs:documentation>
+                Supported value resolution phases.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="raw">
+                <xs:annotation>
+                    <xs:documentation>
+                        When RAW data value is resolved.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="formatted">
+                <xs:annotation>
+                    <xs:documentation>
+                        When RAW data value gets formatted.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="aggregated">
+                <xs:annotation>
+                    <xs:documentation>
+                        When activity data value gets aggregated into activity entity.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>

@@ -4,7 +4,6 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <property name="ReadLines" value="false"/>
         <field name="EventType" value="SNAPSHOT"/>
         <field name="EventName" locator="type|type_instance" locator-type="Label" separator=" "/>
         <field name="Category" locator="plugin|plugin_instance" locator-type="Label" separator=" "/>
@@ -19,7 +18,7 @@
     </parser>
 
     <parser name="CollectdReqBodyParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <embedded-activity name="MsgBody" locator="$" locator-type="Label">
             <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>

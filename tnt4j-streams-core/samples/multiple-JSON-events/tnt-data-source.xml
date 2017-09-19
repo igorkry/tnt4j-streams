@@ -4,15 +4,13 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <property name="ReadLines" value="false"/>
-
         <field name="EventType" value="EVENT"/>
 
         <field name="QuoteProperties" locator="*" locator-type="Label"/>
     </parser>
 
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="EventType" value="ACTIVITY"/>
         <embedded-activity name="Result" locator="$.query.results.quote" locator-type="Label">

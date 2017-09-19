@@ -59,7 +59,6 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="UserName"/>
  *     &lt;enumeration value="Password"/>
  *     &lt;enumeration value="UseSSL"/>
- *     &lt;enumeration value="ReadLines"/>
  *     &lt;enumeration value="RestartOnInputClose"/>
  *     &lt;enumeration value="ArchType"/>
  *     &lt;enumeration value="BufferSize"/>
@@ -337,15 +336,6 @@ public enum StreamProperties {
 	 */
 	@XmlEnumValue("UseSSL")
 	USE_SSL("UseSSL"),
-
-	/**
-	 * 
-	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line.
-	 * 
-	 * 
-	 */
-	@XmlEnumValue("ReadLines")
-	READ_LINES("ReadLines"),
 
 	/**
 	 * 

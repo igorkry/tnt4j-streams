@@ -16,7 +16,7 @@
     </parser>
 
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <embedded-activity name="MsgBody" locator="$.data" locator-type="Label">
             <parser-ref name="SnapshotParser" aggregation="Join"/>

@@ -146,11 +146,6 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_READ_LINES = "ReadLines"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_RESTART_ON_CLOSE = "RestartOnInputClose"; // NON-NLS
 
 	/**

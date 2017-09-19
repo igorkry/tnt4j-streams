@@ -680,7 +680,6 @@ Defining dynamic `field` parameters sample:
 ```xml
     <.../>
     <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <property name="ReadLines" value="false"/>
         <field name="EventType" value="SNAPSHOT"/>
         <.../>
         <field name="${FieldNameLoc}" locator="values" locator-type="Label" value-type="${ValueTypeLoc}" split="true">
@@ -762,7 +761,7 @@ Sample streamed values caching configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="EventType" value="EVENT"/>
 
@@ -1475,7 +1474,7 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <!--<property name="ReadLines" value="false"/>-->
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="MsgBody" locator="$.body" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -1499,7 +1498,7 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `sinkName`, `chanelName` and
-`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property
+`headers`. `MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ActivityDelim` property
 indicates that every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
@@ -1527,7 +1526,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="FlumeJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <!--<property name="ReadLines" value="false"/>-->
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="Location" locator="$.headers.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.headers.auth" locator-type="Label"/>
@@ -1564,7 +1563,7 @@ Stream configuration states that `CharacterStream` referencing `FlumeJSONParser`
 
 `FlumeJSONParser` transforms received JSON data package to Map entries. Note that some entries like `headers` in map
 has inner map as value. Fields of such entries can be accessed defining field name using `.` as field hierarchy
-separator. `ReadLines` property indicates that every line in parsed string represents single JSON data package.
+separator. `ActivityDelim` property indicates that every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
@@ -1610,7 +1609,7 @@ Sample stream configuration:
     </parser>
 
     <parser name="JSONEnvelopeParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <!--<property name="ReadLines" value="false"/>-->
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="MsgBody" locator="$.message" locator-type="Label">
             <parser-ref name="AccessLogParserCommon"/>
@@ -1635,7 +1634,7 @@ Stream configuration states that `CharacterStream` referencing `JSONEnvelopePars
 stream should skip unparseable entries.
 
 `JSONEnvelopeParser` transforms received JSON data package to Map with entries `MsgBody`, `path`, `Tag` and `host`.
-`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ReadLines` property indicates that
+`MsgBody` entry value is passed to stacked parser named `AccessLogParserCommon`. `ActivityDelim` property indicates that
 every line in parsed string represents single JSON data package.
 
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
@@ -1663,7 +1662,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <!--<property name="ReadLines" value="false"/>-->
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="Location" locator="$.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.auth" locator-type="Label"/>
@@ -1696,7 +1695,7 @@ Stream configuration states that `CharacterStream` referencing `LogstashJSONPars
 `CharacterStream` starts server socket on port defined using `Port` property.
 
 `LogstashJSONParser` transforms received JSON data package to Map data structure and maps map entries to activity
-event fields using map entry key labels. `ReadLines` property indicates that every line in parsed string represents
+event fields using map entry key labels. `ActivityDelim` property indicates that every line in parsed string represents
 single JSON data package.
 
 #### HTTP request file
@@ -2655,7 +2654,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="StartTime" locator="$.timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
         <field name="ResourceName" locator="$.url" locator-type="Label"/>
@@ -2712,7 +2711,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="StartTime" locator="$.startOfLoading" locator-type="Label" datatype="Timestamp"
                units="Nanoseconds"/>
@@ -2782,7 +2781,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="ElapsedTime" locator="$.span" locator-type="Label" datatype="Number" units="Milliseconds" required="false"/>
         <field name="ResourceName" separator=",">
@@ -2934,7 +2933,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
     <parser name="RESTResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="EventType" value="Event"/>
         <field name="ApplName" value="weather"/>
@@ -2986,7 +2985,7 @@ Step named `Step Vilnius` defines Cron scheduler expression stating: `invoke eve
 Step named `Step Klaipeda` defines simple scheduler expression stating: `10 times with 45 seconds interval`.
 
 `RESTResponseParser` maps JSON data values to activity event fields `Location`, `GeoLocation`, `Temperature`, `Humidity`
-and `Wind Speed`. Parser property `ReadLines` indicates that whole parsed string represents single JSON data package.
+and `Wind Speed`. Parser property `ActivityDelim` indicates that whole parsed string represents single JSON data package.
 
 ##### JAX-RS XML
 
@@ -3363,7 +3362,6 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="CollectdStatsDataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <property name="ReadLines" value="false"/>
         <field name="EventType" value="SNAPSHOT"/>
         <field name="EventName" locator="type|type_instance" locator-type="Label" separator=" "/>
         <field name="Category" locator="plugin|plugin_instance" locator-type="Label" separator=" "/>
@@ -3378,7 +3376,7 @@ Sample stream configuration:
     </parser>
 
      <parser name="CollectdReqBodyParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="MsgBody" locator="$" locator-type="Label" transparent="true" split="true">
             <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
@@ -3454,7 +3452,7 @@ Sample stream configuration:
     </parser>
 
     <parser name="ResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ReadLines" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
 
         <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true" split="true">
             <parser-ref name="SnapshotParser" aggregation="Join"/>
