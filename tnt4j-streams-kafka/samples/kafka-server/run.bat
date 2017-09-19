@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set RUNDIR=%~p0
+set RUNDIR=%~dp0
 set ZKOPTS=-Dtnt4j.zookeeper.config="%RUNDIR%..\..\config\zookeeper.properties"
 set KAFKAOPTS=-Dtnt4j.kafka.srv.config="%RUNDIR%..\..\config\kafka-server.properties"
 set STREAMSOPTS=%ZKOPTS% %KAFKAOPTS%
