@@ -480,10 +480,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 				return Utils.base64EncodeStr((byte[]) value);
 			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
 				return Utils.encodeHex((byte[]) value);
-			} else if (builtInFormat == ActivityFieldFormatType.string) {
-				return Utils.getString((byte[]) value);
 			} else if (builtInFormat == ActivityFieldFormatType.bytes) {
 				return Utils.toHexString((byte[]) value);
+			} else {
+				return Utils.getString((byte[]) value);
 			}
 		}
 

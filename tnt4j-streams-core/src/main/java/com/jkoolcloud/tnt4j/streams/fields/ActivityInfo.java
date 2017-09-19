@@ -120,7 +120,7 @@ public class ActivityInfo {
 	public void applyField(ActivityField field, Object value) throws ParseException {
 		LOGGER.log(OpLevel.TRACE,
 				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field"), field,
-				value);
+				Utils.toString(value));
 		Object[] values = Utils.makeArray(Utils.simplifyValue(value));
 
 		List<ActivityFieldLocator> locators = field.getLocators();
@@ -395,7 +395,7 @@ public class ActivityInfo {
 
 			LOGGER.log(OpLevel.TRACE,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
-					fieldValue);
+					Utils.toString(fieldValue));
 		} else {
 			addCustomActivityProperty(field, fieldValue);
 		}

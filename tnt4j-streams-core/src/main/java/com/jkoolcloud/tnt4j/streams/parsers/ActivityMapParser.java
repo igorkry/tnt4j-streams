@@ -68,7 +68,7 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 		Object activityData = map.get(StreamsConstants.ACTIVITY_DATA_KEY);
 		if (activityData instanceof byte[]) {
 			String activityDataStr = Utils.getString((byte[]) activityData);
-			map.put(StreamsConstants.ACTIVITY_DATA_KEY, Utils.cleanActivityData(activityDataStr));
+			map.put(StreamsConstants.ACTIVITY_DATA_KEY, activityDataStr);
 		}
 
 		return map;

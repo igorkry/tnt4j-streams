@@ -150,7 +150,6 @@ public abstract class ActivityParser {
 		applyFieldValue(ai, field, value);
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
-			value = Utils.cleanActivityData(value);
 			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
 				boolean applied = applyStackedParser(stream, ai, parserRef, value);
