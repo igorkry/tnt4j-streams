@@ -210,18 +210,54 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		if (autoSort) {
-			int idx = -1;
-			for (int i = 0; i < fieldList.size(); i++) {
-				ActivityField af = fieldList.get(i);
-				if (af.hasCacheLocators() || af.hasActivityLocators() || af.hasActivityTransformations()) {
-					idx = i;
-					break;
-				}
-			}
-			fieldList.add(idx >= 0 ? idx : fieldList.size(), field);
+			addFieldAndSort(field);
 		} else {
 			fieldList.add(field);
 		}
+	}
+
+	/**
+	 * Adds activity field definition to the set of fields supported by this parser and makes fields sorting according
+	 * to value resolution order: activity RAW data value locating fields first, then activity entity field value
+	 * locating fields, and then cache stored values locating fields.
+	 *
+	 * @param field
+	 *            activity field to add
+	 */
+	protected void addFieldAndSort(ActivityField field) {
+		int rIdx = -1;
+		int aIdx = -1;
+		int cIdx = -1;
+		for (int i = 0; i < fieldList.size(); i++) {
+			ActivityField af = fieldList.get(i);
+
+			boolean fActivity = af.hasActivityLocators() || af.hasActivityTransformations();
+			boolean fCache = af.hasCacheLocators();
+			boolean fRAW = !fActivity && !fCache;
+
+			if (fRAW) {
+				rIdx = Math.max(rIdx, i);
+			}
+			if (fActivity) {
+				aIdx = Math.max(aIdx, i);
+			}
+			if (fCache) {
+				cIdx = Math.max(cIdx, i);
+			}
+		}
+
+		int idx = rIdx + 1;
+		aIdx = aIdx < 0 ? rIdx : aIdx;
+		cIdx = cIdx < 0 ? aIdx : cIdx;
+
+		if (field.hasActivityLocators() || field.hasActivityTransformations()) {
+			idx = aIdx + 1;
+		}
+		if (field.hasCacheLocators()) {
+			idx = cIdx + 1;
+		}
+
+		fieldList.add(idx, field);
 	}
 
 	/**
