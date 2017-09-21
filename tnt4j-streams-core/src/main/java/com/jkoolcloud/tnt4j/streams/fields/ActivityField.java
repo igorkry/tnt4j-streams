@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
@@ -430,9 +431,11 @@ public class ActivityField extends AbstractFieldEntity {
 	public ActivityField addStackedParser(ActivityParser parser, String aggregationType) {
 		if (parser != null) {
 			if (stackedParsers == null) {
-				stackedParsers = new HashSet<>(5);
+				stackedParsers = new LinkedHashSet<>(5);
 			}
 
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityField.adding.stacked.parser"), fieldTypeName, parser.getName());
 			stackedParsers.add(new ParserReference(parser, aggregationType));
 		}
 
@@ -674,6 +677,10 @@ public class ActivityField extends AbstractFieldEntity {
 
 		public AggregationType getAggregationType() {
 			return aggregationType;
+		}
+
+		public String toString() {
+			return parser.getName() + ":" + aggregationType; // NON-NLS
 		}
 	}
 }

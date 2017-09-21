@@ -23,11 +23,13 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -58,7 +60,7 @@ public abstract class ActivityParser {
 	protected abstract EventSink logger();
 
 	/**
-	 * Set properties for the parser.
+	 * Set configuration properties for the parser.
 	 * <p>
 	 * This method is called during the parsing of the configuration when all specified properties in the configuration
 	 * have been loaded. In general, parsers should ignore properties that they do not recognize, since they may be
@@ -66,7 +68,7 @@ public abstract class ActivityParser {
 	 * should be called so that it can process any properties it requires.
 	 *
 	 * @param props
-	 *            properties to set
+	 *            configuration properties to set
 	 */
 	public abstract void setProperties(Collection<Map.Entry<String, String>> props);
 
@@ -152,12 +154,24 @@ public abstract class ActivityParser {
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
-				boolean applied = applyStackedParser(stream, ai, parserRef, value);
+				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.stacked.parser.applying"), name, parserRef, field);
+				try {
+					boolean applied = applyStackedParser(stream, ai, parserRef, value);
 
-				if (applied) {
-					break;
+					if (applied) {
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.stacked.parser.applied"), name, parserRef, field);
+						break;
+					}
+				} catch (Exception exc) {
+					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.stacked.parser.failed"), name, parserRef, field, exc);
 				}
 			}
+
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.stacked.parsers.missed"), name, field);
 		}
 	}
 
