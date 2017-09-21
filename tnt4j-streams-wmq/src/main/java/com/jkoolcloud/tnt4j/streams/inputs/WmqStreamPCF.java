@@ -26,6 +26,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 
 /**
@@ -67,6 +68,9 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 	}
 
 	private void handleMQMDParameters(PCFMessage msgData, MQMessage mqMsg) {
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.adding.mq.to.pcf"));
+
 		addParameterIfAbsent(msgData, MQConstants.MQIACF_REPORT, mqMsg.report);
 		addParameterIfAbsent(msgData, MQConstants.MQIACF_MSG_TYPE, mqMsg.messageType);
 		addParameterIfAbsent(msgData, MQConstants.MQIACF_EXPIRY, mqMsg.expiry);
@@ -102,6 +106,10 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 			return;
 		}
 
+		logger().log(OpLevel.DEBUG,
+				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.adding.pcf.param"),
+				paramId, Utils.toString(val));
+
 		PCFParameter paramV = msg.getParameter(paramId);
 		if (paramV == null) {
 			if (val instanceof Integer) {
@@ -121,12 +129,13 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 			} else {
 				throw new IllegalArgumentException(
 						StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WmqStream.parameter.incompatible", paramId, val.getClass().getSimpleName()));
+								"WmqStreamPCF.parameter.incompatible", paramId, val.getClass().getSimpleName()));
 			}
 		} else {
 			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.parameter.exists"),
-					PCFConstants.lookupParameter(paramId), paramV.getValue(), val);
+					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+							"WmqStreamPCF.parameter.exists"),
+					PCFConstants.lookupParameter(paramId), paramV.getValue(), Utils.toString(val));
 		}
 	}
 }
