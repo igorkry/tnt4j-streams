@@ -106,7 +106,7 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 			return;
 		}
 
-		logger().log(OpLevel.DEBUG,
+		logger().log(OpLevel.TRACE,
 				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.adding.pcf.param"),
 				paramId, Utils.toString(val));
 
