@@ -52,7 +52,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public final class StreamsConfigSAXParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsConfigSAXParser.class);
 
-	private static final String HANDLER_PROP_KEY = "tnt4j.streams.config.sax.handler";
+	private static final String SAX_CFG_PROPERTIES = "sax.properties"; // NON-NLS
+	private static final String HANDLER_PROP_KEY = "tnt4j.streams.config.sax.handler"; // NON-NLS
+	private static final String HANDLER_EXT_PROP_KEY = "tnt4j.streams.config.sax.handler.ext."; // NON-NLS
 
 	private StreamsConfigSAXParser() {
 	}
@@ -91,26 +93,40 @@ public final class StreamsConfigSAXParser {
 			}
 		}
 
-		Properties p = Utils.loadPropertiesResource("sax.properties"); // NON-NLS
-
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();
-		ConfigParserHandler hndlr = null;
-		try {
-			String handlerClassName = p.getProperty(HANDLER_PROP_KEY, ConfigParserHandler.class.getName());
-			if (StringUtils.isNotEmpty(handlerClassName)) {
-				hndlr = (ConfigParserHandler) Utils.createInstance(handlerClassName);
-			}
-		} catch (Exception exc) {
-		}
-
-		if (hndlr == null) {
-			hndlr = new ConfigParserHandler();
-		}
+		ConfigParserHandler hndlr = getConfigHandler();
 
 		parser.parse(config, hndlr);
 
 		return hndlr.getStreamsConfigData();
+	}
+
+	private static ConfigParserHandler getConfigHandler() throws IOException {
+		Properties p = Utils.loadPropertiesResources(SAX_CFG_PROPERTIES);
+
+		ConfigParserHandler hndlr = null;
+		try {
+			String handlerClassName = null;
+
+			// check for handler extensions
+			for (String pName : p.stringPropertyNames()) {
+				if (pName.startsWith(HANDLER_EXT_PROP_KEY)) {
+					handlerClassName = p.getProperty(pName);
+					break; // TODO: review when more modules will extend base tnt-data-source configuration
+				}
+			}
+
+			// if no extensions available, get core handler
+			if (StringUtils.isEmpty(handlerClassName)) {
+				handlerClassName = p.getProperty(HANDLER_PROP_KEY, ConfigParserHandler.class.getName());
+			}
+
+			hndlr = (ConfigParserHandler) Utils.createInstance(handlerClassName);
+		} catch (Exception exc) {
+		}
+
+		return hndlr == null ? new ConfigParserHandler() : hndlr;
 	}
 
 	/**

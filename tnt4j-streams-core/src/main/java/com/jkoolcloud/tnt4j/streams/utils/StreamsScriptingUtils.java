@@ -29,6 +29,9 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer;
  * @version $Revision: 1 $
  */
 public final class StreamsScriptingUtils {
+	private static final String SCRIPTING_CFG_PROPERTIES = "scripting.properties"; // NON-NLS
+	private static final String IMPORT_PACKAGES_PROP_KEY_SUFFIX = ".scripting.import.packages"; // NON-NLS
+
 	private static CompilerConfiguration DEFAULT_GROOVY_CONFIGURATION;
 	private static String DEFAULT_JS_CODE_IMPORTS;
 
@@ -46,10 +49,10 @@ public final class StreamsScriptingUtils {
 	 */
 	private static void initDefaultImportPackages() {
 		try {
-			Properties p = Utils.loadPropertiesResources("scripting.properties"); // NON-NLS
+			Properties p = Utils.loadPropertiesResources(SCRIPTING_CFG_PROPERTIES);
 
 			for (String pName : p.stringPropertyNames()) {
-				if (pName.endsWith(".scripting.import.packages")) { // NON-NLS
+				if (pName.endsWith(IMPORT_PACKAGES_PROP_KEY_SUFFIX)) {
 					String importPackages = p.getProperty(pName);
 
 					if (StringUtils.isNotEmpty(importPackages)) {
