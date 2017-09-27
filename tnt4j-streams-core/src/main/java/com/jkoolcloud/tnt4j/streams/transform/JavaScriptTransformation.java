@@ -48,6 +48,20 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 		super(name, scriptCode);
 	}
 
+	/**
+	 * Constructs a new JavaScriptTransformation.
+	 *
+	 * @param name
+	 *            transformation name
+	 * @param scriptCode
+	 *            transformation script code
+	 * @param phase
+	 *            activity data value resolution phase
+	 */
+	public JavaScriptTransformation(String name, String scriptCode, Phase phase) {
+		super(name, scriptCode, phase);
+	}
+
 	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		ScriptEngineManager factory = new ScriptEngineManager();
@@ -66,7 +80,7 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getScriptCode()));
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName()), exc);
+					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
 		}
 	}
 }

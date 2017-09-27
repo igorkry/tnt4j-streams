@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" use="required" type="{}ResourceReferenceType" />
  *       &lt;attribute name="uri" use="required" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
- *       &lt;attribute name="separator" use="optional" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="separator" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -59,7 +59,7 @@ public class ResourceReference {
 	@XmlSchemaType(name = "anyURI")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String uri;
-	@XmlAttribute(name = "separator", required = true)
+	@XmlAttribute(name = "separator")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String separator;
 

@@ -28,6 +28,7 @@ package com.jkoolcloud.tnt4j.streams.transform;
  */
 public abstract class AbstractValueTransformation<V, T> implements ValueTransformation<V, T> {
 	private String name;
+	private Phase phase;
 
 	@Override
 	public String getName() {
@@ -42,5 +43,15 @@ public abstract class AbstractValueTransformation<V, T> implements ValueTransfor
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public Phase getPhase() {
+		return phase;
+	}
+
+	@Override
+	public void setPhase(Phase phase) {
+		this.phase = phase;
 	}
 }

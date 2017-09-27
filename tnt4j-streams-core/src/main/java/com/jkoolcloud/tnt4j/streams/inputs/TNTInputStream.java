@@ -50,9 +50,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
  * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
  * queue size is reached. Default value - {@code 20}. (Optional, actual only if {@code ExecutorsBoundedModel} is set to
  * {@code true})</li>
- * <li>StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
- * <li>StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value -
- * {@code 10}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -100,10 +97,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private int executorThreadsQty = DEFAULT_EXECUTOR_THREADS_QTY;
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
-
-	// cache related properties
-	private Integer cacheMaxSize;
-	private Integer cacheExpireDuration;
 
 	private Thread sh;
 
@@ -182,13 +175,15 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
-	 * Set properties for activity stream. This method is invoked by the configuration loader in response to the
-	 * {@code property} configuration elements. It is invoked once per stream definition, with all property names and
-	 * values specified for this stream. Subclasses should generally override this method to process custom properties,
-	 * and invoke the base class method to handle any built-in properties.
+	 * Set configuration properties for activity stream.
+	 * <p>
+	 * This method is invoked by the configuration loader in response to the {@code property} configuration elements. It
+	 * is invoked once per stream definition, with all property names and values specified for this stream. Subclasses
+	 * should generally override this method to process custom properties, and invoke the base class method to handle
+	 * any built-in properties.
 	 *
 	 * @param props
-	 *            properties to set
+	 *            configuration properties to set
 	 *
 	 * @see #initialize()
 	 */
@@ -207,10 +202,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					executorsTerminationTimeout = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
 					boundedExecutorModel = Boolean.parseBoolean(value);
-				} else if (StreamProperties.PROP_CACHE_MAX_SIZE.equalsIgnoreCase(name)) {
-					cacheMaxSize = Integer.parseInt(value);
-				} else if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equalsIgnoreCase(name)) {
-					cacheExpireDuration = Integer.parseInt(value);
 				}
 			}
 		}
@@ -246,12 +237,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		if (StreamProperties.PROP_EXECUTORS_BOUNDED.equals(name)) {
 			return boundedExecutorModel;
 		}
-		if (StreamProperties.PROP_CACHE_MAX_SIZE.equals(name)) {
-			return cacheMaxSize;
-		}
-		if (StreamProperties.PROP_CACHE_EXPIRE_DURATION.equals(name)) {
-			return cacheExpireDuration;
-		}
 		if (StreamProperties.PROP_STREAM_NAME.equals(name)) {
 			return this.name;
 		}
@@ -284,10 +269,6 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 					: getDefaultExecutorService(executorThreadsQty);
 		} else {
 			out.handleConsumerThread(isOwned() ? ownerThread : Thread.currentThread());
-		}
-
-		if (cacheMaxSize != null || cacheExpireDuration != null) {
-			StreamsCache.initCache(cacheMaxSize, cacheExpireDuration);
 		}
 	}
 
@@ -326,6 +307,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	public void startStream() throws Exception {
 		initialize();
 		start();
+
+		StreamsCache.referStream();
 
 		sh = new Thread(new Runnable() {
 			@Override
@@ -659,7 +642,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			out.cleanup();
 		}
 
-		StreamsCache.cleanup();
+		StreamsCache.unreferStream();
 	}
 
 	private void removeListeners() {

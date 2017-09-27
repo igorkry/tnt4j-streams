@@ -36,6 +36,7 @@ import groovy.lang.GroovyShell;
  * @see GroovyShell#evaluate(String, String)
  */
 public class GroovyTransformation extends AbstractScriptTransformation<Object> {
+
 	/**
 	 * Constructs a new GroovyTransformation.
 	 *
@@ -46,6 +47,20 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	 */
 	public GroovyTransformation(String name, String scriptCode) {
 		super(name, scriptCode);
+	}
+
+	/**
+	 * Constructs a new GroovyTransformation.
+	 *
+	 * @param name
+	 *            transformation name
+	 * @param scriptCode
+	 *            transformation script code
+	 * @param phase
+	 *            activity data value resolution phase
+	 */
+	public GroovyTransformation(String name, String scriptCode, Phase phase) {
+		super(name, scriptCode, phase);
 	}
 
 	@Override
@@ -68,7 +83,7 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 					StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName()), exc);
+					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
 		}
 	}
 }

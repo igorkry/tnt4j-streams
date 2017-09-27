@@ -108,14 +108,25 @@ public abstract class AbstractFieldEntity {
 	 */
 	public void addTransformation(ValueTransformation<Object, Object> transformation) {
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"ActivityFieldLocator.adding.transformation"), this, transformation);
+				"AbstractFieldEntity.adding.transformation"), this, transformation);
 
 		if (transformations == null) {
 			transformations = new ArrayList<>();
 		}
 
+		if (transformation.getPhase() == null) {
+			transformation.setPhase(getDefaultTransformationPhase());
+		}
+
 		transformations.add(transformation);
 	}
+
+	/**
+	 * Returns default activity data value resolution phase when transformation has to be applied for his entity.
+	 * 
+	 * @return default activity data value resolution phase for this entity
+	 */
+	protected abstract ValueTransformation.Phase getDefaultTransformationPhase();
 
 	/**
 	 * Transforms provided object value using defined transformations. If more than one transformation defined,
@@ -125,19 +136,28 @@ public abstract class AbstractFieldEntity {
 	 *            value to transform
 	 * @param ai
 	 *            activity entity instance to get additional value for a transformation
-	 *
+	 * @param phase
+	 *            activity data resolution phase defining transformations to apply
 	 * @return transformed value
 	 * @throws Exception
 	 *             if transformation operation fails
 	 */
-	public Object transformValue(Object fieldValue, ActivityInfo ai) throws Exception {
+	public Object transformValue(Object fieldValue, ActivityInfo ai, ValueTransformation.Phase phase) throws Exception {
 		if (CollectionUtils.isEmpty(transformations)) {
 			return fieldValue;
 		}
 
+		logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"AbstractFieldEntity.value.before.transformations"), this, Utils.toString(fieldValue));
 		Object tValue = fieldValue;
 		for (ValueTransformation<Object, Object> vt : transformations) {
-			tValue = vt.transform(tValue, ai);
+			if (vt.getPhase().equals(phase)) {
+				tValue = vt.transform(tValue, ai);
+				logger().log(OpLevel.TRACE,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"AbstractFieldEntity.value.after.transformation"),
+						this, vt.getName(), Utils.toString(tValue));
+			}
 		}
 
 		return tValue;
@@ -151,7 +171,7 @@ public abstract class AbstractFieldEntity {
 	 */
 	public void setFilter(StreamFiltersGroup<Object> ffg) {
 		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityFieldLocator.adding.filter"),
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFieldEntity.adding.filter"),
 				this, ffg.getName());
 
 		this.filter = ffg;
@@ -194,7 +214,6 @@ public abstract class AbstractFieldEntity {
 					}
 				}
 			}
-
 		}
 
 		return false;

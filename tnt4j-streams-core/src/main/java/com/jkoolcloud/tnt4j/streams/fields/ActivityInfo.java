@@ -34,6 +34,7 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
+import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
@@ -190,7 +191,7 @@ public class ActivityInfo {
 	 */
 	protected Object transform(ActivityField field, Object fieldValue) {
 		try {
-			fieldValue = field.transformValue(fieldValue, this);
+			fieldValue = field.transformValue(fieldValue, this, ValueTransformation.Phase.AGGREGATED);
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1698,7 +1699,7 @@ public class ActivityInfo {
 	public Object getFieldValue(String fieldName) {
 		try {
 			if (fieldName.startsWith(Utils.VAR_EXP_START_TOKEN)) {
-				fieldName = fieldName.substring(2, fieldName.length() - 1);
+				fieldName = Utils.getVarName(fieldName);
 			}
 
 			StreamFieldType sft = Utils.valueOfIgnoreCase(StreamFieldType.class, fieldName);

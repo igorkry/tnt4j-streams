@@ -417,9 +417,12 @@ parser defined field names as script/expression variables having format `${FIELD
 #### Transformation definition
 
 To define transformations stream configuration token `<field-transform>` shall be used. Attributes:
- * `name` - name of transformation (optional)
+ * `name` - name of transformation (optional).
  * `lang` - transformation script/expression language. Can be one of `groovy`, `javascript` or `xpath`. Default value - `javascript`.
- * `beanRef` - transformation implementing bean reference
+ * `beanRef` - transformation implementing bean reference.
+ * `phase` - defines activity data resolution phase, when transformation has to be applied. Can be one of `raw`, `formatted` or `aggregated`.
+ `raw` and `formatted` values are applicable for field locator resolved value transformation, while `aggregated` is default for field value 
+ transformation.
 
 Token body is used to define transformation script/expression code.
 
@@ -515,12 +518,12 @@ and field value after transformation is `VALUE1,VALUE2`.
 ```xml
 <field name="Field" separator=",">
     <field-locator locator="loc1" locator-type="Label">
-        <field-transform name="toUpper" lang="groovy">
+        <field-transform name="toUpper" lang="groovy" phase="raw">
             $fieldValue.toUpperCase()
         </field-transform>
     </field-locator>
     <field-locator locator="loc2" locator-type="Label">
-        <field-transform name="toUpperConcat" lang="groovy">
+        <field-transform name="toUpperConcat" lang="groovy" phase="formatted">
             $fieldValue.toUpperCase() + "_transformed"
         </field-transform>
     </field-locator>
@@ -553,7 +556,6 @@ example field `EventName` resolved value `Transcation_X` and `EventType` resolve
 value becomes as `ACTIVITY=SEND:Transcation_X`.
 
 **NOTE:** 
-* transformations are applied after field/locator value formatting.
 * locator defined transformations are applied before field value transformations.
 * it is possible to define multiple transformations for same stream element (field/locator). In that case transformations are applied 
 sequentially where input of applied transformation is output of previous transformation. 
@@ -750,7 +752,7 @@ use this value when constructing actual XPath expression e.g., `/transaction/${D
 
 ### Caching of streamed data field values
 
-`TNT4J-Streams` provides temporary storage (i.e., cache) for a resolved activity fields values. It is useful when there are some related 
+`TNT4J-Streams` provides temporary storage (i.e. cache) for a resolved activity fields values. It is useful when there are some related 
 activities streamed and particular JKool prepared activity entity requires data values form previously streamed activities.
 
 Sample streamed values caching configuration:
@@ -777,35 +779,35 @@ Sample streamed values caching configuration:
         <field name="Message" locator="$.message" locator-type="Label"/>
         <field name="Resource" locator="$.resource" locator-type="Label"/>
     </parser>
+    
+    <cache>    
+        <property name="MaxSize" value="300"/>
+        <property name="ExpireDuration" value="15"/>
+        
+        <entry id="CachedEventName">
+            <key>EventName</key>
+            <value>${EventName} in ${Transaction}</value>
+        </entry>
+        <entry id="SecretCache">
+            <key>${Transaction}Secret</key>
+            <value>${SecretValue}</value>
+        </entry>
+    </cache>
 
     <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
 
-        <property name="StreamCacheMaxSize" value="300"/>
-        <property name="StreamCacheExpireDuration" value="15"/>
-
-        <parser-ref name="EventParser"/>
-
-        <cache>
-            <entry id="CachedEventName">
-                <key>EventName</key>
-                <value>${EventName} in ${Transaction}</value>
-            </entry>
-            <entry id="SecretCache">
-                <key>${Transaction}Secret</key>
-                <value>${SecretValue}</value>
-            </entry>
-        </cache>
+        <parser-ref name="EventParser"/>        
     </stream>
 
 </tnt-data-source>
 ```
 
 Sample configuration defines stream `MultipleEvents` reading data from JSON files using filename mask `event*.json` and referencing parser 
-`EventParser`. Stream defines two cache related properties `StreamCacheMaxSize` and `StreamCacheExpireDuration`. Definitions of those 
-properties can be found in chapter [Stream cache related parameters](#stream-cache-related-parameters). 
+`EventParser`. Stream defines two cache related properties `MaxSize` and `ExpireDuration`. Definitions of those properties can be found in 
+chapter [Stream cache related parameters](#stream-cache-related-parameters). 
 
-Stream definition has `cache` section, defining stored cache entries. Entry key and value can be configured using static values (e.g, 
+Stream definition has `cache` section, defining stored cache entries. Entry key and value can be configured using static values (e.g., 
 `<key>EventName</key>`), dynamic activity value references (e.g., `<value>${SecretValue}</value>`) referencing activity entity field name, 
 or combined static and dynamic values (e.g., `<value>${EventName} in ${Transaction}</value>`). Using dynamic value references in `<key>` 
 definition will result having multiple cache entries filled in with values resolved from streamed activity data.
@@ -3795,15 +3797,15 @@ That is why sequence of configuration elements is critical and can't be swapped.
 
 These parameters are applicable to all types of streams.
 
- * UseExecutors - identifies whether stream should use executor service to process activities data items asynchronously
+ * `UseExecutors` - identifies whether stream should use executor service to process activities data items asynchronously
  or not. Default value - `false`. (Optional)
-    * ExecutorThreadsQuantity - defines executor service thread pool size. Default value - `4`. (Optional) Actual only if `UseExecutors` 
+    * `ExecutorThreadsQuantity` - defines executor service thread pool size. Default value - `4`. (Optional) Actual only if `UseExecutors` 
     is set to `true`
-    * ExecutorsTerminationTimeout - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) 
+    * `ExecutorsTerminationTimeout` - time to wait (in seconds) for a executor service to terminate. Default value - `20sec`. (Optional) 
     Actual only if `UseExecutors` is set to `true`
-    * ExecutorsBoundedModel - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional) 
+    * `ExecutorsBoundedModel` - identifies whether executor service should use bounded tasks queue model. Default value - `false`. (Optional) 
     Actual only if `UseExecutors` is set to `true`
-        * ExecutorRejectedTaskOfferTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is 
+        * `ExecutorRejectedTaskOfferTimeout` - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is 
         reached. Default value - `20sec`. (Optional) Actual only if `ExecutorsBoundedModel` is set to `true`.
 
     sample:
@@ -3817,20 +3819,23 @@ These parameters are applicable to all types of streams.
 
 ##### Stream cache related parameters
 
-* StreamCacheMaxSize - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
-* StreamCacheExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)
+* `MaxSize` - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
+* `ExpireDuration` - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)
+* `Persisted` - flag indicating cache contents has to be persisted to file on close and loaded on initialization. Default value - `false. 
+(Optional)
 
     sample:
 ```xml
-    <property name="StreamCacheMaxSize" value="500"/>
-    <property name="StreamCacheExpireDuration" value="30"/>
+    <property name="MaxSize" value="500"/>
+    <property name="ExpireDuration" value="30"/>
+    <property name="Persisted" value="true"/>
 ```
 
 ##### Parseable streams parameters
 
 These parameters are applicable to streams which uses parsers to parse incoming RAW activity data.
 
- * HaltIfNoParser - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
+ * `HaltIfNoParser` - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `false`. (Optional)
 
     sample:
@@ -3840,8 +3845,8 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 
 ##### Buffered streams parameters
 
- * BufferSize - maximal buffer queue capacity. Default value - `1024`. (Optional)
- * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ * `BufferSize` - maximal buffer queue capacity. Default value - `1024`. (Optional)
+ * `BufferDropWhenFull` - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
      sample:
@@ -3854,18 +3859,18 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 
 Stream output can be configured using these configuration properties:
 
- * TNT4JConfigFile - path of `tnt4j.properties` file. May be used to override default TNT4J system property `tnt4j.config` defined value. 
+ * `TNT4JConfigFile` - path of `tnt4j.properties` file. May be used to override default TNT4J system property `tnt4j.config` defined value. 
 Default value - `null`. (Optional)
- * TNT4JProperty - defines specific TNT4J configuration properties to be used by stream output. (Optional)
- * TNT4JConfigZKNode - defines ZooKeeper path where stream configuration is located. Default value - ``. (Optional)
- * RetryStateCheck - flag indicating whether tracker state check should be perform repeatedly. If `false`, then streaming process exits with 
+ * `TNT4JProperty` - defines specific TNT4J configuration properties to be used by stream output. (Optional)
+ * `TNT4JConfigZKNode` - defines ZooKeeper path where stream configuration is located. Default value - ``. (Optional)
+ * `RetryStateCheck` - flag indicating whether tracker state check should be perform repeatedly. If `false`, then streaming process exits with 
  `java.lang.IllegalStateException`. Default value - `false`. (Optional)
- * ResolveServerFromDNS - flag indicating whether to resolve activity entity host name/IP from DNS server. Default value - `false`. (Optional)
- * TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging data from both parent and 
+ * `ResolveServerFromDNS` - flag indicating whether to resolve activity entity host name/IP from DNS server. Default value - `false`. (Optional)
+ * `TurnOutActivityChildren` - flag indicating whether to send activity entity child entities independently merging data from both parent and 
  child entity fields. Default value - `false`. (Optional)
- * BuildSourceFQNFromStreamedData - flag indicating whether to set streamed activity entity `Source` FQN build from activity fields data 
+ * `BuildSourceFQNFromStreamedData` - flag indicating whether to set streamed activity entity `Source` FQN build from activity fields data 
  instead of default on configured in `tnt4j.properties`. Default value - `true`. (Optional)
- * SourceFQN - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
+ * `SourceFQN` - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
 
@@ -3928,18 +3933,18 @@ or
 
 #### File line stream parameters (and Hdfs)
 
- * FileName - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
- * FilePolling - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
+ * `FileName` - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
+ * `FilePolling` - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
  are read from oldest to newest sequentially one single time. Default value - `false`. (Optional)
-    * FileReadDelay - delay in seconds between file reading iterations. Actual only if `FilePolling` property is set to `true`. Default 
+    * `FileReadDelay` - delay in seconds between file reading iterations. Actual only if `FilePolling` property is set to `true`. Default 
     value - `15sec`. (Optional)
- * RestoreState - flag `true/false` indicating whether files read state should be stored and restored on stream restart. Note, if 
+ * `RestoreState` - flag `true/false` indicating whether files read state should be stored and restored on stream restart. Note, if 
  `StartFromLatest` is set to `false` - read state storing stays turned on, but previous stored read state is reset (no need to delete state 
  file manually). Default value - `false`. (Optional)
- * StartFromLatest - flag `true/false` indicating that streaming should be performed from latest file entry line. If `false` - then all 
+ * `StartFromLatest` - flag `true/false` indicating that streaming should be performed from latest file entry line. If `false` - then all 
  lines from available files are streamed on startup. Actual only if `FilePolling` or `RestoreState` properties are set to `true`. Default 
  value - `true`. (Optional)
- * RangeToStream - defines streamed data lines index range. Default value - `1:`. (Optional)
+ * `RangeToStream` - defines streamed data lines index range. Default value - `1:`. (Optional)
 
     sample:
  ```xml
@@ -3957,9 +3962,9 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Character stream parameters
 
- * FileName - the system-dependent file name. (Required - just one `FileName` or `Port`)
- * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
- * RestartOnInputClose - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
+ * `FileName` - the system-dependent file name. (Required - just one `FileName` or `Port`)
+ * `Port` - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
+ * `RestartOnInputClose` - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
 
     sample:
 ```xml
@@ -3977,7 +3982,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 #### Standard Java input stream parameters
 
- * InputCloseable - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
+ * `InputCloseable` - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
 
     sample:
 ```xml
@@ -3994,11 +3999,11 @@ Also see ['Standard Java input stream parameters'](#standard-java-input-stream p
 
 #### Http stream parameters
 
- * Port - port number to run Http server. Default value - `8080`. (Optional)
- * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
-    * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
-    * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
-    * KeyPass - key password. (Optional) Actual only if `UseSSL` is set to `true`.
+ * `Port` - port number to run Http server. Default value - `8080`. (Optional)
+ * `UseSSL` - flag indicating to use SSL. Default value - `false`. (Optional)
+    * `Keystore` - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
+    * `KeystorePass` - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
+    * `KeyPass` - key password. (Optional) Actual only if `UseSSL` is set to `true`.
 
     sample:
 ```xml
@@ -4013,11 +4018,11 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### JMS stream parameters
 
- * ServerURI - JMS server URL. (Required)
- * Queue - queue destination name. (Required - just one of `Queue` or `Topic`)
- * Topic - topic destination name. (Required - just one of `Queue` or `Topic`)
- * JNDIFactory - JNDI context factory name. (Required)
- * JMSConnFactory - JMS connection factory name. (Required)
+ * `ServerURI` - JMS server URL. (Required)
+ * `Queue` - queue destination name. (Required - just one of `Queue` or `Topic`)
+ * `Topic` - topic destination name. (Required - just one of `Queue` or `Topic`)
+ * `JNDIFactory` - JNDI context factory name. (Required)
+ * `JMSConnFactory` - JMS connection factory name. (Required)
 
     sample:
 ```xml
@@ -4040,10 +4045,10 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Kafka stream parameters
 
- * Topic - topic name to listen. (Required)
- * StartServer - flag indicating if stream has to start Kafka server on startup. Default value - `false`. (Optional)
- * StartZooKeeper - flag indicating if stream has to start ZooKeeper server on startup. Default value - `false`. (Optional)
- * List of properties used by Kafka API, e.g., zookeeper.connect, group.id. See `kafka.consumer.ConsumerConfig` class for more
+ * `Topic` - topic name to listen. (Required)
+ * `StartServer` - flag indicating if stream has to start Kafka server on startup. Default value - `false`. (Optional)
+ * `StartZooKeeper` - flag indicating if stream has to start ZooKeeper server on startup. Default value - `false`. (Optional)
+ * List of properties used by Kafka API, e.g., `zookeeper.connect`, `group.id`. See `kafka.consumer.ConsumerConfig` class for more
  details on Kafka consumer properties.
 
     sample:
@@ -4059,13 +4064,13 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 #### MQTT stream parameters
 
- * ServerURI - Mqtt server URI. (Required)
- * TopicString - the topic to subscribe to, which can include wildcards. (Required)
- * UserName - authentication user name. (Optional)
- * Password - user password. (Optional)
- * UseSSL - flag indicating to use SSL. Default value - `false`. (Optional)
-    * Keystore - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
-    * KeystorePass - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
+ * `ServerURI` - Mqtt server URI. (Required)
+ * `TopicString` - the topic to subscribe to, which can include wildcards. (Required)
+ * `UserName` - authentication user name. (Optional)
+ * `Password` - user password. (Optional)
+ * `UseSSL` - flag indicating to use SSL. Default value - `false`. (Optional)
+    * `Keystore` - keystore path. (Optional) Actual only if `UseSSL` is set to `true`.
+    * `KeystorePass` - keystore password. (Optional) Actual only if `UseSSL` is set to `true`.
 
     sample:
 ```xml
@@ -4082,18 +4087,18 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### WMQ Stream parameters
 
- * QueueManager - Queue manager name. (Optional)
- * Queue - Queue name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
- * Topic - Topic name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
- * Subscription - Subscription name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
- * TopicString - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
- * Host - WMQ connection host name. (Optional)
- * Port - WMQ connection port number. Default value - `1414`. (Optional)
- * UserName - WMQ user identifier. (Optional)
- * Password - WMQ user password. (Optional)
- * Channel - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
- * StripHeaders - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
- * StreamReconnectDelay - delay in seconds between queue manager reconnection or failed queue GET iterations. Default value - `15sec`. 
+ * `QueueManager` - Queue manager name. (Optional)
+ * `Queue` - Queue name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
+ * `Topic` - Topic name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
+ * `Subscription` - Subscription name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
+ * `TopicString` - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
+ * `Host` - WMQ connection host name. (Optional)
+ * `Port` - WMQ connection port number. Default value - `1414`. (Optional)
+ * `UserName` - WMQ user identifier. (Optional)
+ * `Password` - WMQ user password. (Optional)
+ * `Channel` - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
+ * `StripHeaders` - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
+ * `StreamReconnectDelay` - delay in seconds between queue manager reconnection or failed queue GET iterations. Default value - `15sec`. 
  (Optional)
 
     sample:
@@ -4112,12 +4117,12 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 ##### WMQ Trace Events Stream parameters
 
- * TraceOperations - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ operations which names 
+ * `TraceOperations` - defines traced MQ operations name filter mask (wildcard or RegEx) to process only traces of MQ operations which names 
  matches this mask. Default value - `*`. (Optional)
- * ExcludedRC - defines set of excluded MQ trace events reason codes (delimited using `|` character) to process only MQ trace events having 
+ * `ExcludedRC` - defines set of excluded MQ trace events reason codes (delimited using `|` character) to process only MQ trace events having 
  reason codes not contained in this set. Set entries may be defined using both numeric and MQ constant name values. 
  Default value - ``. (Optional)
- * SuppressBrowseGets - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming. Default value - `false`. 
+ * `SuppressBrowseGets` - flag indicating whether to exclude WMQ BROWSE type GET operation traces from streaming. Default value - `false`. 
  (Optional)
 
     sample:
@@ -4131,10 +4136,10 @@ Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
 
 #### Zipped file line stream parameters (and Hdfs)
 
- * FileName - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
+ * `FileName` - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
  and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
  `./tnt4j-streams-core/samples/zip-stream/sample.zip!2/*.txt`. (Required)
- * ArchType - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)
+ * `ArchType` - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)
 
     sample:
 ```xml
@@ -4147,11 +4152,9 @@ wildcards.
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Ws Stream parameters
+#### Ws Streams parameters
 
-This kind of stream (Rest/WS/Cmd) has no additional configuration parameters.
-
-But has special configuration section - `scnario`. Streaming scenarios allows define `step`'s. Step defines
+All Ws streams has special configuration section - `scnario`. Streaming scenarios allows define `step`'s. Step defines
 request/invocation/execution parameters and scheduler. Steps are invoked/executed independently of each other.
 
  * `scenario` tag has required attribute - `name` (any string).
@@ -4205,16 +4208,59 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
     </scenario>
 ```
 
+##### WsStream parameters
+
+ * `DisableSSL` - flag indicating that stream should disable SSL context verification. Default value - `false`. (Optional)
+ * `SynchronizeRequests` - flag indicating that stream issued WebService requests shall be synchronized and handled in configuration 
+ defined sequence - waiting for prior request to complete before issuing next. Default value - `false`. (Optional)
+ * List of custom WS Stream requests configuration properties. Put variable placeholder in request/step configuration (e.g. `${WsEndpoint}`) 
+ and put property with same name into stream properties list (e.g. `<property name="WsEndpoint" value="https://192.168.3.3/ws"/>`) to have 
+ value mapped into request data. (Optional) 
+ 
+    sample:
+```xml
+    <property name="DisableSSL" value="true"/>
+    <property name="SynchronizeRequests" value="true"/>
+    <!-- Custom WS request properties -->
+    <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
+    ...
+```
+
+###### CastIronWsStream
+
+ * `SecurityCachedTokenKey` - defines streams cache entry key referring `login` request received session ID token. Default value - `Token`.
+ (Optional)
+ * `SecurityResponseParserTag` - defines tag value used to map `login` request data and parser used to parse it. Default value - `login`. 
+ (Optional) 
+
+    sample:
+```xml
+    <property name="SecurityCachedTokenKey" value="SessionIDToken"/>
+    <property name="SecurityResponseParserTag" value="loginData"/>    
+``` 
+
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
+
+##### RestStream parameters
+
+This stream does not have any additional configuration parameters.
+
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
+
+##### CmdStream parameters
+
+This stream does not have any additional configuration parameters.
+
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
 #### Redirect TNT4J Stream parameters
 
- * FileName - the system-dependent file name. (Required - just one `FileName` or `Port`)
- * Port - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
- * RestartOnInputClose - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
+ * `FileName` - the system-dependent file name. (Required - just one `FileName` or `Port`)
+ * `Port` - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
+ * `RestartOnInputClose` - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
  connection. (Optional)
- * BufferSize - maximal buffer queue capacity. Default value - `1024`. (Optional)
- * BufferDropWhenFull - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ * `BufferSize` - maximal buffer queue capacity. Default value - `1024`. (Optional)
+ * `BufferDropWhenFull` - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
     sample:
@@ -4233,8 +4279,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 #### Ms Excel Stream parameters
 
- * FileName - the system-dependent file name of MS Excel document. (Required)
- * SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
+ * `FileName` - the system-dependent file name of MS Excel document. (Required)
+ * `SheetsToProcess` - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
  matches this mask. Default value - ``. (Optional)
 
     sample:
@@ -4247,7 +4293,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 ##### Ms Excel Rows Stream parameters
 
- * RangeToStream - defines streamed data rows index range. Default value - `1:`. (Optional)
+ * `RangeToStream` - defines streamed data rows index range. Default value - `1:`. (Optional)
 
     sample:
 ```xml
@@ -4260,11 +4306,11 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 #### Generic parser parameters
 
- * UseActivityDataAsMessageForUnset - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping 
+ * `UseActivityDataAsMessageForUnset` - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping 
  defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
- * ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line or `EOF` - end of 
+ * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line or `EOF` - end of 
  file/stream. Default value - `EOL`. (Optional)
 
     sample:
@@ -4275,13 +4321,13 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 #### Activity Name-Value parser
 
- * FieldDelim - fields separator. Default value - `,`. (Optional)
- * ValueDelim - value delimiter. Default value - `=`. (Optional)
- * Pattern - pattern used to determine which types of activity data string this parser supports. When `null`, all
+ * `FieldDelim` - fields separator. Default value - `,`. (Optional)
+ * `ValueDelim` - value delimiter. Default value - `=`. (Optional)
+ * `Pattern` - pattern used to determine which types of activity data string this parser supports. When `null`, all
  strings are assumed to match the format supported by this parser. Default value - `null`. (Optional)
- * StripQuotes - whether surrounding double quotes should be stripped from extracted data values. Default value -
+ * `StripQuotes` - whether surrounding double quotes should be stripped from extracted data values. Default value -
  `true`. (Optional)
- * EntryPattern - pattern used to to split data into name/value pairs. It should define two RegEx groups named `key` and `value` used to 
+ * `EntryPattern` - pattern used to to split data into name/value pairs. It should define two RegEx groups named `key` and `value` used to 
  map data contained values to name/value pair. **NOTE:** this parameter takes preference on `FieldDelim` and `ValueDelim` parameters. 
  (Optional)
 
@@ -4298,7 +4344,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity RegEx parser
 
- * Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)
+ * `Pattern` - contains the regular expression pattern that each data item is assumed to match. (Required)
 
     sample:
 * index-capturing groups:
@@ -4316,10 +4362,10 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity token parser
 
- * FieldDelim - fields separator. Default value - `,`. (Optional)
- * Pattern - pattern used to determine which types of activity data string this parser supports. When `null`, all
+ * `FieldDelim` - fields separator. Default value - `,`. (Optional)
+ * `Pattern` - pattern used to determine which types of activity data string this parser supports. When `null`, all
  strings are assumed to match the format supported by this parser. Default value - `null`. (Optional)
- * StripQuotes - whether surrounding double quotes should be stripped from extracted data values. Default value -
+ * `StripQuotes` - whether surrounding double quotes should be stripped from extracted data values. Default value -
  `true`. (Optional)
 
     sample:
@@ -4335,9 +4381,9 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 This parser uses XPath expressions as field locators. You may also use [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions).
 
- * Namespace - additional XML namespace mappings. Default value - `null`. (Optional)
- * RequireDefault - indicates that all attributes are required by default. Default value - `false`. (Optional)
- * NamespaceAware - indicates that parser has to provide support for XML namespaces. Default value - `true`. (Optional)
+ * `Namespace` - additional XML namespace mappings. Default value - `null`. (Optional)
+ * `RequireDefault` - indicates that all attributes are required by default. Default value - `false`. (Optional)
+ * `NamespaceAware` - indicates that parser has to provide support for XML namespaces. Default value - `true`. (Optional)
 
     sample:
 ```xml
@@ -4351,7 +4397,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Message activity XML parser
 
- * SignatureDelim - signature fields delimiter. Default value - `,`. (Optional)
+ * `SignatureDelim` - signature fields delimiter. Default value - `,`. (Optional)
 
     sample:
 ```xml
@@ -4362,8 +4408,8 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
 
 #### Apache access log parser
 
- * LogPattern - access log pattern. (Optional, if RegEx `Pattern` property is defined)
- * ConfRegexMapping - custom log pattern token and RegEx mapping. (Optional, actual only if `LogPattern` property is used)
+ * `LogPattern` - access log pattern. (Optional, if RegEx `Pattern` property is defined)
+ * `ConfRegexMapping` - custom log pattern token and RegEx mapping. (Optional, actual only if `LogPattern` property is used)
 
     sample:
 ```xml
@@ -4423,7 +4469,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity map parser
 
- * LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path elements. 
+ * `LocPathDelim` - locator path in map delimiter. Empty value means locator value should not be delimited into path elements. 
  Default value - `.`. (Optional)
 
     sample:
@@ -4435,7 +4481,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity JSON parser
 
- * ReadLines - indicates that complete JSON data package is single line. Default value - `true`. (Optional, deprecated - use `ActivityDelim`
+ * `ReadLines` - indicates that complete JSON data package is single line. Default value - `true`. (Optional, deprecated - use `ActivityDelim`
   of [Generic parser](#generic-parser-parameters) instead)
 
     sample:
@@ -4447,7 +4493,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 #### Activity JMS message parser
 
- * ConvertToString - flag indicating whether to convert message payload `byte[]` data to string. Applicable to `BytesMessage` and 
+ * `ConvertToString` - flag indicating whether to convert message payload `byte[]` data to string. Applicable to `BytesMessage` and 
  `StreamMessage`. Default value - `false`. (Optional)
 
     sample:
@@ -4459,7 +4505,7 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
 
 #### Activity PCF parser
 
- * TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible and 
+ * `TranslateNumValues` - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible and 
  field/locator data type is `String` (meaning translated value can be assigned to field). If value of particular field should be left as 
  number (e.g., `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
 

@@ -88,8 +88,23 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 *            transformation script code
 	 */
 	protected AbstractScriptTransformation(String name, String scriptCode) {
+		this(name, scriptCode, null);
+	}
+
+	/**
+	 * Constructs a new AbstractScriptTransformation.
+	 *
+	 * @param name
+	 *            transformation name
+	 * @param scriptCode
+	 *            transformation script code
+	 * @param phase
+	 *            activity data value resolution phase
+	 */
+	protected AbstractScriptTransformation(String name, String scriptCode, Phase phase) {
 		this.scriptCode = scriptCode;
 		setName(StringUtils.isEmpty(name) ? scriptCode : name);
+		setPhase(phase);
 
 		initTransformation();
 	}
@@ -113,25 +128,38 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 *            or '{@value #XPATH_SCRIPT_LANG}'
 	 * @param code
 	 *            transformation script code
+	 * @param phaseName
+	 *            data resolution phase name, when to apply transformation: '{@link Phase#RAW}',
+	 *            '{@link Phase#FORMATTED}' (default) or '{@link Phase#AGGREGATED}'
 	 * @return created transformation instance
 	 *
 	 * @throws IllegalArgumentException
 	 *             if transformation can not be created for provided language
 	 */
-	public static ValueTransformation<Object, Object> createScriptTransformation(String name, String lang, String code)
-			throws IllegalArgumentException {
+	public static ValueTransformation<Object, Object> createScriptTransformation(String name, String lang, String code,
+			String phaseName) throws IllegalArgumentException {
 		if (StringUtils.isEmpty(lang)) {
 			lang = JAVA_SCRIPT_LANG;
 		}
 
+		Phase phase = null;
+		if (StringUtils.isNotEmpty(phaseName)) {
+			try {
+				phase = Phase.valueOf(phaseName.toUpperCase());
+			} catch (Exception exc) {
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "ScriptTransformation.unknown.phase", phase));
+			}
+		}
+
 		if (GROOVY_LANG.equalsIgnoreCase(lang)) {
-			return new GroovyTransformation(name, code);
+			return new GroovyTransformation(name, code, phase);
 		} else if (JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
 				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
 		{
-			return new JavaScriptTransformation(name, code);
+			return new JavaScriptTransformation(name, code, phase);
 		} else if (XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
-			return new XPathTransformation(name, code);
+			return new XPathTransformation(name, code, phase);
 		}
 
 		throw new IllegalArgumentException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,

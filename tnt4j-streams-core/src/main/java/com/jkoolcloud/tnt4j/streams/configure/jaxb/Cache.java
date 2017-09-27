@@ -41,6 +41,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="property" type="{}CacheProperty" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="entry" type="{}CacheEntry" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -51,13 +52,52 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Cache", propOrder = { "entry" })
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+@XmlType(name = "Cache", propOrder = { "property", "entry" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
 public class Cache {
 
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<CacheProperty> property;
 	@XmlElement(required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<CacheEntry> entry;
+
+	/**
+	 * Gets the value of the property property.
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the property property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getProperty().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link CacheProperty }
+	 *
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<CacheProperty> getProperty() {
+		if (property == null) {
+			property = new ArrayList<CacheProperty>();
+		}
+		return this.property;
+	}
+
+	public void addProperty(CacheProperty cp) {
+		getProperty().add(cp);
+	}
+
+	public void addProperty(String key, String value) {
+		getProperty().add(new CacheProperty(key, value));
+	}
 
 	/**
 	 * Gets the value of the entry property.

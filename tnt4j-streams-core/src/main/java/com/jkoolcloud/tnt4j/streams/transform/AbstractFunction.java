@@ -51,7 +51,7 @@ public abstract class AbstractFunction<V> extends AbstractValueTransformation<V,
 			return evaluate(Collections.singletonList(value));
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName()), exc);
+					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
 		}
 	}
 }

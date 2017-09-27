@@ -16,14 +16,31 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.CacheProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 
 /**
@@ -31,33 +48,75 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  * <p>
  * Cache entries are defined using static or dynamic (e.g., patterns having field name variable to fill in data from
  * activity entity) values.
+ * <p>
+ * Streams cache supports the following configuration properties:
+ * <ul>
+ * <li>MaxSize - max. capacity of stream resolved values cache. Default value - {@code 100}. (Optional)</li>
+ * <li>ExpireDuration - stream resolved values cache entries expiration duration in minutes. Default value - {@code 10}.
+ * (Optional)</li>
+ * <li>Persisted - flag indicating cache contents has to be persisted to file on close and loaded on initialization.
+ * Default value - {@code false}. (Optional)</li>
+ * </ul>
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  */
 public class StreamsCache {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsCache.class);
+
 	private static final long DEFAULT_CACHE_MAX_SIZE = 100;
 	private static final long DEFAULT_CACHE_EXPIRE_IN_MINUTES = 10;
+	private static final String DEFAULT_FILE_NAME = "./persistedCache.xml"; // NON-NLS
 
 	private static final String PARSER_NAME_VAR = "${ParserName}"; // NON-NLS
 
 	private static Cache<String, Object> valuesCache;
 	private static Map<String, CacheEntry> cacheEntries = new HashMap<>();
+	private static AtomicInteger referencesCount = new AtomicInteger();
+
+	private static long maxSize = DEFAULT_CACHE_MAX_SIZE;
+	private static long expireDuration = DEFAULT_CACHE_EXPIRE_IN_MINUTES;
+	private static boolean persistenceOn = false; // TODO: file naming, because there may be running multiple concurrent
+													// streams configurations (JVMs)
 
 	private static Cache<String, Object> buildCache(long cSize, long duration) {
 		return CacheBuilder.newBuilder().maximumSize(cSize).expireAfterAccess(duration, TimeUnit.MINUTES).build();
 	}
 
 	/**
-	 * Initializes cache setting maximum cache size and cache entries expiration duration.
+	 * Sets cache configuration properties collection.
 	 *
-	 * @param cSize
-	 *            maximum cache size
-	 * @param duration
-	 *            cache entries expiration duration
+	 * @param props
+	 *            configuration properties to set
+	 *
+	 * @see #initialize()
 	 */
-	public static void initCache(Integer cSize, Integer duration) {
-		valuesCache = buildCache(cSize == null ? DEFAULT_CACHE_MAX_SIZE : cSize,
-				duration == null ? DEFAULT_CACHE_EXPIRE_IN_MINUTES : duration);
+	public static void setProperties(Collection<Map.Entry<String, String>> props) {
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+				if (CacheProperties.PROP_MAX_SIZE.equalsIgnoreCase(name)) {
+					maxSize = Long.parseLong(value);
+				} else if (CacheProperties.PROP_EXPIRE_DURATION.equalsIgnoreCase(name)) {
+					expireDuration = Long.parseLong(value);
+				} else if (CacheProperties.PROP_PERSISTED.equalsIgnoreCase(name)) {
+					persistenceOn = Boolean.parseBoolean(value);
+				}
+			}
+		}
+
+		initialize();
+	}
+
+	/**
+	 * Initializes cache setting maximum cache size and cache entries expiration duration.
+	 */
+	public static void initialize() {
+		valuesCache = buildCache(maxSize, expireDuration);
+
+		if (persistenceOn) {
+			loadPersisted();
+		}
 	}
 
 	/**
@@ -70,7 +129,8 @@ public class StreamsCache {
 	 */
 	public static void cacheValues(ActivityInfo ai, String parserName) {
 		if (valuesCache == null) {
-			valuesCache = buildCache(DEFAULT_CACHE_MAX_SIZE, DEFAULT_CACHE_EXPIRE_IN_MINUTES);
+			// valuesCache = buildCache(maxSize, expireDuration);
+			return;
 		}
 
 		for (CacheEntry cacheEntry : cacheEntries.values()) {
@@ -170,12 +230,46 @@ public class StreamsCache {
 
 	/**
 	 * Cleans cache contents.
+	 *
+	 * @see #unreferStream()
 	 */
 	public static void cleanup() {
 		if (valuesCache != null) {
+			if (persistenceOn) {
+				persist(valuesCache.asMap());
+			}
 			valuesCache.cleanUp();
 		}
 		cacheEntries.clear();
+	}
+
+	/**
+	 * Adds stream-cache reference.
+	 */
+	public static void referStream() {
+		if (valuesCache == null) {
+			return;
+		}
+
+		referencesCount.getAndIncrement();
+	}
+
+	/**
+	 * Removes stream-cache reference. When last stream is unreferenced, cache gets cleaned.
+	 *
+	 * @see #cleanup()
+	 */
+	public static void unreferStream() {
+		if (valuesCache == null) {
+			return;
+		}
+
+		int crc = referencesCount.decrementAndGet();
+
+		if (crc <= 0) {
+			cleanup();
+			referencesCount.set(0);
+		}
 	}
 
 	/**
@@ -193,6 +287,60 @@ public class StreamsCache {
 	 */
 	public static CacheEntry addEntry(String entryId, String key, String value, String defaultValue) {
 		return cacheEntries.put(entryId, new CacheEntry(entryId, key, value, defaultValue));
+	}
+
+	public static void loadPersisted() {
+		try {
+			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
+			Unmarshaller unmarshaller = jc.createUnmarshaller();
+			File persistedFile = new File(DEFAULT_FILE_NAME);
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.file"),
+					persistedFile.getAbsolutePath());
+			if (!persistedFile.exists()) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsCache.loading.file.not.found"));
+				return;
+			}
+
+			CacheRoot root = (CacheRoot) unmarshaller.unmarshal(persistedFile);
+
+			Map<String, Object> mapProperty = root.getEntriesMap();
+			if (MapUtils.isNotEmpty(mapProperty)) {
+				for (Map.Entry<String, Object> entry : mapProperty.entrySet()) {
+					valuesCache.put(entry.getKey(), entry.getValue());
+				}
+			}
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.done"),
+					mapProperty == null ? 0 : mapProperty.size(), persistedFile.getAbsolutePath());
+		} catch (JAXBException exc) {
+			LOGGER.log(OpLevel.ERROR,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.failed"),
+					exc);
+		}
+	}
+
+	protected static void persist(Map<String, Object> cacheEntries) {
+		try {
+			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
+			Marshaller marshaller = jc.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			CacheRoot root = new CacheRoot();
+			root.setEntriesMap(cacheEntries);
+			File persistedFile = new File(DEFAULT_FILE_NAME);
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.file"),
+					persistedFile.getAbsolutePath());
+			marshaller.marshal(root, persistedFile);
+			LOGGER.log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.done"),
+					cacheEntries.size(), persistedFile.getAbsolutePath());
+		} catch (JAXBException exc) {
+			LOGGER.log(OpLevel.ERROR,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.failed"),
+					exc);
+		}
 	}
 
 	/**
@@ -272,4 +420,82 @@ public class StreamsCache {
 			return sb.toString();
 		}
 	}
+
+	public static class MapAdapter extends XmlAdapter<MapEntry[], Map<String, Object>> {
+		@Override
+		public MapEntry[] marshal(Map<String, Object> cache) throws Exception {
+			MapEntry[] mapElements = new MapEntry[cache.size()];
+			int i = 0;
+			for (Map.Entry<String, Object> entry : cache.entrySet()) {
+				mapElements[i++] = new MapEntry(entry.getKey(), entry.getValue());
+				LOGGER.log(OpLevel.TRACE,
+						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.entry.marshal"),
+						entry.getKey(), entry.getValue());
+			}
+
+			return mapElements;
+		}
+
+		@Override
+		public Map<String, Object> unmarshal(MapEntry[] mapElements) throws Exception {
+			Map<String, Object> r = new ConcurrentHashMap<>(mapElements.length);
+			for (MapEntry mapElement : mapElements) {
+				r.put(mapElement.key, mapElement.getValue());
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsCache.entry.unmarshal"), mapElement.key, mapElement.getValue());
+			}
+			return r;
+		}
+	}
+
+	public static class MapEntry {
+		@XmlElement
+		public String key;
+		private Object value;
+
+		@XmlElement
+		public Object getValue() {
+			return value;
+		}
+
+		public void setValue(Object value) {
+			if (value instanceof XMLGregorianCalendar) {
+				this.value = ((XMLGregorianCalendar) value).toGregorianCalendar().getTime();
+			} else {
+				this.value = value;
+			}
+
+		}
+
+		private MapEntry() {
+		} // Required by JAXB
+
+		public MapEntry(String key, Object value) {
+			this.key = key;
+			setValue(value);
+		}
+	}
+
+	@XmlRootElement
+	public static class CacheRoot {
+
+		private Map<String, Object> entriesMap;
+
+		@XmlJavaTypeAdapter(MapAdapter.class)
+		public Map<String, Object> getEntriesMap() {
+			return entriesMap;
+		}
+
+		public void setEntriesMap(Map<String, Object> map) {
+			this.entriesMap = map;
+		}
+
+	}
+	/*
+	 * private static class ByteArrayAdapter extends XmlAdapter<String, Byte[]> {
+	 * 
+	 * @Override public Byte[] unmarshal(String v) throws Exception { return ArrayUtils.toObject(v.getBytes()); }
+	 * 
+	 * @Override public String marshal(Byte[] v) throws Exception { return String.valueOf(v); } }
+	 */
 }

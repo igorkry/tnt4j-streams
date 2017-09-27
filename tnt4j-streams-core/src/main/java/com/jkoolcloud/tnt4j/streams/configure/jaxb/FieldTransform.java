@@ -30,15 +30,16 @@ import javax.xml.bind.annotation.*;
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
-  * &lt;complexType name="FieldTransform">
-  *   &lt;simpleContent>
-  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-  *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
-  *       &lt;attribute name="beanRef" type="{http://www.w3.org/2001/XMLSchema}string" />
+ * &lt;complexType name="FieldTransform">
+ *   &lt;simpleContent>
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
+ *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="beanRef" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="lang" type="{}ScriptLangs" default="javascript" />
-  *     &lt;/extension>
-  *   &lt;/simpleContent>
-  * &lt;/complexType>
+ *       &lt;attribute name="phase" type="{}ValueResolutionPhases" default="formatted" />
+ *     &lt;/extension>
+ *   &lt;/simpleContent>
+ * &lt;/complexType>
  * </pre>
  * 
  * 
@@ -60,6 +61,9 @@ public class FieldTransform {
 	@XmlAttribute(name = "lang")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected ScriptLangs lang;
+	@XmlAttribute(name = "phase")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	protected ValueResolutionPhases phase;
 
 	public FieldTransform() {
 
@@ -74,6 +78,13 @@ public class FieldTransform {
 		this.name = name;
 		this.lang = ScriptLangs.fromValue(lang);
 		this.tScript = tScript;
+	}
+
+	public FieldTransform(String name, String lang, String tScript, String phase) {
+		this.name = name;
+		this.lang = ScriptLangs.fromValue(lang);
+		this.tScript = tScript;
+		this.phase = ValueResolutionPhases.fromValue(phase);
 	}
 
 	/**
@@ -170,6 +181,33 @@ public class FieldTransform {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setLang(ScriptLangs value) {
 		this.lang = value;
+	}
+
+	/**
+	 * Gets the value of the phase property.
+	 *
+	 * @return possible object is {@link ValueResolutionPhases }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public ValueResolutionPhases getPhase() {
+		if (phase == null) {
+			return ValueResolutionPhases.FORMATTED;
+		} else {
+			return phase;
+		}
+	}
+
+	/**
+	 * Sets the value of the phase property.
+	 *
+	 * @param value
+	 *            allowed object is {@link ValueResolutionPhases }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setPhase(ValueResolutionPhases value) {
+		this.phase = value;
 	}
 
 }

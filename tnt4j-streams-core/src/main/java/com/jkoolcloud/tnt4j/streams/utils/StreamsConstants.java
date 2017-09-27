@@ -52,7 +52,7 @@ public final class StreamsConstants {
 	public static final String MAP_NODE_TOKEN = "*"; // NON-NLS
 
 	/**
-	 * The constant defininf string delimiting multiple values of stream entity configuration properties having same
+	 * The constant defining string delimiting multiple values of stream entity configuration properties having same
 	 * name: e.g.: Namespace, ConfRegexMapping.
 	 */
 	public static final String MULTI_PROPS_DELIMITER = "&|@"; // NON-NLS

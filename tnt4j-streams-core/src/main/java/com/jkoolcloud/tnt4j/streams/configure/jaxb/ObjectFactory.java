@@ -96,6 +96,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link Cache }
+	 *
+	 */
+	public Cache createCache() {
+		return new Cache();
+	}
+
+	/**
 	 * Create an instance of {@link Field }
 	 *
 	 */
@@ -144,19 +152,19 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link CacheProperty }
+	 *
+	 */
+	public CacheProperty createCacheProperty() {
+		return new CacheProperty();
+	}
+
+	/**
 	 * Create an instance of {@link FieldTransform }
 	 * 
 	 */
 	public FieldTransform createFieldTransform() {
 		return new FieldTransform();
-	}
-
-	/**
-	 * Create an instance of {@link Cache }
-	 *
-	 */
-	public Cache createCache() {
-		return new Cache();
 	}
 
 	/**

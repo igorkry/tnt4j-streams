@@ -42,6 +42,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="ReadLines"/>
  *     &lt;enumeration value="LocPathDelim"/>
  *     &lt;enumeration value="UseActivityDataAsMessageForUnset"/>
+ *     &lt;enumeration value="EntryPattern"/>
+ *     &lt;enumeration value="ActivityDelim"/>
+ *     &lt;enumeration value="NamespaceAware"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -126,7 +129,8 @@ public enum ParserProperties {
 
 	/**
 	 * 
-	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line.
+	 * Property indicates that complete activity RAW data (e.g., JSON) package is single line. Deprecated - use
+	 * "ActivityDelim" instead.
 	 * 
 	 * 
 	 */
@@ -150,7 +154,37 @@ public enum ParserProperties {
 	 *
 	 */
 	@XmlEnumValue("UseActivityDataAsMessageForUnset")
-	USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET("UseActivityDataAsMessageForUnset");
+	USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET("UseActivityDataAsMessageForUnset"),
+
+	/**
+	 *
+	 * Property defines pattern used to to split data into name/value pairs. It should define two RegEx groups named
+	 * "key" and "value" used to map data contained values to name/value pair. NOTE: this parameter takes preference on
+	 * "FieldDelim" and "ValueDelim" properties.
+	 *
+	 *
+	 */
+	@XmlEnumValue("EntryPattern")
+	ENTRY_PATTERN("EntryPattern"),
+
+	/**
+	 *
+	 * Property indicates the delimiter of activity RAW data entries. It can be "EOL" (end-of-line) or "EOF"
+	 * (end-of-file/stream).
+	 *
+	 *
+	 */
+	@XmlEnumValue("ActivityDelim")
+	ACTIVITY_DELIM("ActivityDelim"),
+
+	/**
+	 *
+	 * Property indicates that parser has to provide support for XML namespaces.
+	 *
+	 *
+	 */
+	@XmlEnumValue("NamespaceAware")
+	NAMESPACE_AWARE("NamespaceAware");
 	private final String value;
 
 	ParserProperties(String v) {

@@ -981,6 +981,19 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Returns the appropriate string representation for the specified array.
+	 *
+	 * @param args
+	 *            array to convert to string representation
+	 * @return string representation of array
+	 *
+	 * @see #toStringDeep(Object[])
+	 */
+	public static String arrayToString(Object... args) {
+		return toStringDeep(args);
+	}
+
+	/**
 	 * Returns single object (first item) if list/array contains single item, makes an array from
 	 * {@link java.util.Collection}, or returns same value as parameter in all other cases.
 	 *
@@ -1695,5 +1708,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	private static String getItemIndexStr(String indexToken) {
 		return indexToken.replaceAll("\\D+", ""); // NON-NLS
+	}
+
+	/**
+	 * Extracts variable name from provided variable placeholder string <tt>varPlh</tt>.
+	 *
+	 * @param varPlh
+	 *            variable placeholder string
+	 * @return variable name found within placeholder string
+	 */
+	public static String getVarName(String varPlh) {
+		return StringUtils.isEmpty(varPlh) ? varPlh
+				: varPlh.substring(VAR_EXP_START_TOKEN.length(), varPlh.length() - VAR_EXP_END_TOKEN.length());
 	}
 }

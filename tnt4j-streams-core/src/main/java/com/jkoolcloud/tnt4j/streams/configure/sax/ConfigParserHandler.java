@@ -291,6 +291,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private static final String AUTO_SORT_ATTR = "manualFieldsOrder"; // NON-NLS
 	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String PHASE_ATTR = "phase"; // NON-NLS
+	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
@@ -433,7 +437,21 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	private void processCache(Attributes attributes) {
+	/**
+	 * Processes a {@code <cache>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processCache(Attributes attrs) throws SAXException {
+		// for (int i = 0; i < attrs.getLength(); i++) {
+		// String attName = attrs.getQName(i);
+		// String attValue = attrs.getValue(i);
+		// }
+
 		processingCache = true;
 	}
 
@@ -452,7 +470,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.malformed.configuration", CACHE_ENTRY_ELMT), currParseLocation);
 		}
 
-		if (processingCache == false) {
+		if (!processingCache) {
 			throw new SAXParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ConfigParserHandler.malformed.configuration2", CACHE_ENTRY_ELMT, CACHE_ELMT),
@@ -880,8 +898,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		if (currField == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration3", FIELD_LOC_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT),
-					currParseLocation);
+					"ConfigParserHandler.malformed.configuration2", FIELD_LOC_ELMT,
+					Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT)), currParseLocation);
 		}
 		if (!currField.hasDynamicAttrs() && currFieldHasLocValAttr) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -963,10 +981,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private void processFieldMap(Attributes attrs) throws SAXException {
 		if (currField == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", FIELD_MAP_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
-					currParseLocation);
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration2", FIELD_MAP_ELMT,
+					Utils.arrayToString(FIELD_ELMT, FIELD_LOC_ELMT)), currParseLocation);
 		}
 		// if (currFieldHasLocElmt && currLocatorData == null) {
 		// throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1022,8 +1039,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	private void processFieldMapReference(Attributes attrs) throws SAXException {
 		if (currField == null) {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration3", FIELD_MAP_REF_ELMT, FIELD_ELMT, FIELD_LOC_ELMT),
-					currParseLocation);
+					"ConfigParserHandler.malformed.configuration2", FIELD_MAP_REF_ELMT,
+					Utils.arrayToString(FIELD_ELMT, FIELD_LOC_ELMT)), currParseLocation);
 		}
 
 		if (CollectionUtils.isEmpty(currField.getLocators()) && currLocatorData == null) {
@@ -1160,9 +1177,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currField == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration4", FIELD_TRANSFORM_ELMT, FIELD_ELMT,
-					EMBEDDED_ACTIVITY_ELMT, FIELD_LOC_ELMT), currParseLocation);
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", FIELD_TRANSFORM_ELMT,
+							Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, FIELD_LOC_ELMT)),
+					currParseLocation);
 		}
 
 		if (currTransform == null) {
@@ -1178,6 +1197,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currTransform.beanRef = attValue;
 			} else if (LANG_ATTR.equals(attName)) {
 				currTransform.scriptLang = attValue;
+			} else if (PHASE_ATTR.equals(attName)) {
+				currTransform.phase = attValue;
 			}
 		}
 
@@ -1253,10 +1274,12 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processProperty(Attributes attrs) throws SAXException {
-		if (currStream == null && currParser == null && javaObjectData == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration4", PROPERTY_ELMT, STREAM_ELMT, PARSER_ELMT,
-					JAVA_OBJ_ELMT), currParseLocation);
+		if (currStream == null && currParser == null && javaObjectData == null && !processingCache) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", PROPERTY_ELMT,
+							Utils.arrayToString(STREAM_ELMT, PARSER_ELMT, JAVA_OBJ_ELMT, CACHE_ELMT)),
+					currParseLocation);
 		}
 
 		if (currProperty == null) {
@@ -1290,9 +1313,11 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private void processParserRef(Attributes attrs) throws SAXException {
 		if (currField == null && currStream == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration4", PARSER_REF_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT,
-					STREAM_ELMT), currParseLocation);
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", PARSER_REF_ELMT,
+							Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, STREAM_ELMT)),
+					currParseLocation);
 		}
 		String parserName = null;
 		String aggregationType = null;
@@ -1340,10 +1365,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private void processReference(Attributes attrs) throws SAXException {
 		if (currStream == null && currParser == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration3", REF_ELMT, STREAM_ELMT, PARSER_ELMT),
-					currParseLocation);
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration2", REF_ELMT,
+					Utils.arrayToString(STREAM_ELMT, PARSER_ELMT)), currParseLocation);
 		}
 
 		if (currStream != null) {
@@ -1535,9 +1559,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currLocatorData == null && currField == null && currParser == null) {
-			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.malformed.configuration4", FILTER_ELMT, FIELD_LOC_ELMT, FIELD_ELMT,
-					EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT), currParseLocation);
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", FILTER_ELMT, Utils
+									.arrayToString(FIELD_LOC_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT)),
+					currParseLocation);
 		}
 
 		String name = null;
@@ -1784,6 +1810,10 @@ public class ConfigParserHandler extends DefaultHandler {
 					elementData = null;
 				}
 			} else if (CACHE_ELMT.equals(qName)) {
+				StreamsCache.setProperties(currProperties == null ? null : currProperties.entrySet());
+				if (currProperties != null) {
+					currProperties.clear();
+				}
 				processingCache = false;
 			} else if (CACHE_ENTRY_ELMT.equals(qName)) {
 				if (currCacheEntry != null) {
@@ -1975,7 +2005,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		} else {
 			transform = AbstractScriptTransformation.createScriptTransformation(currTransformData.name,
-					currTransformData.scriptLang, currTransformData.scriptCode);
+					currTransformData.scriptLang, currTransformData.scriptCode, currTransformData.phase);
 		}
 
 		if (currLocatorData != null) {
@@ -2217,6 +2247,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String beanRef;
 		String scriptLang;
 		String scriptCode;
+		String phase;
 	}
 
 	private static class FilterValueData {

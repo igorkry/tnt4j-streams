@@ -191,15 +191,5 @@ public interface StreamProperties {
 	/**
 	 * Constant for name of built-in {@value} property.
 	 */
-	String PROP_CACHE_MAX_SIZE = "StreamCacheMaxSize"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
-	String PROP_CACHE_EXPIRE_DURATION = "StreamCacheExpireDuration"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in {@value} property.
-	 */
 	String PROP_RECONNECT_DELAY = "StreamReconnectDelay"; // NON-NLS
 }

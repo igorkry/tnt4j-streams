@@ -57,6 +57,20 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 		super(name, scriptCode);
 	}
 
+	/**
+	 * Constructs a new XPathTransformation.
+	 *
+	 * @param name
+	 *            transformation name
+	 * @param scriptCode
+	 *            XPath expression code
+	 * @param phase
+	 *            activity data value resolution phase
+	 */
+	public XPathTransformation(String name, String scriptCode, Phase phase) {
+		super(name, scriptCode, phase);
+	}
+
 	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		Map<String, Object> valuesMap = new HashMap<>();
@@ -77,7 +91,7 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 			return xPath.evaluate(getScriptCode(), (Object) null);
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName()), exc);
+					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
 		}
 	}
 

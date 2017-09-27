@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.preparsers.ActivityDataPreParser;
+import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -770,16 +771,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				}
 			}
 
+			val = transformValue(val, locator, cData, locStr, ValueTransformation.Phase.RAW);
+
 			if (formattingNeeded.get()) {
 				val = locator.formatValue(val);
 			}
 
-			try {
-				val = locator.transformValue(val, cData.getActivity());
-			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.transformation.failed"), locStr, toString(val), exc);
-			}
+			val = transformValue(val, locator, cData, locStr, ValueTransformation.Phase.FORMATTED);
 
 			try {
 				boolean filteredOut = locator.filterValue(val, cData.getActivity());
@@ -792,6 +790,33 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 						"ActivityParser.field.filtering.failed"), locStr, toString(val), exc);
 			}
 		}
+		return val;
+	}
+
+	/**
+	 * Applies activity value transformations bound to defined activity value resolution {@code phase}.
+	 *
+	 * @param val
+	 *            activity value to apply transformation
+	 * @param locator
+	 *            activity field locator defined transformations to use
+	 * @param cData
+	 *            parsing context data package
+	 * @param locStr
+	 *            activity data value locator string
+	 * @param phase
+	 *            activity data resolution phase defining transformations to apply
+	 * @return transformed activity field value
+	 */
+	protected Object transformValue(Object val, ActivityFieldLocator locator, ActivityContext cData, String locStr,
+			ValueTransformation.Phase phase) {
+		try {
+			return locator.transformValue(val, cData.getActivity(), phase);
+		} catch (Exception exc) {
+			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityParser.transformation.failed"), locStr, toString(val), exc);
+		}
+
 		return val;
 	}
 

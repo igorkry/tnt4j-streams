@@ -178,6 +178,10 @@ public class EmbeddedActivity {
 		getFieldTransform().add(new FieldTransform(name, lang, tScript));
 	}
 
+	public void addFieldTransform(String name, String lang, String tScript, String phase) {
+		getFieldTransform().add(new FieldTransform(name, lang, tScript, phase));
+	}
+
 	/**
 	 * Gets the value of the parserRef property.
 	 * 

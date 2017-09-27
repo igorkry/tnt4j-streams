@@ -68,8 +68,6 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="StartServer"/>
  *     &lt;enumeration value="InputCloseable"/>
  *     &lt;enumeration value="RangeToStream"/>
- *     &lt;enumeration value="StreamCacheMaxSize"/>
- *     &lt;enumeration value="StreamCacheExpireDuration"/>
  *     &lt;enumeration value="StreamReconnectDelay"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
@@ -365,8 +363,8 @@ public enum StreamProperties {
 	BUFFER_SIZE("BufferSize"),
 
 	/**
-	 *
-	 * Property to define buffered stream buffer element offer timeout value in seconds.
+	 * 
+	 * Flag indicating to drop buffer queue offered RAW activity data entries when queue gets full.
 	 *
 	 *
 	 */
@@ -384,7 +382,7 @@ public enum StreamProperties {
 
 	/**
 	 *
-	 * Property indicates that stream should restore streaming state after (re)start (i.e continue from last streamed
+	 * Property indicates that stream should restore streaming state after (re)start (i.e. continue from last streamed
 	 * file line).
 	 *
 	 *
@@ -414,29 +412,11 @@ public enum StreamProperties {
 	/**
 	 *
 	 * Property to define streamed activity data range (i.e. file lines or sheet rows) from:to.
-	 *
+	 * 
 	 *
 	 */
 	@XmlEnumValue("RangeToStream")
 	RANGE_TO_STREAM("RangeToStream"),
-
-	/**
-	 *
-	 * Property to define stream used cache max. capacity.
-	 *
-	 *
-	 */
-	@XmlEnumValue("StreamCacheMaxSize")
-	STREAM_CACHE_MAX_SIZE("StreamCacheMaxSize"),
-
-	/**
-	 *
-	 * Property to define stream used cache entries expiration duration in minutes.
-	 *
-	 *
-	 */
-	@XmlEnumValue("StreamCacheExpireDuration")
-	STREAM_CACHE_EXPIRE_DURATION("StreamCacheExpireDuration"),
 
 	/**
 	 *

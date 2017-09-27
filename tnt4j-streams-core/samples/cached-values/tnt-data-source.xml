@@ -21,24 +21,24 @@
         <field name="Resource" locator="$.resource" locator-type="Label"/>
     </parser>
 
+    <cache>
+        <property name="MaxSize" value="300"/>
+        <property name="ExpireDuration" value="15"/>
+
+        <entry id="CachedEventName">
+            <key>EventName</key>
+            <value>${EventName} in ${Transaction}</value>
+        </entry>
+        <entry id="SecretCache">
+            <key>${Transaction}Secret</key>
+            <value>${SecretValue}</value>
+        </entry>
+    </cache>
+
     <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
 
-        <property name="StreamCacheMaxSize" value="300"/>
-        <property name="StreamCacheExpireDuration" value="15"/>
-
         <parser-ref name="EventParser"/>
-
-        <cache>
-            <entry id="CachedEventName">
-                <key>EventName</key>
-                <value>${EventName} in ${Transaction}</value>
-            </entry>
-            <entry id="SecretCache">
-                <key>${Transaction}Secret</key>
-                <value>${SecretValue}</value>
-            </entry>
-        </cache>
     </stream>
 
 </tnt-data-source>

@@ -26,6 +26,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -311,6 +312,16 @@ public class ActivityField extends AbstractFieldEntity {
 	 */
 	public String getSeparator() {
 		return StringUtils.isEmpty(separator) ? DEFAULT_FIELD_VALUES_DELIM : separator;
+	}
+
+	/**
+	 * Checks whether field has array formatting attributes {@code separator} or {@code formattingPattern} defined.
+	 *
+	 * @return {@code true} if field has {@code separator} or {#code formattingPattern} defined, {@code false} -
+	 *         otherwise
+	 */
+	public boolean isArrayFormattable() {
+		return separator != null || StringUtils.isNotEmpty(formattingPattern);
 	}
 
 	/**
@@ -651,6 +662,11 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		return value;
+	}
+
+	@Override
+	protected ValueTransformation.Phase getDefaultTransformationPhase() {
+		return ValueTransformation.Phase.AGGREGATED;
 	}
 
 	public static class ParserReference {

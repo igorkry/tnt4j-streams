@@ -102,7 +102,7 @@ public interface TNTStreamOutput<T> {
 	 * Sets output configuration properties collection.
 	 *
 	 * @param props
-	 *            properties to set
+	 *            configuration properties to set
 	 *
 	 * @see #initialize()
 	 */

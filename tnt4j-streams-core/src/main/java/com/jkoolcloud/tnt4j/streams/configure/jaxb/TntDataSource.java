@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.*;
  *         &lt;element name="resource-ref" type="{}ResourceReference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="java-object" type="{}JavaObject" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="parser" type="{}Parser" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="cache" type="{}Cache" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="stream" type="{}Stream" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -63,7 +64,9 @@ public class TntDataSource {
 	protected List<JavaObject> javaObject;
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Parser> parser;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<Cache> cache;
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Stream> stream;
 
 	/**
@@ -171,6 +174,39 @@ public class TntDataSource {
 
 	public void addParser(Parser p) {
 		getParser().add(p);
+	}
+
+	/**
+	 * Gets the value of the cache property.
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the cache property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getCache().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link Cache }
+	 *
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-20T01:17:34+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<Cache> getCache() {
+		if (cache == null) {
+			cache = new ArrayList<Cache>();
+		}
+		return this.cache;
+	}
+
+	public void addCache(Cache c) {
+		getCache().add(c);
 	}
 
 	/**

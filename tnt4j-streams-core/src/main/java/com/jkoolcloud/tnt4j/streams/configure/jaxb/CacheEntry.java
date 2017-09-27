@@ -47,12 +47,12 @@ import javax.xml.bind.annotation.*;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="default">
-  *           &lt;simpleType>
-  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
-  *             &lt;/restriction>
-  *           &lt;/simpleType>
-  *         &lt;/element>
+ *         &lt;element name="default" minOccurs="0">
+ *           &lt;simpleType>
+ *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+ *             &lt;/restriction>
+ *           &lt;/simpleType>
+ *         &lt;/element>
  *       &lt;/sequence>
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>

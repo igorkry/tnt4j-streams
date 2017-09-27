@@ -373,17 +373,17 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 
 				if (nodeDocument != null) { // try expression relative to node
-					val = resolveValueOverXPath(nodeDocument, expr, formattingNeeded);
+					val = resolveValueOverXPath(nodeDocument, expr);
 				}
 				if (val == null) { // otherwise try on complete document
-					val = resolveValueOverXPath(xmlDoc, expr, formattingNeeded);
+					val = resolveValueOverXPath(xmlDoc, expr);
 				}
 
 				if (val instanceof Node) {
 					Node node = (Node) val;
 
 					if (!isNodeSupportedByStackedParser(cData.getField(), node)) {
-						val = getTextContent(locator, node);
+						val = getTextContent(locator, node, formattingNeeded);
 					}
 				}
 			} catch (XPathExpressionException exc) {
@@ -412,8 +412,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		return false;
 	}
 
-	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr, AtomicBoolean formattingNeeded)
-			throws XPathExpressionException {
+	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr) throws XPathExpressionException {
 		Object val = null;
 		NodeList nodes = null;
 		try {
@@ -432,7 +431,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			}
 
 			val = Utils.simplifyValue(valuesList);
-			formattingNeeded.set(false);
 		}
 
 		return val;
@@ -472,11 +470,14 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 *            resolved value
 	 * @param node
 	 *            DOM node to collect textual data
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
 	 * @return resolved textual value formatted based on the locator's formatting properties
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 */
-	protected static Object getTextContent(ActivityFieldLocator locator, Node node) throws ParseException {
+	protected static Object getTextContent(ActivityFieldLocator locator, Node node, AtomicBoolean formattingNeeded)
+			throws ParseException {
 		String strValue = node.getTextContent();
 		Node attrsNode = node;
 
@@ -486,16 +487,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			attrsNode = attr.getOwnerElement();
 		}
 
-		// Get list of attributes and their values for
-		// current element
+		// Get list of attributes and their values for current element
 		NamedNodeMap attrsMap = attrsNode == null ? null : attrsNode.getAttributes();
-
-		Node attr;
-		String attrVal;
-		ActivityFieldLocator locCopy = locator.clone();
 		if (attrsMap != null && attrsMap.getLength() > 0) {
-			attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
-			attrVal = attr == null ? null : attr.getTextContent();
+			ActivityFieldLocator locCopy = locator.clone();
+
+			Node attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+			String attrVal = attr == null ? null : attr.getTextContent();
 			if (StringUtils.isNotEmpty(attrVal)) {
 				locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
 			}
@@ -514,9 +512,14 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			if (StringUtils.isNotEmpty(attrVal)) {
 				locCopy.setUnits(attrVal);
 			}
+
+			Object fValue = locCopy.formatValue(strValue.trim());
+			formattingNeeded.set(false);
+
+			return fValue;
 		}
 
-		return locCopy.formatValue(strValue.trim());
+		return strValue.trim();
 	}
 
 	/**

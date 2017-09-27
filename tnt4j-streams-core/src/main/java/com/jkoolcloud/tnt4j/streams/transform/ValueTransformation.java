@@ -49,4 +49,23 @@ public interface ValueTransformation<V, T> {
 	 *             if transformation operation fails
 	 */
 	T transform(V value, ActivityInfo ai) throws TransformationException;
+
+	/**
+	 * Returns activity data value resolution phase when transformation has to be applied.
+	 * 
+	 * @return activity data value resolution phase
+	 */
+	Phase getPhase();
+
+	/**
+	 * Sets activity data value resolution phase when transformation has to be applied.
+	 *
+	 * @param phase
+	 *            activity data value resolution phase
+	 */
+	void setPhase(Phase phase);
+
+	enum Phase {
+		RAW, FORMATTED, AGGREGATED
+	}
 }

@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.utils;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+package com.jkoolcloud.tnt4j.streams.configure;
 
 /**
- * @author akausinis
- * @version 1.0
+ * Lists predefined property names used by TNT4-Streams cache.
+ *
+ * @version $Revision: 1 $
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ UtilsTest.class, NumericFormatterTest.class, TimestampFormatterTest.class,
-		StreamsThreadTest.class, StreamsResourcesTest.class, StreamsCacheTest.class })
-public class AllUtilsTests {
+public interface CacheProperties {
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_MAX_SIZE = "MaxSize"; // NON-NLS
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_EXPIRE_DURATION = "ExpireDuration"; // NON-NLS
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_PERSISTED = "Persisted"; // NON-NLS
 }
