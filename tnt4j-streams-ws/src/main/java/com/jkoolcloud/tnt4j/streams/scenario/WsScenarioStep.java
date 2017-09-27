@@ -19,6 +19,8 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 /**
  * This class defines TNT4J-Streams-WS configuration scenario step.
  *
@@ -101,6 +103,15 @@ public class WsScenarioStep {
 	}
 
 	/**
+	 * Checks if scenario step has no requests defined.
+	 *
+	 * @return flag indicating scenario has no requests defined
+	 */
+	public boolean isEmpty() {
+		return CollectionUtils.isEmpty(requests);
+	}
+
+	/**
 	 * Returns request invocation method name.
 	 * <p>
 	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
@@ -172,7 +183,7 @@ public class WsScenarioStep {
 	 * Returns password used to perform request if service authentication is needed.
 	 * <p>
 	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 * 
+	 *
 	 * @return password used for authentication
 	 */
 	public String getPassword() {

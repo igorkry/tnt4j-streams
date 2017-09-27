@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @version $Revision: 1 $
  */
 public class SimpleSchedulerData implements SchedulerData {
-	private int interval = 0;
+	private long interval = 0;
 	private TimeUnit units;
 	private Integer repeatCount;
 
@@ -34,7 +34,7 @@ public class SimpleSchedulerData implements SchedulerData {
 	 * @param interval
 	 *            request/call/command invocations interval.
 	 */
-	public SimpleSchedulerData(int interval) {
+	public SimpleSchedulerData(long interval) {
 		this.interval = interval;
 		this.units = TimeUnit.MILLISECONDS;
 	}
@@ -44,7 +44,7 @@ public class SimpleSchedulerData implements SchedulerData {
 	 *
 	 * @return request /call/command invocations interval.
 	 */
-	public int getInterval() {
+	public long getInterval() {
 		return interval;
 	}
 

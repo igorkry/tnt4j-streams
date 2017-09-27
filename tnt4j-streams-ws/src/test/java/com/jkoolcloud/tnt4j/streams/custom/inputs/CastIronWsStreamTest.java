@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.inputs;
+package com.jkoolcloud.tnt4j.streams.custom.inputs;
 
 import static org.junit.Assert.assertEquals;
 

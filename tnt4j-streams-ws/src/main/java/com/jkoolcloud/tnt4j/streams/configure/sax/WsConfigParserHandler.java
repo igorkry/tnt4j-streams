@@ -185,14 +185,14 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					getLocationInfo()));
 		}
 
-		Integer interval = null;
+		Long interval = null;
 		String timeUnits = null;
 		Integer repeatCount = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (INTERVAL_ATTR.equals(attName)) {
-				interval = Integer.parseInt(attValue);
+				interval = Long.parseLong(attValue);
 			} else if (UNITS_ATTR.equals(attName)) {
 				timeUnits = attValue;
 			} else if (REPEATS_ATTR.equals(attName)) {

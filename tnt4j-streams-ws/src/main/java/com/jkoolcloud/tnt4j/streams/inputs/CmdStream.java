@@ -16,16 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -62,16 +58,13 @@ public class CmdStream extends AbstractWsStream {
 	}
 
 	@Override
-	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
-		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequests());
-
-		return JobBuilder.newJob(CmdCallJob.class).withIdentity(scenario.getName() + ':' + step.getName()) // NON-NLS
-				.usingJobData(jobAttrs).build();
+	protected JobDetail buildJob(String jobId, JobDataMap jobAttrs) {
+		return JobBuilder.newJob(CmdCallJob.class).withIdentity(jobId).usingJobData(jobAttrs).build();
 	}
 
 	/**
 	 * Performs system command call.
-	 * 
+	 *
 	 * @param cmdData
 	 *            command data: name and parameters
 	 * @return command response string
@@ -107,17 +100,16 @@ public class CmdStream extends AbstractWsStream {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String respStr = null;
 
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			List<String> requests = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
+			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 
-			if (CollectionUtils.isNotEmpty(requests)) {
-				for (String request : requests) {
+			if (!scenarioStep.isEmpty()) {
+				for (String request : scenarioStep.getRequests()) {
 					try {
 						respStr = executeCommand(request);
 					} catch (Exception exc) {

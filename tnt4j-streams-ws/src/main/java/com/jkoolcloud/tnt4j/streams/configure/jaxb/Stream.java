@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Generated;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -58,7 +61,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;/complexType>
  *       &lt;/redefine>
  *       &lt;sequence>
- *         &lt;element name="scenario" type="{}Scenario" minOccurs="0"/>
+ *         &lt;element name="scenario" type="{}Scenario" maxOccurs="unbounded" minOccurs="1"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -73,29 +76,39 @@ import javax.xml.bind.annotation.XmlType;
 public class Stream extends OriginalStream {
 
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	protected Scenario scenario;
+	protected List<Scenario> scenario;
 
 	/**
 	 * Gets the value of the scenario property.
-	 * 
-	 * @return possible object is {@link Scenario }
-	 * 
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the scenario property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getScenario().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link String }
+	 *
+	 *
 	 */
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	public Scenario getScenario() {
-		return scenario;
+	public List<Scenario> getScenario() {
+		if (scenario == null) {
+			scenario = new ArrayList<Scenario>();
+		}
+		return this.scenario;
 	}
 
-	/**
-	 * Sets the value of the scenario property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link Scenario }
-	 * 
-	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	public void setScenario(Scenario value) {
-		this.scenario = value;
+	public void addRequest(Scenario scr) {
+		getScenario().add(scr);
 	}
 
 }

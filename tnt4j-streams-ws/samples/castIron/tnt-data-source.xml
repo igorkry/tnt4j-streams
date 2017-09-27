@@ -26,8 +26,17 @@
             <field-map source="info" target="ERROR"/>
         </field>
 
-        <field name="StartTime" locator="/*[local-name() = 'logs']/*[local-name() = 'timestamp']" locator-type="Label" datatype="DateTime"
-               format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="StartTime">
+            <field-locator locator="/*[local-name() = 'logs']/*[local-name() = 'timestamp']" locator-type="Label" datatype="DateTime"
+                           format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT">
+                <field-transform name="PadDateTimeMillis" lang="groovy" phase="raw">
+                    <![CDATA[
+                        regex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+                        ($fieldValue ==~ regex) ? $fieldValue : $fieldValue[0..-2]+'.000Z';
+                    ]]>
+                </field-transform>
+            </field-locator>
+        </field>
 
     </parser>
 
@@ -66,7 +75,7 @@
 
     </parser>
 
-    <parser name="searchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="searchLogs">
+    <parser name="SearchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="searchLogs">
         <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
@@ -126,7 +135,7 @@
 
     </parser>
 
-    <parser name="searchJobsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="SearchJobsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
@@ -141,7 +150,7 @@
 
     </parser>
 
-    <parser name="loginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="login">
+    <parser name="LoginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="login">
         <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
@@ -150,7 +159,7 @@
         <field name="Token" locator="/S:Envelope/S:Body/*/*" locator-type="Label"/>
     </parser>
 
-    <parser name="logsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getLogCount"
+    <parser name="LogsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getLogCount"
             manualFieldsOrder="true">
         <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
@@ -188,169 +197,165 @@
 			]]>
             </field-transform>
         </field>
-
     </parser>
 
-    <stream name="CastIronStreamSearchLogs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
+    <cache>
+        <property name="MaxSize" value="300"/>
+        <property name="ExpireDuration" value="55"/>
+        <property name="Persisted" value="true"/>
+
+        <entry id="Token">
+            <key>Token</key>
+            <value>${Token}</value>
+        </entry>
+        <entry id="CurrentLogCount">
+            <key>CurrentLogCount</key>
+            <value>${CurrentLogCount}</value>
+        </entry>
+        <entry id="LogCountDiff">
+            <key>LogCountDiff</key>
+            <value>${LogCountDiff}</value>
+            <default>1</default>
+        </entry>
+        <entry id="CurrentJobsCount">
+            <key>CurrentJobsCount</key>
+            <value>${CurrentJobsCount}</value>
+        </entry>
+        <entry id="JobsCountDiff">
+            <key>JobsCountDiff</key>
+            <value>${JobsCountDiff}</value>
+            <default>1</default>
+        </entry>
+    </cache>
+
+    <stream name="CastIronStreamSearchLogs" class="com.jkoolcloud.tnt4j.streams.custom.inputs.CastIronWsStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="UserName" value="admin"/>
-        <property name="Password" value="slabs123!"/>
-        <property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
+
+        <property name="DisableSSL" value="true"/>
+        <property name="SynchronizeRequests" value="true"/>
+
         <property name="SecurityResponseParserTag" value="login"/>
         <property name="SecurityCachedTokenKey" value="Token"/>
+        <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
 
-        <property name="StreamCacheMaxSize" value="300"/>
-        <property name="StreamCacheExpireDuration" value="55"/>
-
-        <parser-ref name="searchLogsResponseParser"/>
-        <parser-ref name="loginParser"/>
-        <parser-ref name="logsCountParser"/>
+        <parser-ref name="SearchLogsResponseParser"/>
+        <parser-ref name="LoginParser"/>
+        <parser-ref name="LogsCountParser"/>
 
         <scenario name="Sample log poll scenario">
-            <step name="Step 1"
-                  url="https://192.168.3.3/ws/lognotif">
-                <schedule-simple interval="6" units="Seconds" repeatCount="2147483647"/>
+            <step name="Login" url="${WsEndpoint}/security">
                 <request>
                     <![CDATA[
-							  SOAPAction:https://192.168.3.3/ws/lognotif
-							  <log:getLogCount xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
-								 <log:logComponent>all</log:logComponent>
-								 <log:logLevel>all</log:logLevel>
-								 <log:maxDaysOld>-1</log:maxDaysOld>
-								 <log:status>all</log:status>
-							  </log:getLogCount>
-					]]>
-                </request>
-                <request>
-                    <![CDATA[
-							  SOAPAction:https://192.168.3.3/ws/lognotif
-							  <log:searchLogs xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
-							     <log:logComponent>all</log:logComponent>
-								 <log:logLevel>all</log:logLevel>
-								 <log:maxDaysOld>-1</log:maxDaysOld>
-								 <log:status>all</log:status>
-								 <log:page>0</log:page>
-								 <log:pageSize>${LogCountDiff}</log:pageSize>
-							  </log:searchLogs>
-					]]>
+                        SOAPAction:${WsEndpoint}/security
+                        <sec:login xmlns:sec="http://www.approuter.com/schemas/2008/1/security">
+                            <sec:username>admin</sec:username>
+                            <sec:password>slabs123!</sec:password>
+                        </sec:login>
+                    ]]>
                 </request>
             </step>
-
+            <step name="PollLogs"
+                  url="${WsEndpoint}/lognotif">
+                <schedule-simple interval="30" units="Seconds" repeatCount="-1"/>
+                <request>
+                    <![CDATA[
+                        SOAPAction:${WsEndpoint}/lognotif
+                        <log:getLogCount xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
+                            <log:logComponent>all</log:logComponent>
+                            <log:logLevel>all</log:logLevel>
+                            <log:maxDaysOld>-1</log:maxDaysOld>
+                            <log:status>all</log:status>
+                        </log:getLogCount>
+                    ]]>
+                </request>
+                <request>
+                    <![CDATA[
+                        SOAPAction:${WsEndpoint}/lognotif
+                        <log:searchLogs xmlns:log="http://www.approuter.com/schemas/2008/1/lognotif">
+                            <log:logComponent>all</log:logComponent>
+                            <log:logLevel>all</log:logLevel>
+                            <log:maxDaysOld>-1</log:maxDaysOld>
+                            <log:status>all</log:status>
+                            <log:page>0</log:page>
+                            <log:pageSize>${LogCountDiff}</log:pageSize>
+                        </log:searchLogs>
+                    ]]>
+                </request>
+            </step>
         </scenario>
-
-        <cache>
-            <entry id="Token">
-                <key>Token</key>
-                <value>${Token}</value>
-            </entry>
-            <entry id="CurrentLogCount">
-                <key>CurrentLogCount</key>
-                <value>${CurrentLogCount}</value>
-            </entry>
-            <entry id="LogCountDiff">
-                <key>LogCountDiff</key>
-                <value>${LogCountDiff}</value>
-                <default>1</default>
-            </entry>
-            <entry id="CurrentJobsCount">
-                <key>CurrentJobsCount</key>
-                <value>${CurrentJobsCount}</value>
-            </entry>
-            <entry id="JobsCountDiff">
-                <key>JobsCountDiff</key>
-                <value>${JobsCountDiff}</value>
-                <default>1</default>
-            </entry>
-        </cache>
-
     </stream>
 
-    <stream name="CastIronStreamSearchJobs" class="com.jkoolcloud.tnt4j.streams.inputs.CastIronWsStream">
+    <stream name="CastIronStreamSearchJobs" class="com.jkoolcloud.tnt4j.streams.custom.inputs.CastIronWsStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="UserName" value="admin"/>
-        <property name="Password" value="slabs123!"/>
-        <property name="LoginServiceURL" value="https://192.168.3.3/ws/security"/>
-        <property name="SecurityResponseParserTag" value="LOGIN"/>
-        <property name="SecurityCachedTokenKey" value="TOKEN"/>
 
-        <property name="StreamCacheMaxSize" value="300"/>
-        <property name="StreamCacheExpireDuration" value="55"/>
+        <property name="DisableSSL" value="true"/>
+        <property name="SynchronizeRequests" value="true"/>
 
-        <parser-ref name="searchJobsResponseParser"/>
-        <parser-ref name="loginParser"/>
+        <property name="SecurityResponseParserTag" value="login"/>
+        <property name="SecurityCachedTokenKey" value="Token"/>
+        <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
+
+        <parser-ref name="SearchJobsResponseParser"/>
+        <parser-ref name="LoginParser"/>
         <parser-ref name="JobsCountParser"/>
 
         <scenario name="Sample job poll scenario">
-            <step name="Step 1"
-                  url="https://192.168.3.3/ws/orcmon">
-                <schedule-simple interval="35" units="Seconds" repeatCount="2147483647"/>
+            <step name="Login" url="${WsEndpoint}/security">
                 <request>
                     <![CDATA[
-								SOAPAction:https://192.168.3.3/ws/orcmon
-								<orc:getJobCount xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
-									<orc:projectName>Test</orc:projectName>
-									<orc:version>1.0</orc:version>
-									<orc:configName>Default</orc:configName>
-									<orc:orchName>Orchestration</orc:orchName>
-									<orc:status>all</orc:status>
-								</orc:getJobCount>
-					  ]]>
+                        SOAPAction:${WsEndpoint}/security
+                        <sec:login xmlns:sec="http://www.approuter.com/schemas/2008/1/security">
+                            <sec:username>admin</sec:username>
+                            <sec:password>slabs123!</sec:password>
+                        </sec:login>
+                    ]]>
                 </request>
-
+            </step>
+            <step name="PollJobs"
+                  url="${WsEndpoint}/orcmon">
+                <schedule-simple interval="35" units="Seconds" repeatCount="-1"/>
                 <request>
                     <![CDATA[
-								SOAPAction:https://192.168.3.3/ws/orcmon
-								<orc:searchJobs xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
-									<orc:projectName>Test</orc:projectName>
-									<orc:version>1.0</orc:version>
-									<orc:configName>Default</orc:configName>
-									<orc:orchName>Orchestration</orc:orchName>
-									<orc:status>all</orc:status>
-									<orc:page>0</orc:page>
-									<orc:pageSize>${JobsCountDiff}</orc:pageSize>
-								</orc:searchJobs>
-					]]>
+                        SOAPAction:${WsEndpoint}/orcmon
+                        <orc:getJobCount xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
+                            <orc:projectName>Test</orc:projectName>
+                            <orc:version>1.0</orc:version>
+                            <orc:configName>Default</orc:configName>
+                            <orc:orchName>Orchestration</orc:orchName>
+                            <orc:status>all</orc:status>
+                        </orc:getJobCount>
+                    ]]>
+                </request>
+                <request>
+                    <![CDATA[
+                        SOAPAction:${WsEndpoint}/orcmon
+                        <orc:searchJobs xmlns:orc="http://www.approuter.com/schemas/2008/1/orcmon">
+                            <orc:projectName>Test</orc:projectName>
+                            <orc:version>1.0</orc:version>
+                            <orc:configName>Default</orc:configName>
+                            <orc:orchName>Orchestration</orc:orchName>
+                            <orc:status>all</orc:status>
+                            <orc:page>0</orc:page>
+                            <orc:pageSize>${JobsCountDiff}</orc:pageSize>
+                        </orc:searchJobs>
+                    ]]>
                 </request>
             </step>
         </scenario>
-
-        <cache>
-            <entry id="Token">
-                <key>Token</key>
-                <value>${Token}</value>
-            </entry>
-            <entry id="CurrentLogCount">
-                <key>CurrentLogCount</key>
-                <value>${CurrentLogCount}</value>
-            </entry>
-            <entry id="LogCountDiff">
-                <key>LogCountDiff</key>
-                <value>${LogCountDiff}</value>
-                <default>1</default>
-            </entry>
-            <entry id="CurrentJobsCount">
-                <key>CurrentJobsCount</key>
-                <value>${CurrentJobsCount}</value>
-            </entry>
-            <entry id="JobsCountDiff">
-                <key>JobsCountDiff</key>
-                <value>${JobsCountDiff}</value>
-                <default>1</default>
-            </entry>
-        </cache>
-
     </stream>
 
-    <!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-            <property name="FileName" value=".//samples/castIron/responses/searchJobsResponse.xml"/>
-            <property name="TurnOutActivityChildren" value="False"/>
-            <parser-ref name="searchJobsResponseParser"/>
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchJobsResponse.xml"/>-->
+    <!--<property name="TurnOutActivityChildren" value="False"/>-->
 
-         </stream> -->
-    <!--	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-            <property name="FileName" value=".//samples/castIron/responses/searchLogsResponse.xml"/>
-            <property name="TurnOutActivityChildren" value="true"/>
-            <parser-ref name="searchLogsResponseParser"/>
+    <!--<parser-ref name="SearchJobsResponseParser"/>-->
+    <!--</stream>-->
 
-        </stream> -->
+    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchLogsResponse.xml"/>-->
+    <!--<property name="TurnOutActivityChildren" value="true"/>-->
+
+    <!--<parser-ref name="SearchLogsResponseParser"/>-->
+    <!--</stream>-->
+
 </tnt-data-source>

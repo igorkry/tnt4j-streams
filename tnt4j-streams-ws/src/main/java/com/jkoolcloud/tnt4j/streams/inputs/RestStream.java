@@ -17,9 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -42,7 +40,6 @@ import org.quartz.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -70,11 +67,6 @@ public class RestStream extends AbstractWsStream {
 	private static final int DEFAULT_AUTH_PORT = 80;
 
 	/**
-	 * Constant for name of built-in scheduler job property {@value}.
-	 */
-	protected static final String JOB_PROP_REQ_METHOD_KEY = "reqMethod"; // NON-NLS
-
-	/**
 	 * Constructs an empty RestStream. Requires configuration settings to set input stream source.
 	 */
 	public RestStream() {
@@ -87,15 +79,8 @@ public class RestStream extends AbstractWsStream {
 	}
 
 	@Override
-	protected JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs) {
-		jobAttrs.put(JOB_PROP_URL_KEY, step.getUrlStr());
-		jobAttrs.put(JOB_PROP_REQ_KEY, step.getRequests());
-		jobAttrs.put(JOB_PROP_REQ_METHOD_KEY, step.getMethod());
-		jobAttrs.put(JOB_PROP_USERNAME_KEY, step.getUsername());
-		jobAttrs.put(JOB_PROP_PASSWORD_KEY, step.getPassword());
-
-		return JobBuilder.newJob(RestCallJob.class).withIdentity(scenario.getName() + ':' + step.getName()) // NON-NLS
-				.usingJobData(jobAttrs).build();
+	protected JobDetail buildJob(String jobId, JobDataMap jobAttrs) {
+		return JobBuilder.newJob(RestCallJob.class).withIdentity(jobId).usingJobData(jobAttrs).build();
 	}
 
 	/**
@@ -103,7 +88,6 @@ public class RestStream extends AbstractWsStream {
 	 *
 	 * @param uriStr
 	 *            JAX-RS service URI
-	 *
 	 * @return service response string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
@@ -123,7 +107,6 @@ public class RestStream extends AbstractWsStream {
 	 * @param password
 	 *            password used to perform request if service authentication is needed, or {@code null} if no
 	 *            authentication
-	 *
 	 * @return service response string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
@@ -140,13 +123,10 @@ public class RestStream extends AbstractWsStream {
 				uriStr);
 
 		String respStr = null;
-		CloseableHttpClient client = HttpClients.createDefault();
-		try {
+		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpGet get = new HttpGet(uriStr);
 
 			respStr = executeRequest(client, get, username, password);
-		} finally {
-			Utils.close(client);
 		}
 
 		return respStr;
@@ -159,7 +139,6 @@ public class RestStream extends AbstractWsStream {
 	 *            JAX-RS service URI
 	 * @param reqData
 	 *            request data
-	 *
 	 * @return service response string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
@@ -181,7 +160,6 @@ public class RestStream extends AbstractWsStream {
 	 * @param password
 	 *            password used to perform request if service authentication is needed, or {@code null} if no
 	 *            authentication
-	 *
 	 * @return service response string
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
@@ -203,8 +181,7 @@ public class RestStream extends AbstractWsStream {
 				uriStr, reqData);
 
 		String respStr = null;
-		CloseableHttpClient client = HttpClients.createDefault();
-		try {
+		try (CloseableHttpClient client = HttpClients.createDefault()) {
 			HttpPost post = new HttpPost(uriStr);
 			StringEntity reqEntity = new StringEntity(reqData == null ? "" : reqData);
 			// here instead of JSON you can also have XML
@@ -219,8 +196,6 @@ public class RestStream extends AbstractWsStream {
 			post.setEntity(reqEntity);
 
 			respStr = executeRequest(client, post, username, password);
-		} finally {
-			Utils.close(client);
 		}
 
 		return respStr;
@@ -267,28 +242,25 @@ public class RestStream extends AbstractWsStream {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			String respStr = null;
 
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			String urlStr = dataMap.getString(JOB_PROP_URL_KEY);
-			List<String> requests = (List<String>) dataMap.get(JOB_PROP_REQ_KEY);
-			String reqMethod = dataMap.getString(JOB_PROP_REQ_METHOD_KEY);
-			String username = dataMap.getString(JOB_PROP_USERNAME_KEY);
-			String password = dataMap.getString(JOB_PROP_PASSWORD_KEY);
+			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
+			String reqMethod = scenarioStep.getMethod();
 
 			if (StringUtils.isEmpty(reqMethod)) {
 				reqMethod = ReqMethod.GET.name();
 			}
 
 			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
-				if (CollectionUtils.isNotEmpty(requests)) {
-					for (String request : requests) {
+				if (!scenarioStep.isEmpty()) {
+					for (String request : scenarioStep.getRequests()) {
 						try {
-							respStr = executePOST(urlStr, request, username, password);
+							respStr = executePOST(scenarioStep.getUrlStr(), request, scenarioStep.getUsername(),
+									scenarioStep.getPassword());
 						} catch (Exception exc) {
 							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
 									WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.execute.exception"), exc);
@@ -301,7 +273,8 @@ public class RestStream extends AbstractWsStream {
 				}
 			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
 				try {
-					respStr = executeGET(urlStr, username, password);
+					respStr = executeGET(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
+							scenarioStep.getPassword());
 				} catch (Exception exc) {
 					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 							"RestStream.execute.exception"), exc);

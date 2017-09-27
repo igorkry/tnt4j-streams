@@ -25,13 +25,17 @@ public interface WsStreamProperties extends StreamProperties {
 	/**
 	 * Constant for name of built-in stream {@value} property.
 	 */
-	public static final String PROP_SECURITY_RESPONSE_PARSER = "SecurityResponseParserTag"; // NON-NLS
+	public static final String PROP_SECURITY_RESPONSE_PARSER_TAG = "SecurityResponseParserTag"; // NON-NLS
 	/**
 	 * Constant for name of built-in stream {@value} property.
 	 */
-	public static final String PROP_TOKEN_KEY = "SecurityCachedTokenKey"; // NON-NLS
+	public static final String PROP_SECURITY_CACHED_TOKEN_KEY = "SecurityCachedTokenKey"; // NON-NLS
 	/**
 	 * Constant for name of built-in stream {@value} property.
 	 */
-	public static final String PROP_LOGIN_URL = "LoginServiceURL"; // NON-NLS
+	public static final String PROP_DISABLE_SSL = "DisableSSL"; // NON-NLS
+	/**
+	 * Constant for name of built-in stream {@value} property.
+	 */
+	public static final String PROP_SYNCHRONIZE_REQUESTS = "SynchronizeRequests"; // NON-NLS
 }

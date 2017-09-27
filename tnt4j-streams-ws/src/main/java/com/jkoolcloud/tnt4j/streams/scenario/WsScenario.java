@@ -29,6 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 public class WsScenario {
 	private String name;
 	private List<WsScenarioStep> stepsList;
+	private WsScenarioStep loginStep;
 
 	/**
 	 * Constructs a new WsScenario. Defines scenario name.
@@ -60,7 +61,11 @@ public class WsScenario {
 			stepsList = new ArrayList<>();
 		}
 
-		stepsList.add(scenarioStep);
+		if ("login".equalsIgnoreCase(scenarioStep.getName())) { // NON-NLS
+			loginStep = scenarioStep;
+		} else {
+			stepsList.add(scenarioStep);
+		}
 	}
 
 	/**
@@ -79,5 +84,14 @@ public class WsScenario {
 	 */
 	public boolean isEmpty() {
 		return CollectionUtils.isEmpty(stepsList);
+	}
+
+	/**
+	 * Returns scenario step defining SOAP login call.
+	 *
+	 * @return login call step
+	 */
+	public WsScenarioStep getLoginStep() {
+		return loginStep;
 	}
 }

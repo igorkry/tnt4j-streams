@@ -6,7 +6,7 @@
             <xs:complexContent>
                 <xs:extension base="Stream">
                     <xs:sequence>
-                        <xs:element name="scenario" type="Scenario" minOccurs="0" maxOccurs="1">
+                        <xs:element name="scenario" type="Scenario" minOccurs="1" maxOccurs="unbounded">
                             <xs:annotation>
                                 <xs:documentation>
                                     Defines scenario steps set for WS type streams to define request/command data and request/command
@@ -62,7 +62,7 @@
         <xs:attribute name="repeatCount" use="optional" type="xs:integer" default="1">
             <xs:annotation>
                 <xs:documentation>
-                    Repeat iterations count.
+                    Repeat iterations count. -1 means infinitely.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

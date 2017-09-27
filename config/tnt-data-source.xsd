@@ -746,7 +746,7 @@
             <xs:enumeration value="RestoreState">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that stream should restore streaming state after (re)start (i.e., continue from last streamed
+                        Property indicates that stream should restore streaming state after (re)start (i.e. continue from last streamed
                         file line).
                     </xs:documentation>
                 </xs:annotation>
@@ -755,7 +755,7 @@
             <xs:enumeration value="StartServer">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that stream should start as server (e.g., Kafka server) if stream supports both client and server
+                        Property indicates that stream should start as server (e.g. Kafka server) if stream supports both client and server
                         modes.
                     </xs:documentation>
                 </xs:annotation>
@@ -772,23 +772,7 @@
             <xs:enumeration value="RangeToStream">
                 <xs:annotation>
                     <xs:documentation>
-                        Property to define streamed activity data range (i.e., file lines or sheet rows) from:to.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
-            <xs:enumeration value="StreamCacheMaxSize">
-                <xs:annotation>
-                    <xs:documentation>
-                        Property to define stream used cache max. capacity.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
-            <xs:enumeration value="StreamCacheExpireDuration">
-                <xs:annotation>
-                    <xs:documentation>
-                        Property to define stream used cache entries expiration duration in minutes.
+                        Property to define streamed activity data range (i.e. file lines or sheet rows) from:to.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -930,6 +914,40 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- Cache property names enumeration definition -->
+    <xs:simpleType name="CacheProperties">
+        <xs:annotation>
+            <xs:documentation>
+                Set of internally-supported cache properties.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="MaxSize">
+                <xs:annotation>
+                    <xs:documentation>
+                        Cache maximum capacity value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="ExpireDuration">
+                <xs:annotation>
+                    <xs:documentation>
+                        Cache entry expiration duration in minutes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Persisted">
+                <xs:annotation>
+                    <xs:documentation>
+                        Flag indicating cache contents has to be persisted to file on close and loaded on initialization.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Allow user-defined types for custom properties in addition to built-in types for use with user-defined streams -->
     <xs:simpleType name="StreamPropertiesAll">
         <xs:annotation>
@@ -948,6 +966,16 @@
             </xs:documentation>
         </xs:annotation>
         <xs:union memberTypes="ParserProperties xs:string"/>
+    </xs:simpleType>
+
+    <!-- Allow user-defined types for custom properties in addition to built-in types for use with user-defined cache -->
+    <xs:simpleType name="CachePropertiesAll">
+        <xs:annotation>
+            <xs:documentation>
+                Can be either one of the internally-supported properties or a custom one.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:union memberTypes="CacheProperties xs:string"/>
     </xs:simpleType>
 
     <!-- Activity data aggregation types enumeration definition -->
@@ -1042,6 +1070,34 @@
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute name="name" use="required" type="ParserPropertiesAll">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Name of the property.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+
+                <xs:attribute name="value" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Value of the property.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Element <property> under <cache> definition -->
+    <xs:complexType name="CacheProperty">
+        <xs:annotation>
+            <xs:documentation>
+                Defines a cache configuration entity property - set of supported properties is entity-specific.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="CachePropertiesAll">
                     <xs:annotation>
                         <xs:documentation>
                             Name of the property.
@@ -1905,7 +1961,16 @@
                 Defines a stream cache entries patterns.
             </xs:documentation>
         </xs:annotation>
+
         <xs:sequence>
+            <xs:element name="property" type="CacheProperty" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies a configuration property for the cache - property names are cache entity specific.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+
             <xs:element name="entry" type="CacheEntry" minOccurs="1" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -2017,15 +2082,6 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-
-            <xs:element name="cache" type="Cache" minOccurs="0" maxOccurs="unbounded">
-                <xs:annotation>
-                    <xs:documentation>
-                        Defines a stream cache entries patterns.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
-
         </xs:sequence>
 
         <xs:attributeGroup ref="EntityAttributeGroup">
@@ -2190,6 +2246,14 @@
                     <xs:annotation>
                         <xs:documentation>
                             Defines a parser to extract activity elements from a string identifying an activity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+
+                <xs:element name="cache" type="Cache" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Defines a stream cache entries patterns.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>

@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.*;
@@ -53,34 +54,16 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
 	 */
-	protected static final String JOB_PROP_URL_KEY = "urlStr"; // NON-NLS
+	protected static final String JOB_PROP_SCENARIO_KEY = "scenarioObj"; // NON-NLS
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
 	 */
-	protected static final String JOB_PROP_REQ_KEY = "reqData"; // NON-NLS
-	/**
-	 * Constant for name of built-in scheduler job property {@value}.
-	 */
-	protected static final String JOB_PROP_SEMAPHORE = "semaphore"; // NON-NLS
-	/**
-	 * Constant for name of built-in scheduler job property {@value}.
-	 */
-	protected static final String JOB_PROP_USERNAME_KEY = "username"; // NON-NLS
-	/**
-	 * Constant for name of built-in scheduler job property {@value}.
-	 */
-	protected static final String JOB_PROP_PASSWORD_KEY = "password"; // NON-NLS
+	protected static final String JOB_PROP_SCENARIO_STEP_KEY = "scenarioStepObj"; // NON-NLS
 
 	private List<WsScenario> scenarioList;
 
-	protected static Scheduler scheduler;
-
-	static {
-		try {
-			scheduler = StdSchedulerFactory.getDefaultScheduler();
-		} catch (Exception e) {
-		}
-	}
+	private static Scheduler scheduler;
+	private static final ReentrantLock schedInitLock = new ReentrantLock();
 
 	// @Override
 	// public Object getProperty(String name) {
@@ -101,13 +84,17 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	// }
 
 	@Override
-	protected synchronized void initialize() throws Exception {
+	protected void initialize() throws Exception {
 		super.initialize();
 
-		synchronized (scheduler) {
-			if (!scheduler.isStarted()) {
+		schedInitLock.lock();
+		try {
+			if (scheduler == null) {
+				scheduler = StdSchedulerFactory.getDefaultScheduler();
 				scheduler.start();
 			}
+		} finally {
+			schedInitLock.unlock();
 		}
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
@@ -152,8 +139,12 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 		JobDataMap jobAttrs = new JobDataMap();
 		jobAttrs.put(JOB_PROP_STREAM_KEY, this);
+		jobAttrs.put(JOB_PROP_SCENARIO_KEY, scenario);
+		jobAttrs.put(JOB_PROP_SCENARIO_STEP_KEY, step);
 
-		JobDetail job = buildJob(scenario, step, jobAttrs);
+		String jobId = scenario.getName() + ':' + step.getName();
+
+		JobDetail job = buildJob(jobId, jobAttrs);
 
 		ScheduleBuilder<?> scheduleBuilder;
 
@@ -177,16 +168,14 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	/**
 	 * Builds scheduler job for call scenario step.
-	 * 
-	 * @param scenario
-	 *            scenario details
-	 * @param step
-	 *            scenario step details
+	 *
+	 * @param jobId
+	 *            job identifier
 	 * @param jobAttrs
 	 *            additional job attributes
 	 * @return scheduler job detail object.
 	 */
-	protected abstract JobDetail buildJob(WsScenario scenario, WsScenarioStep step, JobDataMap jobAttrs);
+	protected abstract JobDetail buildJob(String jobId, JobDataMap jobAttrs);
 
 	@Override
 	protected long getActivityItemByteSize(String item) {
