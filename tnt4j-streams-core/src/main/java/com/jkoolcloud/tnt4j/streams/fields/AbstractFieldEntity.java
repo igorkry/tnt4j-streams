@@ -107,9 +107,6 @@ public abstract class AbstractFieldEntity {
 	 *            transformation to add
 	 */
 	public void addTransformation(ValueTransformation<Object, Object> transformation) {
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"AbstractFieldEntity.adding.transformation"), this, transformation);
-
 		if (transformations == null) {
 			transformations = new ArrayList<>();
 		}
@@ -117,6 +114,9 @@ public abstract class AbstractFieldEntity {
 		if (transformation.getPhase() == null) {
 			transformation.setPhase(getDefaultTransformationPhase());
 		}
+
+		logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"AbstractFieldEntity.adding.transformation"), this, transformation);
 
 		transformations.add(transformation);
 	}
@@ -153,10 +153,8 @@ public abstract class AbstractFieldEntity {
 		for (ValueTransformation<Object, Object> vt : transformations) {
 			if (vt.getPhase().equals(phase)) {
 				tValue = vt.transform(tValue, ai);
-				logger().log(OpLevel.TRACE,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"AbstractFieldEntity.value.after.transformation"),
-						this, vt.getName(), Utils.toString(tValue));
+				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"AbstractFieldEntity.value.after.transformation"), this, vt, Utils.toString(tValue));
 			}
 		}
 

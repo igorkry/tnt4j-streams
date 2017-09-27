@@ -54,4 +54,9 @@ public abstract class AbstractValueTransformation<V, T> implements ValueTransfor
 	public void setPhase(Phase phase) {
 		this.phase = phase;
 	}
+
+	@Override
+	public String toString() {
+		return name + "@" + phase; // NON-NLS
+	}
 }
