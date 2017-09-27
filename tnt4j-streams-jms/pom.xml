@@ -48,6 +48,7 @@
                             <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
                             <Implementation-Title>${product.name}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
+                            <Main-Class>com.jkoolcloud.tnt4j.streams.StreamsAgent</Main-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
