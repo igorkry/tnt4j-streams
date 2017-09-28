@@ -40,7 +40,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
  * specified regular expression, with the value for each field being retrieved from either of the 1-based group
- * position, or match position.
+ * position, match position, or group name.
  * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):

@@ -1,0 +1,4 @@
+Message with random format
+My_msg_hdr::TID=TEST16_TID::JUNK=MY_JUNK
+TYPE=TEST16_BUY@USER_DATA=TEST16_UserData
+AMOUNT=TEST16_$123
