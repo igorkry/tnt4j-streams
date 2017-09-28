@@ -603,6 +603,24 @@ Or (using default attribute `lang` value)
 ```
 This sample concatenates string `corel_` and resolved value.
 
+`JavaScript`/`Groovy` based transformations be default imports those packages:
+ * `com.jkoolcloud.tnt4j.core`
+ * `com.jkoolcloud.tnt4j.utils`
+ * `com.jkoolcloud.tnt4j.uuid`
+ * `com.jkoolcloud.tnt4j.streams.utils`
+ * `com.jkoolcloud.tnt4j.streams.fields`
+ * `org.apache.commons.lang3`
+ * `org.apache.commons.collections4`
+ 
+so you are allowed directly use classes from those packages in script code, e.g.:
+```xml
+    <field-transform lang="groovy" name="FieldSubstring10">
+        <![CDATA[
+            StringUtils.substring($fieldValue, 0, 10)
+        ]]>
+    </field-transform>
+```   
+
 * XPath expression
 ```xml
 <field name="InvoiceFileFromFunction" locator="7">
