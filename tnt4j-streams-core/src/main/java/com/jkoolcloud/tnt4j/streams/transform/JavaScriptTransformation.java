@@ -77,7 +77,7 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 		}
 
 		try {
-			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getScriptCode()));
+			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);

@@ -233,7 +233,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			ActivityField af = fieldList.get(i);
 
 			boolean fActivity = af.hasActivityLocators() || af.hasActivityTransformations();
-			boolean fCache = af.hasCacheLocators();
+			boolean fCache = af.hasCacheLocators() || af.isResolvingValueOverTransformation();
 			boolean fRAW = !fActivity && !fCache;
 
 			if (fRAW) {
@@ -254,7 +254,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		if (field.hasActivityLocators() || field.hasActivityTransformations()) {
 			idx = aIdx + 1;
 		}
-		if (field.hasCacheLocators()) {
+		if (field.hasCacheLocators() || field.isResolvingValueOverTransformation()) {
 			idx = cIdx + 1;
 		}
 
@@ -705,7 +705,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		if (dynamicLocators != null) {
 			for (Map.Entry<String, ActivityFieldLocator> dLocator : dynamicLocators.entrySet()) {
 				Object lValue = getLocatorValue(dLocator.getValue(), cData);
-				final Object dynamicLocatorValue = Utils.simplifyValue(lValue);
+				Object dynamicLocatorValue = Utils.simplifyValue(lValue);
 				if (dynamicLocatorValue != null) {
 					dynamicValuesMap.put(dLocator.getKey(), dynamicLocatorValue);
 				}

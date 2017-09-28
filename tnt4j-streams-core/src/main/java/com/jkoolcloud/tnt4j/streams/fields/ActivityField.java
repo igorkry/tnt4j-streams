@@ -204,6 +204,29 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	/**
+	 * Checks if this field has no defined locator/value.
+	 *
+	 * @return {@code true} if field has no locators or has only one empty locator
+	 *
+	 * @see ActivityFieldLocator#isEmpty()
+	 */
+	public boolean hasNoValueLocator() {
+		return locators == null || (locators.size() == 1 && locators.get(0).isEmpty());
+	}
+
+	/**
+	 * Checks if this field has no defined locator/value and has activity transformations used to build field value.
+	 *
+	 * @return {@code true} if field has no defined locator/value and has activity transformations
+	 *
+	 * @see #hasNoValueLocator()
+	 * @see #hasActivityTransformations()
+	 */
+	public boolean isResolvingValueOverTransformation() {
+		return hasNoValueLocator() && hasActivityTransformations();
+	}
+
+	/**
 	 * Checks whether any of field static or dynamic locators has type 'Activity'.
 	 *
 	 * @return {@code true} if any of field static or dynamic locators has type 'Activity', {@code false} - otherwise.

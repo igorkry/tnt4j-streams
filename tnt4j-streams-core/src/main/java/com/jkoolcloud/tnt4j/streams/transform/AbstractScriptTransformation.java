@@ -110,11 +110,20 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	}
 
 	/**
-	 * Returns transformation script/expression code.
+	 * Returns transformation script code string.
 	 *
 	 * @return transformation script code
 	 */
 	public String getScriptCode() {
+		return scriptCode;
+	}
+
+	/**
+	 * Returns transformation expression code string.
+	 *
+	 * @return transformation expression
+	 */
+	public String getExpression() {
 		return StringUtils.isEmpty(ppExpression) ? scriptCode : ppExpression;
 	}
 

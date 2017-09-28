@@ -645,9 +645,9 @@ public class ConfigParserHandler extends DefaultHandler {
 				valueType = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
 				separator = attValue;
-			} else if (FORMATTING_PATTERN_ATTR.equals(attName))
+			} else if (FORMATTING_PATTERN_ATTR.equals(attName)) {
 				pattern = attValue;
-			else if (RADIX_ATTR.equals(attName)) {
+			} else if (RADIX_ATTR.equals(attName)) {
 				radix = Integer.parseInt(attValue);
 			} else if (UNITS_ATTR.equals(attName)) {
 				units = attValue;

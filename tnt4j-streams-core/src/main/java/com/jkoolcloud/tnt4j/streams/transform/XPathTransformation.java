@@ -88,7 +88,7 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 		xPath.setXPathVariableResolver(new StreamsVariableResolver(valuesMap));
 
 		try {
-			return xPath.evaluate(getScriptCode(), (Object) null);
+			return xPath.evaluate(getExpression(), (Object) null);
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);

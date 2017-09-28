@@ -79,13 +79,8 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			builtInType = ActivityFieldLocatorType.valueOf(this.type);
 		} catch (Exception e) {
 		}
-		if (builtInType != null && builtInType.getDataType() == Integer.class) {
-			int loc = Integer.parseInt(locator);
-			if (loc <= 0) {
-				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityFieldLocator.numeric.locator.positive"));
-			}
-		}
+
+		validateLocator();
 	}
 
 	/**
@@ -95,11 +90,15 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *            type of locator
 	 * @param locator
 	 *            key to use to locate raw data value - interpretation of this value depends on locator type
+	 * @throws IllegalArgumentException
+	 *             if locator type is a numeric value and is not a positive number
 	 */
 	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator) {
 		this.type = type.name();
 		this.locator = locator;
 		this.builtInType = type;
+
+		validateLocator();
 	}
 
 	/**
@@ -117,6 +116,16 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * locators values.
 	 */
 	ActivityFieldLocator() {
+	}
+
+	private void validateLocator() {
+		if (builtInType != null && builtInType.getDataType() == Integer.class) {
+			int loc = Integer.parseInt(locator);
+			if (loc <= 0) {
+				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityFieldLocator.numeric.locator.positive"));
+			}
+		}
 	}
 
 	@Override
@@ -148,6 +157,25 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
+	 * Checks if this locator type is equal to anny of provided locator <tt>types</tt>.
+	 *
+	 * @param types
+	 *            locator types to check against
+	 * @return {@code true} if any of provided locator types are equal to type of this locator
+	 */
+	public boolean isOfType(ActivityFieldLocatorType... types) {
+		if (types != null) {
+			for (ActivityFieldLocatorType alt : types) {
+				if (builtInType == alt) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Gets the locator to find the value of this field in the raw activity data. This is generally a numeric position
 	 * or a string label.
 	 *
@@ -155,6 +183,15 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 */
 	public String getLocator() {
 		return locator;
+	}
+
+	/**
+	 * Checks if fields <tt>locator key</tt> and <tt>constant value</tt> are empty.
+	 *
+	 * @return {@code true} if <tt>locator key</tt> and <tt>constant value</tt> are empty
+	 */
+	public boolean isEmpty() {
+		return StringUtils.isEmpty(locator) && (cfgValue == null || StringUtils.isEmpty(Utils.toString(cfgValue)));
 	}
 
 	/**
@@ -702,14 +739,16 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			if (key == null) {
 				while (i.hasNext()) {
 					Map.Entry<K, V> e = i.next();
-					if (e.getKey() == null)
+					if (e.getKey() == null) {
 						return e.getValue();
+					}
 				}
 			} else {
 				while (i.hasNext()) {
 					Map.Entry<K, V> e = i.next();
-					if (e.getKey() != null && e.getKey().equals(key))
+					if (e.getKey() != null && e.getKey().equals(key)) {
 						return e.getValue();
+					}
 				}
 			}
 			return null;

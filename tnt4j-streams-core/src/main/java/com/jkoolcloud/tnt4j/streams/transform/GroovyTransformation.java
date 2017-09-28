@@ -79,7 +79,7 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
-			return shell.evaluate(getScriptCode(),
+			return shell.evaluate(getExpression(),
 					StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
