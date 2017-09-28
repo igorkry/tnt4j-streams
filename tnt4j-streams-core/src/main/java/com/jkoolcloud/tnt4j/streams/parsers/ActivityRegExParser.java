@@ -46,6 +46,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link GenericActivityParser}):
  * <ul>
  * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
+ * <li>MatchStrategy - defines <tt>pattern</tt> created <tt>matcher</tt> comparison strategy used against input data
+ * string. Value can be one of: {@code "MATCH"} - pattern should match complete input string, or {@code "FIND"} -
+ * pattern has to match subsequence within input string. Default value - '{@code MATCH}'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -60,13 +63,16 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 * property).
 	 */
 	protected Pattern pattern = null;
+	/**
+	 * Defines strategy used to verify if {@link #pattern} created {@link Matcher} matches input data string.
+	 */
+	protected Strategy matchStrategy = Strategy.MATCH;
 
 	/**
 	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data, cached
 	 * activity data or stream properties from which to extract its value.
 	 */
 	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<>();
-
 	/**
 	 * Defines the mapping of activity fields to the regular expression match sequence(s) in the raw data from which to
 	 * extract its value.
@@ -100,6 +106,12 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"ActivityParser.setting"), name, value);
 					}
+				} else if (ParserProperties.PROP_MATCH_STRATEGY.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						matchStrategy = Strategy.valueOf(value.toUpperCase());
+						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ActivityParser.setting"), name, value);
+					}
 				}
 			}
 		}
@@ -111,8 +123,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (CollectionUtils.isEmpty(locators)) {
 			return;
 		}
-		List<ActivityFieldLocator> matchLocs = new ArrayList<>();
-		List<ActivityFieldLocator> groupLocs = new ArrayList<>();
+		List<ActivityFieldLocator> matchLocs = new ArrayList<>(5);
+		List<ActivityFieldLocator> groupLocs = new ArrayList<>(5);
 		for (ActivityFieldLocator locator : locators) {
 			ActivityFieldLocatorType locType = locator.getBuiltInType();
 			logger().log(OpLevel.DEBUG,
@@ -157,7 +169,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			return null;
 		}
 		Matcher matcher = pattern.matcher(dataStr);
-		if (matcher == null || !matcher.matches()) {
+		if (matcher == null || !isMatching(matcher)) {
 			logger().log(OpLevel.DEBUG,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.input.not.match"),
 					getName(), pattern.pattern());
@@ -170,6 +182,25 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		return cData;
 	}
 
+	/**
+	 * Checks if <tt>matcher</tt> matches input data string using parser defined matching strategy.
+	 * 
+	 * @param matcher
+	 *            matcher instance to use
+	 * @return {@code true} if matcher matches input data string using parser defined matching strategy
+	 */
+	protected boolean isMatching(Matcher matcher) {
+		boolean match;
+
+		if (matchStrategy == Strategy.FIND) {
+			match = matcher.find();
+		} else {
+			match = matcher.matches();
+		}
+
+		return match;
+	}
+
 	@Override
 	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
 		if (cData == null || cData.getData() == null) {
@@ -179,15 +210,16 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField field = null;
 		cData.setActivity(ai);
-		Matcher matcher = (Matcher) cData.getData();
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityRegExParser.applying.regex"), matchMap.size());
 				ArrayList<String> matches = new ArrayList<>();
-				matches.add(""); // dummy entry to index array with match
-									// locations
+				matches.add(""); // dummy entry to index array with match locations
+
+				Matcher matcher = (Matcher) cData.getData();
+				matcher.reset();
 				while (matcher.find()) {
 					String matchStr = matcher.group().trim();
 					matches.add(matchStr);
@@ -288,5 +320,20 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		}
 
 		return val;
+	}
+
+	/**
+	 * Strategies used to verify if pattern matches input data string.
+	 */
+	protected enum Strategy {
+		/**
+		 * Complete input data string matches defined pattern.
+		 */
+		MATCH,
+
+		/**
+		 * Part of input string matches defined pattern.
+		 */
+		FIND
 	}
 }

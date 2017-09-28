@@ -49,7 +49,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * RAW activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
  * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
  * <li>ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: {@code "EOL"} - end of
- * line or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
+ * line, or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
  * </ul>
  *
  * @param <T>

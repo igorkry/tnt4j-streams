@@ -45,6 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="EntryPattern"/>
  *     &lt;enumeration value="ActivityDelim"/>
  *     &lt;enumeration value="NamespaceAware"/>
+ *     &lt;enumeration value="MatchStrategy"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -169,7 +170,7 @@ public enum ParserProperties {
 
 	/**
 	 *
-	 * Property indicates the delimiter of activity RAW data entries. It can be "EOL" (end-of-line) or "EOF"
+	 * Property indicates the delimiter of activity RAW data entries. Can be "EOL" (end-of-line), or "EOF"
 	 * (end-of-file/stream).
 	 *
 	 *
@@ -184,7 +185,18 @@ public enum ParserProperties {
 	 *
 	 */
 	@XmlEnumValue("NamespaceAware")
-	NAMESPACE_AWARE("NamespaceAware");
+	NAMESPACE_AWARE("NamespaceAware"),
+
+	/**
+	 *
+	 * Property defines strategy used to verify if RegEx 'pattern' created 'Matcher' matches input data string. Can be
+	 * "MATCH" (pattern should match complete input string), or "FIND" (pattern has to match subsequence within input
+	 * string).
+	 *
+	 *
+	 */
+	@XmlEnumValue("MatchStrategy")
+	MATCH_STRATEGY("MatchStrategy");
 	private final String value;
 
 	ParserProperties(String v) {

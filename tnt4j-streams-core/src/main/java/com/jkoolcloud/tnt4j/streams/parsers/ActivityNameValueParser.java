@@ -216,8 +216,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		Matcher matcher = entryPattern.matcher(dataStr);
 		Map<String, String> nameValues = new HashMap<>();
 		while (matcher.find()) {
-			String key = matcher.group("key");
-			String value = matcher.group("value");
+			String key = matcher.group("key"); // NON-NLS
+			String value = matcher.group("value"); // NON-NLS
 			nameValues.put(key, value == null ? "" : value.trim());
 			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityNameValueParser.found.regex"), key, value);

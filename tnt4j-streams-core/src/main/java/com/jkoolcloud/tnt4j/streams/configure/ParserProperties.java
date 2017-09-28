@@ -89,4 +89,9 @@ public interface ParserProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_NAMESPACE_AWARE = "NamespaceAware"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_MATCH_STRATEGY = "MatchStrategy"; // NON-NLS
 }

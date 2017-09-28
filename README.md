@@ -4310,7 +4310,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
  defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
- * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line or `EOF` - end of 
+ * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
  file/stream. Default value - `EOL`. (Optional)
 
     sample:
@@ -4345,17 +4345,22 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 #### Activity RegEx parser
 
  * `Pattern` - contains the regular expression pattern that each data item is assumed to match. (Required)
+ * `MatchStrategy` - defines `pattern` created `matcher` comparison strategy used against input data string. Value can be one of: `MATCH` - 
+ pattern should match complete input string, or `FIND` - pattern has to match subsequence within input string. Default value - `MATCH`. 
+ (Optional)
 
     sample:
 * index-capturing groups:
 ```xml
     <property name="Pattern" value="((\S+) (\S+) (\S+))"/>
+    <property name="MatchStrategy" value="FIND"/>
 ```
 * named-capturing groups:
 ```xml
     <property name="Pattern"><![CDATA[
         (?<CoID>.*)\.(?<ProcessArea>.*)\.(?<InterfaceID>.*)\.(?<HopNr>.*)
     ]]></property>
+    <property name="MatchStrategy" value="MATCH"/>
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
