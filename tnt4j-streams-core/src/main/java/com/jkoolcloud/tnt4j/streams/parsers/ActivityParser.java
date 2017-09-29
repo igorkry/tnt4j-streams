@@ -152,12 +152,13 @@ public abstract class ActivityParser {
 		applyFieldValue(ai, field, value);
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
+			boolean applied = false;
 			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
 				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ActivityParser.stacked.parser.applying"), name, parserRef, field);
 				try {
-					boolean applied = applyStackedParser(stream, ai, parserRef, value);
+					applied = applyStackedParser(stream, ai, parserRef, value);
 
 					if (applied) {
 						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -170,8 +171,10 @@ public abstract class ActivityParser {
 				}
 			}
 
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.stacked.parsers.missed"), name, field);
+			if (!applied) {
+				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityParser.stacked.parsers.missed"), name, field);
+			}
 		}
 	}
 

@@ -590,9 +590,15 @@ public class ActivityInfo {
 				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType);
 		Property prevValue = activityProperties.put(propName, p);
 
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
-				propName, Utils.toString(p.getValue()), p.getValueType(), Utils.toString(prevValue));
+		if (prevValue == null) {
+			LOGGER.log(OpLevel.TRACE,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
+					propName, Utils.toString(p.getValue()), p.getValueType());
+		} else {
+			LOGGER.log(OpLevel.WARNING,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.replace.property"),
+					propName, Utils.toString(p.getValue()), p.getValueType(), Utils.toString(prevValue));
+		}
 
 		return prevValue;
 	}
@@ -1651,7 +1657,7 @@ public class ActivityInfo {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("ActivityInfo{"); // NON-NLS
+		StringBuilder sb = new StringBuilder("ActivityInfo{"); // NON-NLS
 		sb.append("serverName=").append(Utils.sQuote(serverName)); // NON-NLS
 		sb.append(", serverIp=").append(Utils.sQuote(serverIp)); // NON-NLS
 		sb.append(", applName=").append(Utils.sQuote(applName)); // NON-NLS
