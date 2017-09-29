@@ -8,10 +8,10 @@
     <parser name="JobNameParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
         <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
 
-        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
-        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
-        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
-        <field name="CoId" locator="1" locator-type="REGroupNum"/>
+        <field name="ProcessArea" locator="2" locator-type="Index"/>
+        <field name="InterfaceID" locator="3" locator-type="Index"/>
+        <field name="HopNum" locator="4" locator-type="Index"/>
+        <field name="CoId" locator="1" locator-type="Index"/>
     </parser>
 
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">

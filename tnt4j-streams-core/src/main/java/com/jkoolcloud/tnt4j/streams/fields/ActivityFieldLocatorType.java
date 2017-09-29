@@ -33,33 +33,22 @@ public enum ActivityFieldLocatorType {
 
 	/**
 	 * Indicates that raw data value is at a specified index location, offset, etc. This is a generic index/offset value
-	 * whose interpretation is up to the specific parser applying the locator.
+	 * whose interpretation is up to the specific parser applying the locator. It also can be index of RegEx group.
 	 */
 	Index(Integer.class),
 
 	/**
 	 * Indicates that raw data value is the value of a particular key or label. Examples of this are XPath expressions
-	 * for XML elements, and where each element of a raw activity data string is a name/value pair.
+	 * for XML elements, and where each element of a raw activity data string is a name/value pair. It also can be name
+	 * of RegEx group.
 	 */
 	Label(String.class),
-
-	/**
-	 * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the
-	 * raw activity data using a regular expression pattern defined as a sequence of groups.
-	 */
-	REGroupNum(Integer.class),
 
 	/**
 	 * Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the
 	 * raw activity data using a regular expression pattern defined as a sequence of repeating match patterns.
 	 */
 	REMatchNum(Integer.class),
-
-	/**
-	 * Indicates that raw data value is the value of a specific regular expression group, for parsers that interpret the
-	 * raw activity data using a regular expression pattern defined as a sequence of groups.
-	 */
-	REGroupName(String.class),
 
 	/**
 	 * Indicates that data value is the value from stream stored cache with specified cache entry key.

@@ -401,7 +401,7 @@
             <xs:enumeration value="Index">
                 <xs:annotation>
                     <xs:documentation>
-                        Locator value is the value at the specified index/offset/position.
+                        Locator value is the value at the specified index/offset/position. It also can be index of RegEx group.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -410,15 +410,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Locator value is the value for the specified label/expression (e.g. name/value pairs like label=value, XPath
-                        expression, etc.).
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
-            <xs:enumeration value="REGroupNum">
-                <xs:annotation>
-                    <xs:documentation>
-                        Locator value is the value for the specified regular expression group number.
+                        expression, etc.). It also can be name of RegEx group.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -427,14 +419,6 @@
                 <xs:annotation>
                     <xs:documentation>
                         Locator value is the value for the specified regular expression match sequence position.
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:enumeration>
-
-            <xs:enumeration value="REGroupName">
-                <xs:annotation>
-                    <xs:documentation>
-                        Locator value is the value for the specified regular expression group name.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>

@@ -33,9 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="StreamProp"/>
  *     &lt;enumeration value="Index"/>
  *     &lt;enumeration value="Label"/>
- *     &lt;enumeration value="REGroupNum"/>
  *     &lt;enumeration value="REMatchNum"/>
- *     &lt;enumeration value="REGroupName"/>
  *     &lt;enumeration value="Cache"/>
  *     &lt;enumeration value="Activity"/>
  *   &lt;/restriction>
@@ -59,7 +57,7 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Locator value is the value at the specified index/offset/position.
+	 * Locator value is the value at the specified index/offset/position. It also can be index of RegEx group.
 	 * 
 	 * 
 	 */
@@ -69,21 +67,12 @@ public enum FieldLocatorTypes {
 	/**
 	 * 
 	 * Locator value is the value for the specified label/expression (e.g. name/value pairs like label=value, XPath
-	 * expression, etc.).
+	 * expression, etc.). It also can be name of RegEx group.
 	 * 
 	 * 
 	 */
 	@XmlEnumValue("Label")
 	LABEL("Label"),
-
-	/**
-	 * 
-	 * Locator value is the value for the specified regular expression group number.
-	 * 
-	 * 
-	 */
-	@XmlEnumValue("REGroupNum")
-	RE_GROUP_NUM("REGroupNum"),
 
 	/**
 	 * 
@@ -93,15 +82,6 @@ public enum FieldLocatorTypes {
 	 */
 	@XmlEnumValue("REMatchNum")
 	RE_MATCH_NUM("REMatchNum"),
-
-	/**
-	 * 
-	 * Locator value is the value for the specified regular expression group name.
-	 * 
-	 * 
-	 */
-	@XmlEnumValue("REGroupName")
-	RE_GROUP_NAME("REGroupName"),
 
 	/**
 	 * 

@@ -8,7 +8,7 @@
                   value="(\s*)&quot;\((.*)\)&quot;,&quot;(.*)&quot; &quot;(.*)&quot;,&quot;(.*)&quot;(.*)"/>
 
         <field name="EventType" value="SNAPSHOT"/>
-        <field name="ProcessorTime" locator="5" locator-type="REGroupNum"/>
+        <field name="ProcessorTime" locator="5" locator-type="Index"/>
     </parser>
 
     <stream name="WinCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">

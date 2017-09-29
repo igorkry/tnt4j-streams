@@ -6,20 +6,20 @@
     <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1" locator-type="REGroupNum"/>
-        <field name="UserName" locator="3" locator-type="REGroupNum"/>
-        <field name="StartTime" locator="4" locator-type="REGroupNum" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+        <field name="Location" locator="1" locator-type="Index"/>
+        <field name="UserName" locator="3" locator-type="Index"/>
+        <field name="StartTime" locator="4" locator-type="Index" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
         <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7" locator-type="REGroupNum"/>
-        <field name="ResourceName" locator="8" locator-type="REGroupNum"/>
-        <field name="CompCode" locator="12" locator-type="REGroupNum">
+        <field name="EventName" locator="7" locator-type="Index"/>
+        <field name="ResourceName" locator="8" locator-type="Index"/>
+        <field name="CompCode" locator="12" locator-type="Index">
             <field-map source="100:206" target="SUCCESS" type="Range"/>
             <field-map source="300:308" target="WARNING" type="Range"/>
             <field-map source="400:417" target="ERROR" type="Range"/>
             <field-map source="500:511" target="ERROR" type="Range"/>
         </field>
-        <field name="ReasonCode" locator="12" locator-type="REGroupNum"/>
-        <field name="MsgValue" locator="13" locator-type="REGroupNum"/>
+        <field name="ReasonCode" locator="12" locator-type="Index"/>
+        <field name="MsgValue" locator="13" locator-type="Index"/>
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">

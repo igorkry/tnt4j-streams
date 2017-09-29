@@ -7,7 +7,7 @@
         <property name="Pattern" value="(.*)"/>
 
         <field name="EventType" value="SNAPSHOT"/>
-        <field name="TomcatActive" locator="1" locator-type="REGroupNum"/>
+        <field name="TomcatActive" locator="1" locator-type="Index"/>
     </parser>
 
     <stream name="UnixCmdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CmdStream">
