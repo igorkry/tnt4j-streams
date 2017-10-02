@@ -4417,6 +4417,26 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser parameters](#generic-parser-parameters).
 
+##### MQ message signature calculation
+
+For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
+calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`. 
+
+Signature calculation configuration sample:
+```xml
+    <field name="TrackingId" separator="#!#" value-type="signature"> 
+        <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/> 
+        <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary" format="hexBinary"/> 
+        <field-locator locator="/messaging_operation/MsgUser" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgPutApplType" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgPutApplName" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgPutDate" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgPutTime" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/Correlator" locator-type="Label"/> 
+    </field>
+``` 
+
 #### Apache access log parser
 
  * `LogPattern` - access log pattern. (Optional, if RegEx `Pattern` property is defined)
@@ -4519,13 +4539,35 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
  * `TranslateNumValues` - indicates that parser should translate resolved numeric values to corresponding MQ constant names if possible and 
  field/locator data type is `String` (meaning translated value can be assigned to field). If value of particular field should be left as 
  number (e.g., `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
-
-    sample:
+ * `SignatureDelim` - signature fields delimiter. Default value - `,`. (Optional)
+ 
+     sample:
 ```xml
     <property name="TranslateNumValues" value="false"/>
+    <property name="SignatureDelim" value="#"/>
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
+
+##### MQ message signature calculation
+
+For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
+calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.  
+
+Signature calculation configuration sample:
+```xml
+    <field name="Correlator" value-type="signature"> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" format="bytes"/> 
+        <field-locator locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/> 
+        <field-locator locator="MQIA_APPL_TYPE" locator-type="Label"/> 
+        <field-locator locator="MQCACF_APPL_NAME" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label"/> 
+    </field>
+``` 
 
 #### IBM MQ Error log entries parser
 

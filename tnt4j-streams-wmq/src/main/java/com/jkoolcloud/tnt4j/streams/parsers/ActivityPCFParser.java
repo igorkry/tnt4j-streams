@@ -63,6 +63,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * names if possible and field/locator data type is 'String' (meaning translated value can be assigned to field). If
  * value of particular field should be left as number (e.g., {@code ReasonCode}), use field/locator attribute
  * {@code datatype="Number"}. (Optional)</li>
+ * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
