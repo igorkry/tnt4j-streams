@@ -31,7 +31,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.jkoolcloud.tnt4j.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * @author akausinis
@@ -40,10 +40,29 @@ import com.jkoolcloud.tnt4j.utils.Utils;
 public class XMLFromBinDataPreParserTest {
 
 	@Test
+	public void testPreParseDefaultNS() throws Exception {
+		byte[] fileBuffer = Files
+				.readAllBytes(Paths.get("../tnt4j-streams-core/samples/XML-from-bin-data/default_ns.dump")); // NON-NLS
+
+		String output = preParseBinData(fileBuffer);
+
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<BLOB_BO:BLOB_BO value=\"asdf\"\n"
+				+ "    xmlns:BLOB_BO=\"http://www.ibm.com/websphere/crossworlds/2002/BOSchema/BLOB_BO\"\n"
+				+ "    xmlns:JText_META_DATA=\"http://www.ibm.com/websphere/crossworlds/2002/BOSchema/JText_META_DATA\"\n"
+				+ "    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n"
+				+ "    <BLOB_BO:BLOB>3</BLOB_BO:BLOB>\n" + "    <BLOB_BO:MetaData>\n"
+				+ "        <JText_META_DATA:JText_META_DATA>\n"
+				+ "            <JText_META_DATA:FileWriteMode>o</JText_META_DATA:FileWriteMode>\n"
+				+ "            <JText_META_DATA:OutFileName>D:\\MQTools\\test_nastel\\file\\SAP_ZCORDELVRY05_OTC_XXX_YYYY_20160317_134839222.txt</JText_META_DATA:OutFileName>\n"
+				+ "        </JText_META_DATA:JText_META_DATA>\n" + "    </BLOB_BO:MetaData>\n" + "</BLOB_BO:BLOB_BO>\n"; // NON-NLS
+
+		Assert.assertEquals(expected, output);
+	}
+
+	@Test
 	public void testPreParse() throws Exception {
 		// Source data
-		byte[] fileBuffer = Files
-				.readAllBytes(Paths.get("..\\tnt4j-streams-core\\samples\\XML-from-bin-data\\RFH2.dump")); // NON-NLS
+		byte[] fileBuffer = Files.readAllBytes(Paths.get("../tnt4j-streams-core/samples/XML-from-bin-data/RFH2.dump")); // NON-NLS
 
 		String output = preParseBinData(fileBuffer);
 
@@ -55,7 +74,7 @@ public class XMLFromBinDataPreParserTest {
 	public void testPreParseIncomplete() throws Exception {
 		// Source data
 		byte[] fileBuffer = Files
-				.readAllBytes(Paths.get("..\\tnt4j-streams-core\\samples\\XML-from-bin-data\\RFH2_incomplete.dump")); // NON-NLS
+				.readAllBytes(Paths.get("../tnt4j-streams-core/samples/XML-from-bin-data/RFH2_incomplete.dump")); // NON-NLS
 
 		String output = preParseBinData(fileBuffer);
 
@@ -74,13 +93,13 @@ public class XMLFromBinDataPreParserTest {
 		Node document = parser.preParse(is);
 
 		// Result
-		final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-		final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS"); // NON-NLS
+		DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+		DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS"); // NON-NLS
 		LSOutput lsOutput = impl.createLSOutput();
 		lsOutput.setEncoding(Utils.UTF8);
 		Writer stringWriter = new StringWriter();
 		lsOutput.setCharacterStream(stringWriter);
-		final LSSerializer lsSerializer = impl.createLSSerializer();
+		LSSerializer lsSerializer = impl.createLSSerializer();
 
 		lsSerializer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE); // NON-NLS
 		// lsSerializer.getDomConfig().setParameter("xml-declaration",

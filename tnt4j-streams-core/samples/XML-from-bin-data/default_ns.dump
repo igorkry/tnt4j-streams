@@ -1,0 +1,9 @@
+<BLOB_BO:BLOB_BO xmlns:BLOB_BO="http://www.ibm.com/websphere/crossworlds/2002/BOSchema/BLOB_BO" xmlns:JText_META_DATA="http://www.ibm.com/websphere/crossworlds/2002/BOSchema/JText_META_DATA" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" value="asdf">
+	<BLOB_BO:BLOB>3</BLOB_BO:BLOB>
+	<BLOB_BO:MetaData>
+		<JText_META_DATA:JText_META_DATA>
+			<JText_META_DATA:FileWriteMode>o</JText_META_DATA:FileWriteMode>
+			<JText_META_DATA:OutFileName>D:\MQTools\test_nastel\file\SAP_ZCORDELVRY05_OTC_XXX_YYYY_20160317_134839222.txt</JText_META_DATA:OutFileName>
+		</JText_META_DATA:JText_META_DATA>
+	</BLOB_BO:MetaData>
+</BLOB_BO:BLOB_BO>

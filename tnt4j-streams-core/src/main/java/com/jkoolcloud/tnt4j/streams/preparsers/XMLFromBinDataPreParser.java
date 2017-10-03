@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Stack;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -294,12 +295,13 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void characters(char[] ch, int start, int length) {
-		Node last = _nodeStk.peek();
-
-		// No text nodes can be children of root (DOM006 exception)
-		if (last != document) {
-			String text = new String(ch, start, length);
-			last.appendChild(document.createTextNode(text));
+		if (!_nodeStk.isEmpty()) {
+			Node last = _nodeStk.peek();
+			// No text nodes can be children of root (DOM006 exception)
+			if (last != document) {
+				String text = new String(ch, start, length);
+				last.appendChild(document.createTextNode(text));
+			}
 		}
 	}
 
@@ -309,7 +311,9 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void endDocument() {
-		_nodeStk.pop();
+		if (!_nodeStk.isEmpty()) {
+			_nodeStk.pop();
+		}
 	}
 
 	@Override
@@ -319,7 +323,9 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		// Add attributes to element
 		int attrsCount = attrs.getLength();
 		for (int i = 0; i < attrsCount; i++) {
-			if (attrs.getLocalName(i) == null) {
+			if (attrs.getLocalName(i).startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
+				tmp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, attrs.getQName(i), attrs.getValue(i));
+			} else if (attrs.getLocalName(i) == null) {
 				tmp.setAttribute(attrs.getQName(i), attrs.getValue(i));
 			} else {
 				tmp.setAttributeNS(attrs.getURI(i), attrs.getQName(i), attrs.getValue(i));
@@ -327,8 +333,10 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		}
 
 		// Append this new node into current stack node
-		Node last = _nodeStk.peek();
-		last.appendChild(tmp);
+		if (!_nodeStk.isEmpty()) {
+			Node last = _nodeStk.peek();
+			last.appendChild(tmp);
+		}
 
 		markLastGoodPosition();
 
@@ -340,8 +348,9 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	@Override
 	public void endElement(String namespace, String localName, String qName) {
-		_nodeStk.pop();
-
+		if (!_nodeStk.isEmpty()) {
+			_nodeStk.pop();
+		}
 		markLastGoodPosition();
 	}
 
@@ -354,10 +363,12 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 */
 	@Override
 	public void processingInstruction(String target, String data) {
-		Node last = _nodeStk.peek();
-		ProcessingInstruction pi = document.createProcessingInstruction(target, data);
-		if (pi != null) {
-			last.appendChild(pi);
+		if (!_nodeStk.isEmpty()) {
+			Node last = _nodeStk.peek();
+			ProcessingInstruction pi = document.createProcessingInstruction(target, data);
+			if (pi != null) {
+				last.appendChild(pi);
+			}
 		}
 	}
 
@@ -390,10 +401,12 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 */
 	@Override
 	public void comment(char[] ch, int start, int length) {
-		Node last = _nodeStk.peek();
-		Comment comment = document.createComment(new String(ch, start, length));
-		if (comment != null) {
-			last.appendChild(comment);
+		if (!_nodeStk.isEmpty()) {
+			Node last = _nodeStk.peek();
+			Comment comment = document.createComment(new String(ch, start, length));
+			if (comment != null) {
+				last.appendChild(comment);
+			}
 		}
 	}
 
@@ -451,7 +464,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 
 	private static class Position {
 		@SuppressWarnings("unused")
-        int line;
+		int line;
 		int column;
 
 		public void reset() {
