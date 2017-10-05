@@ -218,8 +218,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			if (dropDataWhenBufferFull) {
 				boolean added = inputBuffer.offer(inputData);
 				if (!added) {
-					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.changes.buffer.limit"), inputData);
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"AbstractBufferedStream.changes.buffer.limit", inputData);
 					incrementLostActivitiesCount();
 				}
 				return added;
@@ -228,8 +228,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 					inputBuffer.put(inputData);
 					return true;
 				} catch (InterruptedException exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.put.interrupted"), inputData);
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"AbstractBufferedStream.put.interrupted", inputData);
 					incrementLostActivitiesCount();
 				}
 			}
@@ -315,8 +315,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * Shuts down stream input processor: interrupts thread and closes opened data input resources.
 		 */
 		protected void shutdown() {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"AbstractBufferedStream.input.shutdown"), AbstractBufferedStream.this.getName(), getName());
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"AbstractBufferedStream.input.shutdown", AbstractBufferedStream.this.getName(), getName());
 			if (isStopRunning() && inputEnd) {
 				// shot down already.
 				return;
@@ -326,8 +326,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				close();
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractBufferedStream.input.close.error"), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractBufferedStream.input.close.error", exc);
 			}
 		}
 

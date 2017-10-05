@@ -167,9 +167,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		requestHandler.start();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
-				getClass().getSimpleName(), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
 	}
 
 	@Override
@@ -195,17 +194,17 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 	private static class HttpStreamExceptionLogger implements ExceptionLogger {
 		@Override
-		public void log(final Exception ex) {
+		public void log(Exception ex) {
 			if (ex instanceof SocketTimeoutException) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"HttpStream.connection.timed.out"));
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"HttpStream.connection.timed.out");
 			} else if (ex instanceof ConnectionClosedException) {
 				LOGGER.log(OpLevel.ERROR, String.valueOf(ex.getLocalizedMessage()));
 				// } else if (ex instanceof SocketException) {
 				// LOGGER.log(OpLevel.ERROR, ex.getMessage());
 			} else {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"HttpStream.http.server.exception"), ex);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"HttpStream.http.server.exception", ex);
 			}
 		}
 	}
@@ -264,8 +263,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				try {
 					server.start();
 				} catch (IOException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.input.start.failed"), exc);
+					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}
 			}
@@ -299,7 +298,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 		 * </ul>
 		 */
 		@Override
-		public void handle(final HttpRequest request, final HttpResponse response, final HttpContext context)
+		public void handle(HttpRequest request, HttpResponse response, HttpContext context)
 				throws HttpException, IOException {
 
 			if (!(request instanceof HttpEntityEnclosingRequest)) {

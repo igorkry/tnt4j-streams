@@ -169,9 +169,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 		lineRange = IntRange.getRange(rangeValue);
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FileLineStream.initializing.stream"),
-				fileName);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"FileLineStream.initializing.stream", fileName);
 
 		fileWatcher = createFileWatcher();
 		fileWatcher.initialize();
@@ -183,9 +182,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 		fileWatcher.start();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
-				getClass().getSimpleName(), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
 	}
 
 	/**
@@ -219,7 +217,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 	@Override
 	public Line getNextItem() throws Exception {
-		final Line nextItem = super.getNextItem();
+		Line nextItem = super.getNextItem();
 		if (stateHandler != null) {
 			stateHandler.saveState(nextItem, getName());
 		}
@@ -314,8 +312,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 					if (!pollingOn) {
 						shutdown();
 					} else {
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"FileLineStream.waiting"), fileWatcherDelay / 1000.0);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"FileLineStream.waiting", fileWatcherDelay / 1000.0);
 						StreamThread.sleep(fileWatcherDelay);
 					}
 				}

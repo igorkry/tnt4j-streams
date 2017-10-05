@@ -167,22 +167,21 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 							String[] nsFields = nSpace.split("="); // NON-NLS
 							uNamespaces.put(nsFields[0], nsFields[1]);
 							logger().log(OpLevel.DEBUG,
-									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-											"ActivityXmlParser.adding.mapping"),
-									name, nSpace);
+									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+									"ActivityXmlParser.adding.mapping", name, nSpace);
 						}
 					}
 				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						requireAll = Boolean.parseBoolean(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						namespaceAware = Boolean.parseBoolean(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				}
 			}
@@ -256,8 +255,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			try {
 				xmlString = Utils.documentToString(xmlDoc);
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityXmlParser.xmlDocument.toString.error"), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityXmlParser.xmlDocument.toString.error", exc);
 			}
 		}
 
@@ -305,9 +304,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 						if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
 							logger().log(OpLevel.WARNING,
-									StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-											"ActivityXmlParser.required.locator.not.found"),
-									loc, field);
+									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+									"ActivityXmlParser.required.locator.not.found", loc, field);
 							cData.setActivity(null);
 							return null;
 						}
@@ -548,12 +546,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					xmlBuffer.append(line);
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-						getActivityDataType(), eof);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.data.end", getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.error.reading"), getActivityDataType(), ioe);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
 			nextLock.unlock();

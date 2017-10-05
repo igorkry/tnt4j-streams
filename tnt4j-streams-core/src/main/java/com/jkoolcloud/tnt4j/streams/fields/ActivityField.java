@@ -468,8 +468,8 @@ public class ActivityField extends AbstractFieldEntity {
 				stackedParsers = new LinkedHashSet<>(5);
 			}
 
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityField.adding.stacked.parser"), fieldTypeName, parser.getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityField.adding.stacked.parser", fieldTypeName, parser.getName());
 			stackedParsers.add(new ParserReference(parser, aggregationType));
 		}
 

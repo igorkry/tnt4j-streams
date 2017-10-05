@@ -271,7 +271,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 *
 	 * @see #handleZKStoredConfiguration(org.apache.zookeeper.ZooKeeper, String, ZKConfigChangeListener)
 	 */
-	public static void handleZKStoredConfiguration(final String path, final ZKConfigChangeListener zkCfgChangeListener)
+	public static void handleZKStoredConfiguration(String path, ZKConfigChangeListener zkCfgChangeListener)
 			throws IOException, InterruptedException {
 		handleZKStoredConfiguration(zk(), path, zkCfgChangeListener);
 	}
@@ -294,16 +294,16 @@ public class ZKConfigManager implements ZKConfigConstants {
 			public void process(WatchedEvent watchedEvent) {
 				if (path.equals(watchedEvent.getPath())) {
 					if (watchedEvent.getType() == Event.EventType.NodeDataChanged) {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ZKConfigManager.node.changed"), path);
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ZKConfigManager.node.changed", path);
 						zkCfgChangeListener.reconfigure(zk, path, this);
 					} else if (watchedEvent.getType() == Event.EventType.NodeDeleted) {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ZKConfigManager.node.deleted"), path);
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ZKConfigManager.node.deleted", path);
 						zk.exists(path, this, null, null);
 					} else if (watchedEvent.getType() == Event.EventType.NodeCreated) {
-						LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ZKConfigManager.node.created"), path);
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ZKConfigManager.node.created", path);
 						zkCfgChangeListener.reconfigure(zk, path, this);
 					}
 				}
@@ -315,13 +315,13 @@ public class ZKConfigManager implements ZKConfigConstants {
 		try {
 			nStat = zk.exists(path, false);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.node.exists.failed"), path, exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.node.exists.failed", path, exc);
 		}
 
 		if (nStat == null) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.node.create.wait"), path);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.node.create.wait", path);
 			zk.exists(path, watch, null, null);
 		} else {
 			zkCfgChangeListener.reconfigure(zk, path, watch);
@@ -337,22 +337,22 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 */
 	public static Properties readStreamsZKConfig(String zookeeperCfgFile) {
 		if (StringUtils.isNotEmpty(zookeeperCfgFile)) {
-			LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.loading.cfg.file"), zookeeperCfgFile);
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.loading.cfg.file", zookeeperCfgFile);
 
 			try {
 				zkConfigProperties = Utils.loadPropertiesFile(zookeeperCfgFile);
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.loaded.props"), zkConfigProperties.size());
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.loaded.props", zkConfigProperties.size());
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.props.load.error"), zookeeperCfgFile);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.props.load.error", zookeeperCfgFile);
 				zkConfigProperties = null;
 			}
 		} else {
 			if (zkConfigProperties != null) {
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.resetting.cfg"));
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.resetting.cfg");
 				zkConfigProperties.clear();
 			}
 		}
@@ -397,12 +397,12 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 *             if the current thread is interrupted while waiting
 	 */
 	public static ZKConnection openConnection(Properties zkConfProps) throws IOException, InterruptedException {
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.connecting"));
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZKConfigManager.connecting");
 
 		if (MapUtils.isEmpty(zkConfProps)) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.empty.cfg.props"));
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.empty.cfg.props");
 		}
 
 		conn = new ZKConnection();
@@ -413,9 +413,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 		conn.connect(zkConnStr, timeout); // NON-NLS
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigManager.connected"),
-				zkConnStr);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZKConfigManager.connected", zkConnStr);
 
 		return conn;
 	}
@@ -472,11 +471,11 @@ public class ZKConfigManager implements ZKConfigConstants {
 	public static void setupZKNodeData(Properties zkConfProps, String cfgId)
 			throws IOException, InterruptedException, KeeperException {
 		String zkPath = getZKNodePath(zkConfProps, cfgId);
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"ZKConfigManager.cfg.ent.setup.zk.path"), cfgId, zkPath);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZKConfigManager.cfg.ent.setup.zk.path", cfgId, zkPath);
 		if (StringUtils.isEmpty(zkPath)) {
-			LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.cfg.ent.setup.zk.path.empty"), cfgId);
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.cfg.ent.setup.zk.path.empty", cfgId);
 
 			return;
 		}
@@ -485,24 +484,24 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 		if (nStat == null || nStat.getDataLength() <= 0) {
 			String cfgFile = getCfgFilePath(zkConfProps, cfgId);
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.cfg.ent.setup.file.path"), cfgId, cfgFile);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.cfg.ent.setup.file.path", cfgId, cfgFile);
 			byte[] cfgData = ZKConfigInit.loadDataFromFile(cfgFile);
 
 			if (nStat == null) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.cfg.ent.setup.setting"), cfgId, cfgFile);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.cfg.ent.setup.setting", cfgId, cfgFile);
 				createAllNodes(zk(), zkPath, cfgData);
 			} else {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.cfg.ent.setup.updating"), cfgId, cfgFile);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.cfg.ent.setup.updating", cfgId, cfgFile);
 				if (cfgData != null) {
 					update(zk(), zkPath, cfgData);
 				}
 			}
 		} else {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.cfg.ent.setup.ok"), cfgId);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.cfg.ent.setup.ok", cfgId);
 		}
 	}
 
@@ -579,16 +578,16 @@ public class ZKConfigManager implements ZKConfigConstants {
 		 *            node watcher instance
 		 */
 		public void reconfigure(ZooKeeper zk, String path, Watcher watcher) {
-			LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigManager.loading.node.data"), path);
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigManager.loading.node.data", path);
 
 			try {
 				byte[] data = zk.getData(path, watcher, null);
 
 				applyConfigurationData(data);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigManager.cfg.loading.failed"), exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigManager.cfg.loading.failed", exc);
 			}
 		}
 

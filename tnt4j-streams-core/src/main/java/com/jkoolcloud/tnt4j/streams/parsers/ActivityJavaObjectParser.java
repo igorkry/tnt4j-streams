@@ -148,10 +148,9 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 			return obj;
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityJavaObjectParser.could.not.get.declared.field"),
-					path[i], dataObj.getClass().getSimpleName(), toString(dataObj));
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityJavaObjectParser.could.not.get.declared.field", path[i],
+					dataObj.getClass().getSimpleName(), toString(dataObj));
 			return null;
 		}
 	}

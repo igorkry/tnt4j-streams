@@ -115,8 +115,8 @@ public abstract class AbstractFieldEntity {
 			transformation.setPhase(getDefaultTransformationPhase());
 		}
 
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"AbstractFieldEntity.adding.transformation"), this, transformation);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"AbstractFieldEntity.adding.transformation", this, transformation);
 
 		transformations.add(transformation);
 	}
@@ -147,14 +147,14 @@ public abstract class AbstractFieldEntity {
 			return fieldValue;
 		}
 
-		logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"AbstractFieldEntity.value.before.transformations"), this, Utils.toString(fieldValue));
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"AbstractFieldEntity.value.before.transformations", this, Utils.toString(fieldValue));
 		Object tValue = fieldValue;
 		for (ValueTransformation<Object, Object> vt : transformations) {
 			if (vt.getPhase().equals(phase)) {
 				tValue = vt.transform(tValue, ai);
-				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"AbstractFieldEntity.value.after.transformation"), this, vt, Utils.toString(tValue));
+				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFieldEntity.value.after.transformation", this, vt, Utils.toString(tValue));
 			}
 		}
 
@@ -168,9 +168,8 @@ public abstract class AbstractFieldEntity {
 	 *            field filters group
 	 */
 	public void setFilter(StreamFiltersGroup<Object> ffg) {
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFieldEntity.adding.filter"),
-				this, ffg.getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"AbstractFieldEntity.adding.filter", this, ffg.getName());
 
 		this.filter = ffg;
 	}

@@ -148,9 +148,8 @@ public class CastIronWsStream extends WsStream {
 				"http://www.approuter.com/schemas/2008/1/security"); // NON-NLS
 
 		String cachedToken = String.valueOf(StreamsCache.getValue(tokenCacheKey));
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.adding.req.header"),
-				sessionIdElem.getLocalName(), cachedToken);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"CastIronStream.adding.req.header", sessionIdElem.getLocalName(), cachedToken);
 		sessionIdElem.setTextContent(cachedToken);
 		soapRequest.getSOAPHeader().addChildElement(sessionIdElem);
 	}
@@ -195,31 +194,28 @@ public class CastIronWsStream extends WsStream {
 		try {
 			RequestDataAndHeaders requestDataAndHeaders = new RequestDataAndHeaders()
 					.resolve(fillInRequestData(loginStep.getRequests().get(0)), this);
-			final SOAPMessage soapRequest = createMessage(requestDataAndHeaders.getRequest(),
+			SOAPMessage soapRequest = createMessage(requestDataAndHeaders.getRequest(),
 					requestDataAndHeaders.getHeaders(), false, this);
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.login.request"),
-					toXMLString(soapRequest));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CastIronStream.login.request", toXMLString(soapRequest));
 
 			SOAPMessage soapResponse = createSOAPConnection().call(soapRequest,
 					fillInRequestData(loginStep.getUrlStr()));
 
 			if (soapResponse.getSOAPBody().hasFault()) {
-				logger().log(OpLevel.ERROR, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-						"CastIronStream.login.failed"), soapResponse.getSOAPBody().getFault().getFaultString());
+				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						"CastIronStream.login.failed", soapResponse.getSOAPBody().getFault().getFaultString());
 			}
 
 			String responseString = toXMLString(soapResponse);
 
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.login.response"),
-					responseString);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CastIronStream.login.response", responseString);
 
 			applyParsers(responseString, securityResponseParserTag);
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CastIronStream.login.failed"),
-					exc.getLocalizedMessage());
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CastIronStream.login.failed", exc.getLocalizedMessage());
 		}
 	}
 
@@ -237,13 +233,13 @@ public class CastIronWsStream extends WsStream {
 			SOAPMessage request = MessageFactory.newInstance().createMessage(null, is);
 			String currentMethod = request.getSOAPBody().getFirstChild().getLocalName().replace("Response", ""); // NON-NLS
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-					"CastIronStream.parser.tag.resolved"), currentMethod);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CastIronStream.parser.tag.resolved", currentMethod);
 
 			return new String[] { currentMethod };
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-					"CastIronStream.parser.tag.resolve.failed"), exc.getMessage(), data);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CastIronStream.parser.tag.resolve.failed", exc.getMessage(), data);
 		}
 
 		return null;

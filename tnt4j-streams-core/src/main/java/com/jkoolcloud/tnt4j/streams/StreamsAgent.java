@@ -105,8 +105,8 @@ public final class StreamsAgent {
 	 *            </table>
 	 */
 	public static void main(String... args) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.main"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.start.main");
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile, zookeeperStreamId);
@@ -141,8 +141,8 @@ public final class StreamsAgent {
 	 * {@value com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader#STREAMS_CONFIG_KEY}.
 	 */
 	public static void runFromAPI() {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.start.api");
 		loadConfigAndRun((Reader) null);
 	}
 
@@ -158,8 +158,8 @@ public final class StreamsAgent {
 	 *            stream tasks listener
 	 */
 	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.start.api");
 		loadConfigAndRun((Reader) null, streamListener, streamTasksListener);
 	}
 
@@ -185,8 +185,8 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.start.api");
 		loadConfigAndRun(cfgFileName, streamListener, streamTasksListener);
 	}
 
@@ -212,8 +212,8 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.start.api"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.start.api");
 		loadConfigAndRun(cfgFile, streamListener, streamTasksListener);
 	}
 
@@ -258,9 +258,8 @@ public final class StreamsAgent {
 
 	protected static void loadConfigAndRun(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.loading.config.file"),
-				cfgFile == null ? StreamsConfigLoader.getDefaultFile() : cfgFile);
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"StreamsAgent.loading.config.file", cfgFile == null ? StreamsConfigLoader.getDefaultFile() : cfgFile);
 		try {
 			loadConfigAndRun(cfgFile == null ? null : new FileReader(cfgFile), streamListener, streamTasksListener);
 		} catch (FileNotFoundException e) {
@@ -338,11 +337,11 @@ public final class StreamsAgent {
 
 				String path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_STREAM);
 				if (StringUtils.isEmpty(path) && StringUtils.isNotEmpty(zookeeperStreamId)) {
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.streams.registry.sid"), zookeeperStreamId);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsAgent.streams.registry.sid", zookeeperStreamId);
 					path = ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.streams.registry.sid.zk.path"), zookeeperStreamId, path);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsAgent.streams.registry.sid.zk.path", zookeeperStreamId, path);
 
 					if (StringUtils.isEmpty(path)) {
 						throw new IllegalArgumentException(
@@ -350,8 +349,8 @@ public final class StreamsAgent {
 										"StreamsAgent.invalid.stream.id", zookeeperStreamId));
 					}
 
-					LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.streams.registry.sid.setup"), zookeeperStreamId);
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsAgent.streams.registry.sid.setup", zookeeperStreamId);
 					ZKConfigManager.setupZKNodeData(zooProps, zookeeperStreamId);
 					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_LOGGER);
 					ZKConfigManager.setupZKNodeData(zooProps, ZKConfigManager.PROP_CONF_TNT4J);
@@ -361,8 +360,8 @@ public final class StreamsAgent {
 				path = zooProps.getProperty(ZKConfigManager.PROP_CONF_PATH_LOGGER);
 
 				if (StringUtils.isNotEmpty(path)) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.zk.cfg.monitor.logger"), path);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsAgent.zk.cfg.monitor.logger", path);
 
 					ZKConfigManager.handleZKStoredConfiguration(path, new ZKConfigManager.ZKConfigChangeListener() {
 						@Override
@@ -377,8 +376,8 @@ public final class StreamsAgent {
 						: ZKConfigManager.getZKNodePath(zooProps, zookeeperStreamId);
 
 				if (path != null) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"StreamsAgent.zk.cfg.monitor.streams"), path);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsAgent.zk.cfg.monitor.streams", path);
 
 					ZKConfigManager.handleZKStoredConfiguration(path, new ZKConfigManager.ZKConfigChangeListener() {
 						@Override
@@ -401,9 +400,8 @@ public final class StreamsAgent {
 					return true;
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.zk.cfg.failed"),
-						exc);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsAgent.zk.cfg.failed", exc);
 			}
 		}
 
@@ -416,9 +414,8 @@ public final class StreamsAgent {
 
 	protected static void stopStreams() {
 		if (streamThreads != null) {
-			LOGGER.log(OpLevel.INFO,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.stopping.streams"),
-					streamThreads.getName());
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsAgent.stopping.streams", streamThreads.getName());
 			Thread[] atl = new Thread[streamThreads.activeCount()];
 			streamThreads.enumerate(atl, false);
 
@@ -431,11 +428,11 @@ public final class StreamsAgent {
 			}
 
 			if (stl.isEmpty()) {
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"StreamsAgent.streams.stop.empty"));
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsAgent.streams.stop.empty");
 			} else {
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"StreamsAgent.streams.stop.start"), stl.size());
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsAgent.streams.stop.start", stl.size());
 				CountDownLatch streamsCompletionSignal = new CountDownLatch(stl.size());
 				long t1 = System.currentTimeMillis();
 
@@ -450,8 +447,10 @@ public final class StreamsAgent {
 				} catch (InterruptedException exc) {
 				}
 
-				LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"StreamsAgent.streams.stop.complete"), (System.currentTimeMillis() - t1));
+				// StreamsCache.cleanup();
+
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsAgent.streams.stop.complete", (System.currentTimeMillis() - t1));
 			}
 		}
 	}

@@ -420,8 +420,8 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 					valueMap.put(source, target);
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityFieldLocator.mapping.add.error"), source, target, mapType);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityFieldLocator.mapping.add.error", source, target, mapType);
 			}
 		}
 
@@ -448,14 +448,13 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 				target = valueMap.get(srcString);
 			}
 			if (target == null) {
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityFieldLocator.mapped.default"), type);
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityFieldLocator.mapped.default", type);
 				target = mapCatchAll != null ? mapCatchAll : source;
 			}
 		}
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityFieldLocator.mapped.result"),
-				source, target, type);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityFieldLocator.mapped.result", source, target, type);
 		return target;
 	}
 

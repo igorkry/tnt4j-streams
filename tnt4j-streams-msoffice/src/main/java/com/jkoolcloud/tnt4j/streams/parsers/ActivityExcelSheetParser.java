@@ -112,10 +112,9 @@ public class ActivityExcelSheetParser extends AbstractExcelParser<Sheet> {
 				}
 			}
 
-			logger().log(OpLevel.TRACE,
-					StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-							"ActivityExcelRowParser.resolved.cell.value"),
-					locStr, sheet.getWorkbook().getMissingCellPolicy(), toString(val));
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+					"ActivityExcelRowParser.resolved.cell.value", locStr, sheet.getWorkbook().getMissingCellPolicy(),
+					toString(val));
 		}
 
 		return val;

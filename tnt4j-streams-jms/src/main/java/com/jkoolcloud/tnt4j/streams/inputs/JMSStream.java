@@ -164,9 +164,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 		jmsDataReceiver.start();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
-				getClass().getSimpleName(), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
 	}
 
 	@Override
@@ -248,8 +247,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 				try {
 					jmsCon.start();
 				} catch (JMSException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.input.start.failed"), exc);
+					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}
 			}

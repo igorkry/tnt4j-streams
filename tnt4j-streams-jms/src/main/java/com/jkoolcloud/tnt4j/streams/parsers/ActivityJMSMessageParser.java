@@ -114,9 +114,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
 					convertToString = Boolean.parseBoolean(value);
 
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				}
 			}
 		}
@@ -156,8 +155,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 
 			dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
 		} catch (JMSException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
-					"ActivityJMSMessageParser.payload.data.error"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
+					"ActivityJMSMessageParser.payload.data.error", exc);
 		}
 
 		if (!dataMap.isEmpty()) {
@@ -247,8 +246,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				baos.write(buffer);
 			} while (bytesRead != 0);
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
-					"ActivityJMSMessageParser.bytes.buffer.error"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
+					"ActivityJMSMessageParser.bytes.buffer.error", exc);
 		}
 
 		byte[] bytes = baos.toByteArray();
@@ -287,8 +286,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 *             if any JMS exception occurs while parsing message.
 	 */
 	protected void parseCustomMessage(Message message, Map<String, Object> dataMap) throws JMSException {
-		logger().log(OpLevel.WARNING, StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME,
-				"ActivityJMSMessageParser.parsing.custom.jms.message"));
+		logger().log(OpLevel.WARNING, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
+				"ActivityJMSMessageParser.parsing.custom.jms.message");
 	}
 
 	/**

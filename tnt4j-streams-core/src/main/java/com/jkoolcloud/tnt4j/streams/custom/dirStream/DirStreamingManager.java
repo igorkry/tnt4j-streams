@@ -155,13 +155,13 @@ public class DirStreamingManager {
 				try {
 					boolean added = executor.getQueue().offer(r, offerTimeout, TimeUnit.SECONDS);
 					if (!added) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"TNTInputStream.tasks.buffer.limit"), offerTimeout);
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"TNTInputStream.tasks.buffer.limit", offerTimeout);
 						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"DirStreamingManager.job.offer.interrupted"), ((StreamingJob) r).getJobId(), exc);
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"DirStreamingManager.job.offer.interrupted", ((StreamingJob) r).getJobId(), exc);
 				}
 			}
 		});
@@ -184,8 +184,8 @@ public class DirStreamingManager {
 			}
 		});
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"DirStreamingManager.dir.monitoring.started"), dirPath, fileWildcardName);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.dir.monitoring.started", dirPath, fileWildcardName);
 	}
 
 	/**
@@ -195,8 +195,8 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.start();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"DirStreamingManager.could.not.start.watchdog"), exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.could.not.start.watchdog", exc);
 			stop();
 		}
 	}
@@ -236,8 +236,8 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.stop();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"DirStreamingManager.could.not.stop.watchdog"), exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.could.not.stop.watchdog", exc);
 		}
 
 		shutdownExecutors();
@@ -250,15 +250,14 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigCreate(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "DirStreamingManager.job.created"),
-				jobCfgFile);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.created", jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.job.id.not.found", jobCfgFile.getName());
 			return;
 		}
 
@@ -281,15 +280,14 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigChange(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "DirStreamingManager.job.changed"),
-				jobCfgFile);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.changed", jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.job.id.not.found", jobCfgFile.getName());
 			return;
 		}
 
@@ -308,15 +306,14 @@ public class DirStreamingManager {
 	 *            streaming job configuration file
 	 */
 	protected void handleJobConfigRemoval(File jobCfgFile) {
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "DirStreamingManager.job.deleted"),
-				jobCfgFile);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.deleted", jobCfgFile);
 
 		UUID jobId = Utils.findUUID(jobCfgFile.getName());
 
 		if (jobId == null) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"DirStreamingManager.job.id.not.found"), jobCfgFile.getName());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.job.id.not.found", jobCfgFile.getName());
 			return;
 		}
 

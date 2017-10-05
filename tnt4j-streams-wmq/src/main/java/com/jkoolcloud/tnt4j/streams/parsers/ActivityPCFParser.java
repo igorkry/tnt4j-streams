@@ -102,14 +102,13 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				if (WmqParserProperties.PROP_TRANSLATE_NUM_VALUES.equalsIgnoreCase(name)) {
 					translateNumValues = Boolean.parseBoolean(value);
 
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				} else if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						sigDelim = value;
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				}
 			}
@@ -156,8 +155,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
 		val = getParamValue(locator.getDataType(), path, cData.getData(), 0, cData);
 
-		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-				"ActivityPCFParser.resolved.pcf.value"), locStr, toString(val));
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"ActivityPCFParser.resolved.pcf.value", locStr, toString(val));
 
 		return val;
 	}
@@ -393,8 +392,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				mqiStruct = buildMqiStructureFromBinData(param);
 				cData.put(ctxStructKey, mqiStruct);
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"ActivityPCFParser.structure.build.failed"), exc);
+				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"ActivityPCFParser.structure.build.failed", exc);
 				exception = true;
 			}
 
@@ -455,10 +454,9 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		if (mqiStruct != null) {
 			mqiStruct.readFromBuffer(structData, 0, 4, true, env.getNativeCharSet(), new JmqiTls());
 			if (logger().isSet(OpLevel.DEBUG)) {
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"ActivityPCFParser.built.structure"),
-						PCFConstants.lookupParameter(structParam.getParameter()), mqiToString(mqiStruct, env));
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"ActivityPCFParser.built.structure", PCFConstants.lookupParameter(structParam.getParameter()),
+						mqiToString(mqiStruct, env));
 			}
 
 			return mqiStruct;
@@ -477,7 +475,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private static String getFullPath(String[] path, int i) {
 		StringBuilder sb = new StringBuilder();
 
-		for (int pi = 0; pi <= i; i++) {
+		for (int pi = 0; pi <= i; pi++) {
 			sb.append(path[pi]);
 
 			if (pi < i) {
@@ -540,8 +538,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			try {
 				val = resolveObjectValue(mqiSruct, path, i);
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"ActivityPCFParser.structure.value.resolution.failed"), exc);
+				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"ActivityPCFParser.structure.value.resolution.failed", exc);
 
 				// throw new ParseException(
 				// StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,

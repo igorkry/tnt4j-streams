@@ -60,16 +60,15 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 		// appending missing MQMD fields to PCF message
 		handleMQMDParameters(msgData, mqMsg);
 
-		logger().log(OpLevel.TRACE,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.message.data"),
-				msgData.size(), msgData.toString());
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqStream.message.data", msgData.size(), msgData.toString());
 
 		return msgData;
 	}
 
 	private void handleMQMDParameters(PCFMessage msgData, MQMessage mqMsg) {
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.adding.mq.to.pcf"));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqStreamPCF.adding.mq.to.pcf");
 
 		addParameterIfAbsent(msgData, MQConstants.MQIACF_REPORT, mqMsg.report);
 		addParameterIfAbsent(msgData, MQConstants.MQIACF_MSG_TYPE, mqMsg.messageType);
@@ -106,9 +105,8 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 			return;
 		}
 
-		logger().log(OpLevel.TRACE,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.adding.pcf.param"),
-				paramId, Utils.toString(val));
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqStreamPCF.adding.pcf.param", paramId, Utils.toString(val));
 
 		PCFParameter paramV = msg.getParameter(paramId);
 		if (paramV == null) {
@@ -132,10 +130,9 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 								"WmqStreamPCF.parameter.incompatible", paramId, val.getClass().getSimpleName()));
 			}
 		} else {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStreamPCF.parameter.exists"),
-					PCFConstants.lookupParameter(paramId), paramV.getValue(), Utils.toString(val));
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqStreamPCF.parameter.exists", PCFConstants.lookupParameter(paramId), paramV.getValue(),
+					Utils.toString(val));
 		}
 	}
 }

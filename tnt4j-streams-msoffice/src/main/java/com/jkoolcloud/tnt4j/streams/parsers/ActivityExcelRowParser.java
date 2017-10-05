@@ -104,10 +104,9 @@ public class ActivityExcelRowParser extends AbstractExcelParser<Row> {
 			if (cell != null) {
 				val = getCellValue(cell);
 			}
-			logger().log(OpLevel.TRACE,
-					StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-							"ActivityExcelRowParser.resolved.cell.value"),
-					locStr, row.getSheet().getWorkbook().getMissingCellPolicy(), toString(val));
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+					"ActivityExcelRowParser.resolved.cell.value", locStr,
+					row.getSheet().getWorkbook().getMissingCellPolicy(), toString(val));
 		}
 
 		return val;

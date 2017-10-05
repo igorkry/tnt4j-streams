@@ -103,14 +103,14 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						pattern = Pattern.compile(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_MATCH_STRATEGY.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						matchStrategy = Strategy.valueOf(value.toUpperCase());
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				}
 			}
@@ -127,9 +127,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		List<ActivityFieldLocator> groupLocs = new ArrayList<>(5);
 		for (ActivityFieldLocator locator : locators) {
 			ActivityFieldLocatorType locType = locator.getBuiltInType();
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
-					field); // Utils.getDebugString(field));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.adding.field", field); // Utils.getDebugString(field));
 			if (locType == ActivityFieldLocatorType.REMatchNum) {
 				if (groupMap.containsKey(field)) {
 					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
@@ -170,9 +169,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		}
 		Matcher matcher = pattern.matcher(dataStr);
 		if (matcher == null || !isMatching(matcher)) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.input.not.match"),
-					getName(), pattern.pattern());
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.input.not.match", getName(), pattern.pattern());
 			return null;
 		}
 
@@ -213,8 +211,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		// apply fields for parser
 		try {
 			if (!matchMap.isEmpty()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityRegExParser.applying.regex"), matchMap.size());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityRegExParser.applying.regex", matchMap.size());
 				ArrayList<String> matches = new ArrayList<>();
 				matches.add(""); // dummy entry to index array with match locations
 
@@ -223,11 +221,11 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				while (matcher.find()) {
 					String matchStr = matcher.group().trim();
 					matches.add(matchStr);
-					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityRegExParser.match"), matches.size(), matchStr);
+					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityRegExParser.match", matches.size(), matchStr);
 				}
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityRegExParser.found.matches"), matches.size());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityRegExParser.found.matches", matches.size());
 				cData.put(MATCHES_KEY, matches);
 				Object value;
 				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
@@ -238,8 +236,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 					value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 					if (value != null) {
-						logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityRegExParser.setting.field"), field);
+						logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityRegExParser.setting.field", field);
 					}
 
 					applyFieldValue(field, value, cData);
@@ -262,8 +260,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
 				if (value != null) {
-					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityRegExParser.setting.group.field"), field);
+					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityRegExParser.setting.group.field", field);
 				}
 
 				applyFieldValue(field, value, cData);

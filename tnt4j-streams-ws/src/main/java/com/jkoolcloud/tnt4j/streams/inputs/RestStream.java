@@ -113,14 +113,13 @@ public class RestStream extends AbstractWsStream {
 	 */
 	protected static String executeGET(String uriStr, String username, String password) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-					"RestStream.cant.execute.get.request"), uriStr);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"RestStream.cant.execute.get.request", uriStr);
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.invoking.get.request"),
-				uriStr);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"RestStream.invoking.get.request", uriStr);
 
 		String respStr = null;
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -167,8 +166,8 @@ public class RestStream extends AbstractWsStream {
 	protected static String executePOST(String uriStr, String reqData, String username, String password)
 			throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-					"RestStream.cant.execute.post.request"), uriStr);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"RestStream.cant.execute.post.request", uriStr);
 			return null;
 		}
 
@@ -176,9 +175,8 @@ public class RestStream extends AbstractWsStream {
 			return executeGET(uriStr, username, password);
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.invoking.post.request"),
-				uriStr, reqData);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"RestStream.invoking.post.request", uriStr, reqData);
 
 		String respStr = null;
 		try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -262,8 +260,9 @@ public class RestStream extends AbstractWsStream {
 							respStr = executePOST(scenarioStep.getUrlStr(), request, scenarioStep.getUsername(),
 									scenarioStep.getPassword());
 						} catch (Exception exc) {
-							LOGGER.log(OpLevel.WARNING, StreamsResources.getString(
-									WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.execute.exception"), exc);
+							LOGGER.log(OpLevel.WARNING,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"RestStream.execute.exception", exc);
 						}
 
 						if (StringUtils.isNotEmpty(respStr)) {
@@ -276,8 +275,8 @@ public class RestStream extends AbstractWsStream {
 					respStr = executeGET(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
 							scenarioStep.getPassword());
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-							"RestStream.execute.exception"), exc);
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							"RestStream.execute.exception", exc);
 				}
 
 				if (StringUtils.isNotEmpty(respStr)) {

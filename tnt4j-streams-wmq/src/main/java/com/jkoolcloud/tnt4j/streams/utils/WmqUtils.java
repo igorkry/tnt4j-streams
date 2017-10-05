@@ -356,12 +356,11 @@ public class WmqUtils {
 			}
 			value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate,
 					msgPutTime, correlId);
-			logger.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"MessageActivityXmlParser.msg.signature"),
-					value, msgType, msgFormat, msgId == null ? "null" : Utils.encodeHex(msgId),
-					msgId == null ? "null" : new String(msgId), msgUser, msgApplType, msgApplName, msgPutDate,
-					msgPutTime, correlId == null ? "null" : Utils.encodeHex(correlId),
+			logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"MessageActivityXmlParser.msg.signature", value, msgType, msgFormat,
+					msgId == null ? "null" : Utils.encodeHex(msgId), msgId == null ? "null" : new String(msgId),
+					msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
+					correlId == null ? "null" : Utils.encodeHex(correlId),
 					correlId == null ? "null" : new String(correlId));
 		}
 

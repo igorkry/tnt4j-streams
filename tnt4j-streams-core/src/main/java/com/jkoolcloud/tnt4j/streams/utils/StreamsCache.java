@@ -294,12 +294,11 @@ public class StreamsCache {
 			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
 			File persistedFile = new File(DEFAULT_FILE_NAME);
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.file"),
-					persistedFile.getAbsolutePath());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.loading.file", persistedFile.getAbsolutePath());
 			if (!persistedFile.exists()) {
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"StreamsCache.loading.file.not.found"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsCache.loading.file.not.found");
 				return;
 			}
 
@@ -311,13 +310,12 @@ public class StreamsCache {
 					valuesCache.put(entry.getKey(), entry.getValue());
 				}
 			}
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.done"),
-					mapProperty == null ? 0 : mapProperty.size(), persistedFile.getAbsolutePath());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.loading.done", mapProperty == null ? 0 : mapProperty.size(),
+					persistedFile.getAbsolutePath());
 		} catch (JAXBException exc) {
-			LOGGER.log(OpLevel.ERROR,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.loading.failed"),
-					exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.loading.failed", exc);
 		}
 	}
 
@@ -329,17 +327,14 @@ public class StreamsCache {
 			CacheRoot root = new CacheRoot();
 			root.setEntriesMap(cacheEntries);
 			File persistedFile = new File(DEFAULT_FILE_NAME);
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.file"),
-					persistedFile.getAbsolutePath());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.persisting.file", persistedFile.getAbsolutePath());
 			marshaller.marshal(root, persistedFile);
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.done"),
-					cacheEntries.size(), persistedFile.getAbsolutePath());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.persisting.done", cacheEntries.size(), persistedFile.getAbsolutePath());
 		} catch (JAXBException exc) {
-			LOGGER.log(OpLevel.ERROR,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.persisting.failed"),
-					exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsCache.persisting.failed", exc);
 		}
 	}
 
@@ -407,7 +402,7 @@ public class StreamsCache {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("CacheEntry{"); // NON-NLS
+			StringBuilder sb = new StringBuilder("CacheEntry{"); // NON-NLS
 			sb.append("id="); // NON-NLS
 			Utils.quote(id, sb);
 			sb.append(", key="); // NON-NLS
@@ -428,9 +423,8 @@ public class StreamsCache {
 			int i = 0;
 			for (Map.Entry<String, Object> entry : cache.entrySet()) {
 				mapElements[i++] = new MapEntry(entry.getKey(), entry.getValue());
-				LOGGER.log(OpLevel.TRACE,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsCache.entry.marshal"),
-						entry.getKey(), entry.getValue());
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsCache.entry.marshal", entry.getKey(), entry.getValue());
 			}
 
 			return mapElements;
@@ -441,8 +435,8 @@ public class StreamsCache {
 			Map<String, Object> r = new ConcurrentHashMap<>(mapElements.length);
 			for (MapEntry mapElement : mapElements) {
 				r.put(mapElement.key, mapElement.getValue());
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"StreamsCache.entry.unmarshal"), mapElement.key, mapElement.getValue());
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsCache.entry.unmarshal", mapElement.key, mapElement.getValue());
 			}
 			return r;
 		}

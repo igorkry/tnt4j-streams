@@ -100,15 +100,14 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
 					useActivityAsMessage = Boolean.parseBoolean(value);
 
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						activityDelim = value;
 
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				}
 			}
@@ -196,10 +195,20 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.field"),
-				field); // Utils.getDebugString(field));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.adding.field", field); // Utils.getDebugString(field));
 
+		validateSupportedLocatorTypes(field);
+		validateDuplicateFields(field);
+
+		if (autoSort) {
+			addFieldAndSort(field);
+		} else {
+			fieldList.add(field);
+		}
+	}
+
+	private void validateDuplicateFields(ActivityField field) {
 		for (ActivityField aField : fieldList) {
 			StreamFieldType fieldType = aField.getFieldType();
 			if (aField.getFieldTypeName().equals(field.getFieldTypeName())
@@ -209,12 +218,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 								"ActivityParser.duplicate.field", getName(), aField.getFieldTypeName()));
 			}
 		}
+	}
 
-		if (autoSort) {
-			addFieldAndSort(field);
-		} else {
-			fieldList.add(field);
-		}
+	protected void validateSupportedLocatorTypes(ActivityField field) {
 	}
 
 	/**
@@ -272,9 +278,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return;
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.removing.field"),
-				field); // Utils.getDebugString(field));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.removing.field", field); // Utils.getDebugString(field));
 		fieldList.remove(field);
 	}
 
@@ -285,8 +290,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity filters group instance
 	 */
 	public void setActivityFilter(StreamFiltersGroup<ActivityInfo> afg) {
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.adding.filter"), afg);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.adding.filter", afg);
 
 		activityFilter = afg;
 	}
@@ -342,12 +347,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			try {
 				str = ActivityDelim.EOL.name().equals(activityDelim) ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-						getActivityDataType(), eof);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.data.end", getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.error.reading"), getActivityDataType(), ioe);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
 			nextLock.unlock();
@@ -372,27 +376,24 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return null;
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.activity.raw.data"),
-				getLogString(data));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.activity.raw.data", getLogString(data));
 
 		data = preParse(stream, data);
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.preparsed.data"),
-				getLogString(data));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.preparsed.data", getLogString(data));
 
 		ActivityContext cData = prepareItem(stream, data);
 
 		if (cData == null || !cData.isValid()) {
-			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.nothing.to.parse"));
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.nothing.to.parse");
 			return null;
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.data"),
-				getLogString(cData.getMessage()));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.parsing.data", getLogString(cData.getMessage()));
 
 		ActivityInfo ai = parsePreparedItem(cData);
 		fillInMessageData(stream, ai, cData.getMessage());
@@ -433,8 +434,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			data = preParseActivityData(data);
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.pre.parsing.failed"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.pre.parsing.failed", exc);
 		}
 
 		return data;
@@ -458,8 +459,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.activity.filtering.failed"), ai, exc);
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.activity.filtering.failed", ai, exc);
 		}
 
 		if (!ai.isFilteredOut()) {
@@ -766,8 +767,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				} else {
 					val = resolveLocatorValue(locator, cData, formattingNeeded);
 					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
-					logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.locator.resolved"), locStr, toString(val));
+					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.locator.resolved", locStr, toString(val));
 				}
 			}
 
@@ -786,8 +787,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					val = null;
 				}
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.field.filtering.failed"), locStr, toString(val), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.field.filtering.failed", locStr, toString(val), exc);
 			}
 		}
 		return val;
@@ -813,8 +814,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			return locator.transformValue(val, cData.getActivity(), phase);
 		} catch (Exception exc) {
-			logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.transformation.failed"), locStr, toString(val), exc);
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.transformation.failed", locStr, toString(val), exc);
 		}
 
 		return val;
@@ -896,19 +897,19 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected Object preParseActivityData(Object data) throws Exception {
 		if (CollectionUtils.isNotEmpty(preParsers)) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityParser.data.before.pre.parsing"), getLogString(data));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.data.before.pre.parsing", getLogString(data));
 
 			preParserLock.lock();
 			try {
 				for (ActivityDataPreParser<?> preParser : preParsers) {
 					boolean validData = preParser.isDataClassSupported(data);
 					if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.pre.parsing.data"), preParser.getClass().getSimpleName());
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.pre.parsing.data", preParser.getClass().getSimpleName());
 						data = preParser.preParse(data);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.data.after.pre.parsing"), getLogString(data));
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.data.after.pre.parsing", getLogString(data));
 					}
 				}
 			} finally {

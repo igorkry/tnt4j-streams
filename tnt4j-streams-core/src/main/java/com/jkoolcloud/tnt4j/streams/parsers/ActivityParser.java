@@ -155,25 +155,25 @@ public abstract class ActivityParser {
 			boolean applied = false;
 			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
 				// TODO: tags
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.stacked.parser.applying"), name, parserRef, field);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.stacked.parser.applying", name, parserRef, field);
 				try {
 					applied = applyStackedParser(stream, ai, parserRef, value);
 
 					if (applied) {
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.stacked.parser.applied"), name, parserRef, field);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.stacked.parser.applied", name, parserRef, field);
 						break;
 					}
 				} catch (Exception exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityParser.stacked.parser.failed"), name, parserRef, field, exc);
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.stacked.parser.failed", name, parserRef, field, exc);
 				}
 			}
 
 			if (!applied) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.stacked.parsers.missed"), name, field);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.stacked.parsers.missed", name, field);
 			}
 		}
 	}

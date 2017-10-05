@@ -297,9 +297,8 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 
 		ActivityInfo ai = makeActivityInfo(item);
 		if (ai == null) {
-			logger().log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.no.parser"),
-					item);
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTInputStream.no.parser", item);
 			incrementSkippedActivitiesCount();
 			if (haltIfNoParser) {
 				failureFlag.set(true);
@@ -314,8 +313,8 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			if (!ai.isFilteredOut()) {
 				getOutput().logItem(ai);
 			} else {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTInputStream.activity.filtered.out"), ai);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"TNTInputStream.activity.filtered.out", ai);
 			}
 		}
 	}

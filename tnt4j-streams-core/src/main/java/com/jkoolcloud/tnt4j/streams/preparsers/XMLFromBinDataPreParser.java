@@ -209,8 +209,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 			try {
 				is.skip(bPos > absoluteLastGoodPosition ? bPos : absoluteLastGoodPosition);
 			} catch (IOException e) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"XMLFromBinDataPreParser.skip.failed"), e);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"XMLFromBinDataPreParser.skip.failed", e);
 				return;
 			}
 			try {
@@ -341,8 +341,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		markLastGoodPosition();
 
 		// Push this node into stack
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				"XMLFromBinDataPreParser.found.element"), qName);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"XMLFromBinDataPreParser.found.element", qName);
 		_nodeStk.push(tmp);
 	}
 
@@ -419,9 +419,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	public void error(SAXParseException e) throws SAXException {
 		errorPosition.line = e.getLineNumber();
 		errorPosition.column = e.getColumnNumber();
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "XMLFromBinDataPreParser.skipping"),
-				bPos);
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"XMLFromBinDataPreParser.skipping", bPos);
 	}
 
 	@Override

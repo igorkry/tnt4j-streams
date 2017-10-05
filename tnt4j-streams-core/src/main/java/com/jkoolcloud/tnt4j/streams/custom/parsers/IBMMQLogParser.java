@@ -144,8 +144,8 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 				dataMap.putAll(errEntryParser.parse(logEntry));
 			}
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"IBMMQLogParser.log.entry.parse.failed"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"IBMMQLogParser.log.entry.parse.failed", exc);
 		}
 
 		return dataMap;
@@ -191,12 +191,11 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 					}
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-						getActivityDataType(), eof);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.data.end", getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.error.reading"), getActivityDataType(), ioe);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
 			nextLock.unlock();

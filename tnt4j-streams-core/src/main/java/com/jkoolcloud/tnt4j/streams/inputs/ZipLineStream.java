@@ -138,9 +138,8 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZipLineStream.initializing.stream"),
-				zipFileName);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZipLineStream.initializing.stream", zipFileName);
 
 		InputStream fis = loadFile(zipPath);
 
@@ -250,8 +249,8 @@ public class ZipLineStream extends TNTParseableInputStream<String> {
 					lineReader = new LineNumberReader(new BufferedReader(new InputStreamReader(zis)));
 					lineNumber = 0;
 
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ZipLineStream.opening.entry"), entryName);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ZipLineStream.opening.entry", entryName);
 
 					return true;
 				}

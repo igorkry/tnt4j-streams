@@ -73,15 +73,13 @@ public class CmdStream extends AbstractWsStream {
 	 */
 	protected static String executeCommand(String cmdData) throws Exception {
 		if (StringUtils.isEmpty(cmdData)) {
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CmdStream.cant.execute.cmd"),
-					cmdData);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"CmdStream.cant.execute.cmd", cmdData);
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "CmdStream.invoking.command"),
-				cmdData);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"CmdStream.invoking.command", cmdData);
 
 		Process p = Runtime.getRuntime().exec(cmdData);
 
@@ -113,8 +111,8 @@ public class CmdStream extends AbstractWsStream {
 					try {
 						respStr = executeCommand(request);
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-								"CmdStream.execute.exception"), exc);
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+								"CmdStream.execute.exception", exc);
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {

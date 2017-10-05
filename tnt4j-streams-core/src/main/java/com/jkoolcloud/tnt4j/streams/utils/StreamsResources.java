@@ -41,14 +41,14 @@ public final class StreamsResources {
 	/**
 	 * Initializes singleton instance of resource bundle for default locale if such is not available in bundles cache
 	 * map. After initialization bundle object is placed into cache map and retrieved from it on subsequent calls. Cache
-	 * map entry key is {@code bundleName}
+	 * map entry key is <tt>bundleName</tt>.
 	 *
 	 * @param bundleName
 	 *            the base name of the resource bundle
 	 * @return default locale bound resource bundle
 	 * @see ResourceBundle#getBundle(String)
 	 */
-	public static ResourceBundle getBundle(String bundleName) {
+	private static ResourceBundle getBundleBase(String bundleName) {
 		ResourceBundle resBundle = resBundlesMap.get(bundleName);
 		if (resBundle == null) {
 			resBundle = ResourceBundle.getBundle(bundleName);
@@ -57,11 +57,33 @@ public final class StreamsResources {
 		return resBundle;
 	}
 
+	/**
+	 * Initializes singleton instance of resource bundle for default locale if such is not available in bundles cache
+	 * map. After initialization bundle object is placed into cache map and retrieved from it on subsequent calls. Cache
+	 * map entry key is <tt>bundleName</tt>.
+	 * <p>
+	 * If no bundle is associated with given <tt>bundleName</tt>, then bundle associated with
+	 * '{@value RESOURCE_BUNDLE_NAME}' is returned.
+	 *
+	 * @param bundleName
+	 *            the base name of the resource bundle
+	 * @return default locale bound resource bundle
+	 *
+	 * @see #getBundleBase(String)
+	 */
+	public static ResourceBundle getBundle(String bundleName) {
+		try {
+			return getBundleBase(bundleName);
+		} catch (RuntimeException exc) {
+			return getBundleBase(RESOURCE_BUNDLE_NAME);
+		}
+	}
+
 	private static String getResourceString(String bundleName, String key) {
 		try {
-			return getBundle(bundleName).getString(key);
+			return getBundleBase(bundleName).getString(key);
 		} catch (MissingResourceException mre) {
-			return getBundle(RESOURCE_BUNDLE_NAME).getString(key);
+			return getBundleBase(RESOURCE_BUNDLE_NAME).getString(key);
 		}
 	}
 

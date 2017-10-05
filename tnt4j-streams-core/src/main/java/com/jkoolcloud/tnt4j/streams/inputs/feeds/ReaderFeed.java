@@ -101,17 +101,16 @@ public class ReaderFeed extends AbstractFeed<BufferedReader> {
 		@Override
 		public String readLine() throws IOException {
 			if (isClosed()) {
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.closed"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.closed");
 				return null;
 			}
 
 			try {
 				String line = super.readLine();
 
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.line"),
-						line);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.line", line);
 
 				if (line == null) {
 					close();
@@ -131,8 +130,8 @@ public class ReaderFeed extends AbstractFeed<BufferedReader> {
 		@Override
 		public int read(char cbuf[], int off, int len) throws IOException {
 			if (isClosed()) {
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.closed"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.closed");
 				return -1;
 			}
 
@@ -141,9 +140,8 @@ public class ReaderFeed extends AbstractFeed<BufferedReader> {
 
 				String line = total == -1 ? "EOF" : new String(cbuf, off, total); // NON-NLS
 
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.line"),
-						line);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.line", line);
 
 				if (total == -1) {
 					close();

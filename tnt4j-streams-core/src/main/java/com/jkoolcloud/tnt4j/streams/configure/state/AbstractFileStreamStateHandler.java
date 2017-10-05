@@ -137,11 +137,11 @@ public abstract class AbstractFileStreamStateHandler<T> {
 				}
 			}
 		} catch (IOException e) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.error.load"), e);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.error.load", e);
 		} catch (JAXBException e) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.not.parsed"), e);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.not.parsed", e);
 		}
 
 		if (fileAccessState == null) {
@@ -231,9 +231,9 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		}
 
 		Checksum crcLine = new CRC32();
-		final byte[] bytes4Line = line.getBytes();
+		byte[] bytes4Line = line.getBytes();
 		crcLine.update(bytes4Line, 0, bytes4Line.length);
-		final long lineCRC = crcLine.getValue();
+		long lineCRC = crcLine.getValue();
 		return lineCRC == crc;
 	}
 
@@ -270,7 +270,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 *             if state unmarshaling fails
 	 */
 	private static FileAccessState loadStateFromTemp(String streamName) throws IOException, JAXBException {
-		final File tempFile = File.createTempFile("CHECK_PATH", null); // NON-NLS
+		File tempFile = File.createTempFile("CHECK_PATH", null); // NON-NLS
 		String path = tempFile.getParent();
 		tempFile.delete();
 
@@ -315,7 +315,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 	 */
 	private static FileAccessState unmarshal(File stateFile) throws JAXBException {
 		JAXBContext jaxb = JAXBContext.newInstance(FileAccessState.class);
-		final Unmarshaller unmarshaller = jaxb.createUnmarshaller();
+		Unmarshaller unmarshaller = jaxb.createUnmarshaller();
 		return (FileAccessState) unmarshaller.unmarshal(stateFile);
 	}
 
@@ -371,7 +371,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 		if (readLen > 0) {
 			String str = new String(buff, 0, readLen);
-			final byte[] bytes = str.getBytes(Utils.UTF8);
+			byte[] bytes = str.getBytes(Utils.UTF8);
 			crc.update(bytes, 0, bytes.length);
 		}
 
@@ -433,8 +433,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			writeState(fileAccessState, fileDir, streamName);
 		} catch (JAXBException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.error.save"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.error.save", exc);
 		}
 	}
 
@@ -459,7 +459,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		}
 
 		JAXBContext jaxb = JAXBContext.newInstance(FileAccessState.class);
-		final Marshaller marshaller = jaxb.createMarshaller();
+		Marshaller marshaller = jaxb.createMarshaller();
 
 		File fasFile = null;
 		String fileName = getFileName(streamName);
@@ -511,12 +511,12 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			fileAccessState.lastReadTime = System.currentTimeMillis();
 
 			CRC32 crc = new CRC32();
-			final byte[] bytes4Line = lineStr.getBytes(Utils.UTF8);
+			byte[] bytes4Line = lineStr.getBytes(Utils.UTF8);
 			crc.update(bytes4Line, 0, bytes4Line.length);
 			fileAccessState.currentLineCrc = crc.getValue();
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.error"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.error", exc);
 		}
 	}
 
@@ -540,8 +540,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			fileAccessState.currentFileCrc = getFileCrc(file);
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.error"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.error", exc);
 		}
 	}
 

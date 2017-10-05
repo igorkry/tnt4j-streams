@@ -66,13 +66,13 @@ public class ZKConfigInit {
 	 *            </table>
 	 */
 	public static void main(String... args) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.starting.main"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZKConfigInit.starting.main");
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			if (StringUtils.isEmpty(cfgFileName)) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ZKConfigInit.upload.cfg.not.defined"));
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigInit.upload.cfg.not.defined");
 				System.exit(2);
 			} else {
 				loadConfigAndRun(cfgFileName);
@@ -90,8 +90,8 @@ public class ZKConfigInit {
 	 */
 	private static void loadConfigAndRun(String cfgFileName) {
 		if (StringUtils.isEmpty(cfgFileName)) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigInit.upload.cfg.not.defined"));
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigInit.upload.cfg.not.defined");
 			return;
 		}
 
@@ -105,8 +105,8 @@ public class ZKConfigInit {
 				Stat nodeStat = ZKConfigManager.zk().exists(streamsPath, false);
 
 				if (clean && nodeStat != null) {
-					LOGGER.log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ZKConfigInit.clearing.zk"), streamsPath);
+					LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ZKConfigInit.clearing.zk", streamsPath);
 					ZKUtil.deleteRecursive(ZKConfigManager.zk(), streamsPath);
 				}
 
@@ -125,9 +125,8 @@ public class ZKConfigInit {
 					}
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.upload.error"),
-						exc.getLocalizedMessage(), exc);
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ZKConfigInit.upload.error", exc.getLocalizedMessage(), exc);
 			} finally {
 				ZKConfigManager.close();
 			}
@@ -190,9 +189,8 @@ public class ZKConfigInit {
 	 *         {@link java.io.IOException} occurs
 	 */
 	public static byte[] loadDataFromFile(String cfgFileName) {
-		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ZKConfigInit.loading.cfg.data"),
-				cfgFileName);
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ZKConfigInit.loading.cfg.data", cfgFileName);
 
 		if (StringUtils.isEmpty(cfgFileName)) {
 			return null;
@@ -201,8 +199,8 @@ public class ZKConfigInit {
 		try {
 			return Files.readAllBytes(Paths.get(cfgFileName));
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ZKConfigInit.loading.cfg.failed"), exc.getLocalizedMessage(), exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigInit.loading.cfg.failed", exc.getLocalizedMessage(), exc);
 			return null;
 		}
 	}

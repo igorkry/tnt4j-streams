@@ -86,8 +86,8 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 			FileStatus fStatus = file == null ? null : fs.getFileStatus(file);
 			return fStatus != null && fStatus.isFile();
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FileStreamStateHandler.file.error"), exc);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileStreamStateHandler.file.error", exc);
 			return false;
 		}
 	}

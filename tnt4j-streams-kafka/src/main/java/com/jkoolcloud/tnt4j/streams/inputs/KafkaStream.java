@@ -321,19 +321,19 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				startZooKeeper();
 			}
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-					"KafkaStream.server.starting"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaStream.server.starting");
 
 			Properties srvProp = getServerProperties(getScopeProps(PROP_SCOPE_SERVER));
 			server = new KafkaServer(new KafkaConfig(srvProp), SystemTime$.MODULE$);
 			server.startup();
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-					"KafkaStream.server.started"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaStream.server.started");
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.consumer.starting"));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"KafkaStream.consumer.starting");
 
 		consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(getScopeProps(PROP_SCOPE_CONSUMER)));
 	}
@@ -345,8 +345,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	 *             if an error occurred wile starting ZooKeeper server
 	 */
 	protected void startZooKeeper() throws Exception {
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-				"KafkaStream.zookeeper.server.starting"));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"KafkaStream.zookeeper.server.starting");
 
 		// ZooKeeperServerMain.main();
 
@@ -362,8 +362,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		zkCnxnFactory = ServerCnxnFactory.createFactory(sc.getClientPortAddress(), sc.getMaxClientCnxns());
 		zkCnxnFactory.startup(zkServer);
 
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-				"KafkaStream.zookeeper.server.started"));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"KafkaStream.zookeeper.server.started");
 	}
 
 	/**
@@ -426,8 +426,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		while (!closed.get() && !isHalted()) {
 			try {
 				if (messageBuffer == null || !messageBuffer.hasNext()) {
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-							"KafkaStream.empty.messages.buffer"));
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"KafkaStream.empty.messages.buffer");
 					Map<String, Integer> topicCountMap = new HashMap<>();
 					topicCountMap.put(topicName, 1);
 
@@ -438,12 +438,12 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 						kafka.consumer.KafkaStream<byte[], byte[]> stream = streams.get(topicName).get(0);
 						messageBuffer = stream.iterator();
 						logger().log(OpLevel.DEBUG,
-								StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-										"KafkaStream.retrieved.new.messages"),
-								stream.size());
+								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+								"KafkaStream.retrieved.new.messages", stream.size());
 					} else {
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(
-								KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.retrieved.no.new.messages"));
+						logger().log(OpLevel.DEBUG,
+								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+								"KafkaStream.retrieved.no.new.messages");
 					}
 				}
 
@@ -452,8 +452,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					byte[] msgPayload = msg.message();
 					String msgData = Utils.getString(msgPayload);
 
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-							"KafkaStream.next.message"), msgData);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"KafkaStream.next.message", msgData);
 
 					Map<String, Object> msgDataMap = new HashMap<>();
 
@@ -468,12 +468,12 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					return msgDataMap;
 				}
 			} catch (ConsumerTimeoutException e) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
-						"KafkaStream.retrieving.messages.timeout"));
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"KafkaStream.retrieving.messages.timeout");
 			}
 		}
-		logger().log(OpLevel.INFO,
-				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.stopping"));
+		logger().log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"KafkaStream.stopping");
 		return null;
 	}
 

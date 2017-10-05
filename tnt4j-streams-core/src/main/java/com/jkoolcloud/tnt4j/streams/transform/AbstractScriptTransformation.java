@@ -138,8 +138,10 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 * @param code
 	 *            transformation script code
 	 * @param phaseName
-	 *            data resolution phase name, when to apply transformation: '{@link Phase#RAW}',
-	 *            '{@link Phase#FORMATTED}' (default) or '{@link Phase#AGGREGATED}'
+	 *            data resolution phase name, when to apply transformation:
+	 *            '{@link com.jkoolcloud.tnt4j.streams.transform.ValueTransformation.Phase#RAW}',
+	 *            '{@link com.jkoolcloud.tnt4j.streams.transform.ValueTransformation.Phase#FORMATTED}' (default) or
+	 *            '{@link com.jkoolcloud.tnt4j.streams.transform.ValueTransformation.Phase#AGGREGATED}'
 	 * @return created transformation instance
 	 *
 	 * @throws IllegalArgumentException

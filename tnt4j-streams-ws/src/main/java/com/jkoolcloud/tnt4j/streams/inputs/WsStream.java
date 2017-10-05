@@ -176,22 +176,19 @@ public class WsStream extends AbstractWsStream {
 	protected static String callWebService(String url, String soapRequestData, WsStream stream, WsScenario scenario)
 			throws Exception {
 		if (StringUtils.isEmpty(url)) {
-			LOGGER.log(OpLevel.DEBUG,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.cant.execute.request"),
-					url);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WsStream.cant.execute.request", url);
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.invoking.request.raw"),
-				url, soapRequestData);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WsStream.invoking.request.raw", url, soapRequestData);
 
 		RequestDataAndHeaders requestDataAndHeaders = new RequestDataAndHeaders().resolve(soapRequestData, stream);
 		soapRequestData = stream.preProcess(requestDataAndHeaders.getRequest());
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.invoking.request.prep"),
-				url, soapRequestData);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WsStream.invoking.request.prep", url, soapRequestData);
 
 		// Create SOAP message and set request XML as body
 		SOAPMessage soapRequestMessage = createMessage(soapRequestData, requestDataAndHeaders.getHeaders(), true,
@@ -202,15 +199,12 @@ public class WsStream extends AbstractWsStream {
 		SOAPMessage soapResponse = soapConnection.call(soapRequestMessage, url);
 		String respXML = stream.toXMLString(soapResponse);
 
-		LOGGER.log(OpLevel.DEBUG,
-				StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.received.response"), url,
-				respXML);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WsStream.received.response", url, respXML);
 
 		if (soapResponse.getSOAPBody().hasFault()) {
-			LOGGER.log(OpLevel.ERROR,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WsStream.received.failure.response"),
-					url, soapResponse.getSOAPBody().getFault().getFaultString());
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WsStream.received.failure.response", url, soapResponse.getSOAPBody().getFault().getFaultString());
 			stream.handleFault(soapResponse.getSOAPBody().getFault(), scenario);
 			return null;
 		}
@@ -256,9 +250,8 @@ public class WsStream extends AbstractWsStream {
 			// Install the all-trusting host verifier
 			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 		} catch (GeneralSecurityException exc) {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "WsStream.disable.ssl.failed"),
-					exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WsStream.disable.ssl.failed", exc);
 		}
 	}
 
@@ -489,8 +482,8 @@ public class WsStream extends AbstractWsStream {
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
 								stream.fillInRequestData(request), stream, scenario);
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WsStream.execute.exception"), exc);
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+								"WsStream.execute.exception", exc);
 					} finally {
 						if (StringUtils.isNotEmpty(respStr)) {
 							stream.addInputToBuffer(respStr);

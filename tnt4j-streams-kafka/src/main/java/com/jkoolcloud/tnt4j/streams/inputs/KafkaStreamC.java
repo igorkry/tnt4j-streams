@@ -226,8 +226,8 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.consumer.starting"));
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"KafkaStream.consumer.starting");
 
 		kafkaDataReceiver = new KafkaDataReceiver();
 		kafkaDataReceiver.initialize(getScopeProps(PROP_SCOPE_CONSUMER), Collections.singleton(topicName));
@@ -239,9 +239,8 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 
 		kafkaDataReceiver.start();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
-				getClass().getSimpleName(), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
 	}
 
 	@Override
@@ -305,8 +304,9 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 						ConsumerRecords<?, ?> records = consumer.poll(Long.MAX_VALUE);
 						for (ConsumerRecord<?, ?> record : records) {
 							String msgData = Utils.toString(record.value());
-							logger().log(OpLevel.DEBUG, StreamsResources.getString(
-									KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "KafkaStream.next.message"), msgData);
+							logger().log(OpLevel.DEBUG,
+									StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+									"KafkaStream.next.message", msgData);
 
 							addInputToBuffer(record);
 						}

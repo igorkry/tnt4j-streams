@@ -18,7 +18,11 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -33,6 +37,8 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.jkool.StreamsInterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.tnt.TNTInterceptionsReporter;
+import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
  * TODO
@@ -42,7 +48,7 @@ import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.tnt.TNTI
 public class InterceptionsManager {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptionsManager.class);
 
-	private final Set<Object> references = new HashSet<>();
+	private final AtomicInteger referencesCount = new AtomicInteger();
 	private final Collection<InterceptionsReporter> reporters = new ArrayList<>();
 
 	private static InterceptionsManager instance;
@@ -61,7 +67,8 @@ public class InterceptionsManager {
 		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
 			interceptorProps.load(fis);
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, "Failed loading interceptors configuration properties", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"Failed loading interceptors configuration properties", exc);
 		}
 	}
 
@@ -85,23 +92,21 @@ public class InterceptionsManager {
 	}
 
 	public void bindReference(Object ref) {
-		LOGGER.log(OpLevel.DEBUG, "Binding interceptor reference: ref={0}, refsSize={1}", ref, references.size());
+		int crc = referencesCount.incrementAndGet();
 
-		synchronized (references) {
-			references.add(ref);
-		}
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"Binding interceptor reference: ref={0}, refsCount={1}", ref, crc);
 	}
 
 	public void unbindReference(Object ref) {
-		LOGGER.log(OpLevel.DEBUG, "Unbinding interceptor reference: ref={0}, refsSize={1}", ref, references.size());
+		int crc = referencesCount.decrementAndGet();
 
-		synchronized (references) {
-			references.remove(ref);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"Unbinding interceptor reference: ref={0}, refsCount={1}", ref, crc);
 
-			if (references.isEmpty()) {
-				for (InterceptionsReporter rep : reporters) {
-					rep.shutdown();
-				}
+		if (crc <= 0) {
+			for (InterceptionsReporter rep : reporters) {
+				rep.shutdown();
 			}
 		}
 	}
@@ -111,7 +116,8 @@ public class InterceptionsManager {
 	}
 
 	public ProducerRecord<Object, Object> send(ProducerRecord<Object, Object> producerRecord) {
-		LOGGER.log(OpLevel.DEBUG, "InterceptionsManager.send: producerRecord={0}", producerRecord);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"InterceptionsManager.send: producerRecord={0}", producerRecord);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.send(producerRecord);
@@ -121,8 +127,8 @@ public class InterceptionsManager {
 	}
 
 	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
-		LOGGER.log(OpLevel.DEBUG, "InterceptionsManager.acknowledge: recordMetadata={0}, exception={1}", recordMetadata,
-				e);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"InterceptionsManager.acknowledge: recordMetadata={0}, exception={1}", recordMetadata, e);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.acknowledge(recordMetadata, e, clusterResource);
@@ -131,7 +137,8 @@ public class InterceptionsManager {
 
 	public ConsumerRecords<Object, Object> consume(ConsumerRecords<Object, Object> consumerRecords,
 			ClusterResource clusterResource) {
-		LOGGER.log(OpLevel.DEBUG, "InterceptionsManager.consume: consumerRecords={0}", consumerRecords);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"InterceptionsManager.consume: consumerRecords={0}", consumerRecords);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.consume(consumerRecords, clusterResource);
@@ -141,7 +148,8 @@ public class InterceptionsManager {
 	}
 
 	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
-		LOGGER.log(OpLevel.DEBUG, "InterceptionsManager.commit: map={0}", map);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"InterceptionsManager.commit: map={0}", map);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.commit(map);

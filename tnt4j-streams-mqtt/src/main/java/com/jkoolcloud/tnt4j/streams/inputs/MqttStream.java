@@ -187,9 +187,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		mqttDataReceiver.start();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.stream.start"),
-				getClass().getSimpleName(), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
 	}
 
 	@Override
@@ -278,8 +277,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 					client.connect(options == null ? new MqttConnectOptions() : options);
 					client.subscribe(topic);
 				} catch (MqttException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"AbstractBufferedStream.input.start.failed"), exc);
+					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}
 			}
@@ -302,22 +301,21 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			logger().log(OpLevel.ERROR,
-					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.connection.lost"),
-					cause);
+			logger().log(OpLevel.ERROR, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MqttStream.connection.lost", cause);
 
 			try {
 				closeInternals();
 			} catch (MqttException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
-						"MqttStream.error.closing.receiver"), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MqttStream.error.closing.receiver", exc);
 			}
 
 			try {
 				initialize();
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME,
-						"MqttStream.error.reconnecting.receiver"), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MqttStream.error.reconnecting.receiver", exc);
 			}
 		}
 
@@ -340,9 +338,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 			String msgData = Utils.getString(message.getPayload());
 
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, "MqttStream.message.received"),
-					msgData);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MqttStream.message.received", msgData);
 
 			Map<String, Object> msgDataMap = new HashMap<>();
 

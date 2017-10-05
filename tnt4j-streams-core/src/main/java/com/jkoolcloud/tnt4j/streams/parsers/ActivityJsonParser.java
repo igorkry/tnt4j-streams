@@ -89,9 +89,8 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
 					activityDelim = Boolean.parseBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
 
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				}
 			}
 		}
@@ -182,12 +181,11 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 					}
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.data.end"),
-						getActivityDataType(), eof);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.data.end", getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.error.reading"), getActivityDataType(), ioe);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
 			nextLock.unlock();
@@ -239,10 +237,9 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			try {
 				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
-				logger().log(
-						!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG, StreamsResources
-								.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityJsonParser.path.exception"),
-						locStr, exc.getLocalizedMessage());
+				logger().log(!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityJsonParser.path.exception", locStr, exc.getLocalizedMessage());
 			}
 
 			if (jsonValue != null) {

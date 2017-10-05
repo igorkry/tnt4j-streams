@@ -84,10 +84,9 @@ public final class StreamsConfigSAXParser {
 			if (MapUtils.isNotEmpty(validationErrors)) {
 				for (Map.Entry<OpLevel, List<SAXParseException>> vee : validationErrors.entrySet()) {
 					for (SAXParseException ve : vee.getValue()) {
-						LOGGER.log(OpLevel.WARNING,
-								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-										"StreamsConfigSAXParser.xml.validation.error"),
-								ve.getLineNumber(), ve.getColumnNumber(), vee.getKey(), ve.getLocalizedMessage());
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"StreamsConfigSAXParser.xml.validation.error", ve.getLineNumber(), ve.getColumnNumber(),
+								vee.getKey(), ve.getLocalizedMessage());
 					}
 				}
 			}

@@ -87,9 +87,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 				if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
 					nodePathDelim = value;
 
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				}
 			}
 		}
@@ -99,8 +98,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		Map<String, ?> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.no.fields");
 			return null;
 		}
 

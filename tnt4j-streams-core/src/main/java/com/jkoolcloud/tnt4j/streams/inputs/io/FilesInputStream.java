@@ -73,8 +73,8 @@ public class FilesInputStream extends InputStream {
 						fis = new FileInputStream(f);
 						break;
 					} catch (FileNotFoundException exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"FeedInputStream.file.not.found"), f);
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"FeedInputStream.file.not.found", f);
 					}
 				}
 			} else {

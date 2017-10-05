@@ -65,7 +65,21 @@ public interface ValueTransformation<V, T> {
 	 */
 	void setPhase(Phase phase);
 
+	/**
+	 * Supported value resolution phases.
+	 */
 	enum Phase {
-		RAW, FORMATTED, AGGREGATED
+		/**
+		 * When RAW data value is resolved.
+		 */
+		RAW,
+		/**
+		 * When RAW data value gets formatted.
+		 */
+		FORMATTED,
+		/**
+		 * When activity data value gets aggregated into activity entity.
+		 */
+		AGGREGATED
 	}
 }

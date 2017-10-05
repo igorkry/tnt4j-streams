@@ -155,8 +155,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
 		while (true) {
 			if (sheetIterator == null || !sheetIterator.hasNext()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-						"AbstractExcelStream.no.more.sheets"));
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+						"AbstractExcelStream.no.more.sheets");
 
 				return null;
 			}
@@ -173,8 +173,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 			activityPosition = workbook.getSheetIndex(sheet);
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-					"AbstractExcelStream.sheet.to.process"), sheet.getSheetName());
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+					"AbstractExcelStream.sheet.to.process", sheet.getSheetName());
 
 			return sheet;
 		}

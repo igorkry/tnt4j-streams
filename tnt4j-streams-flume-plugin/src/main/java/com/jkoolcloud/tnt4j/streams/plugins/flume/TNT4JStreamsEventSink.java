@@ -80,7 +80,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 		Status result = Status.READY;
 		Channel channel = getChannel();
 		Transaction transaction = null;
-		final Event event;
+		Event event;
 
 		try {
 
@@ -99,8 +99,8 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 
 				out.println(jsonEvent);
 
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-						"TNT4JStreamsEventSink.sending.json"), hostname, port, jsonEvent);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+						"TNT4JStreamsEventSink.sending.json", hostname, port, jsonEvent);
 			}
 			transaction.commit();
 		} catch (Exception ex) {
@@ -112,8 +112,8 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 				try {
 					transaction.rollback();
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-							"TNT4JStreamsEventSink.transaction.rollback.failed"), exc);
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+							"TNT4JStreamsEventSink.transaction.rollback.failed", exc);
 				}
 			}
 			throw new EventDeliveryException(errorMsg, ex);
@@ -139,18 +139,18 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	 */
 	@Override
 	public synchronized void start() {
-		LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-				"TNT4JStreamsEventSink.plugin.starting"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+				"TNT4JStreamsEventSink.plugin.starting");
 		if (StringUtils.isEmpty(hostname) || hostname.equals(DEFAULT_HOST)) {
-			LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-					"TNT4JStreamsEventSink.streams.starting"));
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					"TNT4JStreamsEventSink.streams.starting");
 			StreamsAgent.runFromAPI(streamConfig);
 		}
 		try {
 			openSocket();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-					"TNT4JStreamsEventSink.failed.open.socket"), exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					"TNT4JStreamsEventSink.failed.open.socket", exc);
 		}
 
 		super.start();
@@ -161,14 +161,14 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 	 */
 	@Override
 	public synchronized void stop() {
-		LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-				"TNT4JStreamsEventSink.plugin.stopping"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+				"TNT4JStreamsEventSink.plugin.stopping");
 		Utils.close(out);
 		Utils.close(socket);
 
 		super.stop();
-		LOGGER.log(OpLevel.INFO, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-				"TNT4JStreamsEventSink.plugin.stopped"));
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+				"TNT4JStreamsEventSink.plugin.stopped");
 	}
 
 	/**
@@ -184,28 +184,28 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 		streamConfig = context.getString(PROP_STREAM_CONFIG);
 
 		if (hostname == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-					"TNT4JStreamsEventSink.no.hostname.configured"), DEFAULT_HOST);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					"TNT4JStreamsEventSink.no.hostname.configured", DEFAULT_HOST);
 			hostname = DEFAULT_HOST;
 		}
 
 		if (portStr == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-					"TNT4JStreamsEventSink.no.port.configured"), DEFAULT_PORT);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					"TNT4JStreamsEventSink.no.port.configured", DEFAULT_PORT);
 			port = DEFAULT_PORT;
 		} else {
 			try {
 				port = Integer.parseInt(portStr);
 			} catch (NumberFormatException exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-						"TNT4JStreamsEventSink.parse.port.error"), portStr);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+						"TNT4JStreamsEventSink.parse.port.error", portStr);
 				port = DEFAULT_PORT;
 			}
 		}
 
 		if (streamConfig == null) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
-					"TNT4JStreamsEventSink.no.tnt4j.config"), DEFAULT_CONFIG_FILE_NAME);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					"TNT4JStreamsEventSink.no.tnt4j.config", DEFAULT_CONFIG_FILE_NAME);
 			streamConfig = DEFAULT_CONFIG_FILE_NAME;
 		}
 	}

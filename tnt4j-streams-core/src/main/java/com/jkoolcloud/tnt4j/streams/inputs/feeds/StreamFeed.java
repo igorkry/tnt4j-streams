@@ -75,8 +75,8 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 		@Override
 		public synchronized int read() throws IOException {
 			if (isClosed()) {
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.closed"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.closed");
 				return -1;
 			}
 
@@ -85,9 +85,8 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 
 				String line = b == -1 ? "EOF" : String.format("%02X ", b); // NON-NLS
 
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.bytes"),
-						line);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.bytes", line);
 
 				if (b == -1) {
 					close();
@@ -107,8 +106,8 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 		@Override
 		public synchronized int read(byte[] b, int off, int len) throws IOException {
 			if (isClosed()) {
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.closed"));
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.closed");
 				return -1;
 			}
 
@@ -117,9 +116,8 @@ public class StreamFeed extends AbstractFeed<BufferedInputStream> {
 
 				String line = total == -1 ? "EOF" : Utils.toHexDump(b, off, total); // NON-NLS
 
-				LOGGER.log(OpLevel.DEBUG,
-						StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "AbstractFeed.read.bytes"),
-						line);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"AbstractFeed.read.bytes", line);
 
 				if (total == -1) {
 					close();

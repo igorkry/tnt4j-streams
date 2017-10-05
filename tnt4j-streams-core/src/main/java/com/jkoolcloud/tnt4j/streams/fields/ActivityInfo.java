@@ -119,9 +119,8 @@ public class ActivityInfo {
 	 *             format, etc.)
 	 */
 	public void applyField(ActivityField field, Object value) throws ParseException {
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field"), field,
-				Utils.toString(value));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityInfo.applying.field", field, Utils.toString(value));
 		Object[] values = Utils.makeArray(Utils.simplifyValue(value));
 
 		List<ActivityFieldLocator> locators = field.getLocators();
@@ -158,14 +157,12 @@ public class ActivityInfo {
 		Object fieldValue = Utils.simplifyValue(values);
 
 		if (fieldValue == null) {
-			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.field.value.null"),
-					field);
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.field.value.null", field);
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.applying.field.value"),
-				field, Utils.toString(fieldValue));
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityInfo.applying.field.value", field, Utils.toString(fieldValue));
 
 		fieldValue = transform(field, fieldValue);
 		fieldValue = filterFieldValue(field, fieldValue);
@@ -193,10 +190,8 @@ public class ActivityInfo {
 		try {
 			fieldValue = field.transformValue(fieldValue, this, ValueTransformation.Phase.AGGREGATED);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.transformation.failed"),
-					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.transformation.failed", field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 		}
 
 		return fieldValue;
@@ -219,9 +214,8 @@ public class ActivityInfo {
 		try {
 			return field.filterValue(this, fieldValue);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.filtering.failed"),
-					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.filtering.failed", field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 			return fieldValue;
 		}
 	}
@@ -394,9 +388,8 @@ public class ActivityInfo {
 						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", field));
 			}
 
-			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.field"), field,
-					Utils.toString(fieldValue));
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.set.field", field, Utils.toString(fieldValue));
 		} else {
 			addCustomActivityProperty(field, fieldValue);
 		}
@@ -532,10 +525,9 @@ public class ActivityInfo {
 				int maxIndex = ana[maxOffset];
 
 				if (maxIndex >= vArray.length) {
-					LOGGER.log(OpLevel.WARNING,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"ActivityInfo.formatting.arguments.mismatch"),
-							pattern, maxIndex, ArrayUtils.getLength(vArray));
+					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityInfo.formatting.arguments.mismatch", pattern, maxIndex,
+							ArrayUtils.getLength(vArray));
 				}
 			}
 		} catch (Exception exc) {
@@ -591,13 +583,12 @@ public class ActivityInfo {
 		Property prevValue = activityProperties.put(propName, p);
 
 		if (prevValue == null) {
-			LOGGER.log(OpLevel.TRACE,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.set.property"),
-					propName, Utils.toString(p.getValue()), p.getValueType());
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.set.property", propName, Utils.toString(p.getValue()), p.getValueType());
 		} else {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.replace.property"),
-					propName, Utils.toString(p.getValue()), p.getValueType(), Utils.toString(prevValue));
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.replace.property", propName, Utils.toString(p.getValue()), p.getValueType(),
+					Utils.toString(prevValue));
 		}
 
 		return prevValue;
@@ -963,9 +954,8 @@ public class ActivityInfo {
 		} else if (pTrackable instanceof Snapshot) {
 			return addSnapshotChild((Snapshot) pTrackable, chTrackable);
 		} else {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-					chTrackable == null ? null : chTrackable.getClass(),
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
 					pTrackable == null ? null : pTrackable.getClass());
 		}
 
@@ -977,9 +967,9 @@ public class ActivityInfo {
 			event.getOperation().addSnapshot((Snapshot) chTrackable);
 			return true;
 		} else {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-					chTrackable == null ? null : chTrackable.getClass(), event.getClass());
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
+					event.getClass());
 		}
 
 		return false;
@@ -990,18 +980,17 @@ public class ActivityInfo {
 			activity.add(chTrackable);
 			return chTrackable instanceof Snapshot;
 		} else {
-			LOGGER.log(OpLevel.WARNING,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-					chTrackable == null ? null : chTrackable.getClass(), activity.getClass());
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
+					activity.getClass());
 		}
 
 		return false;
 	}
 
 	private static boolean addSnapshotChild(Snapshot snapshot, Trackable chTrackable) {
-		LOGGER.log(OpLevel.WARNING,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child"),
-				chTrackable == null ? null : chTrackable.getClass(), snapshot.getClass());
+		LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(), snapshot.getClass());
 
 		return false;
 	}

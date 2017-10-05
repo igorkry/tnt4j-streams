@@ -115,30 +115,27 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				String value = prop.getValue();
 				if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
 					fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
 					valueDelim = value;
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						pattern = Pattern.compile(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
 					stripQuotes = Boolean.parseBoolean(value);
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_ENTRY_PATTERN.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						entryPattern = Pattern.compile(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ActivityParser.setting"), name, value);
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
 					}
 				}
 			}
@@ -165,14 +162,13 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		if (StringUtils.isEmpty(dataStr)) {
 			return null;
 		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.splitting.string"),
-				dataStr);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.splitting.string", dataStr);
 		if (pattern != null) {
 			Matcher matcher = pattern.matcher(dataStr);
 			if (matcher == null || !matcher.matches()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityParser.input.not.match"), getName(), pattern.pattern());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.input.not.match", getName(), pattern.pattern());
 				return null;
 			}
 		}
@@ -190,13 +186,12 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.no.fields"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.no.fields");
 			return null;
 		}
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.split"),
-				fields.length);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.split", fields.length);
 		Map<String, String> nameValues = new HashMap<>(fields.length);
 		for (String field : fields) {
 			if (field != null) {
@@ -204,8 +199,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				if (ArrayUtils.isNotEmpty(nv)) {
 					nameValues.put(nv[0], nv.length > 1 ? nv[1].trim() : "");
 				}
-				logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityNameValueParser.found.delim"), field);
+				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityNameValueParser.found.delim", field);
 			}
 		}
 
@@ -219,8 +214,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 			String key = matcher.group("key"); // NON-NLS
 			String value = matcher.group("value"); // NON-NLS
 			nameValues.put(key, value == null ? "" : value.trim());
-			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ActivityNameValueParser.found.regex"), key, value);
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityNameValueParser.found.regex", key, value);
 		}
 
 		return nameValues;

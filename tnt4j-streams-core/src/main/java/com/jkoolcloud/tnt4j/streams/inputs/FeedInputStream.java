@@ -161,8 +161,8 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 		}
 
 		if (pi.hasNext()) {
-			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.skipping.remaining.parsers"));
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FeedInputStream.skipping.remaining.parsers");
 		}
 	}
 
@@ -263,14 +263,14 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 				try {
 					startDataStream();
 				} catch (IOException exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"FeedInputStream.input.start.failed"), exc.getLocalizedMessage());
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FeedInputStream.input.start.failed", exc.getLocalizedMessage());
 					return null;
 				}
 			}
 			if (dataFeed.isClosed() || dataFeed.hasError()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"FeedInputStream.reader.terminated"));
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FeedInputStream.reader.terminated");
 				if (feedInput.canContinue()) {
 					resetDataStream();
 					continue;
@@ -278,22 +278,20 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 
 				return null;
 			}
-			logger().log(OpLevel.TRACE, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.stream.still.open"));
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FeedInputStream.stream.still.open");
 			return dataFeed.getInput();
 		}
 	}
 
 	private void resetDataStream() {
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FeedInputStream.resetting.stream"),
-				feedInput);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"FeedInputStream.resetting.stream", feedInput);
 
 		cleanupStreamInternals();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "FeedInputStream.stream.reset"),
-				getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"FeedInputStream.stream.reset", getName());
 	}
 
 	@Override
@@ -364,11 +362,11 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 		@Override
 		public InputStream getInputStream() throws IOException {
 			svrSocket = new ServerSocket(socketPort);
-			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.waiting.for.connection"), socketPort);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FeedInputStream.waiting.for.connection", socketPort);
 			socket = svrSocket.accept();
-			logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"FeedInputStream.accepted.connection"), socket);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FeedInputStream.accepted.connection", socket);
 			// only accept one connection, close down server socket
 			Utils.close(svrSocket);
 			svrSocket = null;
@@ -421,14 +419,15 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 					if (file.exists()) {
 						try {
 							FileInputStream fis = new FileInputStream(file);
-							logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-									"FeedInputStream.opening.file"), file);
+							logger().log(OpLevel.INFO,
+									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+									"FeedInputStream.opening.file", file);
 							return fis;
 						} finally {
 						}
 					}
-					logger().log(OpLevel.INFO, StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"FeedInputStream.file.not.found"), file);
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FeedInputStream.file.not.found", file);
 				} else {
 					throw new IOException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"FeedInputStream.no.more.files"));

@@ -120,8 +120,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 							try {
 								eRC = WmqUtils.getParamId(erc);
 							} catch (NoSuchElementException exc) {
-								logger().log(OpLevel.WARNING, StreamsResources.getString(
-										WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.invalid.rc"), erc);
+								logger().log(OpLevel.WARNING,
+										StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+										"WmqTraceStream.invalid.rc", erc);
 								continue;
 							}
 
@@ -174,8 +175,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 	private boolean isPCFMessageConsumed(PCFContent pcfMsg) {
 		if (pcfMsg == null) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.msg.consumption.null"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.msg.consumption.null");
 			return true;
 		}
 
@@ -183,8 +184,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 		MQCFIN tmp = (MQCFIN) pcfMsg.getParameter(WmqStreamConstants.TRACE_MARKER);
 		int ti = tmp == null ? 0 : tmp.getIntValue();
 
-		logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-				"WmqTraceStream.msg.consumption.marker.found"), ti, tc);
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqTraceStream.msg.consumption.marker.found", ti, tc);
 
 		if (ti >= tc) {
 			ti = -1;
@@ -193,12 +194,12 @@ public class WmqTraceStream extends WmqStreamPCF {
 		}
 
 		if (ti == -1 || ti > tc) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.msg.consumption.done"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.msg.consumption.done");
 			return true;
 		} else {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.msg.consumption.marker.new"), ti, tc);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.msg.consumption.marker.new", ti, tc);
 			tmp.setIntValue(ti);
 			return false;
 		}
@@ -233,11 +234,11 @@ public class WmqTraceStream extends WmqStreamPCF {
 			pcfMsg.addParameter(WmqStreamConstants.TRACES_COUNT, trC);
 			pcfMsg.addParameter(WmqStreamConstants.TRACE_MARKER, trM);
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.trace.init.marker"), trM, trC);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.trace.init.marker", trM, trC);
 		} else {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.trace.init.no.traces"));
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.trace.init.no.traces");
 		}
 
 		// if (!dupIds.isEmpty()) {
@@ -272,8 +273,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 		boolean relevant = opNameMatch(trace) && rcMatch(trace) && !isBrowseGetSuppressed(trace);
 
 		if (!relevant) {
-			logger().log(OpLevel.TRACE, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-					"WmqTraceStream.trace.suppressed"), trace);
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.trace.suppressed", trace);
 		}
 
 		return relevant;
@@ -293,9 +294,8 @@ public class WmqTraceStream extends WmqStreamPCF {
 		boolean match = operationName == null || opNameMatcher == null
 				|| opNameMatcher.matcher(operationName).matches();
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.trace.name.match"),
-				operationName, match);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqTraceStream.trace.name.match", operationName, match);
 
 		return match;
 	}
@@ -305,9 +305,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 
 		boolean match = traceRC == null || excludedRCs == null || !excludedRCs.contains(traceRC);
 
-		logger().log(OpLevel.DEBUG,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqTraceStream.trace.rc.match"),
-				traceRC == null ? "null" : MQConstants.lookupReasonCode(traceRC), match);
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqTraceStream.trace.rc.match", traceRC == null ? "null" : MQConstants.lookupReasonCode(traceRC),
+				match);
 
 		return match;
 	}
@@ -325,10 +325,9 @@ public class WmqTraceStream extends WmqStreamPCF {
 			browseGet = Utils.matchAny(getOptions, MQConstants.MQGMO_BROWSE_FIRST | MQConstants.MQGMO_BROWSE_NEXT
 					| MQConstants.MQGMO_BROWSE_MSG_UNDER_CURSOR);
 
-			logger().log(OpLevel.DEBUG,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqTraceStream.trace.browse.get"),
-					getOptions, MQConstants.decodeOptions(getOptions, "MQGMO_.*"), browseGet); // NON-NLS
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqTraceStream.trace.browse.get", getOptions, MQConstants.decodeOptions(getOptions, "MQGMO_.*"),
+					browseGet); // NON-NLS
 		}
 
 		return browseGet;

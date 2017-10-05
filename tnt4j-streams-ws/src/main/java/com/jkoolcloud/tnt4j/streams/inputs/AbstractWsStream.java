@@ -97,8 +97,8 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			schedInitLock.unlock();
 		}
 
-		logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-				"AbstractWsStream.scheduler.started"), getName());
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"AbstractWsStream.scheduler.started", getName());
 
 		loadScenarios();
 	}
@@ -126,8 +126,8 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 					"AbstractWsStream.no.scenarios.defined", getName()));
 		} else {
-			logger().log(OpLevel.DEBUG, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-					"AbstractWsStream.stream.scenarios.loaded"), getName(), scenariosCount);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"AbstractWsStream.stream.scenarios.loaded", getName(), scenariosCount);
 		}
 	}
 
@@ -215,8 +215,8 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			try {
 				scheduler.shutdown(true);
 			} catch (SchedulerException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME,
-						"AbstractWsStream.error.closing.scheduler"), exc);
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						"AbstractWsStream.error.closing.scheduler", exc);
 			}
 			scheduler = null;
 		}

@@ -245,7 +245,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			Method m = obj.getClass().getMethod(off ? "add" : "remove", Object.class);
 			m.invoke(obj, "01"); // NON-NLS
 		} catch (Exception exc) {
-			logger().log(OpLevel.DEBUG, "traceOff(boolean) failed", exc); // NON-NLS
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"traceOff(boolean) failed", exc); // NON-NLS
 		}
 	}
 
@@ -301,13 +302,11 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			props.put(CMQC.PASSWORD_PROPERTY, userPass);
 		}
 		if (StringUtils.isEmpty(qmgrName)) {
-			logger().log(OpLevel.INFO,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.connecting.default"),
-					props);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqStream.connecting.default", props);
 		} else {
-			logger().log(OpLevel.INFO,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.connecting.qm"),
-					qmgrName, props);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqStream.connecting.qm", qmgrName, props);
 		}
 		qmgr = new MQQueueManager(qmgrName, props);
 		int openOptions;
@@ -316,29 +315,24 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			openOptions = CMQC.MQSO_FAIL_IF_QUIESCING | CMQC.MQSO_CREATE
 					| (StringUtils.isEmpty(subName) ? CMQC.MQSO_MANAGED : CMQC.MQSO_RESUME);
 			if (StringUtils.isNotEmpty(subName)) {
-				logger().log(OpLevel.INFO,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WmqStream.subscribing.to.topic1"),
-						topicString, topicName, subName, String.format("%08X", openOptions)); // NON-NLS
+				logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.subscribing.to.topic1", topicString, topicName, subName,
+						String.format("%08X", openOptions)); // NON-NLS
 				dest = qmgr.accessTopic(topicString, topicName, openOptions, null, subName);
 			} else {
-				logger().log(OpLevel.INFO,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WmqStream.subscribing.to.topic2"),
-						topicString, topicName, String.format("%08X", openOptions)); // NON-NLS
+				logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.subscribing.to.topic2", topicString, topicName, String.format("%08X", openOptions)); // NON-NLS
 				dest = qmgr.accessTopic(topicString, topicName, CMQC.MQTOPIC_OPEN_AS_SUBSCRIPTION, openOptions);
 			}
 		} else {
 			openOptions = CMQC.MQOO_FAIL_IF_QUIESCING | CMQC.MQOO_INPUT_AS_Q_DEF | CMQC.MQOO_SAVE_ALL_CONTEXT
 					| CMQC.MQOO_INQUIRE;
-			logger().log(OpLevel.INFO,
-					StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.opening.queue"),
-					qmgrName, String.format("%08X", openOptions)); // NON-NLS
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqStream.opening.queue", qmgrName, String.format("%08X", openOptions)); // NON-NLS
 			dest = qmgr.accessQueue(queueName, openOptions);
 		}
-		logger().log(OpLevel.INFO,
-				StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.reading.from"),
-				dest.getName().trim(), String.format("%08X", gmo.options)); // NON-NLS
+		logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				"WmqStream.reading.from", dest.getName().trim(), String.format("%08X", gmo.options)); // NON-NLS
 		curFailCount = 0;
 	}
 
@@ -352,12 +346,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					if (isConnectedToQmgr(mqe)) {
 						// connection to qmgr was successful, so we were not able to open/subscribe to required
 						// queue/topic, so exit
-						logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WmqStream.failed.opening"), formatMqException(mqe));
+						logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+								"WmqStream.failed.opening", formatMqException(mqe));
 						return null;
 					}
-					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.failed.to.connect"), formatMqException(mqe));
+					logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+							"WmqStream.failed.to.connect", formatMqException(mqe));
 					if (!isHalted()) {
 						sleep(reconnectDelay);
 					}
@@ -371,18 +365,17 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 			try {
 				MQMessage mqMsg = new MQMessage();
-				logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-						"WmqStream.waiting.for.message"), dest.getName().trim());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.waiting.for.message", dest.getName().trim());
 				dest.get(mqMsg, gmo);
-				logger().log(OpLevel.DEBUG,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.read.msg"),
-						dest.getName().trim(), mqMsg.getMessageLength());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.read.msg", dest.getName().trim(), mqMsg.getMessageLength());
 				// TODO: MQCFH mqcfh = new MQCFH(mqMsg); mqcfh.control != MQConstants.MQCFC_LAST;
 				if (stripHeaders) {
 					MQHeaderIterator hdrIt = new MQHeaderIterator(mqMsg);
 					hdrIt.skipHeaders();
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.stripped.wmq"));
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+							"WmqStream.stripped.wmq");
 				}
 				T msgData = getActivityDataFromMessage(mqMsg);
 				qmgr.commit();
@@ -398,13 +391,12 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				}
 
 				curFailCount++;
-				logger().log(OpLevel.ERROR,
-						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStream.failed.reading"),
-						dest.getName().trim(), formatMqException(mqe));
+				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.failed.reading", dest.getName().trim(), formatMqException(mqe));
 				boolean throwException = true;
 				if (curFailCount >= MAX_CONSECUTIVE_FAILURES) {
-					logger().log(OpLevel.ERROR, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.reached.limit"), MAX_CONSECUTIVE_FAILURES);
+					logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+							"WmqStream.reached.limit", MAX_CONSECUTIVE_FAILURES);
 					closeQmgrConnection();
 					curFailCount = 0;
 				} else {
@@ -458,10 +450,9 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				dest.close();
 			} catch (MQException mqe) {
 				try {
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-									"WmqStream.error.closing"),
-							dest.getClass().getName(), dest.getName(), formatMqException(mqe));
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+							"WmqStream.error.closing", dest.getClass().getName(), dest.getName(),
+							formatMqException(mqe));
 				} catch (MQException e) {
 				}
 			}
@@ -478,8 +469,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				qmgr.disconnect();
 			} catch (MQException mqe) {
 				try {
-					logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-							"WmqStream.error.closing.qmgr"), qmgr.getName(), formatMqException(mqe));
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+							"WmqStream.error.closing.qmgr", qmgr.getName(), formatMqException(mqe));
 				} catch (MQException e) {
 				}
 			}
