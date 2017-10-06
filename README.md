@@ -3626,7 +3626,7 @@ java %LOGBACKOPTS% %TNT4JOPTS% ...
 ```
 `sh` file:
 ```
-LOGBACKOPTS=-Dlogback.configurationFile="file:%RUNDIR%/../config/logback.xml"
+LOGBACKOPTS=-Dlogback.configurationFile="file:$RUNDIR/../config/logback.xml"
 java $LOGBACKOPTS $TNT4JOPTS
 ```
 
