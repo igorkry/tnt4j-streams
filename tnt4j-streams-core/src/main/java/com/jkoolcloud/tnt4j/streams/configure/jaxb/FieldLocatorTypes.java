@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="StreamProp"/>
  *     &lt;enumeration value="Index"/>
  *     &lt;enumeration value="Label"/>
- *     &lt;enumeration value="REMatchNum"/>
+ *     &lt;enumeration value="REMatchId"/>
  *     &lt;enumeration value="Cache"/>
  *     &lt;enumeration value="Activity"/>
  *   &lt;/restriction>
@@ -76,12 +76,13 @@ public enum FieldLocatorTypes {
 
 	/**
 	 * 
-	 * Locator value is the value for the specified regular expression match sequence position.
+	 * Locator value is the value for the specified regular expression match group identifier: sequence position or
+	 * name.
 	 * 
 	 * 
 	 */
-	@XmlEnumValue("REMatchNum")
-	RE_MATCH_NUM("REMatchNum"),
+	@XmlEnumValue("REMatchId")
+	RE_MATCH_ID("REMatchId"),
 
 	/**
 	 * 

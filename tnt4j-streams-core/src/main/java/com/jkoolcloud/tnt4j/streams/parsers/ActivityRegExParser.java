@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -129,7 +130,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			ActivityFieldLocatorType locType = locator.getBuiltInType();
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.adding.field", field); // Utils.getDebugString(field));
-			if (locType == ActivityFieldLocatorType.REMatchNum) {
+			if (locType == ActivityFieldLocatorType.REMatchId) {
 				if (groupMap.containsKey(field)) {
 					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.conflicting.mapping", field));
@@ -206,53 +207,45 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		}
 
 		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
 		cData.setActivity(ai);
 		// apply fields for parser
-		try {
-			if (!matchMap.isEmpty()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityRegExParser.applying.regex", matchMap.size());
-				ArrayList<String> matches = new ArrayList<>();
-				matches.add(""); // dummy entry to index array with match locations
+		if (!matchMap.isEmpty()) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityRegExParser.applying.regex", matchMap.size());
+			Map<String, String> matches = findMatches((Matcher) cData.getData());
 
-				Matcher matcher = (Matcher) cData.getData();
-				matcher.reset();
-				while (matcher.find()) {
-					String matchStr = matcher.group().trim();
-					matches.add(matchStr);
-					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityRegExParser.match", matches.size(), matchStr);
-				}
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityRegExParser.found.matches", matches.size());
-				cData.put(MATCHES_KEY, matches);
-				Object value;
-				for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : matchMap.entrySet()) {
-					field = fieldMapEntry.getKey();
-					cData.setField(field);
-					List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
+			cData.put(MATCHES_KEY, matches);
 
-					value = Utils.simplifyValue(parseLocatorValues(locations, cData));
-
-					if (value != null) {
-						logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityRegExParser.setting.field", field);
-					}
-
-					applyFieldValue(field, value, cData);
-				}
-				cData.remove(MATCHES_KEY);
-			}
-		} catch (Exception e) {
-			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.regex", field), 0);
-			pe.initCause(e);
-			throw pe;
+			resolveLocatorsValues(matchMap, cData);
+			cData.remove(MATCHES_KEY);
 		}
+
+		resolveLocatorsValues(groupMap, cData);
+
+		return ai;
+	}
+
+	/**
+	 * Resolves and applies <tt>locMap</tt> defined locators mapped RegEx values.
+	 * 
+	 * @param locMap
+	 *            regex locators map
+	 * @param cData
+	 *            prepared activity data item parsing context
+	 * @throws ParseException
+	 *             if exception occurs while resolving regex locators values
+	 *
+	 * @see #parseLocatorValues(java.util.List,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 */
+	protected void resolveLocatorsValues(Map<ActivityField, List<ActivityFieldLocator>> locMap, ActivityContext cData)
+			throws ParseException {
+		ActivityField field = null;
 		try {
 			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : groupMap.entrySet()) {
+			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : locMap.entrySet()) {
 				field = fieldMapEntry.getKey();
 				cData.setField(field);
 				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
@@ -261,19 +254,69 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 
 				if (value != null) {
 					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityRegExParser.setting.group.field", field);
+							"ActivityRegExParser.setting.field", field, value);
 				}
 
 				applyFieldValue(field, value, cData);
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.regex.group", field), 0);
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.regex", field), 0);
 			pe.initCause(e);
 			throw pe;
 		}
+	}
 
-		return ai;
+	/**
+	 * Resolves all available RegEx matches found in activity data.
+	 * <p>
+	 * Found matches map key is match group index or name, value is matched activity data substring.
+	 * 
+	 * @param matcher
+	 *            regex matcher to be used to find matches
+	 * @return map of found matches
+	 * @throws ParseException
+	 *             if exception occurs while finding RegEx matches
+	 */
+	protected Map<String, String> findMatches(Matcher matcher) throws ParseException {
+		try {
+			Map<String, Integer> namedGroupsMap = getNamedGroups(pattern);
+			Map<String, String> matches = new HashMap<>(10);
+
+			matcher.reset();
+			while (matcher.find()) {
+				int gc = matcher.groupCount();
+				for (int gi = 1; gi <= gc; gi++) {
+					String matchStr = matcher.group(gi);
+					if (matchStr != null) {
+						addMatchEntry(matches, String.valueOf(gi), matchStr);
+
+						if (namedGroupsMap != null) {
+							for (Map.Entry<String, Integer> namedGroup : namedGroupsMap.entrySet()) {
+								if (gi == namedGroup.getValue()) {
+									addMatchEntry(matches, namedGroup.getKey(), matchStr);
+								}
+							}
+						}
+					}
+				}
+			}
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityRegExParser.found.matches", matches.size());
+
+			return matches;
+		} catch (Exception e) {
+			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.matches"), 0);
+			pe.initCause(e);
+			throw pe;
+		}
+	}
+
+	private void addMatchEntry(Map<String, String> matches, String matchKey, String matchStr) {
+		matches.put(matchKey, matchStr);
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityRegExParser.match", matchKey, matchStr);
 	}
 
 	/**
@@ -296,12 +339,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 
 		if (StringUtils.isNotEmpty(locStr)) {
 			if (cData.containsKey(MATCHES_KEY)) {
-				ArrayList<String> matches = (ArrayList<String>) cData.get(MATCHES_KEY);
-				int loc = Integer.parseInt(locStr);
-
-				if (loc >= 0 && loc < matches.size()) {
-					val = matches.get(loc);
-				}
+				Map<String, String> matches = (Map<String, String>) cData.get(MATCHES_KEY);
+				val = matches.get(locStr);
 			} else {
 				Matcher matcher = (Matcher) cData.getData();
 				ActivityFieldLocatorType locType = locator.getBuiltInType();
@@ -318,6 +357,27 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		}
 
 		return val;
+	}
+
+	/**
+	 * Retrieves named groups map from <tt>regexPattern</tt>.
+	 * <p>
+	 * Named groups map key is group name, value is group index.
+	 * 
+	 * @param regexPattern
+	 *            pattern to get group names
+	 * @return map of named groups, or {@code null} if no named groups defined
+	 * @throws java.lang.Exception
+	 *             if error occurs while retrieving named groups map from pattern
+	 */
+	@SuppressWarnings("unchecked")
+	protected static Map<String, Integer> getNamedGroups(Pattern regexPattern) throws Exception {
+		Method namedGroupsMethod = Pattern.class.getDeclaredMethod("namedGroups");
+		namedGroupsMethod.setAccessible(true);
+
+		Map<String, Integer> namedGroups = (Map<String, Integer>) namedGroupsMethod.invoke(regexPattern);
+
+		return namedGroups == null ? null : Collections.unmodifiableMap(namedGroups);
 	}
 
 	/**

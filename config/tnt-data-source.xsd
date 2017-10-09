@@ -415,10 +415,10 @@
                 </xs:annotation>
             </xs:enumeration>
 
-            <xs:enumeration value="REMatchNum">
+            <xs:enumeration value="REMatchId">
                 <xs:annotation>
                     <xs:documentation>
-                        Locator value is the value for the specified regular expression match sequence position.
+                        Locator value is the value for the specified regular expression match group identifier: sequence position or name.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>

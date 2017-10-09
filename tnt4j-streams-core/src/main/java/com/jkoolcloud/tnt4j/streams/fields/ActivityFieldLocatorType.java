@@ -46,9 +46,10 @@ public enum ActivityFieldLocatorType {
 
 	/**
 	 * Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the
-	 * raw activity data using a regular expression pattern defined as a sequence of repeating match patterns.
+	 * raw activity data using a regular expression pattern defined as a sequence of repeating match patterns. Math
+	 * identifier can be group sequence number or name.
 	 */
-	REMatchNum(Integer.class),
+	REMatchId(String.class),
 
 	/**
 	 * Indicates that data value is the value from stream stored cache with specified cache entry key.

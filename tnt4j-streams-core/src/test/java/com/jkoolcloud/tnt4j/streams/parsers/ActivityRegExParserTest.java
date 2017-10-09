@@ -73,7 +73,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	public void addField() {
 		ActivityField field = new ActivityField("Test"); // NON-NLS
 		ActivityFieldLocator locator = mock(ActivityFieldLocator.class);
-		when(locator.getType()).thenReturn(ActivityFieldLocatorType.REMatchNum.name());
+		when(locator.getType()).thenReturn(ActivityFieldLocatorType.REMatchId.name());
 		field.addLocator(locator);
 		parser.addField(field);
 	}
@@ -122,8 +122,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = NumberFormatException.class)
 	public void addFieldExceptionTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum"); // NON-NLS
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum"); // NON-NLS
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "REMatchId"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchId"); // NON-NLS
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
@@ -133,8 +133,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFieldExceptionOtherTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "REMatchNum"); // NON-NLS
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchNum"); // NON-NLS
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "REMatchId"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchId"); // NON-NLS
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator2);
 		parser.addField(af);
@@ -168,7 +168,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	@Ignore("Incomplete")
 	@Test(expected = ParseException.class)
 	public void parseWhenMatchMapExceptionTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "1"); // NON-NLS
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1"); // NON-NLS
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
@@ -184,7 +184,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = NumberFormatException.class)
 	public void parseMatchMapOneEntryTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "1");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1");
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);
@@ -194,8 +194,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void parseMatchMapTwoEntriesTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "1");
-		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "2");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1");
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "2");
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		af.addLocator(locator1);
@@ -206,7 +206,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = NumberFormatException.class)
 	public void parseGroupMapOneEntryTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchNum, "1");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1");
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		parser.addField(af);

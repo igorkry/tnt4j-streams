@@ -4,7 +4,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="FreeFormTextParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
-        <property name="Pattern"><![CDATA[(?<tid>(TID)=(.[^\s:,%]*))((?s).*)(?<userData>(USER_DATA)=(.[^\s:,%]*))]]></property>
+        <property name="Pattern"><![CDATA[(?<tid>(TID)=(.[^\s:,%]*))|(?<userData>(USER_DATA)=(.[^\s:,%]*))]]></property>
         <property name="MatchStrategy" value="FIND"/>
         <property name="ActivityDelim" value="EOF"/>
 
@@ -12,14 +12,14 @@
         <field name="EventName" value="FreeFormSwiftText"/>
 
         <field name="UserData" separator=":">
-            <field-locator locator="tid" locator-type="Label">
+            <field-locator locator="tid" locator-type="REMatchId">
                 <field-transform lang="groovy" name="TIDSubstring">
                     <![CDATA[
                         StringUtils.substring($fieldValue, 0, 10)
                     ]]>
                 </field-transform>
             </field-locator>
-            <field-locator locator="userData" locator-type="Label"/>
+            <field-locator locator="userData" locator-type="REMatchId"/>
         </field>
     </parser>
 
