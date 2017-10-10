@@ -4421,9 +4421,22 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
 ##### MQ message signature calculation
 
 For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
-calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`. 
+calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
 
-Signature calculation configuration sample:
+The signature items MUST be specified in the following order:
+* Message Type (`Number`)
+* Message Format (`String`)
+* Message ID (`byte[]` or `String`)
+* Message User (`String`)
+* Message Application Type (`String`)
+* Message Application Name (`String`)
+* Message Date (`String`)
+* Message Time (`String`)
+* Correlator ID (`byte[]` or `String`)
+
+Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
+
+Sample of field definition for signature calculation:
 ```xml
     <field name="TrackingId" separator="#!#" value-type="signature"> 
         <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/> 
@@ -4553,9 +4566,22 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 ##### MQ message signature calculation
 
 For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
-calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.  
+calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
 
-Signature calculation configuration sample:
+The signature items MUST be specified in the following order:
+* Message Type (`Number`)
+* Message Format (`String`)
+* Message ID (`byte[]` or `String`)
+* Message User (`String`)
+* Message Application Type (`String`)
+* Message Application Name (`String`)
+* Message Date (`String`)
+* Message Time (`String`)
+* Correlator ID (`byte[]` or `String`)
+
+Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
+
+Sample of field definition for signature calculation:
 ```xml
     <field name="Correlator" value-type="signature"> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/> 
@@ -4566,7 +4592,7 @@ Signature calculation configuration sample:
         <field-locator locator="MQCACF_APPL_NAME" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label"/> 
     </field>
 ``` 
 
