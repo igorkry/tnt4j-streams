@@ -187,6 +187,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 * @param matcher
 	 *            matcher instance to use
 	 * @return {@code true} if matcher matches input data string using parser defined matching strategy
+	 *
+	 * @see java.util.regex.Matcher#find()
+	 * @see java.util.regex.Matcher#matches()
 	 */
 	protected boolean isMatching(Matcher matcher) {
 		boolean match;
@@ -215,7 +218,6 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			Map<String, String> matches = findMatches((Matcher) cData.getData());
 
 			cData.put(MATCHES_KEY, matches);
-
 			resolveLocatorsValues(matchMap, cData);
 			cData.remove(MATCHES_KEY);
 		}
@@ -277,6 +279,8 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 * @return map of found matches
 	 * @throws ParseException
 	 *             if exception occurs while finding RegEx matches
+	 *
+	 * @see java.util.regex.Matcher#group(int)
 	 */
 	protected Map<String, String> findMatches(Matcher matcher) throws ParseException {
 		try {
@@ -329,6 +333,9 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 *
+	 * @see java.util.regex.Matcher#group(int)
+	 * @see java.util.regex.Matcher#group(String)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -346,17 +353,33 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				ActivityFieldLocatorType locType = locator.getBuiltInType();
 
 				if (locType != null && locType.getDataType() == Integer.class) {
-					int loc = Integer.parseInt(locStr);
-					if (loc >= 0 && loc <= matcher.groupCount()) {
-						val = matcher.group(loc);
-					}
+					val = groupIndex(locStr, matcher);
+				} else if (locType != null && locType.getDataType() == String.class) {
+					val = groupName(locStr, matcher);
 				} else {
-					val = matcher.group(locStr);
+					try {
+						val = groupIndex(locStr, matcher);
+					} catch (NumberFormatException exc) {
+						val = groupName(locStr, matcher);
+					}
 				}
 			}
 		}
 
 		return val;
+	}
+
+	private static String groupIndex(String locStr, Matcher matcher) {
+		int loc = Integer.parseInt(locStr);
+		if (loc >= 0 && loc <= matcher.groupCount()) {
+			return matcher.group(loc);
+		}
+
+		return null;
+	}
+
+	private static String groupName(String locStr, Matcher matcher) {
+		return matcher.group(locStr);
 	}
 
 	/**
