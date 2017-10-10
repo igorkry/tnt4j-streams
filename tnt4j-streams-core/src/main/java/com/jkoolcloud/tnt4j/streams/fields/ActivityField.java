@@ -251,6 +251,8 @@ public class ActivityField extends AbstractFieldEntity {
 	/**
 	 * Checks whether any of provided locators has type {@code lType}.
 	 *
+	 * @param locators
+	 *            locators collection to check
 	 * @param lType
 	 *            locator type
 	 * @return {@code true} if any of provided locators has type {@code lType}, {@code false} - otherwise.
@@ -309,7 +311,7 @@ public class ActivityField extends AbstractFieldEntity {
 	/**
 	 * Gets grouping field (containing no direct value locator, but grouping several field value locators) locator used
 	 * to format resolved activity RAW data avalue.
-	 * 
+	 *
 	 * @return grouping field locator
 	 */
 	public ActivityFieldLocator getGroupLocator() {
@@ -334,7 +336,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 * @return the string being used to separate raw values
 	 */
 	public String getSeparator() {
-		return StringUtils.isEmpty(separator) ? DEFAULT_FIELD_VALUES_DELIM : separator;
+		return separator == null ? DEFAULT_FIELD_VALUES_DELIM : separator;
 	}
 
 	/**
@@ -660,7 +662,7 @@ public class ActivityField extends AbstractFieldEntity {
 
 	/**
 	 * Applies field master locator filters on provided value to check if value should be filtered out from streaming.
-	 * 
+	 *
 	 * @param ai
 	 *            activity info instance to alter "filtered out" flag
 	 * @param value
@@ -692,28 +694,63 @@ public class ActivityField extends AbstractFieldEntity {
 		return ValueTransformation.Phase.AGGREGATED;
 	}
 
+	/**
+	 * Field referenced stacked parser reference definition.
+	 */
 	public static class ParserReference {
 		private ActivityParser parser;
 		private AggregationType aggregationType;
 
+		/**
+		 * Constructs a new ParserReference.
+		 *
+		 * @param parser
+		 *            referenced parser instance
+		 */
 		ParserReference(ActivityParser parser) {
 			this(parser, AggregationType.Merge);
 		}
 
+		/**
+		 * Constructs a new ParserReference.
+		 *
+		 * @param parser
+		 *            referenced parser instance
+		 * @param aggregationType
+		 *            activity entity resolved fields aggregation type name
+		 */
 		ParserReference(ActivityParser parser, String aggregationType) {
 			this(parser, StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
 					: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType));
 		}
 
+		/**
+		 * Constructs a new ParserReference.
+		 *
+		 * @param parser
+		 *            referenced parser instance
+		 * @param aggregationType
+		 *            activity entity resolved fields aggregation type
+		 */
 		ParserReference(ActivityParser parser, AggregationType aggregationType) {
 			this.parser = parser;
 			this.aggregationType = aggregationType;
 		}
 
+		/**
+		 * Returns referenced parser instance.
+		 *
+		 * @return referenced parser instance
+		 */
 		public ActivityParser getParser() {
 			return parser;
 		}
 
+		/**
+		 * Returns activity entity resolved fields aggregation type.
+		 *
+		 * @return the aggregation type
+		 */
 		public AggregationType getAggregationType() {
 			return aggregationType;
 		}
