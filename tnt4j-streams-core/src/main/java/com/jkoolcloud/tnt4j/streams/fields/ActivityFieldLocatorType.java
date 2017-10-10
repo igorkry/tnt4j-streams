@@ -46,7 +46,7 @@ public enum ActivityFieldLocatorType {
 
 	/**
 	 * Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the
-	 * raw activity data using a regular expression pattern defined as a sequence of repeating match patterns. Math
+	 * raw activity data using a regular expression pattern defined as a sequence of repeating match patterns. Match
 	 * identifier can be group sequence number or name.
 	 */
 	REMatchId(String.class),
