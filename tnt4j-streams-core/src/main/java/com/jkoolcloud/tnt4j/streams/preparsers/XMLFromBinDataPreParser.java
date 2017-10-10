@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2017 JKOOL, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.jkoolcloud.tnt4j.streams.preparsers;
 
 import java.io.*;
@@ -29,39 +45,20 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 /**
  * Pre-parser to convert RAW binary activity data to valid XML parseable by actual activity XML parser. It skip's any of
  * unlike XML characters and tries to construct XML DOM structure for actual parser to continue. It uses SAX handler
- * capabilities to parse input stream. The class extends {@link ErrorHandler} interface to catch parsing error, on such
- * event the parser skip's a character and continues to parse element.
+ * capabilities of {@link com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser.XMLBinSAXHandler} to parse
+ * input stream data and build XML DOM document.
  * <p>
  * This preparer is also capable to make valid XML document from RAW activity data having truncated XML structures.
  * <p>
  * If resolved XML has multiple nodes in root level, to make XML valid those nodes gets surrounded by single root node
- * named '{@value #ROOT_ELEMENT}'.
+ * named '{@value com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser.XMLBinSAXHandler#ROOT_ELEMENT}'.
  *
  * @version $Revision: 1 $
  */
-public class XMLFromBinDataPreParser extends DefaultHandler
-		implements ActivityDataPreParser<Document>, ContentHandler, LexicalHandler, ErrorHandler {
+public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
 
-	private static final String XML_PREFIX = "<?xml version='1.0' encoding='UTF-8'?>\n"; // NON-NLS
-	/**
-	 * Constant for surrounding root level node name.
-	 */
-	public static final String ROOT_ELEMENT = "root"; // NON-NLS
-
 	private ActivityFieldFormatType format;
-
-	private Locator locator;
-
-	private Node root = null;
-	private Document document = null;
-	private Stack<Node> _nodeStk = new Stack<>();
-
-	private SAXParser parser;
-
-	private int bPos;
-	private Position errorPosition = new Position();
-	private int absoluteLastGoodPosition;
 
 	/**
 	 * Constructs a new XMLFromBinDataPreParser.
@@ -76,20 +73,6 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	/**
 	 * Constructs a new XMLFromBinDataPreParser.
 	 *
-	 * @param type
-	 *            RAW activity data format name from {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType}
-	 *            enumeration
-	 *
-	 * @throws ParserConfigurationException
-	 *             if initialization of SAX parser fails
-	 */
-	public XMLFromBinDataPreParser(String type) throws ParserConfigurationException {
-		this(ActivityFieldFormatType.valueOf(type));
-	}
-
-	/**
-	 * Constructs a new XMLFromBinDataPreParser.
-	 *
 	 * @param format
 	 *            RAW activity data format
 	 *
@@ -98,29 +81,6 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 */
 	public XMLFromBinDataPreParser(ActivityFieldFormatType format) throws ParserConfigurationException {
 		this.format = format;
-
-		try {
-			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-			parser = parserFactory.newSAXParser();
-			parser.getXMLReader().setErrorHandler(this);
-		} catch (Exception e) {
-			throw new ParserConfigurationException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"XMLFromBinDataPreParser.init.failure"));
-		}
-	}
-
-	private boolean initNewDocument() {
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			document = factory.newDocumentBuilder().newDocument();
-			root = document.createElement(ROOT_ELEMENT);
-			_nodeStk.push(root);
-			bPos = 0;
-			return true;
-		} catch (ParserConfigurationException e1) {
-			return false;
-			// can't initialize
-		}
 	}
 
 	/**
@@ -131,7 +91,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 	 */
 	@Override
 	public Document preParse(Object data) throws ParseException {
-		if (!initNewDocument()) {
+		XMLBinSAXHandler documentHandler = XMLBinSAXHandler.initNewDocument();
+		if (documentHandler == null) {
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.doc.init.failure"), 0);
 		}
@@ -178,7 +139,7 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		}
 
 		try {
-			parseBinInput(is);
+			documentHandler.parseBinInput(is);
 		} catch (IOException e) {
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.bin.data.parse.failure"), 0);
@@ -187,88 +148,8 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 				Utils.close(is);
 			}
 		}
-		return getDOM();
-	}
 
-	/**
-	 * Actual RAW data parsing method. Field {@code bPos} represents actual position in source data. On the SAX
-	 * exception {@code bPos} adjusted to error position and the parser continues from there until the end of stream.
-	 *
-	 * @param is
-	 *            input stream to read
-	 * @throws IOException
-	 *             if I/O exception occurs while reading input stream
-	 */
-	private void parseBinInput(InputStream is) throws IOException {
-		InputStream prefixIS = new ByteArrayInputStream(XML_PREFIX.getBytes());
-		SequenceInputStream sIS = new SequenceInputStream(Collections.enumeration(Arrays.asList(prefixIS, is)));
-		InputSource parserInputSource = new InputSource(sIS);
-		parserInputSource.setEncoding(Utils.UTF8);
-
-		while (bPos <= is.available()) {
-			try {
-				is.skip(bPos > absoluteLastGoodPosition ? bPos : absoluteLastGoodPosition);
-			} catch (IOException e) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"XMLFromBinDataPreParser.skip.failed", e);
-				return;
-			}
-			try {
-				errorPosition.reset();
-				parser.parse(parserInputSource, this);
-			} catch (Exception e) {
-				if (errorPosition.column < (absoluteLastGoodPosition - bPos)) {
-					bPos += errorPosition.column;
-				} else {
-					bPos++;
-				}
-
-				prefixIS.reset();
-				is.reset();
-
-				if (bPos >= is.available()) {
-					handleTrailingText(is);
-					break;
-				}
-			}
-		}
-
-		Utils.close(prefixIS);
-	}
-
-	/**
-	 * In case of incomplete XML data, preserves last chunk of characters as last element text data.
-	 * 
-	 * @param is
-	 *            input stream to read
-	 * @throws IOException
-	 *             if I/O exception occurs while reading input stream
-	 */
-	protected void handleTrailingText(InputStream is) throws IOException {
-		int lPos = absoluteLastGoodPosition - 1;
-		int textLength = bPos - lPos;
-
-		if (textLength > 0) {
-			byte[] buffer = new byte[textLength];
-			try {
-				is.skip(lPos);
-				is.read(buffer);
-				String text = new String(buffer, Utils.UTF8);
-				characters(text.toCharArray(), 0, text.length());
-			} finally {
-				is.reset();
-			}
-		}
-	}
-
-	private Document getDOM() {
-		if (root.getChildNodes().getLength() == 1) {
-			document.appendChild(root.getFirstChild());
-		} else {
-			document.appendChild(root);
-		}
-
-		return document;
+		return documentHandler.getDOM();
 	}
 
 	/**
@@ -293,182 +174,348 @@ public class XMLFromBinDataPreParser extends DefaultHandler
 		return "XML"; // NON-NLS
 	}
 
-	@Override
-	public void characters(char[] ch, int start, int length) {
-		if (!_nodeStk.isEmpty()) {
-			Node last = _nodeStk.peek();
-			// No text nodes can be children of root (DOM006 exception)
-			if (last != document) {
-				String text = new String(ch, start, length);
-				last.appendChild(document.createTextNode(text));
+	/**
+	 * SAX handler implementation allowing to make XML DOM document from provided binary data containing fragments of
+	 * XML. It implements {@link ErrorHandler} interface to catch parsing error, on such event the parser skip's a
+	 * character and continues to parse element.
+	 * <p>
+	 * This SAX handler is also capable to make valid XML document from RAW activity data having truncated XML
+	 * structures.
+	 */
+	protected static class XMLBinSAXHandler extends DefaultHandler
+			implements ContentHandler, LexicalHandler, ErrorHandler {
+		private static final String XML_PREFIX = "<?xml version='1.0' encoding='UTF-8'?>\n"; // NON-NLS
+		/**
+		 * Constant for surrounding root level node name.
+		 */
+		public static final String ROOT_ELEMENT = "root"; // NON-NLS
+
+		private Locator locator;
+
+		private Node root = null;
+		private Document document = null;
+		private Stack<Node> _nodeStk = new Stack<>();
+
+		private SAXParser parser;
+
+		private int bPos;
+		private Position errorPosition = new Position();
+		private int absoluteLastGoodPosition;
+
+		private Integer startSkip = null;
+		private Integer lastSkip = null;
+
+		private XMLBinSAXHandler() throws ParserConfigurationException {
+			try {
+				SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+				parser = parserFactory.newSAXParser();
+				parser.getXMLReader().setErrorHandler(this);
+			} catch (Exception e) {
+				throw new ParserConfigurationException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"XMLFromBinDataPreParser.init.failure"));
 			}
 		}
-	}
 
-	@Override
-	public void startDocument() {
-	}
-
-	@Override
-	public void endDocument() {
-		if (!_nodeStk.isEmpty()) {
-			_nodeStk.pop();
+		/**
+		 * Init new document xml from bin data pre parser SAX handler.
+		 *
+		 * @return the xml from bin data pre parser SAX handler
+		 */
+		public static XMLBinSAXHandler initNewDocument() {
+			try {
+				XMLBinSAXHandler documentHandler = new XMLBinSAXHandler();
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				documentHandler.document = factory.newDocumentBuilder().newDocument();
+				documentHandler.root = documentHandler.document.createElement(ROOT_ELEMENT);
+				documentHandler._nodeStk.push(documentHandler.root);
+				documentHandler.bPos = 0;
+				return documentHandler;
+			} catch (ParserConfigurationException e1) {
+				return null;
+				// can't initialize
+			}
 		}
-	}
 
-	@Override
-	public void startElement(String namespace, String localName, String qName, Attributes attrs) {
-		Element tmp = document.createElementNS(namespace, qName);
+		/**
+		 * Actual RAW data parsing method. Field {@code bPos} represents actual position in source data. On the SAX
+		 * exception {@code bPos} adjusted to error position and the parser continues from there until the end of
+		 * stream.
+		 *
+		 * @param is
+		 *            input stream to read
+		 * @throws IOException
+		 *             if I/O exception occurs while reading input stream
+		 */
+		public void parseBinInput(InputStream is) throws IOException {
+			InputStream prefixIS = new ByteArrayInputStream(XML_PREFIX.getBytes());
+			SequenceInputStream sIS = new SequenceInputStream(Collections.enumeration(Arrays.asList(prefixIS, is)));
+			InputSource parserInputSource = new InputSource(sIS);
+			parserInputSource.setEncoding(Utils.UTF8);
 
-		// Add attributes to element
-		int attrsCount = attrs.getLength();
-		for (int i = 0; i < attrsCount; i++) {
-			if (attrs.getLocalName(i).startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
-				tmp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, attrs.getQName(i), attrs.getValue(i));
-			} else if (attrs.getLocalName(i) == null) {
-				tmp.setAttribute(attrs.getQName(i), attrs.getValue(i));
+			while (bPos <= is.available()) {
+				try {
+					is.skip(bPos > absoluteLastGoodPosition ? bPos : absoluteLastGoodPosition);
+				} catch (IOException e) {
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"XMLFromBinDataPreParser.skip.failed", e);
+					return;
+				}
+				try {
+					errorPosition.reset();
+					parser.parse(parserInputSource, this);
+				} catch (Exception e) {
+					if (errorPosition.column < (absoluteLastGoodPosition - bPos)) {
+						bPos += errorPosition.column;
+					} else {
+						bPos++;
+					}
+
+					prefixIS.reset();
+					is.reset();
+
+					if (bPos >= is.available()) {
+						handleTrailingText(is);
+						break;
+					}
+				}
+			}
+
+			if (startSkip != null) {
+
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"XMLFromBinDataPreParser.skipping", startSkip, bPos);
+			}
+
+			Utils.close(prefixIS);
+		}
+
+		/**
+		 * In case of incomplete XML data, preserves last chunk of characters as last element text data.
+		 *
+		 * @param is
+		 *            input stream to read
+		 * @throws IOException
+		 *             if I/O exception occurs while reading input stream
+		 */
+		protected void handleTrailingText(InputStream is) throws IOException {
+			int lPos = absoluteLastGoodPosition - 1;
+			int textLength = bPos - lPos;
+
+			if (textLength > 0) {
+				byte[] buffer = new byte[textLength];
+				try {
+					is.skip(lPos);
+					is.read(buffer);
+					String text = new String(buffer, Utils.UTF8);
+					characters(text.toCharArray(), 0, text.length());
+				} finally {
+					is.reset();
+				}
+			}
+		}
+
+		/**
+		 * Returns DOM document made from binary data.
+		 *
+		 * @return DOM document made from binary data
+		 */
+		public Document getDOM() {
+			if (root.getChildNodes().getLength() == 1) {
+				document.appendChild(root.getFirstChild());
 			} else {
-				tmp.setAttributeNS(attrs.getURI(i), attrs.getQName(i), attrs.getValue(i));
+				document.appendChild(root);
+			}
+
+			return document;
+		}
+
+		@Override
+		public void characters(char[] ch, int start, int length) {
+			if (!_nodeStk.isEmpty()) {
+				Node last = _nodeStk.peek();
+				// No text nodes can be children of root (DOM006 exception)
+				if (last != document) {
+					String text = new String(ch, start, length);
+					last.appendChild(document.createTextNode(text));
+				}
 			}
 		}
 
-		// Append this new node into current stack node
-		if (!_nodeStk.isEmpty()) {
-			Node last = _nodeStk.peek();
-			last.appendChild(tmp);
+		@Override
+		public void startDocument() {
 		}
 
-		markLastGoodPosition();
-
-		// Push this node into stack
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"XMLFromBinDataPreParser.found.element", qName);
-		_nodeStk.push(tmp);
-	}
-
-	@Override
-	public void endElement(String namespace, String localName, String qName) {
-		if (!_nodeStk.isEmpty()) {
-			_nodeStk.pop();
-		}
-		markLastGoodPosition();
-	}
-
-	private void markLastGoodPosition() {
-		absoluteLastGoodPosition = bPos + locator.getColumnNumber();
-	}
-
-	/**
-	 * Adds processing instruction node to DOM.
-	 */
-	@Override
-	public void processingInstruction(String target, String data) {
-		if (!_nodeStk.isEmpty()) {
-			Node last = _nodeStk.peek();
-			ProcessingInstruction pi = document.createProcessingInstruction(target, data);
-			if (pi != null) {
-				last.appendChild(pi);
+		@Override
+		public void endDocument() {
+			if (!_nodeStk.isEmpty()) {
+				_nodeStk.pop();
 			}
 		}
-	}
 
-	/**
-	 * This class is only used internally so this method should never be called.
-	 */
-	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length) {
-	}
+		@Override
+		public void startElement(String namespace, String localName, String qName, Attributes attrs) {
+			Element tmp = document.createElementNS(namespace, qName);
 
-	/**
-	 * This class is only used internally so this method should never be called.
-	 */
-	@Override
-	public void setDocumentLocator(Locator locator) {
-		this.locator = locator;
-	}
+			// Add attributes to element
+			int attrsCount = attrs.getLength();
+			for (int i = 0; i < attrsCount; i++) {
+				if (attrs.getLocalName(i).startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
+					tmp.setAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, attrs.getQName(i), attrs.getValue(i));
+				} else if (attrs.getLocalName(i) == null) {
+					tmp.setAttribute(attrs.getQName(i), attrs.getValue(i));
+				} else {
+					tmp.setAttributeNS(attrs.getURI(i), attrs.getQName(i), attrs.getValue(i));
+				}
+			}
 
-	/**
-	 * This class is only used internally so this method should never be called.
-	 */
-	@Override
-	public void skippedEntity(String name) {
-	}
+			// Append this new node into current stack node
+			if (!_nodeStk.isEmpty()) {
+				Node last = _nodeStk.peek();
+				last.appendChild(tmp);
+			}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * Lexical Handler method to create comment node in DOM tree.
-	 */
-	@Override
-	public void comment(char[] ch, int start, int length) {
-		if (!_nodeStk.isEmpty()) {
-			Node last = _nodeStk.peek();
-			Comment comment = document.createComment(new String(ch, start, length));
-			if (comment != null) {
-				last.appendChild(comment);
+			markLastGoodPosition();
+
+			// Push this node into stack
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"XMLFromBinDataPreParser.found.element", qName);
+			_nodeStk.push(tmp);
+		}
+
+		@Override
+		public void endElement(String namespace, String localName, String qName) {
+			if (!_nodeStk.isEmpty()) {
+				_nodeStk.pop();
+			}
+			markLastGoodPosition();
+		}
+
+		private void markLastGoodPosition() {
+			absoluteLastGoodPosition = bPos + locator.getColumnNumber();
+
+			if (lastSkip != null && startSkip != null) {
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"XMLFromBinDataPreParser.skipping", startSkip, lastSkip);
+			}
+			startSkip = null;
+			lastSkip = null;
+		}
+
+		/**
+		 * Adds processing instruction node to DOM.
+		 */
+		@Override
+		public void processingInstruction(String target, String data) {
+			if (!_nodeStk.isEmpty()) {
+				Node last = _nodeStk.peek();
+				ProcessingInstruction pi = document.createProcessingInstruction(target, data);
+				if (pi != null) {
+					last.appendChild(pi);
+				}
 			}
 		}
-	}
 
-	@Override
-	public void warning(SAXParseException e) throws SAXException {
-		error(e);
-	}
+		/**
+		 * This class is only used internally so this method should never be called.
+		 */
+		@Override
+		public void ignorableWhitespace(char[] ch, int start, int length) {
+		}
 
-	@Override
-	public void error(SAXParseException e) throws SAXException {
-		errorPosition.line = e.getLineNumber();
-		errorPosition.column = e.getColumnNumber();
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"XMLFromBinDataPreParser.skipping", bPos);
-	}
+		/**
+		 * This class is only used internally so this method should never be called.
+		 */
+		@Override
+		public void setDocumentLocator(Locator locator) {
+			this.locator = locator;
+		}
 
-	@Override
-	public void fatalError(SAXParseException e) throws SAXException {
-		error(e);
-	}
+		/**
+		 * This class is only used internally so this method should never be called.
+		 */
+		@Override
+		public void skippedEntity(String name) {
+		}
 
-	// Lexical Handler methods - not implemented
-	@Override
-	public void startCDATA() {
-	}
+		/**
+		 * {@inheritDoc}
+		 *
+		 * Lexical handler method to create comment node in DOM tree.
+		 */
+		@Override
+		public void comment(char[] ch, int start, int length) {
+			if (!_nodeStk.isEmpty()) {
+				Node last = _nodeStk.peek();
+				Comment comment = document.createComment(new String(ch, start, length));
+				if (comment != null) {
+					last.appendChild(comment);
+				}
+			}
+		}
 
-	@Override
-	public void endCDATA() {
-	}
+		@Override
+		public void warning(SAXParseException e) throws SAXException {
+			error(e);
+		}
 
-	@Override
-	public void startEntity(java.lang.String name) {
-	}
+		@Override
+		public void error(SAXParseException e) throws SAXException {
+			errorPosition.line = e.getLineNumber();
+			errorPosition.column = e.getColumnNumber();
+			if (startSkip == null) {
+				startSkip = bPos;
+			}
+			lastSkip = bPos;
 
-	@Override
-	public void endEntity(String name) {
-	}
+		}
 
-	@Override
-	public void startDTD(String name, String publicId, String systemId) throws SAXException {
-	}
+		@Override
+		public void fatalError(SAXParseException e) throws SAXException {
+			error(e);
+		}
 
-	@Override
-	public void endDTD() {
-	}
+		// Lexical Handler methods - not required.
+		@Override
+		public void startCDATA() {
+		}
 
-	@Override
-	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-	}
+		@Override
+		public void endCDATA() {
+		}
 
-	@Override
-	public void endPrefixMapping(String prefix) {
-	}
+		@Override
+		public void startEntity(java.lang.String name) {
+		}
 
-	private static class Position {
-		@SuppressWarnings("unused")
-		int line;
-		int column;
+		@Override
+		public void endEntity(String name) {
+		}
 
-		public void reset() {
-			this.line = 1;
-			this.column = 1;
+		@Override
+		public void startDTD(String name, String publicId, String systemId) throws SAXException {
+		}
+
+		@Override
+		public void endDTD() {
+		}
+
+		@Override
+		public void startPrefixMapping(String prefix, String uri) throws SAXException {
+		}
+
+		@Override
+		public void endPrefixMapping(String prefix) {
+		}
+
+		private static class Position {
+			@SuppressWarnings("unused")
+			private int line;
+			private int column;
+
+			void reset() {
+				line = 1;
+				column = 1;
+			}
 		}
 	}
 }
