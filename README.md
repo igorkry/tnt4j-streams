@@ -4423,16 +4423,16 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
 For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
 calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
 
-The signature items MUST be specified in the following order:
-* Message Type (`Number`)
-* Message Format (`String`)
-* Message ID (`byte[]` or `String`)
-* Message User (`String`)
-* Message Application Type (`String`)
-* Message Application Name (`String`)
-* Message Date (`String`)
-* Message Time (`String`)
-* Correlator ID (`byte[]` or `String`)
+The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
+* Message Type (**`Number`**)
+* Message Format (**`String`**)
+* Message ID (**`byte[]`** or **`String`**)
+* Message User (**`String`**)
+* Message Application Type (**`String`**)
+* Message Application Name (**`String`**)
+* Message Date (**`String`**)
+* Message Time (**`String`**)
+* Correlator ID (**`byte[]`** or **`String`**)
 
 Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
 
@@ -4568,16 +4568,16 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
 calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
 
-The signature items MUST be specified in the following order:
-* Message Type (`Number`)
-* Message Format (`String`)
-* Message ID (`byte[]` or `String`)
-* Message User (`String`)
-* Message Application Type (`String`)
-* Message Application Name (`String`)
-* Message Date (`String`)
-* Message Time (`String`)
-* Correlator ID (`byte[]` or `String`)
+The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
+* Message Type (**`Number`**)
+* Message Format (**`String`**)
+* Message ID (**`byte[]`** or **`String`**)
+* Message User (**`String`**)
+* Message Application Type (**`String`**)
+* Message Application Name (**`String`**)
+* Message Date (**`String`**)
+* Message Time (**`String`**)
+* Correlator ID (**`byte[]`** or **`String`**)
 
 Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
 

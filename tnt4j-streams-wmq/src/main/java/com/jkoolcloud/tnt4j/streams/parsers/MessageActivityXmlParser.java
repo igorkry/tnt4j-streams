@@ -99,17 +99,18 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * To initiate signature calculation, {@code field} "value type" attribute must be set to
 	 * {@value com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants#VT_SIGNATURE}.
 	 * <p>
-	 * The signature items MUST be specified in the following order:
+	 * The signature items MUST be specified in the following order (meaning of field value is not so important, but
+	 * data types must match):
 	 * <ol>
-	 * <li>Message Type</li>
-	 * <li>Message Format</li>
-	 * <li>Message ID</li>
-	 * <li>Message User</li>
-	 * <li>Message Application Type</li>
-	 * <li>Message Application Name</li>
-	 * <li>Message Date</li>
-	 * <li>Message Time</li>
-	 * <li>Correlator ID</li>
+	 * <li>Message Type - {@link Integer}</li>
+	 * <li>Message Format - {@link String}</li>
+	 * <li>Message ID - {@code byte[]} or {@link String}</li>
+	 * <li>Message User - {@link String}</li>
+	 * <li>Message Application Type - {@link String}</li>
+	 * <li>Message Application Name - {@link String}</li>
+	 * <li>Message Date - {@link String}</li>
+	 * <li>Message Time - {@link String}</li>
+	 * <li>Correlator ID - {@code byte[]} or {@link String}</li>
 	 * </ol>
 	 * <p>
 	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
