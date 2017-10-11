@@ -220,6 +220,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 	}
 
+	/**
+	 * Validates if activity field locators are supported by this parser.
+	 *
+	 * @param field
+	 *            activity field to validate
+	 */
 	protected void validateSupportedLocatorTypes(ActivityField field) {
 	}
 
@@ -882,6 +888,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				preParsers = new ArrayList<>();
 			}
 			preParsers.add((ActivityDataPreParser<?>) refObject);
+		} else {
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.unsupported.reference", getName(),
+					refObject == null ? null : refObject.getClass().getName());
 		}
 	}
 
