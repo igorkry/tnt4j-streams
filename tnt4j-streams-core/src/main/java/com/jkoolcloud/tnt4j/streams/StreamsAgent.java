@@ -106,7 +106,7 @@ public final class StreamsAgent {
 	 */
 	public static void main(String... args) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.main");
+				"StreamsAgent.start.main", pkgVersion());
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile, zookeeperStreamId);
@@ -134,6 +134,11 @@ public final class StreamsAgent {
 		}
 	}
 
+	private static String pkgVersion() {
+		Package sPkg = StreamsAgent.class.getPackage();
+		return sPkg.getImplementationVersion();
+	}
+
 	/**
 	 * Main entry point for running as a API integration.
 	 * <p>
@@ -142,7 +147,7 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI() {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api");
+				"StreamsAgent.start.api", pkgVersion());
 		loadConfigAndRun((Reader) null);
 	}
 
@@ -159,7 +164,7 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api");
+				"StreamsAgent.start.api", pkgVersion());
 		loadConfigAndRun((Reader) null, streamListener, streamTasksListener);
 	}
 
@@ -186,7 +191,7 @@ public final class StreamsAgent {
 	public static void runFromAPI(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api");
+				"StreamsAgent.start.api", pkgVersion());
 		loadConfigAndRun(cfgFileName, streamListener, streamTasksListener);
 	}
 
@@ -213,7 +218,7 @@ public final class StreamsAgent {
 	public static void runFromAPI(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api");
+				"StreamsAgent.start.api", pkgVersion());
 		loadConfigAndRun(cfgFile, streamListener, streamTasksListener);
 	}
 
