@@ -133,6 +133,7 @@
              For most applications, this will be sufficient to be unique -->
 
         <field name="MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+	<field name="CorrelId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>    
 
         <field name="TrackingId" separator="#!#" value-type="signature" required="false">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/>
@@ -314,7 +315,7 @@
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
 
         <!-- these 2 are required if connecting remote or removed for local connection -->
-		<property name="Host" value="localhost"/>
+	<property name="Host" value="localhost"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
@@ -342,11 +343,11 @@
         <property name="QueueManager" value="[QMGR]"/>
 
         <!-- using an application topic, could be channel or connection, change as needed -->
-        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqsput*"/>
+        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqs*"/>
         <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
         
-		<!-- these 2 are required if connecting remote or removed for local connection -->
-		<property name="Host" value="localhost"/>
+	<!-- these 2 are required if connecting remote or removed for local connection -->
+	<property name="Host" value="localhost"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
