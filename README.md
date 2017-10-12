@@ -2490,63 +2490,268 @@ to PCF message and passes it to parser.
 
 #### WMQ Trace Events streaming
 
-This sample shows how to stream activity events received over WMQ as MQ Trace Events.
+This sample shows how to stream activity events received over IBM MQ as MQ Trace Events.   
+
+When configuring mqat.ini application specific stanza or setting the default values for subscriptions, the following values are advised:
+* TraceLevel should be set to MEDIUM or HIGH 
+* ActivityInterval, ActivityCount, SubscriptionDelivery and StopOnGetTraceMsg default values are sufficient in most cases.
+* TraceMessageData set to a value sufficient to capture required data (can be 0 for no payload capture). 
 
 Sample files can be found in `samples/trace-events` directory.
 
 Sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
+<!-- this sample is useful for tracing MQ activity using activity events and requires little or no alteration 
+	 1) Verify Message, Payload and Correlator examples for desired settings
+     2) Set the queue manager(s) to process in the stream section at the end of this file
+	 3) Review other fields as needed 
+	 -->
+	 
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
-
+	
+	<!-- this is a sample imbedded parser to extract a field from the messages based on XML tag 
+	      For this example, you want to extract the item and price from the message
+					<?xml version="1.0" encoding="utf-8"?>
+						<Sample>
+						  <Order>
+							<orderid>A12T67903Z</orderid>
+							<item>Deck of Cards</item>
+							<price>2.50</price>
+							<quantity>3</quantity>
+						   </Order>
+						</Sample>
+						-->
+		  
+	<parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+		<property name="NamespaceAware" value="false"/>
+		<property name="RequireDefault"  value="false"/>
+		
+		<!-- Extract the Order Id, Item Id and Price and include with the data -->
+		<field name="OrderID" locator="/Sample/Order/orderid"  locator-type="Label"/>
+		<field name="ItemID"  locator="/Sample/Order/item"     locator-type="Label"/>
+		<field name="Price"   locator="/Sample/Order/price"    locator-type="Label" datatype="Number" />
+		<field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number" />
+	
+	</parser>
+	
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
+        <property name="RequireDefault" value="false"/>
 
-        <field name="EventType" value="EVENT"/>
+        <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the 
+			  entire content, remove this section.  To capture a portion of the message, use an  
+			  imbedded parser as shown in the example below).  
+			  -->
+        <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
+            <field-transform name="BytesToString" lang="groovy"><![CDATA[
+               $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
+            ]]>
+            </field-transform>
+        </field>
+		
+		<!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
+			  
+		<!--field name="MessageFormats"
+				locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" 
+				datatype="String"  format="string" transparent="true">
+						<parser-ref name="XML_Data_Parser" aggregation="Merge"/>
+		</field-->
 
-        <!-- message fields -->
+        <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
+            The examples of setting the correlator
+            1) Using message id and correlator for applications which use this common MQ pattern
+            2) Using the Connection id to correlate all data from a single MQ connection
+            3) Using message content such as an order or trade ID
+            -->
+
+        <!-- (1) Extract MQ correlation id and message id as correlators, except when hex "0" in CORREL_ID  -->
+        <field name="Correlator">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" required="false">
+                <filter name="CorrelValueFilter">
+                    <value handle="exclude" format="hexBinary">0x000000000000000000000000000000000000000000000000</value>
+                </filter>
+            </field-locator>
+            <!-- * always collect msgid for correlator  -->
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+
+            <!-- (2) uncomment this if you want stitching across the entire application connection.
+                 Note, this correlates across commit boundaries so should not be used for long running applications -->
+            <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+
+            <!-- (3) Content based correlator - use fields from the payload extracted by imbedded parser above -->
+			<!--field-locator locator="OrderID" locator-type="Activity"/-->
+
+        </field>
+
+        <!-- The following fields should be reviewed but default selection should be sufficient in most cases -->
+        <!-- ================================================================================================ -->
+
+        <!-- map MQ API name to a friendly operation name -->
+        <field name="EventName" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label">
+            <field-map source="MQXF_PUT1" target="MQPUT1"/>
+            <field-map source="MQXF_PUT" target="MQPUT"/>
+            <field-map source="MQXF_GET" target="MQGET"/>
+            <field-map source="MQXF_CALLBACK" target="MQCALLBACK"/>
+            <field-map source="MQXF_CONN" target="MQCONN"/>
+            <field-map source="MQXF_CONNX" target="MQCONNX"/>
+            <field-map source="MQXF_DISC" target="MQDISC"/>
+            <field-map source="MQXF_OPEN" target="MQOPEN"/>
+            <field-map source="MQXF_CLOSE" target="MQCLOSE"/>
+            <field-map source="MQXF_BEGIN" target="MQBEGIN"/>
+            <field-map source="MQXF_CMIT" target="MQCOMMIT"/>
+            <field-map source="MQXF_BACK" target="MQBACK"/>
+            <field-map source="MQXF_INQ" target="MQINQ"/>
+            <field-map source="MQXF_CB" target="MQCB"/>
+            <field-map source="" target="OTHER"/>
+        </field>
+
+        <!-- map MQ API name to an operation type -->
+        <field name="EventType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label">
+            <field-map source="MQXF_PUT1" target="SEND"/>
+            <field-map source="MQXF_PUT" target="SEND"/>
+            <field-map source="MQXF_GET" target="RECEIVE"/>
+            <field-map source="MQXF_CALLBACK" target="RECEIVE"/>
+            <field-map source="MQXF_CB" target="RECEIVE"/>
+            <field-map source="MQXF_CONN" target="START"/>
+            <field-map source="MQXF_CONNX" target="START"/>
+            <field-map source="MQXF_DISC" target="END"/>
+            <field-map source="MQXF_OPEN" target="OPEN"/>
+            <field-map source="MQXF_CLOSE" target="CLOSE"/>
+            <field-map source="MQXF_BEGIN" target="START"/>
+            <field-map source="MQXF_CMIT" target="STOP"/>
+            <field-map source="MQXF_BACK" target="STOP"/>
+            <field-map source="MQXF_INQ" target="INQUIRE "/>
+            <field-map source="" target="OTHER"/>
+        </field>
+
+        <!-- *** Use following signature definition for MQ messages ***
+             The signature can be any unique value that will identify the message across systems and is used
+             to identify producers and consumers of a given message.  It is similar to a correlator but uniquely
+             identifies a single message rather than correlating it with other messages related to the flow.
+             This example uses the message type, format and message id plus the date and time the message was put.
+             For most applications, this will be sufficient to be unique -->
+
+        <field name="MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+
+        <field name="TrackingId" separator="#!#" value-type="signature" required="false">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
+
+            <!-- filter out any that don't create tracking ID -->
+            <filter name="TrackingFilter">
+                <value handle="exclude" format="string">1B2M2Y8AsgTpgAmY7PhCfg==</value>
+            </filter>
+        </field>
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
-        <field name="ServerName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
-        <field name="StartTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
-            <field-locator locator="MQCAMO_START_DATE" locator-type="Label"/>
-            <field-locator locator="MQCAMO_START_TIME" locator-type="Label"/>
+        <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
+        <field name="ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
+
+        <field name="DerivedName" value="" transparent="true">
+            <field-transform lang="groovy" name="ResTransform"><![CDATA[
+                ${ResolvedQName} != null
+                    ? ${ResolvedQName}
+                    : (${ObjectName} != null ? ${ObjectName} : ${QMgrName})
+            ]]>
+            </field-transform>
         </field>
-        <field name="EndTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
-            <field-locator locator="MQCAMO_END_DATE" locator-type="Label"/>
-            <field-locator locator="MQCAMO_END_TIME" locator-type="Label"/>
+
+        <field name="ResourceName" formattingPattern="{0}={1}">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label">
+                <field-map source="MQOT_Q" target="QUEUE"/>
+                <field-map source="MQOT_NAMELIST" target="NAMELIST"/>
+                <field-map source="MQOT_PROCESS" target="PROCESS"/>
+                <field-map source="MQOT_STORAGE_CLASS" target="STORAGE_CLASS"/>
+                <field-map source="MQOT_Q_MGR" target="QMGR"/>
+                <field-map source="" target="QMGR"/>
+            </field-locator>
+            <!-- ResourceName identifies the target for events and views such as topology.
+            Using DerivedName will use the resolved queue name when it is available, the application supplied object for other calls and the
+            queue manager when neither is available. Using MQCACF_OBJECT_NAME will use the alias, dynamic or remote queue used by the application. -->
+            <field-locator locator="DerivedName" locator-type="Activity"/>
+            <!--field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/-->
         </field>
-        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
-        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
-        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label"/>
+
+        <!-- general message fields -->
+
+        <field name="HostName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <!-- Also use queue manager and host as 'server'  -->
+        <field name="ServerName" separator=":">
+            <field-locator locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+            <field-locator locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        </field>
+
+        <!-- provide application name without path for tracking -->
+        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label">
+            <field-transform name="fileName" lang="xpath">
+                ts:getFileName($fieldValue)
+            </field-transform>
+        </field>
+
+        <field name="ElapsedTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+               units="Microseconds"/>
+        <!-- also record elapsed time independently as a number only, not time stamp -->
+        <field name="ElapsedTime_us" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+               units="Microseconds"/>
+
+        <!-- time calculations, use highrestime is available (not all calls have it) -->
+        <field name="HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
+               units="Microseconds"/>
+
+        <field name="StartTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+        <field name="EndTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+        <!-- start time is only precise to seconds so use highrestime if available -->
+        <field name="StartTime" value="">
+            <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
+                ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
+            ]]>
+            </field-transform>
+        </field>
+        <field name="EndTime" value="">
+            <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
+                ${HighresTime} != null && ${ElapsedTime} != null
+                    ? ${HighresTime} + ${ElapsedTime}
+                    : (${ElapsedTime} > 0
+                        ? ${EndTimeSec} + ${ElapsedTime}
+                        : ${EndTimeSec} + 1)
+            ]]>
+            </field-transform>
+        </field>
+
+        <!-- activity trace fields -->
+		<field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label" datatype="Number"/>
         <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
-        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
-        <field name="UserId" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label" datatype="Number"/>
+        <field name="UserName" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
         <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
-        <field name="ApiEnv" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="ApiEnvironment" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
         <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
         <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
         <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
-        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
-        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label" datatype="Number"/>
         <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
-        <field name="Correlator" locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
-
-        <!-- activity trace fields -->
-        <field name="EventName" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label"/>
-        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label"/>
+        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label" datatype="Number"/>
         <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
-        <field name="MQTrace_ObjType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
-        <field name="ResourceName" separator="/">
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_MGR" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
-        </field>
-        <field name="MQTrace_ObjQMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
-        <field name="MQTrace_ObjHandle" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
+        <field name="ObjType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
+        <field name="ObjQMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
+
+        <field name="ObjHandle" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
         <field name="CompCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label">
             <field-map source="0" target="SUCCESS"/>
             <field-map source="1" target="WARNING"/>
@@ -2555,66 +2760,100 @@ Sample stream configuration:
             <field-map source="" target="ERROR"/>
         </field>
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
-        <field name="MQTrace_ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_PutOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_CloseOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
-        <field name="MQTrace_ResolvedLocalQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME" locator-type="Label"/>
-        <field name="MQTrace_ResolvedLocalQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
-        <field name="MQTrace_ResolvedType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
-        <field name="MQTrace_DynamicQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
-        <field name="MQTrace_MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label"/>
-        <field name="MQTrace_HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
-               units="Microseconds"/>
-        <field name="MQTrace_BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label"/>
-        <field name="MQTrace_Report" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
-        <field name="MQTrace_MsgType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
-        <field name="MQTrace_Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label"/>
-        <field name="MQTrace_FormatName" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
-        <field name="MQTrace_Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label"/>
-        <field name="MQTrace_Persistence" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
-        <field name="MQTrace_MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
-        <field name="Correlator" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
-        <field name="MQTrace_ReplyToQ" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
-        <field name="MQTrace_ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
-        <field name="MQTrace_CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
-        <field name="MQTrace_Encoding" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
+        <field name="ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
+        <field name="OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
+        <field name="GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
+        <field name="PutOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
+        <field name="CloseOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
+        <field name="ResolvedLocalQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
+        <field name="ResolvedType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
+        <field name="DynamicQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
+        <field name="MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="Report" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
+        <field name="MsgType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
+        <field name="Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label" datatype="Number"/>
+        <field name="FormatName" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+        <field name="Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label" datatype="Number"/>
+        <field name="Persistence" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
+        <field name="ReplyToQ" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
+        <field name="ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
+        <field name="CodedCharSetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
+        <field name="Encoding" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
         <field name="PutTime" separator=" " datatype="DateTime" format="yyyyMMdd HHmmss">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
         </field>
-        <field name="MQTrace_SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label"/>
-        <field name="MQTrace_Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/> <!-- int array -->
-        <field name="MQTrace_ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
-        <field name="MQTrace_QMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCA_Q_MGR_NAME" locator-type="Label"/>
-        <field name="MQTrace_ObjNameRecsPresent" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
-        <field name="MQTrace_CallType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
-        <field name="MQTrace_CtlOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
-        <field name="MQTrace_MQCallbackType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
-        <field name="MQTrace_MQCallbackName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
-        <field name="MQTrace_MQCallbackFunction" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label"
-               datatype="Binary"/>
-        <field name="MQTrace_MQCallbackOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
-        <field name="MQTrace_MQCallbackOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
-        <field name="MQTrace_InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label"/>
-        <field name="MQTrace_UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label"/>
-        <field name="MQTrace_MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label"/>
+        <field name="SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/>
+        <field name="ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
+        <field name="RecsPresent" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
+        <field name="CallType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
+        <field name="CtlOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
+        <field name="MQCallbackType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
+        <field name="MQCallbackName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
+        <field name="MQCallbackFunction" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label" datatype="Binary"/>
+        <field name="MQCallbackOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
+        <field name="MQCallbackOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
+        <field name="InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label" datatype="Number"/>
+
     </parser>
 
-    <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
-        <property name="Host" value="[YOUR_MQ_HOST]"/>
-        <property name="Port" value="[YOUR_MQ_PORT]"/>
-        <property name="QueueManager" value="[YOUR_QM_NAME]"/>
-        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
-        <property name="StripHeaders" value="false"/>
+    <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
+	
+	<!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
 
-        <property name="TraceOperations" value="*"/>
-        <!--<property name="TraceOperations" value="MQXF_*"/>-->
-        <!--<property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>-->
-        <!--<property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>-->
+    <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+        <property name="StripHeaders" value="false"/>
+        <property name="RetryStateCheck" value="true"/>
+
+        <!-- Queue Manager name to which to connect -->
+        <property name="QueueManager" value="[QMGR]"/>
+
+        <!-- using default queue or could be alternate queue -->
+        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+
+        <!-- these 2 are required if connecting remote or removed for local connection -->
+		<property name="Host" value="localhost"/>
+        <property name="Port" value="1414"/>
+
+        <!-- user and password as required by the MQ Queue Manager -->
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
+
+        <!-- these return codes are not typically needed when tracing and excluded -->
+        <property name="ExcludedRC" value="2033|2080|30737"/>
+
+        <!-- Use the following to control which operations are being analyzed.
+            As defined, only operations which process messages are passed. Browse
+            operations are excluded.   -->
+        <property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK)"/>
         <property name="SuppressBrowseGets" value="true"/>
+
+        <parser-ref name="TraceEventsParser"/>
+    </stream>
+
+    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations  -->
+	<stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+        <property name="StripHeaders" value="false"/>
+        <property name="RetryStateCheck" value="true"/>
+
+        <!-- Queue Manager name to which to connect -->
+        <property name="QueueManager" value="[QMGR]"/>
+
+        <!-- using an application topic, could be channel or connection, change as needed -->
+        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqsput*"/>
+        <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
+        
+		<!-- these 2 are required if connecting remote or removed for local connection -->
+		<property name="Host" value="localhost"/>
+        <property name="Port" value="1414"/>
+
+        <!-- user and password as required by the MQ Queue Manager -->
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
@@ -2627,7 +2866,11 @@ be made from it.
 
 `Host` property defines MQ server host name or IP. `Port` property defines MQ server port.
 
-`QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
+`QueueManager` property defines name of queue manager 
+
+`Queue` property defines name of queue to get messages.
+
+`TopicString` property defines specific of generic channel or application to create a subscription without using a queue.
 
 `StripHeaders` property states that MQ message headers shall be preserved.
 
@@ -2643,6 +2886,8 @@ covered by this set will be filtered out from activities stream.
 MQCFGR PCF structures.
 
 `TranslateNumValues` property defines that parser should translate resolved numeric values to corresponding MQ constant names if possible.
+
+`OpenOptions` property defines additional open options to be set, include value="MQSO_WILDCARD_CHAR" when using a generic value for TopicString.
 
 #### Angulartics (AngularJS tracing)
 
