@@ -4107,6 +4107,23 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * `StripHeaders` - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
  * `StreamReconnectDelay` - delay in seconds between queue manager reconnection or failed queue GET iterations. Default value - `15sec`. 
  (Optional)
+ * `OpenOptions` - defines open options value used to access queue or topic. It can define numeric options value or concatenation of MQ 
+ constant names/values delimited by `|` symbol. If options definition starts with `!`, it means that this options set should be used as 
+ complete and passed to Queue Manager without changes. By default these open options are appended to predefined set of: 
+    
+    Predefined set of open options for queue:
+    * MQOO_FAIL_IF_QUIESCING
+    * MQOO_INPUT_AS_Q_DEF
+    * MQOO_SAVE_ALL_CONTEXT
+    * MQOO_INQUIRE
+    
+    Predefined set of open options for topic:
+    * MQSO_FAIL_IF_QUIESCING
+    * MQSO_CREATE
+    * MQSO_MANAGED - if subscription name is empty
+    * MQSO_RESUME - if subscription name is defined
+    
+    (Optional)
 
     sample:
 ```xml
@@ -4118,6 +4135,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="Password" value="someUserPass"/>
     <property name="Channel" value="SYSTEM.DEF.SVRCONN2"/>
     <property name="StripHeaders" value="false"/>
+    <property name="StreamReconnectDelay" value="30"/>
+    <property name="OpenOptions" value="!MQSO_FAIL_IF_QUIESCING|MQSO_CREATE|MQSO_MANAGED|MQSO_WILDCARD_CHAR"/>    
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).

@@ -384,6 +384,10 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 */
 	protected Object resolveMqiStructValue(ActivityFieldDataType fDataType, PCFParameter param, String[] path, int i,
 			PCFContent pcfContent, ActivityContext cData) throws ParseException {
+		if (param == null) {
+			return null;
+		}
+
 		String ctxStructKey = MQ_TMP_CTX_STRUCT_PREF + param.getParameterName();
 		MqiStructure mqiStruct = (MqiStructure) cData.get(ctxStructKey);
 		boolean exception = false;

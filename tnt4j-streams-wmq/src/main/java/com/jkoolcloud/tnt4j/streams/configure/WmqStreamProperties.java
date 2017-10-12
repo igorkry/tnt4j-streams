@@ -58,4 +58,9 @@ public interface WmqStreamProperties extends StreamProperties {
 	 */
 	String PROP_SUPPRESS_BROWSE_GETS = "SuppressBrowseGets"; // NON-NLS
 
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String OPEN_OPTIONS = "OpenOptions"; // NON-NLS
+
 }

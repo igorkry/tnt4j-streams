@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,7 +36,9 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
 
 /**
  * Base class for WebSphere MQ activity stream, where activity data containing {@link MQMessage} is read from the
@@ -62,6 +65,25 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * (Optional)</li>
  * <li>StreamReconnectDelay - delay in seconds between queue manager reconnection or failed queue GET iterations.
  * Default value - {@code 15sec}. (Optional)</li>
+ * <li>OpenOptions - defines open options value used to access queue or topic. It can define numeric options value or
+ * concatenation of MQ constant names/values delimited by {@code '|'} symbol. If options definition starts with
+ * '{@value #FORCE_OPEN_OPTION}', it means that this options set should be used as complete and passed to Queue Manager
+ * without changes. By default these open options are appended to predefined set of: <br>
+ * Predefined set of open options for queue:
+ * <ul>
+ * <li>MQOO_FAIL_IF_QUIESCING</li>
+ * <li>MQOO_INPUT_AS_Q_DEF</li>
+ * <li>MQOO_SAVE_ALL_CONTEXT</li>
+ * <li>MQOO_INQUIRE</li>
+ * </ul>
+ * Predefined set of open options for topic:
+ * <ul>
+ * <li>MQSO_FAIL_IF_QUIESCING</li>
+ * <li>MQSO_CREATE</li>
+ * <li>MQSO_MANAGED - if subscription name is empty</li>
+ * <li>MQSO_RESUME - if subscription name is defined</li>
+ * </ul>
+ * (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -80,6 +102,11 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	 * Delay between queue manager connection retries, in milliseconds.
 	 */
 	protected static final long QMGR_CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(15);
+
+	/**
+	 * Options definition sting token identifying these options as complete set to be set.
+	 */
+	protected static final String FORCE_OPEN_OPTION = "!"; // NON-NLS
 
 	/**
 	 * Represents Queue Manager connected to
@@ -118,6 +145,9 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 
 	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
 
+	private int openOptions;
+	private boolean forceOpenOptions;
+
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
@@ -150,9 +180,67 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					userPass = value;
 				} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
 					reconnectDelay = Integer.valueOf(value);
+				} else if (WmqStreamProperties.OPEN_OPTIONS.equalsIgnoreCase(name)) {
+					openOptions = initOpenOptions(value);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Initiates open options value used to access queue or topic. <tt>optionsStr</tt> can define numeric options value
+	 * or concatenation of MQ constant names/values delimited by {@code '|'} symbol. If <tt>optionsStr</tt> starts with
+	 * '{@value #FORCE_OPEN_OPTION}', it means that this options set should be used as complete and passed to Queue
+	 * Manager without changes. By default these open options are appended to predefined set of:
+	 * <p>
+	 * Predefined set of open options for queue:
+	 * <ul>
+	 * <li>MQOO_FAIL_IF_QUIESCING</li>
+	 * <li>MQOO_INPUT_AS_Q_DEF</li>
+	 * <li>MQOO_SAVE_ALL_CONTEXT</li>
+	 * <li>MQOO_INQUIRE</li>
+	 * </ul>
+	 * <p>
+	 * Predefined set of open options for topic:
+	 * <ul>
+	 * <li>MQSO_FAIL_IF_QUIESCING</li>
+	 * <li>MQSO_CREATE</li>
+	 * <li>MQSO_MANAGED - if subscription name is empty</li>
+	 * <li>MQSO_RESUME - if subscription name is defined</li>
+	 * </ul>
+	 *
+	 * @param optionsStr
+	 *            open options definition string
+	 * @return open options value
+	 *
+	 * @see #connectToQmgr()
+	 */
+	protected int initOpenOptions(String optionsStr) {
+		int openOptions = 0;
+
+		if (StringUtils.isEmpty(optionsStr)) {
+			return openOptions;
+		}
+
+		forceOpenOptions = optionsStr.startsWith(FORCE_OPEN_OPTION);
+		if (forceOpenOptions) {
+			optionsStr = optionsStr.substring(1);
+		}
+		if (StringUtils.isNumeric(optionsStr)) {
+			openOptions = Integer.parseInt(optionsStr);
+			return openOptions;
+		}
+
+		String[] options = Utils.splitValue(optionsStr);
+		for (String option : options) {
+			try {
+				openOptions |= WmqUtils.getParamId(option);
+			} catch (NoSuchElementException e) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+						"WmqStream.error.option.resolve.failed", option);
+			}
+		}
+		return openOptions;
 	}
 
 	@Override
@@ -192,6 +280,9 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		}
 		if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
 			return reconnectDelay;
+		}
+		if (WmqStreamProperties.OPEN_OPTIONS.equalsIgnoreCase(name)) {
+			return openOptions;
 		}
 
 		return super.getProperty(name);
@@ -284,6 +375,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	 *
 	 * @throws Exception
 	 *             if exception occurs connecting to queue manager or opening required objects
+	 *
+	 * @see #initOpenOptions(String)
 	 */
 	protected void connectToQmgr() throws Exception {
 		qmgr = null;
@@ -309,30 +402,36 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					"WmqStream.connecting.qm", qmgrName, props);
 		}
 		qmgr = new MQQueueManager(qmgrName, props);
-		int openOptions;
 		if (StringUtils.isNotEmpty(topicString) || StringUtils.isNotEmpty(topicName)
 				|| StringUtils.isNotEmpty(subName)) {
-			openOptions = CMQC.MQSO_FAIL_IF_QUIESCING | CMQC.MQSO_CREATE
-					| (StringUtils.isEmpty(subName) ? CMQC.MQSO_MANAGED : CMQC.MQSO_RESUME);
+			if (!forceOpenOptions) {
+				openOptions |= CMQC.MQSO_FAIL_IF_QUIESCING | CMQC.MQSO_CREATE
+						| (StringUtils.isEmpty(subName) ? CMQC.MQSO_MANAGED : CMQC.MQSO_RESUME);
+			}
 			if (StringUtils.isNotEmpty(subName)) {
 				logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"WmqStream.subscribing.to.topic1", topicString, topicName, subName,
-						String.format("%08X", openOptions)); // NON-NLS
+						String.format("%08X", openOptions), MQConstants.decodeOptions(openOptions, "MQSO_.*")); // NON-NLS
 				dest = qmgr.accessTopic(topicString, topicName, openOptions, null, subName);
 			} else {
 				logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-						"WmqStream.subscribing.to.topic2", topicString, topicName, String.format("%08X", openOptions)); // NON-NLS
+						"WmqStream.subscribing.to.topic2", topicString, topicName, String.format("%08X", openOptions), // NON-NLS
+						MQConstants.decodeOptions(openOptions, "MQSO_.*")); // NON-NLS
 				dest = qmgr.accessTopic(topicString, topicName, CMQC.MQTOPIC_OPEN_AS_SUBSCRIPTION, openOptions);
 			}
 		} else {
-			openOptions = CMQC.MQOO_FAIL_IF_QUIESCING | CMQC.MQOO_INPUT_AS_Q_DEF | CMQC.MQOO_SAVE_ALL_CONTEXT
-					| CMQC.MQOO_INQUIRE;
+			if (!forceOpenOptions) {
+				openOptions |= CMQC.MQOO_FAIL_IF_QUIESCING | CMQC.MQOO_INPUT_AS_Q_DEF | CMQC.MQOO_SAVE_ALL_CONTEXT
+						| CMQC.MQOO_INQUIRE;
+			}
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WmqStream.opening.queue", qmgrName, String.format("%08X", openOptions)); // NON-NLS
+					"WmqStream.opening.queue", qmgrName, String.format("%08X", openOptions), // NON-NLS
+					MQConstants.decodeOptions(openOptions, "MQOO_.*")); // NON-NLS
 			dest = qmgr.accessQueue(queueName, openOptions);
 		}
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-				"WmqStream.reading.from", dest.getName().trim(), String.format("%08X", gmo.options)); // NON-NLS
+				"WmqStream.reading.from", dest.getName().trim(), String.format("%08X", gmo.options), // NON-NLS
+				MQConstants.decodeOptions(gmo.options, "MQGMO_.*")); // NON-NLS
 		curFailCount = 0;
 	}
 
