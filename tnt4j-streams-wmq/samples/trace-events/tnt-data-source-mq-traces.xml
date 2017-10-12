@@ -1,26 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- this sample is useful for tracing MQ activity using activity events and should require little or no alteration
-	 1) Verify Message and Correlator for desired settings
+<!-- this sample is useful for tracing MQ activity using activity events and requires little or no alteration 
+	 1) Verify Message, Payload and Correlator examples for desired settings
      2) Set the queue manager(s) to process in the stream section at the end of this file
-	 3) Review other fields as needed
+	 3) Review other fields as needed 
 	 -->
-
+	 
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
-
+	
+	<!-- this is a sample imbedded parser to extract a field from the messages based on XML tag 
+	      For this example, you want to extract the item and price from the message
+					<?xml version="1.0" encoding="utf-8"?>
+						<Sample>
+						  <Order>
+							<orderid>A12T67903Z</orderid>
+							<item>Deck of Cards</item>
+							<price>2.50</price>
+							<quantity>3</quantity>
+						   </Order>
+						</Sample>
+						-->
+		  
+	<parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+		<property name="NamespaceAware" value="false"/>
+		<property name="RequireDefault"  value="false"/>
+		
+		<!-- Extract the Order Id, Item Id and Price and include with the data -->
+		<field name="OrderID" locator="/Sample/Order/orderid"  locator-type="Label"/>
+		<field name="ItemID"  locator="/Sample/Order/item"     locator-type="Label"/>
+		<field name="Price"   locator="/Sample/Order/price"    locator-type="Label" datatype="Number" />
+		<field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number" />
+	
+	</parser>
+	
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
         <property name="RequireDefault" value="false"/>
 
-        <!--  Include the entire message data as a UTF-8 String, remove to not capture content or
-              use an imbedded parser to capture some of the content (see documentation) -->
+        <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the 
+			  entire content, remove this section.  To capture a portion of the message, use an  
+			  imbedded parser as shown in the example below).  
+			  -->
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="BytesToString" lang="groovy"><![CDATA[
                $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
             ]]>
             </field-transform>
         </field>
+		
+		<!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
+			  
+		<!--field name="MessageFormats"
+				locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" 
+				datatype="String"  format="string" transparent="true">
+						<parser-ref name="XML_Data_Parser" aggregation="Merge"/>
+		</field-->
 
         <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
 
@@ -45,6 +80,7 @@
             <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
 
             <!-- (3) Content based correlator - use fields from the payload extracted by imbedded parser above -->
+			<!--field-locator locator="OrderID" locator-type="Activity"/-->
 
         </field>
 
@@ -148,8 +184,6 @@
             <field-locator locator="MQCACF_HOST_NAME" locator-type="Label"/>
         </field>
 
-        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
-        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label"/>
         <!-- provide application name without path for tracking -->
         <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label">
             <field-transform name="fileName" lang="xpath">
@@ -194,18 +228,20 @@
         </field>
 
         <!-- activity trace fields -->
+		<field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label" datatype="Number"/>
         <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
-        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label" datatype="Number"/>
         <field name="UserName" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
         <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
         <field name="ApiEnvironment" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
         <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
         <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
         <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
-        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label"/>
-        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label" datatype="Number"/>
         <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
-        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label"/>
+        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label" datatype="Number"/>
         <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
@@ -230,13 +266,13 @@
         <field name="ResolvedLocalQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
         <field name="ResolvedType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
         <field name="DynamicQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
-        <field name="MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label"/>
-        <field name="BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label"/>
+        <field name="MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label" datatype="Number"/>
         <field name="Report" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
         <field name="MsgType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
-        <field name="Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label"/>
+        <field name="Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label" datatype="Number"/>
         <field name="FormatName" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
-        <field name="Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label"/>
+        <field name="Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label" datatype="Number"/>
         <field name="Persistence" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
         <field name="ReplyToQ" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
         <field name="ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
@@ -246,7 +282,7 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
         </field>
-        <field name="SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label"/>
+        <field name="SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label" datatype="Number"/>
         <field name="Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/>
         <field name="ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
         <field name="RecsPresent" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
@@ -257,25 +293,29 @@
         <field name="MQCallbackFunction" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label" datatype="Binary"/>
         <field name="MQCallbackOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
         <field name="MQCallbackOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
-        <field name="InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label"/>
-        <field name="UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label"/>
-        <field name="MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label"/>
+        <field name="InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label" datatype="Number"/>
 
     </parser>
 
     <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
+	
+	<!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
 
     <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="StripHeaders" value="false"/>
         <property name="RetryStateCheck" value="true"/>
 
         <!-- Queue Manager name to which to connect -->
-        <property name="QueueManager" value="QM_A"/>
+        <property name="QueueManager" value="[QMGR]"/>
 
-        <!-- using default queue or could be alternate queue or topic -->
+        <!-- using default queue or could be alternate queue -->
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
 
         <!-- these 2 are required if connecting remote or removed for local connection -->
+		<property name="Host" value="localhost"/>
+        <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
         <!--<property name="UserName" value="[USER_NAME]"/>-->
@@ -286,41 +326,32 @@
 
         <!-- Use the following to control which operations are being analyzed.
             As defined, only operations which process messages are passed. Browse
-            operations are excluded. You could use "*" to select all operations
-            (or add additional call types)     -->
-        <!-- property name="TraceOperations" value="*"/-->
-        <!-- property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK)"/-->
+            operations are excluded.   -->
+        <property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK)"/>
         <property name="SuppressBrowseGets" value="true"/>
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
 
-    <stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations  -->
+	<stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="StripHeaders" value="false"/>
         <property name="RetryStateCheck" value="true"/>
 
         <!-- Queue Manager name to which to connect -->
-        <property name="QueueManager" value="QM_B"/>
+        <property name="QueueManager" value="[QMGR]"/>
 
-        <!-- using default queue or could be alternate queue or topic -->
-        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/QM_B/ActivityTrace/ApplName/amqsput*"/>
+        <!-- using an application topic, could be channel or connection, change as needed -->
+        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqsput*"/>
         <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
-        <!-- these 2 are required if connecting remote or removed for local connection -->
+        
+		<!-- these 2 are required if connecting remote or removed for local connection -->
+		<property name="Host" value="localhost"/>
+        <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
         <!--<property name="UserName" value="[USER_NAME]"/>-->
         <!--<property name="Password" value="[USER_PASS]"/>-->
-
-        <!-- these return codes are not typically needed when tracing and excluded -->
-        <property name="ExcludedRC" value="2033|2080|30737"/>
-
-        <!-- Use the following to control which operations are being analyzed.
-            As defined, only operations which process messages are passed. Browse
-            operations are excluded. You could use "*" to select all operations
-            (or add additional call types)     -->
-        <!-- property name="TraceOperations" value="*"/-->
-        <property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK)"/>
-        <property name="SuppressBrowseGets" value="true"/>
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
