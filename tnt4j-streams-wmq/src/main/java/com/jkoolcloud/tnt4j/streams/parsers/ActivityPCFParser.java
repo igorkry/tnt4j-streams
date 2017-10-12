@@ -353,6 +353,48 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			case MQConstants.MQIACF_VERSION:
 				val = MQConstants.lookup(val, "MQMD_.*"); // NON-NLS
 				break;
+			case MQConstants.MQIACF_OPEN_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQOO_.*"); // NON-NLS
+				break;
+			// case MQConstants.MQIACF_OPTIONS:
+			// break;
+			// case MQConstants.MQIACF_BROKER_OPTIONS:
+			// break;
+			case MQConstants.MQIACF_REGISTRATION_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQREGO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_PUBLICATION_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQPUBO_.*"); // NON-NLS
+				break;
+			// case MQConstants.MQIACF_REG_REG_OPTIONS:
+			// break;
+			case MQConstants.MQIACF_DELETE_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQDELO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_CONNECT_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_AUTH_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQAUTHOPT_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_SUB_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQSO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_MQCB_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQCBO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_CLOSE_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQCO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_GET_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_PUT_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
+				break;
+			case MQConstants.MQIACF_SUBRQ_OPTIONS:
+				val = MQConstants.decodeOptions((int) val, "MQSRO_.*"); // NON-NLS
+				break;
 			default:
 				break;
 			}
