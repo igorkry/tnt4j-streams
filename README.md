@@ -608,7 +608,7 @@ so you are allowed directly use classes from those packages in script code, e.g.
             StringUtils.substring($fieldValue, 0, 10)
         ]]>
     </field-transform>
-```   
+```
 
 * XPath expression
 ```xml
@@ -786,11 +786,11 @@ Sample streamed values caching configuration:
         <field name="Message" locator="$.message" locator-type="Label"/>
         <field name="Resource" locator="$.resource" locator-type="Label"/>
     </parser>
-    
-    <cache>    
+
+    <cache>
         <property name="MaxSize" value="300"/>
         <property name="ExpireDuration" value="15"/>
-        
+
         <entry id="CachedEventName">
             <key>EventName</key>
             <value>${EventName} in ${Transaction}</value>
@@ -804,7 +804,7 @@ Sample streamed values caching configuration:
     <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/cached-values/event*.json"/>
 
-        <parser-ref name="EventParser"/>        
+        <parser-ref name="EventParser"/>
     </stream>
 
 </tnt-data-source>
@@ -2490,7 +2490,7 @@ to PCF message and passes it to parser.
 
 #### WMQ Trace Events streaming
 
-This sample shows how to stream activity events received over IBM MQ as MQ Trace Events.   
+This sample shows how to stream activity events received over IBM MQ as MQ Trace Events.
 
 When configuring mqat.ini application specific stanza or setting the default values for subscriptions, the following values are advised:
 * TraceLevel should be set to MEDIUM or HIGH 
@@ -2502,63 +2502,62 @@ Sample files can be found in `samples/trace-events` directory.
 Sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<!-- this sample is useful for tracing MQ activity using activity events and requires little or no alteration 
+<!-- this sample is useful for tracing MQ activity using activity events and requires little or no alteration
 	 1) Verify Message, Payload and Correlator examples for desired settings
      2) Set the queue manager(s) to process in the stream section at the end of this file
-	 3) Review other fields as needed 
+	 3) Review other fields as needed
 	 -->
-	 
+
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
-	
-	<!-- this is a sample imbedded parser to extract a field from the messages based on XML tag 
-	      For this example, you want to extract the item and price from the message
-					<?xml version="1.0" encoding="utf-8"?>
-						<Sample>
-						  <Order>
-							<orderid>A12T67903Z</orderid>
-							<item>Deck of Cards</item>
-							<price>2.50</price>
-							<quantity>3</quantity>
-						   </Order>
-						</Sample>
-						-->
-		  
-	<parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
-		<property name="NamespaceAware" value="false"/>
-		<property name="RequireDefault"  value="false"/>
-		
-		<!-- Extract the Order Id, Item Id and Price and include with the data -->
-		<field name="OrderID" locator="/Sample/Order/orderid"  locator-type="Label"/>
-		<field name="ItemID"  locator="/Sample/Order/item"     locator-type="Label"/>
-		<field name="Price"   locator="/Sample/Order/price"    locator-type="Label" datatype="Number" />
-		<field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number" />
-	
-	</parser>
-	
+
+    <!-- this is a sample imbedded parser to extract a field from the messages based on XML tag
+          For this example, you want to extract the item and price from the message
+                    <?xml version="1.0" encoding="utf-8"?>
+                        <Sample>
+                          <Order>
+                            <orderid>A12T67903Z</orderid>
+                            <item>Deck of Cards</item>
+                            <price>2.50</price>
+                            <quantity>3</quantity>
+                           </Order>
+                        </Sample>
+                        -->
+
+    <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- Extract the Order Id, Item Id and Price and include with the data -->
+        <field name="OrderID" locator="/Sample/Order/orderid" locator-type="Label"/>
+        <field name="ItemID" locator="/Sample/Order/item" locator-type="Label"/>
+        <field name="Price" locator="/Sample/Order/price" locator-type="Label" datatype="Number"/>
+        <field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number"/>
+
+    </parser>
+
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
         <property name="RequireDefault" value="false"/>
 
-        <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the 
-			  entire content, remove this section.  To capture a portion of the message, use an  
-			  imbedded parser as shown in the example below).  
+        <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
+			  entire content, remove this section.  To capture a portion of the message, use an
+			  imbedded parser as shown in the example below).
 			  -->
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="BytesToString" lang="groovy"><![CDATA[
                $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
-            ]]>
-            </field-transform>
+            ]]></field-transform>            
         </field>
-		
-		<!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
-			  
-		<!--field name="MessageFormats"
-				locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" 
-				datatype="String"  format="string" transparent="true">
-						<parser-ref name="XML_Data_Parser" aggregation="Merge"/>
-		</field-->
+
+        <!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
+
+        <!--field name="MessageFormats"
+                locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label"
+                datatype="String"  format="string" transparent="true">
+                        <parser-ref name="XML_Data_Parser" aggregation="Merge"/>
+        </field-->
 
         <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
             The examples of setting the correlator
@@ -2582,8 +2581,7 @@ Sample stream configuration:
             <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
 
             <!-- (3) Content based correlator - use fields from the payload extracted by imbedded parser above -->
-			<!--field-locator locator="OrderID" locator-type="Activity"/-->
-
+            <!--field-locator locator="OrderID" locator-type="Activity"/-->
         </field>
 
         <!-- The following fields should be reviewed but default selection should be sufficient in most cases -->
@@ -2635,11 +2633,12 @@ Sample stream configuration:
              For most applications, this will be sufficient to be unique -->
 
         <field name="MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+        <field name="CorrelId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
 
         <field name="TrackingId" separator="#!#" value-type="signature" required="false">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
 
@@ -2657,8 +2656,7 @@ Sample stream configuration:
                 ${ResolvedQName} != null
                     ? ${ResolvedQName}
                     : (${ObjectName} != null ? ${ObjectName} : ${QMgrName})
-            ]]>
-            </field-transform>
+            ]]></field-transform>
         </field>
 
         <field name="ResourceName" formattingPattern="{0}={1}">
@@ -2715,8 +2713,7 @@ Sample stream configuration:
         <field name="StartTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
                 ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
-            ]]>
-            </field-transform>
+            ]]></field-transform>
         </field>
         <field name="EndTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
@@ -2725,12 +2722,11 @@ Sample stream configuration:
                     : (${ElapsedTime} > 0
                         ? ${EndTimeSec} + ${ElapsedTime}
                         : ${EndTimeSec} + 1)
-            ]]>
-            </field-transform>
+            ]]></field-transform>
         </field>
 
         <!-- activity trace fields -->
-		<field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
         <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label" datatype="Number"/>
         <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
         <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label" datatype="Number"/>
@@ -2802,8 +2798,8 @@ Sample stream configuration:
     </parser>
 
     <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
-	
-	<!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
+
+    <!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
 
     <stream name="WmqActivityTraceStream" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="StripHeaders" value="false"/>
@@ -2816,7 +2812,7 @@ Sample stream configuration:
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
 
         <!-- these 2 are required if connecting remote or removed for local connection -->
-		<property name="Host" value="localhost"/>
+        <property name="Host" value="localhost"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
@@ -2836,7 +2832,7 @@ Sample stream configuration:
     </stream>
 
     <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations  -->
-	<stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+    <stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="StripHeaders" value="false"/>
         <property name="RetryStateCheck" value="true"/>
 
@@ -2844,11 +2840,11 @@ Sample stream configuration:
         <property name="QueueManager" value="[QMGR]"/>
 
         <!-- using an application topic, could be channel or connection, change as needed -->
-        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqsput*"/>
+        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqs*"/>
         <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
-        
-		<!-- these 2 are required if connecting remote or removed for local connection -->
-		<property name="Host" value="localhost"/>
+
+        <!-- these 2 are required if connecting remote or removed for local connection -->
+        <property name="Host" value="localhost"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
@@ -2866,7 +2862,7 @@ be made from it.
 
 `Host` property defines MQ server host name or IP. `Port` property defines MQ server port.
 
-`QueueManager` property defines name of queue manager 
+`QueueManager` property defines name of queue manager.
 
 `Queue` property defines name of queue to get messages.
 
@@ -2887,7 +2883,8 @@ MQCFGR PCF structures.
 
 `TranslateNumValues` property defines that parser should translate resolved numeric values to corresponding MQ constant names if possible.
 
-`OpenOptions` property defines additional open options to be set, include value="MQSO_WILDCARD_CHAR" when using a generic value for TopicString.
+`OpenOptions` property defines additional open options to be set, include `value="MQSO_WILDCARD_CHAR"` when using a generic value for 
+`TopicString`.
 
 #### Angulartics (AngularJS tracing)
 
@@ -4355,19 +4352,19 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * `OpenOptions` - defines open options value used to access queue or topic. It can define numeric options value or concatenation of MQ 
  constant names/values delimited by `|` symbol. If options definition starts with `!`, it means that this options set should be used as 
  complete and passed to Queue Manager without changes. By default these open options are appended to predefined set of: 
-    
+
     Predefined set of open options for queue:
     * MQOO_FAIL_IF_QUIESCING
     * MQOO_INPUT_AS_Q_DEF
     * MQOO_SAVE_ALL_CONTEXT
     * MQOO_INQUIRE
-    
+
     Predefined set of open options for topic:
     * MQSO_FAIL_IF_QUIESCING
     * MQSO_CREATE
     * MQSO_MANAGED - if subscription name is empty
     * MQSO_RESUME - if subscription name is defined
-    
+
     (Optional)
 
     sample:
@@ -4381,7 +4378,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="Channel" value="SYSTEM.DEF.SVRCONN2"/>
     <property name="StripHeaders" value="false"/>
     <property name="StreamReconnectDelay" value="30"/>
-    <property name="OpenOptions" value="!MQSO_FAIL_IF_QUIESCING|MQSO_CREATE|MQSO_MANAGED|MQSO_WILDCARD_CHAR"/>    
+    <property name="OpenOptions" value="!MQSO_FAIL_IF_QUIESCING|MQSO_CREATE|MQSO_MANAGED|MQSO_WILDCARD_CHAR"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
