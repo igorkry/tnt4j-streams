@@ -20,6 +20,8 @@ import java.security.MessageDigest;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.MQCFGR;
 import com.ibm.mq.pcf.MQCFIN;
@@ -360,6 +362,12 @@ public class WmqUtils {
 				break;
 			}
 		}
+
+		if (isEmptyItems(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
+				correlId)) {
+			return null;
+		}
+
 		value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
 				correlId);
 		logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -369,5 +377,51 @@ public class WmqUtils {
 				correlId == null ? "null" : new String(correlId));
 
 		return value;
+	}
+
+	private static boolean isEmptyItems(Object... items) {
+		if (items != null) {
+			for (Object item : items) {
+				if (!isEmptyItem(item)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean isEmptyItem(Object obj) {
+		if (obj == null) {
+			return true;
+		}
+		if (obj instanceof String) {
+			return StringUtils.isEmpty((String) obj);
+		}
+		if (obj instanceof byte[]) {
+			return isEmptyId((byte[]) obj);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks whether identifier is empty: is {@code null} or contains only {@code 0} values.
+	 *
+	 * @param id
+	 *            identifier to check
+	 * @return {@code true} if <tt>is</tt> is {@code null} and contains only {@code 0} elements, {@code false} -
+	 *         otherwise
+	 */
+	private static boolean isEmptyId(byte[] id) {
+		if (id != null) {
+			for (byte b : id) {
+				if (b != 0) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
