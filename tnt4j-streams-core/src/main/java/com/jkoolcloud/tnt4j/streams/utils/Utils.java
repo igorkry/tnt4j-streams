@@ -362,7 +362,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *             if there was a problem reading from the Reader
 	 * @throws com.google.gson.JsonIOException
 	 *             if json is not a valid representation for an object of type
-	 * 
+	 *
 	 * @see com.google.gson.Gson#fromJson(String, Class)
 	 * @see com.google.gson.Gson#fromJson(java.io.Reader, Class)
 	 */
@@ -662,7 +662,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Reads all text availalbe to read from defined <tt>reader</tt>.
-	 * 
+	 *
 	 * @param reader
 	 *            reader to use for reading
 	 * @return tests string raed from <tt>reader</tt>
@@ -1720,5 +1720,81 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static String getVarName(String varPlh) {
 		return StringUtils.isEmpty(varPlh) ? varPlh
 				: varPlh.substring(VAR_EXP_START_TOKEN.length(), varPlh.length() - VAR_EXP_END_TOKEN.length());
+	}
+
+	/**
+	 * Checks if <tt>array</tt> and all its elements are empty.
+	 *
+	 * @param array
+	 *            array instance to check
+	 * @return {@code true} if <tt>array</tt> is empty or all its elements are empty, {@code false} - otherwise
+	 *
+	 * @see #isEmpty(Object)
+	 */
+	public static boolean isEmptyContent(Object[] array) {
+		if (ArrayUtils.isEmpty(array)) {
+			return true;
+		}
+
+		for (Object ao : array) {
+			if (!isEmpty(ao)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if <tt>collection</tt> and all its elements are empty.
+	 *
+	 * @param collection
+	 *            collection instance to check
+	 * @return {@code true} if <tt>collection</tt> is empty or all its elements are empty, {@code false} - otherwise
+	 *
+	 * @see #isEmpty(Object)
+	 */
+	public static boolean isEmptyContent(Collection<?> collection) {
+		if (CollectionUtils.isEmpty(collection)) {
+			return true;
+		}
+
+		for (Object co : collection) {
+			if (!isEmpty(co)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if <tt>obj</tt> is empty considering when it is:
+	 * <ul>
+	 * <li>{@link String} - is {@code null} or equal to {@code ""}</li>
+	 * <li>{@code Array} - is {@code null} or length is {@code 0}</li>
+	 * <li>{@link Collection} - is {@code null} or length is {@code 0}</li>
+	 * <li>{@link Object} - is {@code null}</li>
+	 * </ul>
+	 *
+	 * @param obj
+	 *            object to check
+	 * @return {@code true} if <tt>obj</tt> is empty, {@code false} - otherwise
+	 */
+	public static boolean isEmpty(Object obj) {
+		if (obj == null) {
+			return true;
+		}
+		if (obj instanceof String) {
+			return StringUtils.isEmpty((String) obj);
+		}
+		if (isArray(obj)) {
+			return ArrayUtils.getLength(obj) > 0;
+		}
+		if (obj instanceof Collection) {
+			return CollectionUtils.isEmpty((Collection<?>) obj);
+		}
+
+		return false;
 	}
 }

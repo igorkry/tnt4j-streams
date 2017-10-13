@@ -293,7 +293,8 @@ public class WmqUtils {
 	 *            signature delimiter
 	 * @param logger
 	 *            logger to log result trace messages
-	 * @return unique message signature
+	 * @return unique message signature, or {@code null} if <tt>value</tt> contained signature calculation items are
+	 *         empty
 	 *
 	 * @see #computeSignature(MessageType, String, byte[], String, String, String, String, String, byte[])
 	 */
@@ -307,63 +308,65 @@ public class WmqUtils {
 				sigItems = sigStr.split(Pattern.quote(sigDelim));
 			}
 		}
-		if (sigItems != null) {
-			MessageType msgType = null;
-			String msgFormat = null;
-			byte[] msgId = null;
-			String msgUser = null;
-			String msgApplType = null;
-			String msgApplName = null;
-			String msgPutDate = null;
-			String msgPutTime = null;
-			byte[] correlId = null;
-			for (int i = 0; i < sigItems.length; i++) {
-				Object item = sigItems[i];
-				if (item == null) {
-					continue;
-				}
-				switch (i) {
-				case 0:
-					msgType = MessageType.valueOf(
-							item instanceof Number ? ((Number) item).intValue() : Integer.parseInt(item.toString()));
-					break;
-				case 1:
-					msgFormat = item.toString();
-					break;
-				case 2:
-					msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-					break;
-				case 3:
-					msgUser = item.toString();
-					break;
-				case 4:
-					msgApplType = item.toString();
-					break;
-				case 5:
-					msgApplName = item.toString();
-					break;
-				case 6:
-					msgPutDate = item.toString();
-					break;
-				case 7:
-					msgPutTime = item.toString();
-					break;
-				case 8:
-					correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-					break;
-				default:
-					break;
-				}
-			}
-			value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate,
-					msgPutTime, correlId);
-			logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"MessageActivityXmlParser.msg.signature", value, msgType, msgFormat,
-					msgId == null ? "null" : Utils.encodeHex(msgId), msgId == null ? "null" : new String(msgId),
-					msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
-					correlId == null ? "null" : Utils.encodeHex(correlId),
-					correlId == null ? "null" : new String(correlId));
+
+		if (Utils.isEmptyContent(sigItems)) {
+			return null;
 		}
+
+		MessageType msgType = null;
+		String msgFormat = null;
+		byte[] msgId = null;
+		String msgUser = null;
+		String msgApplType = null;
+		String msgApplName = null;
+		String msgPutDate = null;
+		String msgPutTime = null;
+		byte[] correlId = null;
+		for (int i = 0; i < sigItems.length; i++) {
+			Object item = sigItems[i];
+			if (item == null) {
+				continue;
+			}
+			switch (i) {
+			case 0:
+				msgType = MessageType.valueOf(
+						item instanceof Number ? ((Number) item).intValue() : Integer.parseInt(item.toString()));
+				break;
+			case 1:
+				msgFormat = item.toString();
+				break;
+			case 2:
+				msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+				break;
+			case 3:
+				msgUser = item.toString();
+				break;
+			case 4:
+				msgApplType = item.toString();
+				break;
+			case 5:
+				msgApplName = item.toString();
+				break;
+			case 6:
+				msgPutDate = item.toString();
+				break;
+			case 7:
+				msgPutTime = item.toString();
+				break;
+			case 8:
+				correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
+				break;
+			default:
+				break;
+			}
+		}
+		value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
+				correlId);
+		logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"MessageActivityXmlParser.msg.signature", value, msgType, msgFormat,
+				msgId == null ? "null" : Utils.encodeHex(msgId), msgId == null ? "null" : new String(msgId), msgUser,
+				msgApplType, msgApplName, msgPutDate, msgPutTime, correlId == null ? "null" : Utils.encodeHex(correlId),
+				correlId == null ? "null" : new String(correlId));
 
 		return value;
 	}
