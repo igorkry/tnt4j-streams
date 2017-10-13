@@ -191,11 +191,9 @@
             </field-transform>
         </field>
 
-        <field name="ElapsedTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
-               units="Microseconds"/>
-        	<!-- also record elapsed time independently as a number only, not time stamp -->
-		<field name="ElapsedTime_us" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds"/>
-
+        <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+               units="Microseconds" transparent="true"/>
+        	
         <!-- time calculations, use highrestime is available (not all calls have it) -->
         <field name="HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
                units="Microseconds"/>
@@ -208,7 +206,17 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
-        <!-- start time is only precise to seconds so use highrestime if available -->
+	 
+        <!-- some events may not have elapsed time, default to 0 -->
+        <field name="ElapsedTime" value="">
+	    <field-transform name="ElapTransform" lang="groovy"><![CDATA[
+               	${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
+            ]]></field-transform> 
+        </field>
+		<!-- also record elapsed time independently as a number only, not time stamp -->
+		<field name="ElapsedTime_us" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds"/>
+
+        <!-- start time and end times are only precise to seconds so use highrestime if available -->    
         <field name="StartTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
                 ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
