@@ -884,8 +884,8 @@ public class ActivityInfo {
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
 				strData = Utils.base64EncodeStr(binData);
-				msgEncoding = "base64"; // NON-NLS
-				msgMimeType = "application/octet-stream"; // NON-NLS
+				msgEncoding = Message.ENCODING_BASE64;
+				msgMimeType = Message.MIME_TYPE_BINARY;
 			} else {
 				strData = Utils.toString(message);
 			}
@@ -1034,8 +1034,8 @@ public class ActivityInfo {
 			if (message instanceof byte[]) {
 				byte[] binData = (byte[]) message;
 				strData = Utils.base64EncodeStr(binData);
-				msgEncoding = "base64"; // NON-NLS
-				msgMimeType = "application/octet-stream"; // NON-NLS
+				msgEncoding = Message.ENCODING_BASE64;
+				msgMimeType = Message.MIME_TYPE_BINARY;
 			} else {
 				strData = Utils.toString(message);
 			}
@@ -1151,12 +1151,13 @@ public class ActivityInfo {
 	 * Computes the unspecified operation times and/or elapsed time based on the specified ones.
 	 */
 	private void determineTimes() {
+		long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
+				: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
+
 		if (elapsedTime < 0L) {
 			if (startTime != null && endTime != null) {
 				elapsedTime = endTime.difference(startTime);
 			} else {
-				long elapsedTimeNano = StringUtils.isEmpty(resourceName) ? TimeTracker.hitAndGet()
-						: ACTIVITY_TIME_TRACKER.hitAndGet(resourceName);
 				elapsedTime = TimestampFormatter.convert(elapsedTimeNano, TimeUnit.NANOSECONDS, TimeUnit.MICROSECONDS);
 			}
 		}
