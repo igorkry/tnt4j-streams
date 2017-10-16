@@ -3,74 +3,74 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-  <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
-  <resource-ref id="MFT_SDS_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_SDS_mappings.json"/>
-	<!-- Example RegEx Parser to capture parts of the field -->
-	<parser name="RegExParser" 	class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
-         <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
-             <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
-             <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
-             <field name="HopNum" locator="4" locator-type="REGroupNum"/>
-  		     <field name="CoId" locator="1" locator-type="REGroupNum"/>
-	</parser>
-		
+    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
+    <resource-ref id="MFT_SDS_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_SDS_mappings.json"/>
+    <!-- Example RegEx Parser to capture parts of the field -->
+    <parser name="RegExParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>
+        <field name="ProcessArea" locator="2" locator-type="REGroupNum"/>
+        <field name="InterfaceID" locator="3" locator-type="REGroupNum"/>
+        <field name="HopNum" locator="4" locator-type="REGroupNum"/>
+        <field name="CoId" locator="1" locator-type="REGroupNum"/>
+    </parser>
+
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="EventType" locator="name(//*[1])" locator-type="Label">
-			<field-map-ref resource="MFT_MAPPINGS.EventType"/>
+            <field-map-ref resource="MFT_MAPPINGS.EventType"/>
         </field>
         <field name="EventName" locator="name(//*[1])" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.EventName"/>
         </field>
-	
-	<!-- Map Custom fields using filed map reference -->
-		<field name="SourceSystemName" locator="/transaction/sourceAgent/@agent" locator-type="Label">
+
+        <!-- Map Custom fields using filed map reference -->
+        <field name="SourceSystemName" locator="/transaction/sourceAgent/@agent" locator-type="Label">
             <field-map-ref resource="MFT_SDS_MAPPINGS.SourceSystemName"/>
         </field>
         <field name="DestinationSystemName" locator="/transaction/destinationAgent/@agent" locator-type="Label">
             <field-map-ref resource="MFT_SDS_MAPPINGS.DestinationSystemName"/>
         </field>
-		
+
         <field name="Direction" locator="name(//*[1])" locator-type="Label" transparent="true"/>
-	
-	<!-- correlation ID asssembly -->
-		<field name="Correlator2" separator="" transparent="true">
+
+        <!-- correlation ID assembly -->
+        <field name="Correlator2" separator="" transparent="true">
             <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
             <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
         </field>
-		<field name="Correlator" datatype="String" format="string" separator=".">
-			<field-locator locator="//*/checksum" locator-type="Label" required="false"/>
-			<field-locator locator="Correlator2" locator-type="Activity" required="false"/>
+        <field name="Correlator" datatype="String" format="string" separator=".">
+            <field-locator locator="//*/checksum" locator-type="Label" required="false"/>
+            <field-locator locator="Correlator2" locator-type="Activity" required="false"/>
             <field-locator locator="/transaction/@ID" locator-type="Label"/>
-		</field>	
-		
+        </field>
+
         <field name="ResourceName" formattingPattern="{0}={1};Agent={2}">
             <!--resolves FILE or QUEUE-->
             <field-locator locator="name(//*/*)" locator-type="Label">
                 <field-map source="file" target="FILE"/>
                 <field-map source="queue" target="QUEUE"/>
-            </field-locator>			
-        <!--resolves file or queue name -->
-		
-    <!-- Example to retrieve file name from provided file path using TNT4J-Streams 	
-		 predefined functions : 'ts:getFileName' & 'ts:getObjectName'. 
-		 Extracts only file & queue name --> 
-	    <!-- <field-locator locator="ts:getFileName(/${Direction}/file)" 	
-			locator-type="Label" required="false"/>
+            </field-locator>
+            <!--resolves file or queue name -->
+
+            <!-- Example to retrieve file name from provided file path using TNT4J-Streams
+                 predefined functions : 'ts:getFileName' & 'ts:getObjectName'.
+                 Extracts only file & queue name -->
+            <!-- <field-locator locator="ts:getFileName(/${Direction}/file)"
+                locator-type="Label" required="false"/>
+                <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
+             -->
+            <!-- to extract file name & file path and queue name only -->
+            <field-locator locator="/${Direction}/file" locator-type="Label" required="false"/>
             <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>
-	     -->
-	    <!-- to extract file name & file path and queue name only --> 
-			<field-locator locator="/${Direction}/file" locator-type="Label" required="false"/>
-            <field-locator locator="ts:getObjectName(/${Direction}/queue)" locator-type="Label" required="false"/>    
-	<!-- agent-->
+            <!-- agent-->
             <field-locator locator="/transaction/${Direction}Agent/@agent" locator-type="Label" required="false"/>
         </field>
 
         <field name="TrackingId" value-type="signature">
-			<field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
+            <field-locator locator="ts:getFileName(/${Direction}/file)" locator-type="Label" required="false"/>
             <field-locator locator="/${Direction}/queue/@messageId" locator-type="Label" required="false"/>
-		</field>
-	
-	    <field name="Size" locator="//*/file/@size" locator-type="Label" required="false"/>
+        </field>
+
+        <field name="Size" locator="//*/file/@size" locator-type="Label" required="false"/>
         <field name="LastModified" locator="//*/file/@last-modified" locator-type="Label" required="false"/>
         <field name="Checksum" locator="//*/checksum" locator-type="Label" required="false"/>
         <field name="ChecksumMethod" locator="//*/checksum/@method" locator-type="Label" required="false"/>
@@ -102,38 +102,42 @@
         <field name="Severity" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
             <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
         </field>
-        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/> 
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" separator="">
             <field-locator locator="/transaction/transferSet/item/status/supplement" locator-type="Label" required="false"/>
         </field>
         <field name="ResourceMgr" locator="/transaction/sourceAgent/@QMgr" locator-type="Label"/>
         <field name="ResMgrType" value="MESSAGING_SERVER"/>
-	<!-- Example of mapping custom fields -->
+        <!-- Example of mapping custom fields -->
         <field name="Source_Filename" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
-        <field name="Destiation_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
+        <field name="Destination_Filename" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
         <field name="Source_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/source/queue, 'FULL')"
                locator-type="Label"/>
         <field name="Destination_Queuename" locator="ts:getObjectName(/transaction/transferSet/item/destination/queue, 'FULL')"
                locator-type="Label"/>
 
-	<!-- Example of mapping custom fields -->
-		<field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
+        <!-- Example of mapping custom fields -->
+        <field name="MFT_SRC_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/file)" locator-type="Label"/>
         <field name="MFT_DST_FILE_NAME" locator="ts:getFileName(/transaction/transferSet/item/destination/file)" locator-type="Label"/>
         <field name="MFT_SRC_QUEUE_NAME" locator="ts:getFileName(/transaction/transferSet/item/source/queue)" locator-type="Label"/>
         <field name="MFT_DST_QUEUE_NAME" locator="ts:getFileName(transaction/transferSet/item/destination/queue)" locator-type="Label"/>
         <field name="MFT_SOURCE_AGNT" locator="/transaction/sourceAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
-		
-	<!-- Example of using 'Merge' attribute in stacked parser. This attribute defines method of resolved activity data aggregation into parent activity.  
-			'Merge' attribute - resolved activity entity fields are merged into parent activity. NOTE: Parent activity entity will contain all fields processed by all stacked parsers. This is default value when attribute aggregation definition is missing in configuration.-->
-		<field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false"> 
-			<parser-ref name="RegExParser" aggregation="Merge"/>
-		</field>
-		
-	<!-- Example of using 'Join' attribute in stacked parser.
-			'Join' - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity having collection of child activities resolved by stacked parsers.
-			For a Join type aggregation there is related stream output parameter TurnOutActivityChildren -->
+
+        <!-- Example of using 'Merge' attribute in stacked parser. This attribute defines method of resolved activity data aggregation into
+        parent activity.
+                'Merge' attribute - resolved activity entity fields are merged into parent activity. NOTE: Parent activity entity will
+                contain all fields processed by all stacked parsers. This is default value when attribute aggregation definition is missing
+                in configuration.-->
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="RegExParser" aggregation="Merge"/>
+        </field>
+
+        <!-- Example of using 'Join' attribute in stacked parser.
+                'Join' - resolved activity entities are collected as children of parent activity. As a result there will be one parent
+                activity entity having collection of child activities resolved by stacked parsers.
+                For a Join type aggregation there is related stream output parameter TurnOutActivityChildren -->
         <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
             <parser-ref name="TransferSetParser" aggregation="Join"/>
         </embedded-activity>
@@ -142,9 +146,9 @@
     <parser name="StartedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="RequireDefault" value="true"/>
-        
+
         <field name="EventType" value="EVENT"/>
-		<field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>			
+        <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Filter" locator="/transaction/action/text()[. = 'started']" locator-type="Label" required="true"/>
         <field name="EventName" value="Started"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
@@ -159,14 +163,13 @@
         <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
         <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
-		<field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false"> 
-			<parser-ref name="RegExParser" aggregation="Merge"/>
-		</field> 
-
-	<field name="TrackingId" value-type="signature">
-                <field-locator locator="/transaction/@ID" locator-type="Label"/>
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="RegExParser" aggregation="Merge"/>
         </field>
 
+        <field name="TrackingId" value-type="signature">
+            <field-locator locator="/transaction/@ID" locator-type="Label"/>
+        </field>
     </parser>
 
     <parser name="CompletedEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
@@ -174,14 +177,14 @@
         <property name="RequireDefault" value="true"/>
 
         <field name="EventType" value="END"/>
-	
-	<field name="TrackingId" value-type="signature">
-                <field-locator locator="/transaction/@ID" locator-type="Label"/>
-        </field>	
-		
-    <!-- Correlator will be set from TrackingId.
-		 UnComment if Correlator is different from TrackingId --> 
-	<!--	<field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/> -->
+
+        <field name="TrackingId" value-type="signature">
+            <field-locator locator="/transaction/@ID" locator-type="Label"/>
+        </field>
+
+        <!-- Correlator will be set from TrackingId.
+             UnComment if Correlator is different from TrackingId -->
+        <!--	<field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/> -->
         <field name="Filter" locator="/transaction/action/text()[. = 'completed']" locator-type="Label" required="true"/>
         <field name="EventName" value="completed"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
@@ -213,37 +216,37 @@
         <field name="Exception" separator="">
             <field-locator locator="/transaction/status/supplement" locator-type="Label" required="false"/>
         </field>
-		<field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false"> 
-			<parser-ref name="RegExParser" aggregation="Merge"/>
-		</field> 
+        <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
+            <parser-ref name="RegExParser" aggregation="Merge"/>
+        </field>
     </parser>
 
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="Host" value="[HOST]"/>
+        <property name="Port" value="1414"/>
+        <property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
+        <property name="QueueManager" value="[QMGR]"/>
+        <property name="Queue" value="FTE.TRANSFER.LOG"/>
+        <!-- TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging data from both
+        parent and child entity fields. Default value - false. (Optional) -->
+        <property name="TurnOutActivityChildren" value="true"/>
+        <parser-ref name="CompletedEventParser"/>
+        <parser-ref name="StartedEventParser"/>
+        <parser-ref name="ProgressEventParser"/>
 
-	<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
-	        <property name="Host" value="[HOST]"/>
-        	<property name="Port" value="1414"/>
-	        <property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
-        	<property name="QueueManager" value="[QMGR]"/>
-	        <property name="Queue" value="FTE.TRANSFER.LOG"/>
-	<!-- TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging data from both parent and child entity fields. Default value - false. (Optional) -->
-         	<property name="TurnOutActivityChildren" value="true"/>
-			<parser-ref name="CompletedEventParser"/>
-			<parser-ref name="StartedEventParser"/>
-			<parser-ref name="ProgressEventParser"/>  
-			
-	<!-- Example to enable executor service to process activities data items 
-		 asynchronously or not. Default value for boolean properties is "false".
-		 Must set "UseExecutors" to "true" for Executors dependent properties to take effect -->
-			<property name="UseExecutors" value="true"/>
-		<!-- defines executor service thread pool size. Default value - 4. -->
-			<prperty name="ExecutorThreadsQuantity" value="10"/>
-		<!-- time to wait (in seconds) for a executor service to terminate. Default	value
-		 - 20sec.-->
-			<property name="ExecutorsTerminationTimeout" value="20"/>
-		<!-- identifies whether executor service should use bounded tasks queue model. -->
-			<property name="ExecutorsBoundedModel" value="true"/>
-		<!-- time to wait (in seconds) for a task to be inserted into bounded queue if max.
-		 queue size is reached. Default value - 20sec -->
-			<property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
-	</stream>
+        <!-- Example to enable executor service to process activities data items
+             asynchronously or not. Default value for boolean properties is "false".
+             Must set "UseExecutors" to "true" for Executors dependent properties to take effect -->
+        <property name="UseExecutors" value="true"/>
+        <!-- defines executor service thread pool size. Default value - 4. -->
+        <property name="ExecutorThreadsQuantity" value="10"/>
+        <!-- time to wait (in seconds) for a executor service to terminate. Default	value
+         - 20sec.-->
+        <property name="ExecutorsTerminationTimeout" value="20"/>
+        <!-- identifies whether executor service should use bounded tasks queue model. -->
+        <property name="ExecutorsBoundedModel" value="true"/>
+        <!-- time to wait (in seconds) for a task to be inserted into bounded queue if max.
+         queue size is reached. Default value - 20sec -->
+        <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
+    </stream>
 </tnt-data-source>
