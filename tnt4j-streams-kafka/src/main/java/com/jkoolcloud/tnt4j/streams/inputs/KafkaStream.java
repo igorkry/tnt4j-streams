@@ -48,8 +48,7 @@ import kafka.consumer.ConsumerTimeoutException;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.server.KafkaConfig;
-import kafka.server.KafkaServer;
-import kafka.utils.SystemTime$;
+import kafka.server.KafkaServerStartable;
 
 /**
  * Implements a Kafka topics transmitted activity stream, where each message body is assumed to represent a single
@@ -129,7 +128,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private ServerCnxnFactory zkCnxnFactory;
 	private FileTxnSnapLog zLog;
 	private boolean startZooKeeper = false;
-	private KafkaServer server;
+	private KafkaServerStartable server;
 	private boolean startServer = false;
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
@@ -325,7 +324,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 					"KafkaStream.server.starting");
 
 			Properties srvProp = getServerProperties(getScopeProps(PROP_SCOPE_SERVER));
-			server = new KafkaServer(new KafkaConfig(srvProp), SystemTime$.MODULE$);
+			server = new KafkaServerStartable(new KafkaConfig(srvProp));
 			server.startup();
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
