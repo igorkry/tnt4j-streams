@@ -254,11 +254,6 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 
 				value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
-				if (value != null) {
-					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityRegExParser.setting.field", field, value);
-				}
-
 				applyFieldValue(field, value, cData);
 			}
 		} catch (Exception e) {

@@ -483,6 +483,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return converted activity info, or {@code null} if activity data is {@code null}
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
+	 *
+	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
 		if (cData == null || cData.getData() == null) {
@@ -560,6 +563,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @see #applyFieldValue(TNTInputStream, ActivityInfo, ActivityField, Object)
 	 */
 	protected void applyFieldValue(ActivityField field, Object value, ActivityContext cData) throws ParseException {
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.applying.field", getName(), field, Utils.toString(value));
+
 		if (field.isDynamic() || (field.isSplitCollection() && Utils.isCollection(value))) {
 			applyDynamicValue(cData, field, value);
 		} else {
@@ -772,10 +778,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					val = cData.getActivity().getFieldValue(locator.getLocator());
 				} else {
 					val = resolveLocatorValue(locator, cData, formattingNeeded);
-					// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
-					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.locator.resolved", locStr, toString(val));
 				}
+
+				// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
+				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.locator.resolved", locStr, toString(val));
 			}
 
 			val = transformValue(val, locator, cData, locStr, ValueTransformation.Phase.RAW);

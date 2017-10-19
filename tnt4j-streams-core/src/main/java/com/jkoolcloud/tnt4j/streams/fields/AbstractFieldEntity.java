@@ -148,13 +148,13 @@ public abstract class AbstractFieldEntity {
 		}
 
 		logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"AbstractFieldEntity.value.before.transformations", this, Utils.toString(fieldValue));
+				"AbstractFieldEntity.value.before.transformations", this, phase, Utils.toString(fieldValue));
 		Object tValue = fieldValue;
 		for (ValueTransformation<Object, Object> vt : transformations) {
 			if (vt.getPhase().equals(phase)) {
 				tValue = vt.transform(tValue, ai);
 				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"AbstractFieldEntity.value.after.transformation", this, vt, Utils.toString(tValue));
+						"AbstractFieldEntity.value.after.transformation", this, vt.getName(), Utils.toString(tValue));
 			}
 		}
 
