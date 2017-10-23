@@ -1160,12 +1160,12 @@ public class ConfigParserHandler extends DefaultHandler {
 				SAXParser parser = parserFactory.newSAXParser();
 				include = true;
 				parser.parse(is, this);
-				include = false;
 			} catch (Exception exc) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ConfigParserHandler.resource.load.error", id, uri), exc);
 			} finally {
 				Utils.close(is);
+				include = false;
 			}
 		} else {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
