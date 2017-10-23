@@ -49,7 +49,7 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
 
     just by applying configuration and without additional coding.
 
-* Redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator. 
+* Redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator.
 
 Importing TNT4J-Streams project into IDE
 ======================================
@@ -247,7 +247,7 @@ sample:
 ```
 
 **NOTE:** `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 
-value to `EVENT`. 
+value to `EVENT`.
 
 **NOTE:** Custom fields values can be found as activity event properties:
 
@@ -311,7 +311,7 @@ is same as:
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
 one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
 
-To define stacked parser You have to define `parser-ref` tag in parser `field` or `embedded-activity` definition. 
+To define stacked parser You have to define `parser-ref` tag in parser `field` or `embedded-activity` definition.
 
 **NOTE:** `embeded-activity` is tag `field` alias, used to define set of locator resolved data transparent to parent activity, but useful 
 to make separate set of related child activities.
@@ -360,9 +360,9 @@ After processing one JMS message TNT4J activity event will contain fields mapped
 Stacked parsers sample configuration tag `<parser-ref>` has attribute `aggregation`. This attribute defines method of resolved activity 
 data aggregation into parent activity. Attribute has two possible values:
 * `Merge` - resolved activity entity fields are merged into parent activity. **NOTE:** Parent activity entity will contain all fields 
-processed by all stacked parsers. This is default value when attribute `aggregation` definition is missing in configuration. 
+processed by all stacked parsers. This is default value when attribute `aggregation` definition is missing in configuration.
 * `Join` - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity 
-having collection of child activities resolved by stacked parsers. 
+having collection of child activities resolved by stacked parsers.
 
 For a `Join` type aggregation there is related stream output parameter `TurnOutActivityChildren`:
 ```xml
@@ -439,7 +439,7 @@ e.g.:
 public class YourTransform implements XPathFunction {
   @Override
    public Object evaluate(List args) {
-    // retrieve expression code provided arguments and make transformation here. 
+    // retrieve expression code provided arguments and make transformation here.
   }
 }
 ...
@@ -497,7 +497,7 @@ Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/it
 </field>
 ```
 When transformation is defined for a field containing multiple locators, field value transformation is applied to all field locators 
-aggregated field value. 
+aggregated field value.
 
 Sample above states that field value combined from locators `loc1` and `loc2` and separated by `,` should be upper cased. For example 
 locator `loc1` resolves value `value1`, locator `loc2` resolves value `vaLue2`. Then field value before transformations is `value1,vaLue2` 
@@ -547,7 +547,7 @@ value becomes as `ACTIVITY=SEND:Transcation_X`.
 **NOTE:** 
 * locator defined transformations are applied before field value transformations.
 * it is possible to define multiple transformations for same stream element (field/locator). In that case transformations are applied 
-sequentially where input of applied transformation is output of previous transformation. 
+sequentially where input of applied transformation is output of previous transformation.
 * it is allowed to combine field and locators transformations within same stream field scope setting transformations for both field and 
 locators independently.
 * when "short form" of field-locator configuration is used, transformation is bound to locator (because field-locator relation is 1:1 and 
@@ -600,7 +600,7 @@ This sample concatenates string `corel_` and resolved value.
  * `com.jkoolcloud.tnt4j.streams.fields`
  * `org.apache.commons.lang3`
  * `org.apache.commons.collections4`
- 
+
 so you are allowed directly use classes from those packages in script code, e.g.:
 ```xml
     <field-transform lang="groovy" name="FieldSubstring10">
@@ -701,7 +701,7 @@ Defining dynamic `field` parameters sample:
 ``` 
 
 Sample shows how how to dynamically define filed `name` and `value-type` parameters referencing values resolved by `FieldNameLoc` and 
-`ValueTypeLoc` locators. 
+`ValueTypeLoc` locators.
 
 There is also field attribute `split` stating that if field/locator resolved value is array/collection, then it should make as many 
 activity fields as there are array/collection items available. In this case if field name is static (or makes same name from dynamically 
@@ -812,7 +812,7 @@ Sample streamed values caching configuration:
 
 Sample configuration defines stream `MultipleEvents` reading data from JSON files using filename mask `event*.json` and referencing parser 
 `EventParser`. Stream defines two cache related properties `MaxSize` and `ExpireDuration`. Definitions of those properties can be found in 
-chapter [Stream cache related parameters](#stream-cache-related-parameters). 
+chapter [Stream cache related parameters](#stream-cache-related-parameters).
 
 Stream definition has `cache` section, defining stored cache entries. Entry key and value can be configured using static values (e.g., 
 `<key>EventName</key>`), dynamic activity value references (e.g., `<value>${SecretValue}</value>`) referencing activity entity field name, 
@@ -1308,7 +1308,7 @@ Sample stream configuration:
 </tnt-data-source>
 ```
 See parsers configuration section ['Apache access log parser'](#apache-access-log-parser) for a default RegEx group names used by 
-`ApacheAccessLogParser`. 
+`ApacheAccessLogParser`.
 
 #### Apache Access log multiple files
 
@@ -2188,7 +2188,7 @@ Sample stream configuration:
 </tnt-data-source>
 ```
 
-Stream configuration in general is mostly same as for ['Kafka client stream'](#kafka-client-stream). 
+Stream configuration in general is mostly same as for ['Kafka client stream'](#kafka-client-stream).
 
 Difference is `StartServer` stream property set to `true` stating that Apache Kafka server should be started by stream and messages consumer 
 has to bind to it. `StartZooKeeper` stream property set to `true` states that ZooKeeper server shall be started on stream startup.
@@ -2196,9 +2196,9 @@ has to bind to it. `StartZooKeeper` stream property set to `true` states that Zo
 Also there is extended set of Apache Kafka configuration properties used by server and consumer. Kafka server dedicated properties starts 
 with prefix `server:` while Kafka consumer properties - with `consumer:`. Properties having no prefix (or prefixes `:`, `common:`) are 
 applied for both - server and consumer. Those properties gets merged with ones defined in properties files. **NOTE:** Stream configuration 
-defined properties has priority over property files defined properties - thus property files defines **default** values used by stream. 
+defined properties has priority over property files defined properties - thus property files defines **default** values used by stream.
 
-Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html). 
+Details on ['Apache Kafka configuration'](https://kafka.apache.org/08/configuration.html).
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -2482,7 +2482,7 @@ to PCF message and passes it to parser.
 
 `QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
 
-`StripHeaders` property states that MQ message headers shall be preserved. 
+`StripHeaders` property states that MQ message headers shall be preserved.
 
 `PCFEventsParser` is of type `ActivityPCFParser` meaning that it will parse PCF messages.
 
@@ -2495,7 +2495,7 @@ This sample shows how to stream activity events received over IBM MQ as MQ Trace
 When configuring mqat.ini application specific stanza or setting the default values for subscriptions, the following values are advised:
 * TraceLevel should be set to MEDIUM or HIGH 
 * ActivityInterval, ActivityCount, SubscriptionDelivery and StopOnGetTraceMsg default values are sufficient in most cases.
-* TraceMessageData set to a value sufficient to capture required data (can be 0 for no payload capture). 
+* TraceMessageData set to a value sufficient to capture required data (can be 0 for no payload capture).
 
 Sample files can be found in `samples/trace-events` directory.
 
@@ -2548,7 +2548,7 @@ Sample stream configuration:
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="BytesToString" lang="groovy"><![CDATA[
                $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
-            ]]></field-transform>            
+            ]]></field-transform>
         </field>
 
         <!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
@@ -2858,7 +2858,7 @@ Sample stream configuration:
 
 Stream configuration states that `WmqActivityTraceStream` referencing `TraceEventsParser` shall be used. Stream takes MQ message from QM, 
 transforms it to PCF message and passes it to parser. If PCF message contains multiple MQ Trace Events, then multiple activity events will 
-be made from it. 
+be made from it.
 
 `Host` property defines MQ server host name or IP. `Port` property defines MQ server port.
 
@@ -3456,7 +3456,7 @@ Stream also additionally sets one TNT4J framework property `event.formatter`. Th
 additional JSON reformatting in default TNT4J data flow.
 
 **NOTE:** you may also re-stream any TNT4J based producer logged trackables from file. Only requirement - trackables must be serialized in JSON 
-format. 
+format.
 
 To do re-streaming from file, change sample configuration by replacing `SampleJMXRoutingStream` stream property `Port` to `FileName` 
 referring file containing logged trackables in JSON format:
@@ -3525,7 +3525,7 @@ workbook sheet row and passes it to parser.
 
 `SampleExcelRowsStream` reads data from `./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx` file.
 
-`RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`. 
+`RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`.
 
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
@@ -3603,7 +3603,7 @@ Sample files can be found in `samples/collectd-json` directory (`tnt4j-streams-c
 **NOTE:** to use this sample `collectd` should be running `Write HTTP` plugin. See [Collectd Wiki](https://collectd.org/wiki/index.php/Plugin:Write_HTTP)
 for details.
 
-Sample report data is available in `stats.json` file. 
+Sample report data is available in `stats.json` file.
 
 Sample stream configuration:
 ```xml
@@ -3680,7 +3680,7 @@ Sample files can be found in `samples/nagios-nagios2json` directory (`tnt4j-stre
 **NOTE:** to use this sample Nagios should be running extension `nagios2json`. See [Sample README](tnt4j-streams-ws/samples/nagios-nagios2json/readme.md)
 for details. `nagios2json` extension works as `CGI` script, but can be handled as simple RESTful service.
 
-Sample report data is available in `report.json` file. 
+Sample report data is available in `report.json` file.
 
 Sample stream configuration:
 ```xml
@@ -3766,7 +3766,7 @@ This sample shows how to stream IBM MQ error log entries as activity events.
 
 Sample files can be found in `samples/ibm-mq-err-log` directory (`tnt4j-streams-core` module).
 
-Sample error log file is available in `AMQERR01.LOG` file. 
+Sample error log file is available in `AMQERR01.LOG` file.
 
 Sample stream configuration:
 ```xml
@@ -3877,7 +3877,7 @@ Configuring TNT4J-Streams
 ======================================
 
 TNT4J-Streams configuration sources may be:
-* configuration files - like `tnt4j.properties`, `log4j.properties`, `tnt-data-source.xml`, etc. 
+* configuration files - like `tnt4j.properties`, `log4j.properties`, `tnt-data-source.xml`, etc.
 * ZooKeeper nodes data - see [ZooKeeper stored configuration](#zookeeper-stored-configuration) chapter for more details.
 
 Configuration data format is same for all sources now.
@@ -3902,8 +3902,7 @@ Filling in configuration template:
 * Replace `<YOUR EVENT SINK CONFIGURATION>` placeholder with actual configuration of streamed activity events sink you wish to use.
 
 **NOTE:** It is **NOT RECOMMENDED** to use `BufferedEventSinkFactory` (or any other asynchronous sinks) with TNT4J-Streams. Streams and 
-sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `Kafka`) consumer uses network communication. 
-
+sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `Kafka`) consumer uses network communication.
 ```properties
 # Stanza used for TNT4J-Streams sources
 {
@@ -4484,7 +4483,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
  * List of custom WS Stream requests configuration properties. Put variable placeholder in request/step configuration (e.g. `${WsEndpoint}`) 
  and put property with same name into stream properties list (e.g. `<property name="WsEndpoint" value="https://192.168.3.3/ws"/>`) to have 
  value mapped into request data. (Optional) 
- 
+
     sample:
 ```xml
     <property name="DisableSSL" value="true"/>
@@ -4499,13 +4498,13 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
  * `SecurityCachedTokenKey` - defines streams cache entry key referring `login` request received session ID token. Default value - `Token`.
  (Optional)
  * `SecurityResponseParserTag` - defines tag value used to map `login` request data and parser used to parse it. Default value - `login`. 
- (Optional) 
+ (Optional)
 
     sample:
 ```xml
     <property name="SecurityCachedTokenKey" value="SessionIDToken"/>
-    <property name="SecurityResponseParserTag" value="loginData"/>    
-``` 
+    <property name="SecurityResponseParserTag" value="loginData"/>
+```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
@@ -4695,7 +4694,7 @@ The signature items MUST be specified in the following order (meaning of field v
 * Message Time (**`String`**)
 * Correlator ID (**`byte[]`** or **`String`**)
 
-Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
+Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`.
 
 Sample of field definition for signature calculation:
 ```xml
@@ -4815,7 +4814,7 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
  field/locator data type is `String` (meaning translated value can be assigned to field). If value of particular field should be left as 
  number (e.g., `ReasonCode`), use field/locator attribute `datatype="Number"`. Default value - `true`. (Optional)
  * `SignatureDelim` - signature fields delimiter. Default value - `,`. (Optional)
- 
+
      sample:
 ```xml
     <property name="TranslateNumValues" value="false"/>
@@ -4840,7 +4839,7 @@ The signature items MUST be specified in the following order (meaning of field v
 * Message Time (**`String`**)
 * Correlator ID (**`byte[]`** or **`String`**)
 
-Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`. 
+Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`.
 
 Sample of field definition for signature calculation:
 ```xml
@@ -4859,7 +4858,7 @@ Sample of field definition for signature calculation:
 
 #### IBM MQ Error log entries parser
 
-This parser has no additional configuration properties. 
+This parser has no additional configuration properties.
 
 Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
@@ -4867,7 +4866,7 @@ Also see [Activity map parser](#activity-map-parser) regarding higher level pars
 
 `TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, supported by 
 stream used parser. Pre-parsers shall implement [`ActivityDataPreParser`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/preparsers/ActivityDataPreParser.java) 
-interface. 
+interface.
 
 Sample stream configuration using pre-parsers:
 ```xml
@@ -4968,11 +4967,17 @@ Sample shows how stream data source configuration imports (over `resource-ref` t
 
 `resource-ref` tag attributes:
 * `id` - is resource identifier and mus be unique. Required.
-* `type` - defines type of imported resource, and currently there is only one available value - `ValuesMap` meaning resource file defines 
-source-target values mapping. Required.
-* `uri` - defines absolute URL or relative path of referenced resource. Required. Supported external resource values mapping definition 
-formats:
-    * JSON
+* `type` - defines type of imported resource. Required. Supported values are:
+    * `ValuesMap` - resource file defines source-target values mapping.
+    * `Parser` - resource file defines external parser configuration to be injected into current `tnt-data-source` configuration.
+* `uri` - defines absolute URL or relative path of referenced resource. Required. See [Referenced resource formats](#referenced-resource-formats).
+* `separator` - defines source and target values delimiter and is applicable to `CSV` and `Properties` formatted resources. Optional.
+
+#### Referenced resource formats
+
+Supported external resource definition formats:
+* `ValuesMap` type resources can be:
+    * `JSON`
     ```json
     {
         "EventType": {
@@ -5006,13 +5011,13 @@ formats:
         }
     }
     ```
-    * CSV
+    * `CSV`
     ```csv
     0,SUCCESS
     40,WARNING
     , ERROR
     ```
-    * Properties 
+    * `Properties`
     ```properties
     0:SUCCESS
     40:WARNING
@@ -5020,8 +5025,7 @@ formats:
     ```
 
     **NOTE:** `JSON` can have multiple mapping definition sets, while `CSV` and `Properties` formats supports only one mapping set definition.
-
-* `separator` - defines source and target values delimiter and is applicable to `CSV` and `Properties` formatted resources. Optional.
+* `Parser` type resources can be only `XML` format defined content.
 
 ## ZooKeeper stored configuration
 
@@ -5059,18 +5063,18 @@ samples.core.single-log=../samples/single-log/tnt-data-source.xml
 ...
 ```
 
-`zk.*` properties defines ZK connection configuration settings. 
+`zk.*` properties defines ZK connection configuration settings.
 
 **NOTE:** `zk.streams.path` property defines root ZK node of streams configuration. All other configuration data nodes will be uploaded 
 under this initial ZK path.
 
 **NOTE:** Do not start you configuration files referencing properties with `zk.`. Such streams configuration reference definition properties
-will be ignored and files referenced by these properties wont be used in upload process. 
+will be ignored and files referenced by these properties wont be used in upload process.
 
-`config.*` and `samples.*` properties defines streams configuration files data mapping to ZK nodes. 
+`config.*` and `samples.*` properties defines streams configuration files data mapping to ZK nodes.
 
 Mapping works this way: property name defines ZK node path (under root configuration node defined using `zk.streams.path` property) and 
-property value is reference to a file containing configuration data to be uploaded to ZK. 
+property value is reference to a file containing configuration data to be uploaded to ZK.
 
 So in upload process property name like `samples.core.single-log` turns to ZK node path `/samples/core/single-log` (full upload ZK path 
 would be `/tnt4j-streams/samples/core/single-log`). You can freely name properties according to your environment organization, but it must 
@@ -5079,7 +5083,7 @@ comply properties naming specification to handle it as property and also must co
 ### Loading ZooKeeper stored configuration data
 
 To make `TNT4J-Streams` load configuration from ZooKeeper use program argument `-z:` referencing `TNT4J-Streams` ZooKeeper configuration 
-file, e.g., `-z:./tnt4j-streams-core/samples/zookeeper-cfg/stream-zk.properties`. 
+file, e.g., `-z:./tnt4j-streams-core/samples/zookeeper-cfg/stream-zk.properties`.
 
 Program argument `-z:` can be used in common with `-f:` argument. Then streams will try to load ZooKeeper stored configuration first and if
 fails - then loads configuration from file referenced by `-f:` argument.
@@ -5123,9 +5127,9 @@ configuration file will be used.
 File consists of ZK configuration registry entities every entity having two properties (except `zk.*` properties set used to configure ZK 
 connection):
 * `cfg.entity.id` + `.zk.path` - defines ZK node path containing entity configuration data. **NOTE:** actual path in ZK ensemble may not 
-necessarily exist and will be created on demand. 
+necessarily exist and will be created on demand.
 * `cfg.entity.id` + `.cfg.file` - defines configuration file path to upload configuration data to ZK node in case ZK node does not exist or 
-is empty. 
+is empty.
 
 Sample streams ZooKeeper configuration registry stile contents:
 ```properties
@@ -5263,7 +5267,7 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
    * to build project and make release assemblies run maven goals `clean package`
    * to build project, make release assemblies and install to local repo run maven goals `clean install`
 
-By default maven will build all modules defined in `tnt4j-streams/pom.xml` file. 
+By default maven will build all modules defined in `tnt4j-streams/pom.xml` file.
 
 If You do not want to build some of optional modules, comment those out like `WMQ` module is. Or You can define maven to build your 
 preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, e.g.:
