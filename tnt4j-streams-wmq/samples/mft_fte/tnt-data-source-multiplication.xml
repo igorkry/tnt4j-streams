@@ -3,8 +3,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_mappings.json"/>
-    <resource-ref id="MFT_SDS_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/mft_fte/mft_SDS_mappings.json"/>
+    <resource-ref id="MFT_MAPPINGS" type="ValuesMap" uri="mft_mappings.json"/>
+    <resource-ref id="MFT_SDS_MAPPINGS" type="ValuesMap" uri="mft_SDS_mappings.json"/>
     <!-- Example RegEx Parser to capture parts of the field -->
     <parser name="RegExParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
         <property name="Pattern" value="(.*)\.(.*)\.(.*)\.(.*)"/>

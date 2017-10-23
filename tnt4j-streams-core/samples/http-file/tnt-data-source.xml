@@ -3,8 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <resource-ref id="AccessLogParserCommon" type="Parser"
-                  uri="./tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserCommon.xml"/>
+    <resource-ref id="AccessLogParserCommon" type="Parser" uri="../apache-access-single-log/AccessLogParserCommon.xml"/>
 
     <parser name="SampleHttpReqParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>

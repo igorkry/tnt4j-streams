@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <resource-ref id="IIB_MAPPINGS" type="ValuesMap" uri="./tnt4j-streams-wmq/samples/message-broker/iib_mappings.json"/>
+    <resource-ref id="IIB_MAPPINGS" type="ValuesMap" uri="iib_mappings.json"/>
     <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="Namespace" value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>

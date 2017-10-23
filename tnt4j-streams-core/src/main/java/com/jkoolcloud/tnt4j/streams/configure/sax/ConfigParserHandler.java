@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.configure.sax;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -1115,17 +1116,9 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(uri, RESOURCE_REF_ELMT, URI_ATTR);
 
 		if (type.equals(ResourceReferenceType.VALUES_MAP.value())) {
-			InputStream is = null;
-			try {
+			try (InputStream is = getURIInputStream(uri)) {
 				if (resourcesMap == null) {
 					resourcesMap = new HashMap<>(5);
-				}
-
-				try {
-					URL url = new URL(uri);
-					is = url.openStream();
-				} catch (MalformedURLException exc) {
-					is = new FileInputStream(uri);
 				}
 
 				if (uri.toLowerCase().endsWith(".json")) { // NON-NLS
@@ -1143,18 +1136,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			} catch (Exception exc) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ConfigParserHandler.resource.load.error", id, uri), exc);
-			} finally {
-				Utils.close(is);
 			}
 		} else if (type.equals(ResourceReferenceType.PARSER.value())) {
-			InputStream is = null;
-			try {
-				try {
-					URL url = new URL(uri);
-					is = url.openStream();
-				} catch (MalformedURLException exc) {
-					is = new FileInputStream(uri);
-				}
+			try (InputStream is = getURIInputStream(uri)) {
 
 				SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 				SAXParser parser = parserFactory.newSAXParser();
@@ -1164,12 +1148,36 @@ public class ConfigParserHandler extends DefaultHandler {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"ConfigParserHandler.resource.load.error", id, uri), exc);
 			} finally {
-				Utils.close(is);
 				include = false;
 			}
 		} else {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.invalidRefType", id, type), currParseLocation);
+		}
+	}
+
+	private static InputStream getURIInputStream(String uri) throws IOException {
+		try {
+			URL url = new URL(uri);
+			return url.openStream();
+		} catch (MalformedURLException exc) {
+			// try use uri as JVM work dir. relative path
+			File file = new File(uri);
+			if (file.exists()) {
+				return new FileInputStream(file);
+			} else {
+				// try use uri as streams cfg. file relative path
+				if (!StringUtils.isEmpty(StreamsConfigSAXParser.cfgFilePath)) {
+					File base = new File(StreamsConfigSAXParser.cfgFilePath);
+					file = Paths.get(base.getParent(), uri).toFile();
+					if (file.exists()) {
+						return new FileInputStream(file);
+					}
+				}
+			}
+
+			throw new IOException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.resource.file.not.found", uri));
 		}
 	}
 

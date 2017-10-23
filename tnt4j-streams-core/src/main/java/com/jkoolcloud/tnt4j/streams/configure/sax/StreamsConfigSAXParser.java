@@ -56,6 +56,11 @@ public final class StreamsConfigSAXParser {
 	private static final String HANDLER_PROP_KEY = "tnt4j.streams.config.sax.handler"; // NON-NLS
 	private static final String HANDLER_EXT_PROP_KEY = "tnt4j.streams.config.sax.handler.ext."; // NON-NLS
 
+	/**
+	 * Path of streams configuration file if it can be resolved from input stream, {@code null} - otherwise.
+	 */
+	static String cfgFilePath;
+
 	private StreamsConfigSAXParser() {
 	}
 
@@ -91,6 +96,8 @@ public final class StreamsConfigSAXParser {
 				}
 			}
 		}
+
+		cfgFilePath = Utils.resolveInputFilePath(config);
 
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();

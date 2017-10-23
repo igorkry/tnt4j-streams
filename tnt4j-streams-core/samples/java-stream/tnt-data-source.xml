@@ -3,9 +3,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <resource-ref id="AccessLogParserCommon" type="Parser"
-                  uri="./tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserCommon.xml"/>
-    <resource-ref id="AccessLogParserExt" type="Parser" uri="./tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserExt.xml"/>
+    <resource-ref id="AccessLogParserCommon" type="Parser" uri="../apache-access-single-log/AccessLogParserCommon.xml"/>
+    <resource-ref id="AccessLogParserExt" type="Parser" uri="../apache-access-single-log/AccessLogParserExt.xml"/>
 
     <java-object name="SampleFileStream" class="java.io.FileInputStream">
         <param name="fileName" value="./tnt4j-streams-core/samples/zip-stream/sample.gz" type="java.lang.String"/>

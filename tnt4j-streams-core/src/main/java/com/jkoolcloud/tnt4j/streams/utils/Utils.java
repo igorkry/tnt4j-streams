@@ -40,6 +40,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.HexDump;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
@@ -1796,5 +1797,95 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Resolves {@link java.io.InputStream} <tt>is</tt> referenced file name path.
+	 * <p>
+	 * Supported {@link java.io.InputStream} types to resolve file path:
+	 * <ul>
+	 * <li>{@link java.io.FileInputStream}</li>
+	 * <li>{@link org.apache.commons.io.input.ReaderInputStream}</li>
+	 * <li>{@link java.io.FilterInputStream}</li>
+	 * </ul>
+	 *
+	 * @param is
+	 *            input stream instance to resolve file path
+	 * @return the path of the <tt>is</tt> referenced file
+	 */
+	public static String resolveInputFilePath(InputStream is) {
+		if (is instanceof FileInputStream) {
+			return resolveInputFilePath((FileInputStream) is);
+		} else if (is instanceof ReaderInputStream) {
+			return resolveInputFilePath((ReaderInputStream) is);
+		} else if (is instanceof FilterInputStream) {
+			return resolveInputFilePath((FilterInputStream) is);
+		}
+
+		return null;
+	}
+
+	private static String resolveInputFilePath(FileInputStream fis) {
+		try {
+			Field pathField = FileInputStream.class.getDeclaredField("path");
+			pathField.setAccessible(true);
+			return (String) pathField.get(fis);
+		} catch (Exception exc) {
+		}
+
+		return null;
+	}
+
+	private static String resolveInputFilePath(ReaderInputStream ris) {
+		try {
+			Field readerField = ReaderInputStream.class.getDeclaredField("reader");
+			readerField.setAccessible(true);
+			Reader reader = (Reader) readerField.get(ris);
+
+			return resolveReaderFilePath(reader);
+		} catch (Exception exc) {
+		}
+
+		return null;
+	}
+
+	private static String resolveInputFilePath(FilterInputStream fis) {
+		try {
+			Field inField = FilterInputStream.class.getDeclaredField("in");
+			inField.setAccessible(true);
+			InputStream is = (InputStream) inField.get(fis);
+
+			return resolveInputFilePath(is);
+		} catch (Exception exc) {
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolves {@link java.io.Reader} <tt>rdr</tt> referenced file name path.
+	 * <p>
+	 * Reader referenced file path can be resolved only if reader lock object is instance of {@link java.io.InputStream}
+	 * and falls under {@link #resolveInputFilePath(java.io.InputStream)} conditions.
+	 *
+	 * @param rdr
+	 *            reader instance to resolve file path
+	 * @return the path of the <tt>rdr</tt> referenced file
+	 *
+	 * @see #resolveInputFilePath(java.io.InputStream)
+	 */
+	public static String resolveReaderFilePath(Reader rdr) {
+		try {
+			Field lockField = Reader.class.getDeclaredField("lock");
+			lockField.setAccessible(true);
+			Object lock = (InputStream) lockField.get(rdr);
+
+			if (lock instanceof InputStream) {
+				return resolveInputFilePath((InputStream) lock);
+			}
+		} catch (Exception exc) {
+		}
+
+		return null;
 	}
 }
