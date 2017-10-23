@@ -117,8 +117,8 @@ public class TNT4JStreamsEventSinkTest {
 		});
 		serverThread.start();
 
-		final Channel channelMock = mock(Channel.class);
-		final Event eventMock = mock(Event.class);
+		Channel channelMock = mock(Channel.class);
+		Event eventMock = mock(Event.class);
 
 		flumeSink.setChannel(channelMock);
 		when(channelMock.take()).thenReturn(eventMock);
@@ -133,15 +133,16 @@ public class TNT4JStreamsEventSinkTest {
 	public void testRB() {
 		String keyModule = "TNT4JStreamsEventSink.streams.starting"; // NON-NLS
 		String keyCore = "ActivityField.field.type.name.empty"; // NON-NLS
+		String brbStr;
 
 		String rbs1 = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME, keyModule);
 		assertNotEquals("Flume resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
 		assertEquals("Flume resource bundle entry found in core", keyModule, rbs1);
-		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
+		brbStr = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in flume", keyCore, rbs1);
+		assertEquals("Core resource bundle entry found in flume", brbStr, rbs1);
 	}
 
 }

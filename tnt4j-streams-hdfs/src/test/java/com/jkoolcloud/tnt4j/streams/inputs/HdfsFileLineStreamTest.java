@@ -85,7 +85,7 @@ public class HdfsFileLineStreamTest {
 
 		TestFileList files = new TestFileList(false);
 
-		final String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix() // NON-NLS
+		String fileName = ("file:////" + files.get(0).getParentFile() + File.separator + files.getPrefix() // NON-NLS
 				+ "*.TST").replace("\\", "/"); // NON-NLS
 
 		Map<String, String> props = new HashMap<>(2);
@@ -93,8 +93,8 @@ public class HdfsFileLineStreamTest {
 		props.put(StreamProperties.PROP_RESTORE_STATE, "false"); // NON-NLS
 
 		when(fs.open(any(Path.class))).thenReturn(new FSDataInputStream(new TestInputStreamStub()));
-		final FileStatus fileStatusMock = mock(FileStatus.class);
-		final FileStatus[] array = new FileStatus[10];
+		FileStatus fileStatusMock = mock(FileStatus.class);
+		FileStatus[] array = new FileStatus[10];
 		Arrays.fill(array, fileStatusMock);
 		when(fs.listStatus(any(Path.class), any(PathFilter.class))).thenReturn(array);
 		when(fileStatusMock.getModificationTime()).thenReturn(1L, 2L, 3L);
@@ -122,23 +122,18 @@ public class HdfsFileLineStreamTest {
 
 	@Test
 	public void testRB() {
-		// String keyModule = "ZorkaConnector.received.null.hello.packet";
+		String keyModule = "HdfsFileLineStream.reading.changes";
 		String keyCore = "ActivityField.field.type.name.empty";
+		String brbStr;
 
-		// String rbs1 =
-		// StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_NAME,
-		// keyModule);
-		// assertNotEquals("Hdfs resource bundle entry not found", rbs1,
-		// keyModule);
-		// rbs1 =
-		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-		// keyModule);
-		// assertEquals("Hdfs resource bundle entry found in core", rbs1,
-		// keyModule);
-		String rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
+		String rbs1 = StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
+		assertNotEquals("Hdfs resource bundle entry not found", rbs1, keyModule);
+		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
+		assertEquals("Hdfs resource bundle entry found in core", rbs1, keyModule);
+		brbStr = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(HdfsStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in hdfs", keyCore, rbs1);
+		assertEquals("Core resource bundle entry found in hdfs", brbStr, rbs1);
 	}
 
 }

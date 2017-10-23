@@ -72,15 +72,16 @@ public class KafkaStreamTest {
 	public void testRB() {
 		String keyModule = "KafkaStream.empty.messages.buffer";
 		String keyCore = "ActivityField.field.type.name.empty";
+		String brbStr;
 
 		String rbs1 = StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
 		assertNotEquals("Kafka resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
 		assertEquals("Kafka resource bundle entry found in core", keyModule, rbs1);
-		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
+		brbStr = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(KafkaStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in kafka", keyCore, rbs1);
+		assertEquals("Core resource bundle entry found in kafka", brbStr, rbs1);
 	}
 
 	@Ignore("Used to run when testing server")

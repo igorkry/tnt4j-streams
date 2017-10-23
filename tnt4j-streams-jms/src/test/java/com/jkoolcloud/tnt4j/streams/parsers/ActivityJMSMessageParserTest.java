@@ -51,26 +51,26 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 	@Test
 	@Override
 	public void getDataMapTest() throws JMSException {
-		final TextMessage message = mock(TextMessage.class);
-		final String string = "TEST"; // NON-NLS
+		TextMessage message = mock(TextMessage.class);
+		String string = "TEST"; // NON-NLS
 		when(message.getText()).thenReturn(string);
 		((ActivityJMSMessageParser) parser).getDataMap(message);
 
-		final BytesMessage messageB = mock(BytesMessage.class);
+		BytesMessage messageB = mock(BytesMessage.class);
 		((ActivityJMSMessageParser) parser).getDataMap(messageB);
 		verify(messageB).readBytes(any(byte[].class));
 
-		final MapMessage messageM = mock(MapMessage.class);
+		MapMessage messageM = mock(MapMessage.class);
 		StringTokenizer tokenizer = new StringTokenizer("TEST,TEST,TEST", ","); // NON-NLS
 		when(messageM.getMapNames()).thenReturn(tokenizer);
 		((ActivityJMSMessageParser) parser).getDataMap(messageM);
 		verify(messageM, times(3)).getObject(anyString());
 
-		final StreamMessage messageS = mock(StreamMessage.class);
+		StreamMessage messageS = mock(StreamMessage.class);
 		((ActivityJMSMessageParser) parser).getDataMap(messageS);
 		verify(messageS).readBytes(any(byte[].class));
 
-		final ObjectMessage messageO = mock(ObjectMessage.class);
+		ObjectMessage messageO = mock(ObjectMessage.class);
 		((ActivityJMSMessageParser) parser).getDataMap(messageO);
 		verify(messageO).getObject();
 
@@ -80,15 +80,16 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 	public void testRB() {
 		String keyModule = "ActivityJMSMessageParser.payload.data.error";
 		String keyCore = "ActivityField.field.type.name.empty";
+		String brbStr;
 
 		String rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
 		assertNotEquals("JMS resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
 		assertEquals("JMS resource bundle entry found in core", keyModule, rbs1);
-		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
+		brbStr = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in jms", keyCore, rbs1);
+		assertEquals("Core resource bundle entry found in jms", brbStr, rbs1);
 	}
 
 }

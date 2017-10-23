@@ -77,14 +77,15 @@ public class MqttStreamTest {
 	public void testRB() {
 		String keyModule = "MqttStream.error.closing.receiver";
 		String keyCore = "ActivityField.field.type.name.empty";
+		String brbStr;
 
 		String rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, keyModule);
 		assertNotEquals("Mqtt resource bundle entry not found", keyModule, rbs1);
 		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyModule);
 		assertEquals("Mqtt resource bundle entry found in core", keyModule, rbs1);
-		rbs1 = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
-		assertNotEquals("Core resource bundle entry not found", keyCore, rbs1);
+		brbStr = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, keyCore);
+		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(MqttStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
-		assertEquals("Core resource bundle entry found in mqtt", keyCore, rbs1);
+		assertEquals("Core resource bundle entry found in mqtt", brbStr, rbs1);
 	}
 }
