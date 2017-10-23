@@ -33,6 +33,9 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.configure.jaxb.ResourceReferenceType;
@@ -63,6 +66,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class ConfigParserHandler extends DefaultHandler {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
 
 	/**
 	 * Constant for default location delimiter in configuration definition.
@@ -1116,7 +1120,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(uri, RESOURCE_REF_ELMT, URI_ATTR);
 
 		if (type.equals(ResourceReferenceType.VALUES_MAP.value())) {
-			try (InputStream is = getURIInputStream(uri)) {
+			try (InputStream is = getResourceInputStream(id, uri)) {
 				if (resourcesMap == null) {
 					resourcesMap = new HashMap<>(5);
 				}
@@ -1138,7 +1142,7 @@ public class ConfigParserHandler extends DefaultHandler {
 						"ConfigParserHandler.resource.load.error", id, uri), exc);
 			}
 		} else if (type.equals(ResourceReferenceType.PARSER.value())) {
-			try (InputStream is = getURIInputStream(uri)) {
+			try (InputStream is = getResourceInputStream(id, uri)) {
 
 				SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 				SAXParser parser = parserFactory.newSAXParser();
@@ -1156,14 +1160,18 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	private static InputStream getURIInputStream(String uri) throws IOException {
+	private static InputStream getResourceInputStream(String id, String uri) throws IOException {
 		try {
 			URL url = new URL(uri);
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ConfigParserHandler.resource.ref.load", id, url);
 			return url.openStream();
 		} catch (MalformedURLException exc) {
 			// try use uri as JVM work dir. relative path
 			File file = new File(uri);
 			if (file.exists()) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ConfigParserHandler.resource.ref.load", id, file.getAbsolutePath());
 				return new FileInputStream(file);
 			} else {
 				// try use uri as streams cfg. file relative path
@@ -1171,13 +1179,15 @@ public class ConfigParserHandler extends DefaultHandler {
 					File base = new File(StreamsConfigSAXParser.cfgFilePath);
 					file = Paths.get(base.getParent(), uri).toFile();
 					if (file.exists()) {
+						LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ConfigParserHandler.resource.ref.load", id, file.getAbsolutePath());
 						return new FileInputStream(file);
 					}
 				}
 			}
 
 			throw new IOException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ConfigParserHandler.resource.file.not.found", uri));
+					"ConfigParserHandler.resource.file.not.found", uri, file.getAbsolutePath()));
 		}
 	}
 
