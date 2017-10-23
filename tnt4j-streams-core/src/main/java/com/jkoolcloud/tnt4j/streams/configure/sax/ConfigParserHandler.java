@@ -22,6 +22,9 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -338,6 +341,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	protected StringBuilder elementData;
 
+	private boolean include = false;
+
 	/**
 	 * Constructs a new ConfigurationParserHandler.
 	 */
@@ -360,6 +365,10 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	@Override
 	public void startDocument() throws SAXException {
+		if (include) {
+			return;
+		}
+
 		currStream = null;
 		currProperties = null;
 		currParser = null;
@@ -377,6 +386,10 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	@Override
 	public void endDocument() throws SAXException {
+		if (include) {
+			return;
+		}
+
 		javaObjectsMap.clear();
 		if (resourcesMap != null) {
 			resourcesMap.clear();
@@ -942,12 +955,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
-		if (currLocatorData.value != null && currLocatorData.value.isEmpty()) {
-			currLocatorData.value = null;
-		}
-
-		// make sure any fields that are required based on other fields are
-		// specified
+		// make sure any fields that are required based on other fields are specified
 		if (ActivityFieldDataType.DateTime == currLocatorData.dataType) {
 			if (currLocatorData.format == null) {
 				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1107,12 +1115,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(uri, RESOURCE_REF_ELMT, URI_ATTR);
 
 		if (type.equals(ResourceReferenceType.VALUES_MAP.value())) {
+			InputStream is = null;
 			try {
 				if (resourcesMap == null) {
 					resourcesMap = new HashMap<>(5);
 				}
-
-				InputStream is;
 
 				try {
 					URL url = new URL(uri);
@@ -1133,10 +1140,32 @@ public class ConfigParserHandler extends DefaultHandler {
 									"ConfigParserHandler.invalidResource", id, uri),
 							currParseLocation);
 				}
-				Utils.close(is);
-			} catch (Exception e) {
+			} catch (Exception exc) {
 				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ConfigParserHandler.jsonParseException", id, uri), e);
+						"ConfigParserHandler.resource.load.error", id, uri), exc);
+			} finally {
+				Utils.close(is);
+			}
+		} else if (type.equals(ResourceReferenceType.PARSER.value())) {
+			InputStream is = null;
+			try {
+				try {
+					URL url = new URL(uri);
+					is = url.openStream();
+				} catch (MalformedURLException exc) {
+					is = new FileInputStream(uri);
+				}
+
+				SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+				SAXParser parser = parserFactory.newSAXParser();
+				include = true;
+				parser.parse(is, this);
+				include = false;
+			} catch (Exception exc) {
+				throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.resource.load.error", id, uri), exc);
+			} finally {
+				Utils.close(is);
 			}
 		} else {
 			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1720,8 +1749,8 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		String cdata = new String(ch, start, length);
 
-		if (this.elementData != null) {
-			this.elementData.append(cdata);
+		if (elementData != null) {
+			elementData.append(cdata);
 		}
 	}
 

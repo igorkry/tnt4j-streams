@@ -1942,7 +1942,8 @@
         <xs:attribute name="manualFieldsOrder" use="optional" type="xs:boolean" default="false">
             <xs:annotation>
                 <xs:documentation>
-                    XXXX
+                    Specifies whether configuration defined fields order shall be preserved in streaming process. By default fields are
+                    ordered by value resolution type: RAW activity data values, activity entity fields values, cache entries values.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -2174,6 +2175,13 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+            <xs:enumeration value="Parser">
+                <xs:annotation>
+                    <xs:documentation>
+                        Resource defines parser configuration.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
@@ -2264,8 +2272,8 @@
 
         <!-- Make sure <parser> names are unique -->
         <xs:key name="UniqueParserName">
-            <xs:selector xpath="parser"/>
-            <xs:field xpath="@name"/>
+            <xs:selector xpath="parser|resource-ref"/>
+            <xs:field xpath="@name|@id"/>
         </xs:key>
 
         <!-- Make sure <stream> names are unique -->
@@ -2284,6 +2292,12 @@
         <xs:key name="UniqueRefName">
             <xs:selector xpath="parser|stream|java-object"/>
             <xs:field xpath="@name"/>
+        </xs:key>
+
+        <!-- Make sure <resource-ref> identifiers are unique -->
+        <xs:key name="UniqueResourceId">
+            <xs:selector xpath="resource-ref"/>
+            <xs:field xpath="@id"/>
         </xs:key>
 
         <!-- Make sure <parser-ref> points to valid <parser> name -->
@@ -2315,12 +2329,6 @@
         <!--<xs:selector xpath="parser/field[@locator-type='Cache']"/>-->
         <!--<xs:field xpath="@locator"/>-->
         <!--</xs:keyref>-->
-
-        <!-- Make sure <resource-ref> identifiers are unique -->
-        <xs:key name="UniqueResourceId">
-            <xs:selector xpath="resource-ref"/>
-            <xs:field xpath="@id"/>
-        </xs:key>
 
         <!-- Make sure <field-map-ref> points to valid <resource-ref> identifier -->
         <!--<xs:keyref name="ValidFieldResourceReference" refer="UniqueResourceId">-->

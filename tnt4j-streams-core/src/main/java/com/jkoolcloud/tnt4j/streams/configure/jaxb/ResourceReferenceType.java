@@ -32,6 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;simpleType name="ResourceReferenceType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="ValuesMap"/>
+ *     &lt;enumeration value="Parser"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -49,7 +50,16 @@ public enum ResourceReferenceType {
 	 * 
 	 */
 	@XmlEnumValue("ValuesMap")
-	VALUES_MAP("ValuesMap");
+	VALUES_MAP("ValuesMap"),
+
+	/**
+	 *
+	 * Resource defines parser configuration.
+	 *
+	 * 
+	 */
+	@XmlEnumValue("Parser")
+	PARSER("Parser");
 	private final String value;
 
 	ResourceReferenceType(String v) {
