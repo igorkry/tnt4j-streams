@@ -20,12 +20,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
+import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class })
+@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllInputsTests.class })
 public class AllMsOfficeStreamTests {
 }
