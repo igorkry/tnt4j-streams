@@ -53,7 +53,6 @@ import javax.xml.bind.annotation.XmlType;
  *                     &lt;/complexContent>
  *                   &lt;/complexType>
  *                 &lt;/element>
- *                 &lt;element name="cache" type="{}Cache" maxOccurs="unbounded" minOccurs="0"/>
  *               &lt;/sequence>
  *               &lt;attGroup ref="{}EntityAttributeGroup"/>
  *             &lt;/restriction>

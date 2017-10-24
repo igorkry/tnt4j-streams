@@ -62,7 +62,7 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Stream", propOrder = { "property", "parserRef", "reference", "tnt4JProperties", "cache" })
+@XmlType(name = "Stream", propOrder = { "property", "parserRef", "reference", "tnt4JProperties" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 public class Stream {
 

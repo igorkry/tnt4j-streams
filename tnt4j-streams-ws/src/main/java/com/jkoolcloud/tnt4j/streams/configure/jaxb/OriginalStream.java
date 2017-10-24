@@ -52,7 +52,6 @@ import javax.xml.bind.annotation.*;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="cache" type="{}Cache" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attGroup ref="{}EntityAttributeGroup"/>
  *     &lt;/restriction>
@@ -63,7 +62,7 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "property", "parserRef", "reference", "tnt4JProperties", "cache" })
+@XmlType(name = "", propOrder = { "property", "parserRef", "reference", "tnt4JProperties" })
 @XmlSeeAlso({ Stream.class })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 public class OriginalStream {
@@ -78,8 +77,6 @@ public class OriginalStream {
 	@XmlElement(name = "tnt4j-properties")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	protected OriginalStream.Tnt4JProperties tnt4JProperties;
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<Cache> cache;
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
@@ -227,39 +224,6 @@ public class OriginalStream {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTnt4JProperties(OriginalStream.Tnt4JProperties value) {
 		this.tnt4JProperties = value;
-	}
-
-	/**
-	 * Gets the value of the cache property.
-	 *
-	 * <p>
-	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
-	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
-	 * the cache property.
-	 *
-	 * <p>
-	 * For example, to add a new item, do as follows:
-	 *
-	 * <pre>
-	 * getCache().add(newItem);
-	 * </pre>
-	 *
-	 *
-	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link Cache }
-	 *
-	 *
-	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<Cache> getCache() {
-		if (cache == null) {
-			cache = new ArrayList<Cache>();
-		}
-		return this.cache;
-	}
-
-	public void addCache(Cache c) {
-		getCache().add(c);
 	}
 
 	/**
