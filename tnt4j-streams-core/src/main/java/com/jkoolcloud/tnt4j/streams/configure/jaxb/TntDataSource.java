@@ -51,7 +51,7 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "resourceRef", "javaObject", "parser", "stream" })
+@XmlType(name = "", propOrder = { "resourceRef", "javaObject", "parser", "cache", "stream" })
 @XmlRootElement(name = "tnt-data-source")
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 public class TntDataSource {
