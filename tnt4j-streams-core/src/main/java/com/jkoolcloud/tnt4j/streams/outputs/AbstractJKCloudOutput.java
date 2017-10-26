@@ -98,7 +98,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	private boolean retryStateCheck = false;
 
 	private boolean closed = false;
-	private JKoolNotificationListener jKoolNotificationListener;
+	private boolean sendStreamStates = true;
+	private JKoolNotificationListener jKoolNotificationListener = new JKoolNotificationListener();
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
@@ -116,6 +117,10 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	@Override
 	public void setStream(TNTInputStream<?, ?> inputStream) {
 		this.stream = inputStream;
+		
+		if (sendStreamStates) {
+			stream.addStreamListener(jKoolNotificationListener);
+		}
 	}
 
 	@Override
@@ -251,17 +256,13 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		} else if (OutputProperties.PROP_RETRY_STATE_CHECK.equalsIgnoreCase(name)) {
 			retryStateCheck = Boolean.parseBoolean((String) value);
 		} else if (OutputProperties.PROP_SEND_STREAM_STATES.equalsIgnoreCase(name)) {
-			boolean sendStreamStates = Boolean.parseBoolean((String) value);
+			sendStreamStates = Boolean.parseBoolean((String) value);
 
-			if (sendStreamStates) {
-				if (jKoolNotificationListener == null) {
-					jKoolNotificationListener = new JKoolNotificationListener();
-				}
-
-				stream.addStreamListener(jKoolNotificationListener);
-			} else {
-				if (jKoolNotificationListener != null) {
-					stream.removeStreamListener(jKoolNotificationListener);
+			if (stream != null) {
+				if (sendStreamStates) {
+					stream.addStreamListener(jKoolNotificationListener);
+				} else {
+					stream.removeStreamListener(jKoolNotificationListener);				
 				}
 			}
 		}
