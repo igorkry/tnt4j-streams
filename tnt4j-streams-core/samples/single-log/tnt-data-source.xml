@@ -27,6 +27,7 @@
         <property name="RestoreState" value="false"/>
         <!--<property name="StartFromLatest" value="false"/>-->
         <!--<property name="RangeToStream" value="1:"/>-->
+        <property name="SendStreamStates" value="true"/>
 
         <parser-ref name="TokenParser"/>
     </stream>

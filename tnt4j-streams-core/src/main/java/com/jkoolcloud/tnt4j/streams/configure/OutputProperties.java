@@ -61,4 +61,9 @@ public interface OutputProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_RETRY_STATE_CHECK = "RetryStateCheck"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_SEND_STREAM_STATES = "SendStreamStates"; // NON-NLS
 }

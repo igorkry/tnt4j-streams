@@ -32,17 +32,21 @@ import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.sink.impl.BufferedEventSink;
 import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigManager;
+import com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener;
+import com.jkoolcloud.tnt4j.streams.inputs.StreamStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
+import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
  * Base class for TNT4J-Streams output handler. Handles {@link Tracker} initialization, configuration and caching. Picks
@@ -58,6 +62,8 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
  * <li>RetryStateCheck - flag indicating whether tracker state check should be perform repeatedly. If {@code false},
  * then streaming process exits with {@link java.lang.IllegalStateException}. Default value - {@code false}.
  * (Optional)</li>
+ * <li>SendStreamStates - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output
+ * endpoint e.g. 'JKoolCloud'. Default value - {@code true}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -90,6 +96,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	private TNTInputStream<?, ?> stream;
 	private boolean retryStateCheck = false;
+
+	private boolean closed = false;
+	private JKoolNotificationListener jKoolNotificationListener;
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
@@ -241,6 +250,20 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			setTnt4jCfgPath(path);
 		} else if (OutputProperties.PROP_RETRY_STATE_CHECK.equalsIgnoreCase(name)) {
 			retryStateCheck = Boolean.parseBoolean((String) value);
+		} else if (OutputProperties.PROP_SEND_STREAM_STATES.equalsIgnoreCase(name)) {
+			boolean sendStreamStates = Boolean.parseBoolean((String) value);
+
+			if (sendStreamStates) {
+				if (jKoolNotificationListener == null) {
+					jKoolNotificationListener = new JKoolNotificationListener();
+				}
+
+				stream.addStreamListener(jKoolNotificationListener);
+			} else {
+				if (jKoolNotificationListener != null) {
+					stream.removeStreamListener(jKoolNotificationListener);
+				}
+			}
 		}
 	}
 
@@ -310,7 +333,13 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 				trackersMap.clear();
 			}
+			closed = true;
 		}
+	}
+
+	@Override
+	public boolean isClosed() {
+		return closed;
 	}
 
 	// protected void closeTracker(String aiSourceFQN, Tracker tracker) {
@@ -426,6 +455,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			defaultSource = defaultSource.getSource();
 		}
 		defaultSource.setSSN(trackerConfig.getSource().getSSN());
+
+		closed = false;
 	}
 
 	/**
@@ -552,4 +583,89 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 *            activity data to send
 	 */
 	protected abstract void logJKCActivity(Tracker tracker, O activityData);
+
+	/**
+	 * Sends stream startup ("welcome") or shutdown message.
+	 *
+	 * @param status
+	 *            stream status
+	 */
+	protected void sendStreamStateMessage(StreamStatus status) {
+		Tracker tracker = getTracker();
+		TrackingEvent sMsgEvent;
+		if (status == StreamStatus.STARTED) {
+			sMsgEvent = tracker.newEvent(OpLevel.INFO, OpType.START, "Streaming-session-start-event", // NON-NLS
+					(String) null, "STREAM_START", // NON-NLS
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.status.msg"),
+					stream.getName(), status);
+		} else {
+			sMsgEvent = tracker.newEvent(OpLevel.INFO, OpType.STOP, "Streaming-session-shutdown-event", // NON-NLS
+					(String) null, "STREAM_SHUTDOWN", // NON-NLS
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.status.msg"),
+					stream.getName(), status);
+		}
+		sMsgEvent.setSource(defaultSource);
+
+		O wMsg = formatStreamStatusMessage(sMsgEvent);
+
+		try {
+			recordActivity(tracker, CONN_RETRY_INTERVAL, wMsg);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTStreamOutput.status.msg.sent", status);
+		} catch (Exception exc) {
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTStreamOutput.status.msg.failed", status);
+		}
+	}
+
+	/**
+	 * Formats stream status message to be output compliant format.
+	 *
+	 * @param statusMessage
+	 *            stream status message
+	 * @return output compliant status message
+	 */
+	protected abstract O formatStreamStatusMessage(TrackingEvent statusMessage);
+
+	private class JKoolNotificationListener implements InputStreamListener {
+		@Override
+		public void onProgressUpdate(TNTInputStream<?, ?> stream, int current, int total) {
+		}
+
+		@Override
+		public void onSuccess(TNTInputStream<?, ?> stream) {
+		}
+
+		@Override
+		public void onFailure(TNTInputStream<?, ?> stream, String msg, Throwable exc, String code) {
+		}
+
+		@Override
+		public void onStatusChange(TNTInputStream<?, ?> stream, StreamStatus status) {
+			if (status == null) {
+				return;
+			}
+
+			switch (status) {
+			case STARTED:
+			case FAILURE:
+			case SUCCESS:
+			case STOP:
+				if (!isClosed()) {
+					sendStreamStateMessage(status);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		@Override
+		public void onFinish(TNTInputStream<?, ?> stream, TNTInputStream.StreamStats stats) {
+		}
+
+		@Override
+		public void onStreamEvent(TNTInputStream<?, ?> stream, OpLevel level, String message, Object source) {
+		}
+	}
 }

@@ -846,7 +846,9 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			streamListeners = new ArrayList<>();
 		}
 
-		streamListeners.add(l);
+		if (!streamListeners.contains(l)) {
+			streamListeners.add(l);
+		}
 	}
 
 	/**

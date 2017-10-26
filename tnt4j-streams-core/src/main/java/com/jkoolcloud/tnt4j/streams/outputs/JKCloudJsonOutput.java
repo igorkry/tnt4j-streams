@@ -17,9 +17,11 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
+import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
  * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to JKool Cloud
@@ -62,5 +64,12 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 	@Override
 	protected void logJKCActivity(Tracker tracker, String trackable) {
 		tracker.log(OpLevel.INFO, trackable);
+	}
+
+	@Override
+	public String formatStreamStatusMessage(TrackingEvent statusMessage) {
+		String sMsgJSON = new JSONFormatter().format(statusMessage);
+
+		return sMsgJSON;
 	}
 }

@@ -156,4 +156,9 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			tracker.tnt((TrackingEvent) trackable);
 		}
 	}
+
+	@Override
+	public Trackable formatStreamStatusMessage(TrackingEvent statusMessage) {
+		return statusMessage;
+	}
 }

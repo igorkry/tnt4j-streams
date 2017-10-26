@@ -4235,6 +4235,8 @@ Default value - `null`. (Optional)
  * `SourceFQN` - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
+ * `SendStreamStates` - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output endpoint e.g. 
+ `JKoolCloud`. Default value - `true`. (Optional) 
 
      sample:
  ```xml
@@ -4248,6 +4250,7 @@ Default value - `null`. (Optional)
      <property name="TurnOutActivityChildren" value="true"/>
      <property name="BuildSourceFQNFromStreamedData" value="false"/>
      <property name="SourceFQN" value="APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}"/>
+     <property name="SendStreamStates" value="false"/> 
  ``` 
 
 **NOTE:** stream output configuration parameters can be defined under `stream` tag (will drill down to default stream output instance), or 

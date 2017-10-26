@@ -107,4 +107,11 @@ public interface TNTStreamOutput<T> {
 	 * @see #initialize()
 	 */
 	void setProperties(Collection<Map.Entry<String, String>> props);
+
+	/**
+	 * Returns flag indicating whether this output instance is closed.
+	 *
+	 * @return {@code true} is this output instance is closed, {@code false} - otherwise
+	 */
+	boolean isClosed();
 }
