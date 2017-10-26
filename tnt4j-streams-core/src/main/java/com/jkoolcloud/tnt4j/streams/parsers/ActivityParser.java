@@ -120,7 +120,7 @@ public abstract class ActivityParser {
 	 * @param value
 	 *            value to apply for this field
 	 * @throws ParseException
-	 *             if an error parsing the specified value
+	 *             if an error occurs while parsing provided activity data <tt>value</tt>
 	 */
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		ai.applyField(field, value);
@@ -144,7 +144,7 @@ public abstract class ActivityParser {
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
-	 *             if an error parsing the specified value
+	 *             if an error occurs while parsing provided activity data <tt>value</tt>
 	 * @see #parse(TNTInputStream, Object)
 	 */
 	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value)
@@ -179,6 +179,23 @@ public abstract class ActivityParser {
 		}
 	}
 
+	/**
+	 * Applies stacked parser to parse provided activity data <tt>value</tt>.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param ai
+	 *            activity object whose data to be altered
+	 * @param field
+	 *            activity field providing data
+	 * @param parserRef
+	 *            stacked parser reference
+	 * @param value
+	 *            data value to be parsed by stacked parser
+	 * @return {@code true} if referenced stacked parser was applied, {@code false} - otherwise
+	 * @throws ParseException
+	 *             if an error occurs while parsing provided activity data <tt>value</tt>
+	 */
 	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
 			ActivityField.ParserReference parserRef, Object value) throws ParseException {
 		if (parserRef.getParser().isDataClassSupported(value) && match(parserRef, value, ai, field)) {
@@ -198,6 +215,21 @@ public abstract class ActivityParser {
 		return false;
 	}
 
+	/**
+	 * Checks if stacked parser reference defined match evaluation expressions evaluates to positive match value for
+	 * provided activity data <tt>value</tt> or parsing context <tt>ai</tt>.
+	 *
+	 * @param parserRef
+	 *            stacked parser reference
+	 * @param value
+	 *            activity data package to be parsed by stacked parser
+	 * @param ai
+	 *            activity entity providing parsing context data
+	 * @param field
+	 *            activity field
+	 * @return {@code true} if referenced stacked parser matches activity <tt>data</tt> or parsing context <tt>ai</tt>,
+	 *         {@code false} - otherwise
+	 */
 	protected boolean match(ActivityField.ParserReference parserRef, Object value, ActivityInfo ai,
 			ActivityField field) {
 		if (CollectionUtils.isNotEmpty(parserRef.getMatchExpressions())) {
@@ -221,7 +253,21 @@ public abstract class ActivityParser {
 		return true;
 	}
 
-	protected static <T> boolean isDataSupportedByStackedParser(ActivityField field, T data) throws ParseException {
+	/**
+	 * Checks if activity <tt>data</tt> package is supported by <tt>field</tt> referenced stacked parsers.
+	 *
+	 * @param field
+	 *            activity field to get stacked parsers
+	 * @param data
+	 *            activity data package
+	 * @param <T>
+	 *            type of activity data package
+	 * @return {@code true} if field has stacked parsers defined and activity data is supported by any of those parsers,
+	 *         {@code false} - otherwise.
+	 *
+	 * @see #isDataClassSupported(Object)
+	 */
+	protected static <T> boolean isDataSupportedByStackedParser(ActivityField field, T data) {
 		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
 
 		if (stackedParsers != null) {
