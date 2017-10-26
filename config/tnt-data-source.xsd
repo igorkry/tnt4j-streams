@@ -1644,6 +1644,17 @@
         </xs:annotation>
         <xs:complexContent>
             <xs:extension base="Reference">
+                <xs:sequence>
+                    <xs:element name="matchExp" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Defines evaluation expression to check if input data or parsing context matches it and referenced parser
+                                shall parse provided data.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+
                 <xs:attribute name="aggregation" use="optional" type="AggregationTypes" default="Merge">
                     <xs:annotation>
                         <xs:documentation>

@@ -311,10 +311,12 @@ is same as:
 In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
 one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
 
-To define stacked parser You have to define `parser-ref` tag in parser `field` or `embedded-activity` definition.
+To define stacked parser(s) You have to define `parser-ref` tag(s) under parser `field` or `embedded-activity` definition.
 
 **NOTE:** `embeded-activity` is tag `field` alias, used to define set of locator resolved data transparent to parent activity, but useful 
 to make separate set of related child activities.
+
+**NOTE:** if upper level parser resolved data is incompatible with stacked parser, stacked parser is not applied to parse that data.
 
 sample:
 ```xml
@@ -325,6 +327,9 @@ sample:
     <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <.../>
     </parser>
+    <parser name="AccessLogParserExt" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <.../>
+    </parser>
 
     <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <.../>
@@ -333,6 +338,7 @@ sample:
         </field>
         <.../>
         <embedded-activity name="InternalActivity" locator="OtherActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserExt" aggregation="Merge"/>
             <parser-ref name="AccessLogParserCommon" aggregation="Join"/>
         </embedded-activity>
         <.../>
@@ -354,6 +360,114 @@ named `AccessLogParserCommon`.
 
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
+
+#### Stacked parser matching data or parsing context
+
+It is possible to define context or data match criteria for a stacked parser reference. It allows to apply stacked parser on provided data 
+only when data or parsing context matches defined evaluation expression. One parser reference can have multiple match expressions. In that 
+case **all of them must evaluate to positive match** for stacked parser to be applied. **NOTE:** when stacked parser reference has no match 
+expressions defined, only incompatible data type prevents it from being applied.
+
+Sample:
+```xml
+    <field name="MessageFormats" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="String"
+           format="string" transparent="true">
+        <parser-ref name="BNYM_XML_Msg_Data_Parser" aggregation="Merge">
+            <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
+        </parser-ref>
+        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
+            <matchExp>jpath:[?(@.Request.header.receiver == 'SEB')]</matchExp>
+            <matchExp>${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
+        </parser-ref>
+        <parser-ref name="SWIFT_2_Parser" aggregation="Merge">
+            <matchExp>contains(:)</matchExp>
+        </parser-ref>
+    </field>
+```
+
+**NOTE:** if match expression definition breaks configuration XML validity, surround it with `<![CDATA[]]>` e.g.:
+```xml
+        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
+            <matchExp><![CDATA[
+                jpath:[?(@.Request.header.receiver == 'SEB')]
+            ]]></matchExp>
+            <matchExp><![CDATA[
+                ${ObjectName} == "PAYMENTS_QUEUE"
+            ]]></matchExp>
+        </parser-ref>
+``` 
+
+Types of data match evaluation expressions:
+* `String` (default) - it must contain method name from {@link StringUtils} class, and arguments. First method parameter is always bound to 
+`data` value, so only subsequent parameters shall be defined in expression e.g. `contains(PAYMENT)`, `isEmpty()`. To invert evaluation 
+value start expression definition with `!` char.
+
+Some samples: 
+```xml
+<parser-ref ...>
+    <matchExp>isAlpha()</matchExp> <!-- NOTE: default type is applied-->
+    <matchExp>string:startsWithIgnoreCase(SWIFT)</matchExp>
+    <matchExp>string:!isEmpty()</matchExp>
+    <matchExp>string:contains(SWIFT)</matchExp>
+</parser-ref>
+```
+* `RegEx` - should contain any valid Regular Expression (RegEx). **Positive match** is got when RegEx expression pattern matches some 
+subsequence within provided `data` string.
+```xml
+<parser-ref ...>
+    <matchExp>regex:(:33A:)(.*)(:24B:)(.*)</matchExp>
+    <matchExp>regex:((TID)=(.[^\s:,%]*))|((USER_DATA)=(.[^\s:,%]*))</matchExp>
+    <matchExp>regex:(([a-zA-Z]*):)?(.+)</matchExp>
+</parser-ref>
+```
+* `JsonPath` - should contain any valid [JsonPath](https://github.com/json-path/JsonPath) expression. If expression evaluates as `boolean`, 
+then this value is returned. If expression evaluates as `collcetion`, then to get **positive match** it must be **not empty** . In other 
+cases to get **positive match**, expression should be evaluated as **non-null object**.
+```xml
+<parser-ref ...>
+    <matchExp>jpath:$.connected</matchExp>
+    <matchExp>jpath:$.[?(@.id == 'sensor03')]</matchExp>
+    <matchExp>jpath:$.[?(@.temperature > 70)]</matchExp>
+</parser-ref>
+```
+* `XPath` - should contain any valid XPath expression. If expression evaluates as `boolean`, then this value is returned. In other cases to 
+get **positive match**, expression should be evaluated as **non-empty string**.
+```xml
+<parser-ref ...>
+    <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
+    <matchExp>xpath:/Request/genericTransFields/receiver</matchExp>
+    <matchExp>xpath:/Request/header[currency='EUR']/messageId</matchExp>
+</parser-ref>
+```
+
+Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
+activity entity field names. 
+
+Types of context evaluation expressions:
+* `Groovy` (default) - should contain valid `Groovy` language based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>${ObjectName}.startsWith("SYSTEM.")</matchExp> <!-- NOTE: default type is applied-->
+    <matchExp>groovy:${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
+    <matchExp>groovy:${QueueDepth} >= 500</matchExp>
+</parser-ref>
+```
+* `JavaScript` - should contain valid `JavaScript` language based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>js:${ObjectName}.toUpperCase().indexOf("PAYMENT") == 0</matchExp>
+    <matchExp>jscript:${ObjectName} != null</matchExp>
+    <matchExp>javascript:${QueueDepth} != 500</matchExp>
+</parser-ref>
+```
+* `XPath` -  should contain valid `XPath` based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>xpath:boolean(${ObjectStatus})</matchExp>
+    <matchExp>xpath:${EventName} = 'foo'</matchExp>
+    <matchExp>xpath:${PaymentSum} >= 500</matchExp>
+</parser-ref>
+```  
 
 #### Resolved activity entities aggregation
 
@@ -592,7 +706,7 @@ Or (using default attribute `lang` value)
 ```
 This sample concatenates string `corel_` and resolved value.
 
-`JavaScript`/`Groovy` based transformations be default imports those packages:
+`JavaScript`/`Groovy` based transformations default import packages:
  * `com.jkoolcloud.tnt4j.core`
  * `com.jkoolcloud.tnt4j.utils`
  * `com.jkoolcloud.tnt4j.uuid`
@@ -601,7 +715,7 @@ This sample concatenates string `corel_` and resolved value.
  * `org.apache.commons.lang3`
  * `org.apache.commons.collections4`
 
-so you are allowed directly use classes from those packages in script code, e.g.:
+so you are allowed to directly use classes from those packages in script code, e.g.:
 ```xml
     <field-transform lang="groovy" name="FieldSubstring10">
         <![CDATA[
@@ -4432,7 +4546,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         attributes `units` (time units - default value `MILLISECONDS`), `repeatCount` (integer numeric value - default
         value `1`, `-1` means endless).
         * `request` is XML tag to define string represented request data (e.g., system command with parameters). To
-        define XML contents it is recommended to use `CDATA`.
+        define XML contents it is recommended to use `<![CDATA[]]>`.
 
     sample:
 ```xml

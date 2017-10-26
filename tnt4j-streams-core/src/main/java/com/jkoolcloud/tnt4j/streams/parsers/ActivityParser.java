@@ -29,6 +29,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.matchers.Matchers;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -158,7 +159,7 @@ public abstract class ActivityParser {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.stacked.parser.applying", name, parserRef, field);
 				try {
-					applied = applyStackedParser(stream, ai, parserRef, value);
+					applied = applyStackedParser(stream, ai, field, parserRef, value);
 
 					if (applied) {
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -178,9 +179,9 @@ public abstract class ActivityParser {
 		}
 	}
 
-	private static boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai,
+	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
 			ActivityField.ParserReference parserRef, Object value) throws ParseException {
-		if (parserRef.getParser().isDataClassSupported(value)) {
+		if (parserRef.getParser().isDataClassSupported(value) && match(parserRef, value, ai, field)) {
 			ActivityInfo sai = parserRef.getParser().parse(stream, value);
 
 			if (sai != null) {
@@ -191,6 +192,43 @@ public abstract class ActivityParser {
 				}
 
 				return true;
+			}
+		}
+
+		return false;
+	}
+
+	protected boolean match(ActivityField.ParserReference parserRef, Object value, ActivityInfo ai,
+			ActivityField field) {
+		if (CollectionUtils.isNotEmpty(parserRef.getMatchExpressions())) {
+			for (String matchExpression : parserRef.getMatchExpressions()) {
+				boolean match;
+				try {
+					match = Matchers.evaluate(matchExpression, value, ai);
+				} catch (Exception exc) {
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.match.evaluation.failed", name, field.getFieldTypeName(),
+							parserRef.getParser().name, exc);
+					match = false;
+				}
+
+				if (!match) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	protected static <T> boolean isDataSupportedByStackedParser(ActivityField field, T data) throws ParseException {
+		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
+
+		if (stackedParsers != null) {
+			for (ActivityField.ParserReference pRef : stackedParsers) {
+				if (pRef.getParser().isDataClassSupported(data)) {
+					return true;
+				}
 			}
 		}
 

@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.inputs;
+package com.jkoolcloud.tnt4j.streams.matchers;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 /**
  * @author akausinis
  * @version 1.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ AbstractBufferedStreamTest.class, AbstractFileLineStreamTest.class, CharacterStreamTest.class,
-		FileLineStreamTest.class, HttpStreamTest.class, JavaInputStreamTest.class, StreamThreadTest.class,
-		TNTInputStreamTest.class, PipedStreamTest.class, RedirectTNT4JStreamTest.class, ZipLineStreamTest.class })
-public class AllInputsTests {
+public class RegExMatcherTest {
+	@Test
+	public void evaluateTrue() throws Exception {
+		assertTrue(Matchers.evaluate("regex:ee", "rree"));
+	}
+
+	@Test
+	public void evaluateFalse() throws Exception {
+		assertFalse(Matchers.evaluate("regex:ee", "ggrr"));
+	}
+
+	@Test
+	public void evaluateAdvanced() throws Exception {
+		assertTrue(Matchers.evaluate("regex:.*", "eegg"));
+	}
+
 }

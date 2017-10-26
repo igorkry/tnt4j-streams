@@ -461,10 +461,12 @@ public class ActivityField extends AbstractFieldEntity {
 	 *            the stacked parser to add
 	 * @param aggregationType
 	 *            resolved activity entities aggregation type
+	 * @param matchExps
+	 *            match expressions list
 	 *
 	 * @return instance of this activity field
 	 */
-	public ActivityField addStackedParser(ActivityParser parser, String aggregationType) {
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, List<String> matchExps) {
 		if (parser != null) {
 			if (stackedParsers == null) {
 				stackedParsers = new LinkedHashSet<>(5);
@@ -472,10 +474,32 @@ public class ActivityField extends AbstractFieldEntity {
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityField.adding.stacked.parser", fieldTypeName, parser.getName());
-			stackedParsers.add(new ParserReference(parser, aggregationType));
+			ParserReference pRef = new ParserReference(parser, aggregationType);
+			if (CollectionUtils.isNotEmpty(matchExps)) {
+				pRef.setMatchExpressions(matchExps);
+			}
+			stackedParsers.add(pRef);
 		}
 
 		return this;
+	}
+
+	/**
+	 * Adds activity field stacked parser.
+	 *
+	 * @param parser
+	 *            the stacked parser to add
+	 * @param aggregationType
+	 *            resolved activity entities aggregation type
+	 * @param matchExps
+	 *            match expressions array
+	 *
+	 * @return instance of this activity field
+	 *
+	 * @see #addStackedParser(com.jkoolcloud.tnt4j.streams.parsers.ActivityParser, String, java.util.List)
+	 */
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String... matchExps) {
+		return addStackedParser(parser, aggregationType, matchExps == null ? null : Arrays.asList(matchExps));
 	}
 
 	/**
@@ -700,6 +724,7 @@ public class ActivityField extends AbstractFieldEntity {
 	public static class ParserReference {
 		private ActivityParser parser;
 		private AggregationType aggregationType;
+		private List<String> matchExpressions;
 
 		/**
 		 * Constructs a new ParserReference.
@@ -755,6 +780,42 @@ public class ActivityField extends AbstractFieldEntity {
 			return aggregationType;
 		}
 
+		/**
+		 * Returns activity data match evaluation expressions list used to determine if data should be parsed by
+		 * referenced parser.
+		 *
+		 * @return match evaluation expressions list
+		 */
+		public List<String> getMatchExpressions() {
+			return matchExpressions;
+		}
+
+		/**
+		 * Adds activity data match evaluation expression used to determine if data should be parsed by referenced
+		 * parser.
+		 *
+		 * @param matchExpression
+		 *            match evaluation expression
+		 */
+		void addMatchExpression(String matchExpression) {
+			if (matchExpressions == null) {
+				matchExpressions = new ArrayList<>();
+			}
+			matchExpressions.add(matchExpression);
+		}
+
+		/**
+		 * Sets activity data match evaluation expressions used to determine if data should be parsed by referenced
+		 * parser.
+		 *
+		 * @param matchExpressions
+		 *            match evaluation expressions list
+		 */
+		void setMatchExpressions(List<String> matchExpressions) {
+			this.matchExpressions = matchExpressions;
+		}
+
+		@Override
 		public String toString() {
 			return parser.getName() + ":" + aggregationType; // NON-NLS
 		}

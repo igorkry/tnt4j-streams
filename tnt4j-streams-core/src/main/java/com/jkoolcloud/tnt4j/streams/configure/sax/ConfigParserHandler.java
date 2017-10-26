@@ -177,6 +177,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
 	private static final String CACHE_DEFAULT_VALUE_ELMT = "default"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
+	 */
+	private static final String MATCH_EXP_ELMT = "matchExp"; // NON-NLS
 
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -340,6 +344,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private FilterExpressionData currFilterExpression = null;
 	private boolean processingCache = false;
 	private CacheEntryData currCacheEntry = null;
+	private ParserRefData currParserRef = null;
 
 	/**
 	 * Buffer to put current configuration element (token) data value
@@ -452,6 +457,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			processResourceReference(attributes);
 		} else if (CACHE_DEFAULT_VALUE_ELMT.equals(qName)) {
 			processDefault(attributes);
+		} else if (MATCH_EXP_ELMT.equals(qName)) {
+			processMatchExpression(attributes);
 		}
 	}
 
@@ -1366,9 +1373,14 @@ public class ConfigParserHandler extends DefaultHandler {
 							Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, STREAM_ELMT)),
 					currParseLocation);
 		}
+
+		if (currParserRef != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", PARSER_REF_ELMT), currParseLocation);
+		}
+
 		String parserName = null;
 		String aggregationType = null;
-
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -1388,7 +1400,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		if (currField != null) {
-			currField.addStackedParser(parser, aggregationType);
+			// currField.addStackedParser(parser, aggregationType);
+			currParserRef = new ParserRefData(parser, aggregationType);
 		} else {
 			try {
 				currStream.addReference(parser);
@@ -1751,6 +1764,26 @@ public class ConfigParserHandler extends DefaultHandler {
 		elementData = new StringBuilder();
 	}
 
+	/**
+	 * Processes a {@code <match>} element.
+	 *
+	 * @param attrs
+	 *            List of element attributes
+	 *
+	 * @throws SAXException
+	 *             if error occurs parsing element
+	 */
+	private void processMatchExpression(Attributes attrs) throws SAXException {
+		if (currParserRef == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", MATCH_EXP_ELMT, PARSER_REF_ELMT),
+					currParseLocation);
+		}
+
+		elementData = new StringBuilder();
+	}
+
 	private void processTNT4JProperties(Attributes attrs) throws SAXException {
 		if (currStream == null) {
 			throw new SAXParseException(
@@ -1879,6 +1912,18 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleDefault(currCacheEntry);
 
 					elementData = null;
+				}
+			} else if (MATCH_EXP_ELMT.equals(qName)) {
+				if (currParserRef != null) {
+					handleMatchExp(currParserRef);
+
+					elementData = null;
+				}
+			} else if (PARSER_REF_ELMT.equals(qName)) {
+				if (currParserRef != null) {
+					handleParserRef(currParserRef);
+
+					currParserRef = null;
 				}
 			}
 		} catch (SAXException exc) {
@@ -2130,6 +2175,18 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(currCacheEntry.value, VALUE_ELMT);
 	}
 
+	private void handleMatchExp(ParserRefData parserRefData) {
+		String eDataVal = getElementData();
+
+		if (StringUtils.isEmpty(eDataVal == null ? null : eDataVal.trim())) {
+			parserRefData.addMatcherExp(eDataVal);
+		}
+	}
+
+	private void handleParserRef(ParserRefData parserRefData) {
+		currField.addStackedParser(parserRefData.parser, parserRefData.aggregation, parserRefData.matchExps);
+	}
+
 	/**
 	 * Gets a string representing the current line in the file being parsed. Used for error messages.
 	 *
@@ -2315,5 +2372,24 @@ public class ConfigParserHandler extends DefaultHandler {
 		String key;
 		String value;
 		String defaultValue;
+	}
+
+	private static class ParserRefData {
+		ActivityParser parser;
+		String aggregation;
+		List<String> matchExps;
+
+		ParserRefData(ActivityParser parser, String aggregation) {
+			this.parser = parser;
+			this.aggregation = aggregation;
+		}
+
+		void addMatcherExp(String expression) {
+			if (matchExps == null) {
+				matchExps = new ArrayList<>();
+			}
+
+			matchExps.add(expression);
+		}
 	}
 }

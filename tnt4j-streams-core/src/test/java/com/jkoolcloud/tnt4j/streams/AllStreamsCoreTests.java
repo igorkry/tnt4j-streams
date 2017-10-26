@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
 import com.jkoolcloud.tnt4j.streams.configure.AllConfigureTests;
 import com.jkoolcloud.tnt4j.streams.fields.AllFieldsTests;
 import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
+import com.jkoolcloud.tnt4j.streams.matchers.AllMatchersTests;
 import com.jkoolcloud.tnt4j.streams.parsers.AllParsersTests;
 import com.jkoolcloud.tnt4j.streams.preparsers.AllPreparsersTests;
 import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
@@ -32,6 +33,6 @@ import com.jkoolcloud.tnt4j.streams.utils.AllUtilsTests;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ StreamsAgentTest.class, AllConfigureTests.class, AllFieldsTests.class, AllInputsTests.class,
-		AllParsersTests.class, AllPreparsersTests.class, AllUtilsTests.class })
+		AllParsersTests.class, AllPreparsersTests.class, AllUtilsTests.class, AllMatchersTests.class })
 public class AllStreamsCoreTests {
 }

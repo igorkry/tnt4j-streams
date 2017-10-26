@@ -28,5 +28,4 @@ import org.junit.runners.Suite;
 		ActivityJsonParserTest.class, ActivityMapParserTest.class, ActivityNameValueParserTest.class,
 		ActivityRegExParserTest.class, ActivityTokenParserTest.class, ActivityXmlParserTest.class })
 public class AllParsersTests {
-
 }

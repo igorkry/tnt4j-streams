@@ -227,9 +227,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		Node xmlDoc;
 		String xmlString = null;
 		try {
-			if (data instanceof Document) {
-				xmlDoc = (Document) data;
-			} else if (data instanceof Node) {
+			if (data instanceof Node) {
 				xmlDoc = (Node) data;
 			} else {
 				xmlString = getNextActivityString(data);
@@ -311,6 +309,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						}
 					}
 				}
+
 				applyFieldValue(field, Utils.simplifyValue(values), cData);
 				if (locators != null && savedFormats != null) {
 					for (int li = 0; li < locators.size(); li++) {
@@ -360,7 +359,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		if (StringUtils.isNotEmpty(locStr)) {
-			Document nodeDocument = cropDocumentForNode(xmlDoc);
+			Node nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
 				XPathExpression expr;
 				xPathLock.lock();
@@ -380,7 +379,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (val instanceof Node) {
 					Node node = (Node) val;
 
-					if (!isNodeSupportedByStackedParser(cData.getField(), node)) {
+					if (!isDataSupportedByStackedParser(cData.getField(), node)) {
 						val = getTextContent(locator, node, formattingNeeded);
 					}
 				}
@@ -394,20 +393,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		return val;
-	}
-
-	private static boolean isNodeSupportedByStackedParser(ActivityField field, Node node) throws ParseException {
-		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
-
-		if (stackedParsers != null) {
-			for (ActivityField.ParserReference pRef : stackedParsers) {
-				if (pRef.getParser().isDataClassSupported(node)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr) throws XPathExpressionException {
@@ -434,7 +419,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		return val;
 	}
 
-	private Document cropDocumentForNode(Node xmlDoc) throws ParseException {
+	private Node cropDocumentForNode(Node xmlDoc) throws ParseException {
 		if (xmlDoc.getParentNode() != null) { // if node is not document root node
 			try {
 				Document nodeXmlDoc;
