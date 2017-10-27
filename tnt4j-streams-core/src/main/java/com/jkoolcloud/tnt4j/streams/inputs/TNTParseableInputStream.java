@@ -58,7 +58,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 
 	@Override
 	protected void setDefaultStreamOutput() {
-		setOutput(new JKCloudActivityOutput());
+		setOutput(new JKCloudActivityOutput("DefaultParseableInputStreamOutput")); // NON-NLS
 	}
 
 	@Override

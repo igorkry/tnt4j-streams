@@ -73,6 +73,16 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 		super();
 	}
 
+	/**
+	 * Constructs a new JKCloudActivityOutput.
+	 *
+	 * @param name
+	 *            output name value
+	 */
+	public JKCloudActivityOutput(String name) {
+		super(name);
+	}
+
 	@Override
 	protected EventSink logger() {
 		return LOGGER;

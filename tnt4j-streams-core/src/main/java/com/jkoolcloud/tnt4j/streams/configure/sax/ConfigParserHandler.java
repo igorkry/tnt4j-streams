@@ -1315,7 +1315,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		currStream.setName(name);
 		streamsConfigData.addStream(currStream);
 
-		currStream.ensureOutputSet();
+		// currStream.ensureOutputSet();
 	}
 
 	/**
@@ -1943,12 +1943,14 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		javaObjectsMap.put(javaObjectData.name, obj);
 
-		if (MapUtils.isNotEmpty(currProperties)) {
-			if (obj instanceof TNTStreamOutput) {
-				((TNTStreamOutput<?>) obj).setProperties(currProperties.entrySet());
-			}
+		if (obj instanceof TNTStreamOutput) {
+			TNTStreamOutput<?> out = (TNTStreamOutput<?>) obj;
+			out.setName(javaObjectData.name);
 
-			currProperties.clear();
+			if (MapUtils.isNotEmpty(currProperties)) {
+				out.setProperties(currProperties.entrySet());
+				currProperties.clear();
+			}
 		}
 	}
 

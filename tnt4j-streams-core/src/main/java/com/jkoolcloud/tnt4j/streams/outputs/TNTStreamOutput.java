@@ -114,4 +114,19 @@ public interface TNTStreamOutput<T> {
 	 * @return {@code true} is this output instance is closed, {@code false} - otherwise
 	 */
 	boolean isClosed();
+
+	/**
+	 * Sets output name value.
+	 * 
+	 * @param name
+	 *            output name value
+	 */
+	void setName(String name);
+
+	/**
+	 * Returns output name value.
+	 *
+	 * @return output name value
+	 */
+	String getName();
 }

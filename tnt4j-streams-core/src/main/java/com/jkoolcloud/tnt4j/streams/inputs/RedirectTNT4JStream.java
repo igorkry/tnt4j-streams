@@ -150,7 +150,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 
 	@Override
 	protected void setDefaultStreamOutput() {
-		setOutput(new JKCloudJsonOutput());
+		setOutput(new JKCloudJsonOutput("DefaultRedirectStreamOutput")); // NON-NLS
 	}
 
 	@Override

@@ -100,11 +100,22 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	private boolean closed = false;
 	private boolean sendStreamStates = true;
 	private JKoolNotificationListener jKoolNotificationListener = new JKoolNotificationListener();
+	private String name;
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
 	 */
 	protected AbstractJKCloudOutput() {
+	}
+
+	/**
+	 * Constructs a new AbstractJKCloudOutput.
+	 *
+	 * @param name
+	 *            output name value
+	 */
+	protected AbstractJKCloudOutput(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -126,6 +137,16 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	@Override
 	public TNTInputStream<?, ?> getStream() {
 		return stream;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -311,7 +332,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				checkTracker(tracker);
 				trackersMap.put(getTrackersMapKey(t), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.built.new.tracker", (t == null ? "null" : t.getId()));
+						"TNTStreamOutput.built.new.tracker", name, (t == null ? "null" : t.getId()));
 			}
 
 			return tracker;
@@ -362,7 +383,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"TNTStreamOutput.tracker.statistics", trackerId, Utils.toString(tracker.getStats()));
+				"TNTStreamOutput.tracker.statistics", name, trackerId, Utils.toString(tracker.getStats()));
 	}
 
 	/**
@@ -381,7 +402,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				tracker.open();
 			} catch (IOException ioe) {
 				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.failed.to.open", tracker, ioe);
+						"TNTStreamOutput.failed.to.open", name, tracker, ioe);
 				throw ioe;
 			}
 		}
@@ -395,7 +416,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			String cfgFilePath = StringUtils.isEmpty(tnt4jCfgPath) ? tnt4jCfgPath
 					: tnt4jCfgPath.substring(FILE_PREFIX.length());
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTStreamOutput.init.cfg.file", StringUtils.isEmpty(cfgFilePath)
+					"TNTStreamOutput.init.cfg.file", name, StringUtils.isEmpty(cfgFilePath)
 							? System.getProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY) : cfgFilePath);
 			trackerConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
 					cfgFilePath);
@@ -404,7 +425,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		} else if (tnt4jCfgPath.startsWith(ZK_PREFIX)) {
 			String cfgNodePath = tnt4jCfgPath.substring(ZK_PREFIX.length());
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTStreamOutput.zk.cfg.monitor.tnt4j", cfgNodePath);
+					"TNTStreamOutput.zk.cfg.monitor.tnt4j", name, cfgNodePath);
 
 			ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
 				@Override

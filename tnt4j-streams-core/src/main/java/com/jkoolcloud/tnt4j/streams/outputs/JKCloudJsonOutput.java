@@ -45,6 +45,16 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 		super();
 	}
 
+	/**
+	 * Constructs a new JKCloudJsonOutput.
+	 *
+	 * @param name
+	 *            output name value
+	 */
+	public JKCloudJsonOutput(String name) {
+		super(name);
+	}
+
 	@Override
 	protected EventSink logger() {
 		return LOGGER;
@@ -68,8 +78,6 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 
 	@Override
 	public String formatStreamStatusMessage(TrackingEvent statusMessage) {
-		String sMsgJSON = new JSONFormatter().format(statusMessage);
-
-		return sMsgJSON;
+		return new JSONFormatter().format(statusMessage);
 	}
 }
