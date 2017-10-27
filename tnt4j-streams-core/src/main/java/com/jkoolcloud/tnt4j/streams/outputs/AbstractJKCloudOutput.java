@@ -117,7 +117,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	@Override
 	public void setStream(TNTInputStream<?, ?> inputStream) {
 		this.stream = inputStream;
-		
+
 		if (sendStreamStates) {
 			stream.addStreamListener(jKoolNotificationListener);
 		}
@@ -262,7 +262,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				if (sendStreamStates) {
 					stream.addStreamListener(jKoolNotificationListener);
 				} else {
-					stream.removeStreamListener(jKoolNotificationListener);				
+					stream.removeStreamListener(jKoolNotificationListener);
 				}
 			}
 		}
