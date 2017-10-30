@@ -200,10 +200,10 @@ public abstract class ActivityParser {
 	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
 			ActivityField.ParserReference parserRef, Object value) throws ParseException {
 		boolean dataMatch = parserRef.getParser().isDataClassSupported(value);
-		boolean expMatch = match(parserRef, value, ai, field);
+		boolean expMatch = dataMatch && match(parserRef, value, ai, field);
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"ActivityParser.stacked.parser.match", parserRef, dataMatch, expMatch);
+				"ActivityParser.stacked.parser.match", parserRef, dataMatch, dataMatch ? expMatch : "----"); // NON-NLS
 
 		if (dataMatch && expMatch) {
 			ActivityInfo sai = parserRef.getParser().parse(stream, value);
