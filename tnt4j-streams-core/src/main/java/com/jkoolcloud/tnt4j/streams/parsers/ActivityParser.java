@@ -161,9 +161,10 @@ public abstract class ActivityParser {
 				try {
 					applied = applyStackedParser(stream, ai, field, parserRef, value);
 
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.stacked.parser.applied", name, field, parserRef, applied);
+
 					if (applied) {
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.stacked.parser.applied", name, parserRef, field);
 						break;
 					}
 				} catch (Exception exc) {
@@ -198,7 +199,13 @@ public abstract class ActivityParser {
 	 */
 	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
 			ActivityField.ParserReference parserRef, Object value) throws ParseException {
-		if (parserRef.getParser().isDataClassSupported(value) && match(parserRef, value, ai, field)) {
+		boolean dataMatch = parserRef.getParser().isDataClassSupported(value);
+		boolean expMatch = match(parserRef, value, ai, field);
+
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityParser.stacked.parser.match", parserRef, dataMatch, expMatch);
+
+		if (dataMatch && expMatch) {
 			ActivityInfo sai = parserRef.getParser().parse(stream, value);
 
 			if (sai != null) {
@@ -237,10 +244,13 @@ public abstract class ActivityParser {
 				boolean match;
 				try {
 					match = Matchers.evaluate(matchExpression, value, ai);
+					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.match.evaluation", name, field.getFieldTypeName(),
+							parserRef.getParser().name, matchExpression, match);
 				} catch (Exception exc) {
 					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.match.evaluation.failed", name, field.getFieldTypeName(),
-							parserRef.getParser().name, exc);
+							parserRef.getParser().name, matchExpression, exc);
 					match = false;
 				}
 

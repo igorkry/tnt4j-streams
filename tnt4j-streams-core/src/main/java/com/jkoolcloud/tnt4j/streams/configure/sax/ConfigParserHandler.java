@@ -2180,7 +2180,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	private void handleMatchExp(ParserRefData parserRefData) {
 		String eDataVal = getElementData();
 
-		if (StringUtils.isEmpty(eDataVal == null ? null : eDataVal.trim())) {
+		if (StringUtils.isNotEmpty(eDataVal)) {
 			parserRefData.addMatcherExp(eDataVal);
 		}
 	}
