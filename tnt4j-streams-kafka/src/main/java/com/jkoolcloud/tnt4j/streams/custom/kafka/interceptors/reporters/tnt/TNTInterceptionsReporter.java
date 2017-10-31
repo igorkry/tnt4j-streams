@@ -29,6 +29,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -228,6 +229,10 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 
 		try {
 			Map<String, Object> metricsJMX = collectKafkaClientsMerticsJMX();
+			if (MapUtils.isNotEmpty(metricsJMX)) {
+				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
+				tracker.log(OpLevel.INFO, msg);
+			}
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING, "failed to collect Kafka clients metrics over JMX", exc);
 		}
