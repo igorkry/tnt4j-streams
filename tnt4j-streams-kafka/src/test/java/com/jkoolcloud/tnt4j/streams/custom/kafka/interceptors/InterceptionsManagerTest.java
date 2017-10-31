@@ -16,8 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 
+import com.codahale.metrics.*;
+import com.codahale.metrics.json.MetricsModule;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 
 /**
@@ -47,5 +53,40 @@ public class InterceptionsManagerTest {
 	@Test
 	public void kafkaConsumerTest() throws Exception {
 		InterceptorsTest.consume();
+	}
+
+	@Test
+	public void testMetrics() throws JsonProcessingException {
+		MetricRegistry mRegistry = new MetricRegistry();
+		Timer messageLatency = mRegistry.timer("messageLatency");
+		Counter inputCounter = mRegistry.counter("inputCounter");
+		Histogram messageSize = mRegistry.histogram("MessageSize");
+		Meter messageSize2 = mRegistry.meter("MessageSize2");
+
+		inputCounter.inc();
+		inputCounter.inc();
+		inputCounter.inc();
+		inputCounter.inc();
+
+		System.out.println(inputCounter.getCount());
+
+		messageLatency.update(5, TimeUnit.MILLISECONDS);
+		messageLatency.update(6, TimeUnit.MILLISECONDS);
+		messageLatency.update(6, TimeUnit.MILLISECONDS);
+		messageLatency.update(6, TimeUnit.MILLISECONDS);
+		messageLatency.update(6, TimeUnit.MILLISECONDS);
+		messageLatency.update(7, TimeUnit.MILLISECONDS);
+
+		messageSize.update(10);
+		messageSize.update(20);
+		messageSize.update(30);
+
+		messageSize2.mark(10);
+		messageSize2.mark(20);
+		messageSize2.mark(30);
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new MetricsModule(TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS, false));
+		System.out.println(mapper.writeValueAsString(mRegistry));
 	}
 }

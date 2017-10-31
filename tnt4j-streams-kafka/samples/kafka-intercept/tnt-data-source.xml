@@ -6,33 +6,30 @@
     <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ActivityDelim" value="EOF"/>
 
+        <field name="OperationType" locator="$.Type" locator-type="Label" transparent="true">
+            <field-map source="ProducerTopicMetrics" target="Producer"/>
+            <field-map source="ConsumerTopicMetrics" target="Consumer"/>
+        </field>
+
         <field name="EventType" value="EVENT"/>
-        <field name="EventName" value="Kafka_interceptor_metrics_snapshot"/>
+        <field name="EventName" formattingPattern="Metrics of {0} {1}">
+            <field-locator locator="$.Topic" locator-type="Label"/>
+            <field-locator locator="OperationType" locator-type="Activity"></field-locator>
+        </field>
 
-        <field name="AcknowlageM.m1Rate.initialized" locator="$.ackMeter.m1Rate.initialized" locator-type="Label"/>
-        <field name="AcknowlageM.m1Rate.rate" locator="$.ackMeter.m1Rate.rate" locator-type="Label"/>
-        <field name="AcknowlageM.m1Rate.alpha" locator="$.ackMeter.m1Rate.alpha" locator-type="Label"/>
-        <field name="AcknowlageM.m1Rate.interval" locator="$.ackMeter.m1Rate.interval" locator-type="Label"/>
+        <field name="producerCount" locator="$.Metrics.counters.sendCounter.count" locator-type="Label"/>
+        <field name="consumerCount" locator="$.Metrics.counters.consumeMessageCounter.count" locator-type="Label"/>
 
-        <field name="AcknowlageM.m5Rate.initialized" locator="$.ackMeter.m5Rate.initialized" locator-type="Label"/>
-        <field name="AcknowlageM.m5Rate.rate" locator="$.ackMeter.m5Rate.rate" locator-type="Label"/>
-        <field name="AcknowlageM.m5Rate.alpha" locator="$.ackMeter.m5Rate.alpha" locator-type="Label"/>
-        <field name="AcknowlageM.m5Rate.interval" locator="$.ackMeter.m5Rate.interval" locator-type="Label"/>
+        <field name="MeanMessageSize" locator="$.Metrics.histograms.valueSize.mean" locator-type="Label"/>
+        <field name="MeanKeySize" locator="$.Metrics.histograms.keySize.mean" locator-type="Label"/>
 
-        <field name="AcknowlageM.m15Rate.initialized" locator="$.ackMeter.m15Rate.initialized" locator-type="Label"/>
-        <field name="AcknowlageM.m15Rate.rate" locator="$.ackMeter.m15Rate.rate" locator-type="Label"/>
-        <field name="AcknowlageM.m15Rate.alpha" locator="$.ackMeter.m15Rate.alpha" locator-type="Label"/>
-        <field name="AcknowlageM.m15Rate.interval" locator="$.ackMeter.m15Rate.interval" locator-type="Label"/>
-
-        <field name="AcknowlageM.startTime" locator="$.ackMeter.startTime" locator-type="Label" datatype="Timestamp"/>
-        <field name="AcknowlageM.lastTick" locator="$.ackMeter.lastTick" locator-type="Label" datatype="Timestamp"/>
-
+        <field name="MeanJitter" locator="$.Metrics.histograms.messageProducerJitter.mean" locator-type="Label"/>
     </parser>
 
     <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ActivityDelim" value="EOF"/>
 
-        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label">
+        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
             <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge"/>
         </field>
     </parser>

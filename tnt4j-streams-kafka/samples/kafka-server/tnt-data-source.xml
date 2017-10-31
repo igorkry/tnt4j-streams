@@ -47,7 +47,7 @@
         <property name="consumer:auto.commit.interval.ms" value="1000"/>
 
         <!-- Kafka server properties -->
-        <property name="server:broker.id" value="7"/>
+        <property name="server:broker.id" value="0"/>
         <property name="server:host.name" value="localhost"/>
         <property name="server:port" value="9092"/>
         <!--<property name="server:log.flush.interval.messages" value="1"/>-->

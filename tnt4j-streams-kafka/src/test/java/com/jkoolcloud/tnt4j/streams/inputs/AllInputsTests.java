@@ -26,5 +26,4 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ KafkaStreamTest.class })
 public class AllInputsTests {
-
 }

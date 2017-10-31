@@ -33,6 +33,8 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
+ * TODO
+ *
  * @author akausinis
  * @version 1.0
  * @created 2017-09-18 14:49
@@ -40,21 +42,32 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 public class InterceptorsTest {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptorsTest.class);
 
-	private static int eventsToProduce = 10;
+	private static String[] eventsPayload = {
+			"# Licensed to the Apache Software Foundation (ASF) under one or more          ",
+			"# contributor license agreements.  See the NOTICE file distributed with       ",
+			"# this work for additional information regarding copyright ownership.         ",
+			"# The ASF licenses this file to You under the Apache License, Version 2.0     ",
+			"# (the \"License\"); you may not use this file except in compliance with      ",
+			"# the License.  You may obtain a copy of the License at                       ",
+			"#                                                                             ",
+			"#    http://www.apache.org/licenses/LICENSE-2.0                               ",
+			"#                                                                             ", "" };
+	private static int eventsToProduce = eventsPayload.length - 1;
+
 	private static String topicName = "tnt4j_streams_kafka_intercept_test_page_visits"; // NON-NLS
 
 	public static void main(String... args) {
 		try {
 			interceptionsTest();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "InterceptorsTest.interceptionsTest failed to complete!..", exc);
+			LOGGER.log(OpLevel.ERROR, "InterceptorsTest.interceptionsTest failed to complete!..", exc); // NON-NLS
 		}
 	}
 
 	public static void interceptionsTest() throws Exception {
 		final Consumer<String, String> consumer = initConsumer();
 
-		final Thread pt = new Thread(new Runnable() {
+		Thread pt = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -109,12 +122,12 @@ public class InterceptorsTest {
 		for (int ei = 0; ei < eventCount; ei++) {
 			long runtime = System.currentTimeMillis();
 			String ip = "192.168.2." + rnd.nextInt(255); // NON-NLS
-			String msg = runtime + ",www.example.com," + ip + "," + (ei + 1);// NON-NLS
+			String msg = runtime + ",www.example.com," + ip + "," + (ei + 1) + eventsPayload[ei / eventsPayload.length];// NON-NLS
 			ProducerRecord<String, String> data = new ProducerRecord<>(topic, ip, msg);
 			producer.send(data);
 			if (ei % 5 == 0) {
 				try {
-					Thread.sleep((long) (2000 * Math.random()));
+					Thread.sleep((long) (1000 + 2000 * Math.random()));
 				} catch (InterruptedException exc) {
 				}
 			}

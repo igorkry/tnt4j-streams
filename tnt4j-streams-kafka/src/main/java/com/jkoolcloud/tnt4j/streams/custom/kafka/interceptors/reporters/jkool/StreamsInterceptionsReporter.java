@@ -39,6 +39,8 @@ import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.Intercep
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
+import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -61,17 +63,19 @@ public class StreamsInterceptionsReporter implements InterceptionsReporter {
 	public void send(ProducerRecord<Object, Object> producerRecord) {
 		try {
 			ActivityInfo ai = new ActivityInfo();
-			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
+			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Send");
 			ai.setFieldValue(new ActivityField("Partition"), producerRecord.partition());
 			ai.setFieldValue(new ActivityField("Topic"), producerRecord.topic());
 			ai.setFieldValue(new ActivityField("Key"), producerRecord.key());
 			ai.setFieldValue(new ActivityField("Value"), producerRecord.value());
 			ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), producerRecord.timestamp());
+			ai.addCorrelator(producerRecord.topic());
 
 			stream.getOutput().logItem(ai);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "send failed", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"send failed", exc);
 		}
 	}
 
@@ -100,10 +104,12 @@ public class StreamsInterceptionsReporter implements InterceptionsReporter {
 			ai.setFieldValue(new ActivityField("Size"), size);
 			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 					calcStignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
+			ai.addCorrelator(recordMetadata.topic());
 
 			stream.getOutput().logItem(ai);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "acknowledge failed", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"acknowledge failed", exc);
 		}
 	}
 
@@ -114,7 +120,7 @@ public class StreamsInterceptionsReporter implements InterceptionsReporter {
 
 			for (ConsumerRecord<Object, Object> cr : consumerRecords) {
 				ai = new ActivityInfo();
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.RECEIVE);
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Consume_Record");
 				ai.setFieldValue(new ActivityField("Topic"), cr.topic());
 				ai.setFieldValue(new ActivityField("Partition"), cr.partition());
@@ -136,11 +142,13 @@ public class StreamsInterceptionsReporter implements InterceptionsReporter {
 
 				ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 						calcStignature(cr.topic(), cr.partition(), cr.offset()));
+				ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
 
 				stream.getOutput().logItem(ai);
 			}
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "consume failed", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"consume failed", exc);
 		}
 	}
 
@@ -157,14 +165,15 @@ public class StreamsInterceptionsReporter implements InterceptionsReporter {
 				ai.setFieldValue(new ActivityField("Topic"), me.getKey().topic());
 				ai.setFieldValue(new ActivityField("Offset"), me.getValue().offset());
 				ai.setFieldValue(new ActivityField("Metadata"), me.getValue().metadata());
-
 				// ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 				// calcStignature(me.getKey().topic(), me.getKey().partition(), me.getValue().offset()));
+				ai.addCorrelator(me.getKey().topic(), String.valueOf(me.getValue().offset()));
 
 				stream.getOutput().logItem(ai);
 			}
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "commit failed", exc);
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"commit failed", exc);
 		}
 	}
 
