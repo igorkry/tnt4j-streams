@@ -249,6 +249,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			throw pe;
 		}
 
+		resolveDocumentNamespaces(xmlDoc);
+
 		if (xmlString == null) {
 			try {
 				xmlString = Utils.documentToString(xmlDoc);
@@ -262,6 +264,28 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		cData.setMessage(xmlString);
 
 		return cData;
+	}
+
+	private void resolveDocumentNamespaces(Node xmlDoc) {
+		if (xmlDoc instanceof Document) {
+			xmlDoc = ((Document) xmlDoc).getDocumentElement();
+		}
+
+		NamedNodeMap attrs = xmlDoc == null ? null : xmlDoc.getAttributes();
+		if (attrs == null) {
+			return;
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			Node attr = attrs.item(i);
+			if (attr.getNodeName().startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
+				String ns = attr.getNodeName().substring(XMLConstants.XMLNS_ATTRIBUTE.length());
+				if (ns.startsWith(":")) { // NON-NLS
+					ns = ns.substring(1);
+				}
+				namespaces.addPrefixUriMapping(ns, attr.getNodeValue());
+			}
+		}
 	}
 
 	@Override
@@ -381,6 +405,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 					if (!isDataSupportedByStackedParser(cData.getField(), node)) {
 						val = getTextContent(locator, node, formattingNeeded);
+					}
+				} else if (Utils.isCollection(val)) {
+					Object[] nodes = (Object[]) val;
+					for (int i = 0; i < nodes.length; i++) {
+						if (nodes[i] instanceof Node) {
+							nodes[i] = getTextContent(locator, (Node) nodes[i], formattingNeeded);
+						}
 					}
 				}
 			} catch (XPathExpressionException exc) {
