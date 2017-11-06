@@ -139,8 +139,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			}
 		}
 
-		namespaces.addPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
-		namespaces.addPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
+		namespaces.setPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
+		namespaces.setPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
 
 		namespaces.addPrefixUriMappings(uNamespaces);
 	}
@@ -249,7 +249,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			throw pe;
 		}
 
-		resolveDocumentNamespaces(xmlDoc);
+		StreamsXMLUtils.resolveDocumentNamespaces(xmlDoc, namespaces);
 
 		if (xmlString == null) {
 			try {
@@ -264,28 +264,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		cData.setMessage(xmlString);
 
 		return cData;
-	}
-
-	private void resolveDocumentNamespaces(Node xmlDoc) {
-		if (xmlDoc instanceof Document) {
-			xmlDoc = ((Document) xmlDoc).getDocumentElement();
-		}
-
-		NamedNodeMap attrs = xmlDoc == null ? null : xmlDoc.getAttributes();
-		if (attrs == null) {
-			return;
-		}
-
-		for (int i = 0; i < attrs.getLength(); i++) {
-			Node attr = attrs.item(i);
-			if (attr.getNodeName().startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
-				String ns = attr.getNodeName().substring(XMLConstants.XMLNS_ATTRIBUTE.length());
-				if (ns.startsWith(":")) { // NON-NLS
-					ns = ns.substring(1);
-				}
-				namespaces.addPrefixUriMapping(ns, attr.getNodeValue());
-			}
-		}
 	}
 
 	@Override

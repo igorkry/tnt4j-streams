@@ -16,12 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * Implements {@link NamespaceContext}, where every namespace prefix and URI relation is resolved from internally stored
@@ -30,7 +30,10 @@ import javax.xml.namespace.NamespaceContext;
  * @version $Revision: 1 $
  */
 public final class NamespaceMap implements NamespaceContext {
-	private final Map<String, String> map = new HashMap<>();
+	private static final List<String> EMPTY_NS_LIST = Collections.singletonList(XMLConstants.DEFAULT_NS_PREFIX);
+
+	private final Map<String, String> mapNS = new HashMap<>(10);
+	private final Map<String, Set<String>> mapURI = new HashMap<>(10);
 
 	/**
 	 * Constructs a new namespaces map.
@@ -39,15 +42,45 @@ public final class NamespaceMap implements NamespaceContext {
 	}
 
 	/**
-	 * Adds mapping of namespace prefix to namespace URI.
+	 * Sets mapping of namespace prefix to namespace URI.
 	 *
 	 * @param prefix
 	 *            prefix to put into mapping
 	 * @param uri
 	 *            uri to put into mapping
 	 */
-	public void addPrefixUriMapping(String prefix, String uri) {
-		map.put(prefix, uri);
+	public String setPrefixUriMapping(String prefix, String uri) {
+		mapURI(prefix, uri);
+		return mapNS.put(prefix, uri);
+	}
+
+	/**
+	 * Adds mapping of namespace prefix to namespace URI. If mapping already exists, does nothing.
+	 *
+	 * @param prefix
+	 *            prefix to put into mapping
+	 * @param uri
+	 *            uri to put into mapping
+	 * @return {@code true} if mapping was added, {@code false} - otherwise
+	 */
+	public boolean addPrefixUriMapping(String prefix, String uri) {
+		if (!mapNS.containsKey(prefix)) {
+			setPrefixUriMapping(prefix, uri);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns mapping of namespace prefix to namespace URI.
+	 *
+	 * @param prefix
+	 *            prefix to get mapping uri
+	 * @return mapped uri, or {@code null} if there is no namespace prefix mapping defined
+	 */
+	public String getPrefixUriMapping(String prefix) {
+		return mapNS.get(prefix);
 	}
 
 	/**
@@ -57,12 +90,25 @@ public final class NamespaceMap implements NamespaceContext {
 	 *            map containing namespace prefix to namespace URI mappings
 	 */
 	public void addPrefixUriMappings(Map<String, String> nsMap) {
-		map.putAll(nsMap);
+		mapNS.putAll(nsMap);
+
+		for (Map.Entry<String, String> nsms : nsMap.entrySet()) {
+			mapURI(nsms.getKey(), nsms.getValue());
+		}
+	}
+
+	private void mapURI(String prefix, String uri) {
+		Set<String> prefixList = mapURI.get(uri);
+		if (prefixList == null) {
+			prefixList = new LinkedHashSet<>(5);
+			mapURI.put(uri, prefixList);
+		}
+		prefixList.add(prefix);
 	}
 
 	@Override
 	public String getNamespaceURI(String prefix) {
-		String uri = map.get(prefix);
+		String uri = mapNS.get(prefix);
 		if (uri == null) {
 			uri = XMLConstants.XML_NS_URI;
 		}
@@ -71,16 +117,13 @@ public final class NamespaceMap implements NamespaceContext {
 
 	@Override
 	public String getPrefix(String namespaceURI) {
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			if (Utils.equal(entry.getValue(), namespaceURI)) {
-				return entry.getKey();
-			}
-		}
-		return XMLConstants.DEFAULT_NS_PREFIX;
+		Set<String> nsList = mapURI.get(namespaceURI);
+		return CollectionUtils.isEmpty(nsList) ? XMLConstants.DEFAULT_NS_PREFIX : nsList.iterator().next();
 	}
 
 	@Override
 	public Iterator<String> getPrefixes(String namespaceURI) {
-		return map.keySet().iterator();
+		Set<String> nsList = mapURI.get(namespaceURI);
+		return nsList == null ? EMPTY_NS_LIST.iterator() : nsList.iterator();
 	}
 }

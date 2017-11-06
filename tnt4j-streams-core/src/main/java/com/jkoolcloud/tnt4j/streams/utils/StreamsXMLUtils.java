@@ -19,11 +19,16 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionResolver;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName;
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName;
@@ -44,7 +49,7 @@ public final class StreamsXMLUtils {
 		tsContext = new NamespaceMap();
 		tsFunctionResolver = new StreamsFunctionResolver();
 
-		tsContext.addPrefixUriMapping(STREAMS_NS, STREAMS_NS_URI);
+		tsContext.setPrefixUriMapping(STREAMS_NS, STREAMS_NS_URI);
 	}
 
 	private StreamsXMLUtils() {
@@ -103,4 +108,33 @@ public final class StreamsXMLUtils {
 		}
 	}
 
+	/**
+	 * Resolves XML Document DOM node defined namespace mappings and puts them to <tt>namespaces</tt> map.
+	 *
+	 * @param xmlDoc
+	 *            xml document DOM node to use
+	 * @param namespaces
+	 *            namespaces map to put resolved mappings to
+	 */
+	public static void resolveDocumentNamespaces(Node xmlDoc, NamespaceMap namespaces) {
+		if (xmlDoc instanceof Document) {
+			xmlDoc = ((Document) xmlDoc).getDocumentElement();
+		}
+
+		NamedNodeMap attrs = xmlDoc == null ? null : xmlDoc.getAttributes();
+		if (attrs == null) {
+			return;
+		}
+
+		for (int i = 0; i < attrs.getLength(); i++) {
+			Node attr = attrs.item(i);
+			if (attr.getNodeName().startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
+				String ns = attr.getNodeName().substring(XMLConstants.XMLNS_ATTRIBUTE.length());
+				if (ns.startsWith(":")) { // NON-NLS
+					ns = ns.substring(1);
+				}
+				namespaces.setPrefixUriMapping(ns, attr.getNodeValue());
+			}
+		}
+	}
 }
