@@ -33,29 +33,33 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
- * TODO
+ * TNT4J-Streams Kafka interceptors test which can be run as standalone application.
  *
- * @author akausinis
- * @version 1.0
- * @created 2017-09-18 14:49
+ * @version $Revision: 1 $
  */
 public class InterceptorsTest {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptorsTest.class);
 
 	private static String[] eventsPayload = {
-			"# Licensed to the Apache Software Foundation (ASF) under one or more          ",
-			"# contributor license agreements.  See the NOTICE file distributed with       ",
-			"# this work for additional information regarding copyright ownership.         ",
-			"# The ASF licenses this file to You under the Apache License, Version 2.0     ",
-			"# (the \"License\"); you may not use this file except in compliance with      ",
-			"# the License.  You may obtain a copy of the License at                       ",
-			"#                                                                             ",
-			"#    http://www.apache.org/licenses/LICENSE-2.0                               ",
-			"#                                                                             ", "" };
+			"# Licensed to the Apache Software Foundation (ASF) under one or more          ", // NON-NLS
+			"# contributor license agreements.  See the NOTICE file distributed with       ", // NON-NLS
+			"# this work for additional information regarding copyright ownership.         ", // NON-NLS
+			"# The ASF licenses this file to You under the Apache License, Version 2.0     ", // NON-NLS
+			"# (the \"License\"); you may not use this file except in compliance with      ", // NON-NLS
+			"# the License.  You may obtain a copy of the License at                       ", // NON-NLS
+			"#                                                                             ", // NON-NLS
+			"#    http://www.apache.org/licenses/LICENSE-2.0                               ", // NON-NLS
+			"#                                                                             ", "" }; // NON-NLS
 	private static int eventsToProduce = eventsPayload.length - 1;
 
 	private static String topicName = "tnt4j_streams_kafka_intercept_test_page_visits"; // NON-NLS
 
+	/**
+	 * The entry point of standalone application.
+	 *
+	 * @param args
+	 *            test application arguments
+	 */
 	public static void main(String... args) {
 		try {
 			interceptionsTest();
@@ -64,6 +68,12 @@ public class InterceptorsTest {
 		}
 	}
 
+	/**
+	 * Runs interceptions test scenario.
+	 *
+	 * @throws Exception
+	 *             if exception occurs while running interceptions test
+	 */
 	public static void interceptionsTest() throws Exception {
 		final Consumer<String, String> consumer = initConsumer();
 
@@ -92,11 +102,23 @@ public class InterceptorsTest {
 		ct.join();
 	}
 
+	/**
+	 * Consumes Kafka topic messages.
+	 *
+	 * @throws Exception
+	 *             if exception occurs while initializing producer or sending messages
+	 */
 	public static void produce() throws Exception {
 		Producer<String, String> producer = initProducer();
 		produce(producer, topicName, eventsToProduce);
 	}
 
+	/**
+	 * Consumes Kafka topic contained messages.
+	 *
+	 * @throws Exception
+	 *             if exception occurs while initializing consumer or consuming messages
+	 */
 	public static void consume() throws Exception {
 		Consumer<String, String> consumer = initConsumer();
 		consume(consumer);

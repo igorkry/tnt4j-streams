@@ -26,7 +26,7 @@ import org.apache.kafka.common.ClusterResourceListener;
 import org.apache.kafka.common.TopicPartition;
 
 /**
- * TODO
+ * TNT4J-Streams Kafka consumer interceptor implementation.
  *
  * @version $Revision: 1 $
  */
@@ -38,6 +38,9 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 
 	private InterceptionsManager iManager;
 
+	/**
+	 * Constructs a new TNTKafkaCInterceptor.
+	 */
 	public TNTKafkaCInterceptor() {
 		iManager = InterceptionsManager.getInstance();
 		iManager.bindReference(this);
@@ -63,7 +66,7 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 		this.configs = configs;
 		Object groupIdValue = configs.get("group.id");
 		if (groupIdValue != null && groupIdValue instanceof String) {
-			this.groupId = (String) groupIdValue;
+			groupId = (String) groupIdValue;
 		}
 	}
 
@@ -74,7 +77,7 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("TNTKafkaCInterceptor{");
+		StringBuilder sb = new StringBuilder("TNTKafkaCInterceptor{");
 		sb.append("clusterResource=").append(clusterResource);
 		sb.append(", configs=").append(configs);
 		sb.append(", groupId='").append(groupId).append('\'');

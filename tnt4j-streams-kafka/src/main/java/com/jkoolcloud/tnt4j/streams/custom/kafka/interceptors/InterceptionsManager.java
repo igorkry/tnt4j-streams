@@ -18,51 +18,68 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
+import org.apache.kafka.common.Configurable;
 import org.apache.kafka.common.TopicPartition;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
-import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.jkool.StreamsInterceptionsReporter;
-import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.tnt.TNTInterceptionsReporter;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.MetricsReporter;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * TODO
+ * TNT4J-Streams Kafka interceptions manager. It loads interceptions configuration from {@code "interceptors.config"}
+ * referenced properties file (default name is {@code "interceptors.properties"} and initiates interceptions reporters
+ * to be used.
+ * <p>
+ * There are those types of reporters:
+ * <ul>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.MetricsReporter} - to aggregate
+ * and report Kafka metrics collected over interceptions and JMX to dedicated Kafka topic.</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter} - to trace
+ * intercepted messages and send message related events to JKool Cloud.</li>
+ * </ul>
+ * <p>
+ * Interceptions configuration properties:
+ * <ul>
+ * <li>{@code metrics.report.period} - metrics reporting period in seconds. Default value - {@code 30} sec.</li>
+ * <li>{@code trace.kafka.messages} - flag indicating whether to trace intercepted messages. Default value -
+ * {@code true}.</li>
+ * </ul>
  *
  * @version $Revision: 1 $
+ *
+ * @see com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.MetricsReporter
+ * @see com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter
  */
 public class InterceptionsManager {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptionsManager.class);
 
-	private final AtomicInteger referencesCount = new AtomicInteger();
+	private static final String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties"; // NON-NLS
+
+	private final Set<Configurable> references = new HashSet<>();
 	private final Collection<InterceptionsReporter> reporters = new ArrayList<>();
 
 	private static InterceptionsManager instance;
 
-	public static String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties";
 	private String interceptorsPropFile = DEFAULT_INTERCEPTORS_PROP_FILE;
-
 	private Properties interceptorProps = new Properties();
 
 	private InterceptionsManager() {
 	}
 
 	private void loadProperties() {
-		interceptorsPropFile = System.getProperty("interceptors.config", DEFAULT_INTERCEPTORS_PROP_FILE);
+		interceptorsPropFile = System.getProperty("interceptors.config", DEFAULT_INTERCEPTORS_PROP_FILE); // NON-NLS
 
 		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
 			interceptorProps.load(fis);
@@ -75,13 +92,20 @@ public class InterceptionsManager {
 	private void initialize() {
 		loadProperties();
 
-		addReporter(new TNTInterceptionsReporter());
-		boolean traceMessages = Boolean.parseBoolean(interceptorProps.getProperty("trace.kafka.messages", "true"));
+		int reportingPeriod = Integer.parseInt(interceptorProps.getProperty("metrics.report.period",
+				String.valueOf(MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC)));
+		addReporter(new MetricsReporter(reportingPeriod));
+		boolean traceMessages = Boolean.parseBoolean(interceptorProps.getProperty("trace.kafka.messages", "true")); // NON-NLS
 		if (traceMessages) {
-			addReporter(new StreamsInterceptionsReporter());
+			addReporter(new MsgTraceReporter());
 		}
 	}
 
+	/**
+	 * Gets instance of interceptions manager.
+	 *
+	 * @return instance of interceptions manager
+	 */
 	public static synchronized InterceptionsManager getInstance() {
 		if (instance == null) {
 			instance = new InterceptionsManager();
@@ -91,30 +115,88 @@ public class InterceptionsManager {
 		return instance;
 	}
 
-	public void bindReference(Object ref) {
-		int crc = referencesCount.incrementAndGet();
+	/**
+	 * Binds interceptor reference.
+	 *
+	 * @param ref
+	 *            interceptor reference to bind
+	 */
+	public void bindReference(Configurable ref) {
+		references.add(ref);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"Binding interceptor reference: ref={0}, refsCount={1}", ref, crc);
+				"Binding interceptor reference: ref={0}, refsCount={1}", ref, references.size());
 	}
 
-	public void unbindReference(Object ref) {
-		int crc = referencesCount.decrementAndGet();
+	/**
+	 * Unbinds interceptor reference.
+	 *
+	 * @param ref
+	 *            interceptor reference to unbind
+	 */
+	public void unbindReference(Configurable ref) {
+		references.remove(ref);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"Unbinding interceptor reference: ref={0}, refsCount={1}", ref, crc);
+				"Unbinding interceptor reference: ref={0}, refsCount={1}", ref, references.size());
 
-		if (crc <= 0) {
+		if (references.isEmpty()) {
 			for (InterceptionsReporter rep : reporters) {
 				rep.shutdown();
 			}
 		}
 	}
 
+	/**
+	 * Checks if Kafka producer is intercepted.
+	 *
+	 * @return {@code true} if interceptors references has any instance if
+	 *         {@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor} class, {@code false}
+	 *         - otherwise
+	 */
+	public boolean isProducerIntercepted() {
+		return isClientIntercepted(TNTKafkaPInterceptor.class);
+	}
+
+	/**
+	 * Checks if Kafka consumer is intercepted.
+	 *
+	 * @return {@code true} if interceptors references has any instance if
+	 *         {@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor} class, {@code false}
+	 *         - otherwise
+	 */
+	public boolean isConsumerIntercepted() {
+		return isClientIntercepted(TNTKafkaCInterceptor.class);
+	}
+
+	private boolean isClientIntercepted(Class<? extends Configurable> refClass) {
+		for (Configurable ref : references) {
+			if (refClass.isInstance(ref)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Adds interceptions reporter to reporters list.
+	 *
+	 * @param reporter
+	 *            reporter instance to add
+	 */
 	public void addReporter(InterceptionsReporter reporter) {
 		reporters.add(reporter);
 	}
 
+	/**
+	 * Notifies reporters that Kafka producer has sent message.
+	 *
+	 * @param producerRecord
+	 *            producer record to be sent
+	 *
+	 * @return producer record to be sent
+	 */
 	public ProducerRecord<Object, Object> send(ProducerRecord<Object, Object> producerRecord) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.send: producerRecord={0}", producerRecord);
@@ -126,6 +208,16 @@ public class InterceptionsManager {
 		return producerRecord;
 	}
 
+	/**
+	 * Notifies reporters that Kafka producer has acknowledge sent message.
+	 *
+	 * @param recordMetadata
+	 *            sent message record metadata
+	 * @param e
+	 *            occurred exception
+	 * @param clusterResource
+	 *            cluster resource metadata records where sent to
+	 */
 	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.acknowledge: recordMetadata={0}, exception={1}", recordMetadata, e);
@@ -135,6 +227,16 @@ public class InterceptionsManager {
 		}
 	}
 
+	/**
+	 * Notifies reporters that Kafka consumer has consumed messages.
+	 *
+	 * @param consumerRecords
+	 *            consumed records collection
+	 * @param clusterResource
+	 *            cluster resource metadata records where consumed from
+	 *
+	 * @return consumed records collection
+	 */
 	public ConsumerRecords<Object, Object> consume(ConsumerRecords<Object, Object> consumerRecords,
 			ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -147,6 +249,12 @@ public class InterceptionsManager {
 		return consumerRecords;
 	}
 
+	/**
+	 * Notifies reporters that Kafka consumer has committed messages.
+	 *
+	 * @param map
+	 *            committed records topics and messages map
+	 */
 	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.commit: map={0}", map);

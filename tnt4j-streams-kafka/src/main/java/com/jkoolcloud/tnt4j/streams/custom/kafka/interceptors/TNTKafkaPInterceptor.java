@@ -25,7 +25,7 @@ import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.ClusterResourceListener;
 
 /**
- * TODO
+ * TNT4J-Streams Kafka producer interceptor implementation.
  *
  * @version $Revision: 1 $
  */
@@ -35,6 +35,9 @@ public class TNTKafkaPInterceptor implements ProducerInterceptor<Object, Object>
 	private Map<String, ?> configs;
 	private InterceptionsManager iManager;
 
+	/**
+	 * Constructs a new TNTKafkaPInterceptor.
+	 */
 	public TNTKafkaPInterceptor() {
 		iManager = InterceptionsManager.getInstance();
 		iManager.bindReference(this);
@@ -67,7 +70,7 @@ public class TNTKafkaPInterceptor implements ProducerInterceptor<Object, Object>
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("TNTKafkaPInterceptor{");
+		StringBuilder sb = new StringBuilder("TNTKafkaPInterceptor{");
 		sb.append("clusterResource=").append(clusterResource);
 		sb.append(", configs=").append(configs);
 		sb.append('}');

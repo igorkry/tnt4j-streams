@@ -15,11 +15,11 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams Kafka interceptors collected data
- * reporters.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams Kafka interceptors intercepted messages
+ * trace reporters.
  *
  * @author akausinis
  * @version 1.0
  */
 
-package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters;
+package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;

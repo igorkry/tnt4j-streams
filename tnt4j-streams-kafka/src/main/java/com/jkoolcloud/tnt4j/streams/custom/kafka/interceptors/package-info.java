@@ -15,7 +15,7 @@
  */
 
 /**
- * TODO
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams Kafka client interceptors.
  *
  * @version $Revision: 1 $
  */

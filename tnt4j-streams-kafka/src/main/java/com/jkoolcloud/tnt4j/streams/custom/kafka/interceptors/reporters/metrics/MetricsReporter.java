@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.tnt;
+package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -58,17 +58,34 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
 /**
- * TODO
+ * Producer/Consumer interceptors intercepted data metrics aggregator and reporter sending collected metrics data as
+ * JSON over configured TNT4J {@link Tracker}.
+ * <p>
+ * Reported metrics:
+ * <ul>
+ * <li>Kafka consumer JMX metrics</li>
+ * <li>Kafka producer JMX metrics</li>
+ * <li>JVM JMX metrics</li>
+ * <li>This reporter accumulated additional Kafka metrics</li>
+ * </ul>
+ * <p>
+ * Metrics data is reported in scheduled intervals and on interceptions shutdown.
  *
  * @version $Revision: 1 $
  */
-public class TNTInterceptionsReporter implements InterceptionsReporter {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TNTInterceptionsReporter.class);
+public class MetricsReporter implements InterceptionsReporter {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MetricsReporter.class);
+
+	/**
+	 * Default metrics reporting period - {@value} seconds.
+	 */
+	public static final int DEFAULT_REPORTING_PERIOD_SEC = 30;
 	private static final String TOPIC_UNRELATED = "Topic unrelated"; // NON-NLS
 
 	private java.util.Timer metricsReportingTimer;
@@ -78,21 +95,38 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 	private Map<String, TopicMetrics> topicsMetrics = new HashMap<>();
 
 	private static class TopicMetrics {
+		/**
+		 * The topic name.
+		 */
 		String topic;
+		/**
+		 * The partition index.
+		 */
 		Integer partition;
+		/**
+		 * The collected metrics registry.
+		 */
 		MetricRegistry mRegistry = new MetricRegistry();
-
+		/**
+		 * Last producer sent message timestamp.
+		 */
 		long lastSend;
 
-		public TopicMetrics(String topic, Integer partition) {
+		/**
+		 * Constructs a new TopicMetrics.
+		 *
+		 * @param topic
+		 *            the topic name
+		 * @param partition
+		 *            the partition index
+		 */
+		TopicMetrics(String topic, Integer partition) {
 			this.topic = topic;
 			this.partition = partition;
 		}
 	}
 
 	private static class ConsumerTopicMetrics extends TopicMetrics {
-		static final String SUFFIX = "_consumer"; // NON-NLS
-
 		private final Meter consumeM = mRegistry.meter("consumeMeter"); // NON-NLS
 		private final Counter consumeC = mRegistry.counter("consumeIterationsCounter"); // NON-NLS
 		private final Counter consumeMessagesC = mRegistry.counter("consumeMessageCounter"); // NON-NLS
@@ -101,14 +135,20 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 		private final Histogram valueSize = mRegistry.histogram("valueSize"); // NON-NLS
 		private final com.codahale.metrics.Timer latency = mRegistry.timer("messageLatency");// NON-NLS
 
-		public ConsumerTopicMetrics(String topic, Integer partition) {
+		/**
+		 * Constructs a new ConsumerTopicMetrics.
+		 *
+		 * @param topic
+		 *            the topic name
+		 * @param partition
+		 *            the partition index
+		 */
+		ConsumerTopicMetrics(String topic, Integer partition) {
 			super(topic, partition);
 		}
 	}
 
 	private static class ProducerTopicMetrics extends TopicMetrics {
-		static final String SUFFIX = "_producer"; // NON-NLS
-
 		private final Histogram jitter = mRegistry.histogram("messageProducerJitter"); // NON-NLS
 		private final Meter sendM = mRegistry.meter("sendMeter"); // NON-NLS
 		private final Meter ackM = mRegistry.meter("ackMeter"); // NON-NLS
@@ -116,12 +156,33 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 		private final Counter ackC = mRegistry.counter("ackCounter"); // NON-NLS
 		private final Meter errorMeter = mRegistry.meter("errorCounter"); // NON-NLS
 
-		public ProducerTopicMetrics(String topic, Integer partition) {
+		/**
+		 * Constructs a new ProducerTopicMetrics.
+		 *
+		 * @param topic
+		 *            the topic name
+		 * @param partition
+		 *            the partition index
+		 */
+		ProducerTopicMetrics(String topic, Integer partition) {
 			super(topic, partition);
 		}
 	}
 
-	public TNTInterceptionsReporter() {
+	/**
+	 * Constructs a new MetricsReporter.
+	 */
+	public MetricsReporter() {
+		this(DEFAULT_REPORTING_PERIOD_SEC);
+	}
+
+	/**
+	 * Constructs a new MetricsReporter.
+	 *
+	 * @param reportingPeriod
+	 *            the metrics reporting period in seconds
+	 */
+	public MetricsReporter(int reportingPeriod) {
 		tracker = initTracker();
 		TimerTask mrt = new TimerTask() {
 			@Override
@@ -129,7 +190,7 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 				reportMetrics(topicsMetrics);
 			}
 		};
-		long period = TimeUnit.SECONDS.toMillis(30);
+		long period = TimeUnit.SECONDS.toMillis(reportingPeriod);
 		metricsReportingTimer = new java.util.Timer();
 		metricsReportingTimer.scheduleAtFixedRate(mrt, period, period);
 	}
@@ -137,7 +198,6 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 	@Override
 	public void send(ProducerRecord<Object, Object> producerRecord) {
 		String topic = producerRecord.topic();
-		// TODO producerRecord.partition()
 		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition());
 		long now = System.currentTimeMillis();
 		long jitter = now - topicMetrics.lastSend;
@@ -193,7 +253,6 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 	public void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource) {
 		for (ConsumerRecord<?, ?> record : consumerRecords) {
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition());
-			// TODO record.partition()
 			long duration = System.currentTimeMillis() - record.timestamp();
 			topicMetrics.latency.update(duration, TimeUnit.MILLISECONDS);
 			topicMetrics.keySize.update(record.serializedKeySize());
@@ -228,7 +287,22 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 		mapper.registerModule(new MetricsRegistryModule());
 
 		try {
-			Map<String, Object> metricsJMX = collectKafkaClientsMerticsJMX();
+			if (InterceptionsManager.getInstance().isProducerIntercepted()) {
+				Map<String, Object> metricsJMX = collectKafkaProducerMetricsJMX();
+				if (MapUtils.isNotEmpty(metricsJMX)) {
+					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
+					tracker.log(OpLevel.INFO, msg);
+				}
+			}
+			if (InterceptionsManager.getInstance().isConsumerIntercepted()) {
+				Map<String, Object> metricsJMX = collectKafkaConsumerMetricsJMX();
+				if (MapUtils.isNotEmpty(metricsJMX)) {
+					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
+					tracker.log(OpLevel.INFO, msg);
+				}
+			}
+
+			Map<String, Object> metricsJMX = collectJVMMetricsJMX();
 			if (MapUtils.isNotEmpty(metricsJMX)) {
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
 				tracker.log(OpLevel.INFO, msg);
@@ -255,7 +329,20 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 		return tracker;
 	}
 
-	private static Map<String, Object> collectKafkaClientsMerticsJMX() {
+	private static Map<String, Object> collectKafkaConsumerMetricsJMX() {
+		Map<String, Object> attrsMap = new HashMap<>();
+
+		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+		try {
+			collectMetricsJMX("kafka.consumer:", "kafka.consumer:*", mBeanServer, attrsMap); // NON-NLS
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING, "failed to collect KafkaConsumer metrics over JMX", exc);
+		}
+
+		return attrsMap;
+	}
+
+	private static Map<String, Object> collectKafkaProducerMetricsJMX() {
 		Map<String, Object> attrsMap = new HashMap<>();
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -264,12 +351,18 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 		} catch (Exception exc) {
 			LOGGER.log(OpLevel.WARNING, "failed to collect KafkaProducer metrics over JMX", exc);
 		}
-		try {
-			collectMetricsJMX("kafka.consumer:", "kafka.consumer:*", mBeanServer, attrsMap); // NON-NLS
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "failed to collect KafkaConsumer metrics over JMX", exc);
-		}
+		return attrsMap;
+	}
 
+	private static Map<String, Object> collectJVMMetricsJMX() {
+		Map<String, Object> attrsMap = new HashMap<>();
+
+		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+		try {
+			collectMetricsJMX("java.lang:", "java.lang:*", mBeanServer, attrsMap); // NON-NLS
+		} catch (Exception exc) {
+			LOGGER.log(OpLevel.WARNING, "failed to collect JVM metrics over JMX", exc);
+		}
 		return attrsMap;
 	}
 
@@ -290,7 +383,10 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 
 	private static class MetricsRegistrySerializer extends StdSerializer<TopicMetrics> {
 
-		protected MetricsRegistrySerializer() {
+		/**
+		 * Constructs a new MetricsRegistrySerializer.
+		 */
+		MetricsRegistrySerializer() {
 			super(TopicMetrics.class);
 		}
 
@@ -308,7 +404,7 @@ public class TNTInterceptionsReporter implements InterceptionsReporter {
 	}
 
 	private static class MetricsRegistryModule extends Module {
-		public static final Version VERSION = new Version(1, 2, 0, "", "com.jkoolcloud.tnt4j.streams", // NON-NLS
+		private static final Version VERSION = new Version(1, 2, 0, "", "com.jkoolcloud.tnt4j.streams", // NON-NLS
 				"tnt4j-streams-kafka"); // NON-NLS
 
 		@Override

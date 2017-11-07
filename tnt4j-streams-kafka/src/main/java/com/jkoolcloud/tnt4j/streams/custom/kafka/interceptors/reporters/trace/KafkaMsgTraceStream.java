@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
+package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 
 /**
- * TODO
+ * Implements Kafka intercepted messages trace reporter used stream. Stream itself does nothing, only initiates
+ * streaming process. Reporter uses just stream output to send intercepted messages data to JKool Cloud.
  *
  * @version $Revision: 1 $
  */
-public class KafkaInterceptorStream<T> extends AbstractBufferedStream<T> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaInterceptorStream.class);
+class KafkaMsgTraceStream extends AbstractBufferedStream<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaMsgTraceStream.class);
 
 	private boolean ended = false;
 
-	public KafkaInterceptorStream() {
-		setName("KafkaInterceptorStream");
+	/**
+	 * Constructs a new KafkaMsgTraceStream.
+	 */
+	public KafkaMsgTraceStream() {
+		setName("KafkaMsgTraceStream"); // NON-NLS
 	}
 
 	@Override
@@ -40,7 +44,7 @@ public class KafkaInterceptorStream<T> extends AbstractBufferedStream<T> {
 	}
 
 	@Override
-	protected long getActivityItemByteSize(T activityItem) {
+	protected long getActivityItemByteSize(Object activityItem) {
 		return 0;
 	}
 
@@ -49,6 +53,9 @@ public class KafkaInterceptorStream<T> extends AbstractBufferedStream<T> {
 		return ended;
 	}
 
+	/**
+	 * Marks stream input end.
+	 */
 	public void markEnded() {
 		this.ended = true;
 	}

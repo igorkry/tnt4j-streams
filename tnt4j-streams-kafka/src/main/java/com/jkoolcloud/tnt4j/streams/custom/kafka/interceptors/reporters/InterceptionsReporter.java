@@ -26,18 +26,58 @@ import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
 
 /**
- * TODO
+ * This interface defines operations commonly used by TNT4J-Streams Kafka interceptor reporters.
  *
  * @version $Revision: 1 $
  */
 public interface InterceptionsReporter {
+	/**
+	 * Notifies reporter when Kafka producer interceptor has invoked
+	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#onSend(org.apache.kafka.clients.producer.ProducerRecord)}
+	 * event.
+	 *
+	 * @param producerRecord
+	 *            producer record to be sent
+	 */
 	void send(ProducerRecord<Object, Object> producerRecord);
 
+	/**
+	 * Notifies reporter when Kafka producer interceptor has invoked
+	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#onAcknowledgement(org.apache.kafka.clients.producer.RecordMetadata, Exception)}
+	 * event.
+	 *
+	 * @param recordMetadata
+	 *            sent message record metadata
+	 * @param e
+	 *            occurred exception
+	 * @param clusterResource
+	 *            cluster resource metadata records where sent to
+	 */
 	void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource);
 
+	/**
+	 * Notifies reporter when Kafka consumer interceptor has invoked
+	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#onConsume(org.apache.kafka.clients.consumer.ConsumerRecords)}
+	 * event.
+	 *
+	 * @param consumerRecords
+	 *            consumed records collection
+	 * @param clusterResource
+	 *            cluster resource metadata records where consumed from
+	 */
 	void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource);
 
+	/**
+	 * Notifies reporter when Kafka consumer interceptor has invoked
+	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#onCommit(java.util.Map)} event.
+	 *
+	 * @param map
+	 *            committed records topics and messages map
+	 */
 	void commit(Map<TopicPartition, OffsetAndMetadata> map);
 
+	/**
+	 * Notifies reporter that all interceptors has been closed and reporter should shutdown.
+	 */
 	void shutdown();
 }

@@ -15,9 +15,11 @@
  */
 
 /**
- * TODO
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams Kafka interceptors collected metrics data
+ * reporters.
  *
- * @version $Revision: 1 $
+ * @author akausinis
+ * @version 1.0
  */
 
-package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.jkool;
+package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics;
