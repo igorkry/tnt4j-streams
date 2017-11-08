@@ -130,6 +130,18 @@
         <field name="io-wait-time-ns-avg" locator="$.['kafka.producer:io-wait-time-ns-avg']" locator-type="Label"/>
     </parser>
 
+    <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <field name="EventName" value="Kafka producer metrics"/>
+        <field name="EventType" value="EVENT"/>
+        <field name="CpuLoad" locator="$.['java.lang:SystemCpuLoad']" locator-type="Label"/>
+        <field name="LoadedClasses" locator="$.['java.lang:TotalLoadedClassCount']" locator-type="Label"/>
+        <field name="ProcessCpuLoad" locator="$.['java.lang:ProcessCpuLoad']" locator-type="Label"/>
+        <field name="FreeSwapSpaceSize" locator="$.['java.lang:FreeSwapSpaceSize']" locator-type="Label"/>
+        <field name="FreePhysicalMemorySize" locator="$.['java.lang:FreePhysicalMemorySize']" locator-type="Label"/>
+        <field name="TotalSwapSpaceSize" locator="$.['java.lang:TotalSwapSpaceSize']" locator-type="Label"/>
+        <field name="TotalPhysicalMemorySize" locator="$.['java.lang:TotalPhysicalMemorySize']" locator-type="Label"/>
+    </parser>
+
     <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
         <property name="ActivityDelim" value="EOF"/>
 
@@ -144,6 +156,10 @@
 
             <parser-ref name="KafkaProducerMetrics" aggregation="Merge">
                 <matchExp>JPATH:$.['kafka.producer:response-rate']</matchExp>
+            </parser-ref>
+
+            <parser-ref name="JvmMetricParser" aggregation="Merge">
+                <matchExp>JPATH:$.['java.lang:Version']</matchExp>
             </parser-ref>
         </field>
     </parser>
