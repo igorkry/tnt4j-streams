@@ -29,6 +29,7 @@ import javax.xml.xpath.XPathFunctionResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName;
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName;
@@ -115,8 +116,10 @@ public final class StreamsXMLUtils {
 	 *            xml document DOM node to use
 	 * @param namespaces
 	 *            namespaces map to put resolved mappings to
+	 * @param topOnly
+	 *            flag indicating to resolve only top level namespace definitions
 	 */
-	public static void resolveDocumentNamespaces(Node xmlDoc, NamespaceMap namespaces) {
+	public static void resolveDocumentNamespaces(Node xmlDoc, NamespaceMap namespaces, boolean topOnly) {
 		if (xmlDoc instanceof Document) {
 			xmlDoc = ((Document) xmlDoc).getDocumentElement();
 		}
@@ -128,12 +131,23 @@ public final class StreamsXMLUtils {
 
 		for (int i = 0; i < attrs.getLength(); i++) {
 			Node attr = attrs.item(i);
-			if (attr.getNodeName().startsWith(XMLConstants.XMLNS_ATTRIBUTE)) {
-				String ns = attr.getNodeName().substring(XMLConstants.XMLNS_ATTRIBUTE.length());
-				if (ns.startsWith(":")) { // NON-NLS
-					ns = ns.substring(1);
+			if (attr.getNamespaceURI() != null && attr.getNamespaceURI().equals(XMLConstants.XMLNS_ATTRIBUTE_NS_URI)) {
+				String ns = attr.getLocalName();
+				if (ns.equals(XMLConstants.XMLNS_ATTRIBUTE)) {
+					ns = XMLConstants.DEFAULT_NS_PREFIX;
 				}
+
 				namespaces.setPrefixUriMapping(ns, attr.getNodeValue());
+			}
+		}
+
+		if (!topOnly) {
+			NodeList children = xmlDoc.getChildNodes();
+			for (int i = 0; i < children.getLength(); i++) {
+				Node child = children.item(i);
+				if (child.getNodeType() == Node.ELEMENT_NODE) {
+					resolveDocumentNamespaces(child, namespaces, false);
+				}
 			}
 		}
 	}

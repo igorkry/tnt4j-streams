@@ -218,6 +218,11 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	@Override
+	protected boolean isDataSupported(Object data) {
+		return true;
+	}
+
+	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
 	}
@@ -249,7 +254,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			throw pe;
 		}
 
-		StreamsXMLUtils.resolveDocumentNamespaces(xmlDoc, namespaces);
+		StreamsXMLUtils.resolveDocumentNamespaces(xmlDoc, namespaces, true);
 
 		if (xmlString == null) {
 			try {
@@ -385,7 +390,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						val = getTextContent(locator, node, formattingNeeded);
 					}
 				} else if (Utils.isCollection(val)) {
-					Object[] nodes = (Object[]) val;
+					Object[] nodes = Utils.makeArray(val);
 					for (int i = 0; i < nodes.length; i++) {
 						if (nodes[i] instanceof Node) {
 							nodes[i] = getTextContent(locator, (Node) nodes[i], formattingNeeded);

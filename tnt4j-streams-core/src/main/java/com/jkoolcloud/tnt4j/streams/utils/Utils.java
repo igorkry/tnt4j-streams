@@ -977,6 +977,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			Map<?, ?> m = (Map<?, ?>) value;
 			return toString(m.entrySet());
 		}
+		if (value instanceof Node) {
+			return ((Node) value).getTextContent();
+		}
 
 		return String.valueOf(value);
 	}
