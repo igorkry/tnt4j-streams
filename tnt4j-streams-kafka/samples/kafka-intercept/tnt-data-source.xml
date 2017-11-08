@@ -131,7 +131,7 @@
     </parser>
 
     <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <field name="EventName" value="Kafka producer metrics"/>
+        <field name="EventName" value="JMV metrics"/>
         <field name="EventType" value="EVENT"/>
         <field name="CpuLoad" locator="$.['java.lang:SystemCpuLoad']" locator-type="Label"/>
         <field name="LoadedClasses" locator="$.['java.lang:TotalLoadedClassCount']" locator-type="Label"/>

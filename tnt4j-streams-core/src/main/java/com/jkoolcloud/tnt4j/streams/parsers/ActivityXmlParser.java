@@ -218,11 +218,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	@Override
-	protected boolean isDataSupported(Object data) {
-		return true;
-	}
-
-	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
 	}
