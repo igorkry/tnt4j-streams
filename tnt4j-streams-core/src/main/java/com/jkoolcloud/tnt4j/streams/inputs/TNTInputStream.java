@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -706,20 +707,27 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 						if (streamExecutorService == null) {
 							processActivityItem(item, failureFlag);
 						} else {
-							streamExecutorService.submit(new ActivityItemProcessingTask(item, failureFlag));
+							streamExecutorService
+									.submit(new ActivityItemProcessingTask(item, failureFlag, getActivityPosition()));
 						}
 					}
 				} catch (IllegalStateException ise) {
 					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-							ise.getLocalizedMessage(), ise);
+							ExceptionUtils.getRootCauseMessage(ise), ise);
 					failureFlag.set(true);
 					notifyFailed(null, ise, null);
 					halt(false);
 				} catch (Exception exc) {
 					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-							exc.getLocalizedMessage(), exc);
+							ExceptionUtils.getRootCauseMessage(exc), exc);
+					notifyStreamEvent(OpLevel.ERROR,
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
+									ExceptionUtils.getRootCauseMessage(exc)),
+							getActivityPosition());
+					incrementSkippedActivitiesCount();
 				}
 			}
 		} catch (Exception e) {
@@ -813,7 +821,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
-	 * Returns stream name value
+	 * Returns stream name value.
 	 *
 	 * @return stream name
 	 */
@@ -822,7 +830,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
-	 * Sets stream name value
+	 * Sets stream name value.
 	 *
 	 * @param name
 	 *            stream name
@@ -1016,6 +1024,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	private class ActivityItemProcessingTask implements Runnable {
 		private T item;
 		private AtomicBoolean failureFlag;
+		private int activityPosition;
 
 		/**
 		 * Constructs a new ActivityItemProcessingTask.
@@ -1024,10 +1033,13 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		 *            raw activity data item to process asynchronously
 		 * @param failureFlag
 		 *            failure flag to set value if task processing fails
+		 * @param activityPosition
+		 *            streamed activity position index
 		 */
-		ActivityItemProcessingTask(T activityItem, AtomicBoolean failureFlag) {
+		ActivityItemProcessingTask(T activityItem, AtomicBoolean failureFlag, int activityPosition) {
 			this.item = activityItem;
 			this.failureFlag = failureFlag;
+			this.activityPosition = activityPosition;
 		}
 
 		@Override
@@ -1036,9 +1048,14 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
 				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTInputStream.failed.record.activity", e.getLocalizedMessage(), e);
-				failureFlag.set(true);
-				notifyFailed(null, e, null);
+						"TNTInputStream.failed.record.activity.at", activityPosition,
+						ExceptionUtils.getRootCauseMessage(e), e);
+				notifyStreamEvent(OpLevel.ERROR,
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"TNTInputStream.failed.record.activity.at", activityPosition,
+								ExceptionUtils.getRootCauseMessage(e)),
+						item);
+				incrementSkippedActivitiesCount();
 			}
 		}
 
