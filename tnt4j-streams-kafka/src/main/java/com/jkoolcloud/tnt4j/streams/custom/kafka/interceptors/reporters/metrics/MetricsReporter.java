@@ -60,6 +60,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 
@@ -372,11 +373,22 @@ public class MetricsReporter implements InterceptionsReporter {
 		Set<ObjectName> metricsBeans = mBeanServer.queryNames(oName, null);
 
 		for (ObjectName mBeanName : metricsBeans) {
-			MBeanInfo metricsBean = mBeanServer.getMBeanInfo(mBeanName);
-			MBeanAttributeInfo[] pMetricsAttrs = metricsBean.getAttributes();
-			for (MBeanAttributeInfo pMetricsAttr : pMetricsAttrs) {
-				attrsMap.put(prefix + pMetricsAttr.getName(),
-						mBeanServer.getAttribute(mBeanName, pMetricsAttr.getName()));
+			try {
+				MBeanInfo metricsBean = mBeanServer.getMBeanInfo(mBeanName);
+				MBeanAttributeInfo[] pMetricsAttrs = metricsBean.getAttributes();
+				for (MBeanAttributeInfo pMetricsAttr : pMetricsAttrs) {
+					try {
+						attrsMap.put(prefix + pMetricsAttr.getName(),
+								mBeanServer.getAttribute(mBeanName, pMetricsAttr.getName()));
+					} catch (Exception exc) {
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"failed to get MBean ''{0}'' attribute ''{1}'' value", mBeanName,
+								pMetricsAttr.getName(), exc);
+					}
+				}
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"failed to get MBean ''{0}'' info data", mBeanName, exc);
 			}
 		}
 	}

@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -36,23 +37,47 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * TODO
+ * Implements a Kafka topics transmitted activity stream, where each message body is assumed to represent a single
+ * activity or event which should be recorded. Topic to listen is defined using "Topic" property in stream
+ * configuration. Difference from {@link com.jkoolcloud.tnt4j.streams.inputs.KafkaStream} is that this stream uses
+ * "kafka-clients" library to implement Kafka consumer part of the stream.
+ * <p>
+ * This activity stream requires parsers that can support {@link ConsumerRecords} data like
+ * {@link com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser}.
+ * <p>
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link AbstractBufferedStream}):
+ * <ul>
+ * <li>Topic - topic name to listen. (Required)</li>
+ * <li>FileName - Kafka Consumer configuration file ({@code "consumer.properties"}) path. (Optional)</li>
+ * <li>List of Kafka Consumer configuration properties. @see
+ * <a href="https://kafka.apache.org/documentation/#consumerconfigs">Kafka Consumer configuration reference</a></li>.
+ * </ul>
+ * <p>
+ * NOTE: those file defined Kafka consumer properties gets merged with ones defined in stream configuration - user
+ * defined properties. So You can take some basic consumer configuration form file and customize it using stream
+ * configuration defined properties.
  *
  * @version $Revision: 1 $
+ *
+ * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
+ * @see com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser
+ * @see com.jkoolcloud.tnt4j.streams.inputs.KafkaStream
  */
 public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStreamC.class);
 
 	/**
-	 * Kafka server/consumer properties scope mapping key.
+	 * Kafka consumer user (over stream configuration) defined configuration scope mapping key.
 	 */
-	protected static final String PROP_SCOPE_COMMON = "common"; // NON-NLS
+	protected static final String PROP_SCOPE_USER = "user"; // NON-NLS
 	/**
-	 * Kafka consumer properties scope mapping key.
+	 * Kafka consumer properties file defined configuration scope mapping key.
 	 */
 	protected static final String PROP_SCOPE_CONSUMER = "consumer"; // NON-NLS
 
 	private String topicName;
+	private String cfgFileName;
 
 	private Map<String, Properties> userKafkaProps;
 
@@ -82,6 +107,8 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 				String value = prop.getValue();
 				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 					topicName = value;
+				} else if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+					cfgFileName = value;
 				} else {
 					Field[] propFields = StreamProperties.class.getDeclaredFields();
 
@@ -103,12 +130,28 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 				}
 			}
 		}
+
+		if (StringUtils.isNotEmpty(cfgFileName)) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaStreamC.consumer.cfgFile.load", cfgFileName);
+			try {
+				Properties fCfgProps = Utils.loadPropertiesFile(cfgFileName);
+				userKafkaProps.put(PROP_SCOPE_CONSUMER, fCfgProps);
+			} catch (IOException exc) {
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"KafkaStreamC.consumer.cfgFile.load.failed", exc);
+			}
+		}
 	}
 
 	@Override
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 			return topicName;
+		}
+
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			return cfgFileName;
 		}
 
 		Object prop = super.getProperty(name);
@@ -146,7 +189,7 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 	}
 
 	/**
-	 * Gets user defined (from stream configuration) Kafka server configuration property value.
+	 * Gets user defined (from stream configuration) Kafka consumer configuration property value.
 	 *
 	 * @param pName
 	 *            fully qualified property name
@@ -157,10 +200,10 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 			return null;
 		}
 
-		String[] pParts = tokenizePropertyName(pName);
-		Properties sProperties = userKafkaProps.get(pParts[0]);
+		// String[] pParts = tokenizePropertyName(pName);
+		Properties sProperties = userKafkaProps.get(PROP_SCOPE_USER);
 
-		return sProperties == null ? null : sProperties.getProperty(pParts[1]);
+		return sProperties == null ? null : sProperties.getProperty(pName);
 	}
 
 	/**
@@ -186,7 +229,7 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 		}
 
 		if (StringUtils.isEmpty(pParts[0])) {
-			pParts[0] = PROP_SCOPE_COMMON;
+			pParts[0] = PROP_SCOPE_USER;
 		}
 
 		return pParts;
@@ -207,8 +250,8 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 			allScopeProperties.putAll(sProperties);
 		}
 
-		if (!PROP_SCOPE_COMMON.equals(scope)) {
-			sProperties = userKafkaProps.get(PROP_SCOPE_COMMON);
+		if (!PROP_SCOPE_USER.equals(scope)) {
+			sProperties = userKafkaProps.get(PROP_SCOPE_USER);
 			if (sProperties != null) {
 				allScopeProperties.putAll(sProperties);
 			}
@@ -270,7 +313,7 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 		private Collection<String> topics;
 
 		private KafkaDataReceiver() {
-			super("KafkaStreamC.KafkaDataReceiver");
+			super("KafkaStreamC.KafkaDataReceiver"); // NON-NLS
 		}
 
 		/**

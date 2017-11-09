@@ -63,6 +63,9 @@ import kafka.server.KafkaServerStartable;
  * <li>ActivityTransport - activity transport definition: 'Kafka'.</li>
  * </ul>
  * <p>
+ * NOTE: if {@link org.apache.kafka.clients.consumer.ConsumerRecords} is preferred to be used as activity RAW data
+ * packages, use {@link com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC} instead.
+ * <p>
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
  * <ul>
@@ -75,7 +78,7 @@ import kafka.server.KafkaServerStartable;
  * {@link kafka.consumer.ConsumerConfig} for more details on Kafka consumer properties. @see
  * <a href="https://kafka.apache.org/08/configuration.html">Kafka configuration reference</a></li>.
  * </ul>
- *
+ * <p>
  * Default ZooKeeper and Kafka server configuration properties are loaded from configuration files referenced by Java
  * System properties:
  * <ul>
@@ -84,7 +87,7 @@ import kafka.server.KafkaServerStartable;
  * <li>tnt4j.kafka.srv.config - defines path of Kafka server configuration properties file. Sample:
  * {@code -Dtnt4j.kafka.srv.config=tnt4j-streams-kafka/config/kafka-server.properties}</li>
  * </ul>
- *
+ * <p>
  * NOTE: those file defined Kafka server properties gets merged with ones defined in stream configuration - user defined
  * properties.
  *
@@ -94,6 +97,7 @@ import kafka.server.KafkaServerStartable;
  * @see ActivityMapParser
  * @see kafka.consumer.ConsumerConfig
  * @see kafka.server.KafkaServer
+ * @see com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC
  */
 public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);

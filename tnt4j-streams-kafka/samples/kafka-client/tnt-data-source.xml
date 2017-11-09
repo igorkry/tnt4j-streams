@@ -40,6 +40,7 @@
     <stream name="SampleKafkaClientStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC">
         <property name="HaltIfNoParser" value="false"/>
         <property name="Topic" value="TNT4JStreams"/>
+        <!--<property name="FileName" value="./tnt4j-streams-kafka/config/intercept/consumer.properties"/>-->
 
         <!-- Kafka consumer properties -->
         <property name="bootstrap.servers" value="localhost:9092"/>
