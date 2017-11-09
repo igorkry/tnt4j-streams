@@ -64,8 +64,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser
  * @see com.jkoolcloud.tnt4j.streams.inputs.KafkaStream
  */
-public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStreamC.class);
+public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaConsumerStream.class);
 
 	/**
 	 * Kafka consumer user (over stream configuration) defined configuration scope mapping key.
@@ -84,9 +84,9 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 	private KafkaDataReceiver kafkaDataReceiver;
 
 	/**
-	 * Constructs a new KafkaStreamC.
+	 * Constructs a new KafkaConsumerStream.
 	 */
-	public KafkaStreamC() {
+	public KafkaConsumerStream() {
 		super();
 	}
 
@@ -133,13 +133,13 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 
 		if (StringUtils.isNotEmpty(cfgFileName)) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"KafkaStreamC.consumer.cfgFile.load", cfgFileName);
+					"KafkaConsumerStream.consumer.cfgFile.load", cfgFileName);
 			try {
 				Properties fCfgProps = Utils.loadPropertiesFile(cfgFileName);
 				userKafkaProps.put(PROP_SCOPE_CONSUMER, fCfgProps);
 			} catch (IOException exc) {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-						"KafkaStreamC.consumer.cfgFile.load.failed", exc);
+						"KafkaConsumerStream.consumer.cfgFile.load.failed", exc);
 			}
 		}
 	}
@@ -313,7 +313,7 @@ public class KafkaStreamC extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
 		private Collection<String> topics;
 
 		private KafkaDataReceiver() {
-			super("KafkaStreamC.KafkaDataReceiver"); // NON-NLS
+			super("KafkaConsumerStream.KafkaDataReceiver"); // NON-NLS
 		}
 
 		/**

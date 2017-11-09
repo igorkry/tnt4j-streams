@@ -64,7 +64,7 @@ import kafka.server.KafkaServerStartable;
  * </ul>
  * <p>
  * NOTE: if {@link org.apache.kafka.clients.consumer.ConsumerRecords} is preferred to be used as activity RAW data
- * packages, use {@link com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC} instead.
+ * packages, use {@link KafkaConsumerStream} instead.
  * <p>
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link TNTParseableInputStream}):
@@ -97,7 +97,7 @@ import kafka.server.KafkaServerStartable;
  * @see ActivityMapParser
  * @see kafka.consumer.ConsumerConfig
  * @see kafka.server.KafkaServer
- * @see com.jkoolcloud.tnt4j.streams.inputs.KafkaStreamC
+ * @see KafkaConsumerStream
  */
 public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
