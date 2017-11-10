@@ -398,9 +398,10 @@ Sample:
 ``` 
 
 Types of data match evaluation expressions:
-* `String` (default) - it must contain method name from {@link StringUtils} class, and arguments. First method parameter is always bound to 
-`data` value, so only subsequent parameters shall be defined in expression e.g. `contains(PAYMENT)`, `isEmpty()`. To invert evaluation 
-value start expression definition with `!` char.
+* `String` (default) - it must contain a method name from the `StringUtils` class and arguments. The method's first parameter is implied 
+and not specified; it's always bound to the value of the message `data` being parsed. Only subsequent parameters need to be defined in the 
+expression e.g. `contains(PAYMENT)`, `isEmpty()`. To negate the expression result, start the expression definition with the `!` negate 
+character.
 
 Some samples: 
 ```xml
