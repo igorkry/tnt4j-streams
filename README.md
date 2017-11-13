@@ -467,8 +467,14 @@ Types of context evaluation expressions:
     <matchExp>xpath:boolean(${ObjectStatus})</matchExp>
     <matchExp>xpath:${EventName} = 'foo'</matchExp>
     <matchExp>xpath:${PaymentSum} >= 500</matchExp>
+    <matchExp>xpath:boolean(ts:getFileName(${FilePath}))</matchExp>
 </parser-ref>
-```  
+``` 
+The last match expression uses our custom XPath function `getFileName` wrapped with the XPath `boolean` function
+to test if a file name was found.
+
+There are many XPath functions that can be used. See section [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions) 
+and Oracle's [Using XPath Functions](https://docs.oracle.com/cd/E35413_01/doc.722/e35419/dev_xpath_functions.htm#autoId18) reference.
 
 #### Resolved activity entities aggregation
 

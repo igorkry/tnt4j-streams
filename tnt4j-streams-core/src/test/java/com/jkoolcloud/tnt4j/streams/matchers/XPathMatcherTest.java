@@ -44,11 +44,13 @@ public class XPathMatcherTest {
 	@Test
 	public void evaluateTrue() throws Exception {
 		assertTrue(Matchers.evaluate("xpath:/Request/header[currency='EUR']/messageId", xml));
+		assertTrue(Matchers.evaluate("xpath:boolean(/Request)", xml));
 	}
 
 	@Test
 	public void evaluateFalse() throws Exception {
 		assertFalse(Matchers.evaluate("xpath:/Request/header[currency='USD']/messageId", xml));
+		assertFalse(Matchers.evaluate("xpath:boolean(/Request1)", xml));
 	}
 
 	@Test

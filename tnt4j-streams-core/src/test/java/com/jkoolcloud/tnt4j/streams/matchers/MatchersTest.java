@@ -33,12 +33,18 @@ public class MatchersTest {
 	@Test
 	public void contextExpressionTest() throws Exception {
 		ActivityField objNameField = new ActivityField("ObjectName");
+		ActivityField objPathField = new ActivityField("ObjectPath");
+		ActivityField nullField = new ActivityField("NullField");
 
 		ActivityInfo ai = new ActivityInfo();
 		ai.setFieldValue(objNameField, "ccc");
+		ai.setFieldValue(objPathField, "/xxx/yyy/obj.com");
+		ai.setFieldValue(nullField, null);
 
 		assertTrue(Matchers.evaluate("groovy:${ObjectName} == \"ccc\"", ai));
 		assertTrue(Matchers.evaluate("groovy:${ObjectName}.startsWith(\"cc\")", ai));
 		assertFalse(Matchers.evaluate("js:${ObjectName}.toUpperCase().indexOf(\"ccc\") == 0", ai));
+		assertTrue(Matchers.evaluate("xpath:boolean(ts:getFileName(${ObjectPath}))", ai));
+		assertFalse(Matchers.evaluate("xpath:boolean(ts:getFileName(${NullField}))", ai));
 	}
 }

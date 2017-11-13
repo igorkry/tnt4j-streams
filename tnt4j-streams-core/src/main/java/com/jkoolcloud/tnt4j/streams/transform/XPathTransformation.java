@@ -104,13 +104,16 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 
 		@Override
 		public Object resolveVariable(QName variableName) {
+			Object varValue;
 			if (variableName.equals(new QName(FIELD_VALUE_VARIABLE_NAME))) {
-				return valuesMap.get(OWN_FIELD_VALUE_KEY);
+				varValue = valuesMap.get(OWN_FIELD_VALUE_KEY);
+			} else {
+				String varNameStr = "$" + variableName.toString(); // NON-NLS
+
+				varValue = valuesMap.get(varNameStr);
 			}
 
-			String varNameStr = "$" + variableName.toString(); // NON-NLS
-
-			return valuesMap.get(varNameStr);
+			return varValue == null ? "" : varValue;
 		}
 	}
 }
