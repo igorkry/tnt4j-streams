@@ -3940,6 +3940,64 @@ Stream configuration states that `FileStream` referencing `MQErrLogParser` shall
 `MQErrLogParser` maps IBM MQ error log entry resolved fields to activity event fields. There is additional field `ResourceName` resolved 
 from stream configuration data and referring stream input (IBM MQ error log) file name.
 
+#### String ranges streaming
+
+This sample shows how to stream SOCGEN messages strings from file entries as activity events. Each file entry string represents activity 
+event and fields of event are substring ranges.
+
+Sample files can be found in `samples/string-ranges` directory (`tnt4j-streams-core` module).
+
+Sample error log file is available in `strings.txt` file. Now it contains only one entry.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="StrRangesParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityStringParser">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EventName" value="SOCGEN_Msg_Data"/>
+
+        <field name="TransID">  <!-- offsets 0-13 inclusive, length=14, ck line length >= extract length; expected value: TID_TEST3B_456   ok -->
+            <field-locator locator="0:14" locator-type="Range"/>
+        </field>
+        <field name="TransType">  <!-- offsets 20-35 inclusive, length=16, ck line length > starting offset, expected value: TYPE_TEST3B_SALE   ok -->
+            <field-locator locator="20:36" locator-type="Range"/>
+        </field>
+        <field name="TransValue">  <!-- offsets 70-89 inclusive, field length=15, ck line length > starting offset, expected value: AMT_TEST3B_USD123.45   ok -->
+            <field-locator locator="70:90" locator-type="Range"/>
+        </field>
+        <field name="UserData">  <!-- offsets 123-145 inclusive, length=23, ck line length > starting offset, expected value: TEST3B_Model iSeries123   ok -->
+            <field-locator locator="123:146" locator-type="Range"/>
+        </field>
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/string-ranges/strings.txt"/>
+
+        <parser-ref name="StrRangesParser"/>
+    </stream>
+</tnt-data-source>
+``` 
+
+Stream configuration states that `FileStream` referencing `StrRangesParser` shall be used. Stream reads message entries from 
+`./tnt4j-streams-core/samples/string-ranges/strings.txt` file contents an passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+`StrRangesParser` picks range defined substrings and maps them to activity event fields. For example `TransID` is substring ranging 0-13 within 
+provided string. **NOTE** that range lower bound is treated **inclusive** and upper bound - **exclusive**.
+
+`Range` values can be defined as this:
+ * `:x` - from the `beginning` of the string to character at the index `x` (**exclusive**)
+ * `x:y` - from character at the index `x` (**inclusive**) to character at the index `y` (**exclusive**)
+ * `x:` - from character at the index `x` (**inclusive**) to the `end` of the string
+ 
 #### Fluentd logs streaming
 
 TODO 
