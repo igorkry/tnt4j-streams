@@ -33,7 +33,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * NOTE: this stream just pipe input from RAW input source (e.g., System.in) and does not open it. This way when closing
  * this stream, RAW {@link InputStream} or {@link Reader} is not closed and left to be closed by opener.
  * <p>
- * This activity stream supports properties from {@link JavaInputStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link JavaInputStream} (and higher hierarchy streams).
  * 
  * @version $Revision: 2 $
  *

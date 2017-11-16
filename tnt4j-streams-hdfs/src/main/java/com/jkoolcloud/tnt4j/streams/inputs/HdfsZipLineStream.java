@@ -30,7 +30,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports properties from {@link ZipLineStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link ZipLineStream} (and higher hierarchy streams).
  *
  * @version $Revision: 1 $
  *
@@ -59,7 +59,7 @@ public class HdfsZipLineStream extends ZipLineStream {
 	 */
 	@Override
 	protected InputStream loadFile(String zipPath) throws Exception {
-		final URI fileUri = new URI(zipPath);
+		URI fileUri = new URI(zipPath);
 		if (fs == null) {
 			fs = FileSystem.get(fileUri, new Configuration());
 		}

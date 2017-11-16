@@ -31,6 +31,9 @@ import org.apache.poi.ss.usermodel.Workbook;
  * {@link org.apache.poi.ss.usermodel.Sheet} or {@link org.apache.poi.ss.usermodel.Row}), where each field is
  * represented by a {@link org.apache.poi.ss.usermodel.Cell} and the sheet name and cell identifier (row number and
  * column letter) is used to map cell(s) contained data into its corresponding activity field.
+ * <p>
+ * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
+ * parsers).
  *
  * @version $Revision: 1 $
  */

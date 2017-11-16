@@ -30,7 +30,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
  * <p>
  * This activity stream requires parsers that can support {@link Reader}s as the source for activity data.
  * <p>
- * This activity stream supports properties from {@link FeedInputStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link FeedInputStream} (and higher hierarchy streams).
  * 
  * @version $Revision: 1 $
  *

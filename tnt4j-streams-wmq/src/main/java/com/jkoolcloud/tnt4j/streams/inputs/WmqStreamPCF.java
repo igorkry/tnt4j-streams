@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * <p>
  * This activity stream requires parsers that can support {@link PCFContent} data.
  * <p>
- * This activity stream supports properties from {@link AbstractWmqStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link AbstractWmqStream} (and higher hierarchy streams).
  *
  * @version $Revision: 2 $
  */

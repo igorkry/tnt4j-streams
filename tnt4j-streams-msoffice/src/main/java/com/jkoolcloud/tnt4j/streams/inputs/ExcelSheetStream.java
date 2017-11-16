@@ -27,7 +27,8 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * <p>
  * This activity stream requires parsers that can support {@link Sheet} data.
  * <p>
- * This activity stream supports properties from {@link AbstractExcelStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link AbstractExcelStream} (and higher hierarchy
+ * streams).
  *
  * @version $Revision: 1 $
  *

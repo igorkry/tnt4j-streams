@@ -27,6 +27,8 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser;
  * trace parameters group ({@link MQCFGR} having parameter value {@code MQGACF_ACTIVITY_TRACE}).
  * <p>
  * Now it does all the same as {@link ActivityPCFParser} and left only for backward compatibility.
+ * <p>
+ * This parser supports configuration properties from {@link ActivityPCFParser} (and higher hierarchy parsers).
  *
  * @version $Revision: 2 $
  * @deprecated use {@link ActivityPCFParser} instead.

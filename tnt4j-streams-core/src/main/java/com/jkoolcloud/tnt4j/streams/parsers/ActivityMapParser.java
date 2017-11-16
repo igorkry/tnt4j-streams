@@ -29,6 +29,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * field.
  * <p>
  * Additionally this parser makes activity data transformation from {@code byte[]} to {@link String}.
+ * <p>
+ * This activity parser supports configuration properties from {@link AbstractActivityMapParser} (and higher hierarchy
+ * parsers).
  *
  * @version $Revision: 1 $
  */

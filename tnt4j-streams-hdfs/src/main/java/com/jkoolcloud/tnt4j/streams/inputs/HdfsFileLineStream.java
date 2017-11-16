@@ -45,7 +45,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports properties from {@link AbstractFileLineStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link AbstractFileLineStream} (and higher hierarchy
+ * streams).
  *
  * @version $Revision: 2 $
  *
