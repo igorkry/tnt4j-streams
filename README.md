@@ -4987,6 +4987,18 @@ This parser has no additional configuration properties.
 
 Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
+#### Activity Java object (POJO) parser
+
+This parser has no additional configuration properties.
+
+Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
+
+#### Activity String parser
+ 
+This parser has no additional configuration properties.
+
+Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
+
 ### Pre-parsers
 
 `TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, supported by 

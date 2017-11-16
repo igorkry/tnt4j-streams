@@ -16,7 +16,6 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
@@ -265,7 +264,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private boolean isValueTranslatable(ActivityFieldDataType fDataType) {
-		return translateNumValues && fDataType == ActivityFieldDataType.String;
+		return translateNumValues
+				&& (fDataType == ActivityFieldDataType.String || fDataType == ActivityFieldDataType.Generic);
 	}
 
 	/**
@@ -582,7 +582,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			val = resolveMQSCOValue((MQSCO) mqiSruct, path[i], fDataType);
 		} else {
 			try {
-				val = resolveObjectValue(mqiSruct, path, i);
+				val = Utils.getFieldValue(path, mqiSruct, i);
 			} catch (Exception exc) {
 				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityPCFParser.structure.value.resolution.failed", exc);
@@ -951,21 +951,6 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldDataType fDataType) {
 		return mqsco; // TODO
-	}
-
-	private static Object resolveObjectValue(Object obj, String[] path, int i) throws Exception {
-		Object val = null;
-		String fieldName = path[i];
-
-		Field f = obj.getClass().getDeclaredField(fieldName);
-		f.setAccessible(true);
-		val = f.get(obj);
-
-		if (!isLastPathToken(path, i)) {
-			val = resolveObjectValue(val, path, i + 1);
-		}
-
-		return val;
 	}
 
 	/**

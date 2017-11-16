@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+
 /**
  * Lists the build-in raw activity field locator types.
  * <p>
@@ -50,6 +52,11 @@ public enum ActivityFieldLocatorType {
 	 * identifier can be group sequence number or name.
 	 */
 	REMatchId(String.class),
+
+	/**
+	 * Indicates that raw data value is the range within enclosing object: r.g. characters range within string.
+	 */
+	Range(IntRange.class),
 
 	/**
 	 * Indicates that data value is the value from stream stored cache with specified cache entry key.

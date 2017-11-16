@@ -22,44 +22,67 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.StringUtils;
 
-import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
- * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} (POJO) data
- * structure, where each field is represented by declared class field and the field name is used to map each field into
- * its corresponding activity field.
+ * Implements an activity data parser that assumes each activity data item is a string (0-based characters array), where
+ * each field is represented as range of substring characters. Range values can be:
+ * <ul>
+ * <li>{@code ":x"} - from the beginning of the string to character at the index {@code x} (exclusive)</li>
+ * <li>{@code "x:y"} - from character at the index {@code x} (inclusive) to character at the index {@code y}
+ * (exclusive)</li>
+ * <li>{@code "x:"} - from character at the index {@code x} (inclusive) to the end of the string</li>
+ * </ul>
  * <p>
- * If field is complex object, sub-fields can be accessed using
- * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator:
- * e.g., 'header.author.name'.
+ * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
+ * parsers).
  * <p>
  * This activity parser supports those activity field locator types:
  * <ul>
- * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
  * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#StreamProp}</li>
  * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Cache}</li>
  * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
  * </ul>
+ * <p>
+ * Here are some examples of how this parser can be used:
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ *  <parser name="StrRangesParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityStringParser">
+ *      <field name="EventType" value="EVENT"/>
+ *      <field name="EventName" value="SOCGEN_Msg_Data"/>
+ *
+ * 		<field name= "TransID" field-locator locator="0:14" locator-type="Range"/>
+ * 		<field name= "TransType" field-locator locator="20:36" locator-type="Range"/>
+ * 		<field name= "TransValue"field-locator locator="70:90" locator-type="Range"/>
+ * 		<field name= "UserData" field-locator locator="123:146" locator-type="Range"/>
+ * 	</parser>
+ * </pre>
+ * 
+ * </blockquote>
+ * <p>
  *
  * @version $Revision: 1 $
+ *
+ * @see com.jkoolcloud.tnt4j.streams.utils.IntRange
  */
-public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJavaObjectParser.class);
+public class ActivityStringParser extends GenericActivityParser<String> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityStringParser.class);
 
 	/**
-	 * Constructs a new ActivityJavaObjectParser.
+	 * Constructs a new ActivityStringParser.
 	 */
-	public ActivityJavaObjectParser() {
+	public ActivityStringParser() {
 		super();
 	}
 
@@ -87,35 +110,17 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		// }
 	}
 
-	/**
-	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
-	 * determine if the parser can parse the data in the format that the stream has it.
-	 * <p>
-	 * This parser supports the following class types (and all classes extending/implementing any of these):
-	 * <ul>
-	 * <li>{@link java.lang.Object}</li>
-	 * </ul>
-	 *
-	 * @param data
-	 *            data object whose class is to be verified
-	 * @return {@code true} if this parser can process data in the specified format, {@code false} - otherwise
-	 */
-	@Override
-	protected boolean isDataClassSupportedByParser(Object data) {
-		return Object.class.isInstance(data);
-	}
-
 	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
-		ActivityContext cData = new ActivityContext(stream, data, data);
-		cData.setMessage(getRawDataAsMessage(data));
+		String dataStr = getNextActivityString(data);
+		if (StringUtils.isEmpty(dataStr)) {
+			return null;
+		}
+
+		ActivityContext cData = new ActivityContext(stream, data, dataStr);
+		cData.setMessage(dataStr);
 
 		return cData;
-	}
-
-	@Override
-	protected String getRawDataAsMessage(Object data) {
-		return ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 	}
 
 	/**
@@ -127,35 +132,30 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 *            activity data carrier object
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
-	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 * @return substring value resolved by locator, or {@code null} if value is not resolved
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
-			AtomicBoolean formattingNeeded) {
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
 		try {
-			val = Utils.getFieldValue(path, cData.getData(), 0);
+			IntRange range = IntRange.getRange(locStr, true);
+
+			val = StringUtils.substring(cData.getData(), range.getFrom(), range.getTo());
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "ActivityJavaObjectParser.resolve.locator.value.failed", exc);
+			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ActivityStringParser.range.exception"), 0);
+			pe.initCause(exc);
+
+			throw pe;
 		}
 
 		return val;
 	}
 
-	/**
-	 * Returns type of RAW activity data entries.
-	 *
-	 * @return type of RAW activity data entries - OBJECT
-	 */
-	@Override
-	protected String getActivityDataType() {
-		return "OBJECT"; // NON-NLS
-	}
-
 	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
-			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.REMatchId, ActivityFieldLocatorType.Range);
+			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.Label, ActivityFieldLocatorType.REMatchId);
 
 	/**
 	 * {@inheritDoc}
@@ -163,8 +163,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * Unsupported activity locator types are:
 	 * <ul>
 	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Index}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
 	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#REMatchId}</li>
-	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
 	 * </ul>
 	 */
 	@Override

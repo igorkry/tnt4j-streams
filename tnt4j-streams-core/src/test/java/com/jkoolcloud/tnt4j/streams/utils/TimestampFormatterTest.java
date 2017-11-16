@@ -38,23 +38,23 @@ public class TimestampFormatterTest {
 		Number testNum = 100000L;
 		for (TimeUnit fromUnits : TimeUnit.values()) {
 			for (TimeUnit toUnits : TimeUnit.values()) {
-				final Number convert = TimestampFormatter.convert(testNum, fromUnits, toUnits);
-				final Number convertBack = TimestampFormatter.convert(testNum, toUnits, fromUnits);
+				Number convert = TimestampFormatter.convert(testNum, fromUnits, toUnits);
+				Number convertBack = TimestampFormatter.convert(testNum, toUnits, fromUnits);
 			}
 		}
 	}
 
 	@Test
 	public void testParse() throws ParseException {
-		final Date date = new Date();
+		Date date = new Date();
 		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
 		assertNotNull(TimestampFormatter.parse(TimeUnit.MILLISECONDS, date));
-		assertNotNull(formatter.parse(date));
+		assertNotNull(formatter.parseAny(date));
 		assertNotNull(TimestampFormatter.parse(TimeUnit.MICROSECONDS, Calendar.getInstance()));
-		assertNotNull(formatter.parse(Calendar.getInstance()));
+		assertNotNull(formatter.parseAny(Calendar.getInstance()));
 		assertNotNull(TimestampFormatter.parse(TimeUnit.SECONDS, date.getTime()));
-		assertNotNull(formatter.parse(String.valueOf(date.getTime())));
-		assertNotNull(formatter.parse(date.getTime()));
+		assertNotNull(formatter.parseAny(String.valueOf(date.getTime())));
+		assertNotNull(formatter.parseAny(date.getTime()));
 		// formatter.setPattern("# ", Locale.FRENCH.toString()); TODO
 		// assertNotNull(formatter.parse(String.valueOf(date.getTime())));
 		assertNotNull(TimestampFormatter.parse(TimeUnit.DAYS, 4.70));
@@ -74,13 +74,13 @@ public class TimestampFormatterTest {
 	@Test(expected = ParseException.class)
 	public void testParseExcepion2() throws ParseException {
 		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
-		formatter.parse(this);
+		formatter.parseAny(this);
 	}
 
 	@Test
 	public void testTimeZone() {
 		TimestampFormatter formatter = new TimestampFormatter(TimeUnit.MILLISECONDS);
-		final String timezone = TimeZone.getDefault().toString();
+		String timezone = TimeZone.getDefault().toString();
 		formatter.setTimeZone(timezone);
 		assertEquals(timezone, formatter.getTimeZone());
 	}

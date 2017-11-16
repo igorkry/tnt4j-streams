@@ -313,6 +313,7 @@ public class ActivityInfo {
 				break;
 			case Correlator:
 				addCorrelator(Utils.getTags(fieldValue));
+				// addCorrelator(Utils.getTags(formatTagsObject(fieldValue, field)));
 				break;
 			case ElapsedTime:
 				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class));
@@ -441,6 +442,8 @@ public class ActivityInfo {
 			case DateTime:
 			case Timestamp:
 				return getTimestampValue(fieldValue, field);
+			case Generic:
+				return getPredictedValue(fieldValue, field);
 			case Binary:
 			default:
 				return getStringValue(fieldValue, field);
@@ -450,12 +453,40 @@ public class ActivityInfo {
 		return getStringValue(fieldValue, field);
 	}
 
+	private static Object getPredictedValue(Object fieldValue, ActivityField field) {
+		// is it a number
+		try {
+			return getNumberValue(fieldValue);
+		} catch (NumberFormatException e) {
+		}
+
+		// is it a boolean
+		try {
+			Boolean b = getBooleanValue(fieldValue);
+			if (b != null) {
+				return b;
+			}
+		} catch (Exception exc) {
+		}
+
+		// is it a timestamp
+		try {
+			return getTimestampValue(fieldValue, field);
+		} catch (ParseException e1) {
+		}
+
+		// make a string eventually
+		return getStringValue(fieldValue, field);
+	}
+
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
 		ActivityFieldLocator fmLocator = field.getMasterLocator();
+		UsecTimestamp timestamp = TimestampFormatter.getTimestamp(fieldValue);
+		if (timestamp != null) {
+			return timestamp;
+		}
 
-		if (fieldValue instanceof UsecTimestamp) {
-			return (UsecTimestamp) fieldValue;
-		} else if (fieldValue instanceof Number) {
+		if (fieldValue instanceof Number) {
 			return new UsecTimestamp((Number) fieldValue);
 		} else {
 			return TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
@@ -1191,6 +1222,10 @@ public class ActivityInfo {
 		Number num = value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
 
 		return Utils.castNumber(num, clazz);
+	}
+
+	private static Boolean getBooleanValue(Object value) {
+		return value instanceof Boolean ? (Boolean) value : Utils.getBoolean(value);
 	}
 
 	/**

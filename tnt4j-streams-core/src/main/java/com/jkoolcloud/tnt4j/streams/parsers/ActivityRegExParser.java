@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -40,7 +41,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
- * specified regular expression, with the value for each field being retrieved from either of the 1-based group
+ * specified regular expression, with the value for each field being retrieved from either of the 0-based group
  * position, match position, or group name.
  * <p>
  * This parser supports the following configuration properties (in addition to those supported by
@@ -51,10 +52,20 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * string. Value can be one of: {@code "MATCH"} - pattern should match complete input string, or {@code "FIND"} -
  * pattern has to match subsequence within input string. Default value - '{@code MATCH}'. (Optional)</li>
  * </ul>
+ * <p>
+ * This activity parser supports those activity field locator types:
+ * <ul>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Index}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#REMatchId}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#StreamProp}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Cache}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
-public class ActivityRegExParser extends GenericActivityParser<Object> {
+public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
 
 	private static final String MATCHES_KEY = "MATCHES_DATA"; // NON-NLS
@@ -215,7 +226,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		if (!matchMap.isEmpty()) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityRegExParser.applying.regex", matchMap.size());
-			Map<String, String> matches = findMatches((Matcher) cData.getData());
+			Map<String, String> matches = findMatches(cData.getData());
 
 			cData.put(MATCHES_KEY, matches);
 			resolveLocatorsValues(matchMap, cData);
@@ -285,12 +296,12 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 			matcher.reset();
 			while (matcher.find()) {
 				int gc = matcher.groupCount();
-				for (int gi = 1; gi <= gc; gi++) {
+				for (int gi = 0; gi <= gc; gi++) {
 					String matchStr = matcher.group(gi);
 					if (matchStr != null) {
 						addMatchEntry(matches, String.valueOf(gi), matchStr);
 
-						if (namedGroupsMap != null) {
+						if (MapUtils.isNotEmpty(namedGroupsMap)) {
 							for (Map.Entry<String, Integer> namedGroup : namedGroupsMap.entrySet()) {
 								if (gi == namedGroup.getValue()) {
 									addMatchEntry(matches, namedGroup.getKey(), matchStr);
@@ -344,7 +355,7 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 				Map<String, String> matches = (Map<String, String>) cData.get(MATCHES_KEY);
 				val = matches.get(locStr);
 			} else {
-				Matcher matcher = (Matcher) cData.getData();
+				Matcher matcher = cData.getData();
 				ActivityFieldLocatorType locType = locator.getBuiltInType();
 
 				if (locType != null && locType.getDataType() == Integer.class) {
@@ -396,6 +407,22 @@ public class ActivityRegExParser extends GenericActivityParser<Object> {
 		Map<String, Integer> namedGroups = (Map<String, Integer>) namedGroupsMethod.invoke(regexPattern);
 
 		return namedGroups == null ? null : Collections.unmodifiableMap(namedGroups);
+	}
+
+	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
+			.of(ActivityFieldLocatorType.Range);
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Unsupported activity locator types are:
+	 * <ul>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
+	 * </ul>
+	 */
+	@Override
+	protected EnumSet<ActivityFieldLocatorType> getUnsupportedLocatorTypes() {
+		return UNSUPPORTED_LOCATOR_TYPES;
 	}
 
 	/**

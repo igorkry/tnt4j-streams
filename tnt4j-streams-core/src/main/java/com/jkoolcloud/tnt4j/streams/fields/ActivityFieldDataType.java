@@ -46,5 +46,11 @@ public enum ActivityFieldDataType {
 	 * Raw data value is interpreted as a numeric timestamp, optionally in the specified units (assumed to be in
 	 * milliseconds if not specified).
 	 */
-	Timestamp
+	Timestamp,
+
+	/**
+	 * Raw data value is interpreted as a generic value and streams should try to predict real value out of it: boolean,
+	 * number, timestamp, date, string.
+	 */
+	Generic
 }

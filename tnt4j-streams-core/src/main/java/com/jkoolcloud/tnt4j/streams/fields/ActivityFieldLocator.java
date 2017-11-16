@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
@@ -43,7 +44,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 
 	private String type = null;
 	private String locator = null;
-	private ActivityFieldDataType dataType = ActivityFieldDataType.String;
+	private ActivityFieldDataType dataType = ActivityFieldDataType.Generic;
 	private int radix = 10;
 	private String units = null;
 	private String format = null;
@@ -119,11 +120,28 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	private void validateLocator() {
-		if (builtInType != null && builtInType.getDataType() == Integer.class) {
-			int loc = Integer.parseInt(locator);
-			if (loc <= 0) {
-				throw new IllegalArgumentException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityFieldLocator.numeric.locator.positive"));
+		if (builtInType != null) {
+			if (builtInType.getDataType() == Integer.class) {
+				try {
+					int loc = Integer.parseInt(locator);
+					if (loc < 0) {
+						throw new IllegalArgumentException(
+								StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"ActivityFieldLocator.numeric.locator.positive"));
+					}
+				} catch (NumberFormatException exc) {
+					throw new IllegalArgumentException(
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityFieldLocator.invalid.numeric.locator", locator));
+				}
+			} else if (builtInType.getDataType() == IntRange.class) {
+				try {
+					IntRange.getRange(locator, true);
+				} catch (Exception exc) {
+					throw new IllegalArgumentException(
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityFieldLocator.invalid.range.locator", locator));
+				}
 			}
 		}
 	}
@@ -235,7 +253,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *            the data type for raw data field
 	 */
 	public void setDataType(ActivityFieldDataType dataType) {
-		this.dataType = dataType;
+		this.dataType = dataType == null ? ActivityFieldDataType.Generic : dataType;
 	}
 
 	/**
@@ -472,6 +490,9 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			return cfgValue;
 		}
 		switch (dataType) {
+		case Generic:
+			value = getPredictedValue(value);
+			break;
 		case String:
 			value = getMappedValue(value == null ? null : formatStringValue(value));
 			break;
@@ -489,6 +510,41 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			break;
 		}
 		return value;
+	}
+
+	private Object getPredictedValue(Object value) {
+		// nothing to predict of
+		if (value == null) {
+			return null;
+		}
+
+		// is it a number
+		try {
+			Object pValue = getMappedValue(formatNumericValue(value));
+			dataType = ActivityFieldDataType.Number;
+			return pValue;
+		} catch (ParseException exc) {
+		}
+
+		// is it a datetime/timestamp
+		try {
+			Object pValue = formatDateValue(value);
+			dataType = value instanceof Number || NumberUtils.isDigits(Utils.toString(value))
+					? ActivityFieldDataType.Timestamp : ActivityFieldDataType.DateTime;
+			return pValue;
+		} catch (ParseException exc) {
+		}
+
+		// is it a binary
+		if (value instanceof byte[]) {
+			dataType = ActivityFieldDataType.Binary;
+			return value;
+		}
+
+		// make a string eventually
+		Object pValue = getMappedValue(formatStringValue(value));
+		dataType = ActivityFieldDataType.String;
+		return pValue;
 	}
 
 	/**
@@ -598,11 +654,11 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *             format, etc.)
 	 */
 	protected UsecTimestamp formatDateValue(Object value) throws ParseException {
-		if (value instanceof UsecTimestamp) {
-			return (UsecTimestamp) value;
+		UsecTimestamp timestamp = TimestampFormatter.getTimestamp(value);
+		if (timestamp != null) {
+			return timestamp;
 		}
 		if (timeParser == null) {
-			ActivityFieldDataType fDataType = dataType == null ? ActivityFieldDataType.DateTime : dataType;
 			TimeUnit fUnits = TimeUnit.MILLISECONDS;
 			if (units != null) {
 				try {
@@ -610,7 +666,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 				} catch (Exception e) {
 				}
 			}
-			timeParser = fDataType == ActivityFieldDataType.Timestamp || fDataType == ActivityFieldDataType.Number
+			timeParser = dataType == ActivityFieldDataType.Timestamp || dataType == ActivityFieldDataType.Number
 					? new TimestampFormatter(fUnits) : new TimestampFormatter(format, timeZone, locale);
 		}
 		return timeParser.parse(value);

@@ -80,7 +80,7 @@ public class StringMatcher implements Matcher {
 	 *            expression definition with {@code '!'} char.
 	 * @param data
 	 *            data string to evaluate expression against
-	 * @return {@code true} if {@link StringUtils} method returned {@link true} (or in case of compare returns
+	 * @return {@code true} if {@link StringUtils} method returned {@code true} (or in case of compare returns
 	 *         {@code 0}), {@code false} - otherwise
 	 * @throws java.lang.Exception
 	 *             if there is no specified method found in {@link org.apache.commons.lang3.StringUtils} class or

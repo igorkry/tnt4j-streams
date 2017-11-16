@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +28,7 @@ import org.apache.commons.collections4.MapUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -47,6 +49,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
  * elements. Default value - '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}'.
  * (Optional)</li>
+ * </ul>
+ * <p>
+ * This activity parser supports those activity field locator types:
+ * <ul>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#StreamProp}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Cache}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -147,5 +157,23 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	@Override
 	protected String getActivityDataType() {
 		return "MAP"; // NON-NLS
+	}
+
+	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
+			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.REMatchId, ActivityFieldLocatorType.Range);
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Unsupported activity locator types are:
+	 * <ul>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Index}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#REMatchId}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
+	 * </ul>
+	 */
+	@Override
+	protected EnumSet<ActivityFieldLocatorType> getUnsupportedLocatorTypes() {
+		return UNSUPPORTED_LOCATOR_TYPES;
 	}
 }

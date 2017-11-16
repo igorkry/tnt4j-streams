@@ -58,6 +58,15 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+
+            <xs:enumeration value="Generic">
+                <xs:annotation>
+                    <xs:documentation>
+                        Field value is generic and streams should try to make real value out of it: boolean, number, timestamp, date,
+                        string.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
@@ -419,6 +428,14 @@
                 <xs:annotation>
                     <xs:documentation>
                         Locator value is the value for the specified regular expression match group identifier: sequence position or name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Range">
+                <xs:annotation>
+                    <xs:documentation>
+                        Locator value is the range within enclosing object: r.g. characters range within string.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -1158,7 +1175,7 @@
             </xs:annotation>
         </xs:attribute>
 
-        <xs:attribute name="datatype" use="optional" type="DataTypes" default="String">
+        <xs:attribute name="datatype" use="optional" type="DataTypes" default="Generic">
             <xs:annotation>
                 <xs:documentation>
                     Indicates how to interpret value extracted for this field.

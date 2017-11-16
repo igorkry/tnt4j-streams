@@ -227,6 +227,26 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            activity field to validate
 	 */
 	protected void validateSupportedLocatorTypes(ActivityField field) {
+		EnumSet<ActivityFieldLocatorType> unsupportedLocators = getUnsupportedLocatorTypes();
+
+		if (unsupportedLocators != null) {
+			for (ActivityFieldLocatorType uLocatorType : unsupportedLocators) {
+				if (field.hasLocatorsOfType(uLocatorType)) {
+					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+							StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.unsupported.locator",
+							field.getFieldTypeName(), uLocatorType.name(), this.getClass().getName()));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns set of locator types unsupported by this parser.
+	 *
+	 * @return set of unsupported locator types
+	 */
+	protected EnumSet<ActivityFieldLocatorType> getUnsupportedLocatorTypes() {
+		return null;
 	}
 
 	/**

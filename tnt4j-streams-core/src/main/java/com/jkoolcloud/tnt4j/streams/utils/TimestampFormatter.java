@@ -144,16 +144,39 @@ public class TimestampFormatter {
 
 	/**
 	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
-	 * parser.
+	 * formatter. First it tries to use simple conversion of <tt>value<tt/> to a {@link UsecTimestamp} and just if it
+	 * does not succeed, parse it.
 	 *
 	 * @param value
 	 *            value to convert
 	 * @return formatted value of timestamp
 	 * @throws ParseException
-	 *             if an error parsing the specified value based timestamp pattern supported by this parser;
-	 * @see #parse(TimeUnit, Object)
+	 *             if an error parsing the specified value based timestamp pattern supported by this formatter
+	 *
+	 * @see #getTimestamp(Object)
+	 * @see #parse(Object)
 	 */
-	public UsecTimestamp parse(Object value) throws ParseException {
+	public UsecTimestamp parseAny(Object value) throws ParseException {
+		UsecTimestamp timestamp = getTimestamp(value);
+		if (timestamp != null) {
+			return timestamp;
+		}
+
+		return parse(value);
+	}
+
+	/**
+	 * Converts provided <tt>value</tt> to a {@link UsecTimestamp} without parsing.
+	 * <p>
+	 * If <tt>value</tt> is {@link UsecTimestamp}, {@link Date} or {@link Calendar}, then casted or new instance of
+	 * {@link UsecTimestamp} is returned. Otherwise {@code null} is returned.
+	 *
+	 * @param value
+	 *            object value to convert
+	 * @return {@link UsecTimestamp} built from provided <tt>value</tt>, or {@code null} if {@link UsecTimestamp} can't
+	 *         be built
+	 */
+	public static UsecTimestamp getTimestamp(Object value) {
 		if (value instanceof UsecTimestamp) {
 			return (UsecTimestamp) value;
 		}
@@ -163,6 +186,24 @@ public class TimestampFormatter {
 		if (value instanceof Calendar) {
 			return new UsecTimestamp(((Calendar) value).getTimeInMillis(), 0);
 		}
+
+		return null;
+	}
+
+	/**
+	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
+	 * formatter.
+	 * 
+	 * @param value
+	 *            value to convert
+	 * @return formatted value of timestamp
+	 * @throws ParseException
+	 *             if an error parsing the specified value based timestamp pattern supported by this formatter
+	 *
+	 * @see #parse(java.util.concurrent.TimeUnit, Object)
+	 * @see #parse(String, Object, String, String)
+	 */
+	public UsecTimestamp parse(Object value) throws ParseException {
 		if (value instanceof String || value instanceof Number) {
 			if (units != null) {
 				return parse(units, value);
@@ -329,7 +370,7 @@ public class TimestampFormatter {
 
 	/**
 	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
-	 * parser.
+	 * formatter.
 	 *
 	 * @param pattern
 	 *            pattern value is in
@@ -347,7 +388,7 @@ public class TimestampFormatter {
 	 */
 	public static UsecTimestamp parse(String pattern, Object value, String timeZoneId, String locale)
 			throws ParseException {
-		String dateStr = String.valueOf(value);
+		String dateStr = Utils.toString(value);
 		return new UsecTimestamp(dateStr, pattern, timeZoneId, locale);
 	}
 

@@ -164,7 +164,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param opType
 	 *            object to be mapped to OpType enumeration constant
-	 * @return OpType mapping or {@code null} if mapping not found
+	 * @return OpType mapping, or {@code null} if mapping not found
 	 */
 	public static OpType mapOpType(Object opType) {
 		if (opType == null) {
@@ -909,7 +909,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * In case of {@link java.util.Collection} - it is transformed to {@code Object[]}.
 	 * <p>
 	 * When obj is {@code Object[]} - array item referenced by index is returned if {@code index < array.length}, first
-	 * array item if {@code array.length == 1} or {@code null} in all other cases.
+	 * array item if {@code array.length == 1}, or {@code null} in all other cases.
 	 *
 	 * @param obj
 	 *            object instance containing item
@@ -1128,16 +1128,27 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Splits object identification path expression into path nodes array.
+	 * <p>
+	 * If empty path node is found, it is removed from path.
 	 *
 	 * @param path
 	 *            object identification path
 	 * @param nps
 	 *            path nodes separator
-	 * @return array of path nodes or {@code null} if path is empty
+	 * @return array of path nodes, or {@code null} if path is empty
 	 */
 	public static String[] getNodePath(String path, String nps) {
 		if (StringUtils.isNotEmpty(path)) {
-			return StringUtils.isEmpty(nps) ? new String[] { path } : path.split(Pattern.quote(nps));
+			String[] pArray = StringUtils.isEmpty(nps) ? new String[] { path } : path.split(Pattern.quote(nps));
+			List<String> pList = new ArrayList<>(pArray.length);
+			for (String pe : pArray) {
+				if (StringUtils.isNotEmpty(pe)) {
+					pList.add(pe);
+				}
+			}
+
+			pArray = new String[pList.size()];
+			return pList.toArray(pArray);
 		}
 
 		return null;
@@ -1217,12 +1228,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static Properties loadPropertiesFile(String propFile) throws IOException {
 		Properties fProps = new Properties();
 
-		InputStream is = null;
-		try {
-			is = new FileInputStream(new File(propFile));
+		try (InputStream is = new FileInputStream(new File(propFile))) {
 			fProps.load(is);
-		} finally {
-			close(is);
 		}
 
 		return fProps;
@@ -1242,14 +1249,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static Properties loadPropertiesResource(String name) throws IOException {
 		Properties rProps = new Properties();
-
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream ins = loader.getResourceAsStream(name);
 
-		try {
+		try (InputStream ins = loader.getResourceAsStream(name)) {
 			rProps.load(ins);
-		} finally {
-			close(ins);
 		}
 
 		return rProps;
@@ -1274,12 +1277,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		Enumeration<URL> rEnum = loader.getResources(name);
 
 		while (rEnum.hasMoreElements()) {
-			InputStream ins = rEnum.nextElement().openStream();
-
-			try {
+			try (InputStream ins = rEnum.nextElement().openStream()) {
 				rProps.load(ins);
-			} finally {
-				close(ins);
 			}
 		}
 
@@ -1887,6 +1886,75 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				return resolveInputFilePath((InputStream) lock);
 			}
 		} catch (Exception exc) {
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolves Java object (POJO) instance field value defined by <tt>dataObj</tt> fields names <tt>path<tt> array.
+	 * <p>
+	 * If <tt>path</tt> level resolved value is primitive type ({@link Class#isPrimitive()}), then value resolution
+	 * terminates at that level.
+	 * <p>
+	 * Value resolution also terminates if path element index <tt>i</tt> is {@code i >= path.length}.
+	 *
+	 * @param path
+	 *            fields path as array of objects field names
+	 * @param dataObj
+	 *            Java object instance to resolve value
+	 * @param i
+	 *            processed locator path element index
+	 * @return resolved Java object field value, or {@code null} if value is not resolved
+	 * @throws java.lang.RuntimeException
+	 *             if field can't be found or accessed
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see Class#isPrimitive()
+	 */
+	public static Object getFieldValue(String[] path, Object dataObj, int i) throws RuntimeException {
+		if (ArrayUtils.isEmpty(path) || dataObj == null) {
+			return null;
+		}
+
+		if (i >= path.length || dataObj.getClass().isPrimitive()) {
+			return dataObj;
+		}
+
+		try {
+			Field f = dataObj.getClass().getDeclaredField(path[i]);
+			f.setAccessible(true);
+
+			return getFieldValue(path, f.get(dataObj), i + 1);
+		} catch (Exception exc) {
+			throw new RuntimeException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"Utils.could.not.get.declared.field", path[i], dataObj.getClass().getSimpleName(),
+					toString(dataObj)), exc);
+		}
+	}
+
+	/**
+	 * Converts provided object type <tt>value</tt> to a Boolean.
+	 * <p>
+	 * <tt>value</tt> will be converted to real boolean value only if string representation of it is {@code "true"} or
+	 * {@code "false"} (case insensitive). In all other cases {@code null} is returned.
+	 *
+	 * @param value
+	 *            object value to convert to a Boolean
+	 * @return boolean value resolved from provided <tt>value</tt>, or {@code null} if <tt>value</tt> does not represent
+	 *         boolean
+	 */
+	public static Boolean getBoolean(Object value) {
+		if (value != null) {
+			String vStr = toString(value);
+
+			if ("true".equalsIgnoreCase(vStr)) { // NON-NLS
+				return true;
+			}
+
+			if ("false".equalsIgnoreCase(vStr)) { // NON-NLS
+				return false;
+			}
 		}
 
 		return null;
