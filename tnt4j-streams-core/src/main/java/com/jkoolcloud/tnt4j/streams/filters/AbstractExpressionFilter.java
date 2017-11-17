@@ -174,8 +174,8 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	 * @throws IllegalArgumentException
 	 *             if filter can not be created for provided language
 	 */
-	public static AbstractExpressionFilter<?> createExpressionFilter(String handleType, String lang, String expression)
-			throws IllegalArgumentException {
+	public static AbstractExpressionFilter<Object> createExpressionFilter(String handleType, String lang,
+			String expression) throws IllegalArgumentException {
 		if (StringUtils.isEmpty(lang)) {
 			lang = JAVA_SCRIPT_LANG;
 		}
@@ -212,7 +212,7 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("AbstractExpressionFilter{"); // NON-NLS
+		StringBuilder sb = new StringBuilder("AbstractExpressionFilter{"); // NON-NLS
 		sb.append("handleType=").append(handleType); // NON-NLS
 		sb.append(", filterExpression=").append(Utils.sQuote(filterExpression)); // NON-NLS
 		sb.append('}');

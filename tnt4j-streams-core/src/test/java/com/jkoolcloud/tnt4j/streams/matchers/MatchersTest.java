@@ -19,6 +19,9 @@ package com.jkoolcloud.tnt4j.streams.matchers;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -46,5 +49,11 @@ public class MatchersTest {
 		assertFalse(Matchers.evaluate("js:${ObjectName}.toUpperCase().indexOf(\"ccc\") == 0", ai));
 		assertTrue(Matchers.evaluate("xpath:boolean(ts:getFileName(${ObjectPath}))", ai));
 		assertFalse(Matchers.evaluate("xpath:boolean(ts:getFileName(${NullField}))", ai));
+
+		Map<String, String> map = new HashMap<>(1);
+		map.put("key", "value");
+
+		assertTrue(Matchers.evaluate("groovy:$fieldValue instanceof Map", map));
+		assertFalse(Matchers.evaluate("groovy:$fieldValue instanceof String", map));
 	}
 }

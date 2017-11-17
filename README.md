@@ -440,6 +440,14 @@ get **positive match**, expression should be evaluated as **non-empty string**.
     <matchExp>xpath:/Request/header[currency='EUR']/messageId</matchExp>
 </parser-ref>
 ```
+* `Groovy` or `JavaScript` script based expressions. To access field value (data passed to stacked parser) use predefined variable 
+placeholder `$fieldValue`.
+```xml
+<parser-ref ...>
+    <matchExp>groovy:$fieldValue instanceof Map</matchExp>
+    <matchExp>javascript:$fieldValue.length > 300</matchExp>
+</parser-ref>
+```   
 
 Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
 activity entity field names. 
@@ -521,7 +529,7 @@ In streams configuration You can define field or locator resolved values transfo
 activity value post-processing before sending it to [JKool Cloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
 activity file path.
 
-To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`. You na also use 
+To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`. You can also use 
 parser defined field names as script/expression variables having format `${FIELD_NAME}` to access resolved activity entity fields like 
 `${EventType}` or `${Trace.HighResTime}`.
 

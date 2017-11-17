@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.matchers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,8 @@ public class Matchers {
 	 */
 	protected static final Pattern EVAL_EXP_PATTERN = Pattern.compile("((?<type>[a-zA-Z]*):)?(?<evalExp>.+)"); // NON-NLS
 
+	private static Map<String, StreamEntityFilter<Object>> langEvaluatorsCache = new HashMap<>(5);
+
 	/**
 	 * Evaluates match <tt>expression</tt> against provided activity <tt>data</tt>.
 	 *
@@ -58,18 +62,9 @@ public class Matchers {
 	 *             if evaluation expression is empty or evaluation of match expression fails
 	 */
 	public static boolean evaluate(String expression, Object data) throws Exception {
-		java.util.regex.Matcher m = EVAL_EXP_PATTERN.matcher(expression);
-		if (!m.matches()) {
-			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "Matchers.expression.invalid", expression));
-		}
-		String evalType = m.group("type"); // NON-NLS
-		String evalExpression = m.group("evalExp"); // NON-NLS
-
-		if (StringUtils.isEmpty(evalExpression)) {
-			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "Matchers.expression.empty", expression));
-		}
+		String[] expTokens = tokenizeExpression(expression);
+		String evalType = expTokens[0];
+		String evalExpression = expTokens[1];
 
 		if (StringUtils.isEmpty(evalType)) {
 			evalType = "STRING"; // NON-NLS
@@ -83,8 +78,9 @@ public class Matchers {
 		case "JPATH": // NON-NLS
 			return validateAndProcess(JsonPathMatcher.getInstance(), evalExpression, data);
 		case "STRING": // NON-NLS
-		default:
 			return validateAndProcess(StringMatcher.getInstance(), evalExpression, data);
+		default:
+			return evaluate(evalType, evalExpression, data);
 		}
 	}
 
@@ -94,6 +90,17 @@ public class Matchers {
 		} else {
 			return false;
 		}
+	}
+
+	private static boolean evaluate(String evalLang, String evalExp, Object data) throws Exception {
+		String expression = evalLang + ':' + evalExp;
+		StreamEntityFilter<Object> ef = langEvaluatorsCache.get(expression);
+		if (ef == null) {
+			ef = AbstractExpressionFilter.createExpressionFilter(HandleType.EXCLUDE.name(), evalLang, evalExp);
+			langEvaluatorsCache.put(expression, ef);
+		}
+
+		return ef.doFilter(data, null);
 	}
 
 	/**
@@ -111,13 +118,31 @@ public class Matchers {
 	 *             if evaluation expression is empty or evaluation of match expression fails
 	 */
 	public static boolean evaluate(String expression, ActivityInfo ai) throws Exception {
+		StreamEntityFilter<Object> ef = langEvaluatorsCache.get(expression);
+		if (ef == null) {
+			String[] expTokens = tokenizeExpression(expression);
+			String lang = expTokens[0];
+			String evalExpression = expTokens[1];
+
+			if (StringUtils.isEmpty(lang)) {
+				lang = ScriptLangs.GROOVY.value();
+			}
+
+			ef = AbstractExpressionFilter.createExpressionFilter(HandleType.EXCLUDE.name(), lang, evalExpression);
+			langEvaluatorsCache.put(expression, ef);
+		}
+
+		return ef.doFilter(null, ai);
+	}
+
+	private static String[] tokenizeExpression(String expression) {
 		java.util.regex.Matcher m = EVAL_EXP_PATTERN.matcher(expression);
 		if (!m.matches()) {
 			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 					StreamsResources.RESOURCE_BUNDLE_NAME, "Matchers.expression.invalid", expression));
 		}
 
-		String lang = m.group("type"); // NON-NLS
+		String evalType = m.group("type"); // NON-NLS
 		String evalExpression = m.group("evalExp"); // NON-NLS
 
 		if (StringUtils.isEmpty(evalExpression)) {
@@ -125,13 +150,7 @@ public class Matchers {
 					StreamsResources.RESOURCE_BUNDLE_NAME, "Matchers.expression.empty", expression));
 		}
 
-		if (StringUtils.isEmpty(lang)) {
-			lang = ScriptLangs.GROOVY.value();
-		}
-
-		StreamEntityFilter<?> ef = AbstractExpressionFilter.createExpressionFilter(HandleType.EXCLUDE.name(), lang,
-				evalExpression);
-		return ef.doFilter(null, ai);
+		return new String[] { evalType, evalExpression };
 	}
 
 	/**
