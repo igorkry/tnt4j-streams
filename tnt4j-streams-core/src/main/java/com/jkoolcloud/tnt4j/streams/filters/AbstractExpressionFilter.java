@@ -24,9 +24,12 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -35,34 +38,13 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @param <T>
  *            the type of filtered data value
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see com.jkoolcloud.tnt4j.streams.filters.JavaScriptExpressionFilter
  * @see com.jkoolcloud.tnt4j.streams.filters.GroovyExpressionFilter
  * @see com.jkoolcloud.tnt4j.streams.filters.XPathExpressionFilter
  */
 public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T> {
-	/**
-	 * Constant for field value variable name used in script/expression code.
-	 */
-	protected static final String FIELD_VALUE_VARIABLE_NAME = "fieldValue"; // NON-NLS
-	/**
-	 * Constant for field value variable expression used in script/expression code.
-	 */
-	protected static final String FIELD_VALUE_VARIABLE_EXPR = '$' + FIELD_VALUE_VARIABLE_NAME;
-
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String GROOVY_LANG = "groovy"; // NON-NLS
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String JAVA_SCRIPT_LANG = "javascript"; // NON-NLS
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String XPATH_SCRIPT_LANG = "xpath"; // NON-NLS
 
 	/**
 	 * Filter expression string.
@@ -117,6 +99,20 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	}
 
 	/**
+	 * Returns logger used by this filter.
+	 *
+	 * @return filter logger
+	 */
+	protected abstract EventSink getLogger();
+
+	/**
+	 * Returns filter used expressions evaluation language descriptor string.
+	 *
+	 * @return expressions evaluation language descriptor string
+	 */
+	protected abstract String getHandledLanguage();
+
+	/**
 	 * Returns filter expression string.
 	 * 
 	 * @return filter expressions string
@@ -165,8 +161,10 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	 * @param handleType
 	 *            filter {@link com.jkoolcloud.tnt4j.streams.filters.HandleType} name
 	 * @param lang
-	 *            scripting/expression language: '{@value #GROOVY_LANG}', '{@value #JAVA_SCRIPT_LANG}' ('js', 'jscript')
-	 *            or '{@value #XPATH_SCRIPT_LANG}'
+	 *            scripting/expression language:
+	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG}',
+	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG}' ('js', 'jscript')
+	 *            or '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}'
 	 * @param expression
 	 *            filter expression string
 	 * @return created expression filter instance
@@ -177,16 +175,16 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	public static AbstractExpressionFilter<Object> createExpressionFilter(String handleType, String lang,
 			String expression) throws IllegalArgumentException {
 		if (StringUtils.isEmpty(lang)) {
-			lang = JAVA_SCRIPT_LANG;
+			lang = StreamsScriptingUtils.JAVA_SCRIPT_LANG;
 		}
 
-		if (GROOVY_LANG.equalsIgnoreCase(lang)) {
+		if (StreamsScriptingUtils.GROOVY_LANG.equalsIgnoreCase(lang)) {
 			return new GroovyExpressionFilter(handleType, expression);
-		} else if (JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
+		} else if (StreamsScriptingUtils.JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
 				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
 		{
 			return new JavaScriptExpressionFilter(handleType, expression);
-		} else if (XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
+		} else if (StreamsScriptingUtils.XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
 			return new XPathExpressionFilter(handleType, expression);
 		}
 
@@ -215,7 +213,30 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 		StringBuilder sb = new StringBuilder("AbstractExpressionFilter{"); // NON-NLS
 		sb.append("handleType=").append(handleType); // NON-NLS
 		sb.append(", filterExpression=").append(Utils.sQuote(filterExpression)); // NON-NLS
-		sb.append('}');
+		sb.append("}"); // NON-NLS
 		return sb.toString();
+	}
+
+	/**
+	 * Logs expression evaluation match result.
+	 * <p>
+	 * Log entry is build only if logger log level {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE} is set.
+	 * 
+	 * @param varsMap
+	 *            variables binding map
+	 * @param match
+	 *            expression match result
+	 *
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#isSet(com.jkoolcloud.tnt4j.core.OpLevel)
+	 * @see com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#describeExpression(String, java.util.Map, String,
+	 *      java.util.Collection, java.util.Map)
+	 */
+	protected void logEvaluationResult(Map<String, Object> varsMap, boolean match) {
+		if (getLogger().isSet(OpLevel.TRACE)) {
+			getLogger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ExpressionFilter.evaluation.result", StreamsScriptingUtils.describeExpression(filterExpression,
+							varsMap, getHandledLanguage(), exprVars, placeHoldersMap),
+					match);
+		}
 	}
 }

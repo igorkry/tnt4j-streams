@@ -22,6 +22,8 @@ import javax.script.ScriptEngineManager;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
@@ -35,6 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
  * @see ScriptEngine#eval(String)
  */
 public class JavaScriptTransformation extends AbstractScriptTransformation<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JavaScriptTransformation.class);
 
 	/**
 	 * Constructs a new JavaScriptTransformation.
@@ -63,10 +66,20 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 	}
 
 	@Override
+	protected EventSink getLogger() {
+		return LOGGER;
+	}
+
+	@Override
+	protected String getHandledLanguage() {
+		return StreamsScriptingUtils.JAVA_SCRIPT_LANG;
+	}
+
+	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
-		factory.put(FIELD_VALUE_VARIABLE_EXPR, value);
+		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.JAVA_SCRIPT_LANG);
+		factory.put(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
 			for (String eVar : exprVars) {
@@ -77,7 +90,11 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 		}
 
 		try {
-			return engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
+			Object tValue = engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
+
+			logEvaluationResult(factory.getBindings(), tValue);
+
+			return tValue;
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);

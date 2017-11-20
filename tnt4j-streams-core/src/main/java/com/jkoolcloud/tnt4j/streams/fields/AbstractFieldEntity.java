@@ -190,7 +190,12 @@ public abstract class AbstractFieldEntity {
 			return false;
 		}
 
-		return filter.doFilter(fieldValue, ai);
+		boolean filteredOut = filter.doFilter(fieldValue, ai);
+
+		logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"AbstractFieldEntity.filtering.result", this, filter.getName(), filteredOut);
+
+		return filteredOut;
 	}
 
 	/**

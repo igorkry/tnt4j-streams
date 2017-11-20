@@ -903,6 +903,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			boolean filteredOut = activityFilter.doFilter(null, ai);
 			ai.setFiltered(filteredOut);
+			logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.filtering.result", getName(), activityFilter.getName(), filteredOut);
 		} finally {
 			filterLock.unlock();
 		}

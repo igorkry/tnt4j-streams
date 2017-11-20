@@ -20,6 +20,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
@@ -36,6 +38,7 @@ import groovy.lang.GroovyShell;
  * @see GroovyShell#evaluate(String, String)
  */
 public class GroovyTransformation extends AbstractScriptTransformation<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyTransformation.class);
 
 	/**
 	 * Constructs a new GroovyTransformation.
@@ -64,9 +67,20 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	}
 
 	@Override
+	protected EventSink getLogger() {
+		return LOGGER;
+	}
+
+	@Override
+	protected String getHandledLanguage() {
+		return StreamsScriptingUtils.GROOVY_LANG;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		Binding binding = new Binding();
-		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
+		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
 			for (String eVar : exprVars) {
@@ -79,8 +93,12 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
-			return shell.evaluate(getExpression(),
+			Object tValue = shell.evaluate(getExpression(),
 					StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
+
+			logEvaluationResult(binding.getVariables(), tValue);
+
+			return tValue;
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);

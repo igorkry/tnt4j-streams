@@ -19,6 +19,8 @@ package com.jkoolcloud.tnt4j.streams.filters;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
@@ -35,6 +37,7 @@ import groovy.lang.GroovyShell;
  * @see GroovyShell#evaluate(String, String)
  */
 public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyExpressionFilter.class);
 
 	/**
 	 * Constructs a new GroovyExpressionFilter. Handle type is set to
@@ -60,9 +63,20 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	}
 
 	@Override
+	protected EventSink getLogger() {
+		return LOGGER;
+	}
+
+	@Override
+	protected String getHandledLanguage() {
+		return StreamsScriptingUtils.GROOVY_LANG;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
 		Binding binding = new Binding();
-		binding.setVariable(FIELD_VALUE_VARIABLE_EXPR, value);
+		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
 			for (String eVar : exprVars) {
@@ -76,6 +90,8 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 
 		try {
 			boolean match = (boolean) shell.evaluate(getExpression());
+
+			logEvaluationResult(binding.getVariables(), match);
 
 			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {

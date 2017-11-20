@@ -26,8 +26,11 @@ import javax.xml.xpath.XPathVariableResolver;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 
 /**
@@ -43,6 +46,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
  * @see XPath#evaluate(String, Object)
  */
 public class XPathTransformation extends AbstractScriptTransformation<Object> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XPathTransformation.class);
+
 	private static final String OWN_FIELD_VALUE_KEY = "<!TNT4J_XPATH_TRSF_FLD_VALUE!>"; // NON-NLS;
 
 	/**
@@ -72,6 +77,16 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 	}
 
 	@Override
+	protected EventSink getLogger() {
+		return LOGGER;
+	}
+
+	@Override
+	protected String getHandledLanguage() {
+		return StreamsScriptingUtils.XPATH_SCRIPT_LANG;
+	}
+
+	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
 		Map<String, Object> valuesMap = new HashMap<>();
 		valuesMap.put(OWN_FIELD_VALUE_KEY, value);
@@ -88,7 +103,11 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 		xPath.setXPathVariableResolver(new StreamsVariableResolver(valuesMap));
 
 		try {
-			return xPath.evaluate(getExpression(), (Object) null);
+			Object tValue = xPath.evaluate(getExpression(), (Object) null);
+
+			logEvaluationResult(valuesMap, tValue);
+
+			return tValue;
 		} catch (Exception exc) {
 			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
@@ -105,7 +124,7 @@ public class XPathTransformation extends AbstractScriptTransformation<Object> {
 		@Override
 		public Object resolveVariable(QName variableName) {
 			Object varValue;
-			if (variableName.equals(new QName(FIELD_VALUE_VARIABLE_NAME))) {
+			if (variableName.equals(new QName(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_NAME))) {
 				varValue = valuesMap.get(OWN_FIELD_VALUE_KEY);
 			} else {
 				String varNameStr = "$" + variableName.toString(); // NON-NLS

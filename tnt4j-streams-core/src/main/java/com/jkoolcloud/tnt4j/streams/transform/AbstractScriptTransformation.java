@@ -24,9 +24,12 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -35,34 +38,13 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @param <V>
  *            the type of transformed data value
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see JavaScriptTransformation
  * @see GroovyTransformation
  * @see XPathTransformation
  */
 public abstract class AbstractScriptTransformation<V> extends AbstractValueTransformation<V, Object> {
-	/**
-	 * Constant for field value variable name used in script/expression code.
-	 */
-	protected static final String FIELD_VALUE_VARIABLE_NAME = "fieldValue"; // NON-NLS
-	/**
-	 * Constant for field value variable expression used in script/expression code.
-	 */
-	protected static final String FIELD_VALUE_VARIABLE_EXPR = '$' + FIELD_VALUE_VARIABLE_NAME;
-
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String GROOVY_LANG = "groovy"; // NON-NLS
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String JAVA_SCRIPT_LANG = "javascript"; // NON-NLS
-	/**
-	 * Constant for name of scripting/expression language {@value}.
-	 */
-	protected static final String XPATH_SCRIPT_LANG = "xpath"; // NON-NLS
 
 	private String scriptCode;
 
@@ -110,6 +92,20 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	}
 
 	/**
+	 * Returns logger used by this transformation.
+	 *
+	 * @return transformation logger
+	 */
+	protected abstract EventSink getLogger();
+
+	/**
+	 * Returns transformation used expressions evaluation language descriptor string.
+	 *
+	 * @return expressions evaluation language descriptor string
+	 */
+	protected abstract String getHandledLanguage();
+
+	/**
 	 * Returns transformation script code string.
 	 *
 	 * @return transformation script code
@@ -133,8 +129,10 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 * @param name
 	 *            transformation name
 	 * @param lang
-	 *            scripting/expression language: '{@value #GROOVY_LANG}', '{@value #JAVA_SCRIPT_LANG}' ('js', 'jscript')
-	 *            or '{@value #XPATH_SCRIPT_LANG}'
+	 *            scripting/expression language:
+	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG}',
+	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG}' ('js', 'jscript')
+	 *            or '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}'
 	 * @param code
 	 *            transformation script code
 	 * @param phaseName
@@ -150,7 +148,7 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	public static ValueTransformation<Object, Object> createScriptTransformation(String name, String lang, String code,
 			String phaseName) throws IllegalArgumentException {
 		if (StringUtils.isEmpty(lang)) {
-			lang = JAVA_SCRIPT_LANG;
+			lang = StreamsScriptingUtils.JAVA_SCRIPT_LANG;
 		}
 
 		Phase phase = null;
@@ -163,13 +161,13 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 			}
 		}
 
-		if (GROOVY_LANG.equalsIgnoreCase(lang)) {
+		if (StreamsScriptingUtils.GROOVY_LANG.equalsIgnoreCase(lang)) {
 			return new GroovyTransformation(name, code, phase);
-		} else if (JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
+		} else if (StreamsScriptingUtils.JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
 				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
 		{
 			return new JavaScriptTransformation(name, code, phase);
-		} else if (XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
+		} else if (StreamsScriptingUtils.XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
 			return new XPathTransformation(name, code, phase);
 		}
 
@@ -213,5 +211,28 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 		String fieldName = placeHoldersMap.get(eVar);
 
 		return new Property(StringUtils.isEmpty(fieldName) ? eVar : fieldName, fValue);
+	}
+
+	/**
+	 * Logs transformation expression evaluation result.
+	 * <p>
+	 * Log entry is build only if logger log level {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE} is set.
+	 *
+	 * @param varsMap
+	 *            variables binding map
+	 * @param tValue
+	 *            transformation evaluation result
+	 *
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#isSet(com.jkoolcloud.tnt4j.core.OpLevel)
+	 * @see com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#describeExpression(String, java.util.Map, String,
+	 *      java.util.Collection, java.util.Map)
+	 */
+	protected void logEvaluationResult(Map<String, Object> varsMap, Object tValue) {
+		if (getLogger().isSet(OpLevel.TRACE)) {
+			getLogger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ScriptTransformation.evaluation.result", StreamsScriptingUtils.describeExpression(scriptCode,
+							varsMap, getHandledLanguage(), exprVars, placeHoldersMap),
+					Utils.toString(tValue));
+		}
 	}
 }

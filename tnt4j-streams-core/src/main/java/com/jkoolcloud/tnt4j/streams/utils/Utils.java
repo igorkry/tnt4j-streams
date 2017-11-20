@@ -1718,11 +1718,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param varPlh
 	 *            variable placeholder string
-	 * @return variable name found within placeholder string
+	 * @return variable name found within placeholder string, or <tt>varPlh</tt> value if it is empty or does not start
+	 *         with "{@value #VAR_EXP_START_TOKEN}"
 	 */
 	public static String getVarName(String varPlh) {
-		return StringUtils.isEmpty(varPlh) ? varPlh
-				: varPlh.substring(VAR_EXP_START_TOKEN.length(), varPlh.length() - VAR_EXP_END_TOKEN.length());
+		if (StringUtils.isNotEmpty(varPlh)) {
+			if (varPlh.startsWith(VAR_EXP_START_TOKEN)) {
+				return varPlh.substring(VAR_EXP_START_TOKEN.length(), varPlh.length() - VAR_EXP_END_TOKEN.length());
+			}
+		}
+
+		return varPlh;
 	}
 
 	/**
