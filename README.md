@@ -4739,12 +4739,16 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
  * `FileName` - the system-dependent file name of MS Excel document. (Required)
  * `SheetsToProcess` - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
- matches this mask. Default value - ``. (Optional)
+ matches this mask. (Optional)
+ * `WorkbookPassword` - excel workbook password. (Optional)
+ * `GroupingActivityName` - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)
 
     sample:
 ```xml
     <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
+    <property name="WorkbookPassword" value="xlsPass"/>    
+    <property name="GroupingActivityName" value="Events from XLSX file"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).

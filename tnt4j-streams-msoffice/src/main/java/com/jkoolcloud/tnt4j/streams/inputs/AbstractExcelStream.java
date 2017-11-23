@@ -49,6 +49,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
  * matches this mask. (Optional)</li>
  * <li>WorkbookPassword - excel workbook password. (Optional)</li>
+ * <li>GroupingActivityName - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)</li>
  * </ul>
  *
  * @param <T>
