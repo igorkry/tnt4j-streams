@@ -758,14 +758,16 @@ public class ActivityInfo {
 		determineTimes();
 		resolveServer(false);
 
-		String trackId = StringUtils.isEmpty(trackingId) ? tracker.newUUID() : trackingId;
+		if (StringUtils.isEmpty(trackingId)) {
+			trackingId = tracker.newUUID();
+		}
 
 		if (eventType == OpType.ACTIVITY) {
-			return buildActivity(tracker, eventName, trackId, chTrackables);
+			return buildActivity(tracker, eventName, trackingId, chTrackables);
 		} else if (eventType == OpType.SNAPSHOT) {
-			return buildSnapshot(tracker, eventName, trackId);
+			return buildSnapshot(tracker, eventName, trackingId);
 		} else {
-			return buildEvent(tracker, eventName, trackId, chTrackables);
+			return buildEvent(tracker, eventName, trackingId, chTrackables);
 		}
 	}
 

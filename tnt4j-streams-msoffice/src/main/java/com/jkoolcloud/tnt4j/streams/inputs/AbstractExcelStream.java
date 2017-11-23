@@ -27,8 +27,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -42,7 +47,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <ul>
  * <li>FileName - the system-dependent file name of MS Excel document. (Required)</li>
  * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
- * matches this mask. Default value - ''. (Optional)</li>
+ * matches this mask. (Optional)</li>
+ * <li>WorkbookPassword - excel workbook password. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -58,6 +64,11 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	private String sheetName = null;
 	private Pattern sheetNameMatcher = null;
+
+	private String wbPass = null;
+
+	private String groupingActivityName = null;
+	private String groupingActivityId = null;
 
 	private Workbook workbook;
 	private Iterator<Sheet> sheetIterator;
@@ -83,6 +94,12 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					if (StringUtils.isNotEmpty(sheetName)) {
 						sheetNameMatcher = Pattern.compile(Utils.wildcardToRegex2(sheetName));
 					}
+				} else if (MsOfficeStreamProperties.PROP_WORKBOOK_PASS.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						wbPass = value;
+					}
+				} else if (MsOfficeStreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
+					groupingActivityName = value;
 				}
 			}
 		}
@@ -95,6 +112,15 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		}
 		if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
 			return sheetName;
+		}
+		if (MsOfficeStreamProperties.PROP_WORKBOOK_PASS.equalsIgnoreCase(name)) {
+			return wbPass;
+		}
+		if (MsOfficeStreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
+			return groupingActivityName;
+		}
+		if (MsOfficeStreamProperties.PROP_GROUPING_ACTIVITY_ID.equalsIgnoreCase(name)) {
+			return groupingActivityId;
 		}
 
 		return super.getProperty(name);
@@ -125,8 +151,19 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 					MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractExcelStream.file.not.exist", fileName));
 		}
 
-		workbook = WorkbookFactory.create(wbFile);
+		workbook = WorkbookFactory.create(wbFile, wbPass, true);
 		sheetIterator = workbook.sheetIterator();
+
+		if (StringUtils.isNotEmpty(groupingActivityName)) {
+			ActivityInfo gai = new ActivityInfo();
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventType.name(), ActivityFieldDataType.String),
+					OpType.ACTIVITY.name());
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventName.name(), ActivityFieldDataType.String),
+					groupingActivityName);
+			output().logItem(gai);
+
+			groupingActivityId = gai.getTrackingId();
+		}
 	}
 
 	// @Override
