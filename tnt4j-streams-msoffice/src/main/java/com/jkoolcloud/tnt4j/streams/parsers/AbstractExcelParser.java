@@ -22,10 +22,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -96,6 +93,23 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	 * @return evaluated cell value
 	 */
 	protected Object getCellValue(Cell cell) {
+		switch (cell.getCellTypeEnum()) {
+		case BOOLEAN:
+			return cell.getBooleanCellValue();
+		case NUMERIC:
+			return DateUtil.isCellDateFormatted(cell) ? cell.getDateCellValue() : cell.getNumericCellValue();
+		case FORMULA:
+			return evaluateCellFormula(cell);
+		case STRING:
+			return cell.getRichStringCellValue().toString();
+		case BLANK:
+			return null;
+		default:
+			return cell.toString();
+		}
+	}
+
+	private Object evaluateCellFormula(Cell cell) {
 		CellValue cellValue;
 		evaluationLock.lock();
 		try {
@@ -109,6 +123,10 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 			evaluationLock.unlock();
 		}
 
+		return getCellValue(cell, cellValue);
+	}
+
+	private static Object getCellValue(Cell cell, CellValue cellValue) {
 		if (cellValue == null) {
 			return cell.toString();
 		}
@@ -117,7 +135,8 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		case BOOLEAN:
 			return cellValue.getBooleanValue();
 		case NUMERIC:
-			return cellValue.getNumberValue();
+			return DateUtil.isCellDateFormatted(cell) ? DateUtil.getJavaDate(cellValue.getNumberValue())
+					: cellValue.getNumberValue();
 		case STRING:
 			return cellValue.getStringValue();
 		default:

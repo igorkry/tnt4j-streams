@@ -53,8 +53,7 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 
 	private int totalRows = 0;
 
-	private Sheet currSheet;
-	private Iterator<Row> rowIterator;
+	private Iterator<Row> rows;
 
 	/**
 	 * Constructs a new ExcelRowStream. Requires configuration settings to set input stream source.
@@ -116,19 +115,19 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	@Override
 	public Row getNextItem() throws Exception {
 		while (true) {
-			if (currSheet == null || !rowIterator.hasNext()) {
+			if (rows == null || !rows.hasNext()) {
 				activityPosition = 0;
-				currSheet = getNextNameMatchingSheet(false);
+				Sheet sheet = getNextNameMatchingSheet(false);
 
-				if (currSheet == null) {
+				if (sheet == null) {
 					return null;
 				} else {
-					rowIterator = currSheet.rowIterator();
-					totalRows += currSheet.getPhysicalNumberOfRows();
+					rows = sheet.rowIterator();
+					totalRows += sheet.getPhysicalNumberOfRows();
 				}
 			}
 
-			if (!rowIterator.hasNext()) {
+			if (!rows.hasNext()) {
 				continue;
 			}
 
@@ -136,12 +135,12 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 			if (!rowRange.inRange(activityPosition)) {
 				// skip row if it is not in range
 				skipFilteredActivities();
-				rowIterator.next();
+				rows.next();
 
 				continue;
 			}
 
-			Row row = rowIterator.next();
+			Row row = rows.next();
 
 			if (row != null) {
 				addStreamedBytesCount(getRowBytesCount(row));

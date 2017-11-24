@@ -72,7 +72,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	private String groupingActivityId = null;
 
 	private Workbook workbook;
-	private Iterator<Sheet> sheetIterator;
+	private Iterator<Sheet> sheets;
 
 	/**
 	 * Attribute storing sheet/row position marker of streamed file.
@@ -153,7 +153,7 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 		}
 
 		workbook = WorkbookFactory.create(wbFile, wbPass, true);
-		sheetIterator = workbook.sheetIterator();
+		sheets = workbook.sheetIterator();
 
 		if (StringUtils.isNotEmpty(groupingActivityName)) {
 			ActivityInfo gai = new ActivityInfo();
@@ -192,14 +192,14 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	 */
 	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
 		while (true) {
-			if (sheetIterator == null || !sheetIterator.hasNext()) {
+			if (sheets == null || !sheets.hasNext()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
 						"AbstractExcelStream.no.more.sheets");
 
 				return null;
 			}
 
-			Sheet sheet = sheetIterator.next();
+			Sheet sheet = sheets.next();
 			boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
 
 			if (!match) {
