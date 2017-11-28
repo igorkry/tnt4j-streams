@@ -44,7 +44,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 
 	private String type = null;
 	private String locator = null;
-	private ActivityFieldDataType dataType = ActivityFieldDataType.Generic;
+	private ActivityFieldDataType dataType = ActivityFieldDataType.String;
 	private int radix = 10;
 	private String units = null;
 	private String format = null;
@@ -253,7 +253,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *            the data type for raw data field
 	 */
 	public void setDataType(ActivityFieldDataType dataType) {
-		this.dataType = dataType == null ? ActivityFieldDataType.Generic : dataType;
+		this.dataType = dataType == null ? ActivityFieldDataType.String : dataType;
 	}
 
 	/**
