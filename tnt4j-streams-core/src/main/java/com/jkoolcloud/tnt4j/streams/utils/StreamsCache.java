@@ -60,7 +60,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  *
  * @version $Revision: 3 $
  */
-public class StreamsCache {
+public final class StreamsCache {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsCache.class);
 
 	private static final long DEFAULT_CACHE_MAX_SIZE = 100;
@@ -69,8 +69,8 @@ public class StreamsCache {
 
 	private static final String PARSER_NAME_VAR = "${ParserName}"; // NON-NLS
 
-	private static Cache<String, Object> valuesCache;
-	private static Map<String, CacheEntry> cacheEntries = new HashMap<>();
+	private static Cache<String, CacheValue> valuesCache;
+	private static Map<String, CacheEntry> cacheEntries = new HashMap<>(5);
 	private static AtomicInteger referencesCount = new AtomicInteger();
 
 	private static long maxSize = DEFAULT_CACHE_MAX_SIZE;
@@ -78,7 +78,7 @@ public class StreamsCache {
 	private static boolean persistenceOn = false; // TODO: file naming, because there may be running multiple concurrent
 													// streams configurations (JVMs)
 
-	private static Cache<String, Object> buildCache(long cSize, long duration) {
+	private static Cache<String, CacheValue> buildCache(long cSize, long duration) {
 		return CacheBuilder.newBuilder().maximumSize(cSize).expireAfterAccess(duration, TimeUnit.MINUTES).build();
 	}
 
@@ -120,6 +120,15 @@ public class StreamsCache {
 	}
 
 	/**
+	 * Checks if streams cache is initialized.
+	 * 
+	 * @return {@code true} if cache is initialized, {@code false} - otherwise
+	 */
+	public static boolean isInitialized() {
+		return valuesCache != null;
+	}
+
+	/**
 	 * Fills in cache entries patterns with activity entity fields values and puts filled in entries to cache.
 	 *
 	 * @param ai
@@ -128,7 +137,7 @@ public class StreamsCache {
 	 *            parser name
 	 */
 	public static void cacheValues(ActivityInfo ai, String parserName) {
-		if (valuesCache == null) {
+		if (!isInitialized()) {
 			// valuesCache = buildCache(maxSize, expireDuration);
 			return;
 		}
@@ -138,7 +147,7 @@ public class StreamsCache {
 			Object resolvedFieldValue = fillInValuePattern(cacheEntry.getValue(), ai, parserName);
 
 			if (resolvedFieldKey != null && resolvedFieldValue != null) {
-				valuesCache.put(resolvedFieldKey, resolvedFieldValue);
+				valuesCache.put(resolvedFieldKey, new CacheValue(resolvedFieldValue, cacheEntry.isTransient()));
 			}
 		}
 	}
@@ -203,7 +212,8 @@ public class StreamsCache {
 		if (cacheEntry != null) {
 			String cacheKey = fillInKeyPattern(cacheEntry.getKey(), ai, parserName);
 			if (cacheKey != null) {
-				return valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
+				CacheValue value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
+				return value == null ? null : value.value();
 			} else {
 				return cacheEntry.getDefaultValue();
 			}
@@ -219,13 +229,13 @@ public class StreamsCache {
 	 * @return resolved cached value or {@code null} if there is no such entry or data in cache
 	 */
 	public static Object getValue(String cacheKey) {
-		Object value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
+		CacheValue value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
 		if (value == null) {
 			CacheEntry cacheEntry = cacheEntries.get(cacheKey);
 
 			return cacheEntry == null ? null : cacheEntry.getDefaultValue();
 		}
-		return value;
+		return value.value();
 	}
 
 	/**
@@ -247,10 +257,6 @@ public class StreamsCache {
 	 * Adds stream-cache reference.
 	 */
 	public static void referStream() {
-		if (valuesCache == null) {
-			return;
-		}
-
 		referencesCount.getAndIncrement();
 	}
 
@@ -260,10 +266,6 @@ public class StreamsCache {
 	 * @see #cleanup()
 	 */
 	public static void unreferStream() {
-		if (valuesCache == null) {
-			return;
-		}
-
 		int crc = referencesCount.decrementAndGet();
 
 		if (crc <= 0) {
@@ -289,7 +291,27 @@ public class StreamsCache {
 		return cacheEntries.put(entryId, new CacheEntry(entryId, key, value, defaultValue));
 	}
 
-	public static void loadPersisted() {
+	/**
+	 * Adds cache entry pattern definition to cache entry patterns map.
+	 *
+	 * @param entryId
+	 *            entry identifier
+	 * @param key
+	 *            entry key pattern
+	 * @param value
+	 *            entry value pattern
+	 * @param defaultValue
+	 *            default entry value
+	 * @param transientEntry
+	 *            indicating whether cache entry is transient and should not be persisted
+	 * @return previous cache entry instance stored
+	 */
+	public static CacheEntry addEntry(String entryId, String key, String value, String defaultValue,
+			boolean transientEntry) {
+		return cacheEntries.put(entryId, new CacheEntry(entryId, key, value, defaultValue, transientEntry));
+	}
+
+	private static void loadPersisted() {
 		try {
 			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -304,9 +326,9 @@ public class StreamsCache {
 
 			CacheRoot root = (CacheRoot) unmarshaller.unmarshal(persistedFile);
 
-			Map<String, Object> mapProperty = root.getEntriesMap();
+			Map<String, CacheValue> mapProperty = root.getEntriesMap();
 			if (MapUtils.isNotEmpty(mapProperty)) {
-				for (Map.Entry<String, Object> entry : mapProperty.entrySet()) {
+				for (Map.Entry<String, CacheValue> entry : mapProperty.entrySet()) {
 					valuesCache.put(entry.getKey(), entry.getValue());
 				}
 			}
@@ -319,7 +341,7 @@ public class StreamsCache {
 		}
 	}
 
-	protected static void persist(Map<String, Object> cacheEntries) {
+	private static void persist(Map<String, CacheValue> cacheEntries) {
 		try {
 			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
 			Marshaller marshaller = jc.createMarshaller();
@@ -339,6 +361,22 @@ public class StreamsCache {
 	}
 
 	/**
+	 * Adds cache entry for defined key and value.
+	 * 
+	 * @param key
+	 *            cache entry key
+	 * @param value
+	 *            cache entry value
+	 */
+	public static void addValue(String key, Object value) {
+		if (!isInitialized()) {
+			initialize();
+		}
+
+		valuesCache.put(key, new CacheValue(value, true));
+	}
+
+	/**
 	 * Defines cache entry pattern.
 	 */
 	public static class CacheEntry {
@@ -346,6 +384,7 @@ public class StreamsCache {
 		private String key;
 		private String value;
 		private String defaultValue;
+		private boolean transientEntry = false;
 
 		/**
 		 * Constructs new CacheEntry.
@@ -356,12 +395,33 @@ public class StreamsCache {
 		 *            cache entry key pattern
 		 * @param value
 		 *            cache entry value pattern
+		 * @param defaultValue
+		 *            cache entry default value
 		 */
 		private CacheEntry(String id, String key, String value, String defaultValue) {
+			this(id, key, value, defaultValue, false);
+		}
+
+		/**
+		 * Constructs new CacheEntry.
+		 *
+		 * @param id
+		 *            cache entry identifier
+		 * @param key
+		 *            cache entry key pattern
+		 * @param value
+		 *            cache entry value pattern
+		 * @param defaultValue
+		 *            cache entry default value
+		 * @param transientEntry
+		 *            indicating whether cache entry is transient and should not be persisted
+		 */
+		private CacheEntry(String id, String key, String value, String defaultValue, boolean transientEntry) {
 			this.id = id;
 			this.key = key;
 			this.value = value;
 			this.defaultValue = defaultValue;
+			this.transientEntry = transientEntry;
 		}
 
 		/**
@@ -400,6 +460,17 @@ public class StreamsCache {
 			return defaultValue;
 		}
 
+		/**
+		 * Returns flag indicating that all cache entries build by this entry pattern are transient and should not be
+		 * persisted.
+		 * 
+		 * @return {@code true} if cache entries build by this entry pattern are transient and should not be persisted,
+		 *         {@code false} - otherwise
+		 */
+		public boolean isTransient() {
+			return transientEntry;
+		}
+
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder("CacheEntry{"); // NON-NLS
@@ -411,30 +482,67 @@ public class StreamsCache {
 			Utils.quote(value, sb);
 			sb.append(", defaultValue="); // NON-NLS
 			Utils.quote(defaultValue, sb);
+			sb.append(", transient="); // NON-NLS
+			Utils.quote(transientEntry, sb);
 			sb.append('}'); // NON-NLS
 			return sb.toString();
 		}
 	}
 
-	public static class MapAdapter extends XmlAdapter<MapEntry[], Map<String, Object>> {
+	/**
+	 * Defines cache entry value.
+	 */
+	public static class CacheValue {
+		private Object value;
+		private boolean transientValue = false;
+
+		public CacheValue(Object value) {
+			this(value, false);
+		}
+
+		public CacheValue(Object value, boolean transientValue) {
+			this.value = value;
+			this.transientValue = transientValue;
+		}
+
+		public Object value() {
+			return value;
+		}
+
+		public boolean isTransient() {
+			return transientValue;
+		}
+	}
+
+	/**
+	 * Cache entries map JAXB marshaling adapter.
+	 */
+	public static class MapAdapter extends XmlAdapter<MapEntry[], Map<String, CacheValue>> {
 		@Override
-		public MapEntry[] marshal(Map<String, Object> cache) throws Exception {
-			MapEntry[] mapElements = new MapEntry[cache.size()];
-			int i = 0;
-			for (Map.Entry<String, Object> entry : cache.entrySet()) {
-				mapElements[i++] = new MapEntry(entry.getKey(), entry.getValue());
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"StreamsCache.entry.marshal", entry.getKey(), entry.getValue());
+		public MapEntry[] marshal(Map<String, CacheValue> cache) throws Exception {
+			List<MapEntry> pEntries = new ArrayList<>(cache.size());
+			for (Map.Entry<String, CacheValue> entry : cache.entrySet()) {
+				if (!entry.getValue().isTransient()) {
+					pEntries.add(new MapEntry(entry.getKey(), entry.getValue()));
+
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsCache.entry.marshal", entry.getKey(), entry.getValue());
+				} else {
+					LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"StreamsCache.entry.marshal.skip", entry.getKey(), entry.getValue());
+				}
 			}
 
+			MapEntry[] mapElements = new MapEntry[pEntries.size()];
+			mapElements = pEntries.toArray(mapElements);
 			return mapElements;
 		}
 
 		@Override
-		public Map<String, Object> unmarshal(MapEntry[] mapElements) throws Exception {
-			Map<String, Object> r = new ConcurrentHashMap<>(mapElements.length);
+		public Map<String, CacheValue> unmarshal(MapEntry[] mapElements) throws Exception {
+			Map<String, CacheValue> r = new ConcurrentHashMap<>(mapElements.length);
 			for (MapEntry mapElement : mapElements) {
-				r.put(mapElement.key, mapElement.getValue());
+				r.put(mapElement.key, new CacheValue(mapElement.getValue()));
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"StreamsCache.entry.unmarshal", mapElement.key, mapElement.getValue());
 			}
@@ -442,6 +550,9 @@ public class StreamsCache {
 		}
 	}
 
+	/**
+	 * Cache map entry marshaling entity.
+	 */
 	public static class MapEntry {
 		@XmlElement
 		public String key;
@@ -470,20 +581,22 @@ public class StreamsCache {
 		}
 	}
 
+	/**
+	 * Root element for JAXB cache entries persisting.
+	 */
 	@XmlRootElement
 	public static class CacheRoot {
 
-		private Map<String, Object> entriesMap;
+		private Map<String, CacheValue> entriesMap;
 
 		@XmlJavaTypeAdapter(MapAdapter.class)
-		public Map<String, Object> getEntriesMap() {
+		public Map<String, CacheValue> getEntriesMap() {
 			return entriesMap;
 		}
 
-		public void setEntriesMap(Map<String, Object> map) {
+		public void setEntriesMap(Map<String, CacheValue> map) {
 			this.entriesMap = map;
 		}
-
 	}
 	/*
 	 * private static class ByteArrayAdapter extends XmlAdapter<String, Byte[]> {

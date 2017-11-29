@@ -16,20 +16,11 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-
-import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
-import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
  * Base class for abstract activity data parser that assumes each activity data item can MS Excel
@@ -48,8 +39,6 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	private FormulaEvaluator evaluator;
 	protected final ReentrantLock evaluationLock = new ReentrantLock();
 
-	private ActivityField parentIdField;
-
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
@@ -67,22 +56,6 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		// }
 		// }
 		// }
-	}
-
-	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
-		ActivityInfo ai = super.parse(stream, data);
-
-		String parentId = (String) stream.getProperty(MsOfficeStreamProperties.PROP_GROUPING_ACTIVITY_ID);
-		if (StringUtils.isNotEmpty(parentId)) {
-			if (parentIdField == null) {
-				parentIdField = new ActivityField(StreamFieldType.ParentId.name(), ActivityFieldDataType.String);
-			}
-
-			ai.setFieldValue(parentIdField, parentId);
-		}
-
-		return ai;
 	}
 
 	/**

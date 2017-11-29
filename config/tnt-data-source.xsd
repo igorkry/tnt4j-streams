@@ -2051,6 +2051,13 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="transient" use="optional" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    Defines flag indicating whether cache entry is transient and should not be persisted.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Element <stream> definition -->

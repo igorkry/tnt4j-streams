@@ -57,6 +57,12 @@ public final class StreamsConstants {
 	 */
 	public static final String MULTI_PROPS_DELIMITER = "&|@"; // NON-NLS
 
+	/**
+	 * The constant defining key for streams cache entry containing stream events grouping ACTIVITY identifier, to be
+	 * used as streamed entities parent identifier.
+	 */
+	public static final String STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY = ".GroupingActivityId"; // NON-NLS
+
 	private StreamsConstants() {
 	}
 }

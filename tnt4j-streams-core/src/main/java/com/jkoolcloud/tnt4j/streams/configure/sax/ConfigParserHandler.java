@@ -307,6 +307,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private static final String PHASE_ATTR = "phase"; // NON-NLS
 	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String TRANSIENT_ATTR = "transient"; // NON-NLS
+	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
@@ -511,6 +515,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			String attValue = attrs.getValue(i);
 			if (ID_ATTR.equals(attName)) {
 				currCacheEntry.id = attValue;
+			} else if (TRANSIENT_ATTR.equals(attName)) {
+				currCacheEntry.transientEntry = Boolean.parseBoolean(attValue);
 			}
 		}
 
@@ -2144,7 +2150,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleCacheEntry(CacheEntryData currCacheEntry) throws SAXException {
-		StreamsCache.addEntry(currCacheEntry.id, currCacheEntry.key, currCacheEntry.value, currCacheEntry.defaultValue);
+		StreamsCache.addEntry(currCacheEntry.id, currCacheEntry.key, currCacheEntry.value, currCacheEntry.defaultValue,
+				currCacheEntry.transientEntry);
 	}
 
 	private void handleKey(CacheEntryData currCacheEntry) throws SAXException {
@@ -2374,6 +2381,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String key;
 		String value;
 		String defaultValue;
+		boolean transientEntry;
 	}
 
 	private static class ParserRefData {

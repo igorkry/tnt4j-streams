@@ -27,11 +27,11 @@ All You need is to define Your data format mapping to TNT4J event mapping in TNT
     * MS Excel document
 
 * Files (also HDFS) can be streamed:
-    * as "whole at once" - when stream starts, it reads file contents line by line meaning single file line hols
-    data of single activity event. After file reading completes - stream stops.
-    * using file polling - when some application uses file to write data at runtime, stream waits for file changes.
-    When file changes, changed (appended) lines are read by stream and interpreted as single line is single activity
-    event. Stream stops only when application gets terminated or some critical runtime error occurs.
+    * as "whole at once" - when a stream starts, it reads file contents line by line meaning a single file line holds data of a single 
+    activity event. After file reading completes - the stream stops.
+    * using file polling - when some application uses file to write data at runtime, stream waits for file changes. When file changes, 
+    changed (appended) lines are read by stream and interpreted as single line is single activity event. Stream stops only when application 
+    gets terminated or some critical runtime error occurs.
 
 * Customized parser for Apache Access Logs.
 
@@ -830,7 +830,7 @@ Defining dynamic `field` parameters sample:
     <.../>
 ``` 
 
-Sample shows how how to dynamically define filed `name` and `value-type` parameters referencing values resolved by `FieldNameLoc` and 
+Sample shows how to dynamically define field `name` and `value-type` parameters referencing values resolved by `FieldNameLoc` and 
 `ValueTypeLoc` locators.
 
 There is also field attribute `split` stating that if field/locator resolved value is array/collection, then it should make as many 
@@ -3941,7 +3941,7 @@ Sample stream configuration:
 ``` 
 
 Stream configuration states that `FileStream` referencing `MQErrLogParser` shall be used. Stream reads IBM MQ error log entries from 
-`./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG` file contents an passes it to parser.
+`./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG` file contents and passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 
@@ -3970,16 +3970,16 @@ Sample stream configuration:
         <field name="EventType" value="EVENT"/>
         <field name="EventName" value="SOCGEN_Msg_Data"/>
 
-        <field name="TransID">  <!-- offsets 0-13 inclusive, length=14, ck line length >= extract length; expected value: TID_TEST3B_456   ok -->
+        <field name="TransID">  <!-- offsets 0-13 inclusive, length=14, expected value: TID_TEST3B_456 -->
             <field-locator locator="0:14" locator-type="Range"/>
         </field>
-        <field name="TransType">  <!-- offsets 20-35 inclusive, length=16, ck line length > starting offset, expected value: TYPE_TEST3B_SALE   ok -->
+        <field name="TransType">  <!-- offsets 20-35 inclusive, length=16, expected value: TYPE_TEST3B_SALE -->
             <field-locator locator="20:36" locator-type="Range"/>
         </field>
-        <field name="TransValue">  <!-- offsets 70-89 inclusive, field length=15, ck line length > starting offset, expected value: AMT_TEST3B_USD123.45   ok -->
+        <field name="TransValue">  <!-- offsets 70-89 inclusive, field length=20, expected value: AMT_TEST3B_USD123.45  -->
             <field-locator locator="70:90" locator-type="Range"/>
         </field>
-        <field name="UserData">  <!-- offsets 123-145 inclusive, length=23, ck line length > starting offset, expected value: TEST3B_Model iSeries123   ok -->
+        <field name="UserData">  <!-- offsets 123-145 inclusive, length=23, expected value: TEST3B_Model iSeries123 -->
             <field-locator locator="123:146" locator-type="Range"/>
         </field>
     </parser>
@@ -3994,7 +3994,7 @@ Sample stream configuration:
 ``` 
 
 Stream configuration states that `FileStream` referencing `StrRangesParser` shall be used. Stream reads message entries from 
-`./tnt4j-streams-core/samples/string-ranges/strings.txt` file contents an passes it to parser.
+`./tnt4j-streams-core/samples/string-ranges/strings.txt` file contents and passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable entries.
 
@@ -4273,10 +4273,12 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 
  * `HaltIfNoParser` - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
  If set to `false` - puts log entry and continues. Default value - `false`. (Optional)
+ * `GroupingActivityName` - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)
 
     sample:
 ```xml
     <property name="HaltIfNoParser" value="true"/>
+    <property name="GroupingActivityName" value="Events from XLSX file"/>
 ```
 
 ##### Buffered streams parameters
@@ -4741,14 +4743,12 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
  * `SheetsToProcess` - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
  matches this mask. (Optional)
  * `WorkbookPassword` - excel workbook password. (Optional)
- * `GroupingActivityName` - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)
 
     sample:
 ```xml
     <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
-    <property name="WorkbookPassword" value="xlsPass"/>    
-    <property name="GroupingActivityName" value="Events from XLSX file"/>
+    <property name="WorkbookPassword" value="xlsPass"/>        
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).

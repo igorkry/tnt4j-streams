@@ -25,10 +25,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -40,6 +46,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <ul>
  * <li>HaltIfNoParser - if set to {@code true}, stream will halt if none of the parsers can parse activity object RAW
  * data. If set to {@code false} - puts log entry and continues. Default value - {@code false}. (Optional)</li>
+ * <li>GroupingActivityName - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -55,6 +62,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<>();
 
 	private boolean haltIfNoParser = false;
+	private String groupingActivityName = null;
 
 	@Override
 	protected void setDefaultStreamOutput() {
@@ -71,6 +79,8 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 				String value = prop.getValue();
 				if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
 					haltIfNoParser = Boolean.parseBoolean(value);
+				} else if (StreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
+					groupingActivityName = value;
 				}
 			}
 		}
@@ -81,8 +91,28 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		if (StreamProperties.PROP_HALT_ON_PARSER.equals(name)) {
 			return haltIfNoParser;
 		}
+		if (StreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
+			return groupingActivityName;
+		}
 
 		return super.getProperty(name);
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
+
+		if (StringUtils.isNotEmpty(groupingActivityName)) {
+			ActivityInfo gai = new ActivityInfo();
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventType.name(), ActivityFieldDataType.String),
+					OpType.ACTIVITY.name());
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventName.name(), ActivityFieldDataType.String),
+					groupingActivityName);
+			output().logItem(gai);
+
+			StreamsCache.addValue(getName() + StreamsConstants.STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY,
+					gai.getTrackingId());
+		}
 	}
 
 	@Override
@@ -300,6 +330,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTInputStream.no.parser", item);
 			incrementSkippedActivitiesCount();
+			rollbackTransaction();
 			if (haltIfNoParser) {
 				failureFlag.set(true);
 				notifyFailed(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,

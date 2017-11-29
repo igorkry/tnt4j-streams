@@ -31,13 +31,4 @@ public interface MsOfficeStreamProperties extends StreamProperties {
 	 * Constant for name of built-in stream {@value} property.
 	 */
 	String PROP_WORKBOOK_PASS = "WorkbookPassword"; // NON-NLS
-	/**
-	 * Constant for name of built-in stream {@value} property.
-	 */
-	String PROP_GROUPING_ACTIVITY_NAME = "GroupingActivityName"; // NON-NLS
-
-	/**
-	 * Constant for name of built-in stream {@value} property. NOTE: this property is read-only.
-	 */
-	String PROP_GROUPING_ACTIVITY_ID = "GroupingActivityId"; // NON-NLS
 }

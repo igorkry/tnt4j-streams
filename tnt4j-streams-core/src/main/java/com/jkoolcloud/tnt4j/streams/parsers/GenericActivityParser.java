@@ -35,6 +35,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.preparsers.ActivityDataPreParser;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -89,6 +90,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected final Lock preParserLock = new ReentrantLock();
 
 	private boolean autoSort = true;
+	private ActivityField parentIdField;
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
@@ -424,6 +426,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		ActivityInfo ai = parsePreparedItem(cData);
 		fillInMessageData(stream, ai, cData.getMessage());
 		postParse(cData);
+
+		String parentId = (String) StreamsCache
+				.getValue(stream.getName() + StreamsConstants.STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY);
+		if (StringUtils.isNotEmpty(parentId)) {
+			if (parentIdField == null) {
+				parentIdField = new ActivityField(StreamFieldType.ParentId.name(), ActivityFieldDataType.String);
+			}
+
+			ai.setFieldValue(parentIdField, parentId);
+		}
 
 		return ai;
 	}
