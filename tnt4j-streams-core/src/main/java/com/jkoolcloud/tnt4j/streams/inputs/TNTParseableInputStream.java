@@ -330,7 +330,6 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTInputStream.no.parser", item);
 			incrementSkippedActivitiesCount();
-			rollbackTransaction();
 			if (haltIfNoParser) {
 				failureFlag.set(true);
 				notifyFailed(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
