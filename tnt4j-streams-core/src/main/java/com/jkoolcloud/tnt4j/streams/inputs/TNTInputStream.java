@@ -732,7 +732,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 			}
 		} catch (Exception e) {
 			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTInputStream.failed.record.activity", e.getLocalizedMessage(), e);
+					"TNTInputStream.fatal.stream.failure", name, e.getLocalizedMessage(), e);
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
 		} finally {
