@@ -85,6 +85,15 @@ public enum FieldLocatorTypes {
 	RE_MATCH_ID("REMatchId"),
 
 	/**
+	 *
+	 * Locator value is the range within enclosing object: r.g. characters range within string.
+	 *
+	 *
+	 */
+	@XmlEnumValue("Range")
+	RANGE("Range"),
+
+	/**
 	 * 
 	 * Locator value is the value for stream stored cache key.
 	 * 

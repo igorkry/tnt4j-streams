@@ -1175,7 +1175,7 @@
             </xs:annotation>
         </xs:attribute>
 
-        <xs:attribute name="datatype" use="optional" type="DataTypes" default="Generic">
+        <xs:attribute name="datatype" use="optional" type="DataTypes" default="String">
             <xs:annotation>
                 <xs:documentation>
                     Indicates how to interpret value extracted for this field.

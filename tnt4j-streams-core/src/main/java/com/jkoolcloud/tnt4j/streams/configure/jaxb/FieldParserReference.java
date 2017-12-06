@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Generated;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -36,6 +39,9 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType name="FieldParserReference">
  *   &lt;complexContent>
  *     &lt;extension base="{}Reference">
+ *       &lt;sequence>
+ *         &lt;element name="matchExp" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *       &lt;/sequence>
  *       &lt;attribute name="aggregation" type="{}AggregationTypes" default="Merge" />
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -45,10 +51,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "FieldParserReference")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+@XmlType(name = "FieldParserReference", propOrder = { "matchExp" })
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T04:18:24+02:00", comments = "JAXB RI v2.2.4-2")
 public class FieldParserReference extends Reference {
 
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T04:18:24+02:00", comments = "JAXB RI v2.2.4-2")
+	protected List<String> matchExp;
 	@XmlAttribute(name = "aggregation")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	protected AggregationTypes aggregation;
@@ -60,6 +68,39 @@ public class FieldParserReference extends Reference {
 	public FieldParserReference(String name, AggregationTypes aType) {
 		super(name);
 		this.aggregation = aType;
+	}
+
+	/**
+	 * Gets the value of the matchExp property.
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the matchExp property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getMatchExp().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link String }
+	 *
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T04:18:24+02:00", comments = "JAXB RI v2.2.4-2")
+	public List<String> getMatchExp() {
+		if (matchExp == null) {
+			matchExp = new ArrayList<String>();
+		}
+		return this.matchExp;
+	}
+
+	public void addMatchExp(String matchExp) {
+		getMatchExp().add(matchExp);
 	}
 
 	/**

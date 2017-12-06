@@ -55,6 +55,7 @@ import javax.xml.bind.annotation.*;
  *         &lt;/element>
  *       &lt;/sequence>
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="transient" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -79,6 +80,9 @@ public class CacheEntry {
 	@XmlAttribute(name = "id", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String id;
+	@XmlAttribute(name = "transient", required = false)
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	protected Boolean transientEntry;
 
 	public CacheEntry() {
 
@@ -185,6 +189,29 @@ public class CacheEntry {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setId(String value) {
 		this.id = value;
+	}
+
+	/**
+	 * Gets the value of the transient property.
+	 *
+	 * @return possible object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	public Boolean isTransient() {
+		return transientEntry;
+	}
+
+	/**
+	 * Sets the value of the transient property.
+	 *
+	 * @param value
+	 *            allowed object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-12-06T05:46:13+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setTransient(Boolean value) {
+		this.transientEntry = value;
 	}
 
 }
