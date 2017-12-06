@@ -89,7 +89,18 @@ public enum DataTypes {
 	 * 
 	 */
 	@XmlEnumValue("Timestamp")
-	TIMESTAMP("Timestamp");
+	TIMESTAMP("Timestamp"),
+
+	/**
+	 *
+	 * Field value is generic and streams should try to make real value out of it: boolean, number, timestamp, date,
+	 * string.
+	 *
+	 *
+	 */
+	@XmlEnumValue("Generic")
+	GENERIC("Generic");
+
 	private final String value;
 
 	DataTypes(String v) {
