@@ -197,4 +197,14 @@ public interface StreamProperties {
 	 * Constant for name of built-in stream {@value} property.
 	 */
 	String PROP_GROUPING_ACTIVITY_NAME = "GroupingActivityName"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_ACTIVITY_DELIM = "ActivityDelim"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_KEEP_LINE_SEPARATORS = "KeepLineSeparators"; // NON-NLS
 }

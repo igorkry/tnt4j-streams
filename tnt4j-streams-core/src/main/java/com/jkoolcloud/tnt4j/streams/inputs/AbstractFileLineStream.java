@@ -61,6 +61,11 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual only if
  * 'FilePolling' or 'RestoreState' properties are set to {@code true}. Default value - {@code true}. (Optional)</li>
  * <li>RangeToStream - defines streamed data lines index range. Default value - {@code 1:}. (Optional)</li>
+ * <li>ActivityDelim - defining activities data delimiter used by stream. Value can be: {@code "EOL"} - end of line,
+ * {@code "EOF"} - end of file/stream, or any user defined symbol or string. Default value - '{@code EOL}'.
+ * (Optional)</li>
+ * <li>KeepLineSeparators - flag indicating whether to return line separators at the end of read line. Default value -
+ * {@code false}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 2 $
@@ -98,6 +103,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 
 	private String rangeValue = "1:"; // NON-NLS
 	private IntRange lineRange = null;
+	protected String activityDelimiter = ActivityDelim.EOL.name();
+	protected boolean keepLineSeparators = false;
 
 	/**
 	 * Constructs a new AbstractFileLineStream.
@@ -126,6 +133,10 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 					storeState = Boolean.parseBoolean(value);
 				} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
 					rangeValue = value;
+				} else if (StreamProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+					activityDelimiter = value;
+				} else if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
+					keepLineSeparators = Boolean.parseBoolean(value);
 				}
 			}
 		}
@@ -150,6 +161,12 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
 			return rangeValue;
+		}
+		if (StreamProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+			return activityDelimiter;
+		}
+		if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
+			return keepLineSeparators;
 		}
 		return super.getProperty(name);
 	}
@@ -340,14 +357,45 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 */
 		protected void readNewFileLines(LineNumberReader lnr) throws IOException {
 			String line;
+			StringBuilder sb = new StringBuilder(256);
 			while ((line = lnr.readLine()) != null && !isInputEnded()) {
 				lineNumber = lnr.getLineNumber();
 				if (StringUtils.isNotEmpty(line) && lineRange.inRange(lineNumber)) {
-					addInputToBuffer(new Line(line, lineNumber));
+					addActivityDataLine(line, sb, lineNumber);
 				} else {
 					skipFilteredActivities();
 				}
 			}
+
+			if (sb.length() > 0) {
+				addLineToBuffer(sb, lineNumber);
+			}
+		}
+
+		private void addActivityDataLine(String line, StringBuilder sb, int lineNumber) {
+			sb.append(line);
+			if (keepLineSeparators) {
+				sb.append('\n');
+			}
+
+			if (lineHasActivityDelim(line)) {
+				addLineToBuffer(sb, lineNumber);
+			}
+		}
+
+		private boolean lineHasActivityDelim(String line) {
+			if (activityDelimiter.equals(ActivityDelim.EOL.name())) {
+				return true;
+			} else if (activityDelimiter.equals(ActivityDelim.EOF.name())) {
+				return false;
+			} else {
+				return line.endsWith(activityDelimiter);
+			}
+		}
+
+		private void addLineToBuffer(StringBuilder sb, int lineNumber) {
+			addInputToBuffer(new Line(sb.toString(), lineNumber));
+			sb.setLength(0);
 		}
 
 		/**
@@ -439,5 +487,20 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		public String toString() {
 			return text;
 		}
+	}
+
+	/**
+	 * List built-in types of activity data delimiters within RAW data.
+	 */
+	protected enum ActivityDelim {
+		/**
+		 * Activity data delimiter is end-of-line.
+		 */
+		EOL,
+
+		/**
+		 * Activity data delimiter is end-of-file.
+		 */
+		EOF,
 	}
 }

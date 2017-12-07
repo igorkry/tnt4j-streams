@@ -3930,10 +3930,15 @@ Sample stream configuration:
 
     </parser>
 
-    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
         <property name="RestoreState" value="false"/>
+        <property name="FilePolling" value="true"/>
+        <property name="FileReadDelay" value="20"/>
+        <property name="StartFromLatest" value="false"/>
+        <property name="ActivityDelim" value="-----"/>
+        <property name="KeepLineSeparators" value="true"/>
 
         <parser-ref name="MQErrLogParser"/>
     </stream>
@@ -4386,6 +4391,9 @@ or
  lines from available files are streamed on startup. Actual only if `FilePolling` or `RestoreState` properties are set to `true`. Default 
  value - `true`. (Optional)
  * `RangeToStream` - defines streamed data lines index range. Default value - `1:`. (Optional)
+ * `ActivityDelim` - defining activities data delimiter used by stream. Value can be: `EOL` - end of line, `EOF` - end of file/stream, or 
+ any user defined symbol or string. Default value - `EOL`. (Optional)
+ * `KeepLineSeparators` - flag indicating whether to return line separators at the end of read line. Default value - `false`. (Optional)
 
     sample:
  ```xml
@@ -4395,6 +4403,8 @@ or
     <property name="FilePolling" value="true"/>
     <property name="RestoreState" value="true"/>
     <property name="RangeToStream" value="12:125"/>
+    <property name="ActivityDelim" value="-----"/>
+    <property name="KeepLineSeparators" value="true"/>
  ```
 
 In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[path]`. Path may contain wildcards.

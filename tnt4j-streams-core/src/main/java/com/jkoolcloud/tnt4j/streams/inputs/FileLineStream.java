@@ -36,7 +36,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports properties from {@link AbstractFileLineStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link AbstractFileLineStream} (and higher hierarchy
+ * streams).
  *
  * @version $Revision: 2 $
  *
@@ -149,8 +150,14 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		 */
 		@Override
 		protected void readFileChanges() {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.reading.changes", fileToRead.getAbsolutePath());
+			if (fileToRead != null) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.reading.changes", fileToRead.getAbsolutePath());
+			} else {
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.reading.no.file");
+				return;
+			}
 
 			if (!fileToRead.canRead()) {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -226,6 +233,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private LineNumberReader skipOldLines(LineNumberReader lnr) throws IOException {
+			int mln = lnr.getLineNumber();
 			lnr.mark(0);
 			boolean skipFail = false;
 
@@ -249,9 +257,15 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				} else {
 					if (lnr.markSupported()) {
 						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.resetting.reader", 0);
+								"FileLineStream.resetting.reader", mln);
 
-						lnr.reset();
+						try {
+							lnr.reset();
+						} catch (IOException exc) {
+							logger().log(OpLevel.WARNING,
+									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+									"FileLineStream.resetting.failed", mln, lnr.getLineNumber());
+						}
 					}
 				}
 			}

@@ -214,8 +214,14 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		 */
 		@Override
 		protected void readFileChanges() {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.reading.changes", fileToRead.toString());
+			if (fileToRead != null) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.reading.changes", fileToRead.toString());
+			} else {
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.reading.no.file");
+				return;
+			}
 
 			try {
 				if (fs == null) {
@@ -303,6 +309,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private LineNumberReader skipOldLines(LineNumberReader lnr, FileSystem fs) throws Exception {
+			int mln = lnr.getLineNumber();
 			lnr.mark(0);
 			boolean skipFail = false;
 
@@ -326,9 +333,15 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				} else {
 					if (lnr.markSupported()) {
 						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.resetting.reader", 0);
+								"FileLineStream.resetting.reader", mln);
 
-						lnr.reset();
+						try {
+							lnr.reset();
+						} catch (IOException exc) {
+							logger().log(OpLevel.WARNING,
+									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+									"FileLineStream.resetting.failed", mln, lnr.getLineNumber());
+						}
 					}
 				}
 			}

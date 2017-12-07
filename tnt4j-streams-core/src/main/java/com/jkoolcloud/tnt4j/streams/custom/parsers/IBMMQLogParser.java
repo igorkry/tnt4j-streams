@@ -54,8 +54,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>Action - resolved log entry IBM MQ error fix action message text</li>
  * <li>Where - resolved log entry error descriptor location string containing source code file name and line number</li>
  * </ul>
- *
- * This activity parser supports properties from {@link AbstractActivityMapParser} (and higher hierarchy parsers).
+ * <p>
+ * This activity parser supports configuration properties from {@link AbstractActivityMapParser} (and higher hierarchy
+ * parsers).
  *
  * @version $Revision: 1 $
  */
@@ -63,7 +64,10 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(IBMMQLogParser.class);
 
 	private static final String RAW_ERR_LOG_ENTRY_KEY = "RAW_ERR_LOG_ENTRY"; // NON-NLS
-	private static final String ENTRIES_DELIM = "-----"; // NON-NLS
+	/**
+	 * Constant defining IBM MQ error log entries delimiter.
+	 */
+	public static final String ENTRIES_DELIM = "-----"; // NON-NLS
 
 	private final IBMMQErrParser errEntryParser;
 
@@ -167,7 +171,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 
 	/**
 	 * Reads RAW IBM MQ error log entry string from {@link BufferedReader}. If the data input source contains multiple
-	 * error log entries, then each document must start with {@code "-----"}, and be separated by a new line.
+	 * error log entries, then each document must ends with {@value ENTRIES_DELIM}, and be separated by a new line.
 	 * 
 	 * @param rdr
 	 *            reader to use for reading
@@ -183,7 +187,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			try {
 				for (String line; entryString == null && (line = rdr.readLine()) != null;) {
 					entryBuffer.append(line);
-					if (line.startsWith(ENTRIES_DELIM)) {
+					if (line.endsWith(ENTRIES_DELIM)) {
 						if (entryBuffer.length() > 0) {
 							entryString = entryBuffer.toString();
 							entryBuffer.setLength(0);
