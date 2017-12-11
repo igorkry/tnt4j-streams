@@ -63,7 +63,6 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 public class IBMMQLogParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(IBMMQLogParser.class);
 
-	private static final String RAW_ERR_LOG_ENTRY_KEY = "RAW_ERR_LOG_ENTRY"; // NON-NLS
 	/**
 	 * Constant defining IBM MQ error log entries delimiter.
 	 */
@@ -131,7 +130,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 	}
 
 	@Override
-	protected Map<String, ?> getDataMap(Object data) {
+	protected Map<String, Object> getDataMap(Object data) {
 		if (data == null) {
 			return null;
 		}
@@ -141,7 +140,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			return null;
 		}
 		Map<String, Object> dataMap = new HashMap<>();
-		dataMap.put(RAW_ERR_LOG_ENTRY_KEY, logEntry);
+		dataMap.put(RAW_ACTIVITY_STRING_KEY, logEntry);
 
 		try {
 			synchronized (errEntryParser) {
@@ -153,20 +152,6 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 		}
 
 		return dataMap;
-	}
-
-	/**
-	 * Retrieves RAW IBM MQ error log entry string to be put to activity field
-	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message}. This is used when no field
-	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message} mapping defined in parser configuration.
-	 * 
-	 * @param dataMap
-	 *            IBM MQ error log entry fields map
-	 * @return RAW IBM MQ error log entry string retrieved from map entry {@code "RAW_ERR_LOG_ENTRY"}
-	 */
-	@Override
-	protected String getRawDataAsMessage(Map<String, ?> dataMap) {
-		return dataMap == null ? null : (String) dataMap.get(RAW_ERR_LOG_ENTRY_KEY);
 	}
 
 	/**

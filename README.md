@@ -3960,7 +3960,7 @@ event and fields of event are substring ranges.
 
 Sample files can be found in `samples/string-ranges` directory (`tnt4j-streams-core` module).
 
-Sample error log file is available in `strings.txt` file. Now it contains only one entry.
+Sample message data is available in `strings.txt` file. Now it contains only one entry.
 
 Sample stream configuration:
 ```xml
@@ -4010,6 +4010,65 @@ provided string. **NOTE** that range lower bound is treated **inclusive** and up
  * `:x` - from the `beginning` of the string to character at the index `x` (**exclusive**)
  * `x:y` - from character at the index `x` (**inclusive**) to character at the index `y` (**exclusive**)
  * `x:` - from character at the index `x` (**inclusive**) to the `end` of the string
+ 
+#### IBM MQ RFH2/JMS streaming
+
+This sample shows how to stream IBM MQ RFH2/JMS binary data as activity events.
+
+Sample files can be found in `samples/rfh2_jms` directory (`tnt4j-streams-wmq` module).
+
+Sample RFH2/JMS data binary dump is available in `rfh2_jms.bin` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+
+    <parser name="RFH2FoldersParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="PayloadDataType" locator="/rfh2Folders/mcd/Msd" locator-type="Label"/>
+        <field name="DestinationQ" locator="/rfh2Folders/jms/Dst" locator-type="Label"/>
+        <field name="StartTime" locator="/rfh2Folders/jms/Tms" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+    </parser>
+
+    <parser name="JMSPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="UserData" locator="*" locator-type="Label"/>
+    </parser>
+
+    <parser name="RFH2Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRFH2Parser">
+        <property name="TranslateNumValues" value="true"/>
+        <property name="UseActivityDataAsMessageForUnset" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EventName" value="IBM_MQ_RFH2/JMS_PAYLOAD"/>
+        <embedded-activity name="FoldersData" locator="rfh2Folders" locator-type="Label">
+            <parser-ref name="RFH2FoldersParser" aggregation="Merge"/>
+        </embedded-activity>
+
+        <embedded-activity name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label">
+            <parser-ref name="JMSPayloadParser" aggregation="Merge"/>
+        </embedded-activity>
+    </parser>
+
+    <stream name="RFH2JMSFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin"/>
+        <property name="RestoreState" value="false"/>
+
+        <parser-ref name="RFH2Parser"/>
+    </stream>
+</tnt-data-source>
+``` 
+
+Stream configuration states that `RFH2JMSFileStream` referencing `RFH2Parser` shall be used. Stream reads message entries from 
+`./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin` file contents and passes it to parser.
+
+`RFH2Parser` resolves RFH2 folders and JMS message payload data into predefined fields `rfh2Folders` and `jmsMsgPayload`. Values of these 
+fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for further parsing into fields of `EVENT` named 
+`IBM_MQ_RFH2/JMS_PAYLOAD`.  
+
+`RFH2FoldersParser` parser uses XPath expressions to resolve values.
+`JMSPayloadParser` copies all JMS MapMessage entries as fields of `EVENT` named `IBM_MQ_RFH2/JMS_PAYLOAD`.  
  
 #### Fluentd logs streaming
 
@@ -5063,6 +5122,22 @@ Sample of field definition for signature calculation:
 
 #### IBM MQ Error log entries parser
 
+This parser resolved data map may contain such entries:
+* `Date` - resolved log entry date string
+* `Time` - resolved log entry time string
+* `Process` - resolved log entry process identifier
+* `User` - resolved log entry user name
+* `Program` - resolved log entry program (application) name
+* `Host` - resolved log entry host name IBM MQ is running on
+* `Installation` - resolved log entry IBM MQ installation name
+* `VRMF` - resolved log entry running IBM MQ version descriptor
+* `QMgr` - resolved log entry Queue manager error occurred on
+* `ErrCode` - resolved log entry IBM MQ error code string
+* `ErrText` - resolved log entry IBM MQ error message text
+* `Explanation` - resolved log entry IBM MQ error explanation message text
+* `Action` - resolved log entry IBM MQ error fix action message text
+* `Where` - resolved log entry error descriptor location string containing source code file name and line number
+
 This parser has no additional configuration properties.
 
 Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
@@ -5078,6 +5153,17 @@ Also see [Generic parser parameters](#generic-parser-parameters) regarding highe
 This parser has no additional configuration properties.
 
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
+
+#### IBM MQ RFH2/JMS binary data parser
+
+This parser resolved data map may contain such entries:
+* `rfh2Folders` - RFH2 folders data XML string. Root element for this XML is `<rfh2Folders>`. Further XPath based parsing can be processed 
+by [Activity XML parser](activity-xml-parser)
+* `jmsMsgPayload` - JMS JMS message payload data
+
+This parser has no additional configuration properties.
+ 
+Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
 ### Pre-parsers
 

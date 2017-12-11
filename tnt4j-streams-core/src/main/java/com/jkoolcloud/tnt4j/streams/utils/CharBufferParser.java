@@ -34,23 +34,23 @@ import java.nio.CharBuffer;
  */
 public abstract class CharBufferParser<I, O> {
 	/**
-	 * Constant for SPACE character '{@value}'.
+	 * Constant for SPACE character {@value}.
 	 */
 	protected static final char SPACE = ' ';
 	/**
-	 * Constant for NL character '{@value}'.
+	 * Constant for NL character {@value}.
 	 */
 	protected static final char NL = '\n';
 	/**
-	 * Constant for RC character '{@value}'.
+	 * Constant for RC character {@value}.
 	 */
 	protected static final char RC = '\r';
 	/**
-	 * Constant for ZERO character '{@value}'.
+	 * Constant for ZERO character {@value}.
 	 */
 	protected static final char ZERO = '0';
 	/**
-	 * Constant for EOF character '{@value}'.
+	 * Constant for EOF character {@value}.
 	 */
 	protected static final int EOF = -1;
 
@@ -154,7 +154,9 @@ public abstract class CharBufferParser<I, O> {
 	 * @see #unread(CharBuffer)
 	 */
 	protected static void skipSpaces(CharBuffer cb) {
-		while (read(cb) == SPACE) {
+		int c;
+
+		while ((c = read(cb)) == SPACE || c == NL || c == RC) {
 			continue;
 		}
 		unread(cb);

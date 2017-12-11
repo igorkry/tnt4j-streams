@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+
+    <parser name="RFH2FoldersParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="PayloadDataType" locator="/rfh2Folders/mcd/Msd" locator-type="Label"/>
+        <field name="DestinationQ" locator="/rfh2Folders/jms/Dst" locator-type="Label"/>
+        <field name="StartTime" locator="/rfh2Folders/jms/Tms" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
+    </parser>
+
+    <parser name="JMSPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="UserData" locator="*" locator-type="Label"/>
+    </parser>
+
+    <parser name="RFH2Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRFH2Parser">
+        <property name="TranslateNumValues" value="true"/>
+        <property name="UseActivityDataAsMessageForUnset" value="false"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="EventName" value="IBM_MQ_RFH2/JMS_PAYLOAD"/>
+        <embedded-activity name="FoldersData" locator="rfh2Folders" locator-type="Label">
+            <parser-ref name="RFH2FoldersParser" aggregation="Merge"/>
+        </embedded-activity>
+
+        <embedded-activity name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label">
+            <parser-ref name="JMSPayloadParser" aggregation="Merge"/>
+        </embedded-activity>
+    </parser>
+
+    <stream name="RFH2JMSFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin"/>
+        <property name="RestoreState" value="false"/>
+
+        <parser-ref name="RFH2Parser"/>
+    </stream>
+</tnt-data-source>

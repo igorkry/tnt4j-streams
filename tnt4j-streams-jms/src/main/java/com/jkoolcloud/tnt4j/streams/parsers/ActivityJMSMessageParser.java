@@ -56,6 +56,15 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * NOTE: Custom messages parsing not implemented and puts just log entry.
  * <p>
+ * This parser resolved data map may contain such entries:
+ * <ul>
+ * <li>ActivityData - JMS message payload data. In case of {@link javax.jms.MapMessage} this entry is omitted, because
+ * message contained map entries are copied to data map.</li>
+ * <li>Correlator - JMS message correlation id {@link javax.jms.Message#getJMSCorrelationID()}.</li>
+ * <li>ActivityTransport - value is always
+ * {@value com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants#TRANSPORT_JMS}.</li>
+ * </ul>
+ * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link AbstractActivityMapParser}):
  * <ul>
@@ -130,13 +139,14 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @return activity object data map
 	 */
 	@Override
-	protected Map<String, ?> getDataMap(Object data) {
+	protected Map<String, Object> getDataMap(Object data) {
 		if (data == null) {
 			return null;
 		}
 
 		Message message = (Message) data;
 		Map<String, Object> dataMap = new HashMap<>();
+		dataMap.put(RAW_ACTIVITY_STRING_KEY, message.toString());
 
 		try {
 			if (message instanceof TextMessage) {

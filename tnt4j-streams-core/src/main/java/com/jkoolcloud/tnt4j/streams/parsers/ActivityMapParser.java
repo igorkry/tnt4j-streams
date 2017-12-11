@@ -61,7 +61,7 @@ public class ActivityMapParser extends AbstractActivityMapParser {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Map<String, ?> getDataMap(Object data) {
+	protected Map<String, Object> getDataMap(Object data) {
 		if (data == null) {
 			return null;
 		}

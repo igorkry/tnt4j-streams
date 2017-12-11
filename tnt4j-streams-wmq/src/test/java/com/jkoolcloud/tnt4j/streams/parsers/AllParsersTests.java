@@ -24,7 +24,6 @@ import org.junit.runners.Suite;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ MessageActivityXmlParserTest.class, MessageTypeTest.class })
+@Suite.SuiteClasses({ ActivityRFH2ParserTest.class, MessageActivityXmlParserTest.class, MessageTypeTest.class })
 public class AllParsersTests {
-
 }

@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.preparsers;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,7 +52,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This preparer is also capable to make valid XML document from RAW activity data having truncated XML structures.
  * <p>
  * If resolved XML has multiple nodes in root level, to make XML valid those nodes gets surrounded by single root node
- * named '{@value com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser.XMLBinSAXHandler#ROOT_ELEMENT}'.
+ * named {@value com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser.XMLBinSAXHandler#ROOT_ELEMENT}.
  *
  * @version $Revision: 1 $
  */
@@ -116,6 +117,9 @@ public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> 
 		} else if (data instanceof byte[]) {
 			is = new ByteArrayInputStream((byte[]) data);
 			closeWhenDone = true;
+		} else if (data instanceof ByteBuffer) {
+			is = new ByteArrayInputStream(((ByteBuffer) data).array());
+			closeWhenDone = true;
 		} else if (data instanceof Reader) {
 			Reader reader = (Reader) data;
 			is = new ReaderInputStream(reader, Utils.UTF8);
@@ -161,12 +165,13 @@ public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> 
 	 * <li>{@link java.io.InputStream}</li>
 	 * <li>{@link java.io.Reader}</li>
 	 * <li>{@code byte[]}</li>
+	 * <li>{@link java.nio.ByteBuffer}</li>
 	 * </ul>
 	 */
 	@Override
 	public boolean isDataClassSupported(Object data) {
 		return String.class.isInstance(data) || InputStream.class.isInstance(data) || Reader.class.isInstance(data)
-				|| byte[].class.isInstance(data);
+				|| byte[].class.isInstance(data) || ByteBuffer.class.isInstance(data);
 	}
 
 	@Override

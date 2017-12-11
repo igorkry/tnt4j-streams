@@ -40,14 +40,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * field into its corresponding activity field.
  * <p>
  * If map entry value is inner map, entries of that map can be accessed using
- * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy delimiter:
- * e.g., 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
+ * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} as naming hierarchy delimiter: e.g.,
+ * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
  * <ul>
  * <li>LocPathDelim - locator path in map delimiter. Empty value means locator value should not be delimited into path
- * elements. Default value - '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}'.
+ * elements. Default value - {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}.
  * (Optional)</li>
  * </ul>
  * <p>
@@ -66,6 +66,10 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * Constant for map entry locator path delimiter.
 	 */
 	protected String nodePathDelim = StreamsConstants.DEFAULT_PATH_DELIM;
+	/**
+	 * Constant defining key for map entry containing string representation of raw activity data.
+	 */
+	public static final String RAW_ACTIVITY_STRING_KEY = "RAW_ACTIVITY_STRING_ENTRY"; // NON-NLS
 
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
@@ -106,7 +110,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
-		Map<String, ?> dataMap = getDataMap(data);
+		Map<String, Object> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.no.fields");
@@ -126,7 +130,24 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *            activity object data
 	 * @return activity object data map
 	 */
-	protected abstract Map<String, ?> getDataMap(Object data);
+	protected abstract Map<String, Object> getDataMap(Object data);
+
+	/**
+	 * Transforms activity data to be put to activity entity field
+	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message}. This is used when no field
+	 * {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message} mapping defined in parser configuration.
+	 *
+	 * @param dataMap
+	 *            activity object data map
+	 * @return RAW activity data string representation retrieved from map entry {@value #RAW_ACTIVITY_STRING_KEY}
+	 */
+	@Override
+	protected String getRawDataAsMessage(Map<String, ?> dataMap) {
+		if (dataMap != null && dataMap.containsKey(RAW_ACTIVITY_STRING_KEY)) {
+			return (String) dataMap.remove(RAW_ACTIVITY_STRING_KEY);
+		}
+		return super.getRawDataAsMessage(dataMap);
+	}
 
 	/**
 	 * Gets field raw data value resolved by locator.
