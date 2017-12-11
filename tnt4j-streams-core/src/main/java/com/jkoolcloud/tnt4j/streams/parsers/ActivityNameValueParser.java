@@ -64,7 +64,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 
 	/**
 	 * Contains the field separator (set by {@code FieldDelim} property) - Default:
-	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
+	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}
 	 */
 	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
 

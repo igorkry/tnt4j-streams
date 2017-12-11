@@ -63,7 +63,7 @@ public final class StreamsResources {
 	 * map entry key is <tt>bundleName</tt>.
 	 * <p>
 	 * If no bundle is associated with given <tt>bundleName</tt>, then bundle associated with
-	 * '{@value RESOURCE_BUNDLE_NAME}' is returned.
+	 * {@value RESOURCE_BUNDLE_NAME} is returned.
 	 *
 	 * @param bundleName
 	 *            the base name of the resource bundle

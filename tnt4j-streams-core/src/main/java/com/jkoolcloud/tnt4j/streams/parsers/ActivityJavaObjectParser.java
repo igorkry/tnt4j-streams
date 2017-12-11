@@ -40,8 +40,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * its corresponding activity field.
  * <p>
  * If field is complex object, sub-fields can be accessed using
- * '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}' as naming hierarchy separator:
- * e.g., 'header.author.name'.
+ * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} as naming hierarchy separator: e.g.,
+ * 'header.author.name'.
  * <p>
  * This activity parser supports those activity field locator types:
  * <ul>

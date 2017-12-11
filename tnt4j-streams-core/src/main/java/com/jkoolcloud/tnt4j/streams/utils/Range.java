@@ -104,7 +104,7 @@ public abstract class Range<T extends Number> {
 	}
 
 	/**
-	 * Parses string defining range values. Range definition separator is '{@value #RANGE_SEPARATOR}'.
+	 * Parses string defining range values. Range definition separator is {@value #RANGE_SEPARATOR}.
 	 * 
 	 * @param rangeStr
 	 *            range definition string to parse

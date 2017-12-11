@@ -162,9 +162,9 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 	 *            filter {@link com.jkoolcloud.tnt4j.streams.filters.HandleType} name
 	 * @param lang
 	 *            scripting/expression language:
-	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG}',
-	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG}' ('js', 'jscript')
-	 *            or '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}'
+	 *            {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG},
+	 *            {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG} ('js', 'jscript')
+	 *            or {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}
 	 * @param expression
 	 *            filter expression string
 	 * @return created expression filter instance

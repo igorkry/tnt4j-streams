@@ -53,7 +53,7 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MessageActivityXmlParser.class);
 	/**
 	 * Contains the field separator (set by {@code SignatureDelim} property) - Default:
-	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}"
+	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}
 	 */
 	protected String sigDelim = DEFAULT_DELIM;
 

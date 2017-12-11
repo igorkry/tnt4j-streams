@@ -85,7 +85,7 @@ public class DoubleRange extends Range<Double> {
 	 * If {@code rangeStr} has missing range bound values, default ones are set: lower
 	 * {@code positive ? 0 : -Double.MAX_VALUE}, upper {@code Double.MAX_VALUE}.
 	 * <p>
-	 * Range separator symbol is '{@value com.jkoolcloud.tnt4j.streams.utils.Range#RANGE_SEPARATOR}'.
+	 * Range separator symbol is {@value com.jkoolcloud.tnt4j.streams.utils.Range#RANGE_SEPARATOR}.
 	 *
 	 * @param rangeStr
 	 *            range definition string to parse

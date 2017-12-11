@@ -157,8 +157,8 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 
 	/**
 	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property
-	 * '{@value com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties#PROP_SHEETS}') sheets name filtering
-	 * mask. If no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties#PROP_SHEETS}) sheets name filtering mask.
+	 * If no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
 	 *
 	 * @param countSkips
 	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count

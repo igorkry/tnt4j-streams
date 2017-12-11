@@ -321,7 +321,7 @@ public abstract class ActivityParser {
 
 	/**
 	 * Sets activity parser tags string. Tags are separated using
-	 * "{@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}".
+	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}.
 	 *
 	 * @param tags
 	 *            tags string

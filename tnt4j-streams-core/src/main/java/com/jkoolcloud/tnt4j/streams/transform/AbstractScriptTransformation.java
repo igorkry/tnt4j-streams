@@ -130,9 +130,9 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	 *            transformation name
 	 * @param lang
 	 *            scripting/expression language:
-	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG}',
-	 *            '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG}' ('js', 'jscript')
-	 *            or '{@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}'
+	 *            {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#GROOVY_LANG},
+	 *            {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#JAVA_SCRIPT_LANG} ('js', 'jscript')
+	 *            or {@value com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#XPATH_SCRIPT_LANG}
 	 * @param code
 	 *            transformation script code
 	 * @param phaseName
