@@ -1,0 +1,22 @@
+<rfh2Folders>
+    <mcd>
+        <Msd>jms_bytes</Msd>
+    </mcd>
+    <jms>
+        <Dst>queue://LQQQ/EPH.ALSREQUESTQ</Dst>
+        <Tms>1446139225436</Tms>
+        <Dlv>2</Dlv>
+    </jms>
+    <usr>
+        <_wb_PaymentInstruction>252025749</_wb_PaymentInstruction>
+        <_wb_flowGroup>incoming-instruction-flowgroup</_wb_flowGroup>
+        <dtdTraceTagInfo>FW1;-416581086;1892369396;10792;3;-1400424038;10480;2</dtdTraceTagInfo>
+        <_wb_flow>E25OutboundTransfer.receive</_wb_flow>
+        <_wb_PaymentInterchange>250398550</_wb_PaymentInterchange>
+        <messageEncoding>UTF-8</messageEncoding>
+        <_wb_origin>InterchangeLoaderMDBBean</_wb_origin>
+        <messageDataType>object_output_stream</messageDataType>
+        <usingFile dt='boolean'>0</usingFile>
+        <_wb_fileName>unknown</_wb_fileName>
+    </usr>
+</rfh2Folders>
