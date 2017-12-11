@@ -145,7 +145,7 @@ public abstract class CharBufferParser<I, O> {
 	}
 
 	/**
-	 * Read until a non-whitespace char is found.
+	 * Read until a non space char ({@code ' '}) is found.
 	 *
 	 * @param cb
 	 *            char buffer containing text to read
@@ -154,9 +154,24 @@ public abstract class CharBufferParser<I, O> {
 	 * @see #unread(CharBuffer)
 	 */
 	protected static void skipSpaces(CharBuffer cb) {
-		int c;
+		while (read(cb) == SPACE) {
+			continue;
+		}
+		unread(cb);
+	}
 
-		while ((c = read(cb)) == SPACE || c == NL || c == RC) {
+	/**
+	 * Read until a non-whitespace char is found.
+	 *
+	 * @param cb
+	 *            char buffer containing text to read
+	 *
+	 * @see #read(CharBuffer)
+	 * @see #unread(CharBuffer)
+	 * @see java.lang.Character#isWhitespace(char)
+	 */
+	protected static void skipWhitespaces(CharBuffer cb) {
+		while (Character.isWhitespace(read(cb))) {
 			continue;
 		}
 		unread(cb);
@@ -258,7 +273,7 @@ public abstract class CharBufferParser<I, O> {
 	}
 
 	/**
-	 * Read until a end of the word and discard read chars. Word is terminated by whitespace char (' ') or end of
+	 * Read until a end of the word and discard read chars. Word is terminated by space char ({@code ' '}) or end of
 	 * buffer.
 	 *
 	 * @param cb
@@ -278,7 +293,8 @@ public abstract class CharBufferParser<I, O> {
 	}
 
 	/**
-	 * Read a word into the given {@link StringBuilder}. Word is terminated by whitespace char (' ') or end of buffer.
+	 * Read a word into the given {@link StringBuilder}. Word is terminated by space char ({@code ' '}) or end of
+	 * buffer.
 	 *
 	 * @param cb
 	 *            char buffer containing text to read
@@ -300,7 +316,7 @@ public abstract class CharBufferParser<I, O> {
 	}
 
 	/**
-	 * Read a word from buffer as a string. Word is terminated by whitespace char (' ') or end of buffer.
+	 * Read a word from buffer as a string. Word is terminated by pace char ({@code ' '}) or end of buffer.
 	 *
 	 * @param cb
 	 *            char buffer containing text to read

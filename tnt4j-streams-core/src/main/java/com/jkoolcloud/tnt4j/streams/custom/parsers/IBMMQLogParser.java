@@ -236,7 +236,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			CharBuffer cb = stringToBuffer(logEntry);
 
 			String date = readWord(cb, 9);
-			skipSpaces(cb);
+			skipWhitespaces(cb);
 			String time = readWord(cb, 8);
 			readChars(cb, 3);
 			String process = readBetween(cb, "Process(", CB); // NON-NLS
@@ -248,11 +248,11 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			String qMgr = readBetween(cb, "QMgr(", CB); // NON-NLS
 
 			String errCode = readUntil(cb, COLON);
-			skipSpaces(cb);
+			skipWhitespaces(cb);
 			String errText = readUntil(cb, "EXPLANATION:"); // NON-NLS
-			skipSpaces(cb);
+			skipWhitespaces(cb);
 			String explanation = readUntil(cb, "ACTION:"); // NON-NLS
-			skipSpaces(cb);
+			skipWhitespaces(cb);
 			String action = readUntil(cb, ENTRIES_DELIM);
 
 			String where = null;
@@ -291,7 +291,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 		private static String readBetween(CharBuffer cb, String pre, char term) throws IOException {
 			expect(cb, pre);
 			String str = readUntil(cb, term);
-			skipSpaces(cb);
+			skipWhitespaces(cb);
 
 			return str;
 		}
