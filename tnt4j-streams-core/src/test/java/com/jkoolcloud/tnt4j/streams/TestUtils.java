@@ -19,9 +19,15 @@ package com.jkoolcloud.tnt4j.streams;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
+import com.jkoolcloud.tnt4j.format.DefaultFormatter;
+import com.jkoolcloud.tnt4j.format.EventFormatter;
+import com.jkoolcloud.tnt4j.sink.*;
+import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -38,5 +44,79 @@ public final class TestUtils {
 			assertNotNull("Property " + name + " is null", result); // NON-NLS
 			assertEquals("Property not set as expected", property.getValue(), String.valueOf(result));
 		}
+	}
+
+	public static class SimpleTestStream extends AbstractBufferedStream<String> {
+		private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TestUtils.class);
+
+		@Override
+		protected long getActivityItemByteSize(String activityItem) {
+			return 0;
+		}
+
+		@Override
+		protected boolean isInputEnded() {
+			return false;
+		}
+
+		@Override
+		protected EventSink logger() {
+			return LOGGER;
+		}
+	}
+
+	public static void configureConsoleLogger() {
+		File log4jConfig = new File("..\\config\\log4j.properties");
+		if (log4jConfig.exists()) {
+			System.setProperty("log4j.configuration", "file:///../config/log4j.properties");
+			return;
+		}
+
+		final EventSinkFactory delegate = DefaultEventSinkFactory.getInstance();
+		final SinkLogEventListener logToConsoleEvenSinkListener = new SinkLogEventListener() {
+			private final DefaultFormatter formatter = new DefaultFormatter();
+
+			@Override
+			public void sinkLogEvent(SinkLogEvent ev) {
+				System.out.println(formatter.format(ev.getSinkObject(), ev.getArguments()));
+			}
+		};
+		DefaultEventSinkFactory.setDefaultEventSinkFactory(new EventSinkFactory() {
+			@Override
+			public EventSink getEventSink(String name) {
+				EventSink eventSink = delegate.getEventSink(name);
+				configure(eventSink);
+				return eventSink;
+			}
+
+			@Override
+			public EventSink getEventSink(String name, Properties props) {
+				EventSink eventSink = delegate.getEventSink(name, props);
+				configure(eventSink);
+				return eventSink;
+			}
+
+			@Override
+			public EventSink getEventSink(String name, Properties props, EventFormatter frmt) {
+				EventSink eventSink = delegate.getEventSink(name, props, frmt);
+				configure(eventSink);
+				return eventSink;
+			}
+
+			@Override
+			public long getTTL() {
+				return delegate.getTTL();
+			}
+
+			@Override
+			public void setTTL(long ttl) {
+				delegate.setTTL(ttl);
+			}
+
+			private void configure(EventSink eventSink) {
+				eventSink.filterOnLog(false);
+				eventSink.addSinkLogEventListener(logToConsoleEvenSinkListener);
+			}
+		});
 	}
 }
