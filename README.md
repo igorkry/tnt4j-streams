@@ -2521,7 +2521,7 @@ Sample stream configuration:
 </tnt-data-source>
 ```
 
-Stream configuration states that `WmqStream` referencing `EventParser` shall be used. Stream deserialize message to
+Stream configuration states that `WmqStream` referencing `EventParser` shall be used. Stream de-serialize message to
 string and passes it to parser.
 
 `QueueManager` property defines name of queue manager and `Queue` property defines name of queue to get messages.
@@ -4041,14 +4041,14 @@ Sample stream configuration:
         <property name="UseActivityDataAsMessageForUnset" value="false"/>
 
         <field name="EventType" value="EVENT"/>
-        <field name="EventName" value="IBM_MQ_RFH2/JMS_PAYLOAD"/>
-        <embedded-activity name="FoldersData" locator="rfh2Folders" locator-type="Label">
+        <field name="EventName" value="IBM MQ RFH2/JMS Payload"/>
+        <field name="FoldersData" locator="rfh2Folders" locator-type="Label" transparent="true">
             <parser-ref name="RFH2FoldersParser" aggregation="Merge"/>
-        </embedded-activity>
+        </field>
 
-        <embedded-activity name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label">
+        <field name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label" transparent="true">
             <parser-ref name="JMSPayloadParser" aggregation="Merge"/>
-        </embedded-activity>
+        </field>
     </parser>
 
     <stream name="RFH2JMSFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">
@@ -4061,7 +4061,9 @@ Sample stream configuration:
 ``` 
 
 Stream configuration states that `RFH2JMSFileStream` referencing `RFH2Parser` shall be used. Stream reads message entries from 
-`./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin` file contents and passes it to parser.
+`./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin` file contents and passes it to parser. Since `ActivityRFH2Parser` is extension of map 
+parser it produces map having two entries with predefined keys: `rfh2Folders` for RFH2 folders data XML string, and `jmsMsgPayload` for JMS 
+message payload de-serialized object or bytes if serialisation can't be done.   
 
 `RFH2Parser` resolves RFH2 folders and JMS message payload data into predefined fields `rfh2Folders` and `jmsMsgPayload`. Values of these 
 fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for further parsing into fields of `EVENT` named 
@@ -5168,7 +5170,7 @@ Also see [Activity map parser](#activity-map-parser) regarding higher level pars
 This parser resolved data map may contain such entries:
 * `rfh2Folders` - RFH2 folders data XML string. Root element for this XML is `<rfh2Folders>`. Further XPath based parsing can be processed 
 by [Activity XML parser](activity-xml-parser)
-* `jmsMsgPayload` - JMS JMS message payload data
+* `jmsMsgPayload` - JMS JMS message payload data: de-serialized object or bytes if serialisation can't be done.
 
 ### Pre-parsers
 

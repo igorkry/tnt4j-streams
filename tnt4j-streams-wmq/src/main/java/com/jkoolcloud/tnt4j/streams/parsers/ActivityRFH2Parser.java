@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.utils.Utils;
  * <ul>
  * <li>rfh2Folders - RFH2 folders data XML string. Root element for this XML is {@value #ROOT_ELEM}. Further XPath based
  * parsing can be processed by {@link com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser}.</li>
- * <li>jmsMsgPayload - JMS JMS message payload data.</li>
+ * <li>jmsMsgPayload - JMS JMS message payload data: de-serialized object or bytes if serialisation can't be done.</li>
  * </ul>
  * <p>
  * This activity parser supports configuration properties from {@link AbstractActivityMapParser} (and higher hierarchy
