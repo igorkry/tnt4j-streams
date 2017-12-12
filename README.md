@@ -5048,6 +5048,11 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
+**NOTE:** Using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
+as activity entity fields/properties by using map entry data as this:
+* map entry key  - field/property name
+* map entry value - field/property value 
+
 #### Activity JSON parser
 
  * `ReadLines` - indicates that complete JSON data package is single line. Default value - `true`. (Optional, deprecated - use `ActivityDelim`
@@ -5122,6 +5127,10 @@ Sample of field definition for signature calculation:
 
 #### IBM MQ Error log entries parser
 
+This parser has no additional configuration properties.
+
+Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
+
 This parser resolved data map may contain such entries:
 * `Date` - resolved log entry date string
 * `Time` - resolved log entry time string
@@ -5138,10 +5147,6 @@ This parser resolved data map may contain such entries:
 * `Action` - resolved log entry IBM MQ error fix action message text
 * `Where` - resolved log entry error descriptor location string containing source code file name and line number
 
-This parser has no additional configuration properties.
-
-Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
-
 #### Activity Java object (POJO) parser
 
 This parser has no additional configuration properties.
@@ -5156,14 +5161,14 @@ Also see [Generic parser parameters](#generic-parser-parameters) regarding highe
 
 #### IBM MQ RFH2/JMS binary data parser
 
+This parser has no additional configuration properties.
+ 
+Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
+
 This parser resolved data map may contain such entries:
 * `rfh2Folders` - RFH2 folders data XML string. Root element for this XML is `<rfh2Folders>`. Further XPath based parsing can be processed 
 by [Activity XML parser](activity-xml-parser)
 * `jmsMsgPayload` - JMS JMS message payload data
-
-This parser has no additional configuration properties.
- 
-Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
 ### Pre-parsers
 

@@ -18,14 +18,14 @@
         <property name="UseActivityDataAsMessageForUnset" value="false"/>
 
         <field name="EventType" value="EVENT"/>
-        <field name="EventName" value="IBM_MQ_RFH2/JMS_PAYLOAD"/>
-        <embedded-activity name="FoldersData" locator="rfh2Folders" locator-type="Label">
+        <field name="EventName" value="IBM MQ RFH2/JMS Payload"/>
+        <field name="FoldersData" locator="rfh2Folders" locator-type="Label" transparent="true">
             <parser-ref name="RFH2FoldersParser" aggregation="Merge"/>
-        </embedded-activity>
+        </field>
 
-        <embedded-activity name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label">
+        <field name="JMS_Payload" locator="jmsMsgPayload" locator-type="Label" transparent="true">
             <parser-ref name="JMSPayloadParser" aggregation="Merge"/>
-        </embedded-activity>
+        </field>
     </parser>
 
     <stream name="RFH2JMSFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">

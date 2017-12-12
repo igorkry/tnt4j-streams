@@ -43,6 +43,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} as naming hierarchy delimiter: e.g.,
  * 'headers.auth.name'. Locator path delimiter value can be configured over parser 'LocPathDelim' property.
  * <p>
+ * Using locator path token value {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN} you can
+ * make parser to take all map entries from that level and put it all as activity entity fields/properties by using map
+ * entry data as this:
+ * <ul>
+ * <li>map entry key - field/property name</li>
+ * <li>map entry value - field/property value</li>
+ * </ul>
+ * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
  * <ul>
@@ -159,6 +167,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 *
+	 * @see Utils#getMapValueByPath(String, String, java.util.Map)
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,

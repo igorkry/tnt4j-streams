@@ -1582,6 +1582,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} and path
 	 * level value is {@code 0}.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1600,6 +1603,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Resolves map contained value by provided map keys path.
 	 * <p>
 	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1620,6 +1626,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Resolves map contained value by provided map keys path.
 	 * <p>
 	 * Path level value is {@code 0}.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1638,6 +1647,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1660,6 +1672,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Resolves map contained value by provided map keys path.
 	 * <p>
 	 * Path level value is {@code 0}.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path tokens array referencing wanted value
@@ -1675,6 +1690,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 	/**
 	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * If map keys path token is {@value StreamsConstants#MAP_NODE_TOKEN}, then complete map instance is returned for
+	 * that path level.
 	 *
 	 * @param path
 	 *            map keys path tokens array referencing wanted value
