@@ -287,6 +287,10 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 * File monitor attribute storing modification time of streamed file.
 		 */
 		protected long lastModifTime = -1;
+		/**
+		 * File monitor attribute storing timestamp for last reading of new file lines.
+		 */
+		protected long lastReadTime = -1;
 
 		/**
 		 * Total bytes count available to stream.
@@ -359,6 +363,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			String line;
 			StringBuilder sb = new StringBuilder(256);
 			while ((line = lnr.readLine()) != null && !isInputEnded()) {
+				lastReadTime = System.currentTimeMillis();
 				lineNumber = lnr.getLineNumber();
 				if (StringUtils.isNotEmpty(line) && lineRange.inRange(lineNumber)) {
 					addActivityDataLine(line, sb, lineNumber);
@@ -427,21 +432,14 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 
 		/**
-		 * Returns time period from last file read to be logged.
+		 * Returns time period in seconds from last activity provided <tt>timestamp</tt> value.
 		 *
-		 * @param flm
-		 *            file last modified timestamp
-		 * @return time period representation to be logged
+		 * @param timestamp
+		 *            timestamp value to calculate period
+		 * @return time period in seconds to be logged
 		 */
-		protected Object getLastReadTimeToLog(long flm) {
-			long fat = flm;
-			long lrt = lastModifTime;
-			if (lrt < 0 && stateHandler != null) {
-				lrt = stateHandler.getReadTime();
-				fat = System.currentTimeMillis();
-			}
-
-			return lrt < 0 ? "UNKNOWN" : TimeUnit.MILLISECONDS.toSeconds(fat - lrt); // NON-NLS
+		protected Object getPeriodInSeconds(long timestamp) {
+			return timestamp < 0 ? "--" : TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timestamp); // NON-NLS
 		}
 	}
 

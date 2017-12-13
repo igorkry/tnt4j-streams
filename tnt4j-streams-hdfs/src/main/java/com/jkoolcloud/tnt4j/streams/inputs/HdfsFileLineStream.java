@@ -22,7 +22,6 @@ import java.io.LineNumberReader;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
@@ -175,12 +174,15 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 			updateDataTotals(availableFiles, fs);
 
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.found.files", availableFiles.length, fileName);
+
 			stateHandler = storeState
 					? new HdfsFileStreamStateHandler(availableFiles, fs, HdfsFileLineStream.this.getName()) : null;
 			if (isStoredStateAvailable()) {
 				filePath = stateHandler.getFile();
 				lineNumber = stateHandler.getLineNumber();
-				// lastModifTime = stateHandler.getReadTime();
+				lastReadTime = stateHandler.getReadTime();
 			} else {
 				filePath = ArrayUtils.isEmpty(availableFiles) ? null
 						: startFromLatestActivity ? availableFiles[availableFiles.length - 1] : availableFiles[0];
@@ -192,6 +194,10 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				lastModifTime = getModificationTime(fileToRead, fs);
 				lineNumber = Utils.countLines(fs.open(fileToRead));
 			}
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.stream.file.watcher.initialized", HdfsFileLineStream.this.getName(),
+					filePath.toUri(), lineNumber < 0 ? 0 : lineNumber);
 		}
 
 		/**
@@ -216,7 +222,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		protected void readFileChanges() {
 			if (fileToRead != null) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"FileLineStream.reading.changes", fileToRead.toString());
+						"FileLineStream.reading.changes", fileToRead.toUri(), lineNumber < 0 ? 0 : lineNumber);
 			} else {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.reading.no.file");
@@ -247,9 +253,8 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					long flm = fStatus.getModificationTime();
 					if (flm > lastModifTime) {
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.file.updated",
-								TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-								getLastReadTimeToLog(flm));
+								"FileLineStream.file.updated", getPeriodInSeconds(flm),
+								getPeriodInSeconds(lastReadTime));
 
 						lastModifTime = flm;
 					} else {
@@ -290,7 +295,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 			}
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.changes.read.end", fileToRead.toString());
+					"FileLineStream.changes.read.end", fileToRead.toUri(), lineNumber);
 		}
 
 		private LineNumberReader rollToCurrentLine(FileSystem fs) throws Exception {
@@ -309,14 +314,11 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private LineNumberReader skipOldLines(LineNumberReader lnr, FileSystem fs) throws Exception {
-			int mln = lnr.getLineNumber();
-			lnr.mark(0);
 			boolean skipFail = false;
-
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.file.shorter");
+							"FileLineStream.file.shorter", lnr.getLineNumber(), lineNumber);
 
 					skipFail = true;
 					break;
@@ -331,18 +333,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 					return rollToCurrentLine(fs);
 				} else {
-					if (lnr.markSupported()) {
-						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.resetting.reader", mln);
-
-						try {
-							lnr.reset();
-						} catch (IOException exc) {
-							logger().log(OpLevel.WARNING,
-									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-									"FileLineStream.resetting.failed", mln, lnr.getLineNumber());
-						}
-					}
+					lineNumber = lnr.getLineNumber();
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.nowhere.to.swap", lineNumber);
 				}
 			}
 
@@ -357,6 +350,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				availableFiles = searchFiles(filePath, fs);
 				updateDataTotals(availableFiles, fs);
 
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.found.files", availableFiles.length, fileName);
+
 				Path prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
@@ -366,6 +362,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.changing.to.previous", prevFile.toUri());
+				} else {
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.no.previous");
 				}
 
 				return prevFile != null;
@@ -382,6 +381,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				availableFiles = searchFiles(filePath, fs);
 				updateDataTotals(availableFiles, fs);
 
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.found.files", availableFiles.length, fileName);
+
 				Path nextFile = getFirstNewer(availableFiles, lastModifTime, fs);
 
 				if (nextFile != null) {
@@ -391,6 +393,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.changing.to.next", nextFile.toUri());
+				} else {
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.no.next");
 				}
 
 				return nextFile != null;

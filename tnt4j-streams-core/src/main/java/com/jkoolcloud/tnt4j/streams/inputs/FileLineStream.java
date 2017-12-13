@@ -17,7 +17,6 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -107,8 +106,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		@Override
 		protected void initialize(Object... params) throws Exception {
 			availableFiles = Utils.listFilesByName(fileName);
-
 			updateDataTotals(availableFiles);
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.found.files", availableFiles.length, fileName);
 
 			File file;
 			stateHandler = storeState ? new FileStreamStateHandler(availableFiles, FileLineStream.this.getName())
@@ -116,7 +117,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			if (isStoredStateAvailable()) {
 				file = stateHandler.getFile();
 				lineNumber = stateHandler.getLineNumber();
-				// lastModifTime = stateHandler.getReadTime();
+				lastReadTime = stateHandler.getReadTime();
 			} else {
 				file = ArrayUtils.isEmpty(availableFiles) ? null
 						: startFromLatestActivity ? availableFiles[availableFiles.length - 1] : availableFiles[0];
@@ -128,6 +129,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				lastModifTime = fileToRead.lastModified();
 				lineNumber = Utils.countLines(new FileInputStream(fileToRead));
 			}
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.stream.file.watcher.initialized", FileLineStream.this.getName(),
+					file.getAbsolutePath(), lineNumber < 0 ? 0 : lineNumber);
 		}
 
 		/**
@@ -152,7 +157,8 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		protected void readFileChanges() {
 			if (fileToRead != null) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"FileLineStream.reading.changes", fileToRead.getAbsolutePath());
+						"FileLineStream.reading.changes", fileToRead.getAbsolutePath(),
+						lineNumber < 0 ? 0 : lineNumber);
 			} else {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.reading.no.file");
@@ -176,9 +182,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				long flm = fileToRead.lastModified();
 				if (flm > lastModifTime) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.file.updated",
-							TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - flm),
-							getLastReadTimeToLog(flm));
+							"FileLineStream.file.updated", getPeriodInSeconds(flm), getPeriodInSeconds(lastReadTime));
 
 					lastModifTime = flm;
 				} else {
@@ -214,7 +218,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			}
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.changes.read.end", fileToRead.getAbsolutePath());
+					"FileLineStream.changes.read.end", fileToRead.getAbsolutePath(), lineNumber);
 		}
 
 		private LineNumberReader rollToCurrentLine() throws IOException {
@@ -233,14 +237,11 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private LineNumberReader skipOldLines(LineNumberReader lnr) throws IOException {
-			int mln = lnr.getLineNumber();
-			lnr.mark(0);
 			boolean skipFail = false;
-
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.file.shorter");
+							"FileLineStream.file.shorter", lnr.getLineNumber(), lineNumber);
 
 					skipFail = true;
 					break;
@@ -255,18 +256,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 					return rollToCurrentLine();
 				} else {
-					if (lnr.markSupported()) {
-						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.resetting.reader", mln);
-
-						try {
-							lnr.reset();
-						} catch (IOException exc) {
-							logger().log(OpLevel.WARNING,
-									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-									"FileLineStream.resetting.failed", mln, lnr.getLineNumber());
-						}
-					}
+					lineNumber = lnr.getLineNumber();
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.nowhere.to.swap", lineNumber);
 				}
 			}
 
@@ -278,6 +270,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.found.files", availableFiles.length, fileName);
+
 				File prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
@@ -286,7 +281,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 					lastModifTime = prevFile.lastModified();
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.changing.to.previous", prevFile.getAbsolutePath());
+							"FileLineStream.swapping.to.previous", prevFile.getAbsolutePath());
+				} else {
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.no.previous");
 				}
 
 				return prevFile != null;
@@ -300,6 +298,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
 
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"FileLineStream.found.files", availableFiles.length, fileName);
+
 				File nextFile = Utils.getFirstNewer(availableFiles, lastModifTime);
 
 				if (nextFile != null) {
@@ -308,7 +309,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 					lineNumber = 0;
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.changing.to.next", nextFile.getAbsolutePath());
+							"FileLineStream.swapping.to.next", nextFile.getAbsolutePath());
+				} else {
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.no.next");
 				}
 
 				return nextFile != null;
