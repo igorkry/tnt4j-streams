@@ -24,7 +24,6 @@ import org.junit.runners.Suite;
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ExcelStreamTest.class })
+@Suite.SuiteClasses({ ExcelStreamTest.class, ExcelSXSSFRowStreamTest.class })
 public class AllInputsTests {
-
 }

@@ -33,6 +33,10 @@ import com.jkoolcloud.tnt4j.streams.utils.IntRange;
  * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook sheet
  * {@link Row} is assumed to represent a single activity or event which should be recorded.
  * <p>
+ * NOTE: since this stream uses DOM based access of MS Excel file contents, memory stream used consumption may be
+ * significant. But it provides all features of cell value formatting and formula value evaluation. If memory
+ * consumption is critical, use {@link com.jkoolcloud.tnt4j.streams.inputs.ExcelSXSSFRowStream} instead.
+ * <p>
  * This activity stream requires parsers that can support {@link Row} data.
  * <p>
  * This activity stream supports the following configuration properties (in addition to those supported by

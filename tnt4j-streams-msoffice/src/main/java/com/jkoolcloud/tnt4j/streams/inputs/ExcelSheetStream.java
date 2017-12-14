@@ -25,6 +25,9 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook
  * {@link Sheet} is assumed to represent a single activity or event which should be recorded.
  * <p>
+ * NOTE: since this stream uses DOM based access of MS Excel file contents, memory stream used consumption may be
+ * significant. But it provides all features of cell value formatting and formula value evaluation.
+ * <p>
  * This activity stream requires parsers that can support {@link Sheet} data.
  * <p>
  * This activity stream supports configuration properties from {@link AbstractExcelStream} (and higher hierarchy

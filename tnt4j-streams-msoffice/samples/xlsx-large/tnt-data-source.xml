@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="ExcelRowParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityExcelRowParser">
+        <field name="EventType" value="EVENT"/>
+        <field name="EventName" locator="A" locator-type="Label" datatype="String"/>
+        <field name="Requestor" locator="B" locator-type="Label" datatype="String"/>
+        <field name="RequestorSeniority" locator="C" locator-type="Label" datatype="String"/>
+        <field name="ITOwner" locator="D" locator-type="Label" datatype="String"/>
+        <field name="FiledAgainst" locator="E" locator-type="Label" datatype="String"/>
+        <field name="TicketType" locator="F" locator-type="Label" datatype="String"/>
+        <field name="TicketSeverity" locator="G" locator-type="Label" datatype="String"/>
+        <field name="Priority" locator="H" locator-type="Label" datatype="String"/>
+        <field name="DaysOpen" locator="I" locator-type="Label" datatype="Number"/>
+        <field name="Satisfaction" locator="J" locator-type="Label" datatype="String"/>
+    </parser>
+
+    <stream name="SampleExcelRowsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelSXSSFRowStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-large/WA_Fn-UseC_-IT-Help-Desk.xlsx"/>
+        <property name="RangeToStream" value="2:"/>
+        <property name="SheetsToProcess" value="WA_Fn-UseC_-IT-Help-Desk*"/>
+        <!--<property name="SheetsToProcess" value="Sheet(1|2)"/>-->
+
+        <parser-ref name="ExcelRowParser"/>
+    </stream>
+</tnt-data-source>

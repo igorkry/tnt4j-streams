@@ -3665,6 +3665,11 @@ workbook sheet row and passes it to parser.
 **NOTE:** `StartTime` fields defines format and locale to correctly parse field data string. `EventType` uses manual
 field string mapping to TNT4J event field value.
 
+**NOTE:** `ExcelRowStream` uses DOM based MS Excel file reading, thus memory consumption for large file may be significant, but it allows 
+random cells access and precise formula evaluation. In case memory consumption is critical factor, use `ExcelSXSSFRowStream` instead of 
+`ExcelRowStream`. It uses Apache POI SXSSF API to read MS Excel as a stream consistently iterating over workbook sheets rows and cells. 
+Thus it may have some drawback on cell formula evaluation. For more information see [Apache POI spreadsheet documentation](https://poi.apache.org/spreadsheet/).     
+
 ##### Sheets
 
 This sample shows how to stream MS Excel workbook sheets as activity events.
@@ -4808,7 +4813,7 @@ or
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Ms Excel Stream parameters
+#### Ms Excel Stream generic parameters
 
  * `FileName` - the system-dependent file name of MS Excel document. (Required)
  * `SheetsToProcess` - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
@@ -4830,10 +4835,10 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
     sample:
 ```xml
-    <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
-    <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
     <property name="RangeToStream" value="5:30"/>
 ```
+
+Also see ['Ms Excel Stream generic parameters'](#ms-excel-stream-generic-parameters).
 
 ### Parsers configuration
 
