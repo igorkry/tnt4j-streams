@@ -26,8 +26,7 @@
         <tnt4j.version>2.7-SNAPSHOT</tnt4j.version>
         <jesl.version>0.5-SNAPSHOT</jesl.version>
 
-        <httpcomponents.version>4.5.3</httpcomponents.version>
-        <httpcomponents.core.version>4.4.8</httpcomponents.core.version>
+        <httpcomponents.version>4.5.4</httpcomponents.version>
 
         <msgpack.version>0.8.13</msgpack.version>
 
@@ -107,10 +106,6 @@
             <!-- streams uses slf4j-log4j as default -->
             <exclusions>
                 <exclusion>
-                    <groupId>commons-lang</groupId>
-                    <artifactId>commons-lang</artifactId>
-                </exclusion>
-                <exclusion>
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
@@ -130,10 +125,6 @@
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>com.jkoolcloud.jesl.net</groupId>
@@ -248,11 +239,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpcomponents.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>${httpcomponents.core.version}</version>
         </dependency>
 
         <!-- logging dependencies -->
