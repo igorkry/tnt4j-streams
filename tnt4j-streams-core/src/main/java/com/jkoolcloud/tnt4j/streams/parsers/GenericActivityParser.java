@@ -179,7 +179,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            object to convert to string representation
 	 * @return string representation of object
 	 */
-	protected static String toString(Object data) {
+	protected String toString(Object data) {
 		if (data instanceof byte[]) {
 			return Utils.toHexDump((byte[]) data);
 		}
@@ -615,7 +615,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return data to be used for activity field {@link com.jkoolcloud.tnt4j.streams.fields.StreamFieldType#Message}
 	 */
 	protected String getRawDataAsMessage(T data) {
-		return Utils.toString(data);
+		return toString(data);
 	}
 
 	// protected void postParse(ActivityInfo ai, TNTInputStream<?, ?> stream, T data) throws ParseException {
