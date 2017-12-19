@@ -55,7 +55,6 @@ public class ActivityInfo {
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<>();
 	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
 	private static final String LOCAL_SERVER_IP_KEY = "LOCAL_SERVER_IP_KEY"; // NON-NLS
-	private static final String TRANSPARENT_PROP_TYPE = "<TRANSPARENT>"; // NON-NLS
 
 	private String serverName = null;
 	private String serverIp = null;
@@ -170,7 +169,7 @@ public class ActivityInfo {
 		if (!field.isTransparent()) {
 			setFieldValue(field, fieldValue);
 		} else {
-			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), TRANSPARENT_PROP_TYPE);
+			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), true);
 		}
 	}
 
@@ -570,7 +569,8 @@ public class ActivityInfo {
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
 	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
-	 * Same as invoking {@link #addActivityProperty(String, Object, String)} setting value type to {@code null}.
+	 * Same as invoking {@link #addActivityProperty(String, Object, boolean)} setting transient flag value to
+	 * {@code false}.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -581,10 +581,32 @@ public class ActivityInfo {
 	 *
 	 * @see Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
-	 * @see #addActivityProperty(String, Object, String)
+	 * @see #addActivityProperty(String, Object, boolean)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
-		return addActivityProperty(propName, propValue, null);
+		return addActivityProperty(propName, propValue, false);
+	}
+
+	/**
+	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 *
+	 * @param propName
+	 *            activity item property key
+	 * @param propValue
+	 *            activity item property value
+	 * @param transient_
+	 *            flag indicating whether property is transient
+	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
+	 *         property set
+	 *
+	 * @see Map#put(Object, Object)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, boolean)
+	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
+	 */
+	public Object addActivityProperty(String propName, Object propValue, boolean transient_) {
+		return addActivityProperty(new Property(propName, wrapPropertyValue(propValue), transient_));
 	}
 
 	/**
@@ -602,24 +624,44 @@ public class ActivityInfo {
 	 *
 	 * @see Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, String)
+	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
+		return addActivityProperty(new Property(propName, wrapPropertyValue(propValue),
+				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType));
+	}
+
+	/**
+	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 *
+	 * @param property
+	 *            property instance to add to activity entity properties map
+	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
+	 *         property set
+	 *
+	 * @see Map#put(Object, Object)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
+	 */
+	public Object addActivityProperty(Property property) {
 		if (activityProperties == null) {
 			activityProperties = new HashMap<>();
 		}
 
-		Property p = new Property(propName, wrapPropertyValue(propValue),
-				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType);
-		Property prevValue = activityProperties.put(propName, p);
+		String propName = property.getKey();
+		Property prevValue = activityProperties.put(propName, property);
 
 		if (prevValue == null) {
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.set.property", propName, Utils.toString(p.getValue()), p.getValueType());
+					"ActivityInfo.set.property", propName, Utils.toString(property.getValue()),
+					property.getValueType());
 		} else {
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.replace.property", propName, Utils.toString(p.getValue()), p.getValueType(),
-					Utils.toString(prevValue));
+					"ActivityInfo.replace.property", propName, Utils.toString(property.getValue()),
+					property.getValueType(), Utils.toString(prevValue));
 		}
 
 		return prevValue;
@@ -862,12 +904,14 @@ public class ActivityInfo {
 
 		if (activityProperties != null) {
 			for (Property ap : activityProperties.values()) {
-				if (isNotTransparentProperty(ap)) {
-					if (ap.getValue() instanceof Snapshot) {
-						event.getOperation().addSnapshot((Snapshot) ap.getValue());
-					} else {
-						event.getOperation().addProperty(ap);
-					}
+				if (ap.isTransient()) {
+					continue;
+				}
+
+				if (ap.getValue() instanceof Snapshot) {
+					event.getOperation().addSnapshot((Snapshot) ap.getValue());
+				} else {
+					event.getOperation().addProperty(ap);
 				}
 			}
 		}
@@ -955,12 +999,14 @@ public class ActivityInfo {
 
 		if (activityProperties != null) {
 			for (Property ap : activityProperties.values()) {
-				if (isNotTransparentProperty(ap)) {
-					if (ap.getValue() instanceof Trackable) {
-						activity.add((Trackable) ap.getValue());
-					} else {
-						activity.addProperty(ap);
-					}
+				if (ap.isTransient()) {
+					continue;
+				}
+
+				if (ap.getValue() instanceof Trackable) {
+					activity.add((Trackable) ap.getValue());
+				} else {
+					activity.addProperty(ap);
 				}
 			}
 		}
@@ -1105,17 +1151,15 @@ public class ActivityInfo {
 
 		if (activityProperties != null) {
 			for (Property ap : activityProperties.values()) {
-				if (isNotTransparentProperty(ap)) {
-					snapshot.add(ap);
+				if (ap.isTransient()) {
+					continue;
 				}
+
+				snapshot.add(ap);
 			}
 		}
 
 		return snapshot;
-	}
-
-	private static boolean isNotTransparentProperty(Property prop) {
-		return prop != null && !prop.getValueType().equals(TRANSPARENT_PROP_TYPE);
 	}
 
 	/**
