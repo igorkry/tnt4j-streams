@@ -311,13 +311,19 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		if (StringUtils.isEmpty(topicName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
+
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
 
 		if (startServer) {
 			if (startZooKeeper) {

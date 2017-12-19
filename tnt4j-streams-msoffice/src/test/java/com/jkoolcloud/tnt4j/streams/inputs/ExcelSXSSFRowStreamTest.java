@@ -47,6 +47,7 @@ public class ExcelSXSSFRowStreamTest {
 		props.put(MsOfficeStreamProperties.PROP_SHEETS, "WA_Fn-UseC_-IT-Help-Desk");
 
 		stream.setProperties(props.entrySet());
+		stream.applyProperties();
 
 		doReturn(true).when(stream).addInputToBuffer(any(Row.class));
 		// when(stream.addInputToBuffer(any(Row.class))).thenReturn(true);
@@ -63,6 +64,7 @@ public class ExcelSXSSFRowStreamTest {
 		props.put(StreamProperties.PROP_RANGE_TO_STREAM, "2:11");
 
 		stream.setProperties(props.entrySet());
+		stream.applyProperties();
 
 		doReturn(true).when(stream).addInputToBuffer(any(Row.class));
 		// when(stream.addInputToBuffer(any(Row.class))).thenReturn(true);
@@ -85,6 +87,7 @@ public class ExcelSXSSFRowStreamTest {
 		props.put(MsOfficeStreamProperties.PROP_SHEETS, "WA_Fn-UseC_-IT-Help-Desk");
 
 		stream.setProperties(props.entrySet());
+		stream.applyProperties();
 
 		// doReturn(true).when(stream).addInputToBuffer(any(Row.class));
 		// when(stream.addInputToBuffer(any(Row.class))).thenReturn(true);

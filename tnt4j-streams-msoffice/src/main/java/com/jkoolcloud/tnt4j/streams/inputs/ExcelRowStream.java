@@ -101,8 +101,8 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		rowRange = IntRange.getRange(rangeValue);
 	}

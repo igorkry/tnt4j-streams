@@ -172,6 +172,13 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	}
 
 	@Override
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
+
+		lineRange = IntRange.getRange(rangeValue);
+	}
+
+	@Override
 	public void initialize() throws Exception {
 		super.initialize();
 
@@ -183,8 +190,6 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		if (!pollingOn && !storeState) {
 			startFromLatestActivity = false;
 		}
-
-		lineRange = IntRange.getRange(rangeValue);
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"FileLineStream.initializing.stream", fileName);

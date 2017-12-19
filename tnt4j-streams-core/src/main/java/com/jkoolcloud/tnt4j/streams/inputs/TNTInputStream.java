@@ -186,6 +186,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @param props
 	 *            configuration properties to set
 	 *
+	 * @see #applyProperties()
 	 * @see #initialize()
 	 */
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
@@ -211,6 +212,17 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	}
 
 	/**
+	 * Applies activity stream configuration properties.
+	 * 
+	 * @throws Exception
+	 *             indicates that stream is not configured properly and cannot continue
+	 *
+	 * @see #setProperties(java.util.Collection)
+	 */
+	protected void applyProperties() throws Exception {
+	}
+
+	/**
 	 * Get value of specified property. If subclasses override {@link #setProperties(Collection)}, they should generally
 	 * override this method as well to return the value of custom properties, and invoke the base class method to handle
 	 * any built-in properties.
@@ -218,6 +230,8 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @param name
 	 *            name of property whose value is to be retrieved
 	 * @return value for property, or {@code null} if property does not exist
+	 *
+	 * @see #setProperties(java.util.Collection)
 	 */
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_DATETIME.equals(name)) {
@@ -305,6 +319,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *             indicates that stream is not configured properly or was unable to start and cannot continue
 	 */
 	public void startStream() throws Exception {
+		applyProperties();
 		initialize();
 		start();
 

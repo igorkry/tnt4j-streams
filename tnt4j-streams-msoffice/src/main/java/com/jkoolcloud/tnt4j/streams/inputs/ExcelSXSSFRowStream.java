@@ -39,10 +39,11 @@ import org.apache.poi.hssf.record.crypto.Biff8EncryptionKey;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
+import org.apache.poi.poifs.filesystem.DirectoryNode;
 import org.apache.poi.poifs.filesystem.DocumentFactoryHelper;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -208,10 +209,15 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		rowRange = IntRange.getRange(rangeValue);
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
 
 		Thread excelFileReader = new Thread(new Runnable() {
 			@Override
@@ -253,12 +259,22 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	 *             if excel file or workbook can't be read
 	 */
 	protected void readXLS(File xlsFile) throws IOException {
-		if (wbPass != null) {
-			Biff8EncryptionKey.setCurrentUserPassword(wbPass);
-		}
+		NPOIFSFileSystem fs = null;
+		InputStream dis = null;
+		boolean passwordSet = false;
 
-		try (InputStream fin = new FileInputStream(xlsFile); POIFSFileSystem poifs = new POIFSFileSystem(fin);
-				InputStream dis = poifs.createDocumentInputStream("Workbook") /* NON-NLS */) {
+		try {
+			fs = new NPOIFSFileSystem(xlsFile, true);
+			DirectoryNode root = fs.getRoot();
+			if (root.hasEntry("EncryptedPackage")) { // NON-NLS
+				dis = DocumentFactoryHelper.getDecryptedStream(fs, wbPass);
+			} else {
+				if (wbPass != null) {
+					Biff8EncryptionKey.setCurrentUserPassword(wbPass);
+					passwordSet = true;
+				}
+				dis = fs.createDocumentInputStream("Workbook"); // NON-NLS
+			}
 			HSSFRequest req = new HSSFRequest();
 
 			XLSEventListener listener = new XLSEventListener(this);
@@ -268,9 +284,12 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 			HSSFEventFactory factory = new HSSFEventFactory();
 			factory.processEvents(req, dis);
 		} finally {
-			if (wbPass != null) {
+			if (passwordSet) {
 				Biff8EncryptionKey.setCurrentUserPassword((String) null);
 			}
+
+			Utils.close(fs);
+			Utils.close(dis);
 		}
 	}
 
@@ -288,9 +307,7 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	 *             if file contained XML reading fails
 	 */
 	protected void readXLXS(File xlsxFile) throws IOException, SAXException, OpenXML4JException {
-		try (NPOIFSFileSystem npoifs = new NPOIFSFileSystem(xlsxFile, true);
-				InputStream dis = DocumentFactoryHelper.getDecryptedStream(npoifs, wbPass);
-				OPCPackage xlsxPackage = OPCPackage.open(dis)) {
+		try (OPCPackage xlsxPackage = OPCPackage.open(xlsxFile, PackageAccess.READ)) {
 			ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(xlsxPackage);
 			XSSFReader xssfReader = new XSSFReader(xlsxPackage);
 			StylesTable styles = xssfReader.getStylesTable();

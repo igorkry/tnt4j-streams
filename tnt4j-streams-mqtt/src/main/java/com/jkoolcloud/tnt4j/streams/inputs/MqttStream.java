@@ -165,8 +165,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		if (StringUtils.isEmpty(serverURI)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -176,6 +176,11 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_STRING));
 		}
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
 
 		mqttDataReceiver = new MqttDataReceiver();
 		mqttDataReceiver.initialize();

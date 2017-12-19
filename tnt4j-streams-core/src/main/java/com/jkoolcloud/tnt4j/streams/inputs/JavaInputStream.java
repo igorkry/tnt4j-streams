@@ -137,13 +137,18 @@ public class JavaInputStream extends TNTParseableInputStream<String> {
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		if (rawReader == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FeedInputStream.no.stream.reader"));
 		}
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
 
 		inputReader = new LineNumberReader(
 				rawReader instanceof BufferedReader ? rawReader : new BufferedReader(rawReader));
