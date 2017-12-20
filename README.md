@@ -4387,7 +4387,7 @@ Default value - `null`. (Optional)
 
      sample:
  ```xml
-     <property name="TNT4JConfigFile" value="../../configuration/tnt4j_dev.properties"/>
+     <property name="TNT4JConfigFile" value="../../configuration/tnt4j.properties"/>
      <tnt4j-properties>
          <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
      </tnt4j-properties>
