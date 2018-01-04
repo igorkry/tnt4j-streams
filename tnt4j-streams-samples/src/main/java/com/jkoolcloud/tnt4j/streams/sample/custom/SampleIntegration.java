@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.sample.custom;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -45,6 +46,12 @@ public final class SampleIntegration {
 		try {
 			StreamsConfigLoader cfg = StringUtils.isEmpty(cfgFileName) ? new StreamsConfigLoader()
 					: new StreamsConfigLoader(cfgFileName);
+
+			if (cfg.isErroneous()) {
+				throw new IllegalStateException(
+						"Erroneous TNT4J-Streams configuration found! Interrupting initialization..."); // NON-NLS
+			}
+
 			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
 			if (streams == null || streams.isEmpty()) {
 				throw new IllegalStateException("No Activity Streams found in configuration"); // NON-NLS
@@ -57,6 +64,8 @@ public final class SampleIntegration {
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
 			}
+		} catch (SAXException | IllegalStateException e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}

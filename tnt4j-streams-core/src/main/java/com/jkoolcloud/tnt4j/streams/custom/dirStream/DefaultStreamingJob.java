@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -90,6 +91,12 @@ public class DefaultStreamingJob implements StreamingJob {
 
 		try {
 			StreamsConfigLoader cfg = new StreamsConfigLoader(streamCfgFile);
+
+			if (cfg.isErroneous()) {
+				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"StreamsAgent.erroneous.configuration"));
+			}
+
 			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
 
 			if (CollectionUtils.isEmpty(streams)) {
@@ -99,7 +106,6 @@ public class DefaultStreamingJob implements StreamingJob {
 
 			ThreadGroup streamThreads = new ThreadGroup(DefaultStreamingJob.class.getName() + "Threads"); // NON-NLS
 			StreamThread ft;
-
 			DefaultStreamListener dsl = new DefaultStreamListener();
 
 			for (TNTInputStream<?, ?> stream : streams) {
@@ -111,6 +117,8 @@ public class DefaultStreamingJob implements StreamingJob {
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
 			}
+		} catch (SAXException | IllegalStateException e) {
+			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
 		}

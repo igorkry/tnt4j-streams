@@ -54,6 +54,7 @@ public class StreamsConfigLoader {
 	private static final String DFLT_CONFIG_FILE_PATH2 = DFLT_CONFIG_PATH2 + File.separator + DFLT_CFG_FILE_NAME;
 
 	private StreamsConfigData streamsCfgData;
+	private boolean erroneous = false;
 
 	/**
 	 * Constructs a new TNT4J-Streams Configuration loader, using the default configuration file
@@ -209,6 +210,7 @@ public class StreamsConfigLoader {
 				true);
 		try {
 			streamsCfgData = StreamsConfigSAXParser.parse(config, validate);
+			erroneous = streamsCfgData == null;
 		} finally {
 			Utils.close(config);
 		}
@@ -252,5 +254,14 @@ public class StreamsConfigLoader {
 	 */
 	public ActivityParser getParser(String parserName) {
 		return streamsCfgData == null ? null : streamsCfgData.getParser(parserName);
+	}
+
+	/**
+	 * Returns flag indicating if streams configuration has XML-XSD validation errors.
+	 *
+	 * @return {@code true} if streams configuration is erroneous, {@code false} - otherwise
+	 */
+	public boolean isErroneous() {
+		return erroneous;
 	}
 }

@@ -71,7 +71,7 @@ public final class StreamsConfigSAXParser {
 	 *            input stream to get configuration data from
 	 * @param validate
 	 *            flag indicating whether to validate configuration XML against XSD schema
-	 * @return streams configuration data
+	 * @return streams configuration data or {@code null} if configuration is erroneous (fails XML-XSD validation)
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
 	 * @throws SAXException
@@ -96,6 +96,8 @@ public final class StreamsConfigSAXParser {
 								vee.getKey(), ve.getLocalizedMessage());
 					}
 				}
+
+				return null;
 			}
 		}
 

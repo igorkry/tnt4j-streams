@@ -290,7 +290,7 @@ public final class StreamsAgent {
 		try {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
 					streamTasksListener);
-		} catch (SAXException e) {
+		} catch (SAXException | IllegalStateException e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
 		} catch (Exception e) {
 			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
@@ -311,6 +311,11 @@ public final class StreamsAgent {
 			StreamTasksListener streamTasksListener) throws Exception {
 		if (cfg == null) {
 			return;
+		}
+
+		if (cfg.isErroneous()) {
+			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"StreamsAgent.erroneous.configuration"));
 		}
 
 		Collection<TNTInputStream<?, ?>> streams;
@@ -417,7 +422,20 @@ public final class StreamsAgent {
 		return streamThreads == null ? false : streamThreads.activeCount() > 0;
 	}
 
-	protected static void stopStreams() {
+	/**
+	 * Stops all running streams within default streams thread group.
+	 */
+	public static void stopStreams() {
+		stopStreams(streamThreads);
+	}
+
+	/**
+	 * Stops all running streams within provided <tt>streamThreads</tt> group.
+	 *
+	 * @param streamThreads
+	 *            thread group running all streams threads
+	 */
+	public static void stopStreams(ThreadGroup streamThreads) {
 		if (streamThreads != null) {
 			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsAgent.stopping.streams", streamThreads.getName());
