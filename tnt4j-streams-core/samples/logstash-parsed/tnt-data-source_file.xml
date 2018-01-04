@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="Location" locator="$.clientip" locator-type="Label"/>
+        <field name="UserName" locator="$.auth" locator-type="Label"/>
+        <field name="StartTime" locator="$.timestamp" locator-type="Label" format="dd/MMM/yyyy:HH:mm:ss z"
+               locale="en-US"/>
+        <field name="EventType" value="SEND"/>
+        <field name="EventName" locator="$.verb" locator-type="Label"/>
+        <field name="ResourceName" locator="$.request" locator-type="Label"/>
+        <field name="CompCode" locator="$.response" locator-type="Label">
+            <field-map source="100:206" target="SUCCESS" type="Range"/>
+            <field-map source="300:308" target="WARNING" type="Range"/>
+            <field-map source="400:417" target="ERROR" type="Range"/>
+            <field-map source="500:511" target="ERROR" type="Range"/>
+        </field>
+        <field name="ReasonCode" locator="$.response" locator-type="Label"/>
+        <field name="MsgValue" locator="$.bytes" locator-type="Label"/>
+        <field name="Message" locator="$.message" locator-type="Label"/>
+        <field name="Tag" locator="$.tags" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/logstash-parsed/messages.json"/>
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="StartFromLatest" value="false"/>
+
+        <parser-ref name="LogstashJSONParser"/>
+    </stream>
+</tnt-data-source>

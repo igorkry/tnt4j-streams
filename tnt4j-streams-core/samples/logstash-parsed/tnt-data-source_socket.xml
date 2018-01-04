@@ -4,7 +4,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ActivityDelim" value="EOF"/>
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="Location" locator="$.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.auth" locator-type="Label"/>
@@ -26,9 +26,10 @@
     </parser>
 
     <stream name="SampleLogstashStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value="./tnt4j-streams-core/samples/logstash-parsed/messages.json"/>
-        <!--<property name="Port" value="9595"/>-->
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="RestartOnInputClose" value="true"/>
+        <property name="Port" value="9595"/>
 
-        <parser-ref name="LogstashJSONParser"/>
+        <parser-ref name="JSONEnvelopeParser"/>
     </stream>
 </tnt-data-source>

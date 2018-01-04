@@ -1801,7 +1801,7 @@ Sample stream configuration:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="LogstashJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
-        <property name="ActivityDelim" value="EOF"/>
+        <property name="ActivityDelim" value="EOL"/>
 
         <field name="Location" locator="$.clientip" locator-type="Label"/>
         <field name="UserName" locator="$.auth" locator-type="Label"/>
@@ -1833,9 +1833,9 @@ Stream configuration states that `CharacterStream` referencing `LogstashJSONPars
 
 `CharacterStream` starts server socket on port defined using `Port` property.
 
-`LogstashJSONParser` transforms received JSON data package to Map data structure and maps map entries to activity
-event fields using map entry key labels. `ActivityDelim` property indicates that every line in parsed string represents
-single JSON data package.
+`LogstashJSONParser` transforms the received JSON data package to a Map data structure and maps map entries to activity event fields using 
+map entry key labels. The `ActivityDelim` property with value `EOL` indicates that every line in the parsed stream represents a single JSON 
+data package.
 
 #### HTTP request file
 
