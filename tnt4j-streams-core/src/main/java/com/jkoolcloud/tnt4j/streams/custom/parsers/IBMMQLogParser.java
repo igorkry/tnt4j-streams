@@ -245,7 +245,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			String host = readBetween(cb, "Host(", CB); // NON-NLS
 			String install = readBetween(cb, "Installation(", CB); // NON-NLS
 			String vrmf = readBetween(cb, "VRMF(", CB); // NON-NLS
-			String qMgr = readBetween(cb, "QMgr(", CB); // NON-NLS
+			String qMgr = readBetween(cb, "QMgr(", CB, true); // NON-NLS
 
 			String errCode = readUntil(cb, COLON);
 			skipWhitespaces(cb);
@@ -290,6 +290,24 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 
 		private static String readBetween(CharBuffer cb, String pre, char term) throws IOException {
 			expect(cb, pre);
+			String str = readUntil(cb, term);
+			skipWhitespaces(cb);
+
+			return str;
+		}
+
+		private static String readBetween(CharBuffer cb, String pre, char term, boolean optional) throws IOException {
+			int pos = cb.position();
+			try {
+				expect(cb, pre);
+			} catch (IOException exc) {
+				if (optional) {
+					cb.position(pos);
+					return null;
+				} else {
+					throw exc;
+				}
+			}
 			String str = readUntil(cb, term);
 			skipWhitespaces(cb);
 
