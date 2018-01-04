@@ -81,6 +81,8 @@ public final class StreamsConfigSAXParser {
 	 */
 	public static StreamsConfigData parse(InputStream config, boolean validate)
 			throws ParserConfigurationException, SAXException, IOException {
+		cfgFilePath = Utils.resolveInputFilePath(config);
+
 		if (validate) {
 			config = config.markSupported() ? config : new ByteArrayInputStream(IOUtils.toByteArray(config));
 
@@ -96,8 +98,6 @@ public final class StreamsConfigSAXParser {
 				}
 			}
 		}
-
-		cfgFilePath = Utils.resolveInputFilePath(config);
 
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();
