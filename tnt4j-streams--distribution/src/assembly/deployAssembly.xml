@@ -73,6 +73,7 @@
                             <include>*-sources.jar</include>
                             <include>*-tests.jar</include>
                             <include>*-javadoc.jar</include>
+                            <include>*-all.jar</include>
                         </includes>
                     </fileSet>
                 </fileSets>
