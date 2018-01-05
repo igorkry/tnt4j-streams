@@ -30,7 +30,7 @@
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.LOG"/>
         <!-- Windows MQ Installation path -->
         <!--<property name="FileName" value="C:/Program Files (x86)/IBM/WebSphere MQ/errors/AMQERR*.LOG"/>-->
         <!-- UNIX MQ installation path -->

@@ -252,12 +252,14 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				} else {
 					long flm = fStatus.getModificationTime();
 					if (flm > lastModifTime) {
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"FileLineStream.file.updated", getPeriodInSeconds(flm),
 								getPeriodInSeconds(lastReadTime));
 
 						lastModifTime = flm;
 					} else {
+						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"FileLineStream.file.not.changed");
 						boolean swapped = swapToNextFile(fs);
 
 						if (!swapped) {
@@ -333,9 +335,10 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 
 					return rollToCurrentLine(fs);
 				} else {
-					lineNumber = lnr.getLineNumber();
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.nowhere.to.swap", lineNumber);
+					lineNumber = 0;
+					lnr.setLineNumber(lineNumber);
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.resetting.reader", lineNumber);
 				}
 			}
 
@@ -343,6 +346,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean swapToPrevFile(FileSystem fs) throws Exception {
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.will.swap.to.previous", fileName);
+
 			if (Utils.isWildcardString(fileName)) {
 				URI fileUri = new URI(fileName);
 				Path filePath = new Path(fileUri);
@@ -361,7 +367,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					lastModifTime = getModificationTime(prevFile, fs);
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.changing.to.previous", prevFile.toUri());
+							"FileLineStream.swapping.to.previous", lineNumber, prevFile.toUri());
 				} else {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.previous");
@@ -374,6 +380,9 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 		}
 
 		private boolean swapToNextFile(FileSystem fs) throws Exception {
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.will.swap.to.next", fileName);
+
 			if (Utils.isWildcardString(fileName)) {
 				URI fileUri = new URI(fileName);
 				Path filePath = new Path(fileUri);
@@ -392,7 +401,7 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					lineNumber = 0;
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.changing.to.next", nextFile.toUri());
+							"FileLineStream.swapping.to.next", nextFile.toUri());
 				} else {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.next");

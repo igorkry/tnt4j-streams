@@ -181,11 +181,13 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			} else {
 				long flm = fileToRead.lastModified();
 				if (flm > lastModifTime) {
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.file.updated", getPeriodInSeconds(flm), getPeriodInSeconds(lastReadTime));
 
 					lastModifTime = flm;
 				} else {
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.file.not.changed");
 					boolean swapped = swapToNextFile();
 
 					if (!swapped) {
@@ -256,9 +258,10 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 					return rollToCurrentLine();
 				} else {
-					lineNumber = lnr.getLineNumber();
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.nowhere.to.swap", lineNumber);
+					lineNumber = 0;
+					lnr.setLineNumber(lineNumber);
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FileLineStream.resetting.reader", lineNumber);
 				}
 			}
 
@@ -266,6 +269,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private boolean swapToPrevFile() {
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.will.swap.to.previous", fileName);
+
 			if (Utils.isWildcardString(fileName)) {
 				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
@@ -281,7 +287,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 					lastModifTime = prevFile.lastModified();
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.swapping.to.previous", prevFile.getAbsolutePath());
+							"FileLineStream.swapping.to.previous", lineNumber, prevFile.getAbsolutePath());
 				} else {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.previous");
@@ -294,6 +300,9 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		}
 
 		private boolean swapToNextFile() {
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.will.swap.to.next", fileName);
+
 			if (Utils.isWildcardString(fileName)) {
 				availableFiles = Utils.searchFiles(fileName);
 				updateDataTotals(availableFiles);
