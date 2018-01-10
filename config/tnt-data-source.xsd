@@ -1348,7 +1348,7 @@
                 Defines a field locator configuration entity.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -1379,7 +1379,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
         <xs:attributeGroup ref="FieldLocatorAttributes"/>
     </xs:complexType>
 
@@ -1499,7 +1499,7 @@
                 Filters activity data to be included/excluded from streaming by evaluating value or script/expression defined rules.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <xs:element name="value" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -1561,7 +1561,7 @@
                     </xs:simpleContent>
                 </xs:complexType>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
 
         <xs:attribute name="name" use="required" type="xs:string">
             <xs:annotation>
@@ -1690,7 +1690,7 @@
                 Translates an item from an activity RAW data to an activity entity field.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <!--<xs:choice>-->
             <xs:element name="field-locator" type="FieldLocator" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
@@ -1737,7 +1737,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
 
         <xs:attribute name="name" use="required" type="FieldNamesAll">
             <xs:annotation>
@@ -1841,7 +1841,7 @@
                 Defines activity field containing embedded activity entities data parsed by referenced parser.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <xs:element name="field-locator" type="FieldLocator" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -1871,7 +1871,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
 
         <xs:attribute name="name" use="required" type="xs:string">
             <xs:annotation>
@@ -1910,7 +1910,7 @@
                 Defines a parser to extract activity elements from a string identifying an activity.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <xs:element name="property" type="ParserProperty" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -1948,7 +1948,7 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
 
         <xs:attributeGroup ref="EntityAttributeGroup">
             <xs:annotation>
@@ -2067,7 +2067,7 @@
                 Defines a activity elements RAW data input stream.
             </xs:documentation>
         </xs:annotation>
-        <xs:all>
+        <xs:sequence>
             <xs:element name="property" type="StreamProperty" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
@@ -2112,7 +2112,7 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-        </xs:all>
+        </xs:sequence>
 
         <xs:attributeGroup ref="EntityAttributeGroup">
             <xs:annotation>
