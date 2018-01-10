@@ -34,6 +34,7 @@ import javax.xml.xpath.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
@@ -173,13 +174,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					}
 				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
-						requireAll = Boolean.parseBoolean(value);
+						requireAll = BooleanUtils.toBoolean(value);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
-						namespaceAware = Boolean.parseBoolean(value);
+						namespaceAware = BooleanUtils.toBoolean(value);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}
@@ -379,16 +380,12 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 
 				if (val instanceof Node) {
-					Node node = (Node) val;
-
-					if (!isDataSupportedByStackedParser(cData.getField(), node)) {
-						val = getTextContent(locator, node, formattingNeeded);
-					}
+					val = getTextOnDemand((Node) val, locator, cData, formattingNeeded);
 				} else if (Utils.isCollection(val)) {
 					Object[] nodes = Utils.makeArray(val);
 					for (int i = 0; i < nodes.length; i++) {
 						if (nodes[i] instanceof Node) {
-							nodes[i] = getTextContent(locator, (Node) nodes[i], formattingNeeded);
+							nodes[i] = getTextOnDemand((Node) nodes[i], locator, cData, formattingNeeded);
 						}
 					}
 				}
@@ -402,6 +399,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		return val;
+	}
+
+	private static Object getTextOnDemand(Node node, ActivityFieldLocator locator, ActivityContext cData,
+			AtomicBoolean formattingNeeded) throws ParseException {
+		if (!isDataSupportedByStackedParser(cData.getField(), node)) {
+			return getTextContent(locator, node, formattingNeeded);
+		}
+
+		return node;
 	}
 
 	private static Object resolveValueOverXPath(Node xmlDoc, XPathExpression expr) throws XPathExpressionException {
