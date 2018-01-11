@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ServerConfig;
@@ -164,9 +165,9 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
 					topicName = value;
 				} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
-					startServer = Boolean.parseBoolean(value);
+					startServer = BooleanUtils.toBoolean(value);
 				} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
-					startZooKeeper = Boolean.parseBoolean(value);
+					startZooKeeper = BooleanUtils.toBoolean(value);
 				} else {
 					Field[] propFields = StreamProperties.class.getDeclaredFields();
 

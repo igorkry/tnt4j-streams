@@ -22,10 +22,8 @@ import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -317,6 +315,7 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 
 		private Consumer<?, ?> consumer;
 		private Collection<String> topics;
+		private boolean autoCommit = true;
 
 		private KafkaDataReceiver() {
 			super("KafkaConsumerStream.KafkaDataReceiver"); // NON-NLS
@@ -337,6 +336,7 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 			Properties cProperties = (Properties) params[0];
 			topics = (Collection<String>) params[1];
 
+			autoCommit = Utils.getBoolean("enable.auto.commit", cProperties, true); // NON-NLS
 			consumer = new KafkaConsumer<>(cProperties);
 		}
 
@@ -351,20 +351,44 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 
 					while (!isHalted()) {
 						ConsumerRecords<?, ?> records = consumer.poll(Long.MAX_VALUE);
-						for (ConsumerRecord<?, ?> record : records) {
-							String msgData = Utils.toString(record.value());
-							logger().log(OpLevel.DEBUG,
-									StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-									"KafkaStream.next.message", msgData);
-
-							addInputToBuffer(record);
+						if (autoCommit) {
+							addRecordsToBuffer(records);
+						} else {
+							for (TopicPartition partition : records.partitions()) {
+								List<? extends ConsumerRecord<?, ?>> partitionRecords = records.records(partition);
+								addRecordsToBuffer(partitionRecords);
+								long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+								consumer.commitSync(
+										Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+								logger().log(OpLevel.DEBUG,
+										StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+										"KafkaStream.committing.offset", partition, lastOffset);
+							}
 						}
 					}
 				} catch (WakeupException exc) {
 				} finally {
-					// consumer.unsubscribe();
+					consumer.unsubscribe();
 					consumer.close();
 				}
+			}
+		}
+
+		/**
+		 * Adds consumer records from provided <tt>records</tt> collection to stream input buffer.
+		 *
+		 * @param records
+		 *            records collection to add to stream input buffer
+		 *
+		 * @see #addInputToBuffer(Object)
+		 */
+		protected void addRecordsToBuffer(Iterable<? extends ConsumerRecord<?, ?>> records) {
+			for (ConsumerRecord<?, ?> record : records) {
+				String msgData = Utils.toString(record.value());
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"KafkaStream.next.message", msgData);
+
+				addInputToBuffer(record);
 			}
 		}
 
