@@ -60,6 +60,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
+import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
@@ -309,7 +310,8 @@ public class MetricsReporter implements InterceptionsReporter {
 				tracker.log(OpLevel.INFO, msg);
 			}
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "failed to collect Kafka clients metrics over JMX", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.clients.jmx.fail", exc);
 		}
 
 		try {
@@ -317,8 +319,9 @@ public class MetricsReporter implements InterceptionsReporter {
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metrics.getValue());
 				tracker.log(OpLevel.INFO, msg);
 			}
-		} catch (JsonProcessingException e) {
-			LOGGER.log(OpLevel.ERROR, "failed to report metrics", e);
+		} catch (JsonProcessingException exc) {
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.report.metrics.fail", exc);
 		}
 	}
 
@@ -337,7 +340,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("kafka.consumer:", "kafka.consumer:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "failed to collect KafkaConsumer metrics over JMX", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.consumer.jmx.fail", exc);
 		}
 
 		return attrsMap;
@@ -350,7 +354,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("kafka.producer:", "kafka.producer:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "failed to collect KafkaProducer metrics over JMX", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.producer.jmx.fail", exc);
 		}
 		return attrsMap;
 	}
@@ -362,7 +367,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("java.lang:", "java.lang:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "failed to collect JVM metrics over JMX", exc);
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.jvm.jmx.fail", exc);
 		}
 		return attrsMap;
 	}
@@ -381,14 +387,14 @@ public class MetricsReporter implements InterceptionsReporter {
 						attrsMap.put(prefix + pMetricsAttr.getName(),
 								mBeanServer.getAttribute(mBeanName, pMetricsAttr.getName()));
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"failed to get MBean ''{0}'' attribute ''{1}'' value", mBeanName,
-								pMetricsAttr.getName(), exc);
+						LOGGER.log(OpLevel.WARNING,
+								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(), exc);
 					}
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"failed to get MBean ''{0}'' info data", mBeanName, exc);
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MetricsReporter.bean.info.fail", mBeanName, exc);
 			}
 		}
 	}

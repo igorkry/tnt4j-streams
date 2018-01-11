@@ -25,7 +25,6 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
-import org.apache.kafka.common.Configurable;
 import org.apache.kafka.common.TopicPartition;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -36,6 +35,7 @@ import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.utils.Utils;
 
 /**
  * TNT4J-Streams Kafka interceptions manager. It loads interceptions configuration from {@code "interceptors.config"}
@@ -67,8 +67,8 @@ public class InterceptionsManager {
 
 	private static final String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties"; // NON-NLS
 
-	private final Set<Configurable> references = new HashSet<>();
-	private final Collection<InterceptionsReporter> reporters = new ArrayList<>();
+	private final Set<TNTKafkaInterceptor> references = new HashSet<>(5);
+	private final Collection<InterceptionsReporter> reporters = new ArrayList<>(2);
 
 	private static InterceptionsManager instance;
 
@@ -85,17 +85,17 @@ public class InterceptionsManager {
 			interceptorProps.load(fis);
 		} catch (IOException exc) {
 			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"Failed loading interceptors configuration properties", exc);
+					"InterceptionsManager.cfg.load.failed", interceptorProps, exc);
 		}
 	}
 
 	private void initialize() {
 		loadProperties();
 
-		int reportingPeriod = Integer.parseInt(interceptorProps.getProperty("metrics.report.period",
-				String.valueOf(MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC)));
+		int reportingPeriod = Utils.getInt("metrics.report.period", interceptorProps,
+				MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC);
 		addReporter(new MetricsReporter(reportingPeriod));
-		boolean traceMessages = Boolean.parseBoolean(interceptorProps.getProperty("trace.kafka.messages", "true")); // NON-NLS
+		boolean traceMessages = Utils.getBoolean("trace.kafka.messages", interceptorProps, true); // NON-NLS
 		if (traceMessages) {
 			addReporter(new MsgTraceReporter());
 		}
@@ -121,11 +121,11 @@ public class InterceptionsManager {
 	 * @param ref
 	 *            interceptor reference to bind
 	 */
-	public void bindReference(Configurable ref) {
+	public void bindReference(TNTKafkaInterceptor ref) {
 		references.add(ref);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"Binding interceptor reference: ref={0}, refsCount={1}", ref, references.size());
+				"InterceptionsManager.bind.reference", ref, references.size());
 	}
 
 	/**
@@ -134,11 +134,11 @@ public class InterceptionsManager {
 	 * @param ref
 	 *            interceptor reference to unbind
 	 */
-	public void unbindReference(Configurable ref) {
+	public void unbindReference(TNTKafkaInterceptor ref) {
 		references.remove(ref);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"Unbinding interceptor reference: ref={0}, refsCount={1}", ref, references.size());
+				"InterceptionsManager.unbind.reference", ref, references.size());
 
 		if (references.isEmpty()) {
 			for (InterceptionsReporter rep : reporters) {
@@ -169,8 +169,8 @@ public class InterceptionsManager {
 		return isClientIntercepted(TNTKafkaCInterceptor.class);
 	}
 
-	private boolean isClientIntercepted(Class<? extends Configurable> refClass) {
-		for (Configurable ref : references) {
+	private boolean isClientIntercepted(Class<? extends TNTKafkaInterceptor> refClass) {
+		for (TNTKafkaInterceptor ref : references) {
 			if (refClass.isInstance(ref)) {
 				return true;
 			}
@@ -199,7 +199,7 @@ public class InterceptionsManager {
 	 */
 	public ProducerRecord<Object, Object> send(ProducerRecord<Object, Object> producerRecord) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"InterceptionsManager.send: producerRecord={0}", producerRecord);
+				"InterceptionsManager.send", producerRecord);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.send(producerRecord);
@@ -220,7 +220,7 @@ public class InterceptionsManager {
 	 */
 	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"InterceptionsManager.acknowledge: recordMetadata={0}, exception={1}", recordMetadata, e);
+				"InterceptionsManager.acknowledge", recordMetadata, e);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.acknowledge(recordMetadata, e, clusterResource);
@@ -240,7 +240,7 @@ public class InterceptionsManager {
 	public ConsumerRecords<Object, Object> consume(ConsumerRecords<Object, Object> consumerRecords,
 			ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"InterceptionsManager.consume: consumerRecords={0}", consumerRecords);
+				"InterceptionsManager.consume", consumerRecords);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.consume(consumerRecords, clusterResource);
@@ -257,10 +257,19 @@ public class InterceptionsManager {
 	 */
 	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"InterceptionsManager.commit: map={0}", map);
+				"InterceptionsManager.commit", map);
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.commit(map);
 		}
+	}
+
+	public Map<String, ?> getInterceptorsConfig() {
+		Map<String, Object> getConfigResponse = new HashMap<>();
+		for (TNTKafkaInterceptor ref : references) {
+			getConfigResponse.putAll(ref.getConfig());
+		}
+
+		return getConfigResponse;
 	}
 }

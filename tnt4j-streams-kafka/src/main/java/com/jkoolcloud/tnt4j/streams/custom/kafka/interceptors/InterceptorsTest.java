@@ -31,6 +31,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.utils.Utils;
 
 /**
  * TNT4J-Streams Kafka interceptors test which can be run as standalone application.
@@ -128,7 +129,7 @@ public class InterceptorsTest {
 		Properties props = new Properties();
 		props.load(new FileReader(System.getProperty("producer.config")));// NON-NLS
 
-		eventsToProduce = Integer.parseInt(props.getProperty("events.count", "10"));
+		eventsToProduce = Utils.getInt("events.count", props, 10);
 		props.remove("events.count");
 		topicName = props.getProperty("test.app.topic.name", "tnt4j_streams_kafka_intercept_test_page_visits"); // NON-NLS
 		props.remove("test.app.topic.name");

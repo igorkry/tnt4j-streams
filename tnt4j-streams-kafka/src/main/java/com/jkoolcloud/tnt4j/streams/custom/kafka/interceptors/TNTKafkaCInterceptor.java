@@ -22,7 +22,6 @@ import org.apache.kafka.clients.consumer.ConsumerInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.ClusterResource;
-import org.apache.kafka.common.ClusterResourceListener;
 import org.apache.kafka.common.TopicPartition;
 
 /**
@@ -30,7 +29,7 @@ import org.apache.kafka.common.TopicPartition;
  *
  * @version $Revision: 1 $
  */
-public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>, ClusterResourceListener {
+public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>, TNTKafkaInterceptor {
 
 	private ClusterResource clusterResource;
 	private Map<String, ?> configs;
@@ -76,11 +75,16 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 	}
 
 	@Override
+	public Map<String, ?> getConfig() {
+		return configs;
+	}
+
+	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("TNTKafkaCInterceptor{");
-		sb.append("clusterResource=").append(clusterResource);
-		sb.append(", configs=").append(configs);
-		sb.append(", groupId='").append(groupId).append('\'');
+		StringBuilder sb = new StringBuilder("TNTKafkaCInterceptor{"); // NON-NLS
+		sb.append("clusterResource=").append(clusterResource); // NON-NLS
+		sb.append(", configs=").append(configs); // NON-NLS
+		sb.append(", groupId='").append(groupId).append('\''); // NON-NLS
 		sb.append('}');
 
 		return sb.toString();

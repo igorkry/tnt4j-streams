@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams;
+package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
-import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.AllKafkaInterceptorsTests;
-import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.TraceCommandDeserializerTest;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllInputsTests.class, AllKafkaInterceptorsTests.class })
-public class AllKafkaStreamTests {
+@Suite.SuiteClasses({ InterceptionsManagerTest.class, TraceCommandDeserializerTest.class })
+public class AllKafkaInterceptorsTests {
 }

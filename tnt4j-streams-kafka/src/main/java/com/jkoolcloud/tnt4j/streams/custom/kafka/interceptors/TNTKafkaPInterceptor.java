@@ -22,14 +22,13 @@ import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
-import org.apache.kafka.common.ClusterResourceListener;
 
 /**
  * TNT4J-Streams Kafka producer interceptor implementation.
  *
  * @version $Revision: 1 $
  */
-public class TNTKafkaPInterceptor implements ProducerInterceptor<Object, Object>, ClusterResourceListener {
+public class TNTKafkaPInterceptor implements ProducerInterceptor<Object, Object>, TNTKafkaInterceptor {
 
 	private ClusterResource clusterResource;
 	private Map<String, ?> configs;
@@ -69,10 +68,15 @@ public class TNTKafkaPInterceptor implements ProducerInterceptor<Object, Object>
 	}
 
 	@Override
+	public Map<String, ?> getConfig() {
+		return configs;
+	}
+
+	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("TNTKafkaPInterceptor{");
-		sb.append("clusterResource=").append(clusterResource);
-		sb.append(", configs=").append(configs);
+		StringBuilder sb = new StringBuilder("TNTKafkaPInterceptor{"); // NON-NLS
+		sb.append("clusterResource=").append(clusterResource); // NON-NLS
+		sb.append(", configs=").append(configs); // NON-NLS
 		sb.append('}');
 
 		return sb.toString();

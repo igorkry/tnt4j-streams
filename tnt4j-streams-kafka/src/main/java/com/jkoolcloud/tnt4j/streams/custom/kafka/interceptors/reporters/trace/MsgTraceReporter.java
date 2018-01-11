@@ -18,22 +18,27 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
@@ -58,8 +63,12 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class MsgTraceReporter implements InterceptionsReporter {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MsgTraceReporter.class);
+	public static final String TNT_TRACE_CONFIG_TOPIC = "TNT_TRACE_CONFIG_TOPIC"; // NON-NLS
+	public static final int POOL_TIME_SECONDS = 3;
 
 	private KafkaMsgTraceStream stream;
+	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig;
+	private final Timer pollTimer = new Timer();
 
 	/**
 	 * Constructs a new MsgTraceReporter.
@@ -67,123 +76,180 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	public MsgTraceReporter() {
 		stream = new KafkaMsgTraceStream();
 		StreamsAgent.runFromAPI(stream);
+		TimerTask mrt = new TimerTask() {
+			@Override
+			public void run() {
+				pollConfigQueue(InterceptionsManager.getInstance().getInterceptorsConfig(), traceConfig);
+			}
+		};
+		long period = TimeUnit.SECONDS.toMillis(POOL_TIME_SECONDS);
+		pollTimer.scheduleAtFixedRate(mrt, period, period);
+	}
+
+	protected static void pollConfigQueue(Map<String, ?> config,
+			Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig) {
+		Properties props = new Properties();
+		props.putAll(config);
+		if (!props.isEmpty()) {
+			KafkaConsumer<String, TraceCommandDeserializer.TopicTraceCommand> consumer = new KafkaConsumer<>(props,
+					new StringDeserializer(), new TraceCommandDeserializer());
+			TopicPartition topic = new TopicPartition(MsgTraceReporter.TNT_TRACE_CONFIG_TOPIC, 0);
+			consumer.assign(Collections.singletonList(topic));
+			while (true) {
+				ConsumerRecords<String, TraceCommandDeserializer.TopicTraceCommand> records = consumer.poll(100);
+				if (records.count() > 0) {
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"MsgTraceReporter.polled.commands", records.count());
+					for (ConsumerRecord<String, TraceCommandDeserializer.TopicTraceCommand> record : records) {
+						if (record.value() != null) {
+							traceConfig.put(record.value().topic, record.value());
+						}
+					}
+					break;
+				}
+			}
+
+		}
+	}
+
+	private Boolean shouldSendTrace(String topic, boolean count) {
+		TraceCommandDeserializer.TopicTraceCommand topicTraceConfig = traceConfig.get(topic);
+		if (topicTraceConfig == null) {
+			topicTraceConfig = traceConfig.get(TraceCommandDeserializer.MASTER_CONFIG);
+		}
+		return topicTraceConfig.match(topic, count);
 	}
 
 	@Override
 	public void send(ProducerRecord<Object, Object> producerRecord) {
-		try {
-			ActivityInfo ai = new ActivityInfo();
-			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
-			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Send");
-			ai.setFieldValue(new ActivityField("Partition"), producerRecord.partition());
-			ai.setFieldValue(new ActivityField("Topic"), producerRecord.topic());
-			ai.setFieldValue(new ActivityField("Key"), producerRecord.key());
-			ai.setFieldValue(new ActivityField("Value"), producerRecord.value());
-			ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), producerRecord.timestamp());
-			ai.addCorrelator(producerRecord.topic());
+		if (shouldSendTrace(producerRecord.topic(), true)) {
+			try {
+				ActivityInfo ai = new ActivityInfo();
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Send"); // NON-NLS
+				ai.setFieldValue(new ActivityField("Partition"), producerRecord.partition()); // NON-NLS
+				ai.setFieldValue(new ActivityField("Topic"), producerRecord.topic()); // NON-NLS
+				ai.setFieldValue(new ActivityField("Key"), producerRecord.key()); // NON-NLS
+				ai.setFieldValue(new ActivityField("Value"), producerRecord.value()); // NON-NLS
+				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), producerRecord.timestamp());
+				ai.addCorrelator(producerRecord.topic());
 
-			stream.getOutput().logItem(ai);
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"send failed", exc);
+				stream.getOutput().logItem(ai);
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MsgTraceReporter.send.failed", exc);
+			}
 		}
 	}
 
 	@Override
 	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
-		try {
-			ActivityInfo ai = new ActivityInfo();
-			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
-			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Acknowledge");
-			ai.setFieldValue(new ActivityField("Offset"), recordMetadata.offset());
-			ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), recordMetadata.timestamp());
-			ai.setFieldValue(new ActivityField("Checksum"), recordMetadata.checksum());
-			ai.setFieldValue(new ActivityField("Topic"), recordMetadata.topic());
-			ai.setFieldValue(new ActivityField("Partition"), recordMetadata.partition());
-			if (e != null) {
-				ai.setFieldValue(new ActivityField(StreamFieldType.Exception.name()),
-						StringUtils.isEmpty(e.getMessage()) ? e.toString() : e.getMessage());
+		if (shouldSendTrace(recordMetadata.topic(), false)) {
+			try {
+				ActivityInfo ai = new ActivityInfo();
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Acknowledge"); // NON-NLS
+				ai.setFieldValue(new ActivityField("Offset"), recordMetadata.offset()); // NON-NLS
+				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), recordMetadata.timestamp());
+				ai.setFieldValue(new ActivityField("Checksum"), recordMetadata.checksum()); // NON-NLS
+				ai.setFieldValue(new ActivityField("Topic"), recordMetadata.topic()); // NON-NLS
+				ai.setFieldValue(new ActivityField("Partition"), recordMetadata.partition()); // NON-NLS
+				if (e != null) {
+					ai.setFieldValue(new ActivityField(StreamFieldType.Exception.name()),
+							StringUtils.isEmpty(e.getMessage()) ? e.toString() : e.getMessage());
+				}
+				if (clusterResource != null) {
+					ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
+				}
+
+				int size = Math.max(recordMetadata.serializedKeySize(), 0)
+						+ Math.max(recordMetadata.serializedValueSize(), 0);
+
+				ai.setFieldValue(new ActivityField("Size"), size); // NON-NLS
+				ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
+						calcSignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
+				ai.addCorrelator(recordMetadata.topic());
+
+				stream.getOutput().logItem(ai);
+			} catch (Exception exc) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MsgTraceReporter.acknowledge.failed", exc);
 			}
-			if (clusterResource != null) {
-				ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId());
-			}
-
-			int size = Math.max(recordMetadata.serializedKeySize(), 0)
-					+ Math.max(recordMetadata.serializedValueSize(), 0);
-
-			ai.setFieldValue(new ActivityField("Size"), size);
-			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
-					calcSignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
-			ai.addCorrelator(recordMetadata.topic());
-
-			stream.getOutput().logItem(ai);
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"acknowledge failed", exc);
 		}
 	}
 
 	@Override
 	public void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource) {
-		try {
-			ActivityInfo ai;
+		ActivityInfo ai;
+		for (ConsumerRecord<Object, Object> cr : consumerRecords) {
+			if (shouldSendTrace(cr.topic(), true)) {
+				try {
+					ai = new ActivityInfo();
+					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.RECEIVE);
+					ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()),
+							"Kafka_Consumer_Consume_Record"); // NON-NLS
+					ai.setFieldValue(new ActivityField("Topic"), cr.topic()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Partition"), cr.partition()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Offset"), cr.offset()); // NON-NLS
+					ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), cr.timestamp());
+					ai.setFieldValue(new ActivityField("TimestampType"), cr.timestampType()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Key"), cr.key()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Value"), cr.value()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Checksum"), cr.checksum()); // NON-NLS
 
-			for (ConsumerRecord<Object, Object> cr : consumerRecords) {
-				ai = new ActivityInfo();
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.RECEIVE);
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Consume_Record");
-				ai.setFieldValue(new ActivityField("Topic"), cr.topic());
-				ai.setFieldValue(new ActivityField("Partition"), cr.partition());
-				ai.setFieldValue(new ActivityField("Offset"), cr.offset());
-				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), cr.timestamp());
-				ai.setFieldValue(new ActivityField("TimestampType"), cr.timestampType());
-				ai.setFieldValue(new ActivityField("Key"), cr.key());
-				ai.setFieldValue(new ActivityField("Value"), cr.value());
+					int size = Math.max(cr.serializedKeySize(), 0) + Math.max(cr.serializedValueSize(), 0);
+					long latency = System.currentTimeMillis() - cr.timestamp();
 
-				int size = Math.max(cr.serializedKeySize(), 0) + Math.max(cr.serializedValueSize(), 0);
-				long latency = System.currentTimeMillis() - cr.timestamp();
+					ai.setFieldValue(new ActivityField("Size"), size); // NON-NLS
+					ai.setFieldValue(new ActivityField("Latency"), latency); // NON-NLS
 
-				ai.setFieldValue(new ActivityField("Size"), size);
-				ai.setFieldValue(new ActivityField("Latency"), latency);
+					if (clusterResource != null) {
+						ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
+					}
 
-				if (clusterResource != null) {
-					ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId());
+					if (cr.headers() != null) {
+						for (Header header : cr.headers()) {
+							ai.setFieldValue(new ActivityField(header.key()), header.value());
+						}
+					}
+
+					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
+							calcSignature(cr.topic(), cr.partition(), cr.offset()));
+					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
+
+					stream.getOutput().logItem(ai);
+				} catch (Exception exc) {
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"MsgTraceReporter.consume.failed", exc);
 				}
-
-				ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
-						calcSignature(cr.topic(), cr.partition(), cr.offset()));
-				ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
-
-				stream.getOutput().logItem(ai);
 			}
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"consume failed", exc);
 		}
 	}
 
 	@Override
 	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
-		try {
-			ActivityInfo ai;
+		ActivityInfo ai;
+		for (Map.Entry<TopicPartition, OffsetAndMetadata> me : map.entrySet()) {
+			if (shouldSendTrace(me.getKey().topic(), false)) {
+				try {
+					ai = new ActivityInfo();
+					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
+					ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()),
+							"Kafka_Consumer_Commit_Entry"); // NON-NLS
+					ai.setFieldValue(new ActivityField("Partition"), me.getKey().partition()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Topic"), me.getKey().topic()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Offset"), me.getValue().offset()); // NON-NLS
+					ai.setFieldValue(new ActivityField("Metadata"), me.getValue().metadata()); // NON-NLS
+					// ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
+					// calcSignature(me.getKey().topic(), me.getKey().partition(), me.getValue().offset()));
+					ai.addCorrelator(me.getKey().topic(), String.valueOf(me.getValue().offset()));
 
-			for (Map.Entry<TopicPartition, OffsetAndMetadata> me : map.entrySet()) {
-				ai = new ActivityInfo();
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Commit_Entry");
-				ai.setFieldValue(new ActivityField("Partition"), me.getKey().partition());
-				ai.setFieldValue(new ActivityField("Topic"), me.getKey().topic());
-				ai.setFieldValue(new ActivityField("Offset"), me.getValue().offset());
-				ai.setFieldValue(new ActivityField("Metadata"), me.getValue().metadata());
-				// ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
-				// calcSignature(me.getKey().topic(), me.getKey().partition(), me.getValue().offset()));
-				ai.addCorrelator(me.getKey().topic(), String.valueOf(me.getValue().offset()));
-
-				stream.getOutput().logItem(ai);
+					stream.getOutput().logItem(ai);
+				} catch (Exception exc) {
+					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"MsgTraceReporter.commit.failed", exc);
+				}
 			}
-		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"commit failed", exc);
 		}
 	}
 
