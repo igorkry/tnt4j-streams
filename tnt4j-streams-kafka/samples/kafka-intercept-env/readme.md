@@ -1,5 +1,7 @@
 * Install Kafka (if not yet)
-* Put `tnt4j` libs to `<KAFKA_INSTALL_DIR>/libs/tnt4j`
+* Put `tnt4j` libs to `<KAFKA_INSTALL_DIR>/libs/tnt4j`.  Maven produces `all-in-one` jar named `tnt4j-streams-kafka-[VERSION]-all.jar` when 
+building `tnt4j-streams-kafka` module. Use it alone instead of having multiple dependent jar files from built tnt4j-streams package `lib` 
+dir.  
 * Alter: 
     * *NIX: `<KAFKA_INSTALL_DIR>/bin/kafka-run-class.sh` by adding section after `# classpath addition for release` section:
     ```bash
@@ -18,6 +20,7 @@
     	call :concat %%i
     )
     ```   
+    **NOTE:** there is sample `.bat` file provided next to this manual, use it as reference.     
 * Alter `<KAFKA_INSTALL_DIR>/config/consumer.properties` by adding:
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor
