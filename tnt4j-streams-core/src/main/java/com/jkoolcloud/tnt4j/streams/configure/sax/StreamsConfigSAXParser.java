@@ -97,7 +97,9 @@ public final class StreamsConfigSAXParser {
 					}
 				}
 
-				return null;
+				if (validationErrors.containsKey(OpLevel.FATAL)) {
+					return null;
+				}
 			}
 		}
 
