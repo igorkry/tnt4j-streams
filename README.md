@@ -2669,7 +2669,6 @@ Sample stream configuration:
 
     <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
         <property name="TranslateNumValues" value="true"/>
-        <property name="RequireDefault" value="false"/>
 
         <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
 			  entire content, remove this section.  To capture a portion of the message, use an
@@ -4029,7 +4028,7 @@ Sample stream configuration:
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <parser name="RFH2FoldersParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="PayloadDataType" locator="/rfh2Folders/mcd/Msd" locator-type="Label"/>

@@ -2,16 +2,7 @@
 <xs:schema id="TNTDataSourceWMQ_PCF" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:redefine schemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
-        <xs:attributeGroup name="FieldLocatorAttributes">
-            <xs:attributeGroup ref="FieldLocatorAttributes"/>
-            <xs:attribute name="locator" use="optional" type="PCFLocatorValues">
-                <xs:annotation>
-                    <xs:documentation>
-                        PCF message parameter MQ constant name/value (for body) or field name (for header).
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:attribute>
-        </xs:attributeGroup>
+        <!-- TODO add required redefinitions -->
     </xs:redefine>
 
     <!-- PCF message parameter locator definition -->
