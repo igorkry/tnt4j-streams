@@ -207,7 +207,7 @@ public class StreamsConfigLoader {
 	 */
 	protected void load(InputStream config) throws SAXException, ParserConfigurationException, IOException {
 		boolean validate = Utils.getBoolean("com.jkoolcloud.tnt4j.streams.validate.config", System.getProperties(), // NON-NLS
-				true);
+				false);
 		try {
 			streamsCfgData = StreamsConfigSAXParser.parse(config, validate);
 			erroneous = streamsCfgData == null;
