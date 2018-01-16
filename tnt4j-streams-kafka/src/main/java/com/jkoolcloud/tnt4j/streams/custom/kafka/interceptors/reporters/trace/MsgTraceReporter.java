@@ -30,7 +30,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -207,11 +206,11 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
 					}
 
-					if (cr.headers() != null) {
-						for (Header header : cr.headers()) {
-							ai.setFieldValue(new ActivityField(header.key()), header.value());
-						}
-					}
+					// if (cr.headers() != null) {
+					// for (Header header : cr.headers()) {
+					// ai.setFieldValue(new ActivityField(header.key()), header.value());
+					// }
+					// }
 
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
