@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-    <parser name="WsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="WSResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="s=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="a=http://schemas.datacontract.org/2004/07/"/>
         <property name="Namespace" value="i=http://www.w3.org/2001/XMLSchema-instance"/>
@@ -30,10 +30,10 @@
                locator-type="Label"/>
     </parser>
 
-    <stream name="WsSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
+    <stream name="WSSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
         <property name="HaltIfNoParser" value="false"/>
 
-        <parser-ref name="WsResponseParser"/>
+        <parser-ref name="WSResponseParser"/>
 
         <scenario name="Sample WS stream scenario">
             <step name="Step 1"

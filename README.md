@@ -3233,7 +3233,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-    <parser name="WsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+    <parser name="WSResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="s=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="a=http://schemas.datacontract.org/2004/07/"/>
         <property name="Namespace" value="i=http://www.w3.org/2001/XMLSchema-instance"/>
@@ -3260,7 +3260,7 @@ Sample stream configuration:
                locator-type="Label"/>
     </parser>
 
-    <stream name="WsSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
+    <stream name="WSSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.WsStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample WS stream scenario">
@@ -3279,12 +3279,12 @@ Sample stream configuration:
             </step>
         </scenario>
 
-        <parser-ref name="WsResponseParser"/>
+        <parser-ref name="WSResponseParser"/>
     </stream>
 </tnt-data-source>
 ```
 
-Stream configuration states that `WsStream` referencing `WsResponseParser` shall be used. Stream takes response received
+Stream configuration states that `WsStream` referencing `WSResponseParser` shall be used. Stream takes response received
 SOAP compliant XML string and passes it to parser.
 
 `HaltIfNoParser` property indicates that stream should skip unparseable entries.
@@ -3293,7 +3293,7 @@ Streaming scenario consists of one step defining service request URL, scheduler 
 interval`. `request` definition contains SOAP request header `SOAPAction` and SOAP request body data
 `tem:GetCurrentWeatherInformationByStationID`.
 
-`WsResponseParser` maps XML data values to activity event fields `GeoLocation`, `Temperature`, `Humidity` and
+`WSResponseParser` maps XML data values to activity event fields `GeoLocation`, `Temperature`, `Humidity` and
 `Wind Speed`. Parser property `Namespace` adds additional namespaces required to parse received JAX-WS XML response
 using XPath.
 
@@ -4694,9 +4694,9 @@ wildcards.
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
 
-#### Ws Streams parameters
+#### WS (web service) Streams parameters
 
-All Ws streams has special configuration section - `scnario`. Streaming scenarios allows define `step`'s. Step defines
+All WS streams have a special configuration section, called a `scenario`. Streaming scenarios allow for defining steps. A `step` defines 
 request/invocation/execution parameters and scheduler. Steps are invoked/executed independently of each other.
 
  * `scenario` tag has required attribute - `name` (any string).
@@ -5528,7 +5528,7 @@ Modules list:
    * `Kafka` (O)
    * `Mqtt` (O)
    * `WMQ` (O)
-   * `Ws` (O)
+   * `WS` (O)
    * `MsOffice` (O)
    * `Samples` (O)
    * `Distribution` (OU)
