@@ -53,6 +53,10 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * <li>Explanation - resolved log entry IBM MQ error explanation message text</li>
  * <li>Action - resolved log entry IBM MQ error fix action message text</li>
  * <li>Where - resolved log entry error descriptor location string containing source code file name and line number</li>
+ * <li>pid - derived entry for user convenience made by taking part before {@code '.'} from resolved {@code 'Process'}
+ * entry value</li>
+ * <li>tid - derived entry for user convenience made by taking part after {@code '.'} from resolved {@code 'Process'}
+ * entry value</li>
  * </ul>
  * <p>
  * This activity parser supports configuration properties from {@link AbstractActivityMapParser} (and higher hierarchy
@@ -284,6 +288,11 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			map.put("Explanation", StringUtils.trim(exp)); // NON-NLS
 			map.put("Action", StringUtils.trim(action)); // NON-NLS
 			map.put("Where", StringUtils.trim(where)); // NON-NLS
+
+			// splitting 'Process' to pid and tid for user convenience
+			String[] pt = process.split("\\."); // NON-NLS
+			map.put("pid", pt.length > 0 ? pt[0] : null); // NON-NLS
+			map.put("tid", pt.length > 1 ? pt[1] : null); // NON-NLS
 
 			return map;
 		}

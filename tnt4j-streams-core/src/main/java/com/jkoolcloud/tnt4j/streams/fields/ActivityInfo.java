@@ -1261,11 +1261,18 @@ public class ActivityInfo {
 	// }
 
 	private static Number getNumberValue(Object value) {
-		return value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
+		if (value instanceof Number) {
+			return (Number) value;
+		}
+
+		String valStr = Utils.toString(value);
+		valStr = StringUtils.trim(valStr);
+
+		return StringUtils.isEmpty(valStr) ? null : NumberUtils.createNumber(valStr);
 	}
 
 	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {
-		Number num = value instanceof Number ? (Number) value : NumberUtils.createNumber(Utils.toString(value));
+		Number num = getNumberValue(value);
 
 		return Utils.castNumber(num, clazz);
 	}

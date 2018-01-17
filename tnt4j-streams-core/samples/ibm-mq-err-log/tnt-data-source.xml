@@ -13,7 +13,9 @@
             <field-locator locator="Date" locator-type="Label"/>
             <field-locator locator="Time" locator-type="Label"/>
         </field>
-        <field name="ProcessId" locator="Process" locator-type="Label"/>
+        <field name="Process" locator="Process" locator-type="Label"/>
+        <field name="ProcessId" locator="pid" locator-type="Label"/>
+        <field name="ThreadId" locator="tid" locator-type="Label"/>
         <field name="UserName" locator="User" locator-type="Label"/>
         <field name="ApplName" locator="Program" locator-type="Label"/>
         <field name="ServerName" locator="Host" locator-type="Label"/>
