@@ -5,7 +5,7 @@ Why TNT4J-Streams
 ======================================
 
 * TNT4J-Streams can be run out of the box for a large set of data streaming without writing no additional code.
-All You need is to define Your data format mapping to TNT4J event mapping in TNT4J-Streams configuration.
+All you need is to define your data format mapping to TNT4J event mapping in TNT4J-Streams configuration.
 
 * Supports the following data sources:
     * File
@@ -57,7 +57,7 @@ Importing TNT4J-Streams project into IDE
 ## Eclipse
 * Select File->Import...->Maven->Existing Maven Projects
 * Click 'Next'
-* In 'Root directory' field select path of directory where You have downloaded (checked out from git)
+* In 'Root directory' field select path of directory where you have downloaded (checked out from git)
 TNT4J-Streams project
 * Click 'OK'
 * Dialog fills in with project modules details
@@ -69,15 +69,15 @@ Running TNT4J-Streams
 ## Running TNT4J-Streams
 * As standalone application
     * write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
-    * configure Your loggers
+    * configure your loggers
     * use `bin/tnt4j-streams.bat` or `bin/tnt4j-streams.sh` to run standalone application
-* As API integrated into Your product
+* As API integrated into your product
     * Write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
-    * use `StreamsAgent.runFromAPI(configFileName)` in Your code
+    * use `StreamsAgent.runFromAPI(configFileName)` in your code
 
 ## TNT4J Events field mappings
 
-Mapping of streamed data to activity event fields are performed by parser. To map field value You have to define
+Mapping of streamed data to activity event fields are performed by parser. To map field value you have to define
 `field` tag in parser configuration:
 * `name` attribute defines activity event field name
 * `locator` attribute defines location of data value from streamed data
@@ -308,10 +308,10 @@ is same as:
 
 ### Stacked parsers
 
-In stream parsers configuration You are allowed to use stacked parsers technique: it is when some field data parsed by
+In stream parsers configuration you are allowed to use stacked parsers technique: it is when some field data parsed by
 one parser can be forwarded to another parser to make more detailed parsing: envelope-message approach.
 
-To define stacked parser(s) You have to define `parser-ref` tag(s) under parser `field` or `embedded-activity` definition.
+To define stacked parser(s) you have to define `parser-ref` tag(s) under parser `field` or `embedded-activity` definition.
 
 **NOTE:** `embeded-activity` is tag `field` alias, used to define set of locator resolved data transparent to parent activity, but useful 
 to make separate set of related child activities.
@@ -525,7 +525,7 @@ child activity entities with data from parent activity entity.
 
 ### Field value transformations
 
-In streams configuration You can define field or locator resolved values transformations. In general transformations performs resolved 
+In streams configuration you can define field or locator resolved values transformations. In general transformations performs resolved 
 activity value post-processing before sending it to [JKool Cloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
 activity file path.
 
@@ -560,7 +560,7 @@ Retrieves desired object name from provided fully qualified object name. Functio
     * search symbols. (Optional)
     * replacement symbols. (Optional)
 
-You may also define your own customized XPath functions. To do this Your API has to:
+You may also define your own customized XPath functions. To do this your API has to:
 * implement interface `javax.xml.xpath.XPathFunction`
 * register function by invoking `com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils.registerCustomFunction(functionName, function)`.
 
@@ -576,7 +576,7 @@ public class YourTransform implements XPathFunction {
 StreamsXMLUtils.registerCustomFunction("yourTransformation", new YourTransform());
 ...
 ```
-then You can use it from stream configuration:
+then you can use it from stream configuration:
 ```xml
 <field name="InvoiceFileFromFunction" locator="7">
     <field-transform name="fileNameF" lang="xpath">
@@ -752,7 +752,7 @@ This sample retrieves file name from resolved file path (contained in `$fieldVal
 
 * Transformation bean
 
-To make custom Java Bean based transformations Your API should implement interface `com.jkoolcloud.tnt4j.streams.transform.ValueTransformation<V, T>`.
+To make custom Java Bean based transformations your API should implement interface `com.jkoolcloud.tnt4j.streams.transform.ValueTransformation<V, T>`.
 
 ```xml
 <tnt-data-source
@@ -960,7 +960,7 @@ particular cached value.
 When release assemblies are built, samples are located in `samples` directory, e.g., `../build/tnt4j-streams/tnt4j-streams-1.0.0/samples`.
 To run particular sample:
 * go to sample directory
-* run `run.bat` or `run.sh` depending on Your OS
+* run `run.bat` or `run.sh` depending on your OS
 
 For more detailed explanation of streams and parsers configuration and usage see chapter ['Configuring TNT4J-Streams'](#configuring-tnt4j-streams)
 and JavaDocs.
@@ -1904,7 +1904,7 @@ should skip unparseable entries. Stream puts received request payload data as `b
 `AccessLogParserCommon` is same as in ['Apache Access log single file'](#apache-access-log-single-file) sample, so refer it for more details.
 
 **NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
-complies Your data format.
+complies your data format.
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -1969,7 +1969,7 @@ how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-mapmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -2031,7 +2031,7 @@ Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can b
 ['Apache Access log single file'](#apache-access-log-single-file) and parser configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 **NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
-complies Your data format.
+complies your data format.
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -2041,7 +2041,7 @@ This sample shows how to stream activity events received over JMS transport as m
 
 Sample files can be found in `samples/jms-textmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -2100,7 +2100,7 @@ also shows how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-objectmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if You want to use ActiveMQ as JMS service
+**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
 
 Sample stream configuration:
 ```xml
@@ -2234,7 +2234,7 @@ Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can b
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 **NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
-complies Your data format.
+complies your data format.
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -2401,7 +2401,7 @@ Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can b
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
 **NOTE:** to parse some other data instead of Apache Access Log, replace `AccessLogParserCommon` with parser which
-complies Your data format.
+complies your data format.
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
@@ -4142,9 +4142,9 @@ Configuration data format is same for all sources now.
 
 ## TNT4J configuration
 
-Because TNT4J-Streams is based on TNT4J first You need to configure TNT4J (if have not done this yet).
-Default location of `tnt4j.properties` file is in project `config` directory. At least You must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [JKool Cloud](https://www.jkoolcloud.com/) token assigned for You.
+Because TNT4J-Streams is based on TNT4J first you need to configure TNT4J (if have not done this yet).
+Default location of `tnt4j.properties` file is in project `config` directory. At least you must make one change:
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [JKool Cloud](https://www.jkoolcloud.com/) token assigned for you.
 
 To define `tnt4j.properties` file location use system property `-Dtnt4j.config`, e.g., `-Dtnt4j.config="./config/tnt4j.properties"`.
 
@@ -4291,7 +4291,7 @@ sample stream configuration:
 </tnt-data-source>
 ```
 
-As You can see from sample configuration, there are two major configuration elements defined `parser` and `stream`.
+As you can see from sample configuration, there are two major configuration elements defined `parser` and `stream`.
 Because streams configuration is read using SAX parser referenced entities should be initialized before it is used.
 Note that `stream` uses `parser` reference:
 ```xml
@@ -5556,7 +5556,7 @@ how to do this.
 #### `WMQ` module
 
 **NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
-default. If You want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
+default. If you want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
 libraries will be installed to local maven repository.
 
 What to download manually or copy from your existing IBM MQ installation:
@@ -5590,7 +5590,7 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq
 
 By default maven will build all modules defined in `tnt4j-streams/pom.xml` file.
 
-If You do not want to build some of optional modules, comment those out like `WMQ` module is. Or You can define maven to build your 
+If you do not want to build some of optional modules, comment those out like `WMQ` module is. Or you can define maven to build your 
 preferred set of modules using `-pl, --projects` argument (comma separated modules list) together with `-am, --also-make` argument, e.g.:
 
 ```cmd

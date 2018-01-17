@@ -2,11 +2,11 @@
 
 ## Custom 
 
-This sample shows how to integrate TNT4J-Streams into Your custom API.
+This sample shows how to integrate TNT4J-Streams into your custom API.
 
 Sample files can be found in `com.jkoolcloud.tnt4j.streams.sample` package.
 
-`SampleIntegration.java` shows how to make TNT4J-Streams integration into Your API. Also integration could be made using
+`SampleIntegration.java` shows how to make TNT4J-Streams integration into your API. Also integration could be made using
 `StreamsAgent.runFromAPI(cfgFileName)` call.
 
 `SampleParser.java` shows how to implement custom parser.

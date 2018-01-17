@@ -53,7 +53,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * </ul>
  * <p>
  * NOTE: those file defined Kafka consumer properties gets merged with ones defined in stream configuration - user
- * defined properties. So You can take some basic consumer configuration form file and customize it using stream
+ * defined properties. So you can take some basic consumer configuration form file and customize it using stream
  * configuration defined properties.
  *
  * @version $Revision: 1 $
