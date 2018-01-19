@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.text.ParseException;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class NumericFormatterTest {
 
 	@Test
 	public void testParseStaticHex() throws ParseException {
-		assertEquals(342L, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
+		assertEquals(342, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
 		assertEquals(171, NumericFormatter.parse(null, 0XAB, null));
 		assertNull(NumericFormatter.parse(null, null, null));
 	}
@@ -48,7 +49,7 @@ public class NumericFormatterTest {
 	@Test
 	public void testParseObjectHex() throws ParseException {
 		NumericFormatter formatter = new NumericFormatter();
-		assertEquals(342L, formatter.parse("0xAB", 2)); // NON-NLS
+		assertEquals(342, formatter.parse("0xAB", 2)); // NON-NLS
 		assertEquals(171, formatter.parse(0XAB));
 		assertNull(formatter.parse(null, null));
 	}
@@ -73,4 +74,26 @@ public class NumericFormatterTest {
 		assertEquals("#", formatter.getPattern());
 	}
 
+	@Test
+	public void testGeneric() throws Exception {
+		NumericFormatter formatter = new NumericFormatter();
+		formatter.setPattern(null, Locale.US.toString());
+		assertEquals(123456.789, formatter.parse("123,456.789")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		formatter.setPattern(null, "lt-LT"); // NON-NLS
+		assertEquals(-5896456.7898658, formatter.parse("-5896456,7898658")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		assertEquals(25, formatter.parse("25")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		assertEquals(171, formatter.parse("0xAB")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		assertEquals(123.456789, formatter.parse("123.456789")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		assertEquals(1.0f, formatter.parse("1.0")); // NON-NLS
+	}
 }

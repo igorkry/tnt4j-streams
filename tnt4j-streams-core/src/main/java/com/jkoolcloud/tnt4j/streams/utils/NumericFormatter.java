@@ -18,9 +18,11 @@ package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.ParseException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * Provides methods for parsing objects into numeric values and for formatting numeric values as strings.
@@ -32,8 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 public class NumericFormatter {
 
 	private int radix = 10;
-	private String pattern = null;
-	private DecimalFormat formatter = null;
+	private FormatterContext formatter = null;
 
 	/**
 	 * Creates a number formatter using the default numeric representation.
@@ -56,9 +57,9 @@ public class NumericFormatter {
 	 * Creates a number formatter/parser for numbers using the specified format pattern.
 	 *
 	 * @param pattern
-	 *            format pattern
+	 *            format pattern - can be set to {@code null} to use default representation
 	 * @param locale
-	 *            locale for numeric formatter to use.
+	 *            locale for decimal format to use, or {@code null} if default locale shall be used
 	 */
 	public NumericFormatter(String pattern, String locale) {
 		setPattern(pattern, locale);
@@ -89,21 +90,28 @@ public class NumericFormatter {
 	 * @return format pattern, or {@code null} if none specified
 	 */
 	public String getPattern() {
-		return pattern;
+		return formatter == null ? null : formatter.pattern;
+	}
+
+	/**
+	 * Gets the locale definition string for this formatter.
+	 *
+	 * @return formatter used locale, or {@code null} if none specified
+	 */
+	public String getLocale() {
+		return formatter == null ? null : formatter.locale;
 	}
 
 	/**
 	 * Sets the format pattern string for this formatter.
 	 *
 	 * @param pattern
-	 *            format pattern - can be set to {@code null} to use default representation.
+	 *            format pattern - can be set to {@code null} to use default representation
 	 * @param locale
-	 *            locale for decimal format to use.
+	 *            locale for decimal format to use, or {@code null} if default locale shall be used
 	 */
 	public void setPattern(String pattern, String locale) {
-		this.pattern = pattern;
-		formatter = StringUtils.isEmpty(pattern) ? null : StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
-				: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
+		formatter = new FormatterContext(pattern, locale);
 	}
 
 	/**
@@ -116,6 +124,8 @@ public class NumericFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             pattern, etc.)
+	 *
+	 * @see #parse(com.jkoolcloud.tnt4j.streams.utils.NumericFormatter.FormatterContext, int, Object, Number)
 	 */
 	public Number parse(Object value) throws ParseException {
 		return parse(formatter, radix, value, 1.0);
@@ -133,6 +143,8 @@ public class NumericFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             pattern, etc.)
+	 *
+	 * @see #parse(com.jkoolcloud.tnt4j.streams.utils.NumericFormatter.FormatterContext, int, Object, Number)
 	 */
 	public Number parse(Object value, Number scale) throws ParseException {
 		return parse(formatter, radix, value, scale);
@@ -152,10 +164,34 @@ public class NumericFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             pattern, etc.)
-	 * @see DecimalFormat#DecimalFormat(String)
+	 *
+	 * @see #parse(String, Object, Number, String)
 	 */
 	public static Number parse(String pattern, Object value, Number scale) throws ParseException {
-		return parse(Utils.isEmpty(pattern) ? null : new DecimalFormat(pattern), 10, value, scale);
+		return parse(pattern, value, scale, null);
+	}
+
+	/**
+	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
+	 * defined.
+	 *
+	 * @param pattern
+	 *            number format pattern
+	 * @param value
+	 *            value to convert
+	 * @param scale
+	 *            value to multiply the formatted value by
+	 * @param locale
+	 *            locale for decimal format to use, or {@code null} if default locale shall be used
+	 * @return formatted value of field in required internal data type
+	 * @throws ParseException
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             pattern, etc.)
+	 *
+	 * @see #parse(com.jkoolcloud.tnt4j.streams.utils.NumericFormatter.FormatterContext, int, Object, Number)
+	 */
+	public static Number parse(String pattern, Object value, Number scale, String locale) throws ParseException {
+		return parse(new FormatterContext(pattern, locale), 10, value, scale);
 	}
 
 	/**
@@ -177,34 +213,147 @@ public class NumericFormatter {
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             pattern, etc.)
 	 */
-	private static Number parse(DecimalFormat formatter, int radix, Object value, Number scale) throws ParseException {
+	private static Number parse(FormatterContext formatter, int radix, Object value, Number scale)
+			throws ParseException {
 		if (value == null) {
 			return null;
 		}
-		if (scale == null) {
-			scale = 1.0;
-		}
-		try {
-			Number numValue = null;
-			if (formatter == null && value instanceof String) {
-				String strValue = (String) value;
-				if (strValue.startsWith("0x") || strValue.startsWith("0X")) { // NON-NLS
-					numValue = Long.parseLong(strValue.substring(2), 16);
-				}
+		Number numValue = null;
+		if (value instanceof Number) {
+			numValue = (Number) value;
+		} else {
+			String strValue = Utils.toString(value).trim();
+			if (StringUtils.isEmpty(strValue)) {
+				return null;
 			}
-			if (numValue == null) {
-				if (formatter != null) {
-					numValue = formatter.parse(value.toString());
-				} else if (radix != 10) {
-					numValue = Long.parseLong(value.toString(), radix);
+
+			Exception nfe;
+			if (formatter != null && formatter.format != null) {
+				try {
+					numValue = formatter.format.parse(strValue);
+					nfe = null;
+				} catch (ParseException exc) {
+					nfe = exc;
+				}
+			} else {
+				if (radix != 10) {
+					try {
+						numValue = Long.parseLong(value.toString(), radix);
+						nfe = null;
+					} catch (NumberFormatException exc) {
+						nfe = exc;
+					}
 				} else {
-					numValue = value instanceof Number ? (Number) value : Double.valueOf(value.toString());
+					try {
+						numValue = NumberUtils.createNumber(strValue);
+						nfe = null;
+					} catch (NumberFormatException exc) {
+						nfe = exc;
+					}
+
+					if (numValue == null && formatter != null) {
+						try {
+							numValue = formatter.getGPFormat().parse(strValue);
+							nfe = null;
+						} catch (ParseException exc) {
+							nfe = exc;
+						}
+					}
 				}
 			}
-			Number scaledValue = numValue.doubleValue() * scale.doubleValue();
-			return Utils.castNumber(scaledValue, numValue.getClass());
-		} catch (NumberFormatException nfe) {
-			throw new ParseException(nfe.getLocalizedMessage(), 0);
+
+			if (nfe != null) {
+				ParseException pe = new ParseException(nfe.getLocalizedMessage(), 0);
+				pe.initCause(nfe);
+
+				throw pe;
+			}
+		}
+
+		return scaleNumber(numValue, scale);
+	}
+
+	/**
+	 * Scales number value <tt>numValue</tt> by <tt>scale</tt> factor.
+	 *
+	 * @param numValue
+	 *            number value to scale
+	 * @param scale
+	 *            scale factor
+	 * @return scaled number value
+	 */
+	private static Number scaleNumber(Number numValue, Number scale) {
+		if (numValue == null || scale == null) {
+			return numValue;
+		}
+
+		Number scaledValue = numValue.doubleValue() * scale.doubleValue();
+		return Utils.castNumber(scaledValue, numValue.getClass());
+	}
+
+	/**
+	 * Number formatting context values.
+	 */
+	private static class FormatterContext {
+		private static final String GENERIC_NUMBER_PATTERN = "###,###.###"; // NON-NLS
+
+		private String pattern;
+		private String locale;
+		private NumberFormat format;
+
+		/**
+		 * Creates a number formatter context using defined <tt>pattern</tt></> and default locale.
+		 *
+		 * @param pattern
+		 *            format pattern - can be set to {@code null} to use default representation.
+		 */
+		private FormatterContext(String pattern) {
+			this(pattern, null);
+		}
+
+		/**
+		 * Creates a number formatter context using defined <tt>pattern</tt></> and <tt>locale</tt>.
+		 *
+		 * @param pattern
+		 *            format pattern - can be set to {@code null} to use default representation.
+		 * @param locale
+		 *            locale for decimal format to use, or {@code null} if default locale shall be used
+		 */
+		private FormatterContext(String pattern, String locale) {
+			this.pattern = pattern;
+			this.locale = locale;
+
+			format = StringUtils.isEmpty(pattern) ? null : StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
+					: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
+		}
+
+		/**
+		 * Builds number format instance to parse number from string using general-purpose number format for default or
+		 * specified {@code locale}.
+		 *
+		 * @return general-purpose number format
+		 *
+		 * @see #getGPFormat(String)
+		 */
+		private NumberFormat getGPFormat() {
+			return getGPFormat(locale);
+		}
+
+		/**
+		 * Builds number format instance to parse number from string using general-purpose number format for default or
+		 * specified <tt>locale</tt>.
+		 *
+		 * @param locale
+		 *            locale for decimal format to use, or {@code null} if default locale shall be used
+		 *
+		 * @return general-purpose number format
+		 */
+		private static NumberFormat getGPFormat(String locale) {
+			// return StringUtils.isEmpty(locale) ? new DecimalFormat(GENERIC_NUMBER_PATTERN)
+			// : new DecimalFormat(GENERIC_NUMBER_PATTERN, new DecimalFormatSymbols(Utils.getLocale(locale)));
+
+			return StringUtils.isEmpty(locale) ? NumberFormat.getNumberInstance()
+					: NumberFormat.getNumberInstance(Utils.getLocale(locale));
 		}
 	}
 }

@@ -43,7 +43,7 @@ public class ActivityFieldLocatorTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testActivityFieldLocatorStringStringThrowOnNegative() {
-		locator = new ActivityFieldLocator("TestType", "-1"); // NON-NLS
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "-1"); // NON-NLS
 	} // NON-NLS
 
 	@Test
@@ -89,10 +89,10 @@ public class ActivityFieldLocatorTest {
 	public void testFormatNumericValue() throws ParseException {
 		locator = new ActivityFieldLocator(1);
 		try {
-			locator.setFormat(null, Locale.FRANCE.toString());
+			locator.setFormat(null, Locale.ITALY.toString());
 			assertNull(locator.formatNumericValue(""));
-			assertEquals(1.0, locator.formatNumericValue("1.0")); // NON-NLS
-			assertEquals(1000.0, locator.formatNumericValue("1.000,0")); // NON-NLS
+			assertEquals(1.0f, locator.formatNumericValue("1.0")); // NON-NLS
+			assertEquals(1000.01, locator.formatNumericValue("1.000,01")); // NON-NLS
 		} catch (Exception e) {
 		}
 	}
@@ -131,7 +131,7 @@ public class ActivityFieldLocatorTest {
 	}
 
 	@Test
-	public void testformatValue() throws ParseException {
+	public void testFormatValue() throws ParseException {
 		locator = new ActivityFieldLocator("TEST"); // NON-NLS
 		assertEquals("TEST", locator.formatValue("DENY")); // NON-NLS
 
@@ -151,6 +151,20 @@ public class ActivityFieldLocatorTest {
 		locator.setDataType(ActivityFieldDataType.Binary);
 		locator.setFormat(ActivityFieldFormatType.base64Binary.name(), null);
 		// assertTrue(locator.formatValue("1") instanceof String); //TODO
+
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "NONE"); // NON-NLS
+		locator.setDataType(ActivityFieldDataType.Generic);
+		locator.setFormat(null, Locale.US.toString());
+		assertEquals(123456.789, locator.formatValue("123,456.789")); // NON-NLS
+
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "NONE"); // NON-NLS
+		locator.setDataType(ActivityFieldDataType.Generic);
+		locator.setFormat(null, "lt-LT");
+		assertEquals(-5896456.7898658, locator.formatValue("-5896456,7898658")); // NON-NLS
+
+		locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "NONE"); // NON-NLS
+		locator.setDataType(ActivityFieldDataType.Generic);
+		assertEquals(25, locator.formatValue("25")); // NON-NLS
 	}
 
 	@Test
