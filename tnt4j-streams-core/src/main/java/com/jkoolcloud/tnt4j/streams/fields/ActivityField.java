@@ -86,8 +86,7 @@ public class ActivityField extends AbstractFieldEntity {
 	 */
 	public ActivityField(String fieldTypeName, ActivityFieldDataType dataType) {
 		this(fieldTypeName);
-		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0");
-		loc.setDataType(dataType);
+		ActivityFieldLocator loc = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0", dataType);
 		locators = new ArrayList<>(1);
 		locators.add(loc);
 	}

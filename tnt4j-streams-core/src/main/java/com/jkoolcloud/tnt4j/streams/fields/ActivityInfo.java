@@ -444,8 +444,11 @@ public class ActivityInfo {
 			case Generic:
 				return getPredictedValue(fieldValue, field);
 			case Binary:
-			default:
+			case String:
 				return getStringValue(fieldValue, field);
+			case AsInput:
+			default:
+				return fieldValue;
 			}
 		}
 

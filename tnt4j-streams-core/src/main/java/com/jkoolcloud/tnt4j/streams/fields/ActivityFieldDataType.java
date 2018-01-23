@@ -52,5 +52,10 @@ public enum ActivityFieldDataType {
 	 * Raw data value is interpreted as a generic value and streams should try to predict real value out of it: boolean,
 	 * number, timestamp, date, string.
 	 */
-	Generic
+	Generic,
+
+	/**
+	 * Raw data value is interpreted as it is received from input without changes.
+	 */
+	AsInput
 }

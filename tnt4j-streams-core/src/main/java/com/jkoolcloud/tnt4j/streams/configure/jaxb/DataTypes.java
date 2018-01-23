@@ -99,7 +99,16 @@ public enum DataTypes {
 	 *
 	 */
 	@XmlEnumValue("Generic")
-	GENERIC("Generic");
+	GENERIC("Generic"),
+
+	/**
+	 *
+	 * Field value has same type as it is received from input without changes.
+	 *
+	 *
+	 */
+	@XmlEnumValue("AsInput")
+	ASINPUT("AsInput");
 
 	private final String value;
 

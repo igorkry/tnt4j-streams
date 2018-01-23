@@ -47,6 +47,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;attGroup ref="{}EntityAttributeGroup"/>
  *       &lt;attribute name="tags" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="manualFieldsOrder" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
+ *       &lt;attribute name="default-data-type" type="{}DataTypes" default="String" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -77,6 +78,9 @@ public class Parser {
 	@XmlAttribute(name = "manualFieldsOrder")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
 	protected Boolean manualFieldsOrder;
+	@XmlAttribute(name = "default-data-type")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-01-22T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected DataTypes defaultDataType;
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
@@ -316,6 +320,29 @@ public class Parser {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setManualFieldsOrder(Boolean value) {
 		this.manualFieldsOrder = value;
+	}
+
+	/**
+	 * Gets the value of the defaultDatatype property.
+	 *
+	 * @return possible object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-01-22T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public DataTypes getDefaultDataType() {
+		return defaultDataType;
+	}
+
+	/**
+	 * Sets the value of the defaultDatatype property.
+	 *
+	 * @param value
+	 *            allowed object is {@link DataTypes }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-01-22T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setDefaultDataType(DataTypes value) {
+		this.defaultDataType = value;
 	}
 
 	/**

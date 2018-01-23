@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
@@ -27,7 +27,7 @@
         <field name="MeanJitter" locator="$.Metrics.histograms.messageProducerJitter.mean" locator-type="Label"/>
     </parser>
 
-    <parser name="KafkaConsumerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="KafkaConsumerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="Kafka consumer metrics"/>
         <field name="EventType" value="EVENT"/>
         <field name="io-wait-time-ns-avg" locator="$.['kafka.consumer:io-wait-time-ns-avg']" locator-type="Label" required="true"/>
@@ -83,7 +83,7 @@
         -->
     </parser>
 
-    <parser name="KafkaProducerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="KafkaProducerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="Kafka producer metrics"/>
         <field name="EventType" value="EVENT"/>
         <field name="response-rate" locator="$.['kafka.producer:response-rate']" locator-type="Label" required="true"/>
@@ -130,7 +130,7 @@
         <field name="io-wait-time-ns-avg" locator="$.['kafka.producer:io-wait-time-ns-avg']" locator-type="Label"/>
     </parser>
 
-    <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="JVM metrics"/>
         <field name="EventType" value="EVENT"/>
         <field name="CpuLoad" locator="$.['java.lang:SystemCpuLoad']" locator-type="Label"/>
@@ -142,7 +142,7 @@
         <field name="TotalPhysicalMemorySize" locator="$.['java.lang:TotalPhysicalMemorySize']" locator-type="Label"/>
     </parser>
 
-    <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+    <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
@@ -165,7 +165,7 @@
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser">
-        <field name="TNTEventData" locator="value" locator-type="Label">
+        <field name="TNTEventData" locator="value" locator-type="Label" transparent="true">
             <parser-ref name="TNTJSONParser" aggregation="Merge"/>
         </field>
     </parser>

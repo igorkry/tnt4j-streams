@@ -74,14 +74,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *             if locator type is a numeric value and is not a positive number
 	 */
 	public ActivityFieldLocator(String type, String locator) {
-		this.type = type;
-		this.locator = locator;
-		try {
-			builtInType = ActivityFieldLocatorType.valueOf(this.type);
-		} catch (Exception e) {
-		}
-
-		validateLocator();
+		this(type, locator, null);
 	}
 
 	/**
@@ -95,9 +88,51 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *             if locator type is a numeric value and is not a positive number
 	 */
 	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator) {
+		this(type, locator, null);
+	}
+
+	/**
+	 * Constructs a new activity field locator for either a built-in type or a custom type.
+	 *
+	 * @param type
+	 *            type of locator - can be one of predefined values from {@link ActivityFieldLocatorType} or a custom
+	 *            type
+	 * @param locator
+	 *            key to use to locate raw data value - interpretation of this value depends on locator type
+	 * @param dataType
+	 *            the data type for raw data field
+	 * @throws IllegalArgumentException
+	 *             if locator type is a numeric value and is not a positive number
+	 */
+	public ActivityFieldLocator(String type, String locator, ActivityFieldDataType dataType) {
+		this.type = type;
+		this.locator = locator;
+		try {
+			builtInType = ActivityFieldLocatorType.valueOf(this.type);
+		} catch (Exception e) {
+		}
+		setDataType(dataType);
+
+		validateLocator();
+	}
+
+	/**
+	 * Constructs a new activity field locator for a built-in type.
+	 *
+	 * @param type
+	 *            type of locator
+	 * @param locator
+	 *            key to use to locate raw data value - interpretation of this value depends on locator type
+	 * @param dataType
+	 *            the data type for raw data field
+	 * @throws IllegalArgumentException
+	 *             if locator type is a numeric value and is not a positive number
+	 */
+	public ActivityFieldLocator(ActivityFieldLocatorType type, String locator, ActivityFieldDataType dataType) {
 		this.type = type.name();
 		this.locator = locator;
 		this.builtInType = type;
+		setDataType(dataType);
 
 		validateLocator();
 	}

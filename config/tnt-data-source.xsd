@@ -67,6 +67,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+
+            <xs:enumeration value="AsInput">
+                <xs:annotation>
+                    <xs:documentation>
+                        Field value has same type as it is received from input without changes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
@@ -1972,6 +1980,14 @@
                 <xs:documentation>
                     Specifies whether configuration defined fields order shall be preserved in streaming process. By default fields are
                     ordered by value resolution type: RAW activity data values, activity entity fields values, cache entries values.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute name="default-data-type" use="optional" type="DataTypes" default="String">
+            <xs:annotation>
+                <xs:documentation>
+                    Specifies default data type bound to fields of this parser.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

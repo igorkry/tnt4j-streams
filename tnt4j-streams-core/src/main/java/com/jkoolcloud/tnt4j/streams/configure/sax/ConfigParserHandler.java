@@ -311,6 +311,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private static final String TRANSIENT_ATTR = "transient"; // NON-NLS
 	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String DEFAULT_TYPE_ATTR = "default-data-type"; // NON-NLS
+	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
 	private static final String CDATA = "<![CDATA[]]>"; // NON-NLS
@@ -581,6 +585,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String className = null;
 		String tags = null;
 		boolean autoSort = true;
+		ActivityFieldDataType defaultDataType = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -592,6 +597,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				tags = attValue;
 			} else if (AUTO_SORT_ATTR.equals(attName)) {
 				autoSort = !Boolean.parseBoolean(attValue);
+			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
+				defaultDataType = ActivityFieldDataType.valueOf(attValue);
 			}
 		}
 
@@ -617,6 +624,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			currParser.setName(name);
 			currParser.setTags(tags);
 			((GenericActivityParser<?>) currParser).setAutoSort(autoSort);
+			currParser.setDefaultDataType(defaultDataType);
 			streamsConfigData.addParser(currParser);
 		}
 	}
@@ -714,6 +722,10 @@ public class ConfigParserHandler extends DefaultHandler {
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 							"ConfigParserHandler.cannot.contain", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR),
 					currParseLocation);
+		}
+
+		if (dataType == null) {
+			dataType = currParser.getDefaultDataType();
 		}
 
 		ActivityFieldLocator afl;
@@ -971,6 +983,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (ID_ATTR.equals(attName)) {
 				currLocatorData.id = attValue;
 			}
+		}
+
+		if (currLocatorData.dataType == null) {
+			currLocatorData.dataType = currParser.getDefaultDataType();
 		}
 
 		// make sure any fields that are required based on other fields are specified

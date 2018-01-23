@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
@@ -46,6 +47,8 @@ public abstract class ActivityParser {
 	private String name;
 
 	private String[] tags;
+
+	private ActivityFieldDataType defaultDataType;
 
 	/**
 	 * Constructs a new ActivityParser.
@@ -360,4 +363,23 @@ public abstract class ActivityParser {
 	 * @return type of RAW activity data entries
 	 */
 	protected abstract Object getActivityDataType();
+
+	/**
+	 * Returns default data type to be used by parser bound fields.
+	 *
+	 * @return default data type to be used by parser bound fields
+	 */
+	public ActivityFieldDataType getDefaultDataType() {
+		return defaultDataType;
+	}
+
+	/**
+	 * Sets default data type to be used by parser bound fields.
+	 * 
+	 * @param defaultDataType
+	 *            default data type to be used by parser bound fields
+	 */
+	public void setDefaultDataType(ActivityFieldDataType defaultDataType) {
+		this.defaultDataType = defaultDataType;
+	}
 }
