@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -176,11 +177,11 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 					}
 					socketPort = Integer.valueOf(value);
 				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-					restartOnInputClose = Boolean.parseBoolean(value);
+					restartOnInputClose = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 					bufferSize = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-					dropDataWhenBufferFull = Boolean.parseBoolean(value);
+					dropDataWhenBufferFull = BooleanUtils.toBoolean(value);
 				}
 			}
 		}

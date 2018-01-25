@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFunction;
@@ -30,6 +35,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetFileName;
 import com.jkoolcloud.tnt4j.streams.transform.FuncGetObjectName;
@@ -107,6 +114,28 @@ public final class StreamsXMLUtils {
 
 			return null;
 		}
+	}
+
+	/**
+	 * Parses <tt>is</tt> defined XML contents using <tt>dh</tt> SAX parser handler.
+	 *
+	 * 
+	 * @param is
+	 *            input stream to read XML contents
+	 * @param dh
+	 *            SAX parser handler instance to use for parsing
+	 * @throws ParserConfigurationException
+	 *             if a parser cannot be created which satisfies the requested configuration
+	 * @throws SAXException
+	 *             if any SAX errors occur during parser initialization or XML parsing
+	 * @throws IOException
+	 *             if any I/O errors occur
+	 */
+	public static void parse(InputStream is, DefaultHandler dh)
+			throws ParserConfigurationException, SAXException, IOException {
+		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+		SAXParser parser = parserFactory.newSAXParser();
+		parser.parse(is, dh);
 	}
 
 	/**

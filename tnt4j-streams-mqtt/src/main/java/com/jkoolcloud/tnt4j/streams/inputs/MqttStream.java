@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -148,7 +149,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 				} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 					topic = value;
 				} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-					useSSL = Boolean.parseBoolean(value);
+					useSSL = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 					keystore = value;
 				} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {

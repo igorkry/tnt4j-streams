@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -100,7 +101,7 @@ public final class StreamsCache {
 				} else if (CacheProperties.PROP_EXPIRE_DURATION.equalsIgnoreCase(name)) {
 					expireDuration = Long.parseLong(value);
 				} else if (CacheProperties.PROP_PERSISTED.equalsIgnoreCase(name)) {
-					persistenceOn = Boolean.parseBoolean(value);
+					persistenceOn = BooleanUtils.toBoolean(value);
 				}
 			}
 		}

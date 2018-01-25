@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -101,7 +102,7 @@ public class JavaInputStream extends TNTParseableInputStream<String> {
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_INPUT_CLOSEABLE.equalsIgnoreCase(name)) {
-					inputCloseable = Boolean.parseBoolean(value);
+					inputCloseable = BooleanUtils.toBoolean(value);
 				}
 			}
 		}

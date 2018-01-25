@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -408,8 +408,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 		conn = new ZKConnection();
 
 		String zkConnStr = zkConfProps.getProperty(PROP_ZK_CONN, DEFAULT_CONN_HOST);
-		int timeout = Integer
-				.parseInt(zkConfProps.getProperty(PROP_ZK_CONN_TIMEOUT, String.valueOf(DEFAULT_CONN_TIMEOUT)));
+		int timeout = Utils.getInt(PROP_ZK_CONN_TIMEOUT, zkConfProps, DEFAULT_CONN_TIMEOUT);
 
 		conn.connect(zkConnStr, timeout); // NON-NLS
 

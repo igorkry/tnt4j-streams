@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -87,7 +88,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 					bufferSize = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-					dropDataWhenBufferFull = Boolean.parseBoolean(value);
+					dropDataWhenBufferFull = BooleanUtils.toBoolean(value);
 				}
 			}
 		}

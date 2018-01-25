@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
@@ -99,7 +100,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				String value = prop.getValue();
 
 				if (WmqParserProperties.PROP_TRANSLATE_NUM_VALUES.equalsIgnoreCase(name)) {
-					translateNumValues = Boolean.parseBoolean(value);
+					translateNumValues = BooleanUtils.toBoolean(value);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,6 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "name", "", "Stream attr name"); // NON-NLS
 		attrs.addAttribute("", "", "radix", "", "555"); // NON-NLS
 		attrs.addAttribute("", "", "required", "", "Requered"); // NON-NLS
-		attrs.addAttribute("", "", "locator", "", ""); // NON-NLS
 		attrs.addAttribute("", "", "value", "", "555"); // NON-NLS
 		attrs.addAttribute("", "", "units", "", "Units"); // NON-NLS
 		attrs.addAttribute("", "", "format", "", "YYYY-mm-dd HH:mm:ss"); // NON-NLS
@@ -248,7 +247,6 @@ public class ConfigParserHandlerTest {
 		AttributesImpl attrs = new AttributesImpl();
 		attrs.addAttribute("", "", "name", "", "Stream attr name"); // NON-NLS
 		attrs.addAttribute("", "", "locator", "", "|555"); // NON-NLS
-		attrs.addAttribute("", "", "value", "", ""); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser"); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs); // NON-NLS

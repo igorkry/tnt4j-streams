@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -128,7 +129,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
-					stripQuotes = Boolean.parseBoolean(value);
+					stripQuotes = BooleanUtils.toBoolean(value);
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_ENTRY_PATTERN.equalsIgnoreCase(name)) {

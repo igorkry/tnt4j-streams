@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -124,19 +125,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 					fileName = value;
 				} else if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
-					startFromLatestActivity = Boolean.parseBoolean(value);
+					startFromLatestActivity = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
 					fileWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
 				} else if (StreamProperties.PROP_FILE_POLLING.equalsIgnoreCase(name)) {
-					pollingOn = Boolean.parseBoolean(value);
+					pollingOn = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
-					storeState = Boolean.parseBoolean(value);
+					storeState = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
 					rangeValue = value;
 				} else if (StreamProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
 					activityDelimiter = value;
 				} else if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
-					keepLineSeparators = Boolean.parseBoolean(value);
+					keepLineSeparators = BooleanUtils.toBoolean(value);
 				}
 			}
 		}

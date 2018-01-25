@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +37,14 @@ public abstract class ActivityParserTestBase {
 
 	public abstract void isDataClassSupportedTest();
 
-	public static Collection<Map.Entry<String, String>> makeProperty(final String propertyName,
-			final String testValue) {
+	public static Collection<Map.Entry<String, String>> makeProperty(String propertyName, String testValue) {
 		Map<String, String> props = new HashMap<>(1);
 		props.put(propertyName, String.valueOf(testValue));
 
 		return props.entrySet();
 	}
 
-	public void setProperty(ActivityParser parser, final String propertyName, final Object testValue) {
+	public void setProperty(ActivityParser parser, String propertyName, Object testValue) {
 		parser.setProperties(makeProperty(propertyName, testValue.toString()));
 	}
 
@@ -56,7 +55,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void parserNameTest() {
-		final String name = "Test"; // NON-NLS
+		String name = "Test"; // NON-NLS
 		parser.setName(name);
 		assertEquals(name, parser.getName());
 	}
@@ -73,7 +72,7 @@ public abstract class ActivityParserTestBase {
 
 	@Test
 	public void tagsTest() {
-		final String tag = "Test"; // NON-NLS
+		String tag = "Test"; // NON-NLS
 		parser.setTags(tag);
 		assertEquals(tag, parser.getTags()[0]);
 	}

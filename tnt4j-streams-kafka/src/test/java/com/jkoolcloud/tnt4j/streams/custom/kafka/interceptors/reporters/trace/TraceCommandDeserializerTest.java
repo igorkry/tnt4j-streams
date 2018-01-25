@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * @author akausinis
+ * @version 1.0
+ */
 public class TraceCommandDeserializerTest {
 
 	// String[] testCases = { "trace on topic TNT4JStreams", "trace off topic TNT4JStreams",
