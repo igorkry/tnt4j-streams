@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,14 +327,22 @@ public class MetricsReporter implements InterceptionsReporter {
 
 	private static Tracker initTracker() {
 		TrackerConfig trackerConfig = DefaultConfigFactory.getInstance().getConfig(
-				"com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.tnt", SourceType.APPL, (String) null); // NON-NLS
+				"com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics", SourceType.APPL, // NON-NLS
+				(String) null);
 		Tracker tracker = TrackingLogger.getInstance(trackerConfig.build());
 
 		return tracker;
 	}
 
+	/**
+	 * Collects Kafka consumer domain {@code 'kafka.consumer'} JMX attributes values.
+	 *
+	 * @return map of Kafka consumer JMX attributes values
+	 *
+	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 */
 	private static Map<String, Object> collectKafkaConsumerMetricsJMX() {
-		Map<String, Object> attrsMap = new HashMap<>();
+		Map<String, Object> attrsMap = new HashMap<>(20);
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
@@ -347,8 +355,15 @@ public class MetricsReporter implements InterceptionsReporter {
 		return attrsMap;
 	}
 
-	private static Map<String, Object> collectKafkaProducerMetricsJMX() {
-		Map<String, Object> attrsMap = new HashMap<>();
+	/**
+	 * Collects Kafka producer domain {@code 'kafka.producer'} JMX attributes values.
+	 *
+	 * @return map of Kafka producer JMX attributes values
+	 *
+	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 */
+	public static Map<String, Object> collectKafkaProducerMetricsJMX() {
+		Map<String, Object> attrsMap = new HashMap<>(20);
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
@@ -360,7 +375,14 @@ public class MetricsReporter implements InterceptionsReporter {
 		return attrsMap;
 	}
 
-	private static Map<String, Object> collectJVMMetricsJMX() {
+	/**
+	 * Collects JVM domain {@code 'java.lang'} JMX attributes values.
+	 * 
+	 * @return map of JVM JMX attributes values
+	 *
+	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 */
+	public static Map<String, Object> collectJVMMetricsJMX() {
 		Map<String, Object> attrsMap = new HashMap<>();
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -373,7 +395,21 @@ public class MetricsReporter implements InterceptionsReporter {
 		return attrsMap;
 	}
 
-	private static void collectMetricsJMX(String prefix, String objNameStr, MBeanServer mBeanServer,
+	/**
+	 * Collects JMX attributes of MBeans defined by <tt>objNameStr</tt>.
+	 *
+	 * @param prefix
+	 *            attribute key prefix
+	 * @param objNameStr
+	 *            MBeans object name pattern to query
+	 * @param mBeanServer
+	 *            MBean server instance to use
+	 * @param attrsMap
+	 *            attributes map to put collected values
+	 * @throws Exception
+	 *             if JMX attributes collecting fails
+	 */
+	public static void collectMetricsJMX(String prefix, String objNameStr, MBeanServer mBeanServer,
 			Map<String, Object> attrsMap) throws Exception {
 		ObjectName oName = new ObjectName(objNameStr);
 		Set<ObjectName> metricsBeans = mBeanServer.queryNames(oName, null);
