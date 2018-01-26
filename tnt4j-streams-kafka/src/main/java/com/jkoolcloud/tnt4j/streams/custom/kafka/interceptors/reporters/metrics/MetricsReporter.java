@@ -326,9 +326,8 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	private static Tracker initTracker() {
-		TrackerConfig trackerConfig = DefaultConfigFactory.getInstance().getConfig(
-				"com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics", SourceType.APPL, // NON-NLS
-				(String) null);
+		TrackerConfig trackerConfig = DefaultConfigFactory.getInstance().getConfig(MetricsReporter.class,
+				SourceType.APPL, (String) null);
 		Tracker tracker = TrackingLogger.getInstance(trackerConfig.build());
 
 		return tracker;
