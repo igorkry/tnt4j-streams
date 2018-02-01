@@ -529,9 +529,9 @@ In streams configuration you can define field or locator resolved values transfo
 activity value post-processing before sending it to [JKool Cloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
 activity file path.
 
-To pass resolved field/locator value to transformation script/expression use predefined variable placeholder `$fieldValue`. You can also use 
-parser defined field names as script/expression variables having format `${FIELD_NAME}` to access resolved activity entity fields like 
-`${EventType}` or `${Trace.HighResTime}`.
+To pass a resolved field/locator value to a transformation script/expression, use the predefined variable placeholder `$fieldValue`. You can 
+also use parser defined field names as script/expression variables having the format `${FIELD_NAME}` to access resolved activity entity 
+fields like `${EventType}` or `${Trace.HighResTime}`. The referenced fields must be <u>within the same parser definition</u>.
 
 #### Transformation definition
 
@@ -812,8 +812,9 @@ TODO
 
 ### Use of dynamic locators
 
-`TNT4J-Streams` allows to dynamically define `field`/`field-locator` parameters. Dynamic reference variable placeholder is defined using 
-`${XXXXX}` format, where `XXXXX` is name or identifier of another data source configuration entity.
+`TNT4J-Streams` allows you to dynamically define `field`/`field-locator` parameters. A dynamic reference variable placeholder is defined 
+using `${XXXXX}` format, where `XXXXX` is a name or identifier of another data source configuration entity <u>within the same parser 
+definition</u>.
 
 Defining dynamic `field` parameters sample:
 ```xml
