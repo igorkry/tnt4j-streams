@@ -4641,6 +4641,9 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     * MQSO_RESUME - if subscription name is defined
 
     (Optional)
+    
+ * `CMQC.XXXXXXX_PROPERTY` - any `CMQC` defined Queue Manager connection property. You can define multiple `CMQC` connection properties per 
+ `stream` definition, but only one per `property` definition. (Optional)    
 
     sample:
 ```xml
@@ -4654,6 +4657,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="StripHeaders" value="false"/>
     <property name="StreamReconnectDelay" value="30"/>
     <property name="OpenOptions" value="!MQSO_FAIL_IF_QUIESCING|MQSO_CREATE|MQSO_MANAGED|MQSO_WILDCARD_CHAR"/>
+    <property name="CMQC.USE_MQCSP_AUTHENTICATION_PROPERTY" value="true"/>
+    <property name="CMQC.THREAD_AFFINITY_PROPERTY" value="false"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters).
