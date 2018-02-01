@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.*;
@@ -67,7 +65,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * Default value - {@code 15sec}. (Optional)</li>
  * <li>OpenOptions - defines open options value used to access queue or topic. It can define numeric options value or
  * concatenation of MQ constant names/values delimited by {@code '|'} symbol. If options definition starts with
- * '{@value #FORCE_OPEN_OPTION}', it means that this options set should be used as complete and passed to Queue Manager
+ * {@value #FORCE_OPEN_OPTION}, it means that this options set should be used as complete and passed to Queue Manager
  * without changes. By default these open options are appended to predefined set of: <br>
  * Predefined set of open options for queue:
  * <ul>
@@ -143,6 +141,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private String userName;
 	private String userPass;
 
+	private Map<String, Object> mqConnProps = new HashMap<>(5);
+
 	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
 
 	private int openOptions;
@@ -173,7 +173,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				} else if (WmqStreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
 					qmgrChannelName = value;
 				} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
-					stripHeaders = Boolean.parseBoolean(value);
+					stripHeaders = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
 					userName = value;
 				} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
@@ -182,6 +182,25 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 					reconnectDelay = Integer.valueOf(value);
 				} else if (WmqStreamProperties.OPEN_OPTIONS.equalsIgnoreCase(name)) {
 					openOptions = initOpenOptions(value);
+				} else {
+					String[] mqcNameTokens = name.split("\\.");
+					String mqcName = mqcNameTokens[mqcNameTokens.length - 1];
+					Object mqcVal = MQConstants.getValue(mqcName);
+					if (mqcVal != null) {
+						Object cVal = Utils.getBoolean(value);
+						if (cVal == null) {
+							try {
+								cVal = Integer.parseInt(value);
+							} catch (Exception exc) {
+							}
+
+							if (cVal == null) {
+								cVal = String.valueOf(cVal);
+							}
+						}
+
+						mqConnProps.put(String.valueOf(mqcVal), cVal);
+					}
 				}
 			}
 		}
@@ -190,7 +209,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	/**
 	 * Initiates open options value used to access queue or topic. <tt>optionsStr</tt> can define numeric options value
 	 * or concatenation of MQ constant names/values delimited by {@code '|'} symbol. If <tt>optionsStr</tt> starts with
-	 * '{@value #FORCE_OPEN_OPTION}', it means that this options set should be used as complete and passed to Queue
+	 * {@value #FORCE_OPEN_OPTION}, it means that this options set should be used as complete and passed to Queue
 	 * Manager without changes. By default these open options are appended to predefined set of:
 	 * <p>
 	 * Predefined set of open options for queue:
@@ -222,6 +241,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			return openOptions;
 		}
 
+		optionsStr = optionsStr.trim();
 		forceOpenOptions = optionsStr.startsWith(FORCE_OPEN_OPTION);
 		if (forceOpenOptions) {
 			optionsStr = optionsStr.substring(1);
@@ -234,7 +254,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		String[] options = Utils.splitValue(optionsStr);
 		for (String option : options) {
 			try {
-				openOptions |= WmqUtils.getParamId(option);
+				openOptions |= WmqUtils.getParamId(option.trim());
 			} catch (NoSuchElementException e) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"WmqStream.error.option.resolve.failed", option);
@@ -394,6 +414,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 		if (StringUtils.isNotEmpty(userPass)) {
 			props.put(CMQC.PASSWORD_PROPERTY, userPass);
 		}
+
+		props.putAll(mqConnProps);
 		if (StringUtils.isEmpty(qmgrName)) {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 					"WmqStream.connecting.default", props);
