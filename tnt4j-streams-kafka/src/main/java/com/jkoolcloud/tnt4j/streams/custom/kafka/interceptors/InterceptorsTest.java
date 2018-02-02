@@ -177,12 +177,14 @@ public class InterceptorsTest {
 			try {
 				ConsumerRecords<String, String> records = consumer.poll(Long.MAX_VALUE);
 				int ei = 0;
+				Map<String, Object> data = new HashMap<>(3);
 				for (ConsumerRecord<String, String> record : records) {
-					Map<String, Object> data = new HashMap<>();
+					data.clear();
 					data.put("partition", record.partition()); // NON-NLS
 					data.put("offset", record.offset()); // NON-NLS
 					data.put("value", record.value()); // NON-NLS
-					LOGGER.log(OpLevel.INFO, "Consuming Kafka message: {1}", consumer.hashCode(), data); // NON-NLS
+					LOGGER.log(OpLevel.INFO, "Consuming Kafka message: idx={2} msg={1}", consumer.hashCode(), data, // NON-NLS
+							ei++);
 
 					try {
 						Thread.sleep((long) (200 * Math.random()));
