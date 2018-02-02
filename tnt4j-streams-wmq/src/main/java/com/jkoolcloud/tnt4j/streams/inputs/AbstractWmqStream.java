@@ -18,7 +18,10 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -134,19 +137,22 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	private String topicName = null;
 	private String subName = null;
 	private String topicString = null;
-	private String qmgrHostName = null;
-	private int qmgrPort = 1414;
-	private String qmgrChannelName = "SYSTEM.DEF.SVRCONN"; // NON-NLS
 	private boolean stripHeaders = true;
-	private String userName;
-	private String userPass;
-
-	private Map<String, Object> mqConnProps = new HashMap<>(5);
+	// QM connection parameters
+	private Hashtable<String, Object> mqConnProps = new Hashtable<>(6);
 
 	private long reconnectDelay = QMGR_CONN_RETRY_INTERVAL;
 
 	private int openOptions;
 	private boolean forceOpenOptions;
+
+	private MQMessage mqMsg;
+
+	protected AbstractWmqStream() {
+		mqConnProps.put(CMQC.PORT_PROPERTY, 1414);
+		mqConnProps.put(CMQC.CHANNEL_PROPERTY, "SYSTEM.DEF.SVRCONN"); // NON-NLS
+		mqConnProps.put(CMQC.CONNECT_OPTIONS_PROPERTY, CMQC.MQCNO_HANDLE_SHARE_NONE);
+	}
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
@@ -167,17 +173,27 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 				} else if (WmqStreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 					topicString = value;
 				} else if (WmqStreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
-					qmgrHostName = value;
+					if (StringUtils.isNotEmpty(value)) {
+						mqConnProps.put(CMQC.HOST_NAME_PROPERTY, value);
+					}
 				} else if (WmqStreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-					qmgrPort = Integer.valueOf(value);
+					if (StringUtils.isNotEmpty(value)) {
+						mqConnProps.put(CMQC.PORT_PROPERTY, Integer.valueOf(value));
+					}
 				} else if (WmqStreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
-					qmgrChannelName = value;
+					if (StringUtils.isNotEmpty(value)) {
+						mqConnProps.put(CMQC.CHANNEL_PROPERTY, value);
+					}
 				} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 					stripHeaders = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
-					userName = value;
+					if (StringUtils.isNotEmpty(value)) {
+						mqConnProps.put(CMQC.USER_ID_PROPERTY, value);
+					}
 				} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
-					userPass = value;
+					if (StringUtils.isNotEmpty(value)) {
+						mqConnProps.put(CMQC.PASSWORD_PROPERTY, value);
+					}
 				} else if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
 					reconnectDelay = Integer.valueOf(value);
 				} else if (WmqStreamProperties.OPEN_OPTIONS.equalsIgnoreCase(name)) {
@@ -281,22 +297,22 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			return topicString;
 		}
 		if (WmqStreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
-			return qmgrHostName;
+			return mqConnProps.get(CMQC.HOST_NAME_PROPERTY);
 		}
 		if (WmqStreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-			return qmgrPort;
+			return mqConnProps.get(CMQC.PORT_PROPERTY);
 		}
 		if (WmqStreamProperties.PROP_CHANNEL_NAME.equalsIgnoreCase(name)) {
-			return qmgrChannelName;
+			return mqConnProps.get(CMQC.CHANNEL_PROPERTY);
 		}
 		if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
 			return stripHeaders;
 		}
 		if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
-			return userName;
+			return mqConnProps.get(CMQC.USER_ID_PROPERTY);
 		}
 		if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
-			return userPass;
+			return mqConnProps.get(CMQC.PASSWORD_PROPERTY);
 		}
 		if (StreamProperties.PROP_RECONNECT_DELAY.equalsIgnoreCase(name)) {
 			return reconnectDelay;
@@ -401,29 +417,15 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	protected void connectToQmgr() throws Exception {
 		qmgr = null;
 		dest = null;
-		Hashtable<String, Object> props = new Hashtable<>();
-		props.put(CMQC.CONNECT_OPTIONS_PROPERTY, CMQC.MQCNO_HANDLE_SHARE_NONE);
-		if (StringUtils.isNotEmpty(qmgrHostName)) {
-			props.put(CMQC.HOST_NAME_PROPERTY, qmgrHostName);
-			props.put(CMQC.PORT_PROPERTY, qmgrPort);
-			props.put(CMQC.CHANNEL_PROPERTY, qmgrChannelName);
-		}
-		if (StringUtils.isNotEmpty(userName)) {
-			props.put(CMQC.USER_ID_PROPERTY, userName);
-		}
-		if (StringUtils.isNotEmpty(userPass)) {
-			props.put(CMQC.PASSWORD_PROPERTY, userPass);
-		}
 
-		props.putAll(mqConnProps);
 		if (StringUtils.isEmpty(qmgrName)) {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WmqStream.connecting.default", props);
+					"WmqStream.connecting.default", mqConnProps);
 		} else {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WmqStream.connecting.qm", qmgrName, props);
+					"WmqStream.connecting.qm", qmgrName, mqConnProps);
 		}
-		qmgr = new MQQueueManager(qmgrName, props);
+		qmgr = new MQQueueManager(qmgrName, mqConnProps);
 		if (StringUtils.isNotEmpty(topicString) || StringUtils.isNotEmpty(topicName)
 				|| StringUtils.isNotEmpty(subName)) {
 			if (!forceOpenOptions) {
