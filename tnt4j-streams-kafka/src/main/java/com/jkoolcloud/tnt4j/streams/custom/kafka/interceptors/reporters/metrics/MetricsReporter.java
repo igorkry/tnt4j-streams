@@ -424,12 +424,13 @@ public class MetricsReporter implements InterceptionsReporter {
 					} catch (Exception exc) {
 						LOGGER.log(OpLevel.WARNING,
 								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(), exc);
+								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(),
+								Utils.getExceptionMessages(exc));
 					}
 				}
 			} catch (Exception exc) {
 				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-						"MetricsReporter.bean.info.fail", mBeanName, exc);
+						"MetricsReporter.bean.info.fail", mBeanName, Utils.getExceptionMessages(exc));
 			}
 		}
 	}

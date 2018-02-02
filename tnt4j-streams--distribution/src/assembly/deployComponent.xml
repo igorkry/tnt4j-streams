@@ -103,6 +103,13 @@
         </fileSet>
         <!-- user defined property files -->
         <fileSet>
+            <directory>../tnt4j-streams-kafka/target/config</directory>
+            <includes>
+                <include>*.*</include>
+            </includes>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>../config</directory>
             <includes>
                 <include>*.*</include>
@@ -114,6 +121,9 @@
             <includes>
                 <include>**/*.*</include>
             </includes>
+            <excludes>
+                <exclude>**/tnt4j*.properties</exclude>
+            </excludes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>

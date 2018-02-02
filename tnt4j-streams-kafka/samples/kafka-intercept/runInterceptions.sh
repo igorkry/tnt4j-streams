@@ -6,7 +6,7 @@ else
 fi
 
 LIBPATH="$SCRIPTPATH/../../*:$SCRIPTPATH/../../lib/*"
-TNT4JOPTS="-Dtnt4j.config=$SCRIPTPATH/../../config/intercept/tnt4j_kafka.properties"
+TNT4JOPTS="-Dtnt4j.config=$SCRIPTPATH/../../config/tnt4j.properties"
 LOG4JOPTS="-Dlog4j.configuration=file:$SCRIPTPATH/../../config/log4j.properties"
 PRODUCER_CONFIG="-Dproducer.config=$SCRIPTPATH/../../config/intercept/producer.properties"
 CONSUMER_CONFIG="-Dconsumer.config=$SCRIPTPATH/../../config/intercept/consumer.properties"
