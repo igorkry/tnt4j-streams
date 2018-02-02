@@ -127,6 +127,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.zcore.maven</groupId>
+                <artifactId>merge-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <executions>
+                    <execution>
+                        <id>merge</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <mergers>
+                                <merger>
+                                    <target>${project.build.directory}/config/tnt4j.properties</target>
+                                    <sources>
+                                        <source>../config/tnt4j.properties</source>
+                                        <source>./config/intercept/tnt4j_kafka.properties</source>
+                                    </sources>
+                                </merger>
+                            </mergers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
