@@ -148,6 +148,8 @@ public class InterceptorsTest {
 			String msg = runtime + ",www.example.com," + ip + "," + (ei + 1) + eventsPayload[ei / eventsPayload.length];// NON-NLS
 			ProducerRecord<String, String> data = new ProducerRecord<>(topic, ip, msg);
 			producer.send(data);
+			LOGGER.log(OpLevel.INFO, "Producing Kafka message: seqNumber={2} msg={1}", producer.hashCode(), // NON-NLS
+					data, ei);
 			if (ei % 5 == 0) {
 				try {
 					Thread.sleep((long) (1000 + 2000 * Math.random()));
@@ -173,18 +175,18 @@ public class InterceptorsTest {
 
 	private static void consume(Consumer<String, String> consumer) {
 		boolean halt = false;
+		int ei = 0;
+		Map<String, Object> data = new HashMap<>(3);
 		while (!halt) {
 			try {
 				ConsumerRecords<String, String> records = consumer.poll(Long.MAX_VALUE);
-				int ei = 0;
-				Map<String, Object> data = new HashMap<>(3);
 				for (ConsumerRecord<String, String> record : records) {
 					data.clear();
 					data.put("partition", record.partition()); // NON-NLS
 					data.put("offset", record.offset()); // NON-NLS
 					data.put("value", record.value()); // NON-NLS
-					LOGGER.log(OpLevel.INFO, "Consuming Kafka message: idx={2} msg={1}", consumer.hashCode(), data, // NON-NLS
-							ei++);
+					LOGGER.log(OpLevel.INFO, "Consuming Kafka message: seqNumber={2} msg={1}", consumer.hashCode(), // NON-NLS
+							data, ei++);
 
 					try {
 						Thread.sleep((long) (200 * Math.random()));
