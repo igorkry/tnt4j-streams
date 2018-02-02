@@ -4616,11 +4616,12 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * `Topic` - Topic name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
  * `Subscription` - Subscription name. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
  * `TopicString` - Topic string. (Required - at least one of `Queue`, `Topic`, `Subscription`, `TopicString`)
- * `Host` - WMQ connection host name. (Optional)
- * `Port` - WMQ connection port number. Default value - `1414`. (Optional)
- * `UserName` - WMQ user identifier. (Optional)
- * `Password` - WMQ user password. (Optional)
- * `Channel` - Server connection channel name. Default value - `SYSTEM.DEF.SVRCONN`. (Optional)
+ * `Host` - WMQ connection host name. Alias for `CMQC.HOST_NAME_PROPERTY` Queue Manager connection property. (Optional)
+ * `Port` - WMQ connection port number. Alias for `CMQC.PORT_PROPERTY` Queue Manager connection property. Default value - `1414`. (Optional)
+ * `UserName` - WMQ user identifier. Alias for `CMQC.USER_ID_PROPERTY` Queue Manager connection property. (Optional)
+ * `Password` - WMQ user password. Alias for `CMQC.PASSWORD_PROPERTY` Queue Manager connection property. (Optional)
+ * `Channel` - Server connection channel name. Alias for `CMQC.CHANNEL_PROPERTY` Queue Manager connection property. Default value - 
+ `SYSTEM.DEF.SVRCONN`. (Optional)
  * `StripHeaders` - identifies whether stream should strip WMQ message headers. Default value - `true`. (Optional)
  * `StreamReconnectDelay` - delay in seconds between queue manager reconnection or failed queue GET iterations. Default value - `15sec`. 
  (Optional)
