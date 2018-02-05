@@ -18,10 +18,12 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -385,8 +387,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"TNTStreamOutput.tracker.statistics", name, getTrackerId(tracker),
-				Utils.toString(tracker.getStats()));
+				"TNTStreamOutput.tracker.statistics", name, getTrackerId(tracker), Utils.toString(tracker.getStats()));
 	}
 
 	/**
