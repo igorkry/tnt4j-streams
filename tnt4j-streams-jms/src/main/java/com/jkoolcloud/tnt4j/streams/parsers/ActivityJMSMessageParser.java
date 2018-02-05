@@ -183,6 +183,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * <p>
 	 * Common fields are:
 	 * <ul>
+	 * <li>Correlator</li>
 	 * <li>DeliveryMode</li>
 	 * <li>Destination</li>
 	 * <li>Expiration</li>
