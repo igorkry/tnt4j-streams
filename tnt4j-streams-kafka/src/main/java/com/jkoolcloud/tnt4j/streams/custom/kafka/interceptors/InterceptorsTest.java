@@ -31,7 +31,9 @@ import org.apache.kafka.common.errors.WakeupException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * TNT4J-Streams Kafka interceptors test which can be run as standalone application.
@@ -65,7 +67,9 @@ public class InterceptorsTest {
 		try {
 			interceptionsTest();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, "InterceptorsTest.interceptionsTest failed to complete!..", exc); // NON-NLS
+			Utils.logThrowable(LOGGER, OpLevel.ERROR,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptorsTest.interceptionsTest failed to complete: {0}", exc); // NON-NLS
 		}
 	}
 

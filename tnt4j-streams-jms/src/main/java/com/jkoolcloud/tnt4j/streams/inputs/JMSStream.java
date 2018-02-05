@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.JMSStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements a JMS message transported activity stream, where each JMS message payload data carried data is assumed to
@@ -247,7 +248,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 				try {
 					jmsCon.start();
 				} catch (JMSException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}

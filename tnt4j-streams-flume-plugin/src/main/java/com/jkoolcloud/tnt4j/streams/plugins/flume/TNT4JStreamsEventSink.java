@@ -106,13 +106,14 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 		} catch (Exception ex) {
 			String errorMsg = StreamsResources.getString(FlumeConstants.RESOURCE_BUNDLE_NAME,
 					"TNT4JStreamsEventSink.failed.to.publish");
-			LOGGER.log(OpLevel.ERROR, errorMsg, ex);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, errorMsg, ex);
 			result = Status.BACKOFF;
 			if (transaction != null) {
 				try {
 					transaction.rollback();
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
 							"TNT4JStreamsEventSink.transaction.rollback.failed", exc);
 				}
 			}
@@ -149,7 +150,7 @@ public class TNT4JStreamsEventSink extends AbstractSink implements Configurable 
 		try {
 			openSocket();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(FlumeConstants.RESOURCE_BUNDLE_NAME),
 					"TNT4JStreamsEventSink.failed.open.socket", exc);
 		}
 

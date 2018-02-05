@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.AbstractActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.utils.CharBufferParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an IBM MQ error log entry {@link String}.
@@ -151,7 +152,8 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 				dataMap.putAll(errEntryParser.parse(logEntry));
 			}
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"IBMMQLogParser.log.entry.parse.failed", exc);
 		}
 
@@ -184,10 +186,12 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 					}
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.data.end", getActivityDataType(), eof);
+				Utils.logThrowable(logger(), OpLevel.DEBUG,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityParser.data.end",
+						getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {

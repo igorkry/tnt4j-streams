@@ -138,7 +138,7 @@ public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> 
 				closeWhenDone = true;
 			} catch (IOException e) {
 				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"XMLFromBinDataPreParser.data.read.failed", e.getLocalizedMessage()), 0);
+						"XMLFromBinDataPreParser.data.read.failed", Utils.getExceptionMessages(e)), 0);
 			}
 		}
 
@@ -261,7 +261,8 @@ public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> 
 				try {
 					is.skip(bPos > absoluteLastGoodPosition ? bPos : absoluteLastGoodPosition);
 				} catch (IOException e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"XMLFromBinDataPreParser.skip.failed", e);
 					return;
 				}

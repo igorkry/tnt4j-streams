@@ -439,7 +439,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				mqiStruct = buildMqiStructureFromBinData(param);
 				cData.put(ctxStructKey, mqiStruct);
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityPCFParser.structure.build.failed", exc);
 				exception = true;
 			}
@@ -585,7 +586,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			try {
 				val = Utils.getFieldValue(path, mqiSruct, i);
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityPCFParser.structure.value.resolution.failed", exc);
 
 				// throw new ParseException(

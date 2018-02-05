@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
@@ -216,7 +217,8 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			try {
 				scheduler.shutdown(true);
 			} catch (SchedulerException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 						"AbstractWsStream.error.closing.scheduler", exc);
 			}
 			scheduler = null;

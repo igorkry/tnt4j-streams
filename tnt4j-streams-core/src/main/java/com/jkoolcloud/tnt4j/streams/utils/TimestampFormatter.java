@@ -289,7 +289,7 @@ public class TimestampFormatter {
 		} catch (NumberFormatException nfe) {
 			ParseException pe = new ParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"TimestampFormatter.failed.parsing", value, nfe.getLocalizedMessage()),
+							"TimestampFormatter.failed.parsing", value, Utils.getExceptionMessages(nfe)),
 					0);
 			pe.initCause(nfe);
 			throw pe;

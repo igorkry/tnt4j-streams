@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -160,7 +161,8 @@ public class DirStreamingManager {
 						notifyStreamingJobRejected(r);
 					}
 				} catch (InterruptedException exc) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.WARNING,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"DirStreamingManager.job.offer.interrupted", ((StreamingJob) r).getJobId(), exc);
 				}
 			}
@@ -195,7 +197,7 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.start();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"DirStreamingManager.could.not.start.watchdog", exc);
 			stop();
 		}
@@ -236,7 +238,8 @@ public class DirStreamingManager {
 		try {
 			dirWatchdog.stop();
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"DirStreamingManager.could.not.stop.watchdog", exc);
 		}
 
@@ -329,22 +332,23 @@ public class DirStreamingManager {
 		}
 	}
 
-	// public void cancelJob(String jobId) { //TODO
-	// if (jobId == null) {
-	// return;
-	// }
-	//
-	// synchronized (executorService) {
-	// for (Runnable r : executorService.getQueue()) {
-	// DefaultStreamingJob sJob = (DefaultStreamingJob) r;
-	//
-	// if (sJob.equals(jobId)) {
-	// executorService.remove(sJob);
-	// break;
-	// }
-	// }
-	// }
-	// }
+	public void cancelJob(String jobId) {
+		if (StringUtils.isEmpty(jobId)) {
+			return;
+		}
+
+		synchronized (executorService) {
+			for (Runnable r : executorService.getQueue()) {
+				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
+
+				if (sJob.equals(jobId)) {
+					sJob.cancel();
+					executorService.remove(sJob);
+					break;
+				}
+			}
+		}
+	}
 
 	/**
 	 * Sets TNT4J configuration file (tnt4j.properties) path.

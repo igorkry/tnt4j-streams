@@ -30,6 +30,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -128,7 +129,9 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		try {
 			val = Utils.getFieldValue(path, cData.getData(), 0);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, "ActivityJavaObjectParser.resolve.locator.value.failed", exc);
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityJavaObjectParser.resolve.locator.value.failed", exc);
 		}
 
 		return val;

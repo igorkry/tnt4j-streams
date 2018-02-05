@@ -28,6 +28,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for buffered input activity stream. RAW activity data retrieved from input source is placed into blocking
@@ -327,7 +328,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				close();
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"AbstractBufferedStream.input.close.error", exc);
 			}
 		}

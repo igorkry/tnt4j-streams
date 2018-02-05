@@ -268,7 +268,7 @@ public final class StreamsAgent {
 		try {
 			loadConfigAndRun(cfgFile == null ? null : new FileReader(cfgFile), streamListener, streamTasksListener);
 		} catch (FileNotFoundException e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+			LOGGER.log(OpLevel.ERROR, Utils.getExceptionMessages(e));
 		}
 	}
 
@@ -291,9 +291,10 @@ public final class StreamsAgent {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
 					streamTasksListener);
 		} catch (SAXException | IllegalStateException e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
+			LOGGER.log(OpLevel.ERROR, Utils.getExceptionMessages(e));
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsAgent.start.failed", e);
 		}
 	}
 
@@ -410,8 +411,9 @@ public final class StreamsAgent {
 					return true;
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"StreamsAgent.zk.cfg.failed", exc);
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "StreamsAgent.zk.cfg.failed",
+						exc);
 			}
 		}
 

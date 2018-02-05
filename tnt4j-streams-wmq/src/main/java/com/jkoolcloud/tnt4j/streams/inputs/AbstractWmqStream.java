@@ -36,10 +36,7 @@ import com.ibm.msg.client.commonservices.trace.Trace;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Base class for WebSphere MQ activity stream, where activity data containing {@link MQMessage} is read from the
@@ -372,8 +369,9 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 			Method m = obj.getClass().getMethod(off ? "add" : "remove", Object.class);
 			m.invoke(obj, "01"); // NON-NLS
 		} catch (Exception exc) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"traceOff(boolean) failed", exc); // NON-NLS
+			Utils.logThrowable(logger(), OpLevel.DEBUG,
+					StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"traceOff(boolean) failed: {0}", exc); // NON-NLS
 		}
 	}
 

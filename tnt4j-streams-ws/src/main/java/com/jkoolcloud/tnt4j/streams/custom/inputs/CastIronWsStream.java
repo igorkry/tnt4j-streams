@@ -214,8 +214,9 @@ public class CastIronWsStream extends WsStream {
 
 			applyParsers(responseString, securityResponseParserTag);
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"CastIronStream.login.failed", exc.getLocalizedMessage());
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME), "CastIronStream.login.failed",
+					exc);
 		}
 	}
 
@@ -239,7 +240,7 @@ public class CastIronWsStream extends WsStream {
 			return new String[] { currentMethod };
 		} catch (Exception exc) {
 			logger().log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"CastIronStream.parser.tag.resolve.failed", exc.getMessage(), data);
+					"CastIronStream.parser.tag.resolve.failed", Utils.getExceptionMessages(exc), data);
 		}
 
 		return null;

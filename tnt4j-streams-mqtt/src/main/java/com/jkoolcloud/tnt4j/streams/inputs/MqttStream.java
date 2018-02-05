@@ -283,7 +283,8 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 					client.connect(options == null ? new MqttConnectOptions() : options);
 					client.subscribe(topic);
 				} catch (MqttException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}
@@ -307,20 +308,23 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
-					"MqttStream.connection.lost", cause);
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME), "MqttStream.connection.lost",
+					cause);
 
 			try {
 				closeInternals();
 			} catch (MqttException exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MqttStream.error.closing.receiver", exc);
 			}
 
 			try {
 				initialize();
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(MqttStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MqttStream.error.reconnecting.receiver", exc);
 			}
 		}

@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * TNT4J-Streams Kafka interceptions manager. It loads interceptions configuration from {@code "interceptors.config"}
@@ -84,7 +84,8 @@ public class InterceptionsManager {
 		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
 			interceptorProps.load(fis);
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"InterceptionsManager.cfg.load.failed", interceptorProps, exc);
 		}
 	}
@@ -220,7 +221,7 @@ public class InterceptionsManager {
 	 */
 	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"InterceptionsManager.acknowledge", recordMetadata, e);
+				"InterceptionsManager.acknowledge", recordMetadata, e); // NOTE: exception logging
 
 		for (InterceptionsReporter rep : reporters) {
 			rep.acknowledge(recordMetadata, e, clusterResource);

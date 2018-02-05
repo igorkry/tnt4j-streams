@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link ConsumerRecord} data
@@ -47,7 +49,12 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
  * <li>value - record data</li>
  * </ul>
  * <p>
- * If {@code key} or {@code value} contains complex data, use stacked parsers to parse that data.
+ * If {@code key} or {@code value} contains complex data, use stacked parsers to parse that data. Or if it can be
+ * treated as simple Java object (POJO), particular field value can be resolved defining class field names within
+ * locator path string.
+ * <p>
+ * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
+ * parsers).
  *
  * @version $Revision: 1 $
  */
@@ -108,30 +115,65 @@ public class KafkaConsumerRecordParser extends GenericActivityParser<ConsumerRec
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		ConsumerRecord<?, ?> cRecord = cData.getData();
+		String[] valPath = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
+		try {
+			val = getRecordValue(valPath, cData.getData(), 0);
+		} catch (Exception exc) {
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaConsumerRecordParser.resolve.locator.value.failed", exc);
+		}
 
-		if (StringUtils.isNotEmpty(locStr)) {
-			if (locStr.equalsIgnoreCase("topic")) { // NON-NLS
-				val = cRecord.topic();
-			} else if (locStr.equalsIgnoreCase("partition")) { // NON-NLS
-				val = cRecord.partition();
-			} else if (locStr.equalsIgnoreCase("offset")) { // NON-NLS
-				val = cRecord.offset();
-			} else if (locStr.equalsIgnoreCase("timestamp")) { // NON-NLS
-				val = cRecord.timestamp();
-			} else if (locStr.equalsIgnoreCase("timestampType")) { // NON-NLS
-				val = cRecord.timestampType();
-			} else if (locStr.equalsIgnoreCase("checksum")) { // NON-NLS
-				val = cRecord.checksum();
-			} else if (locStr.equalsIgnoreCase("serializedKeySize")) { // NON-NLS
-				val = cRecord.serializedKeySize();
-			} else if (locStr.equalsIgnoreCase("serializedValueSize")) { // NON-NLS
-				val = cRecord.serializedValueSize();
-			} else if (locStr.equalsIgnoreCase("key")) { // NON-NLS
-				val = cRecord.key();
-			} else if (locStr.equalsIgnoreCase("value")) { // NON-NLS
-				val = cRecord.value();
-			}
+		return val;
+	}
+
+	/**
+	 * Resolves {@link org.apache.kafka.clients.consumer.ConsumerRecord} instance field value defined by
+	 * <tt>cRecord</tt> fields names <tt>path<tt> array.
+	 * <p>
+	 * If consumer record <tt>key</tt> and <tt>value</tt> fields classes are known, it can be processed further defining
+	 * field names of those classes as <tt>path</path> elements.
+	 *
+	 * @param path
+	 *            fields path as array of consumer record field names
+	 * @param cRecord
+	 *            consumer record instance to resolve value
+	 * @param i
+	 *            processed locator path element index
+	 * @return resolved consumer record value, or {@code null} if value is not resolved
+	 * @throws java.lang.RuntimeException
+	 *             if field can't be found or accessed
+	 *
+	 * @see Utils#getFieldValue(String[], Object, int)
+	 */
+	protected Object getRecordValue(String[] path, ConsumerRecord<?, ?> cRecord, int i) throws RuntimeException {
+		if (ArrayUtils.isEmpty(path) || cRecord == null) {
+			return null;
+		}
+
+		Object val = null;
+		String propStr = path[i];
+
+		if ("topic".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.topic();
+		} else if ("partition".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.partition();
+		} else if ("offset".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.offset();
+		} else if ("timestamp".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.timestamp();
+		} else if ("timestampType".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.timestampType();
+		} else if ("checksum".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.checksum();
+		} else if ("serializedKeySize".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.serializedKeySize();
+		} else if ("serializedValueSize".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = cRecord.serializedValueSize();
+		} else if ("key".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = Utils.getFieldValue(path, cRecord.key(), i + 1);
+		} else if ("value".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = Utils.getFieldValue(path, cRecord.value(), i + 1);
 		}
 
 		return val;

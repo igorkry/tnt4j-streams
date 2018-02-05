@@ -182,10 +182,12 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 					}
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.data.end", getActivityDataType(), eof);
+				Utils.logThrowable(logger(), OpLevel.DEBUG,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityParser.data.end",
+						getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
@@ -238,9 +240,9 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			try {
 				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
-				logger().log(!locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG,
+				Utils.logThrowable(logger(), !locator.isOptional() ? OpLevel.WARNING : OpLevel.DEBUG,
 						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityJsonParser.path.exception", locStr, exc.getLocalizedMessage());
+						"ActivityJsonParser.path.exception", locStr, exc);
 			}
 
 			if (jsonValue != null) {

@@ -376,10 +376,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			try {
 				str = ActivityDelim.EOL.name().equals(activityDelim) ? Utils.getNonEmptyLine(rdr) : Utils.readAll(rdr);
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.data.end", getActivityDataType(), eof);
+				Utils.logThrowable(logger(), OpLevel.DEBUG,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityParser.data.end",
+						getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {
@@ -473,7 +475,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			data = preParseActivityData(data);
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.pre.parsing.failed", exc);
 		}
 
@@ -498,7 +501,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			filterActivity(ai);
 		} catch (Exception exc) {
-			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.activity.filtering.failed", ai, exc);
 		}
 
@@ -833,7 +837,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					val = null;
 				}
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.field.filtering.failed", locStr, toString(val), exc);
 			}
 		}
@@ -860,7 +865,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		try {
 			return locator.transformValue(val, cData.getActivity(), phase);
 		} catch (Exception exc) {
-			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.transformation.failed", locStr, toString(val), exc);
 		}
 

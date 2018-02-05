@@ -277,7 +277,8 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 				try {
 					lnr = rollToCurrentLine(fs);
 				} catch (IOException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.error.rolling", exc);
 				}
 
@@ -285,14 +286,16 @@ public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
 					try {
 						readNewFileLines(lnr);
 					} catch (IOException exc) {
-						logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						Utils.logThrowable(logger(), OpLevel.ERROR,
+								StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"FileLineStream.error.reading", exc);
 					} finally {
 						Utils.close(lnr);
 					}
 				}
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.error.reading.changes", exc);
 			}
 

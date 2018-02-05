@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,8 +250,9 @@ public class WsStream extends AbstractWsStream {
 			// Install the all-trusting host verifier
 			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 		} catch (GeneralSecurityException exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WsStream.disable.ssl.failed", exc);
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME), "WsStream.disable.ssl.failed",
+					exc);
 		}
 	}
 
@@ -482,7 +483,8 @@ public class WsStream extends AbstractWsStream {
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
 								stream.fillInRequestData(request), stream, scenario);
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						Utils.logThrowable(LOGGER, OpLevel.WARNING,
+								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"WsStream.execute.exception", exc);
 					} finally {
 						if (StringUtils.isNotEmpty(respStr)) {

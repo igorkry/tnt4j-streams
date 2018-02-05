@@ -421,8 +421,9 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FeedInputStream.accepted.connection", connSocket);
 				} catch (Exception e) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"RedirectTNT4JStream.failed.accept.connection", e.getLocalizedMessage(), e);
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"RedirectTNT4JStream.failed.accept.connection", e);
 
 					boolean recovered = restartOnInputClose && resetDataStream();
 
@@ -437,8 +438,9 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 						activeFeedersList.add(feeder);
 						feeder.start();
 					} catch (Exception e) {
-						logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"RedirectTNT4JStream.socket.initialization", e.getLocalizedMessage(), e);
+						Utils.logThrowable(logger(), OpLevel.ERROR,
+								StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"RedirectTNT4JStream.socket.initialization", e);
 					}
 				}
 			}
@@ -458,7 +460,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"RedirectTNT4JStream.stream.reset", srvSocketPort);
 			} catch (Exception exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"RedirectTNT4JStream.resetting.failed", getName(), exc);
 
 				return false;
@@ -533,12 +536,14 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 						}
 					}
 				} catch (IOException ioe) {
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"RedirectTNT4JStream.feeder.failure", ioe.getLocalizedMessage());
+					Utils.logThrowable(logger(), OpLevel.WARNING,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"RedirectTNT4JStream.feeder.failure", ioe);
 					halt();
 				} catch (Exception e) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"RedirectTNT4JStream.feeder.failure", e.getLocalizedMessage(), e);
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"RedirectTNT4JStream.feeder.failure", e);
 				}
 			}
 

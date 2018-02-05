@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Main class for jKool LLC TNT4J-Streams configuration uploader to ZooKeeper.
@@ -125,8 +126,9 @@ public class ZKConfigInit {
 					}
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ZKConfigInit.upload.error", exc.getLocalizedMessage(), exc);
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ZKConfigInit.upload.error",
+						exc);
 			} finally {
 				ZKConfigManager.close();
 			}
@@ -199,8 +201,8 @@ public class ZKConfigInit {
 		try {
 			return Files.readAllBytes(Paths.get(cfgFileName));
 		} catch (IOException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ZKConfigInit.loading.cfg.failed", exc.getLocalizedMessage(), exc);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ZKConfigInit.loading.cfg.failed", exc);
 			return null;
 		}
 	}

@@ -137,10 +137,12 @@ public abstract class AbstractFileStreamStateHandler<T> {
 				}
 			}
 		} catch (IOException e) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error.load", e);
 		} catch (JAXBException e) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.not.parsed", e);
 		}
 
@@ -433,7 +435,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			writeState(fileAccessState, fileDir, streamName);
 		} catch (JAXBException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error.save", exc);
 		}
 	}
@@ -515,7 +518,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			crc.update(bytes4Line, 0, bytes4Line.length);
 			fileAccessState.currentLineCrc = crc.getValue();
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error", exc);
 		}
 	}
@@ -540,7 +544,8 @@ public abstract class AbstractFileStreamStateHandler<T> {
 		try {
 			fileAccessState.currentFileCrc = getFileCrc(file);
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error", exc);
 		}
 	}

@@ -260,7 +260,7 @@ public class RestStream extends AbstractWsStream {
 							respStr = executePOST(scenarioStep.getUrlStr(), request, scenarioStep.getUsername(),
 									scenarioStep.getPassword());
 						} catch (Exception exc) {
-							LOGGER.log(OpLevel.WARNING,
+							Utils.logThrowable(LOGGER, OpLevel.WARNING,
 									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"RestStream.execute.exception", exc);
 						}
@@ -275,7 +275,8 @@ public class RestStream extends AbstractWsStream {
 					respStr = executeGET(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
 							scenarioStep.getPassword());
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.WARNING,
+							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 							"RestStream.execute.exception", exc);
 				}
 

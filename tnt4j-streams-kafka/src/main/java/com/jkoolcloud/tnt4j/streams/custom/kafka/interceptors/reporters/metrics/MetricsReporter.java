@@ -310,7 +310,8 @@ public class MetricsReporter implements InterceptionsReporter {
 				tracker.log(OpLevel.INFO, msg);
 			}
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.clients.jmx.fail", exc);
 		}
 
@@ -320,7 +321,8 @@ public class MetricsReporter implements InterceptionsReporter {
 				tracker.log(OpLevel.INFO, msg);
 			}
 		} catch (JsonProcessingException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.report.metrics.fail", exc);
 		}
 	}
@@ -347,7 +349,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("kafka.consumer:", "kafka.consumer:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.consumer.jmx.fail", exc);
 		}
 
@@ -368,7 +371,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("kafka.producer:", "kafka.producer:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.producer.jmx.fail", exc);
 		}
 		return attrsMap;
@@ -388,7 +392,8 @@ public class MetricsReporter implements InterceptionsReporter {
 		try {
 			collectMetricsJMX("java.lang:", "java.lang:*", mBeanServer, attrsMap); // NON-NLS
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.jvm.jmx.fail", exc);
 		}
 		return attrsMap;
@@ -422,15 +427,15 @@ public class MetricsReporter implements InterceptionsReporter {
 						attrsMap.put(prefix + pMetricsAttr.getName(),
 								mBeanServer.getAttribute(mBeanName, pMetricsAttr.getName()));
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING,
+						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(),
-								Utils.getExceptionMessages(exc));
+								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(), exc);
 					}
 				}
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-						"MetricsReporter.bean.info.fail", mBeanName, Utils.getExceptionMessages(exc));
+				Utils.logThrowable(LOGGER, OpLevel.WARNING,
+						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MetricsReporter.bean.info.fail", mBeanName, exc);
 			}
 		}
 	}

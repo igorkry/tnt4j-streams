@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,8 @@ public class ActivityInfo {
 		try {
 			fieldValue = field.transformValue(fieldValue, this, ValueTransformation.Phase.AGGREGATED);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityInfo.transformation.failed", field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 		}
 
@@ -213,8 +214,9 @@ public class ActivityInfo {
 		try {
 			return field.filterValue(this, fieldValue);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.filtering.failed", field.getFieldTypeName(), Utils.toString(fieldValue), exc);
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityInfo.filtering.failed",
+					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
 			return fieldValue;
 		}
 	}

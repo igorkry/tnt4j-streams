@@ -48,7 +48,9 @@ import org.w3c.dom.Node;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.internal.LinkedTreeMap;
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
  * General utility methods used by TNT4J-Streams.
@@ -758,7 +760,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 						.append(i < valueObjFields.length - 1 ? ", " : ""); // NON-NLS
 			}
 		} catch (Exception exc) {
-			sb.append(exc.toString());
+			sb.append(getExceptionMessages(exc));
 		}
 
 		sb.append('}');
@@ -1120,7 +1122,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			hexStr = NEW_LINE + bos.toString(UTF8);
 			bos.close();
 		} catch (Exception exc) {
-			hexStr = "HEX FAIL: " + exc.getLocalizedMessage(); // NON-NLS
+			hexStr = "HEX FAIL: " + getExceptionMessages(exc); // NON-NLS
 		}
 
 		return hexStr;
@@ -1982,5 +1984,64 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Log a given resource bundle message with a specified severity and {@link java.lang.Throwable} details.
+	 * <p>
+	 * If <tt>logger</tt> log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
+	 * trace is logged. In other cases only exception messages are logged.
+	 *
+	 * @param logger
+	 *            event sink to be used for logging
+	 * @param sev
+	 *            message severity to log
+	 * @param rb
+	 *            resource bundle for messages
+	 * @param key
+	 *            into resource bundle
+	 * @param args
+	 *            arguments passed along the message
+	 *
+	 * @see #getThrowable(Object[])
+	 * @see #getExceptionMessages(Throwable)
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#isSet(com.jkoolcloud.tnt4j.core.OpLevel)
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#log(com.jkoolcloud.tnt4j.core.OpLevel, java.util.ResourceBundle, String,
+	 *      Object...)
+	 */
+	public static void logThrowable(EventSink logger, OpLevel sev, ResourceBundle rb, String key, Object... args) {
+		Throwable ex = getThrowable(args);
+		if (ex != null && logger.isSet(OpLevel.TRACE)) {
+			args[args.length - 1] = getExceptionMessages(ex);
+		}
+		logger.log(sev, rb, key, args);
+	}
+
+	/**
+	 * Log a given string message with a specified severity and {@link java.lang.Throwable} details.
+	 * <p>
+	 * If <tt>logger</tt> log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
+	 * trace is logged. In other cases only exception messages are logged.
+	 *
+	 * @param logger
+	 *            event sink to be used for logging
+	 * @param sev
+	 *            message severity to log
+	 * @param msg
+	 *            string message to be logged
+	 * @param args
+	 *            arguments passed along the message
+	 *
+	 * @see #getThrowable(Object[])
+	 * @see #getExceptionMessages(Throwable)
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#isSet(com.jkoolcloud.tnt4j.core.OpLevel)
+	 * @see com.jkoolcloud.tnt4j.sink.EventSink#log(com.jkoolcloud.tnt4j.core.OpLevel, String, Object...)
+	 */
+	public static void logThrowable(EventSink logger, OpLevel sev, String msg, Object... args) {
+		Throwable ex = getThrowable(args);
+		if (ex != null && logger.isSet(OpLevel.TRACE)) {
+			args[args.length - 1] = getExceptionMessages(ex);
+		}
+		logger.log(sev, msg, args);
 	}
 }

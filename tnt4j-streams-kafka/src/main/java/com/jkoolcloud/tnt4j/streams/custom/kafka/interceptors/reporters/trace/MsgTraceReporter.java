@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -135,7 +134,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 				stream.getOutput().logItem(ai);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MsgTraceReporter.send.failed", exc);
 			}
 		}
@@ -155,7 +155,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				ai.setFieldValue(new ActivityField("Partition"), recordMetadata.partition()); // NON-NLS
 				if (e != null) {
 					ai.setFieldValue(new ActivityField(StreamFieldType.Exception.name()),
-							StringUtils.isEmpty(e.getMessage()) ? e.toString() : e.getMessage());
+							Utils.getExceptionMessages(e));
 				}
 				if (clusterResource != null) {
 					ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
@@ -171,7 +171,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 				stream.getOutput().logItem(ai);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MsgTraceReporter.acknowledge.failed", exc);
 			}
 		}
@@ -206,19 +207,14 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
 					}
 
-					// if (cr.headers() != null) {
-					// for (Header header : cr.headers()) {
-					// ai.setFieldValue(new ActivityField(header.key()), header.value());
-					// }
-					// }
-
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
 					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
 
 					stream.getOutput().logItem(ai);
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 							"MsgTraceReporter.consume.failed", exc);
 				}
 			}
@@ -245,7 +241,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 					stream.getOutput().logItem(ai);
 				} catch (Exception exc) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 							"MsgTraceReporter.commit.failed", exc);
 				}
 			}

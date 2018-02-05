@@ -337,7 +337,7 @@ public final class StreamsCache {
 					"StreamsCache.loading.done", mapProperty == null ? 0 : mapProperty.size(),
 					persistedFile.getAbsolutePath());
 		} catch (JAXBException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.loading.failed", exc);
 		}
 	}
@@ -356,7 +356,7 @@ public final class StreamsCache {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.persisting.done", cacheEntries.size(), persistedFile.getAbsolutePath());
 		} catch (JAXBException exc) {
-			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.persisting.failed", exc);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,6 +212,11 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	protected void applyProperties() throws Exception {
 		super.applyProperties();
 
+		if (StringUtils.isEmpty(fileName)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
+		}
+
 		rowRange = IntRange.getRange(rangeValue);
 	}
 
@@ -240,7 +245,8 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 										"ExcelSXSSFRowStream.unsupported.format", fileName));
 					}
 				} catch (Exception e) {
-					LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
 							"ExcelSXSSFRowStream.file.read.failed", fileName, e);
 				}
 				ended = true;
@@ -356,7 +362,7 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 			sheetParser.parse(sheetSource);
 		} catch (ParserConfigurationException exc) {
 			throw new RuntimeException(StreamsResources.getStringFormatted(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME,
-					"ExcelSXSSFRowStream.sax.cfg.error", exc.getLocalizedMessage()));
+					"ExcelSXSSFRowStream.sax.cfg.error", Utils.getExceptionMessages(exc)));
 		}
 	}
 

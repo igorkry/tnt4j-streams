@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class that all activity streams must extend. It provides some base functionality useful for all activity
@@ -195,7 +196,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
-					useExecutorService = Boolean.parseBoolean(value);
+					useExecutorService = BooleanUtils.toBoolean(value);
 				} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
 					executorThreadsQty = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
@@ -203,7 +204,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
 					executorsTerminationTimeout = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
-					boundedExecutorModel = Boolean.parseBoolean(value);
+					boundedExecutorModel = BooleanUtils.toBoolean(value);
 				}
 			}
 		}
@@ -727,27 +728,28 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 						}
 					}
 				} catch (IllegalStateException ise) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-							ExceptionUtils.getRootCauseMessage(ise), ise);
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"TNTInputStream.failed.record.activity.at", getActivityPosition(), ise);
 					failureFlag.set(true);
 					notifyFailed(null, ise, null);
 					halt(false);
 				} catch (Exception exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-							ExceptionUtils.getRootCauseMessage(exc), exc);
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"TNTInputStream.failed.record.activity.at", getActivityPosition(), exc);
 					notifyStreamEvent(OpLevel.ERROR,
 							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"TNTInputStream.failed.record.activity.at", getActivityPosition(),
-									ExceptionUtils.getRootCauseMessage(exc)),
+									Utils.getExceptionMessages(exc)),
 							getActivityPosition());
 					incrementSkippedActivitiesCount();
 				}
 			}
 		} catch (Exception e) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTInputStream.fatal.stream.failure", name, e.getLocalizedMessage(), e);
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTInputStream.fatal.stream.failure", name, e);
 			failureFlag.set(true);
 			notifyFailed(null, e, null);
 		} finally {
@@ -772,10 +774,11 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		try {
 			cleanup();
 		} catch (Throwable exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTInputStream.failed.cleanup.stream", exc.getLocalizedMessage(), exc);
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTInputStream.failed.cleanup.stream", exc);
 			notifyStreamEvent(OpLevel.ERROR, StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.failed.cleanup.stream", exc.getLocalizedMessage()), name);
+					"TNTInputStream.failed.cleanup.stream", Utils.getExceptionMessages(exc)), name);
 		}
 
 		notifyFinished();
@@ -1060,15 +1063,15 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		@Override
 		public void run() {
 			try {
-				processActivityItem(item, failureFlag);
+				processActivityItem(item, failureFlag);				
 			} catch (Exception e) { // TODO: better handling
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTInputStream.failed.record.activity.at", activityPosition,
-						ExceptionUtils.getRootCauseMessage(e), e);
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"TNTInputStream.failed.record.activity.at", activityPosition, e);
 				notifyStreamEvent(OpLevel.ERROR,
 						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 								"TNTInputStream.failed.record.activity.at", activityPosition,
-								ExceptionUtils.getRootCauseMessage(e)),
+								Utils.getExceptionMessages(e)),
 						item);
 				incrementSkippedActivitiesCount();
 			}

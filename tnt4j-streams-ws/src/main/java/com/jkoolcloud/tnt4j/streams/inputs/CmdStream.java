@@ -111,7 +111,8 @@ public class CmdStream extends AbstractWsStream {
 					try {
 						respStr = executeCommand(request);
 					} catch (Exception exc) {
-						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						Utils.logThrowable(LOGGER, OpLevel.WARNING,
+								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"CmdStream.execute.exception", exc);
 					}
 

@@ -204,7 +204,8 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			try {
 				lnr = rollToCurrentLine();
 			} catch (IOException exc) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.error.rolling", exc);
 			}
 
@@ -212,7 +213,8 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				try {
 					readNewFileLines(lnr);
 				} catch (IOException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.error.reading", exc);
 				} finally {
 					Utils.close(lnr);

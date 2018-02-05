@@ -158,7 +158,7 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 			return interpret(new String(bytes, charSetName));
 		} catch (Exception e) {
 			throw new SerializationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TraceCommandDeserializer.cmd.parse.failed", e.getMessage()));
+					"TraceCommandDeserializer.cmd.parse.failed", Utils.getExceptionMessages(e)));
 		}
 	}
 

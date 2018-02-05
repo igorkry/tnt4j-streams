@@ -200,11 +200,12 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"HttpStream.connection.timed.out");
 			} else if (ex instanceof ConnectionClosedException) {
-				LOGGER.log(OpLevel.ERROR, String.valueOf(ex.getLocalizedMessage()));
+				LOGGER.log(OpLevel.ERROR, Utils.getExceptionMessages(ex));
 				// } else if (ex instanceof SocketException) {
 				// LOGGER.log(OpLevel.ERROR, ex.getMessage());
 			} else {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"HttpStream.http.server.exception", ex);
 			}
 		}
@@ -264,7 +265,8 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				try {
 					server.start();
 				} catch (IOException exc) {
-					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.ERROR,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"AbstractBufferedStream.input.start.failed", exc);
 					shutdown();
 				}

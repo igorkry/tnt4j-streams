@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -203,7 +204,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 					}
 					socketPort = Integer.valueOf(value);
 				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-					restartOnInputClose = Boolean.parseBoolean(value);
+					restartOnInputClose = BooleanUtils.toBoolean(value);
 				}
 			}
 		}
@@ -263,8 +264,9 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 				try {
 					startDataStream();
 				} catch (IOException exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FeedInputStream.input.start.failed", exc.getLocalizedMessage());
+					Utils.logThrowable(logger(), OpLevel.WARNING,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"FeedInputStream.input.start.failed", exc);
 					return null;
 				}
 			}

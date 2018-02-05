@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.jms.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -121,7 +122,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				String value = prop.getValue();
 
 				if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
-					convertToString = Boolean.parseBoolean(value);
+					convertToString = BooleanUtils.toBoolean(value);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);
@@ -149,6 +150,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		dataMap.put(RAW_ACTIVITY_STRING_KEY, message.toString());
 
 		try {
+			parseCommonMessage(message, dataMap);
+
 			if (message instanceof TextMessage) {
 				parseTextMessage((TextMessage) message, dataMap);
 			} else if (message instanceof BytesMessage) {
@@ -162,10 +165,9 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 			} else {
 				parseCustomMessage(message, dataMap);
 			}
-
-			dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
 		} catch (JMSException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
 					"ActivityJMSMessageParser.payload.data.error", exc);
 		}
 
@@ -174,6 +176,28 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		}
 
 		return dataMap;
+	}
+
+	protected void parseCommonMessage(Message message, Map<String, Object> dataMap) throws JMSException {
+		dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
+		dataMap.put("DeliveryMode", message.getJMSDeliveryMode()); //NON-NLS
+		dataMap.put("Destination", message.getJMSDestination()); //NON-NLS
+		dataMap.put("Expiration", message.getJMSExpiration()); //NON-NLS
+		dataMap.put("MessageId", message.getJMSMessageID()); //NON-NLS
+		dataMap.put("Priority", message.getJMSPriority()); //NON-NLS
+		dataMap.put("Redelivered", message.getJMSRedelivered()); //NON-NLS
+		dataMap.put("RepyTo", message.getJMSReplyTo()); //NON-NLS
+		dataMap.put("Timestamp", message.getJMSTimestamp()); //NON-NLS
+		dataMap.put("Type", message.getJMSType()); //NON-NLS
+
+		@SuppressWarnings("unchecked")
+		Enumeration<String> propNames = message.getPropertyNames();
+		if (propNames != null) {
+			while (propNames.hasMoreElements()) {
+				String pName = propNames.nextElement();
+				dataMap.put(pName, message.getStringProperty(pName));
+			}
+		}
 	}
 
 	/**
@@ -256,7 +280,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				baos.write(buffer);
 			} while (bytesRead != 0);
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
 					"ActivityJMSMessageParser.bytes.buffer.error", exc);
 		}
 

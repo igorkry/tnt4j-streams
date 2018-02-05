@@ -26,8 +26,8 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
-import com.jkoolcloud.tnt4j.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an IBM MQ RFH2/JMS binary data package.
@@ -127,7 +127,8 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 
 			dataMap.put(RAW_ACTIVITY_STRING_KEY, rfh2.toString());
 		} catch (Exception exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityRFH2Parser.rfh2.parse.failed", exc);
 		} finally {
 			if (closeWhenDone) {
@@ -169,7 +170,8 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 		try (ObjectInputStream ois = new ObjectInputStream(is)) {
 			msgObj = ois.readObject();
 		} catch (Exception exc) {
-			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.WARNING,
+					StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 					"ActivityRFH2Parser.failed.read.object", exc);
 			try {
 				is.reset();
@@ -179,7 +181,8 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 
 				msgObj = msgDataBytes;
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityRFH2Parser.failed.read.bytes", ioe);
 			}
 		}

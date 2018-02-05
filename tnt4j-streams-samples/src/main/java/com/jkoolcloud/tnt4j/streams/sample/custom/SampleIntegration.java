@@ -27,6 +27,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Sample integration of TNT4J-Streams into an application.
@@ -65,9 +66,9 @@ public final class SampleIntegration {
 				ft.start();
 			}
 		} catch (SAXException | IllegalStateException e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error", Utils.getExceptionMessages(e)); // NON-NLS
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start streams", e); // NON-NLS
 		}
 	}
 
@@ -84,7 +85,7 @@ public final class SampleIntegration {
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start stream", e); // NON-NLS
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.TrackingLogger;
@@ -242,10 +241,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 				return;
 			} catch (IllegalStateException ise) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.check.failed", getTrackerId(tracker), ise.getLocalizedMessage());
-				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.check.failed.trace", getTrackerId(tracker), ise);
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"TNTStreamOutput.check.failed", getTrackerId(tracker), ise);
 				if (thread == null) {
 					throw ise;
 				}
@@ -280,15 +278,15 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			}
 			setTnt4jCfgPath(path);
 		} else if (OutputProperties.PROP_RETRY_STATE_CHECK.equalsIgnoreCase(name)) {
-			retryStateCheck = Boolean.parseBoolean((String) value);
+			retryStateCheck = BooleanUtils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_SEND_STREAM_STATES.equalsIgnoreCase(name)) {
-			sendStreamStates = Boolean.parseBoolean((String) value);
+			sendStreamStates = BooleanUtils.toBoolean((String) value);
 
-			if (stream != null) {
+			if (getStream() != null) {
 				if (sendStreamStates) {
-					stream.addStreamListener(jKoolNotificationListener);
+					getStream().addStreamListener(jKoolNotificationListener);
 				} else {
-					stream.removeStreamListener(jKoolNotificationListener);
+					getStream().removeStreamListener(jKoolNotificationListener);
 				}
 			}
 		}
@@ -338,7 +336,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				trackersMap.put(getTrackersMapKey(t), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"TNTStreamOutput.built.new.tracker", name, getTrackerId(tracker),
-						(t == null ? "null" : t.getId()));
+						(t == null ? "null" : t.getId()), tracker);
 			}
 
 			return tracker;
@@ -356,6 +354,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
 					Tracker tracker = te.getValue();
 					dumpTrackerStats(tracker);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"TNTStreamOutput.tracker.close", name, getTrackerId(tracker), tracker);
 					Utils.close(tracker);
 				}
 
@@ -385,7 +385,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"TNTStreamOutput.tracker.statistics", name, getTrackerId(tracker), Utils.toString(tracker.getStats()));
+				"TNTStreamOutput.tracker.statistics", name, getTrackerId(tracker),
+				Utils.toString(tracker.getStats()));
 	}
 
 	/**
@@ -403,7 +404,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			try {
 				tracker.open();
 			} catch (IOException ioe) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"TNTStreamOutput.failed.to.open", name, tracker, ioe);
 				throw ioe;
 			}
@@ -524,12 +526,11 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				}
 				return;
 			} catch (IOException ioe) {
-				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.recording.failed", ioe.getLocalizedMessage());
+				Utils.logThrowable(logger(), OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"TNTStreamOutput.recording.failed", ioe);
 				logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"TNTStreamOutput.recording.failed.activity", activityData); // TODO: maybe use some formatter?
-				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.recording.failed.trace", ioe);
 				if (thread == null) {
 					throw ioe;
 				}
@@ -550,8 +551,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		try {
 			tracker.reopen();
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTStreamOutput.tracker.reopen.failed", getTrackerId(tracker), exc.getLocalizedMessage());
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTStreamOutput.tracker.reopen.failed", getTrackerId(tracker), exc);
 		}
 	}
 

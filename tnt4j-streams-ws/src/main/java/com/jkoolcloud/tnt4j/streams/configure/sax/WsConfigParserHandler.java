@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
@@ -42,6 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class WsConfigParserHandler extends ConfigParserHandler {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsConfigParserHandler.class);
 
 	private static final String SCENARIO_ELMT = "scenario"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS

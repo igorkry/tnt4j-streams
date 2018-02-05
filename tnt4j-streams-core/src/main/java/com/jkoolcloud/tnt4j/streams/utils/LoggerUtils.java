@@ -105,7 +105,7 @@ public class LoggerUtils {
 		try {
 			loggerProps.load(is);
 		} catch (Exception exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"LoggerUtils.log4j.load.error", exc);
 		} finally {
 			Utils.close(is);
@@ -123,7 +123,8 @@ public class LoggerUtils {
 				invoke("org.apache.log4j.PropertyConfigurator", "configure", new Class[] { Properties.class }, // NON-NLS
 						loggerProps);
 			} catch (Exception exc) {
-				logger.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger, OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"LoggerUtils.log4j.reconfiguring.fail", exc);
 			}
 
@@ -139,7 +140,7 @@ public class LoggerUtils {
 					"LoggerUtils.jul.reconfiguring");
 			java.util.logging.LogManager.getLogManager().readConfiguration(is);
 		} catch (Exception exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"LoggerUtils.jul.reconfiguring.fail", exc);
 		} finally {
 			Utils.close(is);
@@ -167,7 +168,7 @@ public class LoggerUtils {
 			// jc.doConfigure(is);
 			invoke(jc, "doConfigure", new Class[] { InputStream.class }, is); // NON-NLS
 		} catch (Exception exc) {
-			logger.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"LoggerUtils.logback.reconfiguring.fail", exc);
 		} finally {
 			Utils.close(is);

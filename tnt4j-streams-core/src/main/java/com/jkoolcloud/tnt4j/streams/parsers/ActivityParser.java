@@ -171,7 +171,8 @@ public abstract class ActivityParser {
 						break;
 					}
 				} catch (Exception exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.WARNING,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.stacked.parser.failed", name, parserRef, field, exc);
 				}
 			}
@@ -251,7 +252,8 @@ public abstract class ActivityParser {
 							"ActivityParser.match.evaluation", name, field.getFieldTypeName(),
 							parserRef.getParser().name, matchExpression, match);
 				} catch (Exception exc) {
-					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					Utils.logThrowable(logger(), OpLevel.WARNING,
+							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.match.evaluation.failed", name, field.getFieldTypeName(),
 							parserRef.getParser().name, matchExpression, exc);
 					match = false;

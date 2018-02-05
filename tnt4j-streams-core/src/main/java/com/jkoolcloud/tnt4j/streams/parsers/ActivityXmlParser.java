@@ -256,7 +256,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			try {
 				xmlString = Utils.documentToString(xmlDoc);
 			} catch (Exception exc) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityXmlParser.xmlDocument.toString.error", exc);
 			}
 		}
@@ -546,10 +547,12 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					xmlBuffer.append(line);
 				}
 			} catch (EOFException eof) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.data.end", getActivityDataType(), eof);
+				Utils.logThrowable(logger(), OpLevel.DEBUG,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityParser.data.end",
+						getActivityDataType(), eof);
 			} catch (IOException ioe) {
-				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.error.reading", getActivityDataType(), ioe);
 			}
 		} finally {

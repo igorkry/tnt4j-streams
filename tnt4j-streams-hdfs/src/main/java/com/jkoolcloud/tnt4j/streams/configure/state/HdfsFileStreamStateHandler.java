@@ -28,6 +28,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements streamed HDFS files access state handler.
@@ -86,7 +87,8 @@ public class HdfsFileStreamStateHandler extends AbstractFileStreamStateHandler<P
 			FileStatus fStatus = file == null ? null : fs.getFileStatus(file);
 			return fStatus != null && fStatus.isFile();
 		} catch (IOException exc) {
-			logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(logger(), OpLevel.ERROR,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error", exc);
 			return false;
 		}

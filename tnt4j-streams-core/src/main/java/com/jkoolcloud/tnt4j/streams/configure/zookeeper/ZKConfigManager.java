@@ -315,7 +315,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 		try {
 			nStat = zk.exists(path, false);
 		} catch (Exception exc) {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ZKConfigManager.node.exists.failed", path, exc);
 		}
 
@@ -585,7 +586,8 @@ public class ZKConfigManager implements ZKConfigConstants {
 
 				applyConfigurationData(data);
 			} catch (Exception exc) {
-				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				Utils.logThrowable(LOGGER, OpLevel.WARNING,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ZKConfigManager.cfg.loading.failed", exc);
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link ProducerRecord} data
@@ -42,7 +44,12 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
  * <li>value - record data</li>
  * </ul>
  * <p>
- * If {@code key} or {@code value} contains complex data, use stacked parsers to parse that data.
+ * If {@code key} or {@code value} contains complex data, use stacked parsers to parse that data. Or if it can be
+ * treated as simple Java object (POJO), particular field value can be resolved defining class field names within
+ * locator path string.
+ * <p>
+ * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
+ * parsers).
  *
  * @version $Revision: 1 $
  */
@@ -103,20 +110,55 @@ public class KafkaProducerRecordParser extends GenericActivityParser<ProducerRec
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		ProducerRecord<?, ?> cRecord = cData.getData();
+		String[] valPath = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
+		try {
+			val = getRecordValue(valPath, cData.getData(), 0);
+		} catch (Exception exc) {
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaProducerRecordParser.resolve.locator.value.failed", exc);
+		}
 
-		if (StringUtils.isNotEmpty(locStr)) {
-			if (locStr.equalsIgnoreCase("topic")) { // NON-NLS
-				val = cRecord.topic();
-			} else if (locStr.equalsIgnoreCase("partition")) { // NON-NLS
-				val = cRecord.partition();
-			} else if (locStr.equalsIgnoreCase("timestamp")) { // NON-NLS
-				val = cRecord.timestamp();
-			} else if (locStr.equalsIgnoreCase("key")) { // NON-NLS
-				val = cRecord.key();
-			} else if (locStr.equalsIgnoreCase("value")) { // NON-NLS
-				val = cRecord.value();
-			}
+		return val;
+	}
+
+	/**
+	 * Resolves {@link org.apache.kafka.clients.producer.ProducerRecord} instance field value defined by
+	 * <tt>pRecord</tt> fields names <tt>path<tt> array.
+	 * <p>
+	 * If producer record <tt>key</tt> and <tt>value</tt> fields classes are known, it can be processed further defining
+	 * field names of those classes as <tt>path</path> elements.
+	 *
+	 * @param path
+	 *            fields path as array of producer record field names
+	 * @param pRecord
+	 *            producer record instance to resolve value
+	 * @param i
+	 *            processed locator path element index
+	 * @return resolved producer record value, or {@code null} if value is not resolved
+	 * @throws java.lang.RuntimeException
+	 *             if field can't be found or accessed
+	 *
+	 * @see Utils#getFieldValue(String[], Object, int)
+	 */
+	protected Object getRecordValue(String[] path, ProducerRecord<?, ?> pRecord, int i) throws RuntimeException {
+		if (ArrayUtils.isEmpty(path) || pRecord == null) {
+			return null;
+		}
+
+		Object val = null;
+		String propStr = path[i];
+
+		if ("topic".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = pRecord.topic();
+		} else if ("partition".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = pRecord.partition();
+		} else if ("timestamp".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = pRecord.timestamp();
+		} else if ("key".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = Utils.getFieldValue(path, pRecord.key(), i + 1);
+		} else if ("value".equalsIgnoreCase(propStr)) { // NON-NLS
+			val = Utils.getFieldValue(path, pRecord.value(), i + 1);
 		}
 
 		return val;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.xml.sax.SAXException;
@@ -28,13 +28,16 @@ import org.xml.sax.SAXException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * This class implements a default directory files streaming job. In general it defines stream configuration attributes
@@ -45,12 +48,15 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 public class DefaultStreamingJob implements StreamingJob {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(DefaultStreamingJob.class);
 
+	private static ThreadGroup streamThreads = new ThreadGroup(DefaultStreamingJob.class.getName() + "Threads"); // NON-NLS;
+
 	private File streamCfgFile;
 	private UUID jobId;
 
 	private String tnt4jCfgFilePath;
 
-	private List<StreamingJobListener> jobListeners;
+	private Collection<TNTInputStream<?, ?>> streams;
+	private Collection<StreamingJobListener> jobListeners;
 
 	/**
 	 * Constructs a new DefaultStreamingJob.
@@ -97,14 +103,13 @@ public class DefaultStreamingJob implements StreamingJob {
 						"StreamsAgent.erroneous.configuration"));
 			}
 
-			Collection<TNTInputStream<?, ?>> streams = cfg.getStreams();
+			streams = cfg.getStreams();
 
 			if (CollectionUtils.isEmpty(streams)) {
 				throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 						"StreamsAgent.no.activity.streams"));
 			}
 
-			ThreadGroup streamThreads = new ThreadGroup(DefaultStreamingJob.class.getName() + "Threads"); // NON-NLS
 			StreamThread ft;
 			DefaultStreamListener dsl = new DefaultStreamListener();
 
@@ -118,10 +123,36 @@ public class DefaultStreamingJob implements StreamingJob {
 				ft.start();
 			}
 		} catch (SAXException | IllegalStateException e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.toString()));
+			LOGGER.log(OpLevel.ERROR, Utils.getExceptionMessages(e));
 		} catch (Exception e) {
-			LOGGER.log(OpLevel.ERROR, String.valueOf(e.getLocalizedMessage()), e);
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsAgent.start.failed", e);
 		}
+	}
+
+	public void cancel() {
+		if (streams != null) {
+			CountDownLatch streamsCompletionSignal = new CountDownLatch(streams.size());
+
+			for (TNTInputStream<?, ?> stream : streams) {
+				stream.getOwnerThread().addCompletionLatch(streamsCompletionSignal);
+
+				stream.stop();
+			}
+
+			try {
+				streamsCompletionSignal.await();
+			} catch (InterruptedException exc) {
+			}
+		}
+	}
+
+	public static boolean isStreamsRunning() {
+		return streamThreads.activeCount() > 0;
+	}
+
+	public static void stopStreams() {
+		StreamsAgent.stopStreams(streamThreads);
 	}
 
 	/**
