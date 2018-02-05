@@ -178,17 +178,42 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		return dataMap;
 	}
 
+	/**
+	 * Parse JMS {@link Message} common fields values into activity data map.
+	 * <p>
+	 * Common fields are:
+	 * <ul>
+	 * <li>DeliveryMode</li>
+	 * <li>Destination</li>
+	 * <li>Expiration</li>
+	 * <li>MessageId</li>
+	 * <li>Priority</li>
+	 * <li>Redelivered</li>
+	 * <li>RepyTo</li>
+	 * <li>Timestamp</li>
+	 * <li>Type</li>
+	 * <li>list of properties accessible over keys enumeration {@link javax.jms.Message#getPropertyNames()} and values
+	 * resolved over {@link javax.jms.Message#getStringProperty(String)}</li>
+	 * </ul>
+	 *
+	 * @param message
+	 *            JMS message instance to parse
+	 * @param dataMap
+	 *            activity object data map to put resolved values
+	 * @throws JMSException
+	 *             if JMS exception occurs while getting common fields values from message
+	 */
 	protected void parseCommonMessage(Message message, Map<String, Object> dataMap) throws JMSException {
 		dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
-		dataMap.put("DeliveryMode", message.getJMSDeliveryMode()); //NON-NLS
-		dataMap.put("Destination", message.getJMSDestination()); //NON-NLS
-		dataMap.put("Expiration", message.getJMSExpiration()); //NON-NLS
-		dataMap.put("MessageId", message.getJMSMessageID()); //NON-NLS
-		dataMap.put("Priority", message.getJMSPriority()); //NON-NLS
-		dataMap.put("Redelivered", message.getJMSRedelivered()); //NON-NLS
-		dataMap.put("RepyTo", message.getJMSReplyTo()); //NON-NLS
-		dataMap.put("Timestamp", message.getJMSTimestamp()); //NON-NLS
-		dataMap.put("Type", message.getJMSType()); //NON-NLS
+		dataMap.put("DeliveryMode", message.getJMSDeliveryMode()); // NON-NLS
+		dataMap.put("Destination", message.getJMSDestination()); // NON-NLS
+		dataMap.put("Expiration", message.getJMSExpiration()); // NON-NLS
+		dataMap.put("MessageId", message.getJMSMessageID()); // NON-NLS
+		dataMap.put("Priority", message.getJMSPriority()); // NON-NLS
+		dataMap.put("Redelivered", message.getJMSRedelivered()); // NON-NLS
+		dataMap.put("RepyTo", message.getJMSReplyTo()); // NON-NLS
+		dataMap.put("Timestamp", message.getJMSTimestamp()); // NON-NLS
+		dataMap.put("Type", message.getJMSType()); // NON-NLS
 
 		@SuppressWarnings("unchecked")
 		Enumeration<String> propNames = message.getPropertyNames();
@@ -208,7 +233,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link TextMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting text from message.
+	 *             if JMS exception occurs while getting text from message
 	 */
 	protected void parseTextMessage(TextMessage textMessage, Map<String, Object> dataMap) throws JMSException {
 		String text = textMessage.getText();
@@ -225,7 +250,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link BytesMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while reading bytes from message.
+	 *             if JMS exception occurs while reading bytes from message
 	 */
 	protected void parseBytesMessage(BytesMessage bytesMessage, Map<String, Object> dataMap) throws JMSException {
 		byte[] bytes = new byte[(int) bytesMessage.getBodyLength()];
@@ -244,7 +269,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link MapMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting map entries from message.
+	 *             if JMS exception occurs while getting map entries from message
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseMapMessage(MapMessage mapMessage, Map<String, Object> dataMap) throws JMSException {
@@ -263,7 +288,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link StreamMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while reading bytes from message.
+	 *             if JMS exception occurs while reading bytes from message
 	 */
 	protected void parseStreamMessage(StreamMessage streamMessage, Map<String, Object> dataMap) throws JMSException {
 		streamMessage.reset();
@@ -301,7 +326,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from JMS {@link ObjectMessage}
 	 * @throws JMSException
-	 *             if JMS exception occurs while getting {@link Serializable} object from message.
+	 *             if JMS exception occurs while getting {@link Serializable} object from message
 	 */
 	protected void parseObjectMessage(ObjectMessage objMessage, Map<String, Object> dataMap) throws JMSException {
 		Serializable serializableObj = objMessage.getObject();
@@ -318,7 +343,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	 * @param dataMap
 	 *            activity data map collected from custom JMS message
 	 * @throws JMSException
-	 *             if any JMS exception occurs while parsing message.
+	 *             if any JMS exception occurs while parsing message
 	 */
 	protected void parseCustomMessage(Message message, Map<String, Object> dataMap) throws JMSException {
 		logger().log(OpLevel.WARNING, StreamsResources.getBundle(JMSStreamConstants.RESOURCE_BUNDLE_NAME),
