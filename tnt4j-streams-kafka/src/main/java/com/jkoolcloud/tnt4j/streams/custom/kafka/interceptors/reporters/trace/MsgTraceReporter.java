@@ -65,7 +65,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	public static final int POOL_TIME_SECONDS = 3;
 
 	private KafkaMsgTraceStream stream;
-	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig;
+	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig = new HashMap<>();
 	private final Timer pollTimer = new Timer();
 
 	/**
