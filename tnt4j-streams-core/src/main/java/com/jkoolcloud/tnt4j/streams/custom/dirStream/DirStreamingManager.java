@@ -332,6 +332,12 @@ public class DirStreamingManager {
 		}
 	}
 
+	/**
+	 * Cancels streaming job execution.
+	 *
+	 * @param jobId
+	 *            unique job identifier
+	 */
 	public void cancelJob(String jobId) {
 		if (StringUtils.isEmpty(jobId)) {
 			return;

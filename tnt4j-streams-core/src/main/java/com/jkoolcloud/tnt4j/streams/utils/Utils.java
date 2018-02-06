@@ -942,9 +942,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return string representation of object
 	 */
 	public static String toString(Object value) {
-		if (value instanceof int[]) {
-			return Arrays.toString((int[]) value);
-		}
 		if (value instanceof byte[]) {
 			return getString((byte[]) value);
 			// return Arrays.toString((byte[]) value);
@@ -953,37 +950,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			return new String((char[]) value);
 			// return Arrays.toString((char[]) value);
 		}
-		if (value instanceof long[]) {
-			return Arrays.toString((long[]) value);
-		}
-		if (value instanceof float[]) {
-			return Arrays.toString((float[]) value);
-		}
-		if (value instanceof short[]) {
-			return Arrays.toString((short[]) value);
-		}
-		if (value instanceof double[]) {
-			return Arrays.toString((double[]) value);
-		}
-		if (value instanceof boolean[]) {
-			return Arrays.toString((boolean[]) value);
-		}
-		if (value instanceof Object[]) {
-			return toStringDeep((Object[]) value);
-		}
-		if (value instanceof Collection) {
-			Collection<?> c = (Collection<?>) value;
-			return toString(c.toArray());
-		}
-		if (value instanceof Map) {
-			Map<?, ?> m = (Map<?, ?>) value;
-			return toString(m.entrySet());
-		}
 		if (value instanceof Node) {
 			return ((Node) value).getTextContent();
 		}
 
-		return String.valueOf(value);
+		return com.jkoolcloud.tnt4j.utils.Utils.toString(value);
 	}
 
 	/**
@@ -1034,34 +1005,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return valuesArray.length == 1 ? valuesArray[0] : valuesArray;
-	}
-
-	/**
-	 * Returns the appropriate string representation for the specified array.
-	 *
-	 * @param a
-	 *            array to convert to string representation
-	 * @return string representation of array
-	 */
-	public static String toStringDeep(Object[] a) {
-		if (a == null) {
-			return "null"; // NON-NLS
-		}
-
-		int iMax = a.length - 1;
-		if (iMax == -1) {
-			return "[]"; // NON-NLS
-		}
-
-		StringBuilder b = new StringBuilder();
-		b.append('[');
-		for (int i = 0;; i++) {
-			b.append(toString(a[i]));
-			if (i == iMax) {
-				return b.append(']').toString();
-			}
-			b.append(", "); // NON-NLS
-		}
 	}
 
 	/**
@@ -1238,7 +1181,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Loads properties from resource with given name.
+	 * Loads properties from resource with the given name.
 	 *
 	 * @param name
 	 *            the resource name
@@ -1261,7 +1204,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Loads properties from all resource with given name.
+	 * Loads properties from all resource with the given name.
 	 *
 	 * @param name
 	 *            the resource name
@@ -1285,6 +1228,21 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return rProps;
+	}
+
+	/**
+	 * Finds resource with the given name.
+	 *
+	 * @param name
+	 *            the resource name
+	 * @return {@link URL} object for reading the resource, or {@code null} if the resource could not be found or the
+	 *         invoker doesn't have adequate privileges to get the resource.
+	 *
+	 * @see java.lang.ClassLoader#getResource(String)
+	 */
+	public static URL getResource(String name) {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		return loader.getResource(name);
 	}
 
 	/**
