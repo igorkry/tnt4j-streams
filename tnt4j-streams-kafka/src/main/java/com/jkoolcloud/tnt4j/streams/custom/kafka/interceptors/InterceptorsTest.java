@@ -17,8 +17,10 @@
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import java.io.FileReader;
+import java.net.URL;
 import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -28,6 +30,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
 
+import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -80,6 +83,12 @@ public class InterceptorsTest {
 	 *             if exception occurs while running interceptions test
 	 */
 	public static void interceptionsTest() throws Exception {
+		String tnt4jCfgPath = System.getProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY);
+		if (StringUtils.isEmpty(tnt4jCfgPath)) {
+			URL defaultCfg = InterceptionsManager.getDefaultTrackerConfiguration();
+			System.setProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY, defaultCfg.toExternalForm());
+		}
+
 		final Consumer<String, String> consumer = initConsumer();
 
 		Thread pt = new Thread(new Runnable() {

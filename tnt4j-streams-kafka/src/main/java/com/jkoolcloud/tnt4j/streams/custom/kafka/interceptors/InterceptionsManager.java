@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -66,6 +67,7 @@ public class InterceptionsManager {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptionsManager.class);
 
 	private static final String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties"; // NON-NLS
+	private static final String DEFAULT_TRACKER_CFG_FILE = "tnt4j_kafka_metrics_default.properties"; // NON-NLS
 
 	private final Set<TNTKafkaInterceptor> references = new HashSet<>(5);
 	private final Collection<InterceptionsReporter> reporters = new ArrayList<>(2);
@@ -84,7 +86,7 @@ public class InterceptionsManager {
 		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
 			interceptorProps.load(fis);
 		} catch (IOException exc) {
-			Utils.logThrowable(LOGGER, OpLevel.ERROR,
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"InterceptionsManager.cfg.load.failed", interceptorProps, exc);
 		}
@@ -93,13 +95,27 @@ public class InterceptionsManager {
 	private void initialize() {
 		loadProperties();
 
+		if (interceptorProps.isEmpty()) {
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.using.defaults");
+		}
+
 		int reportingPeriod = Utils.getInt("metrics.report.period", interceptorProps,
 				MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC);
 		addReporter(new MetricsReporter(reportingPeriod));
-		boolean traceMessages = Utils.getBoolean("trace.kafka.messages", interceptorProps, true); // NON-NLS
+		boolean traceMessages = Utils.getBoolean("trace.kafka.messages", interceptorProps, false); // NON-NLS
 		if (traceMessages) {
 			addReporter(new MsgTraceReporter());
 		}
+	}
+
+	/**
+	 * Returns default Kafka metrics tracker configuration file path.
+	 * 
+	 * @return default Kafka metrics tracker configuration file path
+	 */
+	public static URL getDefaultTrackerConfiguration() {
+		return Utils.getResource(DEFAULT_TRACKER_CFG_FILE);
 	}
 
 	/**

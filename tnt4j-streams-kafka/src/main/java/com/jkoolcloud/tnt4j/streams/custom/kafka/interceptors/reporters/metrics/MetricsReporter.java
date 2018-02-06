@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -330,6 +331,13 @@ public class MetricsReporter implements InterceptionsReporter {
 	private static Tracker initTracker() {
 		TrackerConfig trackerConfig = DefaultConfigFactory.getInstance().getConfig(MetricsReporter.class,
 				SourceType.APPL, (String) null);
+		String cfgSource = trackerConfig == null ? null : trackerConfig.getProperty("source"); // NON-NLS
+		if (!MetricsReporter.class.getPackage().getName().equals(cfgSource)) {
+			URL defaultCfg = InterceptionsManager.getDefaultTrackerConfiguration();
+			trackerConfig = DefaultConfigFactory.getInstance().getConfig(MetricsReporter.class, SourceType.APPL,
+					defaultCfg.toExternalForm());
+		}
+
 		Tracker tracker = TrackingLogger.getInstance(trackerConfig.build());
 
 		return tracker;
