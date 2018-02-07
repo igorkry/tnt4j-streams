@@ -292,22 +292,34 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	public static int countLines(InputStream is) throws IOException {
 		InputStream bis = is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is);
 		try {
-			byte[] c = new byte[1024];
-			int count = 0;
+			byte[] cBuff = new byte[1024];
+			int lCount = 0;
 			int readChars = 0;
 			boolean endsWithoutNewLine = false;
-			while ((readChars = bis.read(c)) != -1) {
+			boolean skipLF = false;
+			while ((readChars = bis.read(cBuff)) != -1) {
 				for (int i = 0; i < readChars; ++i) {
-					if (c[i] == '\n') {
-						++count;
+					int c = cBuff[i];
+					if (skipLF) {
+						skipLF = false;
+						if (c == '\n') {
+							continue;
+						}
+					}
+					switch (c) {
+					case '\r':
+						skipLF = true;
+					case '\n': /* Fall through */
+						++lCount;
+						break;
 					}
 				}
-				endsWithoutNewLine = (c[readChars - 1] != '\n');
+				endsWithoutNewLine = (cBuff[readChars - 1] != '\n');
 			}
 			if (endsWithoutNewLine) {
-				++count;
+				++lCount;
 			}
-			return count;
+			return lCount;
 		} finally {
 			close(bis);
 		}
