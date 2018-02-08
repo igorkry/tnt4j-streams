@@ -19,16 +19,15 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -90,6 +89,8 @@ public class MetricsReporter implements InterceptionsReporter {
 	 */
 	public static final int DEFAULT_REPORTING_PERIOD_SEC = 30;
 	private static final String TOPIC_UNRELATED = "Topic unrelated"; // NON-NLS
+	private static final String METRICS_CORRELATOR_FIELD_NAME = "parentId"; // NON-NLS
+	private static final String OBJ_NAME_ENTRY_KEY = "ObjectName"; // NON-NLS
 
 	private java.util.Timer metricsReportingTimer;
 
@@ -114,6 +115,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 * Last producer sent message timestamp.
 		 */
 		long lastSend;
+
+		/**
+		 * The metrics correlator, tying all metrics packages of one particular sampling.
+		 */
+		String correlator;
 
 		/**
 		 * Constructs a new TopicMetrics.
@@ -288,11 +294,12 @@ public class MetricsReporter implements InterceptionsReporter {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
 		mapper.registerModule(new MetricsRegistryModule());
-
+		String metricsCorrelator = tracker.newUUID();
 		try {
 			if (InterceptionsManager.getInstance().isProducerIntercepted()) {
 				Map<String, Object> metricsJMX = collectKafkaProducerMetricsJMX();
 				if (MapUtils.isNotEmpty(metricsJMX)) {
+					metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
 					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
 					tracker.log(OpLevel.INFO, msg);
 				}
@@ -300,6 +307,7 @@ public class MetricsReporter implements InterceptionsReporter {
 			if (InterceptionsManager.getInstance().isConsumerIntercepted()) {
 				Map<String, Object> metricsJMX = collectKafkaConsumerMetricsJMX();
 				if (MapUtils.isNotEmpty(metricsJMX)) {
+					metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
 					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
 					tracker.log(OpLevel.INFO, msg);
 				}
@@ -307,9 +315,13 @@ public class MetricsReporter implements InterceptionsReporter {
 
 			Map<String, Object> metricsJMX = collectJVMMetricsJMX();
 			if (MapUtils.isNotEmpty(metricsJMX)) {
+				metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
 				tracker.log(OpLevel.INFO, msg);
 			}
+		} catch (UnsupportedOperationException exc) {
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"MetricsReporter.clients.jmx.unsupported", Utils.getExceptionMessages(exc));
 		} catch (Exception exc) {
 			Utils.logThrowable(LOGGER, OpLevel.WARNING,
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -318,7 +330,9 @@ public class MetricsReporter implements InterceptionsReporter {
 
 		try {
 			for (Map.Entry<String, TopicMetrics> metrics : mRegistry.entrySet()) {
-				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metrics.getValue());
+				TopicMetrics topicMetrics = metrics.getValue();
+				topicMetrics.correlator = metricsCorrelator;
+				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(topicMetrics);
 				tracker.log(OpLevel.INFO, msg);
 			}
 		} catch (JsonProcessingException exc) {
@@ -426,26 +440,83 @@ public class MetricsReporter implements InterceptionsReporter {
 		ObjectName oName = new ObjectName(objNameStr);
 		Set<ObjectName> metricsBeans = mBeanServer.queryNames(oName, null);
 
+		Map<String, Object> mBeanAttrsMap;
 		for (ObjectName mBeanName : metricsBeans) {
 			try {
 				MBeanInfo metricsBean = mBeanServer.getMBeanInfo(mBeanName);
 				MBeanAttributeInfo[] pMetricsAttrs = metricsBean.getAttributes();
+				mBeanAttrsMap = new HashMap<>(pMetricsAttrs.length);
 				for (MBeanAttributeInfo pMetricsAttr : pMetricsAttrs) {
 					try {
-						attrsMap.put(prefix + pMetricsAttr.getName(),
-								mBeanServer.getAttribute(mBeanName, pMetricsAttr.getName()));
+						String attrName = pMetricsAttr.getName();
+						Object attrValue = mBeanServer.getAttribute(mBeanName, attrName);
+						mBeanAttrsMap.put(fixKey(attrName), getAttrSimpleValue(attrValue));
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(), exc);
 					}
 				}
+				if (getMapEntryIgnoreCase(mBeanAttrsMap, OBJ_NAME_ENTRY_KEY) == null) {
+					mBeanAttrsMap.put(OBJ_NAME_ENTRY_KEY, mBeanName.getCanonicalName());
+				}
+				if (true) {
+					Map<String, String> objNameProps = mBeanName.getKeyPropertyList();
+					for (Map.Entry<String, String> objNameProp : objNameProps.entrySet()) {
+						Object mv = mBeanAttrsMap.get(objNameProp.getKey());
+						mBeanAttrsMap.put(objNameProp.getKey() + (mv == null ? "" : "_"), objNameProp.getValue()); // NON-NLS
+					}
+				}
+				attrsMap.put(fixKey(mBeanName.getCanonicalName()), mBeanAttrsMap);
 			} catch (Exception exc) {
 				Utils.logThrowable(LOGGER, OpLevel.WARNING,
 						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MetricsReporter.bean.info.fail", mBeanName, exc);
 			}
 		}
+	}
+
+	private static Object getAttrSimpleValue(Object attrValue) {
+		if (attrValue instanceof ObjectName) {
+			return ((ObjectName) attrValue).getCanonicalName();
+		} else if (attrValue instanceof CompositeData) {
+			CompositeData cdata = (CompositeData) attrValue;
+			Set<String> keys = cdata.getCompositeType().keySet();
+			Map<String, Object> attrsMap = new HashMap<>(keys.size());
+			for (String key : keys) {
+				Object cVal = cdata.get(key);
+				attrsMap.put(fixKey(key), getAttrSimpleValue(cVal));
+			}
+			return attrsMap;
+		} else if (attrValue instanceof TabularData) {
+			TabularData tData = (TabularData) attrValue;
+			Collection<?> values = tData.values();
+			Collection<Object> attrValues = new ArrayList<>(values.size());
+			for (Object tVal : values) {
+				attrValues.add(getAttrSimpleValue(tVal));
+			}
+			return attrValues;
+		} else {
+			return attrValue;
+		}
+	}
+
+	private static String fixKey(String key) {
+		return key.replace(',', ';')
+				// .replace (':','|')
+				.replace('.', '_').replace('\\', '_');
+	}
+
+	public static Map.Entry<String, ?> getMapEntryIgnoreCase(Map<String, ?> map, String key) {
+		if (map != null) {
+			for (Map.Entry<String, ?> me : map.entrySet()) {
+				if (me.getKey().equalsIgnoreCase(key)) {
+					return me;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	private static class MetricsRegistrySerializer extends StdSerializer<TopicMetrics> {

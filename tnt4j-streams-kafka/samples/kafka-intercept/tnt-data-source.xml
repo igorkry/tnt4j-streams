@@ -27,123 +27,40 @@
         <field name="MeanJitter" locator="$.Metrics.histograms.messageProducerJitter.mean" locator-type="Label"/>
     </parser>
 
+    <parser name="SnapshotParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser" default-data-type="AsInput">
+        <field name="EventName" locator="ObjectName" locator-type="Label"/>
+        <field name="EventType" value="SNAPSHOT"/>
+        <field name="EverythingElse" locator="*" locator-type="Label"/>
+    </parser>
+
     <parser name="KafkaConsumerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="Kafka consumer metrics"/>
         <field name="EventType" value="EVENT"/>
-        <field name="io-wait-time-ns-avg" locator="$.['kafka.consumer:io-wait-time-ns-avg']" locator-type="Label" required="true"/>
-        <field name="count" locator="$.['kafka.consumer:count']" locator-type="Label"/>
-        <field name="fetch-latency-max" locator="$.['kafka.consumer:fetch-latency-max']" locator-type="Label"/>
-        <field name="sync-time-avg" locator="$.['kafka.consumer:sync-time-avg']" locator-type="Label"/>
-        <field name="incoming-byte-rate" locator="$.['kafka.consumer:incoming-byte-rate']" locator-type="Label"/>
-        <field name="assigned-partitions" locator="$.['kafka.consumer:assigned-partitions']" locator-type="Label"/>
-        <field name="heartbeat-rate" locator="$.['kafka.consumer:heartbeat-rate']" locator-type="Label"/>
-        <field name="join-time-max" locator="$.['kafka.consumer:join-time-max']" locator-type="Label"/>
-        <field name="request-size-max" locator="$.['kafka.consumer:request-size-max']" locator-type="Label"/>
-        <field name="Version" locator="$.['kafka.consumer:Version']" locator-type="Label"/>
-        <field name="fetch-throttle-time-avg" locator="$.['kafka.consumer:fetch-throttle-time-avg']" locator-type="Label"/>
-        <field name="fetch-latency-avg" locator="$.['kafka.consumer:fetch-latency-avg']" locator-type="Label"/>
-        <field name="sync-rate" locator="$.['kafka.consumer:sync-rate']" locator-type="Label"/>
-        <field name="request-latency-avg" locator="$.['kafka.consumer:request-latency-avg']" locator-type="Label"/>
-        <field name="request-size-avg" locator="$.['kafka.consumer:request-size-avg']" locator-type="Label"/>
-        <field name="CommitId" locator="$.['kafka.consumer:CommitId']" locator-type="Label"/>
-        <field name="io-wait-ratio" locator="$.['kafka.consumer:io-wait-ratio']" locator-type="Label"/>
-        <field name="outgoing-byte-rate" locator="$.['kafka.consumer:outgoing-byte-rate']" locator-type="Label"/>
-        <field name="sync-time-max" locator="$.['kafka.consumer:sync-time-max']" locator-type="Label"/>
-        <field name="records-consumed-rate" locator="$.['kafka.consumer:records-consumed-rate']" locator-type="Label"/>
-        <field name="request-latency-max" locator="$.['kafka.consumer:request-latency-max']" locator-type="Label"/>
-        <field name="records-lag-max" locator="$.['kafka.consumer:records-lag-max']" locator-type="Label"/>
-        <field name="bytes-consumed-rate" locator="$.['kafka.consumer:bytes-consumed-rate']" locator-type="Label"/>
-        <field name="fetch-rate" locator="$.['kafka.consumer:fetch-rate']" locator-type="Label"/>
-        <field name="commit-latency-max" locator="$.['kafka.consumer:commit-latency-max']" locator-type="Label"/>
-        <field name="select-rate" locator="$.['kafka.consumer:select-rate']" locator-type="Label"/>
-        <field name="join-time-avg" locator="$.['kafka.consumer:join-time-avg']" locator-type="Label"/>
-        <field name="request-rate" locator="$.['kafka.consumer:request-rate']" locator-type="Label"/>
-        <field name="fetch-throttle-time-max" locator="$.['kafka.consumer:fetch-throttle-time-max']" locator-type="Label"/>
-        <field name="commit-rate" locator="$.['kafka.consumer:commit-rate']" locator-type="Label"/>
-        <field name="io-ratio" locator="$.['kafka.consumer:io-ratio']" locator-type="Label"/>
-        <field name="response-rate" locator="$.['kafka.consumer:response-rate']" locator-type="Label"/>
-        <field name="fetch-size-avg" locator="$.['kafka.consumer:fetch-size-avg']" locator-type="Label"/>
-        <field name="records-per-request-avg" locator="$.['kafka.consumer:records-per-request-avg']" locator-type="Label"/>
-        <field name="heartbeat-response-time-max" locator="$.['kafka.consumer:heartbeat-response-time-max']" locator-type="Label"/>
-        <field name="last-heartbeat-seconds-ago" locator="$.['kafka.consumer:last-heartbeat-seconds-ago']" locator-type="Label"/>
-        <field name="connection-count" locator="$.['kafka.consumer:connection-count']" locator-type="Label"/>
-        <field name="network-io-rate" locator="$.['kafka.consumer:network-io-rate']" locator-type="Label"/>
-        <field name="join-rate" locator="$.['kafka.consumer:join-rate']" locator-type="Label"/>
-        <field name="connection-creation-rate" locator="$.['kafka.consumer:connection-creation-rate']" locator-type="Label"/>
-        <field name="fetch-size-max" locator="$.['kafka.consumer:fetch-size-max']" locator-type="Label"/>
-        <field name="commit-latency-avg" locator="$.['kafka.consumer:commit-latency-avg']" locator-type="Label"/>
-        <field name="io-time-ns-avg" locator="$.['kafka.consumer:io-time-ns-avg']" locator-type="Label"/>
-
-        <!--
-        <field name="connection-close-rate" locator="$.['kafka.consumer:connection-close-rate']" locator-type="Label"/>
-        <field name="tnt4j_streams_kafka_intercept_test_page_visits-0.records-lag-max"
-               locator="$.['kafka.consumer:tnt4j_streams_kafka_intercept_test_page_visits-0.records-lag-max']" locator-type="Label"/>
-        <field name="tnt4j_streams_kafka_intercept_test_page_visits-0.records-lag-avg"
-               locator="$.['kafka.consumer:tnt4j_streams_kafka_intercept_test_page_visits-0.records-lag-avg']" locator-type="Label"/>
-        -->
+        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
+        </embedded-activity>
     </parser>
 
     <parser name="KafkaProducerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="Kafka producer metrics"/>
         <field name="EventType" value="EVENT"/>
-        <field name="response-rate" locator="$.['kafka.producer:response-rate']" locator-type="Label" required="true"/>
-        <field name="request-latency-max" locator="$.['kafka.producer:request-latency-max']" locator-type="Label"/>
-        <field name="batch-size-avg" locator="$.['kafka.producer:batch-size-avg']" locator-type="Label"/>
-        <field name="batch-size-max" locator="$.['kafka.producer:batch-size-max']" locator-type="Label"/>
-        <field name="bufferpool-wait-ratio" locator="$.['kafka.producer:bufferpool-wait-ratio']" locator-type="Label"/>
-        <field name="compression-rate-avg" locator="$.['kafka.producer:compression-rate-avg']" locator-type="Label"/>
-        <field name="io-wait-ratio" locator="$.['kafka.producer:io-wait-ratio']" locator-type="Label"/>
-        <field name="connection-count" locator="$.['kafka.producer:connection-count']" locator-type="Label"/>
-        <field name="buffer-available-bytes" locator="$.['kafka.producer:buffer-available-bytes']" locator-type="Label"/>
-        <field name="byte-rate" locator="$.['kafka.producer:byte-rate']" locator-type="Label"/>
-        <field name="request-latency-avg" locator="$.['kafka.producer:request-latency-avg']" locator-type="Label"/>
-        <field name="outgoing-byte-rate" locator="$.['kafka.producer:outgoing-byte-rate']" locator-type="Label"/>
-        <field name="requests-in-flight" locator="$.['kafka.producer:requests-in-flight']" locator-type="Label"/>
-        <field name="produce-throttle-time-max" locator="$.['kafka.producer:produce-throttle-time-max']" locator-type="Label"/>
-        <field name="produce-throttle-time-avg" locator="$.['kafka.producer:produce-throttle-time-avg']" locator-type="Label"/>
-        <field name="connection-close-rate" locator="$.['kafka.producer:connection-close-rate']" locator-type="Label"/>
-        <field name="records-per-request-avg" locator="$.['kafka.producer:records-per-request-avg']" locator-type="Label"/>
-        <field name="record-queue-time-avg" locator="$.['kafka.producer:record-queue-time-avg']" locator-type="Label"/>
-        <field name="request-rate" locator="$.['kafka.producer:request-rate']" locator-type="Label"/>
-        <field name="count" locator="$.['kafka.producer:count']" locator-type="Label"/>
-        <field name="CommitId" locator="$.['kafka.producer:CommitId']" locator-type="Label"/>
-        <field name="io-time-ns-avg" locator="$.['kafka.producer:io-time-ns-avg']" locator-type="Label"/>
-        <field name="io-ratio" locator="$.['kafka.producer:io-ratio']" locator-type="Label"/>
-        <field name="record-send-rate" locator="$.['kafka.producer:record-send-rate']" locator-type="Label"/>
-        <field name="select-rate" locator="$.['kafka.producer:select-rate']" locator-type="Label"/>
-        <field name="buffer-exhausted-rate" locator="$.['kafka.producer:buffer-exhausted-rate']" locator-type="Label"/>
-        <field name="record-error-rate" locator="$.['kafka.producer:record-error-rate']" locator-type="Label"/>
-        <field name="metadata-age" locator="$.['kafka.producer:metadata-age']" locator-type="Label"/>
-        <field name="request-size-max" locator="$.['kafka.producer:request-size-max']" locator-type="Label"/>
-        <field name="network-io-rate" locator="$.['kafka.producer:network-io-rate']" locator-type="Label"/>
-        <field name="record-size-avg" locator="$.['kafka.producer:record-size-avg']" locator-type="Label"/>
-        <field name="buffer-total-bytes" locator="$.['kafka.producer:buffer-total-bytes']" locator-type="Label"/>
-        <field name="record-size-max" locator="$.['kafka.producer:record-size-max']" locator-type="Label"/>
-        <field name="Version" locator="$.['kafka.producer:Version']" locator-type="Label"/>
-        <field name="record-retry-rate" locator="$.['kafka.producer:record-retry-rate']" locator-type="Label"/>
-        <field name="incoming-byte-rate" locator="$.['kafka.producer:incoming-byte-rate']" locator-type="Label"/>
-        <field name="waiting-threads" locator="$.['kafka.producer:waiting-threads']" locator-type="Label"/>
-        <field name="connection-creation-rate" locator="$.['kafka.producer:connection-creation-rate']" locator-type="Label"/>
-        <field name="request-size-avg" locator="$.['kafka.producer:request-size-avg']" locator-type="Label"/>
-        <field name="compression-rate" locator="$.['kafka.producer:compression-rate']" locator-type="Label"/>
-        <field name="record-queue-time-max" locator="$.['kafka.producer:record-queue-time-max']" locator-type="Label"/>
-        <field name="io-wait-time-ns-avg" locator="$.['kafka.producer:io-wait-time-ns-avg']" locator-type="Label"/>
+        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
+        </embedded-activity>
     </parser>
 
     <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <field name="EventName" value="JVM metrics"/>
         <field name="EventType" value="EVENT"/>
-        <field name="CpuLoad" locator="$.['java.lang:SystemCpuLoad']" locator-type="Label"/>
-        <field name="LoadedClasses" locator="$.['java.lang:TotalLoadedClassCount']" locator-type="Label"/>
-        <field name="ProcessCpuLoad" locator="$.['java.lang:ProcessCpuLoad']" locator-type="Label"/>
-        <field name="FreeSwapSpaceSize" locator="$.['java.lang:FreeSwapSpaceSize']" locator-type="Label"/>
-        <field name="FreePhysicalMemorySize" locator="$.['java.lang:FreePhysicalMemorySize']" locator-type="Label"/>
-        <field name="TotalSwapSpaceSize" locator="$.['java.lang:TotalSwapSpaceSize']" locator-type="Label"/>
-        <field name="TotalPhysicalMemorySize" locator="$.['java.lang:TotalPhysicalMemorySize']" locator-type="Label"/>
+        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
+        </embedded-activity>
     </parser>
 
     <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <property name="ActivityDelim" value="EOF"/>
+        <field name="ProcessId" locator="$.pid" locator-type="Label"/>
+        <field name="ThreadId" locator="$.tid" locator-type="Label"/>
 
         <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
             <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge">
@@ -151,15 +68,15 @@
             </parser-ref>
 
             <parser-ref name="KafkaConsumerMetrics" aggregation="Merge">
-                <matchExp>JPATH:$.['kafka.consumer:fetch-latency-max']</matchExp>
+                <matchExp>JPATH:$.['kafka.consumer:client-id=consumer-1-type=consumer-metrics']</matchExp>
             </parser-ref>
 
             <parser-ref name="KafkaProducerMetrics" aggregation="Merge">
-                <matchExp>JPATH:$.['kafka.producer:response-rate']</matchExp>
+                <matchExp>JPATH:$.['kafka.producer:id=console-producer-type=app-info']</matchExp>
             </parser-ref>
 
             <parser-ref name="JvmMetricParser" aggregation="Merge">
-                <matchExp>JPATH:$.['java.lang:Version']</matchExp>
+                <matchExp>JPATH:$.['java.lang:name=G1 Eden Space-type=MemoryPool']</matchExp>
             </parser-ref>
         </field>
     </parser>

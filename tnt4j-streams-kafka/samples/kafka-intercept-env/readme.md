@@ -43,8 +43,17 @@ log4j.appender.tnt4jAppender.layout.ConversionPattern=%d{ISO8601} %-5p [%t!%c{1}
 log4j.appender.tnt4jAppender.Threshold=TRACE
 #log4j.appender.tnt4jAppender.bufferSize=512
 
-log4j.logger.com.jkoolcloud.tnt4j.streams=DEBUG tnt4jAppender
+log4j.logger.com.jkoolcloud.tnt4j.streams=DEBUG, tnt4jAppender
+### if streams are not subject to log ###
+#log4j.logger.com.jkoolcloud.tnt4j.streams=OFF
+log4j.additivity.com.jkoolcloud.tnt4j.streams=false
 ```
+* Alter `<KAFKA_INSTALL_DIR>/config/tools-log4j.properties` by adding (to disable streams logging to sample consumer/producer console):
+```properties
+######################## TNT4J ########################
+log4j.logger.com.jkoolcloud.tnt4j.streams=OFF
+log4j.additivity.com.jkoolcloud.tnt4j.streams=false
+``` 
 * Run Kafka provided console producer/consumer  
 ```cmd
 kafka-console-consumer --bootstrap-server localhost:9092 --consumer.config ../../onfig/consumer.properties --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning

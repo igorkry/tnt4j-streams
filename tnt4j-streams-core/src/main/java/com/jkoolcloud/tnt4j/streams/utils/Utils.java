@@ -889,7 +889,29 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return obj instanceof Object[] ? (Object[]) obj
-				: obj instanceof Collection ? ((Collection<?>) obj).toArray() : new Object[] { obj };
+				: obj instanceof Collection ? makeArray((Collection<?>) obj) : new Object[] { obj };
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided {@link java.util.Collection} instance {@code coll}.
+	 *
+	 * @param coll
+	 *            collection to make an array
+	 * @return an array containing all of the elements in provided collection
+	 */
+	public static Object[] makeArray(Collection<?> coll) {
+		return coll == null ? null : coll.toArray();
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided {@link java.util.Map} instance {@code map}.
+	 *
+	 * @param map
+	 *            map to make an array
+	 * @return an array containing all of the elements in provided map
+	 */
+	public static Object[] makeArray(Map<?, ?> map) {
+		return map == null ? null : map.entrySet().toArray();
 	}
 
 	/**

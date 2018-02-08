@@ -35,6 +35,8 @@ import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser;
 
+import net.minidev.json.JSONArray;
+
 /**
  * @author akausinis
  * @version 1.0
@@ -53,9 +55,12 @@ public class MetricsReporterTest {
 		Map<String, Object> attrsMap = new HashMap<>();
 		MetricsReporter.collectMetricsJMX("my.name", "my.name:*", mBeanServer, attrsMap);
 
+		@SuppressWarnings("unchecked")
+		Map<String, ?> mBeanAttsMap = (Map<String, ?>) attrsMap.entrySet().iterator().next().getValue();
+
 		// Assure created right
-		assertThat(attrsMap.get("my.nameLong"), instanceOf(Long.class));
-		assertThat(attrsMap.get("my.nameFloat"), instanceOf(Float.class));
+		assertThat(mBeanAttsMap.get("Long"), instanceOf(Long.class));
+		assertThat(mBeanAttsMap.get("Float"), instanceOf(Float.class));
 
 		// Serialize to string
 		ObjectMapper mapper = new ObjectMapper();
@@ -63,26 +68,25 @@ public class MetricsReporterTest {
 
 		// Try parsing
 		DocumentContext context = JsonPath.parse(valueToWriteToTopic);
-		Object longV = context.read("$['my.nameLong']");
-		Object floatV = context.read("$['my.nameFloat']");
+		JSONArray longV = context.read("$..Long");
+		JSONArray floatV = context.read("$..Float");
 
 		// Try the way Streams actually does this
 		ActivityJsonParser parser = new ActivityJsonParser();
 		parser.setDefaultDataType(ActivityFieldDataType.AsInput);
 		ActivityField af = new ActivityField("Long");
 		ActivityField af2 = new ActivityField("Float");
-		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$['my.nameLong']",
-				parser.getDefaultDataType()));
-		af2.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$['my.nameFloat']",
-				parser.getDefaultDataType()));
+		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$..Long", parser.getDefaultDataType()));
+		af2.addLocator(
+				new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$..Float", parser.getDefaultDataType()));
 		parser.addField(af);
 		parser.addField(af2);
 		ActivityInfo ai = parser.parse(mock(TNTInputStream.class), valueToWriteToTopic);
 		assertThat(ai.getFieldValue("Long"), instanceOf(Integer.class));
 		assertThat(ai.getFieldValue("Float"), instanceOf(Double.class));
 
-		assertThat(longV, instanceOf(Integer.class));
-		assertThat(floatV, instanceOf(Double.class));
+		assertThat(longV.get(0), instanceOf(Integer.class));
+		assertThat(floatV.get(0), instanceOf(Double.class));
 	}
 
 	private static class TestMbean implements DynamicMBean {

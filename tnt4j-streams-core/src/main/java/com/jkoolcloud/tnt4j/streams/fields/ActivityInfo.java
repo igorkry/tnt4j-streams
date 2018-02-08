@@ -426,7 +426,7 @@ public class ActivityInfo {
 			String pKey = propPrefix + String.valueOf(pme.getKey());
 
 			if (pme.getValue() instanceof Map) {
-				addPropertiesMap((Map<?, ?>) pme.getValue(), pKey + StreamsConstants.DEFAULT_PATH_DELIM);
+				addPropertiesMap((Map<?, ?>) pme.getValue(), pKey + StreamsConstants.MAP_PROP_NAME_TOKENS_DELIM);
 			} else {
 				addActivityProperty(pKey, pme.getValue());
 			}
