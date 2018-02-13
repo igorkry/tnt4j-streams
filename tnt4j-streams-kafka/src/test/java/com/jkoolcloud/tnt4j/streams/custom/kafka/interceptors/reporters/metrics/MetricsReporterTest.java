@@ -53,7 +53,7 @@ public class MetricsReporterTest {
 		mbean.setAttribute("Float", 15f);
 		mBeanServer.registerMBean(mbean, mbean.name());
 		Map<String, Object> attrsMap = new HashMap<>();
-		MetricsReporter.collectMetricsJMX("my.name", "my.name:*", mBeanServer, attrsMap);
+		MetricsReporter.collectMetricsJMX("my.name:*", mBeanServer, attrsMap);
 
 		@SuppressWarnings("unchecked")
 		Map<String, ?> mBeanAttsMap = (Map<String, ?>) attrsMap.entrySet().iterator().next().getValue();
