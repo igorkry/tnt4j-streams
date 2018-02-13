@@ -28,57 +28,19 @@
     </parser>
 
     <parser name="SnapshotParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser" default-data-type="AsInput">
-        <field name="EventName" locator="ObjectName" locator-type="Label"/>
+        <field name="EventName" locator="properties.ObjectName" locator-type="Label"/>
         <field name="EventType" value="SNAPSHOT"/>
-        <field name="EverythingElse" locator="*" locator-type="Label"/>
-    </parser>
-
-    <parser name="KafkaConsumerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
-        <field name="EventName" value="Kafka consumer metrics"/>
-        <field name="EventType" value="EVENT"/>
-        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
-        </embedded-activity>
-    </parser>
-
-    <parser name="KafkaProducerMetrics" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
-        <field name="EventName" value="Kafka producer metrics"/>
-        <field name="EventType" value="EVENT"/>
-        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
-        </embedded-activity>
-    </parser>
-
-    <parser name="JvmMetricParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
-        <field name="EventName" value="JVM metrics"/>
-        <field name="EventType" value="EVENT"/>
-        <embedded-activity name="beans" locator="$.[*]" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
-        </embedded-activity>
+        <field name="EElse" locator="properties.*" locator-type="Label"/>
     </parser>
 
     <parser name="TNTJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
         <property name="ActivityDelim" value="EOF"/>
-        <field name="ProcessId" locator="$.pid" locator-type="Label"/>
-        <field name="ThreadId" locator="$.tid" locator-type="Label"/>
+        <field name="EventType" value="Activity"/>
+        <field name="EventName" locator="$.operation" locator-type="Label"/>
 
-        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
-            <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge">
-                <matchExp>JPATH:$.Topic</matchExp>
-            </parser-ref>
-
-            <parser-ref name="KafkaConsumerMetrics" aggregation="Merge">
-                <matchExp>JPATH:$.['kafka.consumer:client-id=consumer-1-type=consumer-metrics']</matchExp>
-            </parser-ref>
-
-            <parser-ref name="KafkaProducerMetrics" aggregation="Merge">
-                <matchExp>JPATH:$.['kafka.producer:id=console-producer-type=app-info']</matchExp>
-            </parser-ref>
-
-            <parser-ref name="JvmMetricParser" aggregation="Merge">
-                <matchExp>JPATH:$.['java.lang:name=G1 Eden Space-type=MemoryPool']</matchExp>
-            </parser-ref>
-        </field>
+        <embedded-activity name="Snapshoots" locator="$.snapshots.[*]" locator-type="Label">
+            <parser-ref name="SnapshotParser" aggregation="Relate"/>
+        </embedded-activity>
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser">

@@ -209,17 +209,20 @@ public class InterceptionsManager {
 	/**
 	 * Notifies reporters that Kafka producer has sent message.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking send
 	 * @param producerRecord
 	 *            producer record to be sent
 	 *
 	 * @return producer record to be sent
 	 */
-	public ProducerRecord<Object, Object> send(ProducerRecord<Object, Object> producerRecord) {
+	public ProducerRecord<Object, Object> send(TNTKafkaPInterceptor interceptor,
+			ProducerRecord<Object, Object> producerRecord) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.send", producerRecord);
 
 		for (InterceptionsReporter rep : reporters) {
-			rep.send(producerRecord);
+			rep.send(interceptor, producerRecord);
 		}
 
 		return producerRecord;
@@ -228,6 +231,8 @@ public class InterceptionsManager {
 	/**
 	 * Notifies reporters that Kafka producer has acknowledge sent message.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking acknowledge
 	 * @param recordMetadata
 	 *            sent message record metadata
 	 * @param e
@@ -235,18 +240,21 @@ public class InterceptionsManager {
 	 * @param clusterResource
 	 *            cluster resource metadata records where sent to
 	 */
-	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
+	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
+			ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.acknowledge", recordMetadata, e); // NOTE: exception logging
 
 		for (InterceptionsReporter rep : reporters) {
-			rep.acknowledge(recordMetadata, e, clusterResource);
+			rep.acknowledge(interceptor, recordMetadata, e, clusterResource);
 		}
 	}
 
 	/**
 	 * Notifies reporters that Kafka consumer has consumed messages.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking commit
 	 * @param consumerRecords
 	 *            consumed records collection
 	 * @param clusterResource
@@ -254,13 +262,13 @@ public class InterceptionsManager {
 	 *
 	 * @return consumed records collection
 	 */
-	public ConsumerRecords<Object, Object> consume(ConsumerRecords<Object, Object> consumerRecords,
-			ClusterResource clusterResource) {
+	public ConsumerRecords<Object, Object> consume(TNTKafkaCInterceptor interceptor,
+			ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.consume", consumerRecords);
 
 		for (InterceptionsReporter rep : reporters) {
-			rep.consume(consumerRecords, clusterResource);
+			rep.consume(interceptor, consumerRecords, clusterResource);
 		}
 
 		return consumerRecords;
@@ -269,15 +277,17 @@ public class InterceptionsManager {
 	/**
 	 * Notifies reporters that Kafka consumer has committed messages.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking commit
 	 * @param map
 	 *            committed records topics and messages map
 	 */
-	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
+	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> map) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 				"InterceptionsManager.commit", map);
 
 		for (InterceptionsReporter rep : reporters) {
-			rep.commit(map);
+			rep.commit(interceptor, map);
 		}
 	}
 

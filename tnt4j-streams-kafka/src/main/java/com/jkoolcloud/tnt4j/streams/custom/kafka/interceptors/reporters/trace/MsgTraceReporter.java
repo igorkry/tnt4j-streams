@@ -37,6 +37,8 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
@@ -119,7 +121,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void send(ProducerRecord<Object, Object> producerRecord) {
+	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
 		if (shouldSendTrace(producerRecord.topic(), true)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
@@ -142,7 +144,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
+	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
+			ClusterResource clusterResource) {
 		if (shouldSendTrace(recordMetadata.topic(), false)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
@@ -179,7 +182,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource) {
+	public void consume(TNTKafkaCInterceptor interceptor, ConsumerRecords<Object, Object> consumerRecords,
+			ClusterResource clusterResource) {
 		ActivityInfo ai;
 		for (ConsumerRecord<Object, Object> cr : consumerRecords) {
 			if (shouldSendTrace(cr.topic(), true)) {
@@ -222,7 +226,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void commit(Map<TopicPartition, OffsetAndMetadata> map) {
+	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> map) {
 		ActivityInfo ai;
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> me : map.entrySet()) {
 			if (shouldSendTrace(me.getKey().topic(), false)) {

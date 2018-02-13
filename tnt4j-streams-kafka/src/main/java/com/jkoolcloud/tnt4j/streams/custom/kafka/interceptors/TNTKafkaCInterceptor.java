@@ -47,12 +47,12 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 
 	@Override
 	public ConsumerRecords<Object, Object> onConsume(ConsumerRecords<Object, Object> consumerRecords) {
-		return iManager.consume(consumerRecords, clusterResource);
+		return iManager.consume(this, consumerRecords, clusterResource);
 	}
 
 	@Override
 	public void onCommit(Map<TopicPartition, OffsetAndMetadata> map) {
-		iManager.commit(map);
+		iManager.commit(this, map);
 	}
 
 	@Override

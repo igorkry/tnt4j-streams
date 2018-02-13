@@ -55,15 +55,21 @@ import com.jkoolcloud.tnt4j.TrackingLogger;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.Property;
+import com.jkoolcloud.tnt4j.core.PropertySnapshot;
+import com.jkoolcloud.tnt4j.core.Snapshot;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
+import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 
 /**
  * Producer/Consumer interceptors intercepted data metrics aggregator and reporter sending collected metrics data as
@@ -89,16 +95,18 @@ public class MetricsReporter implements InterceptionsReporter {
 	 */
 	public static final int DEFAULT_REPORTING_PERIOD_SEC = 30;
 	private static final String TOPIC_UNRELATED = "Topic unrelated"; // NON-NLS
-	private static final String METRICS_CORRELATOR_FIELD_NAME = "parentId"; // NON-NLS
 	private static final String OBJ_NAME_ENTRY_KEY = "ObjectName"; // NON-NLS
+	private static final String CLIENT_ID_PROP_NAME = "client.id"; // NON-NLS
 
 	private java.util.Timer metricsReportingTimer;
 
-	private Tracker tracker;
+	protected Tracker tracker;
 
 	private Map<String, TopicMetrics> topicsMetrics = new HashMap<>();
 
-	private static class TopicMetrics {
+	private boolean useObjectNameProperties = true;
+
+	protected static class TopicMetrics {
 		/**
 		 * The topic name.
 		 */
@@ -115,11 +123,18 @@ public class MetricsReporter implements InterceptionsReporter {
 		 * Last producer sent message timestamp.
 		 */
 		long lastSend;
-
 		/**
 		 * The metrics correlator, tying all metrics packages of one particular sampling.
 		 */
 		String correlator;
+		/**
+		 * Topic offset data.
+		 */
+		Offset offset;
+		/**
+		 * String client identifier.
+		 */
+		String clientId;
 
 		/**
 		 * Constructs a new TopicMetrics.
@@ -129,9 +144,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 * @param partition
 		 *            the partition index
 		 */
-		TopicMetrics(String topic, Integer partition) {
+		TopicMetrics(String topic, Integer partition, String clientId) {
 			this.topic = topic;
 			this.partition = partition;
+			this.clientId = clientId;
+			offset = new Offset();
 		}
 	}
 
@@ -151,9 +168,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the topic name
 		 * @param partition
 		 *            the partition index
+		 * @param clientId
+		 *            client identifier
 		 */
-		ConsumerTopicMetrics(String topic, Integer partition) {
-			super(topic, partition);
+		ConsumerTopicMetrics(String topic, Integer partition, String clientId) {
+			super(topic, partition, clientId);
 		}
 	}
 
@@ -172,9 +191,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the topic name
 		 * @param partition
 		 *            the partition index
+		 * @param clientId
+		 *            client identifier
 		 */
-		ProducerTopicMetrics(String topic, Integer partition) {
-			super(topic, partition);
+		ProducerTopicMetrics(String topic, Integer partition, String clientId) {
+			super(topic, partition, clientId);
 		}
 	}
 
@@ -205,9 +226,10 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void send(ProducerRecord<Object, Object> producerRecord) {
+	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
 		String topic = producerRecord.topic();
-		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition());
+		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition(), clientId);
 		long now = System.currentTimeMillis();
 		long jitter = now - topicMetrics.lastSend;
 		topicMetrics.jitter.update(jitter);
@@ -216,28 +238,28 @@ public class MetricsReporter implements InterceptionsReporter {
 		topicMetrics.sendC.inc();
 	}
 
-	private ConsumerTopicMetrics getConsumerTopicMetrics(String topic, Integer partition) {
+	private ConsumerTopicMetrics getConsumerTopicMetrics(String topic, Integer partition, String clientId) {
 		if (topic == null) {
 			topic = TOPIC_UNRELATED;
 		}
 		String key = getMetricsKey(topic, partition, ConsumerTopicMetrics.class);
 		ConsumerTopicMetrics topicMetrics = (ConsumerTopicMetrics) topicsMetrics.get(key);
 		if (topicMetrics == null) {
-			topicMetrics = new ConsumerTopicMetrics(topic, partition);
+			topicMetrics = new ConsumerTopicMetrics(topic, partition, clientId);
 			topicsMetrics.put(key, topicMetrics);
 		}
 
 		return topicMetrics;
 	}
 
-	private ProducerTopicMetrics getProducerTopicMetrics(String topic, Integer partition) {
+	private ProducerTopicMetrics getProducerTopicMetrics(String topic, Integer partition, String clientId) {
 		if (topic == null) {
 			topic = TOPIC_UNRELATED;
 		}
 		String key = getMetricsKey(topic, partition, ProducerTopicMetrics.class);
 		ProducerTopicMetrics topicMetrics = (ProducerTopicMetrics) topicsMetrics.get(key);
 		if (topicMetrics == null) {
-			topicMetrics = new ProducerTopicMetrics(topic, partition);
+			topicMetrics = new ProducerTopicMetrics(topic, partition, clientId);
 			topicsMetrics.put(key, topicMetrics);
 		}
 
@@ -249,19 +271,28 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	@Override
-	public void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource) {
-		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(recordMetadata.topic(), recordMetadata.partition());
+	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
+			ClusterResource clusterResource) {
+		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(recordMetadata.topic(), recordMetadata.partition(),
+				clientId);
 		if (e != null) {
 			topicMetrics.errorMeter.mark();
 		}
 		topicMetrics.ackM.mark();
 		topicMetrics.ackC.inc();
+
+		if (recordMetadata.offset() != -1L) {
+			topicMetrics.offset.update(recordMetadata.offset(), recordMetadata.timestamp());
+		}
 	}
 
 	@Override
-	public void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource) {
+	public void consume(TNTKafkaCInterceptor interceptor, ConsumerRecords<Object, Object> consumerRecords,
+			ClusterResource clusterResource) {
+		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
 		for (ConsumerRecord<?, ?> record : consumerRecords) {
-			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition());
+			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition(), clientId);
 			long duration = System.currentTimeMillis() - record.timestamp();
 			topicMetrics.latency.update(duration, TimeUnit.MILLISECONDS);
 			topicMetrics.keySize.update(record.serializedKeySize());
@@ -269,15 +300,18 @@ public class MetricsReporter implements InterceptionsReporter {
 			topicMetrics.consumeMessagesC.inc();
 			topicMetrics.consumeM.mark();
 			topicMetrics.consumeC.inc();
-		}
 
+			topicMetrics.offset.update(record.offset(), record.timestamp());
+		}
 	}
 
 	@Override
-	public void commit(Map<TopicPartition, OffsetAndMetadata> tpomMap) {
+	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> tpomMap) {
+		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> tpom : tpomMap.entrySet()) {
 			TopicPartition partition = tpom.getKey();
-			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(partition.topic(), partition.partition());
+			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(partition.topic(), partition.partition(),
+					clientId);
 			topicMetrics.commitC.inc();
 		}
 	}
@@ -290,35 +324,24 @@ public class MetricsReporter implements InterceptionsReporter {
 		Utils.close(tracker);
 	}
 
-	private void reportMetrics(Map<String, TopicMetrics> mRegistry) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
-		mapper.registerModule(new MetricsRegistryModule());
+	protected void reportMetrics(Map<String, TopicMetrics> mRegistry) {
 		String metricsCorrelator = tracker.newUUID();
+
 		try {
 			if (InterceptionsManager.getInstance().isProducerIntercepted()) {
-				Map<String, Object> metricsJMX = collectKafkaProducerMetricsJMX();
-				if (MapUtils.isNotEmpty(metricsJMX)) {
-					metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
-					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
-					tracker.log(OpLevel.INFO, msg);
-				}
+				TrackingActivity metricsJMX = collectKafkaProducerMetricsJMX(tracker);
+				metricsJMX.setCorrelator(metricsCorrelator);
+				prepareAndSend(metricsJMX);
 			}
 			if (InterceptionsManager.getInstance().isConsumerIntercepted()) {
-				Map<String, Object> metricsJMX = collectKafkaConsumerMetricsJMX();
-				if (MapUtils.isNotEmpty(metricsJMX)) {
-					metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
-					String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
-					tracker.log(OpLevel.INFO, msg);
-				}
+				TrackingActivity metricsJMX = collectKafkaConsumerMetricsJMX(tracker);
+				metricsJMX.setCorrelator(metricsCorrelator);
+				prepareAndSend(metricsJMX);
 			}
 
-			Map<String, Object> metricsJMX = collectJVMMetricsJMX();
-			if (MapUtils.isNotEmpty(metricsJMX)) {
-				metricsJMX.put(METRICS_CORRELATOR_FIELD_NAME, metricsCorrelator);
-				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metricsJMX);
-				tracker.log(OpLevel.INFO, msg);
-			}
+			TrackingActivity metricsJMX = collectJVMMetricsJMX(tracker);
+			metricsJMX.setCorrelator(metricsCorrelator);
+			prepareAndSend(metricsJMX);
 		} catch (UnsupportedOperationException exc) {
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.clients.jmx.unsupported", Utils.getExceptionMessages(exc));
@@ -329,7 +352,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 
 		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
+			mapper.registerModule(new MetricsRegistryModule());
 			for (Map.Entry<String, TopicMetrics> metrics : mRegistry.entrySet()) {
+				mapper.registerModule(new MetricsRegistryModule());
 				TopicMetrics topicMetrics = metrics.getValue();
 				topicMetrics.correlator = metricsCorrelator;
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(topicMetrics);
@@ -340,6 +367,11 @@ public class MetricsReporter implements InterceptionsReporter {
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.report.metrics.fail", exc);
 		}
+	}
+
+	private void prepareAndSend(TrackingActivity activity) throws JsonProcessingException {
+		activity.setSeverity(OpLevel.INFO);
+		tracker.tnt(activity);
 	}
 
 	private static Tracker initTracker() {
@@ -360,114 +392,120 @@ public class MetricsReporter implements InterceptionsReporter {
 	/**
 	 * Collects Kafka consumer domain {@code 'kafka.consumer'} JMX attributes values.
 	 *
-	 * @return map of Kafka consumer JMX attributes values
+	 * @param tracker
+	 *            tracker instance to use
+	 * @return activity containing snapshots of Kafka consumer JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
 	 */
-	private static Map<String, Object> collectKafkaConsumerMetricsJMX() {
-		Map<String, Object> attrsMap = new HashMap<>(20);
+	private TrackingActivity collectKafkaConsumerMetricsJMX(Tracker tracker) {
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka consumer metrics");
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
-			collectMetricsJMX("kafka.consumer:", "kafka.consumer:*", mBeanServer, attrsMap); // NON-NLS
+			collectMetricsJMX("kafka.consumer:*", mBeanServer, activity); // NON-NLS
 		} catch (Exception exc) {
 			Utils.logThrowable(LOGGER, OpLevel.WARNING,
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.consumer.jmx.fail", exc);
 		}
 
-		return attrsMap;
+		return activity;
 	}
 
 	/**
 	 * Collects Kafka producer domain {@code 'kafka.producer'} JMX attributes values.
 	 *
-	 * @return map of Kafka producer JMX attributes values
+	 * @param tracker
+	 *            tracker instance to use
+	 * @return activity containing snapshots of Kafka producer JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
 	 */
-	public static Map<String, Object> collectKafkaProducerMetricsJMX() {
-		Map<String, Object> attrsMap = new HashMap<>(20);
+	public TrackingActivity collectKafkaProducerMetricsJMX(Tracker tracker) {
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka producer metrics");
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
-			collectMetricsJMX("kafka.producer:", "kafka.producer:*", mBeanServer, attrsMap); // NON-NLS
+			collectMetricsJMX("kafka.producer:*", mBeanServer, activity); // NON-NLS
 		} catch (Exception exc) {
 			Utils.logThrowable(LOGGER, OpLevel.WARNING,
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.producer.jmx.fail", exc);
 		}
-		return attrsMap;
+		return activity;
 	}
 
 	/**
 	 * Collects JVM domain {@code 'java.lang'} JMX attributes values.
-	 * 
-	 * @return map of JVM JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, String, javax.management.MBeanServer, java.util.Map)
+	 * @param tracker
+	 *            tracker instance to use
+	 * @return activity containing snapshots of JVM JMX attributes values
+	 *
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
 	 */
-	public static Map<String, Object> collectJVMMetricsJMX() {
-		Map<String, Object> attrsMap = new HashMap<>();
+	public TrackingActivity collectJVMMetricsJMX(Tracker tracker) {
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "JVM metrics");
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
-			collectMetricsJMX("java.lang:", "java.lang:*", mBeanServer, attrsMap); // NON-NLS
+			collectMetricsJMX("java.lang:*", mBeanServer, activity); // NON-NLS
 		} catch (Exception exc) {
 			Utils.logThrowable(LOGGER, OpLevel.WARNING,
 					StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MetricsReporter.jvm.jmx.fail", exc);
 		}
-		return attrsMap;
+		return activity;
 	}
 
 	/**
 	 * Collects JMX attributes of MBeans defined by <tt>objNameStr</tt>.
 	 *
-	 * @param prefix
-	 *            attribute key prefix
 	 * @param objNameStr
 	 *            MBeans object name pattern to query
 	 * @param mBeanServer
 	 *            MBean server instance to use
-	 * @param attrsMap
-	 *            attributes map to put collected values
+	 * @param activity
+	 *            activity instance to put JMX metrics snapshots
 	 * @throws Exception
 	 *             if JMX attributes collecting fails
 	 */
-	public static void collectMetricsJMX(String prefix, String objNameStr, MBeanServer mBeanServer,
-			Map<String, Object> attrsMap) throws Exception {
+	public void collectMetricsJMX(String objNameStr, MBeanServer mBeanServer, TrackingActivity activity)
+			throws Exception {
 		ObjectName oName = new ObjectName(objNameStr);
 		Set<ObjectName> metricsBeans = mBeanServer.queryNames(oName, null);
 
-		Map<String, Object> mBeanAttrsMap;
 		for (ObjectName mBeanName : metricsBeans) {
 			try {
+				PropertySnapshot snapshot = new PropertySnapshot(mBeanName.getCanonicalName());
 				MBeanInfo metricsBean = mBeanServer.getMBeanInfo(mBeanName);
 				MBeanAttributeInfo[] pMetricsAttrs = metricsBean.getAttributes();
-				mBeanAttrsMap = new HashMap<>(pMetricsAttrs.length);
 				for (MBeanAttributeInfo pMetricsAttr : pMetricsAttrs) {
 					try {
 						String attrName = pMetricsAttr.getName();
 						Object attrValue = mBeanServer.getAttribute(mBeanName, attrName);
-						mBeanAttrsMap.put(fixKey(attrName), getAttrSimpleValue(attrValue));
+						processAttrValue(snapshot, new PropertyNameBuilder(pMetricsAttr.getName()), attrValue);
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 								"MetricsReporter.bean.attr.fail", mBeanName, pMetricsAttr.getName(), exc);
 					}
 				}
-				if (getMapEntryIgnoreCase(mBeanAttrsMap, OBJ_NAME_ENTRY_KEY) == null) {
-					mBeanAttrsMap.put(OBJ_NAME_ENTRY_KEY, mBeanName.getCanonicalName());
+
+				if (getSnapshotPropIgnoreCase(snapshot, OBJ_NAME_ENTRY_KEY) == null) {
+					snapshot.add(OBJ_NAME_ENTRY_KEY, mBeanName.getCanonicalName());
 				}
-				if (true) {
+				if (useObjectNameProperties) {
+					snapshot.add("domain", mBeanName.getDomain()); // NON-NLS
 					Map<String, String> objNameProps = mBeanName.getKeyPropertyList();
 					for (Map.Entry<String, String> objNameProp : objNameProps.entrySet()) {
-						Object mv = mBeanAttrsMap.get(objNameProp.getKey());
-						mBeanAttrsMap.put(objNameProp.getKey() + (mv == null ? "" : "_"), objNameProp.getValue()); // NON-NLS
+						String propKey = objNameProp.getKey();
+						Object mv = snapshot.get(propKey);
+						snapshot.add(propKey + (mv == null ? "" : "_"), objNameProp.getValue()); // NON-NLS
 					}
 				}
-				attrsMap.put(fixKey(mBeanName.getCanonicalName()), mBeanAttrsMap);
+				activity.addSnapshot(snapshot);
 			} catch (Exception exc) {
 				Utils.logThrowable(LOGGER, OpLevel.WARNING,
 						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -476,42 +514,39 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 	}
 
-	private static Object getAttrSimpleValue(Object attrValue) {
-		if (attrValue instanceof ObjectName) {
-			return ((ObjectName) attrValue).getCanonicalName();
-		} else if (attrValue instanceof CompositeData) {
-			CompositeData cdata = (CompositeData) attrValue;
+	protected static PropertySnapshot processAttrValue(PropertySnapshot snapshot, PropertyNameBuilder propName,
+			Object value) {
+		if (value instanceof CompositeData) {
+			CompositeData cdata = (CompositeData) value;
 			Set<String> keys = cdata.getCompositeType().keySet();
-			Map<String, Object> attrsMap = new HashMap<>(keys.size());
 			for (String key : keys) {
 				Object cVal = cdata.get(key);
-				attrsMap.put(fixKey(key), getAttrSimpleValue(cVal));
+				processAttrValue(snapshot, propName.append(key), cVal);
 			}
-			return attrsMap;
-		} else if (attrValue instanceof TabularData) {
-			TabularData tData = (TabularData) attrValue;
+			propName.popLevel();
+		} else if (value instanceof TabularData) {
+			TabularData tData = (TabularData) value;
 			Collection<?> values = tData.values();
-			Collection<Object> attrValues = new ArrayList<>(values.size());
+			int row = 0;
 			for (Object tVal : values) {
-				attrValues.add(getAttrSimpleValue(tVal));
+				processAttrValue(snapshot, propName.append(padNumber(++row)), tVal);
 			}
-			return attrValues;
+			propName.popLevel();
 		} else {
-			return attrValue;
+			snapshot.add(propName.propString(), value);
 		}
+		return snapshot;
 	}
 
-	private static String fixKey(String key) {
-		return key.replace(',', ';')
-				// .replace (':','|')
-				.replace('.', '_').replace('\\', '_');
+	private static String padNumber(int idx) {
+		return idx < 10 ? "0" + idx : String.valueOf(idx);
 	}
 
-	public static Map.Entry<String, ?> getMapEntryIgnoreCase(Map<String, ?> map, String key) {
-		if (map != null) {
-			for (Map.Entry<String, ?> me : map.entrySet()) {
-				if (me.getKey().equalsIgnoreCase(key)) {
-					return me;
+	public static Property getSnapshotPropIgnoreCase(Snapshot snap, String key) {
+		if (snap != null) {
+			for (Property property : snap.getSnapshot()) {
+				if (property.getKey().equalsIgnoreCase(key)) {
+					return property;
 				}
 			}
 		}
@@ -519,7 +554,7 @@ public class MetricsReporter implements InterceptionsReporter {
 		return null;
 	}
 
-	private static class MetricsRegistrySerializer extends StdSerializer<TopicMetrics> {
+	protected static class MetricsRegistrySerializer extends StdSerializer<TopicMetrics> {
 
 		/**
 		 * Constructs a new MetricsRegistrySerializer.
@@ -536,12 +571,15 @@ public class MetricsReporter implements InterceptionsReporter {
 			json.writeObjectField("Partition", topicMetrics.partition); // NON-NLS
 			json.writeObjectField("Type", topicMetrics.getClass().getSimpleName()); // NON-NLS
 			json.writeObjectField("Metrics", topicMetrics.mRegistry); // NON-NLS
+			json.writeObjectField("Correlator", topicMetrics.correlator); // NON-NLS
+			json.writeObjectField("Offset", topicMetrics.offset.values()); // NON-NLS
+			json.writeObjectField("ClientId", topicMetrics.clientId); // NON-NLS
 
 			json.writeEndObject();
 		}
 	}
 
-	private static class MetricsRegistryModule extends Module {
+	protected static class MetricsRegistryModule extends Module {
 		private static final Version VERSION = new Version(1, 2, 0, "", "com.jkoolcloud.tnt4j.streams", // NON-NLS
 				"tnt4j-streams-kafka"); // NON-NLS
 
@@ -561,6 +599,117 @@ public class MetricsReporter implements InterceptionsReporter {
 			simpleSerializers.addSerializer(new MetricsRegistrySerializer());
 
 			setupContext.addSerializers(simpleSerializers);
+		}
+	}
+
+	private static class Offset {
+		Map<String, Long> values = new HashMap<>(2);
+
+		Offset() {
+		}
+
+		void update(long offset, long timestamp) {
+			values.put("offset", offset); // NON-NLS
+			values.put("timestamp", timestamp); // NON-NLS
+		}
+
+		Map<?, ?> values() {
+			return values;
+		}
+	}
+
+	public static class PropertyNameBuilder {
+		private StringBuilder sb;
+		private Deque<Integer> marks;
+		private String delimiter = "\\";
+
+		/**
+		 * Constructs a new PropertyNameBuilder. Default delimiter is {@code "\"}.
+		 *
+		 * @param initName
+		 *            initial property name string
+		 */
+		public PropertyNameBuilder(String initName) {
+			this(initName, "\\");
+		}
+
+		/**
+		 * Constructs a new PropertyNameBuilder.
+		 *
+		 * @param initName
+		 *            initial property name string
+		 * @param delimiter
+		 *            property tokens delimiter
+		 */
+		public PropertyNameBuilder(String initName, String delimiter) {
+			sb = new StringBuilder(checkNull(initName));
+			marks = new ArrayDeque<>(5);
+			this.delimiter = delimiter;
+		}
+
+		/**
+		 * Resets property name builder setting new initial property name value.
+		 * <p>
+		 * Internal {@link StringBuilder} is reset to {@code 0} position and marks stack is cleared.
+		 *
+		 * @param initName
+		 *            initial property name string
+		 */
+		public void reset(String initName) {
+			sb.setLength(0);
+			sb.append(checkNull(initName));
+			marks.clear();
+		}
+
+		private static String checkNull(String initName) {
+			return initName == null ? "null" : initName;
+		}
+
+		/**
+		 * Appends provided string to current property name in internal {@link StringBuilder}. Constructor defined
+		 * {@code delimiter} is added before string to tokenize property name.
+		 * <p>
+		 * Before appending internal {@link StringBuilder}, current builder length is pushed to marks stack for later
+		 * use.
+		 *
+		 * @param str
+		 *            string to append to property name
+		 * @return instance of this property name builder
+		 */
+		public PropertyNameBuilder append(String str) {
+			marks.push(sb.length());
+			sb.append(delimiter).append(checkNull(str));
+			return this;
+		}
+
+		/**
+		 * Resets internal {@link StringBuilder} to marked position of previous token. If marks stack is empty - nothing
+		 * happens, leaving initial property name string in string builder.
+		 */
+		public void popLevel() {
+			if (!marks.isEmpty()) {
+				sb.setLength(marks.pop());
+			}
+		}
+
+		/**
+		 * Returns internal {@link StringBuilder} contained string and resets string builder to marked position of
+		 * previous token.
+		 *
+		 * @return complete property name string
+		 *
+		 * @see #popLevel()
+		 */
+		public String propString() {
+			String str = sb.toString();
+			popLevel();
+
+			return str;
+		}
+
+		@Override
+		public String toString() {
+			return sb.toString();
 		}
 	}
 }

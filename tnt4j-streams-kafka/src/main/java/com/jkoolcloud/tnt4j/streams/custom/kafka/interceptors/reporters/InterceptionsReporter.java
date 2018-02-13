@@ -25,6 +25,9 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
 
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor;
+import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor;
+
 /**
  * This interface defines operations commonly used by TNT4J-Streams Kafka interceptor reporters.
  *
@@ -36,16 +39,20 @@ public interface InterceptionsReporter {
 	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#onSend(org.apache.kafka.clients.producer.ProducerRecord)}
 	 * event.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking send
 	 * @param producerRecord
 	 *            producer record to be sent
 	 */
-	void send(ProducerRecord<Object, Object> producerRecord);
+	void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord);
 
 	/**
 	 * Notifies reporter when Kafka producer interceptor has invoked
 	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#onAcknowledgement(org.apache.kafka.clients.producer.RecordMetadata, Exception)}
 	 * event.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking acknowledge
 	 * @param recordMetadata
 	 *            sent message record metadata
 	 * @param e
@@ -53,28 +60,34 @@ public interface InterceptionsReporter {
 	 * @param clusterResource
 	 *            cluster resource metadata records where sent to
 	 */
-	void acknowledge(RecordMetadata recordMetadata, Exception e, ClusterResource clusterResource);
+	void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
+			ClusterResource clusterResource);
 
 	/**
 	 * Notifies reporter when Kafka consumer interceptor has invoked
 	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#onConsume(org.apache.kafka.clients.consumer.ConsumerRecords)}
 	 * event.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking consume
 	 * @param consumerRecords
 	 *            consumed records collection
 	 * @param clusterResource
 	 *            cluster resource metadata records where consumed from
 	 */
-	void consume(ConsumerRecords<Object, Object> consumerRecords, ClusterResource clusterResource);
+	void consume(TNTKafkaCInterceptor interceptor, ConsumerRecords<Object, Object> consumerRecords,
+			ClusterResource clusterResource);
 
 	/**
 	 * Notifies reporter when Kafka consumer interceptor has invoked
 	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#onCommit(java.util.Map)} event.
 	 *
+	 * @param interceptor
+	 *            interceptor instance invoking commit
 	 * @param map
 	 *            committed records topics and messages map
 	 */
-	void commit(Map<TopicPartition, OffsetAndMetadata> map);
+	void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> map);
 
 	/**
 	 * Notifies reporter that all interceptors has been closed and reporter should shutdown.
