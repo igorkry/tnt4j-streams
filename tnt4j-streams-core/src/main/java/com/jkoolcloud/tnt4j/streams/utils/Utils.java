@@ -2003,7 +2003,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static void logThrowable(EventSink logger, OpLevel sev, ResourceBundle rb, String key, Object... args) {
 		Throwable ex = getThrowable(args);
-		if (ex != null && logger.isSet(OpLevel.TRACE)) {
+		if (ex != null && !logger.isSet(OpLevel.TRACE)) {
 			args[args.length - 1] = getExceptionMessages(ex);
 		}
 		logger.log(sev, rb, key, args);
