@@ -521,7 +521,13 @@ public class MetricsReporter implements InterceptionsReporter {
 			Set<String> keys = cdata.getCompositeType().keySet();
 			for (String key : keys) {
 				Object cVal = cdata.get(key);
-				processAttrValue(snapshot, propName.append(key), cVal);
+				if ("key".equals(key)) { // NON-NLS
+					propName.append(Utils.toString(cVal));
+				} else if ("value".equals(key)) { // NON-NLS
+					processAttrValue(snapshot, propName, cVal);
+				} else {
+					processAttrValue(snapshot, propName.append(key), cVal);
+				}
 			}
 			propName.popLevel();
 		} else if (value instanceof TabularData) {
@@ -529,7 +535,8 @@ public class MetricsReporter implements InterceptionsReporter {
 			Collection<?> values = tData.values();
 			int row = 0;
 			for (Object tVal : values) {
-				processAttrValue(snapshot, propName.append(padNumber(++row)), tVal);
+				processAttrValue(snapshot, tVal instanceof CompositeData ? propName : propName.append(padNumber(++row)),
+						tVal);
 			}
 			propName.popLevel();
 		} else {
