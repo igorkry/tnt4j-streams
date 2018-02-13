@@ -519,11 +519,12 @@ public class MetricsReporter implements InterceptionsReporter {
 		if (value instanceof CompositeData) {
 			CompositeData cdata = (CompositeData) value;
 			Set<String> keys = cdata.getCompositeType().keySet();
+			boolean isKVSet = keys.contains("key") && keys.contains("value"); // NON-NLS
 			for (String key : keys) {
 				Object cVal = cdata.get(key);
-				if ("key".equals(key)) { // NON-NLS
+				if (isKVSet && "key".equals(key)) { // NON-NLS
 					propName.append(Utils.toString(cVal));
-				} else if ("value".equals(key)) { // NON-NLS
+				} else if (isKVSet && "value".equals(key)) { // NON-NLS
 					processAttrValue(snapshot, propName, cVal);
 				} else {
 					processAttrValue(snapshot, propName.append(key), cVal);
