@@ -75,8 +75,6 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-		super.startElement(uri, localName, qName, attributes);
-
 		if (SCENARIO_ELMT.equals(qName)) {
 			processScenario(attributes);
 		} else if (STEP_ELMT.equals(qName)) {
@@ -87,6 +85,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			processSimpleScheduler(attributes);
 		} else if (REQ_ELMT.equals(qName)) {
 			processRequest(attributes);
+		} else {
+			super.startElement(uri, localName, qName, attributes);
 		}
 	}
 
@@ -102,6 +102,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				name = attValue;
+			} else {
+				unknownAttribute(SCENARIO_ELMT, attName);
 			}
 		}
 
@@ -135,6 +137,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				username = attValue;
 			} else if (PASSWORD_ATTR.equals(attName)) {
 				password = attValue;
+			} else {
+				unknownAttribute(STEP_ELMT, attName);
 			}
 		}
 		notEmpty(name, STEP_ELMT, NAME_ATTR);
@@ -165,6 +169,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			String attValue = attrs.getValue(i);
 			if (EXPRESSION_ATTR.equals(attName)) {
 				expression = attValue;
+			} else {
+				unknownAttribute(SCHED_CRON_ELMT, attName);
 			}
 		}
 		notEmpty(expression, SCHED_CRON_ELMT, EXPRESSION_ATTR);
@@ -200,6 +206,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				timeUnits = attValue;
 			} else if (REPEATS_ATTR.equals(attName)) {
 				repeatCount = Integer.parseInt(attValue);
+			} else {
+				unknownAttribute(SCHED_SIMPLE_ELMT, attName);
 			}
 		}
 		if (interval == null || interval < 0) {

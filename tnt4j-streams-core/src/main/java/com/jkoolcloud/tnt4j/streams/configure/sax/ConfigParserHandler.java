@@ -467,6 +467,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			processDefault(attributes);
 		} else if (MATCH_EXP_ELMT.equals(qName)) {
 			processMatchExpression(attributes);
+		} else {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.unknown.tag", qName), currParseLocation);
 		}
 	}
 
@@ -521,6 +524,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currCacheEntry.id = attValue;
 			} else if (TRANSIENT_ATTR.equals(attName)) {
 				currCacheEntry.transientEntry = Boolean.parseBoolean(attValue);
+			} else {
+				unknownAttribute(CACHE_ENTRY_ELMT, attName);
 			}
 		}
 
@@ -599,6 +604,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				autoSort = !Boolean.parseBoolean(attValue);
 			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
 				defaultDataType = ActivityFieldDataType.valueOf(attValue);
+			} else {
+				unknownAttribute(PARSER_ELMT, attName);
 			}
 		}
 
@@ -706,6 +713,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				split = Boolean.parseBoolean(attValue);
 			} else if (ID_ATTR.equals(attName)) {
 				id = attValue;
+			} else {
+				unknownAttribute(FIELD_ELMT, attName);
 			}
 		}
 		// make sure required fields are present
@@ -896,6 +905,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				reqVal = attValue;
 			} else if (ID_ATTR.equals(attName)) {
 				id = attValue;
+			} else {
+				unknownAttribute(EMBEDDED_ACTIVITY_ELMT, attName);
 			}
 		}
 		// make sure required fields are present
@@ -982,6 +993,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currLocatorData.reqVal = attValue;
 			} else if (ID_ATTR.equals(attName)) {
 				currLocatorData.id = attValue;
+			} else {
+				unknownAttribute(FIELD_LOC_ELMT, attName);
 			}
 		}
 
@@ -1048,6 +1061,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				target = attValue;
 			} else if (TYPE_ATTR.equals(attName)) {
 				type = attValue;
+			} else {
+				unknownAttribute(FIELD_MAP_ELMT, attName);
 			}
 		}
 		notNull(source, FIELD_MAP_ELMT, SOURCE_ATTR);
@@ -1096,6 +1111,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			String attValue = attrs.getValue(i);
 			if (RESOURCE_ATTR.equals(attName)) {
 				reference = attValue;
+			} else {
+				unknownAttribute(FIELD_MAP_REF_ELMT, attName);
 			}
 		}
 
@@ -1141,6 +1158,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				uri = attValue;
 			} else if (SEPARATOR_ATTR.equals(attName)) {
 				delim = attValue;
+			} else {
+				unknownAttribute(RESOURCE_REF_ELMT, attName);
 			}
 		}
 
@@ -1275,6 +1294,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currTransform.scriptLang = attValue;
 			} else if (PHASE_ATTR.equals(attName)) {
 				currTransform.phase = attValue;
+			} else {
+				unknownAttribute(FIELD_TRANSFORM_ELMT, attName);
 			}
 		}
 
@@ -1313,6 +1334,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				name = attValue;
 			} else if (CLASS_ATTR.equals(attName)) {
 				className = attValue;
+			} else {
+				unknownAttribute(STREAM_ELMT, attName);
 			}
 		}
 		notEmpty(name, STREAM_ELMT, NAME_ATTR);
@@ -1370,6 +1393,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currProperty.name = attValue;
 			} else if (VALUE_ATTR.equals(attName)) {
 				currProperty.value = attValue;
+			} else {
+				unknownAttribute(PROPERTY_ELMT, attName);
 			}
 		}
 
@@ -1410,6 +1435,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				parserName = attValue;
 			} else if (AGGREGATION_ATTR.equals(attName)) {
 				aggregationType = attValue;
+			} else {
+				unknownAttribute(PARSER_REF_ELMT, attName);
 			}
 		}
 
@@ -1513,13 +1540,15 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	private String getRefObjectNameFromAttr(Attributes attrs) {
+	private String getRefObjectNameFromAttr(Attributes attrs) throws SAXParseException {
 		String refObjName = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				refObjName = attValue;
+			} else {
+				unknownAttribute(REF_ELMT, attName);
 			}
 		}
 		return refObjName;
@@ -1560,6 +1589,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				name = attValue;
 			} else if (CLASS_ATTR.equals(attName)) {
 				className = attValue;
+			} else {
+				unknownAttribute(JAVA_OBJ_ELMT, attName);
 			}
 		}
 
@@ -1599,6 +1630,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				value = attValue;
 			} else if (TYPE_ATTR.equals(attName)) {
 				type = attValue;
+			} else {
+				unknownAttribute(PARAM_ELMT, attName);
 			}
 		}
 
@@ -1654,6 +1687,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				name = attValue;
+			} else {
+				unknownAttribute(FILTER_ELMT, attName);
 			}
 		}
 
@@ -1721,6 +1756,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFilterValue.evaluation = attValue;
 			} else if (FORMAT_ATTR.equals(attName)) {
 				currFilterValue.format = attValue;
+			} else {
+				unknownAttribute(VALUE_ELMT, attName);
 			}
 		}
 
@@ -1780,6 +1817,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				currFilterExpression.handle = attValue;
 			} else if (LANG_ATTR.equals(attName)) {
 				currFilterExpression.lang = attValue;
+			} else {
+				unknownAttribute(EXPRESSION_ELMT, attName);
 			}
 		}
 
@@ -2224,6 +2263,13 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.at.line", currParseLocation.getLineNumber());
 		}
 		return locInfo;
+	}
+
+	protected void unknownAttribute(String element, String attribute) throws SAXParseException {
+		// LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+		// "ConfigParserHandler.unknown.attr", tag, attribute, getLocationInfo());
+		throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+				"ConfigParserHandler.unknown.attr", element, attribute), currParseLocation);
 	}
 
 	private void validateActivityField(ActivityField aField, String qName) throws SAXException {

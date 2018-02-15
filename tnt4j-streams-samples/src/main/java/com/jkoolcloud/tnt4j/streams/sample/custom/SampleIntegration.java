@@ -84,6 +84,8 @@ public final class SampleIntegration {
 			TNTInputStream<?, ?> stream = cfg.getStream("StreamName"); // NON-NLS
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
+		} catch (SAXException | IllegalStateException e) {
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error", Utils.getExceptionMessages(e)); // NON-NLS
 		} catch (Exception e) {
 			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start stream", e); // NON-NLS
 		}

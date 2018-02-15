@@ -291,7 +291,8 @@ public final class StreamsAgent {
 			initAndRun(reader == null ? new StreamsConfigLoader() : new StreamsConfigLoader(reader), streamListener,
 					streamTasksListener);
 		} catch (SAXException | IllegalStateException e) {
-			LOGGER.log(OpLevel.ERROR, Utils.getExceptionMessages(e));
+			LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"StreamsAgent.cfg.error", Utils.getExceptionMessages(e));
 		} catch (Exception e) {
 			Utils.logThrowable(LOGGER, OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsAgent.start.failed", e);
