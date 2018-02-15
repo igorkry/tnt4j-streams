@@ -18,7 +18,7 @@
     <artifactId>tnt4j-streams-hdfs</artifactId>
 
     <properties>
-        <org.apache.hadoop.version>2.8.1</org.apache.hadoop.version>
+        <org.apache.hadoop.version>2.9.0</org.apache.hadoop.version>
     </properties>
 
     <build>
@@ -51,7 +51,7 @@
                         <manifestEntries>
                             <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
                             <Implementation-Title>${product.name}</Implementation-Title>
-                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Version>${project.version}-${maven.build.timestamp}</Implementation-Version>
                             <Main-Class>com.jkoolcloud.tnt4j.streams.StreamsAgent</Main-Class>
                         </manifestEntries>
                     </archive>
@@ -95,6 +95,7 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
             <version>${org.apache.hadoop.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>

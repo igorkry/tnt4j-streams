@@ -52,7 +52,7 @@
                         <manifestEntries>
                             <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
                             <Implementation-Title>${product.name}</Implementation-Title>
-                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Version>${project.version}-${maven.build.timestamp}</Implementation-Version>
                             <Main-Class>com.jkoolcloud.tnt4j.streams.StreamsAgent</Main-Class>
                         </manifestEntries>
                     </archive>
@@ -78,7 +78,7 @@
                             <manifestEntries>
                                 <Implementation-Vendor>${product.vendor}</Implementation-Vendor>
                                 <Implementation-Title>${product.name}</Implementation-Title>
-                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Version>${project.version}-${maven.build.timestamp}</Implementation-Version>
                                 <Main-Class>com.jkoolcloud.tnt4j.streams.StreamsAgent</Main-Class>
                             </manifestEntries>
                         </transformer>
@@ -175,7 +175,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.10</artifactId>
+            <artifactId>kafka_2.11</artifactId>
             <version>${kafka.version}</version>
         </dependency>
         <!--<dependency>-->
