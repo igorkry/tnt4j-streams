@@ -54,10 +54,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jkoolcloud.tnt4j.TrackingLogger;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
-import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.core.Property;
-import com.jkoolcloud.tnt4j.core.PropertySnapshot;
-import com.jkoolcloud.tnt4j.core.Snapshot;
+import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
@@ -135,6 +132,10 @@ public class MetricsReporter implements InterceptionsReporter {
 		 * String client identifier.
 		 */
 		String clientId;
+		/**
+		 * Intercepted client call name.
+		 */
+		String callName;
 
 		/**
 		 * Constructs a new TopicMetrics.
@@ -143,11 +144,16 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the topic name
 		 * @param partition
 		 *            the partition index
+		 * @param clientId
+		 *            client identifier
+		 * @param callName
+		 *            intercepted client call name
 		 */
-		TopicMetrics(String topic, Integer partition, String clientId) {
+		TopicMetrics(String topic, Integer partition, String clientId, String callName) {
 			this.topic = topic;
 			this.partition = partition;
 			this.clientId = clientId;
+			this.callName = callName;
 			offset = new Offset();
 		}
 	}
@@ -170,9 +176,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the partition index
 		 * @param clientId
 		 *            client identifier
+		 * @param callName
+		 *            intercepted client call name
 		 */
-		ConsumerTopicMetrics(String topic, Integer partition, String clientId) {
-			super(topic, partition, clientId);
+		ConsumerTopicMetrics(String topic, Integer partition, String clientId, String callName) {
+			super(topic, partition, clientId, callName);
 		}
 	}
 
@@ -193,9 +201,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the partition index
 		 * @param clientId
 		 *            client identifier
+		 * @param callName
+		 *            intercepted client call name
 		 */
-		ProducerTopicMetrics(String topic, Integer partition, String clientId) {
-			super(topic, partition, clientId);
+		ProducerTopicMetrics(String topic, Integer partition, String clientId, String callName) {
+			super(topic, partition, clientId, callName);
 		}
 	}
 
@@ -203,7 +213,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	 * Constructs a new MetricsReporter.
 	 */
 	public MetricsReporter() {
-		this(DEFAULT_REPORTING_PERIOD_SEC);
+		this(DEFAULT_REPORTING_PERIOD_SEC, null);
 	}
 
 	/**
@@ -211,8 +221,10 @@ public class MetricsReporter implements InterceptionsReporter {
 	 *
 	 * @param reportingPeriod
 	 *            the metrics reporting period in seconds
+	 * @param reportingDelay
+	 *            delay (in seconds) before first metrics reporting is invoked
 	 */
-	public MetricsReporter(int reportingPeriod) {
+	public MetricsReporter(int reportingPeriod, Integer reportingDelay) {
 		tracker = initTracker();
 		TimerTask mrt = new TimerTask() {
 			@Override
@@ -221,15 +233,17 @@ public class MetricsReporter implements InterceptionsReporter {
 			}
 		};
 		long period = TimeUnit.SECONDS.toMillis(reportingPeriod);
+		long delay = reportingDelay == null ? period : TimeUnit.SECONDS.toMillis(reportingDelay);
 		metricsReportingTimer = new java.util.Timer();
-		metricsReportingTimer.scheduleAtFixedRate(mrt, period, period);
+		metricsReportingTimer.scheduleAtFixedRate(mrt, delay, period);
 	}
 
 	@Override
 	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
 		String topic = producerRecord.topic();
 		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
-		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition(), clientId);
+		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition(), clientId,
+				"send"); // NON-NLS
 		long now = System.currentTimeMillis();
 		long jitter = now - topicMetrics.lastSend;
 		topicMetrics.jitter.update(jitter);
@@ -238,36 +252,39 @@ public class MetricsReporter implements InterceptionsReporter {
 		topicMetrics.sendC.inc();
 	}
 
-	private ConsumerTopicMetrics getConsumerTopicMetrics(String topic, Integer partition, String clientId) {
+	private ConsumerTopicMetrics getConsumerTopicMetrics(String topic, Integer partition, String clientId,
+			String callName) {
 		if (topic == null) {
 			topic = TOPIC_UNRELATED;
 		}
-		String key = getMetricsKey(topic, partition, ConsumerTopicMetrics.class);
+		String key = getMetricsKey(topic, partition, ConsumerTopicMetrics.class, callName);
 		ConsumerTopicMetrics topicMetrics = (ConsumerTopicMetrics) topicsMetrics.get(key);
 		if (topicMetrics == null) {
-			topicMetrics = new ConsumerTopicMetrics(topic, partition, clientId);
+			topicMetrics = new ConsumerTopicMetrics(topic, partition, clientId, callName);
 			topicsMetrics.put(key, topicMetrics);
 		}
 
 		return topicMetrics;
 	}
 
-	private ProducerTopicMetrics getProducerTopicMetrics(String topic, Integer partition, String clientId) {
+	private ProducerTopicMetrics getProducerTopicMetrics(String topic, Integer partition, String clientId,
+			String callName) {
 		if (topic == null) {
 			topic = TOPIC_UNRELATED;
 		}
-		String key = getMetricsKey(topic, partition, ProducerTopicMetrics.class);
+		String key = getMetricsKey(topic, partition, ProducerTopicMetrics.class, callName);
 		ProducerTopicMetrics topicMetrics = (ProducerTopicMetrics) topicsMetrics.get(key);
 		if (topicMetrics == null) {
-			topicMetrics = new ProducerTopicMetrics(topic, partition, clientId);
+			topicMetrics = new ProducerTopicMetrics(topic, partition, clientId, callName);
 			topicsMetrics.put(key, topicMetrics);
 		}
 
 		return topicMetrics;
 	}
 
-	private static String getMetricsKey(String topic, Integer partition, Class<? extends TopicMetrics> metricsClass) {
-		return topic + ":" + partition + ":" + metricsClass.getSimpleName(); // NON-NLS
+	private static String getMetricsKey(String topic, Integer partition, Class<? extends TopicMetrics> metricsClass,
+			String op) {
+		return topic + ":" + partition + ":" + metricsClass.getSimpleName() + ":" + op; // NON-NLS
 	}
 
 	@Override
@@ -275,7 +292,7 @@ public class MetricsReporter implements InterceptionsReporter {
 			ClusterResource clusterResource) {
 		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
 		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(recordMetadata.topic(), recordMetadata.partition(),
-				clientId);
+				clientId, "acknowledge"); // NON-NLS
 		if (e != null) {
 			topicMetrics.errorMeter.mark();
 		}
@@ -292,7 +309,8 @@ public class MetricsReporter implements InterceptionsReporter {
 			ClusterResource clusterResource) {
 		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
 		for (ConsumerRecord<?, ?> record : consumerRecords) {
-			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition(), clientId);
+			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition(), clientId,
+					"consume"); // NON-NLS
 			long duration = System.currentTimeMillis() - record.timestamp();
 			topicMetrics.latency.update(duration, TimeUnit.MILLISECONDS);
 			topicMetrics.keySize.update(record.serializedKeySize());
@@ -311,7 +329,7 @@ public class MetricsReporter implements InterceptionsReporter {
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> tpom : tpomMap.entrySet()) {
 			TopicPartition partition = tpom.getKey();
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(partition.topic(), partition.partition(),
-					clientId);
+					clientId, "commit"); // NON-NLS
 			topicMetrics.commitC.inc();
 		}
 	}
@@ -356,7 +374,6 @@ public class MetricsReporter implements InterceptionsReporter {
 			mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
 			mapper.registerModule(new MetricsRegistryModule());
 			for (Map.Entry<String, TopicMetrics> metrics : mRegistry.entrySet()) {
-				mapper.registerModule(new MetricsRegistryModule());
 				TopicMetrics topicMetrics = metrics.getValue();
 				topicMetrics.correlator = metricsCorrelator;
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(topicMetrics);
@@ -396,10 +413,10 @@ public class MetricsReporter implements InterceptionsReporter {
 	 *            tracker instance to use
 	 * @return activity containing snapshots of Kafka consumer JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.core.Activity)
 	 */
 	private TrackingActivity collectKafkaConsumerMetricsJMX(Tracker tracker) {
-		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka consumer metrics");
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka consumer JMX metrics"); // NON-NLS
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
@@ -420,10 +437,10 @@ public class MetricsReporter implements InterceptionsReporter {
 	 *            tracker instance to use
 	 * @return activity containing snapshots of Kafka producer JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.core.Activity)
 	 */
 	public TrackingActivity collectKafkaProducerMetricsJMX(Tracker tracker) {
-		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka producer metrics");
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "Kafka producer JMX metrics"); // NON-NLS
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
@@ -443,10 +460,10 @@ public class MetricsReporter implements InterceptionsReporter {
 	 *            tracker instance to use
 	 * @return activity containing snapshots of JVM JMX attributes values
 	 *
-	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.tracker.TrackingActivity)
+	 * @see #collectMetricsJMX(String, javax.management.MBeanServer, com.jkoolcloud.tnt4j.core.Activity)
 	 */
 	public TrackingActivity collectJVMMetricsJMX(Tracker tracker) {
-		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "JVM metrics");
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "JVM JMX metrics"); // NON-NLS
 
 		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 		try {
@@ -471,8 +488,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	 * @throws Exception
 	 *             if JMX attributes collecting fails
 	 */
-	public void collectMetricsJMX(String objNameStr, MBeanServer mBeanServer, TrackingActivity activity)
-			throws Exception {
+	public void collectMetricsJMX(String objNameStr, MBeanServer mBeanServer, Activity activity) throws Exception {
 		ObjectName oName = new ObjectName(objNameStr);
 		Set<ObjectName> metricsBeans = mBeanServer.queryNames(oName, null);
 
@@ -582,6 +598,7 @@ public class MetricsReporter implements InterceptionsReporter {
 			json.writeObjectField("Correlator", topicMetrics.correlator); // NON-NLS
 			json.writeObjectField("Offset", topicMetrics.offset.values()); // NON-NLS
 			json.writeObjectField("ClientId", topicMetrics.clientId); // NON-NLS
+			json.writeObjectField("CallName", topicMetrics.callName); // NON-NLS
 
 			json.writeEndObject();
 		}

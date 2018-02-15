@@ -64,8 +64,10 @@ reported to dedicated Kafka topic):
 
 #### Interceptors configuration
 
-To configure interceptors use file `./config/intercept/interceptors.properties`. Configuration properties are: 
+To configure interceptors use file `./config/intercept/interceptors.properties`. Configuration properties are:
 * `metrics.report.period` - period (in seconds) of Kafka interceptors (and JMX) collected metrics reporting to dedicated Kafka topic.
+* `metrics.report.delay` - delay (in seconds) before first metrics reporting is invoked. If not defined, it is equal to 
+`metrics.report.period`.  
 * `trace.kafka.messages` - flag indicating whether to trace (send to JKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
 JKool events fields mapping is hardcoded for now.   
 

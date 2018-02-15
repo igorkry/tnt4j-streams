@@ -3,7 +3,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
+    <!-- START of metrics parsing -->
+
+    <parser name="MetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="All" locator-type="Label" locator="*"></field>
+    </parser>
+
+    <parser name="KafkaInterceptMetricsMSGParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
+            default-data-type="AsInput">
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
@@ -12,20 +19,30 @@
             <field-map source="ConsumerTopicMetrics" target="Consumer"/>
         </field>
 
-        <field name="EventType" value="EVENT"/>
+        <field name="EventType" value="ACTIVITY"/>
         <field name="EventName" formattingPattern="Metrics of {0} {1}">
             <field-locator locator="$.Topic" locator-type="Label"/>
             <field-locator locator="OperationType" locator-type="Activity"></field-locator>
         </field>
 
-        <field name="producerCount" locator="$.Metrics.counters.sendCounter.count" locator-type="Label"/>
-        <field name="consumerCount" locator="$.Metrics.counters.consumeMessageCounter.count" locator-type="Label"/>
+        <field name="producerCount" locator="$.Metrics" locator-type="Label">
+            <parser-ref name="MetricsParser" aggregation="Merge"/>
+        </field>
 
-        <field name="MeanMessageSize" locator="$.Metrics.histograms.valueSize.mean" locator-type="Label"/>
-        <field name="MeanKeySize" locator="$.Metrics.histograms.keySize.mean" locator-type="Label"/>
-
-        <field name="MeanJitter" locator="$.Metrics.histograms.messageProducerJitter.mean" locator-type="Label"/>
+        <field name="clientID" locator="$.ClientId" locator-type="Label"/>
+        <field name="Call" locator="$.CallName" locator-type="Label"/>
+        <field name="Offset" locator="$.Offset" locator-type="Label"/>
     </parser>
+
+    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
+        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
+            <parser-ref name="KafkaInterceptMetricsMSGParser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <!-- END of metrics parsing -->
+
+    <!-- START of JMX metrics parsing -->
 
     <parser name="SnapshotParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser" default-data-type="AsInput">
         <field name="EventName" locator="properties.ObjectName" locator-type="Label"/>
@@ -39,15 +56,24 @@
         <field name="EventName" locator="$.operation" locator-type="Label"/>
 
         <embedded-activity name="Snapshoots" locator="$.snapshots.[*]" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Relate"/>
+            <parser-ref name="SnapshotParser" aggregation="Join"/>
         </embedded-activity>
     </parser>
 
     <parser name="KafkaMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.KafkaConsumerRecordParser">
         <field name="TNTEventData" locator="value" locator-type="Label" transparent="true">
-            <parser-ref name="TNTJSONParser" aggregation="Merge"/>
+            <parser-ref name="TNTJSONParser" aggregation="Merge">
+                <matchExp>JPATH:$.snapshots</matchExp>
+            </parser-ref>
+        </field>
+        <field name="KafkaInterceptMetricsData" locator="value" locator-type="Label" transparent="true">
+            <parser-ref name="KafkaInterceptMetricsParser" aggregation="Merge">
+                <matchExp>JPATH:$.msg-text</matchExp>
+            </parser-ref>
         </field>
     </parser>
+
+    <!-- END of JMX metrics parsing -->
 
     <stream name="KafkaMetricsStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaConsumerStream">
         <property name="HaltIfNoParser" value="false"/>

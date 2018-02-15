@@ -28,14 +28,21 @@ import javax.management.*;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jkoolcloud.tnt4j.TrackingLogger;
+import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
+import com.jkoolcloud.tnt4j.config.TrackerConfig;
+import com.jkoolcloud.tnt4j.core.Activity;
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.Snapshot;
+import com.jkoolcloud.tnt4j.format.LevelingJSONFormatter;
+import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser;
-
-import net.minidev.json.JSONArray;
+import com.jkoolcloud.tnt4j.tracker.Tracker;
+import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 
 /**
  * @author akausinis
@@ -47,46 +54,75 @@ public class MetricsReporterTest {
 	public void collectJMXMetricsAndReport() throws Exception {
 
 		// Prepare part : create and register Mbean
-		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-		TestMbean mbean = new TestMbean("my.name:type=Custom");
-		mbean.setAttribute("Long", 15L);
-		mbean.setAttribute("Float", 15f);
-		mBeanServer.registerMBean(mbean, mbean.name());
-		Map<String, Object> attrsMap = new HashMap<>();
-		//MetricsReporter.collectMetricsJMX("my.name:*", mBeanServer, attrsMap);
+		MBeanServer mBeanServer = createTestMBean();
+		Activity activity = new Activity("TestActivity");
+		MetricsReporter reporter = new MetricsReporter();
+		reporter.collectMetricsJMX("my.name:*", mBeanServer, activity);
 
-		@SuppressWarnings("unchecked")
-		Map<String, ?> mBeanAttsMap = (Map<String, ?>) attrsMap.entrySet().iterator().next().getValue();
+		Snapshot snap = activity.getSnapshots().iterator().next();
 
 		// Assure created right
-		assertThat(mBeanAttsMap.get("Long"), instanceOf(Long.class));
-		assertThat(mBeanAttsMap.get("Float"), instanceOf(Float.class));
+		assertThat(snap.get("Long").getValue(), instanceOf(Long.class));
+		assertThat(snap.get("Float").getValue(), instanceOf(Float.class));
 
 		// Serialize to string
-		ObjectMapper mapper = new ObjectMapper();
-		String valueToWriteToTopic = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(attrsMap);
+		LevelingJSONFormatter formatter = new LevelingJSONFormatter(false);
+		String valueToWriteToTopic = formatter.format(snap);
 
 		// Try parsing
 		DocumentContext context = JsonPath.parse(valueToWriteToTopic);
-		JSONArray longV = context.read("$..Long");
-		JSONArray floatV = context.read("$..Float");
+		Object longV = context.read("$.properties.Long");
+		Object floatV = context.read("$.properties.Float");
+		// Assure read correct values
+		assertThat(longV, instanceOf(Integer.class));
+		assertThat(floatV, instanceOf(Double.class));
 
 		// Try the way Streams actually does this
 		ActivityJsonParser parser = new ActivityJsonParser();
 		parser.setDefaultDataType(ActivityFieldDataType.AsInput);
 		ActivityField af = new ActivityField("Long");
 		ActivityField af2 = new ActivityField("Float");
-		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$..Long", parser.getDefaultDataType()));
-		af2.addLocator(
-				new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$..Float", parser.getDefaultDataType()));
+		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$.properties.Long",
+				parser.getDefaultDataType()));
+		af2.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "$.properties.Float",
+				parser.getDefaultDataType()));
 		parser.addField(af);
 		parser.addField(af2);
 		ActivityInfo ai = parser.parse(mock(TNTInputStream.class), valueToWriteToTopic);
 		assertThat(ai.getFieldValue("Long"), instanceOf(Integer.class));
 		assertThat(ai.getFieldValue("Float"), instanceOf(Double.class));
+	}
 
-		assertThat(longV.get(0), instanceOf(Integer.class));
-		assertThat(floatV.get(0), instanceOf(Double.class));
+	private MBeanServer createTestMBean() throws MalformedObjectNameException, InstanceAlreadyExistsException,
+			MBeanRegistrationException, NotCompliantMBeanException {
+		MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+		TestMbean mbean = new TestMbean("my.name:type=Custom");
+		mbean.setAttribute("Long", 15L);
+		mbean.setAttribute("Float", 15f);
+		mBeanServer.registerMBean(mbean, mbean.name());
+		return mBeanServer;
+	}
+
+	@Test
+	public void testTracker() throws Exception {
+		TrackerConfig config = DefaultConfigFactory.getInstance().getConfig(MetricsReporter.class, SourceType.APPL,
+				(String) null);
+
+		config.setProperty("event.sink.factory", "com.jkoolcloud.tnt4j.sink.impl.kafka.SLF4JEventSinkFactory");
+		config.setProperty("source", "com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics");
+		config.setProperty("event.formatter", "com.jkoolcloud.tnt4j.format.LevelingJSONFormatter");
+		config.setProperty("event.formatter.Level", "1");
+
+		Tracker tracker = TrackingLogger.getInstance(config.build());
+
+		TrackingActivity activity = tracker.newActivity(OpLevel.INFO, "ActivityName");
+		tracker.log(OpLevel.ERROR, "ASdfsadf");
+		tracker.tnt(activity);
+		//
+		// MBeanServer mBeanServer = createTestMBean();
+		// MetricsReporter mr = new MetricsReporter(Integer.MAX_VALUE);
+		//
+		// mr.reportMetrics(new HashMap<String, MetricsReporter.TopicMetrics>());
 	}
 
 	private static class TestMbean implements DynamicMBean {

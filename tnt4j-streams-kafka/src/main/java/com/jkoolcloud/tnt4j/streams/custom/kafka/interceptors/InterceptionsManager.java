@@ -54,6 +54,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * Interceptions configuration properties:
  * <ul>
  * <li>{@code metrics.report.period} - metrics reporting period in seconds. Default value - {@code 30} sec.</li>
+ * <li>{@code metrics.report.delay} - delay (in seconds) before first metrics reporting is invoked. If not defined, it
+ * is equal to {@code metrics.report.period}.</li>
  * <li>{@code trace.kafka.messages} - flag indicating whether to trace intercepted messages. Default value -
  * {@code true}.</li>
  * </ul>
@@ -102,7 +104,8 @@ public class InterceptionsManager {
 
 		int reportingPeriod = Utils.getInt("metrics.report.period", interceptorProps,
 				MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC);
-		addReporter(new MetricsReporter(reportingPeriod));
+		int reportingDelay = Utils.getInt("metrics.report.delay", interceptorProps, reportingPeriod);
+		addReporter(new MetricsReporter(reportingPeriod, reportingDelay));
 		boolean traceMessages = Utils.getBoolean("trace.kafka.messages", interceptorProps, false); // NON-NLS
 		if (traceMessages) {
 			addReporter(new MsgTraceReporter());
