@@ -2044,7 +2044,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <ul>
 	 * <li>{@code 'true'}, {@code 'on'}, {@code 'yes'}, {@code 't'}, {@code 'y'} (case insensitive) will return
 	 * {@code true}</li>
-	 * <li>{@code 'false'}, {@code 'off'}, {@code 'no'}, {@code 'n'}, {@code 'f'} (case insensitive) will return
+	 * <li>{@code 'false'}, {@code 'off'}, {@code 'no'}, {@code 'f'}, {@code 'n'} (case insensitive) will return
 	 * {@code false}</li>
 	 * <li>Otherwise, exception is thrown</li>
 	 * </ul>
