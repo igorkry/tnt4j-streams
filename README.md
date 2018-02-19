@@ -71,6 +71,9 @@ Running TNT4J-Streams
     * write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * configure your loggers
     * use `bin/tnt4j-streams.bat` or `bin/tnt4j-streams.sh` to run standalone application
+ 
+     **NOTE:** in case you are using Java 9 as your runtime JVM and getting `java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException`, 
+     add `java` command parameter `--add-modules java.xml.bind` to add JAXB classes to java classpath.
 * As API integrated into your product
     * Write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in your code
@@ -5617,6 +5620,9 @@ Release assemblies are built to `../build/tnt4j-streams` directory.
 **NOTE:** sometimes maven fails to correctly handle dependencies. If dependency configuration looks fine, but maven still complains about 
 missing dependencies try to delete local maven repository by hand: e.g., on MS Windows delete contents of `c:\Users\[username]\.m2\repository` 
 directory.
+
+**NOTE:** in case you are using Java 9 as your compiler and getting `java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException`, add 
+`javac` command parameter `--add-modules java.xml.bind` to add JAXB classes to java classpath. 
 
 ## Running samples
 

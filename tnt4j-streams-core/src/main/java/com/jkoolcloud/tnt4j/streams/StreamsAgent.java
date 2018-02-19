@@ -106,7 +106,7 @@ public final class StreamsAgent {
 	 */
 	public static void main(String... args) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.main", pkgVersion());
+				"StreamsAgent.start.main", pkgVersion(), System.getProperty("java.version"));
 		boolean argsValid = processArgs(args);
 		if (argsValid) {
 			boolean loadedZKConfig = loadZKConfig(zookeeperCfgFile, zookeeperStreamId);
@@ -147,7 +147,7 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI() {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api", pkgVersion());
+				"StreamsAgent.start.api", pkgVersion(), System.getProperty("java.version"));
 		loadConfigAndRun((Reader) null);
 	}
 
@@ -164,7 +164,7 @@ public final class StreamsAgent {
 	 */
 	public static void runFromAPI(InputStreamListener streamListener, StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api", pkgVersion());
+				"StreamsAgent.start.api", pkgVersion(), System.getProperty("java.version"));
 		loadConfigAndRun((Reader) null, streamListener, streamTasksListener);
 	}
 
@@ -191,7 +191,7 @@ public final class StreamsAgent {
 	public static void runFromAPI(String cfgFileName, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api", pkgVersion());
+				"StreamsAgent.start.api", pkgVersion(), System.getProperty("java.version"));
 		loadConfigAndRun(cfgFileName, streamListener, streamTasksListener);
 	}
 
@@ -218,7 +218,7 @@ public final class StreamsAgent {
 	public static void runFromAPI(File cfgFile, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
 		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsAgent.start.api", pkgVersion());
+				"StreamsAgent.start.api", pkgVersion(), System.getProperty("java.version"));
 		loadConfigAndRun(cfgFile, streamListener, streamTasksListener);
 	}
 
