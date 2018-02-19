@@ -22,7 +22,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -89,7 +88,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 					bufferSize = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-					dropDataWhenBufferFull = BooleanUtils.toBoolean(value);
+					dropDataWhenBufferFull = Utils.toBoolean(value);
 				}
 			}
 		}

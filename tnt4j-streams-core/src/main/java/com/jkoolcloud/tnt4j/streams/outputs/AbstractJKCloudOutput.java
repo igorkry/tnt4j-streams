@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.TrackingLogger;
@@ -280,9 +279,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			}
 			setTnt4jCfgPath(path);
 		} else if (OutputProperties.PROP_RETRY_STATE_CHECK.equalsIgnoreCase(name)) {
-			retryStateCheck = BooleanUtils.toBoolean((String) value);
+			retryStateCheck = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_SEND_STREAM_STATES.equalsIgnoreCase(name)) {
-			sendStreamStates = BooleanUtils.toBoolean((String) value);
+			sendStreamStates = Utils.toBoolean((String) value);
 
 			if (getStream() != null) {
 				if (sendStreamStates) {

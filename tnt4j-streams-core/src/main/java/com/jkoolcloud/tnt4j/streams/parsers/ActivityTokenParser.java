@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrMatcher;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -38,6 +37,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is a token-separated string of fields, with
@@ -108,7 +108,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
-					stripQuotes = BooleanUtils.toBoolean(value);
+					stripQuotes = Utils.toBoolean(value);
 					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);
 				}

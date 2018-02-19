@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.*;
@@ -182,7 +181,7 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 						mqConnProps.put(CMQC.CHANNEL_PROPERTY, value);
 					}
 				} else if (WmqStreamProperties.PROP_STRIP_HEADERS.equalsIgnoreCase(name)) {
-					stripHeaders = BooleanUtils.toBoolean(value);
+					stripHeaders = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
 						mqConnProps.put(CMQC.USER_ID_PROPERTY, value);

@@ -42,6 +42,7 @@ import org.apache.commons.io.HexDump;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
@@ -2035,5 +2036,35 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			args[args.length - 1] = getExceptionMessages(ex);
 		}
 		logger.log(sev, msg, args);
+	}
+
+	/**
+	 * Converts a provided string value <tt>str</tt> to a boolean value.
+	 * 
+	 * <ul>
+	 * <li>{@code 'true'}, {@code 'on'}, {@code 'yes'}, {@code 't'}, {@code 'y'} (case insensitive) will return
+	 * {@code true}</li>
+	 * <li>{@code 'false'}, {@code 'off'}, {@code 'no'}, {@code 'n'}, {@code 'f'} (case insensitive) will return
+	 * {@code false}</li>
+	 * <li>Otherwise, exception is thrown</li>
+	 * </ul>
+	 *
+	 * @param str
+	 *            string value to check
+	 * @return boolean value resolved from provided string
+	 * @throws IllegalArgumentException
+	 *             if string value does not resolve to any known boolean value
+	 *
+	 * @see org.apache.commons.lang3.BooleanUtils#toBooleanObject(String)
+	 */
+	public static boolean toBoolean(String str) throws IllegalArgumentException {
+		Boolean bValue = BooleanUtils.toBooleanObject(str);
+
+		if (bValue == null) {
+			throw new IllegalArgumentException(StreamsResources
+					.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME, "Utils.illegal.boolean.value", str));
+		}
+
+		return bValue;
 	}
 }

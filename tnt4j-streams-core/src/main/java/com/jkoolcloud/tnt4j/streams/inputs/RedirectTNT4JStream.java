@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -177,11 +176,11 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 					}
 					socketPort = Integer.valueOf(value);
 				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-					restartOnInputClose = BooleanUtils.toBoolean(value);
+					restartOnInputClose = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_BUFFER_SIZE.equalsIgnoreCase(name)) {
 					bufferSize = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_BUFFER_DROP_WHEN_FULL.equalsIgnoreCase(name)) {
-					dropDataWhenBufferFull = BooleanUtils.toBoolean(value);
+					dropDataWhenBufferFull = Utils.toBoolean(value);
 				}
 			}
 		}
@@ -298,8 +297,29 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 	 */
 	@Override
 	protected void stopInternals() {
+		offerDieMarker();
+	}
+
+	/**
+	 * Adds "DIE" marker object to input buffer to mark "logical" data flow has ended.
+	 *
+	 * @see #offerDieMarker(boolean)
+	 */
+	protected void offerDieMarker() {
+		offerDieMarker(false);
+	}
+
+	/**
+	 * Adds "DIE" marker object to input buffer to mark "logical" data flow has ended.
+	 *
+	 * @param forceClear
+	 *            flag indicating to clear input buffer contents before putting "DIE" marker object into it
+	 */
+	protected void offerDieMarker(boolean forceClear) {
 		if (inputBuffer != null) {
-			// inputBuffer.clear(); //???
+			if (forceClear) {
+				inputBuffer.clear();
+			}
 			inputBuffer.offer(DIE_MARKER);
 		}
 	}
@@ -334,9 +354,7 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		}
 
 		String activityInput = (String) qe;
-
 		addStreamedBytesCount(activityInput == null ? 0 : activityInput.getBytes().length);
-
 		return activityInput;
 	}
 

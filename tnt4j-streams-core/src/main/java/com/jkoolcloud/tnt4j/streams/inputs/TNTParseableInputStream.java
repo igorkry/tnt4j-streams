@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class that all activity streams performing RAW activity data parsing must extend. It maps RAW activities data to
@@ -78,7 +79,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
-					haltIfNoParser = Boolean.parseBoolean(value);
+					haltIfNoParser = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
 					groupingActivityName = value;
 				}

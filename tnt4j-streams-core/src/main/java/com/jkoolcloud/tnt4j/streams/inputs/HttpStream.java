@@ -28,7 +28,6 @@ import javax.net.ssl.SSLContext;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.http.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.config.SocketConfig;
@@ -142,7 +141,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 					serverPort = Integer.valueOf(value);
 				} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-					useSSL = BooleanUtils.toBoolean(value);
+					useSSL = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 					keystore = value;
 				} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {

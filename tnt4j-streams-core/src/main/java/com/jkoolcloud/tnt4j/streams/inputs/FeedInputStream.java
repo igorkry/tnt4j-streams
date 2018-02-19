@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -204,7 +203,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 					}
 					socketPort = Integer.valueOf(value);
 				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-					restartOnInputClose = BooleanUtils.toBoolean(value);
+					restartOnInputClose = Utils.toBoolean(value);
 				}
 			}
 		}

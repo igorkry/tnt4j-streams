@@ -28,7 +28,6 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -149,7 +148,7 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 				} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
 					topic = value;
 				} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-					useSSL = BooleanUtils.toBoolean(value);
+					useSSL = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
 					keystore = value;
 				} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {

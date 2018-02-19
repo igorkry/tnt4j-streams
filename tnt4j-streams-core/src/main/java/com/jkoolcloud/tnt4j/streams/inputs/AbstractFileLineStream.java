@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -36,6 +35,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.IntRange;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for files lines activity stream, where each line of the file is assumed to represent a single activity or
@@ -125,19 +125,19 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 					fileName = value;
 				} else if (StreamProperties.PROP_START_FROM_LATEST.equalsIgnoreCase(name)) {
-					startFromLatestActivity = BooleanUtils.toBoolean(value);
+					startFromLatestActivity = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_FILE_READ_DELAY.equalsIgnoreCase(name)) {
 					fileWatcherDelay = TimeUnit.SECONDS.toMillis(Long.parseLong(value));
 				} else if (StreamProperties.PROP_FILE_POLLING.equalsIgnoreCase(name)) {
-					pollingOn = BooleanUtils.toBoolean(value);
+					pollingOn = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_RESTORE_STATE.equalsIgnoreCase(name)) {
-					storeState = BooleanUtils.toBoolean(value);
+					storeState = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
 					rangeValue = value;
 				} else if (StreamProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
 					activityDelimiter = value;
 				} else if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
-					keepLineSeparators = BooleanUtils.toBoolean(value);
+					keepLineSeparators = Utils.toBoolean(value);
 				}
 			}
 		}

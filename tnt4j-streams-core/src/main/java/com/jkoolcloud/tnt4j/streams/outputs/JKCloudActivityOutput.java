@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceFactory;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
@@ -93,11 +94,11 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 		super.setProperty(name, value);
 
 		if (OutputProperties.PROP_RESOLVE_SERVER.equalsIgnoreCase(name)) {
-			resolveServer = Boolean.parseBoolean((String) value);
+			resolveServer = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
-			turnOutActivityChildren = Boolean.parseBoolean((String) value);
+			turnOutActivityChildren = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_BUILD_FQN_FROM_DATA.equalsIgnoreCase(name)) {
-			buildFQNFromData = Boolean.parseBoolean((String) value);
+			buildFQNFromData = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_SOURCE_FQN.equalsIgnoreCase(name)) {
 			sourceFQN = (String) value;
 		}

@@ -28,7 +28,6 @@ import javax.jms.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -122,7 +121,7 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 				String value = prop.getValue();
 
 				if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
-					convertToString = BooleanUtils.toBoolean(value);
+					convertToString = Utils.toBoolean(value);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);

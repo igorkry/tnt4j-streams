@@ -120,9 +120,9 @@ public class WsStream extends AbstractWsStream {
 				String value = prop.getValue();
 
 				if (WsStreamProperties.PROP_DISABLE_SSL.equalsIgnoreCase(name)) {
-					disableSSL = Boolean.valueOf(value);
+					disableSSL = Utils.toBoolean(value);
 				} else if (WsStreamProperties.PROP_SYNCHRONIZE_REQUESTS.equalsIgnoreCase(name)) {
-					synchronizeRequests = Boolean.valueOf(value);
+					synchronizeRequests = Utils.toBoolean(value);
 				} else {
 					wsProperties.put(name, value);
 				}

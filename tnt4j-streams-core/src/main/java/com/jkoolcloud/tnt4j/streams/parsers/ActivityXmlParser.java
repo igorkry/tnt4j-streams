@@ -34,7 +34,6 @@ import javax.xml.xpath.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
@@ -174,13 +173,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					}
 				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
-						requireAll = BooleanUtils.toBoolean(value);
+						requireAll = Utils.toBoolean(value);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
-						namespaceAware = BooleanUtils.toBoolean(value);
+						namespaceAware = Utils.toBoolean(value);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}

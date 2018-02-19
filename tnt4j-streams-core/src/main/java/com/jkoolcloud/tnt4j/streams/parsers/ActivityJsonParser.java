@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jayway.jsonpath.DocumentContext;
@@ -88,7 +87,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				String value = prop.getValue();
 
 				if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
-					activityDelim = BooleanUtils.toBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
+					activityDelim = Utils.toBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);

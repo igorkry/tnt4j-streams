@@ -34,7 +34,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -101,7 +100,7 @@ public final class StreamsCache {
 				} else if (CacheProperties.PROP_EXPIRE_DURATION.equalsIgnoreCase(name)) {
 					expireDuration = Long.parseLong(value);
 				} else if (CacheProperties.PROP_PERSISTED.equalsIgnoreCase(name)) {
-					persistenceOn = BooleanUtils.toBoolean(value);
+					persistenceOn = Utils.toBoolean(value);
 				}
 			}
 		}

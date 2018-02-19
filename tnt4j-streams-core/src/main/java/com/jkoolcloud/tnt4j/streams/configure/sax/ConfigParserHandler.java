@@ -523,7 +523,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (ID_ATTR.equals(attName)) {
 				currCacheEntry.id = attValue;
 			} else if (TRANSIENT_ATTR.equals(attName)) {
-				currCacheEntry.transientEntry = Boolean.parseBoolean(attValue);
+				currCacheEntry.transientEntry = Utils.toBoolean(attValue);
 			} else {
 				unknownAttribute(CACHE_ENTRY_ELMT, attName);
 			}
@@ -601,7 +601,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (TAGS_ATTR.equals(attName)) {
 				tags = attValue;
 			} else if (AUTO_SORT_ATTR.equals(attName)) {
-				autoSort = !Boolean.parseBoolean(attValue);
+				autoSort = !Utils.toBoolean(attValue);
 			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
 				defaultDataType = ActivityFieldDataType.valueOf(attValue);
 			} else {
@@ -708,9 +708,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (REQUIRED_ATTR.equals(attName)) {
 				reqVal = attValue;
 			} else if (TRANSPARENT_ATTR.equals(attName)) {
-				transparent = Boolean.parseBoolean(attValue);
+				transparent = Utils.toBoolean(attValue);
 			} else if (SPLIT_ATTR.equals(attName)) {
-				split = Boolean.parseBoolean(attValue);
+				split = Utils.toBoolean(attValue);
 			} else if (ID_ATTR.equals(attName)) {
 				id = attValue;
 			} else {

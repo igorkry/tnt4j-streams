@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
@@ -131,7 +130,7 @@ public class WmqTraceStream extends WmqStreamPCF {
 						}
 					}
 				} else if (WmqStreamProperties.PROP_SUPPRESS_BROWSE_GETS.equalsIgnoreCase(name)) {
-					suppressBrowseGets = BooleanUtils.toBoolean(value);
+					suppressBrowseGets = Utils.toBoolean(value);
 				}
 			}
 		}

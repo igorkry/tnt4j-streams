@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -196,7 +195,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
-					useExecutorService = BooleanUtils.toBoolean(value);
+					useExecutorService = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
 					executorThreadsQty = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
@@ -204,7 +203,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 				} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
 					executorsTerminationTimeout = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
-					boundedExecutorModel = BooleanUtils.toBoolean(value);
+					boundedExecutorModel = Utils.toBoolean(value);
 				}
 			}
 		}
@@ -1063,7 +1062,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 		@Override
 		public void run() {
 			try {
-				processActivityItem(item, failureFlag);				
+				processActivityItem(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
 				Utils.logThrowable(logger(), OpLevel.ERROR,
 						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),

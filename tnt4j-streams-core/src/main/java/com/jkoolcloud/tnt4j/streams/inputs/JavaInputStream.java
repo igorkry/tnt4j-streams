@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -102,7 +101,7 @@ public class JavaInputStream extends TNTParseableInputStream<String> {
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_INPUT_CLOSEABLE.equalsIgnoreCase(name)) {
-					inputCloseable = BooleanUtils.toBoolean(value);
+					inputCloseable = Utils.toBoolean(value);
 				}
 			}
 		}
