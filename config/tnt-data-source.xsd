@@ -847,7 +847,7 @@
             <xs:enumeration value="RequireDefault">
                 <xs:annotation>
                     <xs:documentation>
-                        Property indicates that all attributes are required by default.
+                        Property indicates that all parser fields/locators by default requires to resolve non-null value.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -1244,7 +1244,7 @@
         <xs:attribute name="required" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Indicates whether field availability is required.
+                    Indicates whether field non-null value availability is required.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -1828,7 +1828,7 @@
         <xs:attribute name="required" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Indicates whether field availability is required.
+                    Indicates whether field non-null value availability is required.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

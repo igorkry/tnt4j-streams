@@ -51,6 +51,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
  * <li>ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: {@code "EOL"} - end of
  * line, or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
+ * <li>RequireDefault - indicates that all parser fields/locators by default requires to resolve non-null value. Default
+ * value - {@code false}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -81,6 +83,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected String activityDelim = ActivityDelim.EOL.name();
 
+	/**
+	 * Property indicating that all attributes are required by default.
+	 */
+	protected boolean requireAll = false;
+
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
 	private List<ActivityDataPreParser<?>> preParsers;
@@ -108,6 +115,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					if (StringUtils.isNotEmpty(value)) {
 						activityDelim = value;
 
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
+					}
+				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						requireAll = Utils.toBoolean(value);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}
@@ -541,6 +554,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 				applyFieldValue(field, value, cData);
 			}
+		} catch (MissingFieldValueException e) {
+			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
+			cData.setActivity(null);
+			return null;
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
 					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", field), 0);
@@ -717,10 +734,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return field locators parsed values array
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
+	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
+	 *             if required locator value has not been resolved
 	 * @see #parseLocatorValues(java.util.List,
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	protected Object[] parseLocatorValues(ActivityField field, ActivityContext cData) throws ParseException {
+	protected Object[] parseLocatorValues(ActivityField field, ActivityContext cData)
+			throws ParseException, MissingFieldValueException {
 		return parseLocatorValues(field.getLocators(), cData);
 	}
 
@@ -734,13 +754,22 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return locators parsed values array
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
+	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
+	 *             if required locator value has not been resolved
 	 */
 	protected Object[] parseLocatorValues(List<ActivityFieldLocator> locators, ActivityContext cData)
-			throws ParseException {
+			throws ParseException, MissingFieldValueException {
 		if (locators != null) {
 			Object[] values = new Object[locators.size()];
 			for (int li = 0; li < locators.size(); li++) {
-				values[li] = getLocatorValue(locators.get(li), cData);
+				ActivityFieldLocator loc = locators.get(li);
+				values[li] = getLocatorValue(loc, cData);
+
+				if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
+					throw new MissingFieldValueException(
+							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+									"ActivityParser.required.locator.not.found", loc, cData.getField()));
+				}
 			}
 			return values;
 		}

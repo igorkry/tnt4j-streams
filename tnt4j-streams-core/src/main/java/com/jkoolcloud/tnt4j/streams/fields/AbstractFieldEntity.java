@@ -59,7 +59,7 @@ public abstract class AbstractFieldEntity {
 	protected abstract EventSink logger();
 
 	/**
-	 * Sets the required option flag to indicator if field entity is optional
+	 * Sets the required option flag to indicator if field entity value is optional - can be {@code null}.
 	 *
 	 * @param requiredVal
 	 *            {@code true}/{@code false} string

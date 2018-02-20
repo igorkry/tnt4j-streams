@@ -60,8 +60,6 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * {@link GenericActivityParser}):
  * <ul>
  * <li>Namespace - additional XML namespace mappings. (Optional)</li>
- * <li>RequireDefault - indicates that all attributes are required by default. Default value - {@code false}.
- * (Optional)</li>
  * <li>NamespaceAware - indicates that parser has to provide support for XML namespaces. Default value - {@code true}.
  * (Optional)</li>
  * </ul>
@@ -99,10 +97,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	private final ReentrantLock xPathLock = new ReentrantLock();
 	private final ReentrantLock builderLock = new ReentrantLock();
 
-	/**
-	 * Property indicating that all attributes are required by default.
-	 */
-	protected boolean requireAll = false;
 	/**
 	 * Property indicating that parser shall be namespace aware.
 	 */
@@ -170,12 +164,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 									"ActivityXmlParser.adding.mapping", name, nSpace);
 						}
-					}
-				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						requireAll = Utils.toBoolean(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.setting", name, value);
 					}
 				} else if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(value)) {
@@ -302,14 +290,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 						savedFormats[li] = loc.getFormat();
 						savedUnits[li] = loc.getUnits();
 						savedLocales[li] = loc.getLocale();
-
-						if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
-							logger().log(OpLevel.WARNING,
-									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-									"ActivityXmlParser.required.locator.not.found", loc, field);
-							cData.setActivity(null);
-							return null;
-						}
 					}
 				}
 
@@ -322,6 +302,10 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					}
 				}
 			}
+		} catch (MissingFieldValueException e) {
+			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
+			cData.setActivity(null);
+			return null;
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
 					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", field), 0);

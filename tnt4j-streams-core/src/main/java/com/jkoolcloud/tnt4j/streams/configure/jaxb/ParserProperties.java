@@ -103,7 +103,7 @@ public enum ParserProperties {
 
 	/**
 	 * 
-	 * Property indicates that all attributes are required by default.
+	 * Property indicates that all parser fields/locators by default requires to resolve non-null value.
 	 * 
 	 * 
 	 */

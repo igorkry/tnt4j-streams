@@ -222,18 +222,24 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 		ActivityInfo ai = new ActivityInfo();
 		cData.setActivity(ai);
-		// apply fields for parser
-		if (!matchMap.isEmpty()) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityRegExParser.applying.regex", matchMap.size());
-			Map<String, String> matches = findMatches(cData.getData());
+		try {
+			// apply fields for parser
+			if (!matchMap.isEmpty()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityRegExParser.applying.regex", matchMap.size());
+				Map<String, String> matches = findMatches(cData.getData());
 
-			cData.put(MATCHES_KEY, matches);
-			resolveLocatorsValues(matchMap, cData);
-			cData.remove(MATCHES_KEY);
+				cData.put(MATCHES_KEY, matches);
+				resolveLocatorsValues(matchMap, cData);
+				cData.remove(MATCHES_KEY);
+			}
+
+			resolveLocatorsValues(groupMap, cData);
+		} catch (MissingFieldValueException e) {
+			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
+			cData.setActivity(null);
+			return null;
 		}
-
-		resolveLocatorsValues(groupMap, cData);
 
 		return ai;
 	}
@@ -247,6 +253,8 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 *            prepared activity data item parsing context
 	 * @throws ParseException
 	 *             if exception occurs while resolving regex locators values
+	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
+	 *             if required locator value has not been resolved
 	 *
 	 * @see #parseLocatorValues(java.util.List,
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
@@ -254,7 +262,7 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected void resolveLocatorsValues(Map<ActivityField, List<ActivityFieldLocator>> locMap, ActivityContext cData)
-			throws ParseException {
+			throws ParseException, MissingFieldValueException {
 		ActivityField field = null;
 		try {
 			Object value;
@@ -267,6 +275,8 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 				applyFieldValue(field, value, cData);
 			}
+		} catch (MissingFieldValueException e) {
+			throw e;
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
 					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.regex", field), 0);

@@ -4866,11 +4866,14 @@ Also see ['Ms Excel Stream generic parameters'](#ms-excel-stream-generic-paramet
  configuration. Default value - `false`. (Optional)
  * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
  file/stream. Default value - `EOL`. (Optional)
+ * `RequireDefault` - indicates that all parser fields/locators by default requires to resolve non-null value. Default value - `false`. 
+ (Optional).
 
     sample:
 ```xml
     <property name="UseActivityDataAsMessageForUnset" value="true"/>
     <property name="ActivityDelim" value="EOF"/>
+    <property name="RequireDefault" value="true"/>
 ``` 
 
 #### Activity Name-Value parser
@@ -4941,14 +4944,12 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 This parser uses XPath expressions as field locators. You may also use [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions).
 
  * `Namespace` - additional XML namespace mappings. Default value - `null`. (Optional)
- * `RequireDefault` - indicates that all attributes are required by default. Default value - `false`. (Optional)
  * `NamespaceAware` - indicates that parser has to provide support for XML namespaces. Default value - `true`. (Optional)
 
     sample:
 ```xml
     <property name="Namespace" value="xsi=http://www.w3.org/2001/XMLSchema-instance"/>
     <property name="Namespace" value="tnt4j=https://jkool.jkoolcloud.com/jKool/xsds"/>
-    <property name="RequireDefault" value="true"/>
     <property name="NamespaceAware" value="false"/>
 ```
 
