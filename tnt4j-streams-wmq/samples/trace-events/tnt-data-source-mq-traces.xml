@@ -318,8 +318,9 @@
         <!-- using default queue or could be alternate queue -->
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
 
-        <!-- these 2 are required if connecting remote or removed for local connection -->
-        <property name="Host" value="localhost"/>
+        <!-- these are required if connecting remote or removed for local connection -->
+        <property name="Channel" value="[CHANNEL]"/
+        <property name="Host" value="[HOST]"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
@@ -350,8 +351,9 @@
         <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqs*"/>
         <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
 
-        <!-- these 2 are required if connecting remote or removed for local connection -->
-        <property name="Host" value="localhost"/>
+        <!-- these are required if connecting remote or removed for local connection -->
+        <property name="Channel" value="[CHANNEL]"/
+        <property name="Host" value="[HOST]"/>
         <property name="Port" value="1414"/>
 
         <!-- user and password as required by the MQ Queue Manager -->
