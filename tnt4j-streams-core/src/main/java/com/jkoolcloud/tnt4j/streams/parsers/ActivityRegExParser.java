@@ -215,33 +215,19 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	}
 
 	@Override
-	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
-		if (cData == null || cData.getData() == null) {
-			return null;
+	protected void parseFields(ActivityContext cData) throws Exception {
+		// apply fields for parser
+		if (!matchMap.isEmpty()) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityRegExParser.applying.regex", matchMap.size());
+			Map<String, String> matches = findMatches(cData.getData());
+
+			cData.put(MATCHES_KEY, matches);
+			resolveLocatorsValues(matchMap, cData);
+			cData.remove(MATCHES_KEY);
 		}
 
-		ActivityInfo ai = new ActivityInfo();
-		cData.setActivity(ai);
-		try {
-			// apply fields for parser
-			if (!matchMap.isEmpty()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityRegExParser.applying.regex", matchMap.size());
-				Map<String, String> matches = findMatches(cData.getData());
-
-				cData.put(MATCHES_KEY, matches);
-				resolveLocatorsValues(matchMap, cData);
-				cData.remove(MATCHES_KEY);
-			}
-
-			resolveLocatorsValues(groupMap, cData);
-		} catch (MissingFieldValueException e) {
-			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
-			cData.setActivity(null);
-			return null;
-		}
-
-		return ai;
+		resolveLocatorsValues(groupMap, cData);
 	}
 
 	/**
@@ -262,26 +248,17 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected void resolveLocatorsValues(Map<ActivityField, List<ActivityFieldLocator>> locMap, ActivityContext cData)
-			throws ParseException, MissingFieldValueException {
-		ActivityField field = null;
-		try {
-			Object value;
-			for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : locMap.entrySet()) {
-				field = fieldMapEntry.getKey();
-				cData.setField(field);
-				List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
+			throws Exception {
+		ActivityField field;
+		Object value;
+		for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : locMap.entrySet()) {
+			field = fieldMapEntry.getKey();
+			cData.setField(field);
+			List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
 
-				value = Utils.simplifyValue(parseLocatorValues(locations, cData));
+			value = Utils.simplifyValue(parseLocatorValues(locations, cData));
 
-				applyFieldValue(field, value, cData);
-			}
-		} catch (MissingFieldValueException e) {
-			throw e;
-		} catch (Exception e) {
-			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.failed.parsing.regex", field), 0);
-			pe.initCause(e);
-			throw pe;
+			applyFieldValue(field, value, cData);
 		}
 	}
 

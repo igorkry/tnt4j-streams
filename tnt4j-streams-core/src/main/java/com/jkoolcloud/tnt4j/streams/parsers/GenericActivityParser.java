@@ -533,8 +533,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @throws ParseException
 	 *             if exception occurs applying locator format properties to specified value
 	 *
-	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
-	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 * @see #parseFields(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
 		if (cData == null || cData.getData() == null) {
@@ -542,30 +541,46 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
 		cData.setActivity(ai);
 		try {
-			// apply fields for parser
-			Object value;
-			for (ActivityField aField : fieldList) {
-				field = aField;
-				cData.setField(aField);
-				value = Utils.simplifyValue(parseLocatorValues(field, cData));
-
-				applyFieldValue(field, value, cData);
-			}
+			parseFields(cData);
 		} catch (MissingFieldValueException e) {
 			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
 			cData.setActivity(null);
 			return null;
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", field), 0);
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", cData.getField()), 0);
 			pe.initCause(e);
 			throw pe;
 		}
 
 		return ai;
+	}
+
+	/**
+	 * Parses and applies values for all parser bound fields.
+	 *
+	 * @param cData
+	 *            prepared activity data item context to parse
+	 * @throws Exception
+	 *             if exception occurs applying locator format properties to specified value, or required value has not
+	 *             been resolved
+	 *
+	 * @see #parseLocatorValues(com.jkoolcloud.tnt4j.streams.fields.ActivityField,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 */
+	protected void parseFields(ActivityContext cData) throws Exception {
+		// apply fields for parser
+		Object value;
+		for (ActivityField aField : fieldList) {
+			cData.setField(aField);
+			value = Utils.simplifyValue(parseLocatorValues(aField, cData));
+
+			applyFieldValue(aField, value, cData);
+		}
 	}
 
 	/**

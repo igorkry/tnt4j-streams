@@ -256,64 +256,43 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	@Override
-	protected ActivityInfo parsePreparedItem(ActivityContext cData) throws ParseException {
-		if (cData == null || cData.getData() == null) {
-			return null;
-		}
-
-		ActivityInfo ai = new ActivityInfo();
-		ActivityField field = null;
-		cData.setActivity(ai);
-		try {
-			String[] savedFormats = null;
-			String[] savedUnits = null;
-			String[] savedLocales = null;
-			// apply fields for parser
-			Object[] values;
-			for (ActivityField aField : fieldList) {
-				values = null;
-				cData.setField(aField);
-				field = aField;
-				List<ActivityFieldLocator> locators = field.getLocators();
-				if (locators != null) {
-					// need to save format and units specification from config
-					// in case individual entry in activity data overrides it
-					if (ArrayUtils.getLength(savedFormats) < locators.size()) {
-						savedFormats = new String[locators.size()];
-						savedUnits = new String[locators.size()];
-						savedLocales = new String[locators.size()];
-					}
-
-					values = parseLocatorValues(locators, cData);
-					for (int li = 0; li < locators.size(); li++) {
-						ActivityFieldLocator loc = locators.get(li);
-						savedFormats[li] = loc.getFormat();
-						savedUnits[li] = loc.getUnits();
-						savedLocales[li] = loc.getLocale();
-					}
+	protected void parseFields(ActivityContext cData) throws Exception {
+		String[] savedFormats = null;
+		String[] savedUnits = null;
+		String[] savedLocales = null;
+		// apply fields for parser
+		Object[] values;
+		for (ActivityField aField : fieldList) {
+			values = null;
+			cData.setField(aField);
+			List<ActivityFieldLocator> locators = aField.getLocators();
+			if (locators != null) {
+				// need to save format and units specification from config
+				// in case individual entry in activity data overrides it
+				if (ArrayUtils.getLength(savedFormats) < locators.size()) {
+					savedFormats = new String[locators.size()];
+					savedUnits = new String[locators.size()];
+					savedLocales = new String[locators.size()];
 				}
 
-				applyFieldValue(field, Utils.simplifyValue(values), cData);
-				if (locators != null && savedFormats != null) {
-					for (int li = 0; li < locators.size(); li++) {
-						ActivityFieldLocator loc = locators.get(li);
-						loc.setFormat(savedFormats[li], savedLocales[li]);
-						loc.setUnits(savedUnits[li]);
-					}
+				values = parseLocatorValues(locators, cData);
+				for (int li = 0; li < locators.size(); li++) {
+					ActivityFieldLocator loc = locators.get(li);
+					savedFormats[li] = loc.getFormat();
+					savedUnits[li] = loc.getUnits();
+					savedLocales[li] = loc.getLocale();
 				}
 			}
-		} catch (MissingFieldValueException e) {
-			logger().log(OpLevel.WARNING, Utils.getExceptionMessages(e));
-			cData.setActivity(null);
-			return null;
-		} catch (Exception e) {
-			ParseException pe = new ParseException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.parsing.failed", field), 0);
-			pe.initCause(e);
-			throw pe;
-		}
 
-		return ai;
+			applyFieldValue(aField, Utils.simplifyValue(values), cData);
+			if (locators != null && savedFormats != null) {
+				for (int li = 0; li < locators.size(); li++) {
+					ActivityFieldLocator loc = locators.get(li);
+					loc.setFormat(savedFormats[li], savedLocales[li]);
+					loc.setUnits(savedUnits[li]);
+				}
+			}
+		}
 	}
 
 	/**
