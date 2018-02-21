@@ -319,7 +319,7 @@
         <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
 
         <!-- these are required if connecting remote or removed for local connection -->
-        <property name="Channel" value="[CHANNEL]"/
+        <property name="Channel" value="[CHANNEL]"/>
         <property name="Host" value="[HOST]"/>
         <property name="Port" value="1414"/>
 
@@ -352,7 +352,7 @@
         <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
 
         <!-- these are required if connecting remote or removed for local connection -->
-        <property name="Channel" value="[CHANNEL]"/
+        <property name="Channel" value="[CHANNEL]"/>
         <property name="Host" value="[HOST]"/>
         <property name="Port" value="1414"/>
 
