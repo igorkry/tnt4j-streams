@@ -114,7 +114,7 @@
         <field name="MessagesLag" locator="$.Offset.offset" locator-type="Label">
             <field-transform lang="groovy" name="DiffTransform">
                 <![CDATA[
-                     ${LastOffset} != null ? ${LastOffset} - ${Offset} : 0
+                     ${LastOffset} != null &&  ${Offset} > 0 ? ${LastOffset} - ${Offset} : 0
 				]]>
             </field-transform>
         </field>
