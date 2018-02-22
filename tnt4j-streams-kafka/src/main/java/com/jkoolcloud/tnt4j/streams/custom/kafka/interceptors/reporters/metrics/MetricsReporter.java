@@ -104,7 +104,7 @@ public class MetricsReporter implements InterceptionsReporter {
 
 	private boolean useObjectNameProperties = true;
 
-	protected static class TopicMetrics {
+	protected abstract static class TopicMetrics {
 		/**
 		 * The topic name.
 		 */
@@ -125,10 +125,6 @@ public class MetricsReporter implements InterceptionsReporter {
 		 * The metrics correlator, tying all metrics packages of one particular sampling.
 		 */
 		String correlator;
-		/**
-		 * Topic offset data.
-		 */
-		Offset offset;
 		/**
 		 * String client identifier.
 		 */
@@ -169,15 +165,16 @@ public class MetricsReporter implements InterceptionsReporter {
 			this.partition = partition;
 			this.clientId = clientId;
 			this.callName = callName;
-			offset = new Offset();
 		}
 
 		/**
 		 * Resets metrics before next collection iteration (after send).
 		 */
 		void reset() {
-			// offset.reset();
+			getOffset().reset();
 		}
+
+		abstract Offset getOffset();
 	}
 
 	private static class ConsumerTopicMetrics extends TopicMetrics {
@@ -188,6 +185,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		private final Histogram keySize = mRegistry.histogram("keySize"); // NON-NLS
 		private final Histogram valueSize = mRegistry.histogram("valueSize"); // NON-NLS
 		private final com.codahale.metrics.Timer latency = mRegistry.timer("messageLatency");// NON-NLS
+
+		/**
+		 * Topic consumer offset data.
+		 */
+		COffset offset;
 
 		/**
 		 * Constructs a new ConsumerTopicMetrics.
@@ -203,6 +205,12 @@ public class MetricsReporter implements InterceptionsReporter {
 		 */
 		ConsumerTopicMetrics(String topic, Integer partition, String clientId, String callName) {
 			super(topic, partition, clientId, callName);
+			offset = new COffset();
+		}
+
+		@Override
+		COffset getOffset() {
+			return offset;
 		}
 	}
 
@@ -213,6 +221,11 @@ public class MetricsReporter implements InterceptionsReporter {
 		private final Counter sendC = mRegistry.counter("sendCounter"); // NON-NLS
 		private final Counter ackC = mRegistry.counter("ackCounter"); // NON-NLS
 		private final Meter errorMeter = mRegistry.meter("errorCounter"); // NON-NLS
+
+		/**
+		 * Topic producer offset data.
+		 */
+		Offset offset;
 
 		/**
 		 * Constructs a new ProducerTopicMetrics.
@@ -228,6 +241,12 @@ public class MetricsReporter implements InterceptionsReporter {
 		 */
 		ProducerTopicMetrics(String topic, Integer partition, String clientId, String callName) {
 			super(topic, partition, clientId, callName);
+			offset = new Offset();
+		}
+
+		@Override
+		Offset getOffset() {
+			return offset;
 		}
 	}
 
@@ -344,7 +363,7 @@ public class MetricsReporter implements InterceptionsReporter {
 			topicMetrics.consumeM.mark();
 			topicMetrics.consumeC.inc();
 
-			topicMetrics.offset.update(record.offset(), record.timestamp());
+			topicMetrics.offset.update(record.offset(), record.timestamp(), System.currentTimeMillis());
 		}
 	}
 
@@ -357,7 +376,7 @@ public class MetricsReporter implements InterceptionsReporter {
 					clientId, "commit"); // NON-NLS
 			topicMetrics.commitC.inc();
 
-			topicMetrics.offset.update(tpom.getValue().offset(), System.currentTimeMillis());
+			topicMetrics.offset.update(tpom.getValue().offset(), -1, System.currentTimeMillis());
 		}
 	}
 
@@ -624,7 +643,7 @@ public class MetricsReporter implements InterceptionsReporter {
 			json.writeObjectField("Type", topicMetrics.getClass().getSimpleName()); // NON-NLS
 			json.writeObjectField("Metrics", topicMetrics.mRegistry); // NON-NLS
 			json.writeObjectField("Correlator", topicMetrics.correlator); // NON-NLS
-			json.writeObjectField("Offset", topicMetrics.offset.values()); // NON-NLS
+			json.writeObjectField("Offset", topicMetrics.getOffset().values()); // NON-NLS
 			json.writeObjectField("ClientId", topicMetrics.clientId); // NON-NLS
 			if (StringUtils.isNotEmpty(topicMetrics.callName)) {
 				json.writeObjectField("CallName", topicMetrics.callName); // NON-NLS
@@ -658,16 +677,16 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	private static class Offset {
-		private final Map<String, Long> values = new HashMap<>(2);
+		final Map<String, Long> values = new HashMap<>(2);
 
 		Offset() {
 			reset();
 		}
 
-		void update(long offset, long timestamp) {
+		void update(long offset, long p_timestamp) {
 			synchronized (values) {
 				values.put("offset", offset); // NON-NLS
-				values.put("timestamp", timestamp); // NON-NLS
+				values.put("p_timestamp", p_timestamp); // NON-NLS
 			}
 		}
 
@@ -679,6 +698,25 @@ public class MetricsReporter implements InterceptionsReporter {
 
 		void reset() {
 			update(-1L, -1L);
+		}
+	}
+
+	private static class COffset extends Offset {
+		COffset() {
+			reset();
+		}
+
+		void update(long offset, long p_timestamp, long c_timestamp) {
+			synchronized (values) {
+				values.put("offset", offset); // NON-NLS
+				values.put("p_timestamp", p_timestamp); // NON-NLS
+				values.put("c_timestamp", c_timestamp); // NON-NLS
+			}
+		}
+
+		@Override
+		void reset() {
+			update(-1L, -1L, -1L);
 		}
 	}
 

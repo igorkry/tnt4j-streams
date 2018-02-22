@@ -6,11 +6,11 @@
     <!-- START of metrics parsing -->
 
     <parser name="MetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
-        <field name="All" locator-type="Label" locator="*"></field>
+        <field name="All" locator="*" locator-type="Label"/>
     </parser>
 
-    <parser name="KafkaInterceptMetricsMSGParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
-            default-data-type="AsInput">
+    <parser name="SendMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
+            default-data-type="AsInput" manualFieldsOrder="true">
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
@@ -25,21 +25,171 @@
             <field-locator locator="OperationType" locator-type="Activity"></field-locator>
         </field>
 
-        <field name="producerCount" locator="$.Metrics" locator-type="Label">
+        <field name="ProducerSendMetrics" locator="$.Metrics" locator-type="Label">
             <parser-ref name="MetricsParser" aggregation="Merge"/>
         </field>
 
         <field name="clientID" locator="$.ClientId" locator-type="Label"/>
         <field name="Call" locator="$.CallName" locator-type="Label"/>
-        <field name="Offset" locator="$.Offset" locator-type="Label"/>
+
+        <field name="SendOffset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="SendTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
     </parser>
 
-    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
-        <field name="InterceptionsMetricsData" locator="$.msg-text" locator-type="Label" transparent="true">
-            <parser-ref name="KafkaInterceptMetricsMSGParser" aggregation="Merge"/>
+    <parser name="AckMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
+            default-data-type="AsInput" manualFieldsOrder="true">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
+        <field name="OperationType" locator="$.Type" locator-type="Label" transparent="true">
+            <field-map source="ProducerTopicMetrics" target="Producer"/>
+            <field-map source="ConsumerTopicMetrics" target="Consumer"/>
+        </field>
+
+        <field name="EventType" value="ACTIVITY"/>
+        <field name="EventName" formattingPattern="Metrics of {0} {1}">
+            <field-locator locator="$.Topic" locator-type="Label"/>
+            <field-locator locator="OperationType" locator-type="Activity"></field-locator>
+        </field>
+
+        <field name="ProducerAckMetrics" locator="$.Metrics" locator-type="Label">
+            <parser-ref name="MetricsParser" aggregation="Merge"/>
+        </field>
+
+        <field name="LastOffset" locator="LastProduced" locator-type="Cache"/>
+        <field name="LastOffsetTime" locator="LastProducedTime" locator-type="Cache"/>
+
+        <field name="clientID" locator="$.ClientId" locator-type="Label"/>
+        <field name="Call" locator="$.CallName" locator-type="Label"/>
+
+        <field name="AckOffset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="AckTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
+
+        <field name="LatestPOffset" locator="$.Offset.offset" locator-type="Label" transparent="true">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                        ${LastOffset} == null ? $fieldValue : Math.max(${LastOffset}, $fieldValue)
+    				]]>
+            </field-transform>
+        </field>
+        <field name="LatestPTimestamp" locator="$.Offset.p_timestamp" locator-type="Label" transparent="true">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                        ${LastOffset} == null ? null : (${Offset} >= ${LastOffset} ? $fieldValue: ${LastOffsetTime})
+    				]]>
+            </field-transform>
         </field>
     </parser>
 
+    <parser name="ConsumeMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
+            default-data-type="AsInput" manualFieldsOrder="true">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
+        <field name="OperationType" locator="$.Type" locator-type="Label" transparent="true">
+            <field-map source="ProducerTopicMetrics" target="Producer"/>
+            <field-map source="ConsumerTopicMetrics" target="Consumer"/>
+        </field>
+
+        <field name="EventType" value="ACTIVITY"/>
+        <field name="EventName" formattingPattern="Metrics of {0} {1}">
+            <field-locator locator="$.Topic" locator-type="Label"/>
+            <field-locator locator="OperationType" locator-type="Activity"></field-locator>
+        </field>
+
+        <field name="ConsumerConsumeMetrics" locator="$.Metrics" locator-type="Label">
+            <parser-ref name="MetricsParser" aggregation="Merge"/>
+        </field>
+
+        <field name="LastOffset" locator="LastProduced" locator-type="Cache"/>
+        <field name="LastOffsetTime" locator="LastProducedTime" locator-type="Cache"/>
+
+        <field name="clientID" locator="$.ClientId" locator-type="Label"/>
+        <field name="Call" locator="$.CallName" locator-type="Label"/>
+
+        <field name="ConsumeOffset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="ConsumePTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
+        <field name="ConsumeCTimestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
+
+        <field name="MessagesLag" locator="$.Offset.offset" locator-type="Label">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                     ${LastOffset} != null ? ${LastOffset} - ${Offset} : null
+				]]>
+            </field-transform>
+        </field>
+
+        <field name="MessagesLagTime" locator="$.Offset.c_timestamp" locator-type="Label">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                      ${LastOffsetTime} != null && $fieldValue >= 0 ? $fieldValue - ${LastOffsetTime} : 0
+				]]>
+            </field-transform>
+        </field>
+
+        <field name="CommitLagTime" locator="$.Offset.c_timestamp" locator-type="Label">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                      $fieldValue >= 0 ? $fieldValue - ${ConsumePTimestamp} : 0
+				]]>
+            </field-transform>
+        </field>
+
+        <field name="AppendLagTime" locator="$.Offset.p_timestamp" locator-type="Label">
+            <field-transform lang="groovy" name="DiffTransform">
+                <![CDATA[
+                      ${LastOffsetTime} != null ? $fieldValue - ${LastOffsetTime} : null
+				]]>
+            </field-transform>
+        </field>
+    </parser>
+
+    <parser name="CommitMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
+            default-data-type="AsInput" manualFieldsOrder="true">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="topic" locator="$.Topic" locator-type="Label" required="true"/>
+        <field name="OperationType" locator="$.Type" locator-type="Label" transparent="true">
+            <field-map source="ProducerTopicMetrics" target="Producer"/>
+            <field-map source="ConsumerTopicMetrics" target="Consumer"/>
+        </field>
+
+        <field name="EventType" value="ACTIVITY"/>
+        <field name="EventName" formattingPattern="Metrics of {0} {1}">
+            <field-locator locator="$.Topic" locator-type="Label"/>
+            <field-locator locator="OperationType" locator-type="Activity"></field-locator>
+        </field>
+
+        <field name="ConsumerCommitMetrics" locator="$.Metrics" locator-type="Label">
+            <parser-ref name="MetricsParser" aggregation="Merge"/>
+        </field>
+
+        <field name="LastOffset" locator="LastProduced" locator-type="Cache"/>
+        <field name="LastOffsetTime" locator="LastProducedTime" locator-type="Cache"/>
+
+        <field name="clientID" locator="$.ClientId" locator-type="Label"/>
+        <field name="Call" locator="$.CallName" locator-type="Label"/>
+
+        <field name="ConsumeOffset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="ConsumeTimestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
+    </parser>
+
+    <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
+        <field name="message-text" locator="$.msg-text" locator-type="Label" transparent="true">
+            <parser-ref name="AckMetricsParser" aggregation="Merge">
+                <matchExp>JPATH:$[?(@.CallName == 'acknowledge' )]</matchExp>
+            </parser-ref>
+            <parser-ref name="SendMetricsParser" aggregation="Merge">
+                <matchExp>JPATH:$[?(@.CallName == 'send' )]</matchExp>
+            </parser-ref>
+            <parser-ref name="CommitMetricsParser" aggregation="Merge">
+                <matchExp>JPATH:$[?(@.CallName == 'commit' )]</matchExp>
+            </parser-ref>
+            <parser-ref name="ConsumeMetricsParser" aggregation="Merge">
+                <matchExp>JPATH:$[?(@.CallName == 'consume' )]</matchExp>
+            </parser-ref>
+        </field>
+    </parser>
     <!-- END of metrics parsing -->
 
     <!-- START of JMX metrics parsing -->
@@ -55,7 +205,7 @@
         <field name="EventType" value="Activity"/>
         <field name="EventName" locator="$.operation" locator-type="Label"/>
 
-        <embedded-activity name="Snapshoots" locator="$.snapshots.[*]" locator-type="Label">
+        <embedded-activity name="Snapshots" locator="$.snapshots.[*]" locator-type="Label">
             <parser-ref name="SnapshotParser" aggregation="Join"/>
         </embedded-activity>
     </parser>
@@ -73,6 +223,23 @@
         </field>
     </parser>
 
+    <!--cache def -->
+
+    <cache>
+        <property name="MaxSize" value="100"/>
+        <property name="ExpireDuration" value="55"/>
+        <property name="Persisted" value="false"/>
+
+        <entry id="LastProduced">
+            <key>LastProduced-${topic}</key>
+            <value>${LatestPOffset}</value>
+        </entry>
+        <entry id="LastProducedTime">
+            <key>LastProducedTime-${topic}</key>
+            <value>${LatestPTimestamp}</value>
+        </entry>
+    </cache>
+
     <!-- END of JMX metrics parsing -->
 
     <stream name="KafkaMetricsStream" class="com.jkoolcloud.tnt4j.streams.inputs.KafkaConsumerStream">
@@ -82,7 +249,7 @@
 
         <!-- Kafka consumer properties -->
         <property name="bootstrap.servers" value="localhost:9092"/>
-        <property name="group.id" value="0"/>
+        <property name="group.id" value="13"/>
         <property name="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
         <property name="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
 
