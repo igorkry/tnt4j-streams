@@ -30,6 +30,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -146,6 +147,20 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            the partition index
 		 * @param clientId
 		 *            client identifier
+		 */
+		TopicMetrics(String topic, Integer partition, String clientId) {
+			this(topic, partition, clientId, null);
+		}
+
+		/**
+		 * Constructs a new TopicMetrics.
+		 *
+		 * @param topic
+		 *            the topic name
+		 * @param partition
+		 *            the partition index
+		 * @param clientId
+		 *            client identifier
 		 * @param callName
 		 *            intercepted client call name
 		 */
@@ -155,6 +170,13 @@ public class MetricsReporter implements InterceptionsReporter {
 			this.clientId = clientId;
 			this.callName = callName;
 			offset = new Offset();
+		}
+
+		/**
+		 * Resets metrics before next collection iteration (after send).
+		 */
+		void reset() {
+			// offset.reset();
 		}
 	}
 
@@ -250,6 +272,9 @@ public class MetricsReporter implements InterceptionsReporter {
 		topicMetrics.lastSend = now;
 		topicMetrics.sendM.mark();
 		topicMetrics.sendC.inc();
+
+		topicMetrics.offset.update(-1,
+				producerRecord.timestamp() == null ? System.currentTimeMillis() : producerRecord.timestamp());
 	}
 
 	private ConsumerTopicMetrics getConsumerTopicMetrics(String topic, Integer partition, String clientId,
@@ -331,6 +356,8 @@ public class MetricsReporter implements InterceptionsReporter {
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(partition.topic(), partition.partition(),
 					clientId, "commit"); // NON-NLS
 			topicMetrics.commitC.inc();
+
+			topicMetrics.offset.update(tpom.getValue().offset(), System.currentTimeMillis());
 		}
 	}
 
@@ -377,6 +404,7 @@ public class MetricsReporter implements InterceptionsReporter {
 				TopicMetrics topicMetrics = metrics.getValue();
 				topicMetrics.correlator = metricsCorrelator;
 				String msg = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(topicMetrics);
+				topicMetrics.reset();
 				tracker.log(OpLevel.INFO, msg);
 			}
 		} catch (JsonProcessingException exc) {
@@ -598,7 +626,9 @@ public class MetricsReporter implements InterceptionsReporter {
 			json.writeObjectField("Correlator", topicMetrics.correlator); // NON-NLS
 			json.writeObjectField("Offset", topicMetrics.offset.values()); // NON-NLS
 			json.writeObjectField("ClientId", topicMetrics.clientId); // NON-NLS
-			json.writeObjectField("CallName", topicMetrics.callName); // NON-NLS
+			if (StringUtils.isNotEmpty(topicMetrics.callName)) {
+				json.writeObjectField("CallName", topicMetrics.callName); // NON-NLS
+			}
 
 			json.writeEndObject();
 		}
@@ -628,18 +658,27 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	private static class Offset {
-		Map<String, Long> values = new HashMap<>(2);
+		private final Map<String, Long> values = new HashMap<>(2);
 
 		Offset() {
+			reset();
 		}
 
 		void update(long offset, long timestamp) {
-			values.put("offset", offset); // NON-NLS
-			values.put("timestamp", timestamp); // NON-NLS
+			synchronized (values) {
+				values.put("offset", offset); // NON-NLS
+				values.put("timestamp", timestamp); // NON-NLS
+			}
 		}
 
 		Map<?, ?> values() {
-			return values;
+			synchronized (values) {
+				return values;
+			}
+		}
+
+		void reset() {
+			update(-1L, -1L);
 		}
 	}
 

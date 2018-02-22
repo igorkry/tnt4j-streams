@@ -523,13 +523,14 @@ public final class StreamsCache {
 			List<MapEntry> pEntries = new ArrayList<>(cache.size());
 			for (Map.Entry<String, CacheValue> entry : cache.entrySet()) {
 				if (!entry.getValue().isTransient()) {
-					pEntries.add(new MapEntry(entry.getKey(), entry.getValue()));
+					pEntries.add(new MapEntry(entry.getKey(), entry.getValue().value()));
 
 					LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"StreamsCache.entry.marshal", entry.getKey(), entry.getValue());
+							"StreamsCache.entry.marshal", entry.getKey(), Utils.toString(entry.getValue().value()));
 				} else {
 					LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"StreamsCache.entry.marshal.skip", entry.getKey(), entry.getValue());
+							"StreamsCache.entry.marshal.skip", entry.getKey(),
+							Utils.toString(entry.getValue().value()));
 				}
 			}
 
@@ -544,7 +545,7 @@ public final class StreamsCache {
 			for (MapEntry mapElement : mapElements) {
 				r.put(mapElement.key, new CacheValue(mapElement.getValue()));
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"StreamsCache.entry.unmarshal", mapElement.key, mapElement.getValue());
+						"StreamsCache.entry.unmarshal", mapElement.key, Utils.toString(mapElement.getValue()));
 			}
 			return r;
 		}
@@ -569,7 +570,6 @@ public final class StreamsCache {
 			} else {
 				this.value = value;
 			}
-
 		}
 
 		private MapEntry() {
@@ -598,11 +598,18 @@ public final class StreamsCache {
 			this.entriesMap = map;
 		}
 	}
-	/*
-	 * private static class ByteArrayAdapter extends XmlAdapter<String, Byte[]> {
-	 * 
-	 * @Override public Byte[] unmarshal(String v) throws Exception { return ArrayUtils.toObject(v.getBytes()); }
-	 * 
-	 * @Override public String marshal(Byte[] v) throws Exception { return String.valueOf(v); } }
-	 */
+
+	// private static class ByteArrayAdapter extends XmlAdapter<String, Byte[]> {
+	//
+	// @Override
+	// public Byte[] unmarshal(String v) throws Exception {
+	// return ArrayUtils.toObject(v.getBytes());
+	// }
+	//
+	// @Override
+	// public String marshal(Byte[] v) throws Exception {
+	// return String.valueOf(v);
+	// }
+	// }
+
 }
