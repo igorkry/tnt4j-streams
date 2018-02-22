@@ -32,8 +32,8 @@
         <field name="clientID" locator="$.ClientId" locator-type="Label"/>
         <field name="Call" locator="$.CallName" locator-type="Label"/>
 
-        <field name="SendOffset" locator="$.Offset.offset" locator-type="Label"/>
-        <field name="SendTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
+        <field name="Offset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="Timestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
     </parser>
 
     <parser name="AckMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser"
@@ -62,8 +62,8 @@
         <field name="clientID" locator="$.ClientId" locator-type="Label"/>
         <field name="Call" locator="$.CallName" locator-type="Label"/>
 
-        <field name="AckOffset" locator="$.Offset.offset" locator-type="Label"/>
-        <field name="AckTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
+        <field name="Offset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="Timestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
 
         <field name="LatestPOffset" locator="$.Offset.offset" locator-type="Label" transparent="true">
             <field-transform lang="groovy" name="DiffTransform">
@@ -107,9 +107,9 @@
         <field name="clientID" locator="$.ClientId" locator-type="Label"/>
         <field name="Call" locator="$.CallName" locator-type="Label"/>
 
-        <field name="ConsumeOffset" locator="$.Offset.offset" locator-type="Label"/>
-        <field name="ConsumePTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
-        <field name="ConsumeCTimestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
+        <field name="Offset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="PTimestamp" locator="$.Offset.p_timestamp" locator-type="Label"/>
+        <field name="Timestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
 
         <field name="MessagesLag" locator="$.Offset.offset" locator-type="Label">
             <field-transform lang="groovy" name="DiffTransform">
@@ -130,7 +130,7 @@
         <field name="CommitLagTime" locator="$.Offset.c_timestamp" locator-type="Label">
             <field-transform lang="groovy" name="DiffTransform">
                 <![CDATA[
-                      $fieldValue >= 0 ? $fieldValue - ${ConsumePTimestamp} : 0
+                      $fieldValue >= 0 ? $fieldValue - ${PTimestamp} : 0
 				]]>
             </field-transform>
         </field>
@@ -170,8 +170,8 @@
         <field name="clientID" locator="$.ClientId" locator-type="Label"/>
         <field name="Call" locator="$.CallName" locator-type="Label"/>
 
-        <field name="ConsumeOffset" locator="$.Offset.offset" locator-type="Label"/>
-        <field name="ConsumeTimestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
+        <field name="Offset" locator="$.Offset.offset" locator-type="Label"/>
+        <field name="Timestamp" locator="$.Offset.c_timestamp" locator-type="Label"/>
     </parser>
 
     <parser name="KafkaInterceptMetricsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser" default-data-type="AsInput">
