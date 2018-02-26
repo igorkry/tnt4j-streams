@@ -85,12 +85,13 @@ public class TraceCommandDeserializerTest {
 	public void kafkaReadTopicTest() {
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
-		props.put("group.id", "test");
+		props.put("group.id", "13");
 		props.put("enable.auto.commit", "true");
 		props.put("auto.commit.interval.ms", "1000");
 		props.put("session.timeout.ms", "30000");
 		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		props.put("client.id", "kafka-x-ray-test-consumer");
 
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 		consumer.subscribe(Collections.singletonList(MsgTraceReporter.TNT_TRACE_CONFIG_TOPIC));

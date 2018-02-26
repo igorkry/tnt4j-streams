@@ -114,7 +114,7 @@
         <field name="MessagesLag" locator="$.Offset.offset" locator-type="Label">
             <field-transform lang="groovy" name="DiffTransform">
                 <![CDATA[
-                     ${LastOffset} != null &&  ${Offset} > 0 ? ${LastOffset} - ${Offset} : 0
+                     ${LastOffset} != null && ${Offset} > 0 ? ${LastOffset} - ${Offset} : 0
 				]]>
             </field-transform>
         </field>
@@ -249,6 +249,7 @@
         <property name="group.id" value="13"/>
         <property name="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
         <property name="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+        <property name="client.id" value="kafka-x-ray-metrics-reader"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>
