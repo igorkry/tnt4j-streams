@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -294,12 +295,49 @@ public class InterceptionsManager {
 		}
 	}
 
-	public Map<String, ?> getInterceptorsConfig() {
-		Map<String, Object> getConfigResponse = new HashMap<>();
+	/**
+	 * Collects configurations of all referenced interceptors configurations. Configuration of interceptor is bound over
+	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#configure(java.util.Map)} or
+	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#configure(java.util.Map)} methods.
+	 * <p>
+	 * Key of produced map is {@code "client.id"} from interceptor configuration, value - configuration map of
+	 * interceptor.
+	 * <p>
+	 * Does same as calling {@code getInterceptorsConfig(null)}.
+	 *
+	 * @return map of referenced interceptors configurations
+	 *
+	 * @see #getInterceptorsConfig(Class)
+	 */
+	public Map<String, Map<String, ?>> getInterceptorsConfig() {
+		return getInterceptorsConfig(null);
+	}
+
+	/**
+	 * Collects configurations of all class <tt>iClass</tt> matching referenced interceptors configurations.
+	 * Configuration of interceptor is bound over
+	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#configure(java.util.Map)} or
+	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#configure(java.util.Map)} methods.
+	 * <p>
+	 * Key of produced map is {@code "client.id"} from interceptor configuration, value - configuration map of
+	 * interceptor.
+	 *
+	 * @param iClass
+	 *            interceptor type class to match, or {@code null} to iterate over all referenced interceptors
+	 * @return map of class matching referenced interceptors configurations
+	 *
+	 * @see TNTKafkaCInterceptor#getConfig()
+	 */
+	public Map<String, Map<String, ?>> getInterceptorsConfig(Class<? extends TNTKafkaInterceptor> iClass) {
+		Map<String, Map<String, ?>> interceptorsCfg = new HashMap<>();
 		for (TNTKafkaInterceptor ref : references) {
-			getConfigResponse.putAll(ref.getConfig());
+			if (iClass == null || ref.getClass().isAssignableFrom(iClass)) {
+				Map<String, ?> refCfg = ref.getConfig();
+				String clientId = (String) refCfg.get(ConsumerConfig.CLIENT_ID_CONFIG);
+				interceptorsCfg.put(clientId, refCfg);
+			}
 		}
 
-		return getConfigResponse;
+		return interceptorsCfg;
 	}
 }

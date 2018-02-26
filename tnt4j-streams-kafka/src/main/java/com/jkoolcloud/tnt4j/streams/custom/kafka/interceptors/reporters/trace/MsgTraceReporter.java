@@ -16,22 +16,17 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
-import static com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.TraceCommandDeserializer.MASTER_CONFIG;
-
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -82,7 +77,12 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		TimerTask mrt = new TimerTask() {
 			@Override
 			public void run() {
-				pollConfigQueue(InterceptionsManager.getInstance().getInterceptorsConfig(), traceConfig);
+				Map<String, Map<String, ?>> consumersCfg = InterceptionsManager.getInstance()
+						.getInterceptorsConfig(TNTKafkaCInterceptor.class);
+				Map<String, ?> cConfig = MapUtils.isEmpty(consumersCfg) ? null
+						: consumersCfg.entrySet().iterator().next().getValue();
+
+				pollConfigQueue(cConfig, traceConfig);
 			}
 		};
 		long period = TimeUnit.SECONDS.toMillis(POOL_TIME_SECONDS);
@@ -92,8 +92,12 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	protected static void pollConfigQueue(Map<String, ?> config,
 			Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig) {
 		Properties props = new Properties();
-		props.putAll(config);
+		if (config != null) {
+			props.putAll(config);
+		}
 		if (!props.isEmpty()) {
+			props.put(ConsumerConfig.CLIENT_ID_CONFIG, "kafka-x-ray-message-trace-reporter-config-listener"); // NON-NLS
+			props.remove(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG);
 			KafkaConsumer<String, TraceCommandDeserializer.TopicTraceCommand> consumer = new KafkaConsumer<>(props,
 					new StringDeserializer(), new TraceCommandDeserializer());
 			TopicPartition topic = new TopicPartition(MsgTraceReporter.TNT_TRACE_CONFIG_TOPIC, 0);
@@ -111,14 +115,13 @@ public class MsgTraceReporter implements InterceptionsReporter {
 					break;
 				}
 			}
-
 		}
 	}
 
 	protected Boolean shouldSendTrace(String topic, boolean count) {
 		TraceCommandDeserializer.TopicTraceCommand topicTraceConfig = traceConfig.get(topic);
 		if (topicTraceConfig == null) {
-			topicTraceConfig = traceConfig.get(MASTER_CONFIG);
+			topicTraceConfig = traceConfig.get(TraceCommandDeserializer.MASTER_CONFIG);
 		}
 		if (topic == null || topicTraceConfig == null) {
 			return false;
@@ -129,7 +132,10 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 	@Override
 	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
-		if (shouldSendTrace(producerRecord == null ? null : producerRecord.topic(), true)) {
+		if (producerRecord == null) {
+			return;
+		}
+		if (shouldSendTrace(producerRecord.topic(), true)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
@@ -153,7 +159,10 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	@Override
 	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
 			ClusterResource clusterResource) {
-		if (shouldSendTrace(recordMetadata == null ? null : recordMetadata.topic(), false)) {
+		if (recordMetadata == null) {
+			return;
+		}
+		if (shouldSendTrace(recordMetadata.topic(), false)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
@@ -191,9 +200,15 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	@Override
 	public void consume(TNTKafkaCInterceptor interceptor, ConsumerRecords<Object, Object> consumerRecords,
 			ClusterResource clusterResource) {
+		if (consumerRecords == null) {
+			return;
+		}
 		ActivityInfo ai;
 		for (ConsumerRecord<Object, Object> cr : consumerRecords) {
-			if (shouldSendTrace(cr == null ? null : cr.topic(), true)) {
+			if (cr == null) {
+				continue;
+			}
+			if (shouldSendTrace(cr.topic(), true)) {
 				try {
 					ai = new ActivityInfo();
 					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.RECEIVE);
@@ -218,12 +233,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
 					}
 
-					if (cr.headers() != null) {
-						for (Header header : cr.headers()) {
-							ai.setFieldValue(new ActivityField(header.key()), header.value());
-						}
-					}
-
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
 					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
@@ -240,9 +249,15 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 	@Override
 	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> map) {
+		if (map == null) {
+			return;
+		}
 		ActivityInfo ai;
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> me : map.entrySet()) {
-			if (shouldSendTrace((me == null || me.getKey() == null) ? null : me.getKey().topic(), false)) {
+			if (me == null) {
+				continue;
+			}
+			if (shouldSendTrace(me.getKey().topic(), false)) {
 				try {
 					ai = new ActivityInfo();
 					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);

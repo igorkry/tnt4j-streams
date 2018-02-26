@@ -47,6 +47,10 @@
         <property name="group.id" value="0"/>
         <property name="key.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
         <property name="value.deserializer" value="org.apache.kafka.common.serialization.StringDeserializer"/>
+        <property name="enable.auto.commit" value="true"/>
+        <property name="auto.commit.interval.ms" value="1000"/>
+        <property name="session.timeout.ms" value="30000"/>
+        <property name="client.id" value="tnt4j-streams-kafka-consumer"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>
