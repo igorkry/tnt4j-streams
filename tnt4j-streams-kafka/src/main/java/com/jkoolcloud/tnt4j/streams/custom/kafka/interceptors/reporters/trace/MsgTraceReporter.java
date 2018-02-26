@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
+import static com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.TraceCommandDeserializer.MASTER_CONFIG;
+
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.*;
@@ -29,6 +31,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -112,17 +115,21 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		}
 	}
 
-	private Boolean shouldSendTrace(String topic, boolean count) {
+	protected Boolean shouldSendTrace(String topic, boolean count) {
 		TraceCommandDeserializer.TopicTraceCommand topicTraceConfig = traceConfig.get(topic);
 		if (topicTraceConfig == null) {
-			topicTraceConfig = traceConfig.get(TraceCommandDeserializer.MASTER_CONFIG);
+			topicTraceConfig = traceConfig.get(MASTER_CONFIG);
 		}
-		return topicTraceConfig.match(topic, count);
+		if (topic == null || topicTraceConfig == null) {
+			return false;
+		} else {
+			return topicTraceConfig.match(topic, count);
+		}
 	}
 
 	@Override
 	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
-		if (shouldSendTrace(producerRecord.topic(), true)) {
+		if (shouldSendTrace(producerRecord == null ? null : producerRecord.topic(), true)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
@@ -146,7 +153,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	@Override
 	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
 			ClusterResource clusterResource) {
-		if (shouldSendTrace(recordMetadata.topic(), false)) {
+		if (shouldSendTrace(recordMetadata == null ? null : recordMetadata.topic(), false)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
@@ -186,7 +193,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			ClusterResource clusterResource) {
 		ActivityInfo ai;
 		for (ConsumerRecord<Object, Object> cr : consumerRecords) {
-			if (shouldSendTrace(cr.topic(), true)) {
+			if (shouldSendTrace(cr == null ? null : cr.topic(), true)) {
 				try {
 					ai = new ActivityInfo();
 					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.RECEIVE);
@@ -211,6 +218,12 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						ai.setFieldValue(new ActivityField("ClusterId"), clusterResource.clusterId()); // NON-NLS
 					}
 
+					if (cr.headers() != null) {
+						for (Header header : cr.headers()) {
+							ai.setFieldValue(new ActivityField(header.key()), header.value());
+						}
+					}
+
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
 					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
@@ -229,7 +242,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> map) {
 		ActivityInfo ai;
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> me : map.entrySet()) {
-			if (shouldSendTrace(me.getKey().topic(), false)) {
+			if (shouldSendTrace((me == null || me.getKey() == null) ? null : me.getKey().topic(), false)) {
 				try {
 					ai = new ActivityInfo();
 					ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
