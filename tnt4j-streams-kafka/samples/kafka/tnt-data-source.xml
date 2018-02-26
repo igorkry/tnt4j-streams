@@ -36,7 +36,7 @@
 
         <!-- Kafka consumer properties -->
         <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-        <property name="group.id" value="TNT4JStreams"/>
+        <property name="group.id" value="0"/>
 
         <parser-ref name="KafkaMessageParser"/>
     </stream>

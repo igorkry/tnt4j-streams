@@ -31,9 +31,11 @@ import javax.management.openmbean.TabularData;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
@@ -94,7 +96,6 @@ public class MetricsReporter implements InterceptionsReporter {
 	public static final int DEFAULT_REPORTING_PERIOD_SEC = 30;
 	private static final String TOPIC_UNRELATED = "Topic unrelated"; // NON-NLS
 	private static final String OBJ_NAME_ENTRY_KEY = "ObjectName"; // NON-NLS
-	private static final String CLIENT_ID_PROP_NAME = "client.id"; // NON-NLS
 
 	private java.util.Timer metricsReportingTimer;
 
@@ -282,7 +283,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	@Override
 	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
 		String topic = producerRecord.topic();
-		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		String clientId = MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG);
 		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(topic, producerRecord.partition(), clientId,
 				"send"); // NON-NLS
 		long now = System.currentTimeMillis();
@@ -334,7 +335,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	@Override
 	public void acknowledge(TNTKafkaPInterceptor interceptor, RecordMetadata recordMetadata, Exception e,
 			ClusterResource clusterResource) {
-		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		String clientId = MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG);
 		ProducerTopicMetrics topicMetrics = getProducerTopicMetrics(recordMetadata.topic(), recordMetadata.partition(),
 				clientId, "acknowledge"); // NON-NLS
 		if (e != null) {
@@ -351,7 +352,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	@Override
 	public void consume(TNTKafkaCInterceptor interceptor, ConsumerRecords<Object, Object> consumerRecords,
 			ClusterResource clusterResource) {
-		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		String clientId = MapUtils.getString(interceptor.getConfig(), ConsumerConfig.CLIENT_ID_CONFIG);
 		for (ConsumerRecord<?, ?> record : consumerRecords) {
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition(), clientId,
 					"consume"); // NON-NLS
@@ -369,7 +370,7 @@ public class MetricsReporter implements InterceptionsReporter {
 
 	@Override
 	public void commit(TNTKafkaCInterceptor interceptor, Map<TopicPartition, OffsetAndMetadata> tpomMap) {
-		String clientId = MapUtils.getString(interceptor.getConfig(), CLIENT_ID_PROP_NAME);
+		String clientId = MapUtils.getString(interceptor.getConfig(), ConsumerConfig.CLIENT_ID_CONFIG);
 		for (Map.Entry<TopicPartition, OffsetAndMetadata> tpom : tpomMap.entrySet()) {
 			TopicPartition partition = tpom.getKey();
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(partition.topic(), partition.partition(),

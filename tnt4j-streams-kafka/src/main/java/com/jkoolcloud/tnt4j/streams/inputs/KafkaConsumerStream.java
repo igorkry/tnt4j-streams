@@ -337,7 +337,7 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 			Properties cProperties = (Properties) params[0];
 			topics = (Collection<String>) params[1];
 
-			autoCommit = Utils.getBoolean("enable.auto.commit", cProperties, true); // NON-NLS
+			autoCommit = Utils.getBoolean(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, cProperties, true);
 			consumer = new KafkaConsumer<>(cProperties);
 		}
 

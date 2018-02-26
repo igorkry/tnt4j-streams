@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors;
 
 import java.util.Map;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -63,8 +64,8 @@ public class TNTKafkaCInterceptor implements ConsumerInterceptor<Object, Object>
 	@Override
 	public void configure(Map<String, ?> configs) {
 		this.configs = configs;
-		Object groupIdValue = configs.get("group.id");
-		if (groupIdValue != null && groupIdValue instanceof String) {
+		Object groupIdValue = configs.get(ConsumerConfig.GROUP_ID_CONFIG);
+		if (groupIdValue instanceof String) {
 			groupId = (String) groupIdValue;
 		}
 	}

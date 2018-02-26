@@ -57,7 +57,7 @@ public class KafkaStreamTest {
 		Map<String, String> props = new HashMap<>(3);
 		props.put(StreamProperties.PROP_TOPIC_NAME, DEFAULT_TEST_TOPIC);
 		props.put("zookeeper.connect", "127.0.0.1:2181");// NON-NLS
-		props.put("group.id", "TEST"); // NON-NLS
+		props.put("group.id", "13"); // NON-NLS
 		input.setProperties(props.entrySet());
 		testPropertyList(input, props.entrySet());
 	}
@@ -119,7 +119,7 @@ public class KafkaStreamTest {
 		Properties props = new Properties();
 
 		props.put("zookeeper.connect", "localhost:2181"); // NON-NLS
-		props.put("group.id", "TNT4JStreams"); // NON-NLS
+		props.put("group.id", "13"); // NON-NLS
 		props.put("zookeeper.session.timeout.ms", "4000"); // NON-NLS
 		props.put("zookeeper.sync.time.ms", "200"); // NON-NLS
 		props.put("auto.commit.interval.ms", "1000"); // NON-NLS

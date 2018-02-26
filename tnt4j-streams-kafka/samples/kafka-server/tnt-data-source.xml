@@ -41,7 +41,7 @@
         <property name="zookeeper.connection.timeout.ms" value="5000"/>
 
         <!-- Kafka consumer properties -->
-        <property name="consumer:group.id" value="TNT4JStreams"/>
+        <property name="consumer:group.id" value="0"/>
         <!--<property name="consumer:zookeeper.connection.timeout.ms" value="6000"/>-->
         <property name="consumer:consumer.timeout.ms" value="1000"/>
         <property name="consumer:auto.commit.interval.ms" value="1000"/>

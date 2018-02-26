@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -86,7 +87,7 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 	 */
 	public static final String OFF = "off"; // NON-NLS
 
-	private String charSetName = Utils.UTF8;
+	private StringDeserializer cmdDeserializer = new StringDeserializer();
 
 	/**
 	 * Parses trace command <tt>message</tt> and builds command instance handling topic messages tracing activity.
@@ -141,21 +142,14 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 
 	@Override
 	public void configure(Map<String, ?> configs, boolean isKey) {
-		String propertyName = isKey ? "key.deserializer.encoding" : "value.deserializer.encoding"; // NON-NLS
-		Object encodingValue = configs.get(propertyName);
-		if (encodingValue == null) {
-			encodingValue = configs.get("deserializer.encoding"); // NON-NLS
-		}
-
-		if (encodingValue != null && encodingValue instanceof String) {
-			charSetName = (String) encodingValue;
-		}
+		cmdDeserializer.configure(configs, isKey);
 	}
 
 	@Override
 	public TopicTraceCommand deserialize(String s, byte[] bytes) {
+		String cmdStr = cmdDeserializer.deserialize(s, bytes);
 		try {
-			return interpret(new String(bytes, charSetName));
+			return interpret(cmdStr);
 		} catch (Exception e) {
 			throw new SerializationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TraceCommandDeserializer.cmd.parse.failed", Utils.getExceptionMessages(e)));
