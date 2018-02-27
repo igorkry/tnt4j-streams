@@ -25,7 +25,7 @@ import net.minidev.json.JSONValue;
 
 /**
  * JSON formatter extension used with {@link RedirectTNT4JStream} to redirect incoming trackable objects
- * (activities/events/snapshots) produced by other TNT4J based sources like 'tnt4j-stream-jmx' to JKool Cloud.
+ * (activities/events/snapshots) produced by other TNT4J based sources like 'tnt4j-stream-jmx' to JKoolCloud.
  * <p>
  * If object to be formatted is valid JSON, then no additional formatting is performed. JSON validity is determined by
  * invoking {@link JSONValue#isValidJson(String)}.

@@ -529,7 +529,7 @@ child activity entities with data from parent activity entity.
 ### Field value transformations
 
 In streams configuration you can define field or locator resolved values transformations. In general transformations performs resolved 
-activity value post-processing before sending it to [JKool Cloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
+activity value post-processing before sending it to [JKoolCloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
 activity file path.
 
 To pass a resolved field/locator value to a transformation script/expression, use the predefined variable placeholder `$fieldValue`. You can 
@@ -977,8 +977,8 @@ Sample files can be found in `samples/single-log` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -1033,8 +1033,8 @@ Sample files can be found in `samples/multiple-logs` directory.
 `orders-in.log` and `orders-out.log` files contains set of order activity events. Single file line defines data of
 single order activity event.
 
-**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Single Log file'](#single-log-file) with one single difference:
 ```xml
@@ -1051,8 +1051,8 @@ Sample files can be found in `samples/piping-stream` directory.
 
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
-**NOTE:** records in this file are from year `2011` e.g., `12 Jul 2011`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 `jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
  you need is to pass file name of stream parsers configuration, e.g., `parsers.xml`
@@ -1273,8 +1273,8 @@ Sample files can be found in `samples/apache-access-single-log` directory.
 
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
-**NOTE:** records in this file are from year `2004` e.g., `07/Mar/2004`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2004`, e.g. `07/Mar/2004`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -1453,8 +1453,8 @@ Sample files can be found in `samples/apache-access-multi-log` directory.
 
 `localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
 
-**NOTE:** records in this file are from year `2015` ranging from April until November, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/) 
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2015` ranging from April until November, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Apache Access log single file'](#apache-access-log-single-file) with one single 
 difference:
@@ -2215,7 +2215,7 @@ Sample stream configuration:
 
             <!-- Kafka consumer properties -->
             <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-            <property name="group.id" value="TNT4JStreams"/>
+            <property name="group.id" value="0"/>
 
             <parser-ref name="KafkaMessageParser"/>
         </stream>
@@ -2302,7 +2302,7 @@ Sample stream configuration:
         <property name="zookeeper.connection.timeout.ms" value="5000"/>
 
         <!-- Kafka consumer properties -->
-        <property name="consumer:group.id" value="TNT4JStreams"/>
+        <property name="consumer:group.id" value="0"/>
         <!--<property name="consumer:zookeeper.connection.timeout.ms" value="6000"/>-->
         <property name="consumer:consumer.timeout.ms" value="1000"/>
         <property name="consumer:auto.commit.interval.ms" value="1000"/>
@@ -3538,7 +3538,7 @@ containing field `TomcatActive`.
 
 #### Redirecting TNT4J streams
 
-This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to [JKool Cloud](https://www.jkoolcloud.com/) 
+This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to [JKoolCloud](https://www.jkoolcloud.com/) 
 over single `TNT4J-Streams` stream instance.
 
 Sample files can be found in `samples/stream-jmx` directory.
@@ -3583,7 +3583,7 @@ accepted, stream reads incoming data from connection dedicated socket.
 `RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
 accept inbound connection.
 
-Stream referenced object `JMXRedirectOutput` sends JSON formatted data to [JKool Cloud](https://www.jkoolcloud.com/).
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to [JKoolCloud](https://www.jkoolcloud.com/).
 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
 additional JSON reformatting in default TNT4J data flow.
@@ -3613,8 +3613,8 @@ This sample shows how to stream MS Excel workbook rows as activity events.
 
 Sample files can be found in `samples/xlsx-rows` directory.
 
-**NOTE:** records in this file are from year `2010` e.g., `12 Jul 2010`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2010`, e.g. `12 Jul 2010`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -3679,8 +3679,8 @@ This sample shows how to stream MS Excel workbook sheets as activity events.
 
 Sample files can be found in `samples/xlsx-sheets` directory.
 
-**NOTE:** records in this file are from year `2010` e.g., `12 Jul 2010`, so then getting events data in [JKool Cloud](https://www.jkoolcloud.com/)
-please do not forget to just to dashboard time frame to that period!
+**NOTE:** Records in this file are from year `2010`, e.g. `12 Jul 2010`, so when sending the events data to 
+[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -4148,7 +4148,7 @@ Configuration data format is same for all sources now.
 
 Because TNT4J-Streams is based on TNT4J first you need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least you must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [JKool Cloud](https://www.jkoolcloud.com/) token assigned for you.
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [JKoolCloud](https://www.jkoolcloud.com/) token assigned for you.
 
 To define `tnt4j.properties` file location use system property `-Dtnt4j.config`, e.g., `-Dtnt4j.config="./config/tnt4j.properties"`.
 
@@ -4180,7 +4180,7 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
 	tracker.default.snapshot.category: TNT4J-Streams-event-snapshot
 
 	# event sink configuration: destination and data format
-	<YOUR EVENT SINK CONFIGURATION: JKool Cloud, Kafka, MQTT, etc.>
+	<YOUR EVENT SINK CONFIGURATION: JKoolCloud, Kafka, MQTT, etc.>
 
 	event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
 	#event.formatter.Newline: true
@@ -4198,10 +4198,10 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
 }
 ```
 
-#### [JKool Cloud](https://www.jkoolcloud.com/) sink configuration
+#### [JKoolCloud](https://www.jkoolcloud.com/) sink configuration
 
 ```properties
-    #### JKool Cloud event sink factory configuration ####
+    #### JKoolCloud event sink factory configuration ####
     event.sink.factory: com.jkoolcloud.jesl.tnt4j.sink.JKCloudEventSinkFactory
     event.sink.factory.Filename: logs/tnt4j-streams-activities.log
 
@@ -4209,7 +4209,7 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
     #event.sink.factory.Url: https://data.jkoolcloud.com:6585
     #event.sink.factory.Url: https://data.jkoolcloud.com
     event.sink.factory.Token: <YOUR TOKEN>
-    #### JKool Cloud event sink factory configuration end ####
+    #### JKoolCloud event sink factory configuration end ####
 ```
 
 #### Kafka sink configuration
@@ -4393,7 +4393,7 @@ Default value - `null`. (Optional)
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
  * `SendStreamStates` - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output endpoint e.g. 
- [JKool Cloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional) 
+ [JKoolCloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional) 
 
      sample:
  ```xml
@@ -4584,7 +4584,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="StartServer" value="true"/>
     <property name="StartZooKeeper" value="true"/>
     <property name="zookeeper.connect" value="127.0.0.1:2181/tnt4j_kafka"/>
-    <property name="group.id" value="TNT4JStreams"/>
+    <property name="group.id" value="0"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).

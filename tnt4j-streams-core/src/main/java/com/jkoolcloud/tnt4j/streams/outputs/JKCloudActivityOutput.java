@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
  * Implements TNT4J-Streams output logger for activities provided as {@link ActivityInfo} entities to be recorded to
- * JKool Cloud over TNT4J and JESL APIs.
+ * JKoolCloud over TNT4J and JESL APIs.
  * <p>
  * This output supports the following configuration properties (in addition to those supported by
  * {@link com.jkoolcloud.tnt4j.streams.outputs.AbstractJKCloudOutput}):

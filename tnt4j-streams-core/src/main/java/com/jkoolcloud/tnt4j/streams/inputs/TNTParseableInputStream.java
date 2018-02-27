@@ -320,7 +320,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 * {@inheritDoc}
 	 * <p>
 	 * Performs parsing of raw activity data to {@link ActivityInfo} data package, which can be transformed to
-	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to JKool Cloud using TNT4J and JESL APIs.
+	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to JKoolCloud using TNT4J and JESL APIs.
 	 */
 	@Override
 	protected void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {

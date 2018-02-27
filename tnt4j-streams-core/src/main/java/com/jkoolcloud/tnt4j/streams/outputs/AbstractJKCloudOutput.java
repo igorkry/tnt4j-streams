@@ -69,7 +69,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * @param <T>
  *            the type of incoming activity data from stream
  * @param <O>
- *            the type of outgoing activity data package to be sent to JKool Cloud
+ *            the type of outgoing activity data package to be sent to JKoolCloud
  *
  * @version $Revision: 1 $
  */
@@ -77,7 +77,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	private static final String DEFAULT_SOURCE_NAME = "com.jkoolcloud.tnt4j.streams"; // NON-NLS
 	/**
-	 * Delay between retries to submit data package to JKool Cloud if some transmission failure occurs, in milliseconds.
+	 * Delay between retries to submit data package to JKoolCloud if some transmission failure occurs, in milliseconds.
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
@@ -486,7 +486,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Sends activity data package to JKool Cloud using the specified tracker. Performs resend after defined period of
+	 * Sends activity data package to JKoolCloud using the specified tracker. Performs resend after defined period of
 	 * time if initial sending fails.
 	 * 
 	 * @param tracker
@@ -496,7 +496,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @param activityData
 	 *            activity data to send
 	 * @throws Exception
-	 *             indicates an error when sending activity data to JKool Cloud
+	 *             indicates an error when sending activity data to JKoolCloud
 	 */
 	protected void recordActivity(Tracker tracker, long retryPeriod, O activityData) throws Exception {
 		if (tracker == null) {
@@ -558,7 +558,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Performs activity data package sending (logging) to JKool Cloud and checks tracker event sink state if there was
+	 * Performs activity data package sending (logging) to JKoolCloud and checks tracker event sink state if there was
 	 * any communication errors.
 	 * 
 	 * @param tracker
@@ -566,7 +566,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @param activityData
 	 *            activity data to send
 	 * @throws IOException
-	 *             if communication with JKool Cloud fails
+	 *             if communication with JKoolCloud fails
 	 *
 	 * @see #ensureTrackerOpened(com.jkoolcloud.tnt4j.tracker.Tracker)
 	 * @see #logJKCActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
@@ -604,7 +604,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Logs given activity data using provided tracker to communicate JKool Cloud.
+	 * Logs given activity data using provided tracker to communicate JKoolCloud.
 	 * 
 	 * @param tracker
 	 *            communication gateway to use to record activity

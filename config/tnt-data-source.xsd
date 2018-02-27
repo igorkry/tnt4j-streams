@@ -1270,7 +1270,7 @@
     <xs:complexType name="FieldMap">
         <xs:annotation>
             <xs:documentation>
-                Maps a raw value from the activity string to the required field value for JKool Cloud.
+                Maps a raw value from the activity string to the required field value for JKoolCloud.
             </xs:documentation>
         </xs:annotation>
         <xs:attribute name="source" use="required" type="xs:string">
@@ -1360,7 +1360,7 @@
             <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
-                        Maps a field value from the activity string to the required field value for JKool Cloud.
+                        Maps a field value from the activity string to the required field value for JKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1368,7 +1368,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Defines resource reference defining mapping of field value from the activity string to the required field value for
-                        JKool Cloud.
+                        JKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1710,7 +1710,7 @@
             <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
-                        Maps a field value from the activity string to the required field value for JKool Cloud.
+                        Maps a field value from the activity string to the required field value for JKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1718,7 +1718,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Defines resource reference defining mapping of field value from the activity string to the required field value for
-                        JKool Cloud.
+                        JKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>

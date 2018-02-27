@@ -46,8 +46,8 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
- * Producer/Consumer interceptors intercepted messages reporter sending JKool Cloud events containing intercepted
- * message payload data, metadata and context data.
+ * Producer/Consumer interceptors intercepted messages reporter sending JKoolCloud events containing intercepted message
+ * payload data, metadata and context data.
  * <p>
  * JKool Event types sent on consumer/producer interceptions:
  * <ul>

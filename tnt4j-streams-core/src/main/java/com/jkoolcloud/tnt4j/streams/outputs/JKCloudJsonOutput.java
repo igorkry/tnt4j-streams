@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
- * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to JKool Cloud
+ * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to JKoolCloud
  * service over TNT4J and JESL APIs.
  * <p>
  * This output logger primarily is used by {@link com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream} to redirect

@@ -45,7 +45,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
- * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKool Cloud.
+ * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKoolCloud.
  *
  * @version $Revision: 3 $
  */
@@ -105,7 +105,7 @@ public class ActivityInfo {
 
 	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
-	 * the JKool Cloud.
+	 * the JKoolCloud.
 	 *
 	 * @param field
 	 *            field to apply
@@ -782,7 +782,7 @@ public class ActivityInfo {
 	/**
 	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
-	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
+	 * the specified tracker for this activity data entity to be sent to JKoolCloud.
 	 *
 	 * @param tracker
 	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
@@ -821,7 +821,7 @@ public class ActivityInfo {
 	/**
 	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
-	 * the specified tracker for this activity data entity to be sent to JKool Cloud.
+	 * the specified tracker for this activity data entity to be sent to JKoolCloud.
 	 * <p>
 	 * Does same as {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} where
 	 * {@code chTrackables} list is {@code null}.

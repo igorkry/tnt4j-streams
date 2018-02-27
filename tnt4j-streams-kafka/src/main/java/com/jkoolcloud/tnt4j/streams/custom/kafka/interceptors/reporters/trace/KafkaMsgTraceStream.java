@@ -22,7 +22,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 
 /**
  * Implements Kafka intercepted messages trace reporter used stream. Stream itself does nothing, only initiates
- * streaming process. Reporter uses just stream output to send intercepted messages data to JKool Cloud.
+ * streaming process. Reporter uses just stream output to send intercepted messages data to JKoolCloud.
  *
  * @version $Revision: 1 $
  */
