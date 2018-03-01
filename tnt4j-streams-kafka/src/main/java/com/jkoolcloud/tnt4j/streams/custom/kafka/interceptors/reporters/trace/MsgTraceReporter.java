@@ -44,6 +44,8 @@ import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.uuid.JUGFactoryImpl;
+import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
 
 /**
  * Producer/Consumer interceptors intercepted messages reporter sending JKoolCloud events containing intercepted message
@@ -69,6 +71,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	private KafkaMsgTraceStream stream;
 	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig = new HashMap<>();
 	private final Timer pollTimer = new Timer();
+	private UUIDFactory uuidFactory = new JUGFactoryImpl();
+
 	private static KafkaConsumer<String, TraceCommandDeserializer.TopicTraceCommand> consumer;
 
 	/**
@@ -180,7 +184,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), producerRecord.timestamp());
 				ai.addCorrelator(producerRecord.topic());
 
-				stream.getOutput().logItem(ai);
+				stream.addInputToBuffer(ai);
 			} catch (Exception exc) {
 				Utils.logThrowable(LOGGER, OpLevel.ERROR,
 						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -222,7 +226,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						calcSignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
 				ai.addCorrelator(recordMetadata.topic());
 
-				stream.getOutput().logItem(ai);
+				stream.addInputToBuffer(ai);
 			} catch (Exception exc) {
 				Utils.logThrowable(LOGGER, OpLevel.ERROR,
 						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -243,7 +247,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			ai = new ActivityInfo();
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Consume"); // NON-NLS
-			stream.output().logItem(ai);
+			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()), uuidFactory.newUUID());
+			stream.addInputToBuffer(ai);
 
 			tid = ai.getTrackingId();
 		} catch (Exception exc) {
@@ -288,7 +293,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
 					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
 
-					stream.getOutput().logItem(ai);
+					stream.addInputToBuffer(ai);
 				} catch (Exception exc) {
 					Utils.logThrowable(LOGGER, OpLevel.ERROR,
 							StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -309,7 +314,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			ai = new ActivityInfo();
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Commit"); // NON-NLS
-			stream.output().logItem(ai);
+			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()), uuidFactory.newUUID());
+			stream.addInputToBuffer(ai);
 
 			tid = ai.getTrackingId();
 		} catch (Exception exc) {
@@ -338,7 +344,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 							calcSignature(me.getKey().topic(), me.getKey().partition(), me.getValue().offset()));
 					ai.addCorrelator(me.getKey().topic(), String.valueOf(me.getValue().offset()));
 
-					stream.getOutput().logItem(ai);
+					stream.addInputToBuffer(ai);
 				} catch (Exception exc) {
 					Utils.logThrowable(LOGGER, OpLevel.ERROR,
 							StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),

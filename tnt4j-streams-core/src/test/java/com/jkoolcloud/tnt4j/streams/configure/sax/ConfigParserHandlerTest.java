@@ -92,8 +92,9 @@ public class ConfigParserHandlerTest {
 		if (CollectionUtils.isNotEmpty(skipFiles)) {
 			for (File sampleConfiguration : sampleConfigurations) {
 				for (String skipFile : skipFiles) {
-					if (sampleConfiguration.getAbsolutePath().contains(skipFile))
+					if (sampleConfiguration.getAbsolutePath().contains(skipFile)) {
 						sampleConfigurationsFiltered.remove(sampleConfiguration);
+					}
 				}
 			}
 		}
@@ -212,7 +213,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "required", "", "Requered"); // NON-NLS
 		attrs.addAttribute("", "", "value", "", "555"); // NON-NLS
 		attrs.addAttribute("", "", "units", "", "Units"); // NON-NLS
-		attrs.addAttribute("", "", "format", "", "YYYY-mm-dd HH:mm:ss"); // NON-NLS
+		attrs.addAttribute("", "", "format", "", "yyyy-MM-dd HH:mm:ss"); // NON-NLS
 		attrs.addAttribute("", "", "locale", "", "lt_LT"); // NON-NLS
 		attrs.addAttribute("", "", "timezone", "", "Europe/Vilnius"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser"); // NON-NLS
@@ -262,7 +263,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "radix", "", "555"); // NON-NLS
 		attrs.addAttribute("", "", "required", "", "Requered"); // NON-NLS
 		attrs.addAttribute("", "", "units", "", null); // NON-NLS
-		attrs.addAttribute("", "", "format", "", "YYYY-mm-dd HH:mm:ss"); // NON-NLS
+		attrs.addAttribute("", "", "format", "", "yyyy-MM-dd HH:mm:ss"); // NON-NLS
 		attrs.addAttribute("", "", "locale", "", "lt_LT"); // NON-NLS
 		attrs.addAttribute("", "", "timezone", "", "Europe/Vilnius"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser"); // NON-NLS
@@ -282,7 +283,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "radix", "", "555"); // NON-NLS
 		attrs.addAttribute("", "", "required", "", "Requered"); // NON-NLS
 		attrs.addAttribute("", "", "units", "", "Kb"); // NON-NLS
-		attrs.addAttribute("", "", "format", "", "YYYY-mm-dd HH:mm:ss"); // NON-NLS
+		attrs.addAttribute("", "", "format", "", "yyyy-MM-dd HH:mm:ss"); // NON-NLS
 		attrs.addAttribute("", "", "locale", "", "lt_LT"); // NON-NLS
 		attrs.addAttribute("", "", "timezone", "", "Europe/Vilnius"); // NON-NLS
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser"); // NON-NLS
@@ -315,7 +316,7 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "name", "", "Stream attr name");// NON-NLS
 		attrs.addAttribute("", "", "class", "", "com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser"); // NON-NLS
 		attrs.addAttribute("", "", "datatype", "", "DateTime"); // NON-NLS
-		attrs.addAttribute("", "", "format", "", "YYYY-mm-dd"); // NON-NLS
+		attrs.addAttribute("", "", "format", "", "yyyy-MM-dd"); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "parser", attrs); // NON-NLS
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "field", attrs); // NON-NLS
 		attrs.addAttribute("", "", "value", "", null); // NON-NLS

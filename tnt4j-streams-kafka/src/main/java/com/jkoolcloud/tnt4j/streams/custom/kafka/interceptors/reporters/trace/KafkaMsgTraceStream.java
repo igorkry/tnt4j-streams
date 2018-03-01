@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 
 /**
@@ -26,7 +27,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
  *
  * @version $Revision: 1 $
  */
-class KafkaMsgTraceStream extends AbstractBufferedStream<Object> {
+class KafkaMsgTraceStream extends AbstractBufferedStream<ActivityInfo> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaMsgTraceStream.class);
 
 	private boolean ended = false;
@@ -44,8 +45,18 @@ class KafkaMsgTraceStream extends AbstractBufferedStream<Object> {
 	}
 
 	@Override
-	protected long getActivityItemByteSize(Object activityItem) {
-		return 0;
+	public boolean addInputToBuffer(ActivityInfo inputData) throws IllegalStateException {
+		return super.addInputToBuffer(inputData);
+	}
+
+	@Override
+	protected ActivityInfo makeActivityInfo(ActivityInfo data) throws Exception {
+		return data;
+	}
+
+	@Override
+	protected long getActivityItemByteSize(ActivityInfo activityItem) {
+		return 0; // TODO
 	}
 
 	@Override
