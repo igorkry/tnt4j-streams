@@ -107,9 +107,14 @@ public class InterceptionsManager {
 				MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC);
 		int reportingDelay = Utils.getInt("metrics.report.delay", interceptorProps, reportingPeriod);
 		addReporter(new MetricsReporter(reportingPeriod, reportingDelay));
-		boolean traceMessages = Utils.getBoolean("trace.kafka.messages", interceptorProps, false); // NON-NLS
+		boolean traceMessages = Utils.getBoolean("messages.tracer.trace", interceptorProps, false); // NON-NLS
 		if (traceMessages) {
-			addReporter(new MsgTraceReporter());
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.msg.tracer.starting", interceptorProps);
+			addReporter(new MsgTraceReporter(interceptorProps));
+		} else {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.msg.tracer.skipping", interceptorProps);
 		}
 	}
 
