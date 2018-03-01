@@ -61,7 +61,7 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 	/**
 	 * The constant for a command message used date/time pattern.
 	 */
-	public static final String DATE_PATTERN = "YYYY-MM-DD hh:mm"; // NON-NLS
+	public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm"; // NON-NLS
 	/**
 	 * The constant for a command message token defining trace schedule start and end values.
 	 */
@@ -120,7 +120,8 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 
 			if (arg.equalsIgnoreCase(UNTIL)) {
 				TimestampFormatter formatter = new TimestampFormatter(DATE_PATTERN, null, null);
-				UsecTimestamp timestamp = formatter.parse(args[++i] + ' ' + args[++i]);
+				String dateTime = args[++i] + ' ' + args[++i];
+				UsecTimestamp timestamp = formatter.parse(dateTime);
 				command.endAt = timestamp.getTimeMillis();
 			}
 
@@ -201,7 +202,6 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 		 *            topic name of message
 		 * @param needMarkCount
 		 *            flag indicating to decrement messages traces counter
-		 *
 		 * @return {@code true} if topic matches messages tracing command state, {@code false} - otherwise
 		 */
 		public boolean match(String topic, boolean needMarkCount) {

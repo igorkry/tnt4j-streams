@@ -130,6 +130,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		if (consumer != null) {
 			return consumer;
 		}
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"MsgTraceReporter.creating.command.consumer", props);
 		consumer = new KafkaConsumer<>(props, new StringDeserializer(), new TraceCommandDeserializer());
 		TopicPartition topic = new TopicPartition(MsgTraceReporter.TNT_TRACE_CONFIG_TOPIC, 0);
 		consumer.assign(Collections.singletonList(topic));
@@ -152,15 +154,13 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			topicTraceConfig = traceConfig.get(TraceCommandDeserializer.MASTER_CONFIG);
 		}
 
-		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-				"MsgTraceReporter.should.trace", stackTraceElements[2].getMethodName(), topic, count, topicTraceConfig);
+		boolean send = (topic == null || topicTraceConfig == null) ? false : topicTraceConfig.match(topic, count);
+		StackTraceElement callMethodTrace = Utils.getStackFrame(2);
 
-		if (topic == null || topicTraceConfig == null) {
-			return false;
-		} else {
-			return topicTraceConfig.match(topic, count);
-		}
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"MsgTraceReporter.should.trace", callMethodTrace.getMethodName(), topic, count, topicTraceConfig, send);
+
+		return send;
 	}
 
 	@Override
