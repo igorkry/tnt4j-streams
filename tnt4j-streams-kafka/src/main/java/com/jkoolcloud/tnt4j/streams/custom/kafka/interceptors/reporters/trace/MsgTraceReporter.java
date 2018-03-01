@@ -61,9 +61,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class MsgTraceReporter implements InterceptionsReporter {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MsgTraceReporter.class);
+
 	public static final String TNT_TRACE_CONFIG_TOPIC = "TNT_TRACE_CONFIG_TOPIC"; // NON-NLS
 	public static final int POOL_TIME_SECONDS = 3;
-	public static final String MESSAGES_TRACER_KAFKA = "messages.tracer.kafka.";
+	public static final String TRACER_PROPERTY_PREFIX = "messages.tracer.kafka."; // NON-NLS
 
 	private KafkaMsgTraceStream stream;
 	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig = new HashMap<>();
@@ -76,7 +77,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	public MsgTraceReporter(final Properties kafkaProperties) {
 		stream = new KafkaMsgTraceStream();
 		StreamsAgent.runFromAPI(stream);
-		LOGGER.log(OpLevel.DEBUG, "Starting messsage trace reporter\n");
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"MsgTraceReporter.stream.started", stream.getName());
 		TimerTask mrt = new TimerTask() {
 			@Override
 			public void run() {
@@ -89,6 +91,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		};
 		traceConfig.put(TraceCommandDeserializer.MASTER_CONFIG, new TraceCommandDeserializer.TopicTraceCommand());
 		long period = TimeUnit.SECONDS.toMillis(POOL_TIME_SECONDS);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"MsgTraceReporter.schedule.commands.polling", TNT_TRACE_CONFIG_TOPIC, period, period);
 		pollTimer.scheduleAtFixedRate(mrt, period, period);
 	}
 
@@ -135,8 +139,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	protected static Properties extractKafkaProperties(Properties kafkaProperties) {
 		Properties props = new Properties();
 		for (String key : kafkaProperties.stringPropertyNames()) {
-			if (key.startsWith(MESSAGES_TRACER_KAFKA)) {
-				props.put(key.substring(MESSAGES_TRACER_KAFKA.length()), kafkaProperties.getProperty(key));
+			if (key.startsWith(TRACER_PROPERTY_PREFIX)) {
+				props.put(key.substring(TRACER_PROPERTY_PREFIX.length()), kafkaProperties.getProperty(key));
 			}
 		}
 		return props;
@@ -149,8 +153,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		}
 
 		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-		LOGGER.log(OpLevel.DEBUG, "Trace for {0} {2} {1}", stackTraceElements[2].getMethodName(), topicTraceConfig,
-				topic);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+				"MsgTraceReporter.should.trace", stackTraceElements[2].getMethodName(), topic, count, topicTraceConfig);
 
 		if (topic == null || topicTraceConfig == null) {
 			return false;
@@ -198,7 +202,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Acknowledge"); // NON-NLS
 				ai.setFieldValue(new ActivityField("Offset"), recordMetadata.offset()); // NON-NLS
 				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()),
-						recordMetadata.timestamp() * 1000);
+						TimeUnit.MILLISECONDS.toMicros(recordMetadata.timestamp()));
 				ai.setFieldValue(new ActivityField("Checksum"), recordMetadata.checksum()); // NON-NLS
 				ai.setFieldValue(new ActivityField("Topic"), recordMetadata.topic()); // NON-NLS
 				ai.setFieldValue(new ActivityField("Partition"), recordMetadata.partition()); // NON-NLS
@@ -263,7 +267,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 					ai.setFieldValue(new ActivityField("Topic"), cr.topic()); // NON-NLS
 					ai.setFieldValue(new ActivityField("Partition"), cr.partition()); // NON-NLS
 					ai.setFieldValue(new ActivityField("Offset"), cr.offset()); // NON-NLS
-					ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), cr.timestamp() * 1000);
+					ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()),
+							TimeUnit.MILLISECONDS.toMicros(cr.timestamp()));
 					ai.setFieldValue(new ActivityField("TimestampType"), cr.timestampType()); // NON-NLS
 					ai.setFieldValue(new ActivityField("Key"), cr.key()); // NON-NLS
 					ai.setFieldValue(new ActivityField("Value"), cr.value()); // NON-NLS
