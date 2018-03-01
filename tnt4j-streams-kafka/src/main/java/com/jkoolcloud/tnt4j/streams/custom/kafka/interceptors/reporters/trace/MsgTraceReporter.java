@@ -44,8 +44,7 @@ import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.uuid.JUGFactoryImpl;
-import com.jkoolcloud.tnt4j.uuid.UUIDFactory;
+import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
 
 /**
  * Producer/Consumer interceptors intercepted messages reporter sending JKoolCloud events containing intercepted message
@@ -71,7 +70,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	private KafkaMsgTraceStream stream;
 	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig = new HashMap<>();
 	private final Timer pollTimer = new Timer();
-	private UUIDFactory uuidFactory = new JUGFactoryImpl();
 
 	private static KafkaConsumer<String, TraceCommandDeserializer.TopicTraceCommand> consumer;
 
@@ -247,7 +245,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			ai = new ActivityInfo();
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Consume"); // NON-NLS
-			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()), uuidFactory.newUUID());
+			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
+					DefaultUUIDFactory.getInstance().newUUID());
 			stream.addInputToBuffer(ai);
 
 			tid = ai.getTrackingId();
@@ -314,7 +313,8 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			ai = new ActivityInfo();
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Commit"); // NON-NLS
-			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()), uuidFactory.newUUID());
+			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
+					DefaultUUIDFactory.getInstance().newUUID());
 			stream.addInputToBuffer(ai);
 
 			tid = ai.getTrackingId();
