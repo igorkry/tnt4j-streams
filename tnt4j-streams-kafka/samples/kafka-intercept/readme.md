@@ -68,8 +68,48 @@ To configure interceptors use file `./config/intercept/interceptors.properties`.
 * `metrics.report.period` - period (in seconds) of Kafka interceptors (and JMX) collected metrics reporting to dedicated Kafka topic.
 * `metrics.report.delay` - delay (in seconds) before first metrics reporting is invoked. If not defined, it is equal to 
 `metrics.report.period`.  
-* `trace.kafka.messages` - flag indicating whether to trace (send to JKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
+* `messages.tracer.trace` - flag indicating whether to trace (send to JKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
 JKool events fields mapping is hardcoded for now.   
+
+
+##### Kafka messages trace configuration over file
+
+When messaging tracing is enabled, it generates quite noticeable overhead and you're able to control tracing process using topic: 
+`TNT_TRACE_CONFIG_TOPIC`. To read (poll) messages tracing handling commands from topic `TNT_TRACE_CONFIG_TOPIC`, set consumer configuration 
+properties in `interceptor.properties` file.
+
+Use standard Kafka consumer keys with prefix `messages.tracer.kafka.`, e.g:
+```properties
+messages.tracer.kafka.group.id=13
+messages.tracer.kafka.bootstrap.servers=localhost:9092
+messages.tracer.kafka.client.id=kafka-x-ray-intercept-test-producer
+```
+
+Provided configuration should be OK to start with. In the distributed systems adjustments should be made.
+
+`messages.tracer.kafka.group.id` must be unique, in order to all interceptors get the commands, otherwise results will be unpredictable.
+`messages.tracer.kafka.client.id` should not duplicate with other consumers in the same JVM, as you'll get many warnings about MBeans not 
+being registered.
+ 
+All other `messages.tracer.kafka.<KAFKA_CONUMER_PROP_NAME>` options are subject depending on your environment configuration.
+
+To enable trace of all messages from any topic, set `messages.tracer.trace flag enabled`. 
+
+##### Kafka trace control topic commands
+
+To control tracing you should send English-like command to control topic `TNT_TRACE_CONFIG_TOPIC`. 
+E.g. if you wish to use `kafka-console-producer` provided with Apache Kafka, run command:
+```cmd
+kafka-console-producer --broker-list localhost:9092,localhost:9093 --topic TNT_TRACE_CONFIG_TOPIC
+```
+
+* `trace on` - will enable trace
+* `trace off` - will disable trace
+* `trace until 2017-11-10 12:54` - will enable trace until 10/11/2017 12:54 am
+* `trace between 2017-11-10 12:54 2018-11-10 12:54` - will enable trace after 10/11/2017 12:54 am and disable at 10/11/2018 12:54am
+* `trace 100 messages` - will enable trace and count for 100 messages before disabling it
+* `trace 100 messages topic TNT4JStreams` - do the same for specified topic `TNT4JStreams`
+* `trace on topic TNT4JStreams` - will enable trace for specified topic `TNT4JStreams`
 
 #### Kafka broker configuration
 
