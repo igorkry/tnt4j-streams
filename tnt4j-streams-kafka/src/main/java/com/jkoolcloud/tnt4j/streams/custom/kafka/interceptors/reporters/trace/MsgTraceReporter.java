@@ -18,11 +18,13 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.ClusterResource;
@@ -173,14 +175,17 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		if (shouldSendTrace(producerRecord.topic(), true)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Send"); // NON-NLS
 				ai.setFieldValue(new ActivityField("Partition"), producerRecord.partition()); // NON-NLS
 				ai.setFieldValue(new ActivityField("Topic"), producerRecord.topic()); // NON-NLS
 				ai.setFieldValue(new ActivityField("Key"), producerRecord.key()); // NON-NLS
-				ai.setFieldValue(new ActivityField("Value"), producerRecord.value()); // NON-NLS
+				ai.setFieldValue(new ActivityField(StreamFieldType.Message.name()), producerRecord.value());
 				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()), producerRecord.timestamp());
-				ai.addCorrelator(producerRecord.topic());
+				// ai.addCorrelator(producerRecord.topic());
+
+				appendResourceFields(ai, producerRecord.topic(),
+						MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
 
 				stream.addInputToBuffer(ai);
 			} catch (Exception exc) {
@@ -200,7 +205,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		if (shouldSendTrace(recordMetadata.topic(), false)) {
 			try {
 				ActivityInfo ai = new ActivityInfo();
-				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.EVENT);
+				ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.SEND);
 				ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Producer_Acknowledge"); // NON-NLS
 				ai.setFieldValue(new ActivityField("Offset"), recordMetadata.offset()); // NON-NLS
 				ai.setFieldValue(new ActivityField(StreamFieldType.StartTime.name()),
@@ -219,10 +224,13 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				int size = Math.max(recordMetadata.serializedKeySize(), 0)
 						+ Math.max(recordMetadata.serializedValueSize(), 0);
 
-				ai.setFieldValue(new ActivityField("Size"), size); // NON-NLS
+				ai.setFieldValue(new ActivityField(StreamFieldType.MsgLength.name()), size);
 				ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 						calcSignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
-				ai.addCorrelator(recordMetadata.topic());
+				ai.addCorrelator(createCorrelator(recordMetadata.topic(), recordMetadata.offset()));
+
+				appendResourceFields(ai, recordMetadata.topic(),
+						MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
 
 				stream.addInputToBuffer(ai);
 			} catch (Exception exc) {
@@ -231,6 +239,15 @@ public class MsgTraceReporter implements InterceptionsReporter {
 						"MsgTraceReporter.acknowledge.failed", exc);
 			}
 		}
+	}
+
+	private static String createCorrelator(String topic, long offset) {
+		return topic + "_" + offset; // NON-NLS
+	}
+
+	private void appendResourceFields(ActivityInfo ai, String topic, String appName) throws ParseException {
+		ai.setFieldValue(new ActivityField(StreamFieldType.ResourceName.name()), "QUEUE=" + topic); // NON-NLS
+		ai.setFieldValue(new ActivityField(StreamFieldType.ApplName.name()), appName);
 	}
 
 	@Override
@@ -275,13 +292,13 @@ public class MsgTraceReporter implements InterceptionsReporter {
 							TimeUnit.MILLISECONDS.toMicros(cr.timestamp()));
 					ai.setFieldValue(new ActivityField("TimestampType"), cr.timestampType()); // NON-NLS
 					ai.setFieldValue(new ActivityField("Key"), cr.key()); // NON-NLS
-					ai.setFieldValue(new ActivityField("Value"), cr.value()); // NON-NLS
+					ai.setFieldValue(new ActivityField(StreamFieldType.Message.name()), cr.value());
 					ai.setFieldValue(new ActivityField("Checksum"), cr.checksum()); // NON-NLS
 
 					int size = Math.max(cr.serializedKeySize(), 0) + Math.max(cr.serializedValueSize(), 0);
 					long latency = System.currentTimeMillis() - cr.timestamp();
 
-					ai.setFieldValue(new ActivityField("Size"), size); // NON-NLS
+					ai.setFieldValue(new ActivityField(StreamFieldType.MsgLength.name()), size);
 					ai.setFieldValue(new ActivityField("Latency"), latency); // NON-NLS
 
 					if (clusterResource != null) {
@@ -290,7 +307,10 @@ public class MsgTraceReporter implements InterceptionsReporter {
 
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(cr.topic(), cr.partition(), cr.offset()));
-					ai.addCorrelator(cr.topic(), String.valueOf(cr.offset()));
+					ai.addCorrelator(createCorrelator(cr.topic(), cr.offset()));
+
+					appendResourceFields(ai, cr.topic(),
+							MapUtils.getString(interceptor.getConfig(), ConsumerConfig.CLIENT_ID_CONFIG));
 
 					stream.addInputToBuffer(ai);
 				} catch (Exception exc) {
@@ -342,7 +362,10 @@ public class MsgTraceReporter implements InterceptionsReporter {
 					ai.setFieldValue(new ActivityField("Metadata"), me.getValue().metadata()); // NON-NLS
 					ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
 							calcSignature(me.getKey().topic(), me.getKey().partition(), me.getValue().offset()));
-					ai.addCorrelator(me.getKey().topic(), String.valueOf(me.getValue().offset()));
+					ai.addCorrelator(createCorrelator(me.getKey().topic(), me.getValue().offset()));
+
+					appendResourceFields(ai, me.getKey().topic(),
+							MapUtils.getString(interceptor.getConfig(), ConsumerConfig.CLIENT_ID_CONFIG));
 
 					stream.addInputToBuffer(ai);
 				} catch (Exception exc) {
