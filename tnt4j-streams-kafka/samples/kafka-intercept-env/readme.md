@@ -46,7 +46,7 @@ log4j.appender.tnt4jAppender.Threshold=TRACE
 log4j.logger.com.jkoolcloud.tnt4j.streams=DEBUG, tnt4jAppender
 ### if streams are not subject to log ###
 #log4j.logger.com.jkoolcloud.tnt4j.streams=OFF
-log4j.additivity.com.jkoolcloud.tnt4j.streams=false
+#log4j.additivity.com.jkoolcloud.tnt4j.streams=false
 ```
 * Alter `<KAFKA_INSTALL_DIR>/config/tools-log4j.properties` by adding (to disable streams logging to sample consumer/producer console):
 ```properties
