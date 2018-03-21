@@ -2,7 +2,7 @@
 setlocal
 
 set RUNDIR=%~dp0
-set LIBPATH="%LIBPATH%;%RUNDIR%..\*;%RUNDIR%..\lib\*"
+set LIBPATH=%LIBPATH%;%RUNDIR%..\*;%RUNDIR%..\lib\*
 rem tnt4j property override
 IF ["%TNT4J_PROPERTIES%"] EQU [""] set TNT4J_PROPERTIES=%RUNDIR%..\config\tnt4j.properties
 set TNT4JOPTS=-Dtnt4j.config="%TNT4J_PROPERTIES%"
