@@ -8,4 +8,5 @@ fi
 ZKOPTS="-Dtnt4j.zookeeper.config=$SCRIPTPATH/../../config/zookeeper.properties"
 KAFKAOPTS="-Dtnt4j.kafka.srv.config=$SCRIPTPATH/../../config/kafka-server.properties"
 STREAMSOPTS="$ZKOPTS $KAFKAOPTS"
-../../bin/tnt4j-streams.sh -f:tnt-data-source.xml
+# sourcing instead of executing to pass variables
+. ../../bin/tnt4j-streams.sh -f:tnt-data-source.xml

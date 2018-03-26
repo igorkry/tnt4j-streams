@@ -48,4 +48,15 @@ expression use `expression` parameter.
 
 To have basic additional metrics it is enough to do those steps: 
 * put requests of IBM Cast Iron WebService WSDL defined operations into scenario steps for `CastIronWsStream`.
-* add dedicated parsers to parse these requests.  
+* add dedicated parsers to parse these requests.
+
+### Streaming to AutoPilot
+
+To stream collected metrics to autopilot instance use `run_autopilot.bat/run_autopilot.sh` run script files. Those files by default uses 
+`tnt4j_autopilot.properties` for output sinks configuration. 
+
+To configure host and port properties of your running `AutoPilot` instance change values for:
+```properties
+    event.sink.factory.EventSinkFactory.Host: 127.0.0.1
+	event.sink.factory.EventSinkFactory.Port: 6001
+```  

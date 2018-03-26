@@ -485,6 +485,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 				return tags.toArray(new String[tags.size()]);
 			}
+		} else {
+			return new String[] { toString(tagsData) };
 		}
 
 		return null;
