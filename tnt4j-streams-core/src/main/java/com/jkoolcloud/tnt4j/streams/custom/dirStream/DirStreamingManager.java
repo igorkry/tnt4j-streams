@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -108,6 +109,7 @@ public class DirStreamingManager {
 	private String fileWildcardName;
 
 	private ThreadPoolExecutor executorService;
+	private List<Runnable> runningJobs = Collections.synchronizedList(new ArrayList());
 	private DirWatchdog dirWatchdog;
 
 	private String tnt4jCfgFilePath;
@@ -148,7 +150,19 @@ public class DirStreamingManager {
 	private void initialize() {
 		executorService = new ThreadPoolExecutor(CORE_TREAD_POOL_SIZE, MAX_TREAD_POOL_SIZE, KEEP_ALIVE_TIME,
 				TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(MAX_TREAD_POOL_SIZE * 2),
-				new TNTInputStream.StreamsThreadFactory("DirStreamingManagerExecutorThread-")); // NON-NLS
+				new TNTInputStream.StreamsThreadFactory("DirStreamingManagerExecutorThread-")) { // NON-NLS
+			@Override
+			protected void beforeExecute(Thread t, Runnable r) {
+				super.beforeExecute(t, r);
+				runningJobs.add(r);
+			}
+
+			@Override
+			protected void afterExecute(Runnable r, Throwable t) {
+				super.afterExecute(r, t);
+				runningJobs.remove(r);
+			}
+		};
 
 		executorService.setRejectedExecutionHandler(new RejectedExecutionHandler() {
 			@Override
@@ -320,6 +334,7 @@ public class DirStreamingManager {
 			return;
 		}
 
+		// TODO: maybe use cancel?
 		synchronized (executorService) {
 			for (Runnable r : executorService.getQueue()) {
 				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
@@ -343,17 +358,47 @@ public class DirStreamingManager {
 			return;
 		}
 
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.cancel", jobId);
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.cancel.checking.running", jobId);
+
+		for (Runnable r : runningJobs) {
+			DefaultStreamingJob sJob = (DefaultStreamingJob) r;
+
+			if (sJob.equals(jobId)) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"DirStreamingManager.job.cancel.running", jobId);
+				sJob.cancel();
+				runningJobs.remove(sJob);
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"DirStreamingManager.job.cancel.completed", jobId, runningJobs.size());
+				return;
+			}
+		}
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.cancel.checking.pending", jobId);
+
 		synchronized (executorService) {
 			for (Runnable r : executorService.getQueue()) {
 				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
 
 				if (sJob.equals(jobId)) {
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"DirStreamingManager.job.cancel.pending", jobId);
 					sJob.cancel();
 					executorService.remove(sJob);
-					break;
+					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"DirStreamingManager.job.cancel.completed", jobId, executorService.getQueue().size());
+					return;
 				}
 			}
 		}
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.not.found", jobId);
 	}
 
 	/**
