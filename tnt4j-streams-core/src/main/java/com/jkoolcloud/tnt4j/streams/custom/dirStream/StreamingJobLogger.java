@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 
+import java.io.File;
+
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamingStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -25,10 +28,9 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  *
  * @version $Revision: 1 $
  */
-public class StreamingJobLogger implements StreamingJobListener {
+public class StreamingJobLogger implements StreamingJobListener, JobFilesListener {
 
 	public StreamingJobLogger() {
-
 	}
 
 	@Override
@@ -60,5 +62,11 @@ public class StreamingJobLogger implements StreamingJobListener {
 	public void onStreamEvent(StreamingJob job, OpLevel level, String message, Object source) {
 		System.out.println("Streaming job event occurred: job=" + job + " level=" + level + " msg=" + message // NON-NLS
 				+ " source=" + source); // NON-NLS
+	}
+
+	@Override
+	public void onJobFileStateChanged(File jobCfgFile, String jobId, JobFileState fileState) {
+		System.out.println("Streaming job configuration file state changed: job=" + jobId + " file=" + jobCfgFile
+				+ " state=" + fileState); // NON-NLS
 	}
 }

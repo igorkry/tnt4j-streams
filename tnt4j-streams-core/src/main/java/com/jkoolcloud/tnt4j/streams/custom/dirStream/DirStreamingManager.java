@@ -114,7 +114,8 @@ public class DirStreamingManager {
 
 	private String tnt4jCfgFilePath;
 
-	private List<StreamingJobListener> streamingJobsListeners;
+	private List<StreamingJobListener> streamingJobListeners;
+	private List<JobFilesListener> jobFileListeners;
 
 	/**
 	 * Constructs an empty DirStreamingManager.
@@ -278,11 +279,13 @@ public class DirStreamingManager {
 			return;
 		}
 
+		notifyJobFileAdded(jobCfgFile, jobId.toString(), JobFileState.ADDED);
+
 		DefaultStreamingJob sJob = new DefaultStreamingJob(jobId, jobCfgFile);
 		sJob.setTnt4jCfgFilePath(tnt4jCfgFilePath);
 
-		if (CollectionUtils.isNotEmpty(streamingJobsListeners)) {
-			for (StreamingJobListener sjl : streamingJobsListeners) {
+		if (CollectionUtils.isNotEmpty(streamingJobListeners)) {
+			for (StreamingJobListener sjl : streamingJobListeners) {
 				sJob.addStreamingJobListener(sjl);
 			}
 		}
@@ -307,6 +310,8 @@ public class DirStreamingManager {
 					"DirStreamingManager.job.id.not.found", jobCfgFile.getName());
 			return;
 		}
+
+		notifyJobFileAdded(jobCfgFile, jobId.toString(), JobFileState.CHANGED);
 
 		synchronized (executorService) {
 			// TODO: check job state - if already processing halt and restart???
@@ -334,12 +339,15 @@ public class DirStreamingManager {
 			return;
 		}
 
+		notifyJobFileAdded(jobCfgFile, jobId.toString(), JobFileState.REMOVED);
+
 		// TODO: maybe use cancel?
 		synchronized (executorService) {
 			for (Runnable r : executorService.getQueue()) {
 				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
 
 				if (sJob.equals(jobId)) {
+					sJob.cancel();
 					executorService.remove(sJob);
 					break;
 				}
@@ -412,32 +420,32 @@ public class DirStreamingManager {
 	}
 
 	/**
-	 * Adds defined {@code StreamingJobListener} to streaming jobs listeners list.
+	 * Adds defined {@link StreamingJobListener} to streaming jobs listeners list.
 	 *
 	 * @param l
-	 *            the {@code StreamingJobListener} to be added
+	 *            the {@link StreamingJobListener} to be added
 	 */
 	public void addStreamingJobListener(StreamingJobListener l) {
 		if (l == null) {
 			return;
 		}
 
-		if (streamingJobsListeners == null) {
-			streamingJobsListeners = new ArrayList<>();
+		if (streamingJobListeners == null) {
+			streamingJobListeners = new ArrayList<>();
 		}
 
-		streamingJobsListeners.add(l);
+		streamingJobListeners.add(l);
 	}
 
 	/**
-	 * Removes defined {@code StreamingJobListener} from streaming jobs listeners list.
+	 * Removes defined {@link StreamingJobListener} from streaming jobs listeners list.
 	 *
 	 * @param l
-	 *            the {@code StreamingJobListener} to be removed
+	 *            the {@link StreamingJobListener} to be removed
 	 */
 	public void removeStreamingJobListener(StreamingJobListener l) {
-		if (l != null && streamingJobsListeners != null) {
-			streamingJobsListeners.remove(l);
+		if (l != null && streamingJobListeners != null) {
+			streamingJobListeners.remove(l);
 		}
 	}
 
@@ -448,8 +456,8 @@ public class DirStreamingManager {
 	 *            executor rejected files streaming job
 	 */
 	protected void notifyStreamingJobRejected(Runnable job) {
-		if (streamingJobsListeners != null) {
-			for (StreamingJobListener l : streamingJobsListeners) {
+		if (streamingJobListeners != null) {
+			for (StreamingJobListener l : streamingJobListeners) {
 				l.onStatusChange((StreamingJob) job, StreamingJobStatus.REJECT);
 			}
 		}
@@ -463,9 +471,57 @@ public class DirStreamingManager {
 	 *            executor dropped off files streaming job
 	 */
 	protected void notifyStreamingJobDropOff(Runnable job) {
-		if (streamingJobsListeners != null) {
-			for (StreamingJobListener l : streamingJobsListeners) {
+		if (streamingJobListeners != null) {
+			for (StreamingJobListener l : streamingJobListeners) {
 				l.onStatusChange((StreamingJob) job, StreamingJobStatus.DROP_OFF);
+			}
+		}
+	}
+
+	/**
+	 * Adds defined {@link JobFilesListener} to streaming jobs listeners list.
+	 *
+	 * @param l
+	 *            the {@link JobFilesListener} to be added
+	 */
+	public void addJobFileListener(JobFilesListener l) {
+		if (l == null) {
+			return;
+		}
+
+		if (jobFileListeners == null) {
+			jobFileListeners = new ArrayList<>();
+		}
+
+		jobFileListeners.add(l);
+	}
+
+	/**
+	 * Removes defined {@link JobFilesListener} from streaming jobs listeners list.
+	 *
+	 * @param l
+	 *            the {@link JobFilesListener} to be removed
+	 */
+	public void removeJobFileListener(JobFilesListener l) {
+		if (l != null && jobFileListeners != null) {
+			jobFileListeners.remove(l);
+		}
+	}
+
+	/**
+	 * Notifies that watchdog found new streaming configuration file.
+	 *
+	 * @param jobCfgFile
+	 *            streaming job configuration file
+	 * @param jobId
+	 *            job identifier
+	 * @param fileState
+	 *            new watchdog detected streaming job configuration file state
+	 */
+	protected void notifyJobFileAdded(File jobCfgFile, String jobId, JobFileState fileState) {
+		if (jobFileListeners != null) {
+			for (JobFilesListener l : jobFileListeners) {
+				l.onJobFileStateChanged(jobCfgFile, jobId, fileState);
 			}
 		}
 	}

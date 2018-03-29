@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamingStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
@@ -30,6 +31,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @version $Revision: 1 $
  *
  * @see DefaultStreamingJob#addStreamingJobListener(StreamingJobListener)
+ * @see com.jkoolcloud.tnt4j.streams.custom.dirStream.DirStreamingManager#addStreamingJobListener(StreamingJobListener)
  */
 public interface StreamingJobListener {
 	/**
