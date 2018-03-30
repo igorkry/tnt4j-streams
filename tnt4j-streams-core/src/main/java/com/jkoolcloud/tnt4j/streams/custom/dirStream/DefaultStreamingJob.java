@@ -32,7 +32,6 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
@@ -247,7 +246,7 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 	}
 
-	private class DefaultStreamListener implements InputStreamListener, OutputStreamListener {
+	private class DefaultStreamListener implements InputStreamListener {
 
 		@Override
 		public void onProgressUpdate(TNTInputStream<?, ?> stream, int current, int total) {
@@ -303,6 +302,6 @@ public class DefaultStreamingJob implements StreamingJob {
 					l.onStreamEvent(DefaultStreamingJob.this, level, message, source);
 				}
 			}
-		}		
+		}
 	}
 }
