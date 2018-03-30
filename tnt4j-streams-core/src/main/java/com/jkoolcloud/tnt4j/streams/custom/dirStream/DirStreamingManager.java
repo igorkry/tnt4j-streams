@@ -155,12 +155,18 @@ public class DirStreamingManager {
 			@Override
 			protected void beforeExecute(Thread t, Runnable r) {
 				super.beforeExecute(t, r);
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"DirStreamingManager.job.add.running", ((DefaultStreamingJob) r).getJobId());
 				runningJobs.add(r);
 			}
 
 			@Override
 			protected void afterExecute(Runnable r, Throwable t) {
 				super.afterExecute(r, t);
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"DirStreamingManager.job.remove.running", ((DefaultStreamingJob) r).getJobId());
 				runningJobs.remove(r);
 			}
 		};
