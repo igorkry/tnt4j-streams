@@ -347,7 +347,7 @@ public class DirStreamingManager {
 				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
 
 				if (sJob.equals(jobId)) {
-					sJob.cancel();
+					// /sJob.cancel();
 					executorService.remove(sJob);
 					break;
 				}
@@ -375,6 +375,9 @@ public class DirStreamingManager {
 		for (Runnable r : runningJobs) {
 			DefaultStreamingJob sJob = (DefaultStreamingJob) r;
 
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"DirStreamingManager.job.running", sJob.getJobId());
+
 			if (sJob.equals(jobId)) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"DirStreamingManager.job.cancel.running", jobId);
@@ -392,6 +395,9 @@ public class DirStreamingManager {
 		synchronized (executorService) {
 			for (Runnable r : executorService.getQueue()) {
 				DefaultStreamingJob sJob = (DefaultStreamingJob) r;
+
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"DirStreamingManager.job.pending", sJob.getJobId());
 
 				if (sJob.equals(jobId)) {
 					LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
