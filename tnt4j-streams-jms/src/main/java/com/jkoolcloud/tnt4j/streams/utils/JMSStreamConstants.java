@@ -32,6 +32,11 @@ public final class JMSStreamConstants {
 	 */
 	public static final String TRANSPORT_JMS = "JMS"; // NON-NLS
 
+	/**
+	 * The constant to indicate default map key for JMS message metadata values map.
+	 */
+	public static final String MSG_METADATA_KEY = "MsgMetadata"; // NON-NLS
+
 	private JMSStreamConstants() {
 	}
 }

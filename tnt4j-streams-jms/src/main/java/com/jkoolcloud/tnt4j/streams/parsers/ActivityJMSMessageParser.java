@@ -60,7 +60,22 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <ul>
  * <li>ActivityData - JMS message payload data. In case of {@link javax.jms.MapMessage} this entry is omitted, because
  * message contained map entries are copied to data map.</li>
- * <li>Correlator - JMS message correlation id {@link javax.jms.Message#getJMSCorrelationID()}.</li>
+ * <li>MsgMetadata - JMS message metadata map containing those fields:</li>
+ * <ul>
+ * <li>Correlator - message correlation identifier</li>
+ * <li>CorrelatorBytes - message correlation identifier bytes value</li>
+ * <li>DeliveryMode - message delivery mode number</li>
+ * <li>Destination - destination name this message was received from</li>
+ * <li>Expiration - message's expiration time</li>
+ * <li>MessageId - message identifier string</li>
+ * <li>Priority - message priority level number</li>
+ * <li>Redelivered - indication flag of whether this message is being redelivered</li>
+ * <li>ReplyTo - destination name to which a reply to this message should be sent</li>
+ * <li>Timestamp - timestamp in milliseconds</li>
+ * <li>Type - message type name supplied by the client when the message was sent</li>
+ * <li>CustomMsgProps - map of properties accessible over keys enumeration {@link javax.jms.Message#getPropertyNames()}
+ * and values resolved over {@link javax.jms.Message#getStringProperty(String)}</li>
+ * </ul>
  * <li>ActivityTransport - value is always
  * {@value com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants#TRANSPORT_JMS}.</li>
  * </ul>
@@ -149,7 +164,8 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		dataMap.put(RAW_ACTIVITY_STRING_KEY, message.toString());
 
 		try {
-			parseCommonMessage(message, dataMap);
+			Map<String, Object> metadataMap = parseCommonMessage(message);
+			dataMap.put(JMSStreamConstants.MSG_METADATA_KEY, metadataMap);
 
 			if (message instanceof TextMessage) {
 				parseTextMessage((TextMessage) message, dataMap);
@@ -178,50 +194,80 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Parse JMS {@link Message} common fields values into activity data map.
+	 * Collects JMS {@link com.jkoolcloud.tnt4j.core.Message} common fields values into message metadata map.
 	 * <p>
-	 * Common fields are:
+	 * Common message metadata fields are:
 	 * <ul>
-	 * <li>Correlator</li>
-	 * <li>DeliveryMode</li>
-	 * <li>Destination</li>
-	 * <li>Expiration</li>
-	 * <li>MessageId</li>
-	 * <li>Priority</li>
-	 * <li>Redelivered</li>
-	 * <li>RepyTo</li>
-	 * <li>Timestamp</li>
-	 * <li>Type</li>
-	 * <li>list of properties accessible over keys enumeration {@link javax.jms.Message#getPropertyNames()} and values
-	 * resolved over {@link javax.jms.Message#getStringProperty(String)}</li>
+	 * <li>Correlator - message correlation identifier</li>
+	 * <li>CorrelatorBytes - message correlation identifier bytes value</li>
+	 * <li>DeliveryMode - message delivery mode number</li>
+	 * <li>Destination - destination name this message was received from</li>
+	 * <li>Expiration - message's expiration time</li>
+	 * <li>MessageId - message identifier string</li>
+	 * <li>Priority - message priority level number</li>
+	 * <li>Redelivered - indication flag of whether this message is being redelivered</li>
+	 * <li>ReplyTo - destination name to which a reply to this message should be sent</li>
+	 * <li>Timestamp - timestamp in milliseconds</li>
+	 * <li>Type - message type name supplied by the client when the message was sent</li>
+	 * <li>CustomMsgProps - map of properties accessible over keys enumeration
+	 * {@link javax.jms.Message#getPropertyNames()} and values resolved over
+	 * {@link javax.jms.Message#getStringProperty(String)}</li>
 	 * </ul>
 	 *
 	 * @param message
 	 *            JMS message instance to parse
-	 * @param dataMap
-	 *            activity object data map to put resolved values
+	 * @return map instance, containing resolved message metadata values
 	 * @throws JMSException
 	 *             if JMS exception occurs while getting common fields values from message
 	 */
-	protected void parseCommonMessage(Message message, Map<String, Object> dataMap) throws JMSException {
-		dataMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
-		dataMap.put("DeliveryMode", message.getJMSDeliveryMode()); // NON-NLS
-		dataMap.put("Destination", message.getJMSDestination()); // NON-NLS
-		dataMap.put("Expiration", message.getJMSExpiration()); // NON-NLS
-		dataMap.put("MessageId", message.getJMSMessageID()); // NON-NLS
-		dataMap.put("Priority", message.getJMSPriority()); // NON-NLS
-		dataMap.put("Redelivered", message.getJMSRedelivered()); // NON-NLS
-		dataMap.put("RepyTo", message.getJMSReplyTo()); // NON-NLS
-		dataMap.put("Timestamp", message.getJMSTimestamp()); // NON-NLS
-		dataMap.put("Type", message.getJMSType()); // NON-NLS
+	protected Map<String, Object> parseCommonMessage(Message message) throws JMSException {
+		Map<String, Object> msgMetaMap = new HashMap<>(10);
+
+		msgMetaMap.put(StreamFieldType.Correlator.name(), message.getJMSCorrelationID());
+		msgMetaMap.put("CorrelatorBytes", message.getJMSCorrelationIDAsBytes()); // NON-NLS
+		msgMetaMap.put("DeliveryMode", message.getJMSDeliveryMode()); // NON-NLS
+		// msgMetaMap.put("DeliveryTime", message.getJMSDeliveryTime()); // NON-NLS
+		msgMetaMap.put("Destination", getDestinationName(message.getJMSDestination())); // NON-NLS
+		msgMetaMap.put("Expiration", message.getJMSExpiration()); // NON-NLS
+		msgMetaMap.put("MessageId", message.getJMSMessageID()); // NON-NLS
+		msgMetaMap.put("Priority", message.getJMSPriority()); // NON-NLS
+		msgMetaMap.put("Redelivered", message.getJMSRedelivered()); // NON-NLS
+		msgMetaMap.put("ReplyTo", getDestinationName(message.getJMSReplyTo())); // NON-NLS
+		msgMetaMap.put("Timestamp", message.getJMSTimestamp()); // NON-NLS
+		msgMetaMap.put("Type", message.getJMSType()); // NON-NLS
 
 		@SuppressWarnings("unchecked")
 		Enumeration<String> propNames = message.getPropertyNames();
+		Map<String, Object> customPropsMap = new HashMap<>();
 		if (propNames != null) {
 			while (propNames.hasMoreElements()) {
 				String pName = propNames.nextElement();
-				dataMap.put(pName, message.getStringProperty(pName));
+				customPropsMap.put(pName, message.getStringProperty(pName));
 			}
+		}
+		if (!customPropsMap.isEmpty()) {
+			msgMetaMap.put("CustomMsgProps", customPropsMap); // NON-NLS
+		}
+
+		return msgMetaMap;
+	}
+
+	/**
+	 * Resolves provided JMS {@link javax.jms.Destination} instance name.
+	 *
+	 * @param dest
+	 *            JMS destination instance to resolve value
+	 * @return resolved JMS destination name, or {@code null} if destination is {@code null}
+	 * @throws JMSException
+	 *             if JMS exception occurs while getting destination name value
+	 */
+	protected static String getDestinationName(Destination dest) throws JMSException {
+		if (dest instanceof Topic) {
+			return ((Topic) dest).getTopicName();
+		} else if (dest instanceof Queue) {
+			return ((Queue) dest).getQueueName();
+		} else {
+			return dest == null ? null : dest.toString();
 		}
 	}
 

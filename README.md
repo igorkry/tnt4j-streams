@@ -2011,11 +2011,15 @@ Sample stream configuration:
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="ServerURI" value="tcp://localhost:61616"/>
+        <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
+        <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
+        <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
+        <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
-        <property name="Topic" value="topic.SampleJMSTopic"/>
-        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <property name="Topic" value="TestTopic"/>
+        <property name="JMSConnFactory" value="/jms/cf/another"/>
+                
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -2023,9 +2027,9 @@ Sample stream configuration:
 
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
-`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`JMSStream` connects to server defined using `java.naming.provider.url` property, and takes messages from topic defined
 `Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
-should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+should skip unparseable entries. `java.naming.factory.initial` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
@@ -2076,11 +2080,15 @@ Sample stream configuration:
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="ServerURI" value="tcp://localhost:61616"/>
-        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
-        <property name="Topic" value="topic.SampleJMSTopic"/>
-        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
+    <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+    <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
+    <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
+    <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
+    <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+    <property name="Topic" value="TestTopic"/>
+    <property name="JMSConnFactory" value="/jms/cf/another"/>
+                
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -2088,9 +2096,9 @@ Sample stream configuration:
 
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
-`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`JMSStream` connects to server defined using `java.naming.provider.url` property, and takes messages from topic defined
 `Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
-should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+should skip unparseable entries. `java.naming.factory.initial` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps activity event data from JMS map message using map entries key labels.
@@ -2141,11 +2149,15 @@ Sample stream configuration:
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="ServerURI" value="tcp://localhost:61616"/>
+        <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
+        <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
+        <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
+        <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
-        <property name="Topic" value="topic.SampleJMSTopic"/>
-        <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-        <property name="JMSConnFactory" value="ConnectionFactory"/>
+        <property name="Topic" value="TestTopic"/>
+        <property name="JMSConnFactory" value="/jms/cf/another"/>
+
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -2153,9 +2165,9 @@ Sample stream configuration:
 
 Stream configuration states that `JMSStream` referencing `SampleJMSParser` shall be used.
 
-`JMSStream` connects to server defined using `ServerURI` property, and takes messages from topic defined
+`JMSStream` connects to server defined using `java.naming.provider.url` property, and takes messages from topic defined
 `Topic` property. To define wanted queue use `Queue` property. `HaltIfNoParser` property indicates that stream
-should skip unparseable entries. `JNDIFactory` property defines that ActiveMQ shall be used.
+should skip unparseable entries. `java.naming.factory.initial` property defines that ActiveMQ shall be used.
 Stream puts received message data to map and passes it to parser.
 
 `SampleJMSParser` maps metadata to activity event data. `ActivityData` entry value is passed to stacked parser named
@@ -4545,25 +4557,27 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### JMS stream parameters
 
- * `ServerURI` - JMS server URL. (Required)
+ * `java.naming.provider.url` - JMS server URL. (Required)
  * `Queue` - queue destination name. (Required - just one of `Queue` or `Topic`)
  * `Topic` - topic destination name. (Required - just one of `Queue` or `Topic`)
- * `JNDIFactory` - JNDI context factory name. (Required)
+ * `java.naming.factory.initial` - JNDI context factory name. (Required)
  * `JMSConnFactory` - JMS connection factory name. (Required)
+ * list of JNDI context configuration properties supported by JMS server implementation. See `javax.naming.Context` for more details. 
+ (Optional)
 
     sample:
 ```xml
-    <property name="ServerURI" value="tcp://localhost:61616"/>
+    <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
     <property name="Topic" value="topic.SampleJMSTopic"/>
-    <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+    <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
     <property name="JMSConnFactory" value="ConnectionFactory"/>
     <parser-ref name="SampleJMSParser"/>
 ```
 or
 ```xml
-    <property name="ServerURI" value="tcp://localhost:61616"/>
+    <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
     <property name="Queue" value="queue.SampleJMSQueue"/>
-    <property name="JNDIFactory" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+    <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
     <property name="JMSConnFactory" value="ConnectionFactory"/>
     <parser-ref name="SampleJMSParser"/>
 ```

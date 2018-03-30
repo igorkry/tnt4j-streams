@@ -17,15 +17,14 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.lang.IllegalStateException;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -45,11 +44,13 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractBufferedStream}):
  * <ul>
- * <li>ServerURI - JMS server URL. (Required)</li>
+ * <li>java.naming.provider.url - JMS server URL. (Required)</li>
  * <li>Queue - queue destination name. (Required - just one of 'Queue' or 'Topic')</li>
  * <li>Topic - topic destination name. (Required - just one of 'Queue' or 'Topic')</li>
- * <li>JNDIFactory - JNDI context factory name. (Required)</li>
+ * <li>java.naming.factory.initial - JNDI context factory name. (Required)</li>
  * <li>JMSConnFactory - JMS connection factory name. (Required)</li>
+ * <li>list of JNDI context configuration properties supported by JMS server implementation. See
+ * {@link javax.naming.Context} for more details. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1$
@@ -58,15 +59,16 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class JMSStream extends AbstractBufferedStream<Message> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JMSStream.class);
+	private static final String DEFINITION_DELIMITER = ",";// NON-NLS
 
 	// Stream properties
-	private String serverURL = null;
-	private String queueName = null;
-	private String topicName = null;
-	private String jndiFactory = null;
+	private String[] queueNames = null;
+	private String[] topicNames = null;
 	private String jmsConnFactory = null;
+	// JMS Context properties
+	private Properties ctxProps = new Properties();
 
-	private JMSDataReceiver jmsDataReceiver;
+	private List<JMSDataReceiver> jmsDataReceivers = new ArrayList<>();
 
 	/**
 	 * Constructs an empty JMSStream. Requires configuration settings to set input stream source.
@@ -82,20 +84,18 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	public Object getProperty(String name) {
-		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
-			return serverURL;
-		}
 		if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
-			return queueName;
+			return StringUtils.join(queueNames, DEFINITION_DELIMITER);
 		}
 		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-			return topicName;
-		}
-		if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
-			return jndiFactory;
+			return StringUtils.join(topicNames, DEFINITION_DELIMITER);
 		}
 		if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 			return jmsConnFactory;
+		}
+		String cpv = ctxProps.getProperty(name);
+		if (cpv != null) {
+			return cpv;
 		}
 
 		return super.getProperty(name);
@@ -109,28 +109,42 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 			for (Map.Entry<String, String> prop : props) {
 				String name = prop.getKey();
 				String value = prop.getValue();
-				if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
-					serverURL = value;
-				} else if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(topicName)) {
+				if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
+					if (ArrayUtils.isNotEmpty(topicNames)) {
 						throw new IllegalStateException(StreamsResources.getStringFormatted(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 					}
-					queueName = value;
+					queueNames = value.split(DEFINITION_DELIMITER);
 				} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(queueName)) {
+					if (ArrayUtils.isNotEmpty(queueNames)) {
 						throw new IllegalStateException(StreamsResources.getStringFormatted(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
 					}
-					topicName = value;
-				} else if (StreamProperties.PROP_JNDI_FACTORY.equalsIgnoreCase(name)) {
-					jndiFactory = value;
+					topicNames = value.split(DEFINITION_DELIMITER);
 				} else if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 					jmsConnFactory = value;
+				} else {
+					ctxProps.put(name, value);
 				}
 			}
+		}
+	}
+
+	@Override
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
+
+		if (StringUtils.isEmpty(ctxProps.getProperty(Context.PROVIDER_URL))) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined", Context.PROVIDER_URL));
+		}
+
+		if (ArrayUtils.isEmpty(queueNames) && ArrayUtils.isEmpty(topicNames)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_QUEUE_NAME,
+					StreamProperties.PROP_TOPIC_NAME));
 		}
 	}
 
@@ -138,32 +152,31 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		if (StringUtils.isEmpty(serverURL)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.property.undefined", StreamProperties.PROP_SERVER_URI));
+		Context ic = new InitialContext(ctxProps);
+
+		if (ArrayUtils.isEmpty(queueNames)) {
+			for (String topicName : topicNames) {
+				JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
+				jmsDataReceivers.add(jmsDataReceiver);
+				jmsDataReceiver.initialize(ic, topicName, jmsConnFactory);
+			}
+		} else {
+			for (String queueName : topicNames) {
+				JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
+				jmsDataReceivers.add(jmsDataReceiver);
+				jmsDataReceiver.initialize(ic, queueName, jmsConnFactory);
+			}
 		}
 
-		if (StringUtils.isEmpty(queueName) && StringUtils.isEmpty(topicName)) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_QUEUE_NAME,
-					StreamProperties.PROP_TOPIC_NAME));
-		}
-
-		jmsDataReceiver = new JMSDataReceiver();
-		Hashtable<String, String> env = new Hashtable<>(2);
-		env.put(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
-		env.put(Context.PROVIDER_URL, serverURL);
-
-		Context ic = new InitialContext(env);
-
-		jmsDataReceiver.initialize(ic, StringUtils.isEmpty(queueName) ? topicName : queueName, jmsConnFactory);
 	}
 
 	@Override
 	protected void start() throws Exception {
 		super.start();
 
-		jmsDataReceiver.start();
+		for (JMSDataReceiver jmsDataReceiver : jmsDataReceivers) {
+			jmsDataReceiver.start();
+		}
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"TNTInputStream.stream.start", getClass().getSimpleName(), getName());
@@ -171,7 +184,7 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	protected void cleanup() {
-		if (jmsDataReceiver != null) {
+		for (JMSDataReceiver jmsDataReceiver : jmsDataReceivers) {
 			jmsDataReceiver.shutdown();
 		}
 
@@ -180,7 +193,15 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	protected boolean isInputEnded() {
-		return jmsDataReceiver.isInputEnded();
+		boolean flag = true;
+
+		for (JMSDataReceiver jmsDataReceiver : jmsDataReceivers) {
+			if (!jmsDataReceiver.isInputEnded()) {
+				flag = false;
+			}
+		}
+
+		return flag;
 	}
 
 	@Override
@@ -264,9 +285,15 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		 */
 		@Override
 		void closeInternals() throws JMSException {
-			jmsReceiver.close();
-			jmsSession.close();
-			jmsCon.close();
+			if (jmsReceiver != null) {
+				jmsReceiver.close();
+			}
+			if (jmsSession != null) {
+				jmsSession.close();
+			}
+			if (jmsCon != null) {
+				jmsCon.close();
+			}
 		}
 
 		/**
