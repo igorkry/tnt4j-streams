@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -36,6 +37,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.outputs.OutputStreamListener;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -57,6 +59,7 @@ public class DefaultStreamingJob implements StreamingJob {
 
 	private Collection<TNTInputStream<?, ?>> streams;
 	private Collection<StreamingJobListener> jobListeners;
+	private WeakReference<DirStreamingManager> managerRef;
 
 	/**
 	 * Constructs a new DefaultStreamingJob.
@@ -66,9 +69,10 @@ public class DefaultStreamingJob implements StreamingJob {
 	 * @param streamCfgFile
 	 *            stream configuration file
 	 */
-	public DefaultStreamingJob(UUID jobId, File streamCfgFile) {
+	public DefaultStreamingJob(UUID jobId, File streamCfgFile, DirStreamingManager manager) {
 		this.jobId = jobId;
 		this.streamCfgFile = streamCfgFile;
+		this.managerRef = new WeakReference<>(manager);
 	}
 
 	@Override
@@ -95,6 +99,8 @@ public class DefaultStreamingJob implements StreamingJob {
 
 		// TODO: configuration from ZooKeeper
 
+		managerRef.get().addRunningTask(this);
+
 		try {
 			StreamsConfigLoader cfg = new StreamsConfigLoader(streamCfgFile);
 
@@ -117,7 +123,7 @@ public class DefaultStreamingJob implements StreamingJob {
 				stream.addStreamListener(dsl);
 
 				stream.output().setProperty(OutputProperties.PROP_TNT4J_CONFIG_FILE, tnt4jCfgFilePath);
-
+				stream.output().addOutputListener(dsl);
 				ft = new StreamThread(streamThreads, stream,
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
@@ -207,6 +213,10 @@ public class DefaultStreamingJob implements StreamingJob {
 		if (jobListeners != null) {
 			jobListeners.clear();
 		}
+
+		if (managerRef != null) {
+			managerRef.get().removeRunningTask(this);
+		}
 	}
 
 	/**
@@ -239,7 +249,7 @@ public class DefaultStreamingJob implements StreamingJob {
 		}
 	}
 
-	private class DefaultStreamListener implements InputStreamListener {
+	private class DefaultStreamListener implements InputStreamListener, OutputStreamListener {
 
 		@Override
 		public void onProgressUpdate(TNTInputStream<?, ?> stream, int current, int total) {
@@ -293,6 +303,15 @@ public class DefaultStreamingJob implements StreamingJob {
 			if (jobListeners != null) {
 				for (StreamingJobListener l : jobListeners) {
 					l.onStreamEvent(DefaultStreamingJob.this, level, message, source);
+				}
+			}
+		}
+
+		@Override
+		public void onEventLog(TNTInputStream<?, ?> stream, Object item) {
+			if (jobListeners != null) {
+				for (StreamingJobListener l : jobListeners) {
+					l.onSendEvent(DefaultStreamingJob.this, (ActivityInfo) item);
 				}
 			}
 		}

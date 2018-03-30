@@ -151,25 +151,7 @@ public class DirStreamingManager {
 	private void initialize() {
 		executorService = new ThreadPoolExecutor(CORE_TREAD_POOL_SIZE, MAX_TREAD_POOL_SIZE, KEEP_ALIVE_TIME,
 				TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(MAX_TREAD_POOL_SIZE * 2),
-				new TNTInputStream.StreamsThreadFactory("DirStreamingManagerExecutorThread-")) { // NON-NLS
-			@Override
-			protected void beforeExecute(Thread t, Runnable r) {
-				super.beforeExecute(t, r);
-
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"DirStreamingManager.job.add.running", ((DefaultStreamingJob) r).getJobId());
-				runningJobs.add(r);
-			}
-
-			@Override
-			protected void afterExecute(Runnable r, Throwable t) {
-				super.afterExecute(r, t);
-
-				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"DirStreamingManager.job.remove.running", ((DefaultStreamingJob) r).getJobId());
-				runningJobs.remove(r);
-			}
-		};
+				new TNTInputStream.StreamsThreadFactory("DirStreamingManagerExecutorThread-")); // NON-NLS
 
 		executorService.setRejectedExecutionHandler(new RejectedExecutionHandler() {
 			@Override
@@ -287,7 +269,7 @@ public class DirStreamingManager {
 
 		notifyJobFileAdded(jobCfgFile, jobId.toString(), JobFileState.ADDED);
 
-		DefaultStreamingJob sJob = new DefaultStreamingJob(jobId, jobCfgFile);
+		DefaultStreamingJob sJob = new DefaultStreamingJob(jobId, jobCfgFile, this);
 		sJob.setTnt4jCfgFilePath(tnt4jCfgFilePath);
 
 		if (CollectionUtils.isNotEmpty(streamingJobListeners)) {
@@ -359,6 +341,30 @@ public class DirStreamingManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds running job instance to running tasks list.
+	 *
+	 * @param job
+	 *            running job instance
+	 */
+	void addRunningTask(DefaultStreamingJob job) {
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.add.running", job.getJobId());
+		runningJobs.add(job);
+	}
+
+	/**
+	 * Removed stopped job instance from running tasks list.
+	 *
+	 * @param job
+	 *            stopped job instance
+	 */
+	void removeRunningTask(DefaultStreamingJob job) {
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"DirStreamingManager.job.remove.running", job.getJobId());
+		runningJobs.remove(job);
 	}
 
 	/**
