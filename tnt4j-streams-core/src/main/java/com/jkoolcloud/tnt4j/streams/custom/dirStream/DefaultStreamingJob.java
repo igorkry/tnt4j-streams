@@ -37,7 +37,6 @@ import com.jkoolcloud.tnt4j.streams.inputs.InputStreamListener;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.outputs.OutputStreamListener;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -123,7 +122,6 @@ public class DefaultStreamingJob implements StreamingJob {
 				stream.addStreamListener(dsl);
 
 				stream.output().setProperty(OutputProperties.PROP_TNT4J_CONFIG_FILE, tnt4jCfgFilePath);
-				stream.output().addOutputListener(dsl);
 				ft = new StreamThread(streamThreads, stream,
 						String.format("%s:%s", stream.getClass().getSimpleName(), stream.getName())); // NON-NLS
 				ft.start();
@@ -305,15 +303,6 @@ public class DefaultStreamingJob implements StreamingJob {
 					l.onStreamEvent(DefaultStreamingJob.this, level, message, source);
 				}
 			}
-		}
-
-		@Override
-		public void onEventLog(TNTInputStream<?, ?> stream, Object item) {
-			if (jobListeners != null) {
-				for (StreamingJobListener l : jobListeners) {
-					l.onSendEvent(DefaultStreamingJob.this, (ActivityInfo) item);
-				}
-			}
-		}
+		}		
 	}
 }
