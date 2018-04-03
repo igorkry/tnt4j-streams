@@ -25,7 +25,7 @@
         <jaxb.version>2.3.0</jaxb.version>
 
         <tnt4j.version>2.7-SNAPSHOT</tnt4j.version>
-        <jesl.version>0.5-SNAPSHOT</jesl.version>
+        <jesl.version>0.6-SNAPSHOT</jesl.version>
 
         <httpcomponents.version>4.5.4</httpcomponents.version>
 
