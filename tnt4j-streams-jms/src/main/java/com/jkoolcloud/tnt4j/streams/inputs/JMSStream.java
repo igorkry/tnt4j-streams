@@ -110,18 +110,8 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (StreamProperties.PROP_QUEUE_NAME.equalsIgnoreCase(name)) {
-					if (ArrayUtils.isNotEmpty(topicNames)) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
-					}
 					queueNames = value.split(DEFINITION_DELIMITER);
 				} else if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-					if (ArrayUtils.isNotEmpty(queueNames)) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-								StreamProperties.PROP_QUEUE_NAME, StreamProperties.PROP_TOPIC_NAME));
-					}
 					topicNames = value.split(DEFINITION_DELIMITER);
 				} else if (JMSStreamProperties.PROP_JMS_CONN_FACTORY.equalsIgnoreCase(name)) {
 					jmsConnFactory = value;
@@ -153,21 +143,21 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		super.initialize();
 
 		Context ic = new InitialContext(ctxProps);
+		JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
 
-		if (ArrayUtils.isEmpty(queueNames)) {
-			for (String topicName : topicNames) {
-				JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
-				jmsDataReceivers.add(jmsDataReceiver);
-				jmsDataReceiver.initialize(ic, topicName, jmsConnFactory);
-			}
-		} else {
-			for (String queueName : topicNames) {
-				JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
+		if (queueNames != null) {
+			for (String queueName : queueNames) {
 				jmsDataReceivers.add(jmsDataReceiver);
 				jmsDataReceiver.initialize(ic, queueName, jmsConnFactory);
 			}
 		}
 
+		if (topicNames != null) {
+			for (String topicName : topicNames) {
+				jmsDataReceivers.add(jmsDataReceiver);
+				jmsDataReceiver.initialize(ic, topicName, jmsConnFactory);
+			}
+		}
 	}
 
 	@Override
