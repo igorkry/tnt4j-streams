@@ -4558,8 +4558,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 #### JMS stream parameters
 
  * `java.naming.provider.url` - JMS server URL. (Required)
- * `Queue` - queue destination name. (Required - just one of `Queue` or `Topic`)
- * `Topic` - topic destination name. (Required - just one of `Queue` or `Topic`)
+ * `Queue` - queue destination name or names delimited using `,` char. (Required - at least one of `Queue` or `Topic`)
+ * `Topic` - topic destination name or names delimited using `,` char. (Required - at least one of `Queue` or `Topic`)
  * `java.naming.factory.initial` - JNDI context factory name. (Required)
  * `JMSConnFactory` - JMS connection factory name. (Required)
  * list of JNDI context configuration properties supported by JMS server implementation. See `javax.naming.Context` for more details. 
@@ -4568,7 +4568,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     sample:
 ```xml
     <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
-    <property name="Topic" value="topic.SampleJMSTopic"/>
+    <property name="Topic" value="topic.SampleJMSTopic,topic.OtherSampleJMSTopic"/>
     <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
     <property name="JMSConnFactory" value="ConnectionFactory"/>
     <parser-ref name="SampleJMSParser"/>
@@ -4576,7 +4576,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 or
 ```xml
     <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
-    <property name="Queue" value="queue.SampleJMSQueue"/>
+    <property name="Queue" value="queue.SampleJMSQueue,queue.OtherSampleJMSQueue"/>
     <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
     <property name="JMSConnFactory" value="ConnectionFactory"/>
     <parser-ref name="SampleJMSParser"/>

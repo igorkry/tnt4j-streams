@@ -45,8 +45,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@link AbstractBufferedStream}):
  * <ul>
  * <li>java.naming.provider.url - JMS server URL. (Required)</li>
- * <li>Queue - queue destination name. (Required - just one of 'Queue' or 'Topic')</li>
- * <li>Topic - topic destination name. (Required - just one of 'Queue' or 'Topic')</li>
+ * <li>Queue - queue destination name or names delimited using {@code ','} char. (Required - at least one of 'Queue' or
+ * 'Topic')</li>
+ * <li>Topic - topic destination name or names delimited using {@code ','} char. (Required - at least one of 'Queue' or
+ * 'Topic')</li>
  * <li>java.naming.factory.initial - JNDI context factory name. (Required)</li>
  * <li>JMSConnFactory - JMS connection factory name. (Required)</li>
  * <li>list of JNDI context configuration properties supported by JMS server implementation. See
@@ -143,19 +145,21 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 		super.initialize();
 
 		Context ic = new InitialContext(ctxProps);
-		JMSDataReceiver jmsDataReceiver = new JMSDataReceiver();
 
-		if (queueNames != null) {
-			for (String queueName : queueNames) {
-				jmsDataReceivers.add(jmsDataReceiver);
-				jmsDataReceiver.initialize(ic, queueName, jmsConnFactory);
-			}
-		}
+		initReceivers(queueNames, ic);
+		initReceivers(topicNames, ic);
+	}
 
-		if (topicNames != null) {
-			for (String topicName : topicNames) {
-				jmsDataReceivers.add(jmsDataReceiver);
-				jmsDataReceiver.initialize(ic, topicName, jmsConnFactory);
+	private void initReceivers(String[] destinations, Context ic) throws Exception {
+		if (destinations != null) {
+			JMSDataReceiver jmsDataReceiver;
+			for (String destName : destinations) {
+				String tDestName = destName.trim();
+				if (StringUtils.isNotEmpty(tDestName)) {
+					jmsDataReceiver = new JMSDataReceiver();
+					jmsDataReceiver.initialize(ic, tDestName, jmsConnFactory);
+					jmsDataReceivers.add(jmsDataReceiver);
+				}
 			}
 		}
 	}
