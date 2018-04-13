@@ -36,6 +36,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
 * Customized parser for Apache Access Logs.
 
 * Customized IBM MQ Trace Events stream (and parser).
+* Customized IBM MQ Error log parser (also supports JSON formatted logs).
 
 * It can be integrated with:
     * Logstash
@@ -3935,7 +3936,9 @@ Sample stream configuration:
             <field-locator locator="Date" locator-type="Label"/>
             <field-locator locator="Time" locator-type="Label"/>
         </field>
-        <field name="ProcessId" locator="Process" locator-type="Label"/>
+        <field name="Process" locator="Process" locator-type="Label"/>
+        <field name="ProcessId" locator="pid" locator-type="Label"/>
+        <field name="ThreadId" locator="tid" locator-type="Label"/>
         <field name="UserName" locator="User" locator-type="Label"/>
         <field name="ApplName" locator="Program" locator-type="Label"/>
         <field name="ServerName" locator="Host" locator-type="Label"/>
@@ -3947,12 +3950,11 @@ Sample stream configuration:
         <field name="Explanation" locator="Explanation" locator-type="Label"/>
         <field name="Action" locator="Action" locator-type="Label"/>
         <field name="Where" locator="Where" locator-type="Label"/>
-
     </parser>
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.LOG"/>       
         <property name="RestoreState" value="false"/>
         <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="20"/>
@@ -3972,6 +3974,79 @@ Stream configuration states that `FileStream` referencing `MQErrLogParser` shall
 
 `MQErrLogParser` maps IBM MQ error log entry resolved fields to activity event fields. There is additional field `ResourceName` resolved 
 from stream configuration data and referring stream input (IBM MQ error log) file name.
+
+#### JSON format IBM MQ error log streaming
+
+This sample shows how to stream JSON formatted IBM MQ (version starting 9.0.5) error log entries as activity events.
+
+Sample files can be found in `samples/ibm-mq-err-log` directory (`tnt4j-streams-core` module).
+
+Sample error log file is available in `AMQERR01.JSON` file.
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="MQErrLogJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="UseActivityDataAsMessageForUnset" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
+
+        <field name="StartTime" locator="$.ibm_datetime" format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" locator-type="Label"/>
+        <field name="Process" locator="$.ibm_processName" locator-type="Label"/>
+        <field name="ProcessId" locator="$.ibm_processId" locator-type="Label"/>
+        <field name="ThreadId" locator="$.ibm_threadId" locator-type="Label"/>
+        <field name="UserName" locator="$.ibm_userName" locator-type="Label"/>
+        <field name="ServerName" locator="$.ibm_serverName" locator-type="Label"/>
+        <field name="Location" locator="$.ibm_installationName" locator-type="Label"/>
+        <field name="VRMF" locator="$.ibm_version" locator-type="Label"/>
+        <field name="QMGR" locator="$.ibm_qmgrId" locator-type="Label"/>
+        <field name="EventName" locator="$.ibm_messageId" locator-type="Label"/>
+        <field name="Exception" locator="$.message" locator-type="Label"/>
+        <field name="Where" locator="$.module" locator-type="Label"/>
+
+        <field name="MsgVariable1" locator="$.ibm_arithInsert1" locator-type="Label"/>
+        <field name="MsgVariable2" locator="$.ibm_arithInsert2" locator-type="Label"/>
+        <field name="MsgComment1" locator="$.ibm_commentInsert1" locator-type="Label"/>
+        <field name="MsgComment2" locator="$.ibm_commentInsert2" locator-type="Label"/>
+        <field name="MsgComment3" locator="$.ibm_commentInsert3" locator-type="Label"/>
+        <field name="Severity" locator="$.loglevel" locator-type="Label"/> <!--  INFO, WARNING, or ERROR -->
+        <field name="Sequence" locator="$.ibm_sequence" locator-type="Label"/>
+        <field name="RemoteHost" locator="$.ibm_remoteHost" locator-type="Label"/>
+        <field name="Host" locator="$.host" locator-type="Label"/>
+        <field name="InstallationDir" locator="$.ibm_installationDir" locator-type="Label"/>        
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.JSON"/>
+        <property name="RestoreState" value="false"/>
+        <property name="FilePolling" value="true"/>
+        <property name="FileReadDelay" value="20"/>
+        <property name="StartFromLatest" value="false"/>
+        <property name="ActivityDelim" value="EOL"/>
+
+        <parser-ref name="MQErrLogJSONParser"/>
+    </stream>
+</tnt-data-source>
+``` 
+
+Stream configuration states that `FileStream` referencing `MQErrLogJSONParser` shall be used. Stream reads JSON formatted IBM MQ error log 
+entries (one per line) from `./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.JSON` file contents and passes it to parser.
+
+`HaltIfNoParser` property indicates that stream should skip unparseable entries.
+
+`MQErrLogJSONParser` maps IBM MQ error JSON log entry resolved fields to activity event fields. There is additional field `ResourceName` 
+resolved from stream configuration data and referring stream input (IBM MQ error log) file name.
+
+**NOTE:** JSON formatted IBM MQ error log entries does not have some fields e.g. `Action`, `Explanation`, like ordinary log has.
+
+See [JSON format diagnostic messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.ref.doc/q130430_.htm) for more 
+details.
 
 #### String ranges streaming
 
