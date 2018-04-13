@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="MQErrLogJSONParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="UseActivityDataAsMessageForUnset" value="true"/>
+
+        <field name="EventType" value="EVENT"/>
+        <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
+
+        <field name="StartTime" locator="$.ibm_datetime" format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" locator-type="Label"/>
+        <field name="Process" locator="$.ibm_processName" locator-type="Label"/>
+        <field name="ProcessId" locator="$.ibm_processId" locator-type="Label"/>
+        <field name="ThreadId" locator="$.ibm_threadId" locator-type="Label"/>
+        <field name="UserName" locator="$.ibm_userName" locator-type="Label"/>
+        <field name="ServerName" locator="$.ibm_serverName" locator-type="Label"/>
+        <field name="Location" locator="$.ibm_installationName" locator-type="Label"/>
+        <field name="VRMF" locator="$.ibm_version" locator-type="Label"/>
+        <field name="QMGR" locator="$.ibm_qmgrId" locator-type="Label"/>
+        <field name="EventName" locator="$.ibm_messageId" locator-type="Label"/>
+        <field name="Exception" locator="$.message" locator-type="Label"/>
+        <field name="Where" locator="$.module" locator-type="Label"/>
+
+        <field name="MsgVariable1" locator="$.ibm_arithInsert1" locator-type="Label"/>
+        <field name="MsgVariable2" locator="$.ibm_arithInsert2" locator-type="Label"/>
+        <field name="MsgComment1" locator="$.ibm_commentInsert1" locator-type="Label"/>
+        <field name="MsgComment2" locator="$.ibm_commentInsert2" locator-type="Label"/>
+        <field name="MsgComment3" locator="$.ibm_commentInsert3" locator-type="Label"/>
+        <field name="Severity" locator="$.loglevel" locator-type="Label"/> <!--  INFO, WARNING, or ERROR -->
+        <field name="Sequence" locator="$.ibm_sequence" locator-type="Label"/>
+        <field name="RemoteHost" locator="$.ibm_remoteHost" locator-type="Label"/>
+        <field name="Host" locator="$.host" locator-type="Label"/>
+        <field name="InstallationDir" locator="$.ibm_installationDir" locator-type="Label"/>
+        <!-- type field is reserved, value always 'mq_log' -->
+        <!--<field name="LogType" locator="$.type" locator-type="Label"/>-->
+
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.JSON"/>
+        <!-- Windows MQ Installation path -->
+        <!--<property name="FileName" value="C:/Program Files (x86)/IBM/WebSphere MQ/errors/AMQERR*.LOG"/>-->
+        <!-- UNIX MQ installation path -->
+        <!--<property name="FileName" value="/var/mqm/errors/AMQERR*.LOG"/>-->
+        <property name="RestoreState" value="false"/>
+        <property name="FilePolling" value="true"/>
+        <property name="FileReadDelay" value="20"/>
+        <property name="StartFromLatest" value="false"/>
+        <property name="ActivityDelim" value="EOL"/>
+
+        <parser-ref name="MQErrLogJSONParser"/>
+    </stream>
+</tnt-data-source>
