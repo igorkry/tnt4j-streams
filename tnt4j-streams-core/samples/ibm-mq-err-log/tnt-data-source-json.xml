@@ -14,13 +14,14 @@
         <field name="ProcessId" locator="$.ibm_processId" locator-type="Label"/>
         <field name="ThreadId" locator="$.ibm_threadId" locator-type="Label"/>
         <field name="UserName" locator="$.ibm_userName" locator-type="Label"/>
-        <field name="ServerName" locator="$.ibm_serverName" locator-type="Label"/>
+        <field name="ServerName" locator="$.host" locator-type="Label"/>
         <field name="Location" locator="$.ibm_installationName" locator-type="Label"/>
-        <field name="VRMF" locator="$.ibm_version" locator-type="Label"/>
-        <field name="QMGR" locator="$.ibm_qmgrId" locator-type="Label"/>
+        <field name="Version" locator="$.ibm_version" locator-type="Label"/>
+        <field name="QMGR" locator="$.ibm_serverName" locator-type="Label"/>
+        <field name="AppServerName" locator="$.ibm_serverName" locator-type="Label"/>
         <field name="EventName" locator="$.ibm_messageId" locator-type="Label"/>
         <field name="Exception" locator="$.message" locator-type="Label"/>
-        <field name="Where" locator="$.module" locator-type="Label"/>
+        <field name="Module" locator="$.module" locator-type="Label"/>
 
         <field name="MsgVariable1" locator="$.ibm_arithInsert1" locator-type="Label"/>
         <field name="MsgVariable2" locator="$.ibm_arithInsert2" locator-type="Label"/>
