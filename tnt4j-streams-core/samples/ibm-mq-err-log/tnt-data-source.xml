@@ -20,13 +20,13 @@
         <field name="ApplName" locator="Program" locator-type="Label"/>
         <field name="ServerName" locator="Host" locator-type="Label"/>
         <field name="Location" locator="Installation" locator-type="Label"/>
-        <field name="VRMF" locator="VRMF" locator-type="Label"/>
+        <field name="Version" locator="VRMF" locator-type="Label"/>
         <field name="QMGR" locator="QMgr" locator-type="Label"/>
         <field name="EventName" locator="ErrCode" locator-type="Label"/>
         <field name="Exception" locator="ErrText" locator-type="Label"/>
         <field name="Explanation" locator="Explanation" locator-type="Label"/>
         <field name="Action" locator="Action" locator-type="Label"/>
-        <field name="Where" locator="Where" locator-type="Label"/>
+        <field name="Module" locator="Where" locator-type="Label"/>
 
     </parser>
 
