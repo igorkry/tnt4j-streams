@@ -5167,7 +5167,10 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 **NOTE:** using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
 as activity entity fields/properties by using map entry data as this:
 * map entry key  - field/property name
-* map entry value - field/property value 
+* map entry value - field/property value
+
+Locator path token `*` can be omitted if last path token resolves to `java.util.Map` type value. However to get complete map for root path 
+level you must define it `locator="*"` anyway, since locator value can't be empty.    
 
 **NOTE:** using locator path token value `#` (e.g. `locator="#"`) you can make parser to get all yet parser un-touched map entries from that 
 level and put it all as activity entity fields/properties by using map entry data as this:

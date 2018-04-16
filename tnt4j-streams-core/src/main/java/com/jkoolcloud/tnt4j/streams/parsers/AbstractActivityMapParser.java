@@ -48,6 +48,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>map entry key - field/property name</li>
  * <li>map entry value - field/property value</li>
  * </ul>
+ * Locator path token {@code '*'} can be omitted if last path token resolves to {@link java.util.Map} type value.
+ * However to get complete map for root path level you must define it {@code locator="*"} anyway, since locator value
+ * can't be empty.
  * <p>
  * Using locator path token value {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN} you
  * can make parser to get all yet parser un-touched map entries from that level and put it all as activity entity
