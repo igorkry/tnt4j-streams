@@ -1972,7 +1972,7 @@ should skip unparseable entries. Stream puts received form parameters data to ma
 This sample shows how to stream activity events received over JMS transport as text messages. Sample also shows
 how to use stacked parsers technique to extract message payload data.
 
-Sample files can be found in `samples/jms-mapmessage` directory.
+Sample files can be found in `samples/jms-textmessage` directory.
 
 **NOTE:** in `run.bat/run.sh` file set variable `JMS_IMPL_LIBPATH` value to reference JMS implementation (`ActiveMQ`, `Solace`, `RabbitMQ` 
 and etc.) libraries used by your environment.
@@ -1984,46 +1984,72 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
-        <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
+   <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+       <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
-        <field name="Location" locator="1" locator-type="Index"/>
-        <field name="UserName" locator="3" locator-type="Index"/>
-        <field name="StartTime" locator="4" locator-type="Index" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
-        <field name="EventType" value="SEND"/>
-        <field name="EventName" locator="7" locator-type="Index"/>
-        <field name="ResourceName" locator="8" locator-type="Index"/>
-        <field name="CompCode" locator="12" locator-type="Index">
-            <field-map source="100:206" target="SUCCESS" type="Range"/>
-            <field-map source="300:308" target="WARNING" type="Range"/>
-            <field-map source="400:417" target="ERROR" type="Range"/>
-            <field-map source="500:511" target="ERROR" type="Range"/>
-        </field>
-        <field name="ReasonCode" locator="12" locator-type="Index"/>
-        <field name="MsgValue" locator="13" locator-type="Index"/>
-    </parser>
+       <field name="Location" locator="1" locator-type="Index"/>
+       <field name="UserName" locator="3" locator-type="Index"/>
+       <field name="StartTime" locator="4" locator-type="Index" format="dd/MMM/yyyy:HH:mm:ss z" locale="en-US"/>
+       <field name="EventType" value="SEND"/>
+       <field name="EventName" locator="7" locator-type="Index"/>
+       <field name="ResourceName" locator="8" locator-type="Index"/>
+       <field name="CompCode" locator="12" locator-type="Index">
+           <field-map source="100:206" target="SUCCESS" type="Range"/>
+           <field-map source="300:308" target="WARNING" type="Range"/>
+           <field-map source="400:417" target="ERROR" type="Range"/>
+           <field-map source="500:511" target="ERROR" type="Range"/>
+       </field>
+       <field name="ReasonCode" locator="12" locator-type="Index"/>
+       <field name="MsgValue" locator="13" locator-type="Index"/>
+   </parser>
 
-    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
-        <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
-        <field name="MsgBody" locator="ActivityData" locator-type="Label">
-            <parser-ref name="AccessLogParserCommon"/>
-        </field>
-        <field name="Correlator" locator="Correlator" locator-type="Label"/>
-    </parser>
+   <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
+       <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
+       <field name="MsgBody" locator="ActivityData" locator-type="Label">
+           <parser-ref name="AccessLogParserCommon"/>
+       </field>
 
-    <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
-        <property name="HaltIfNoParser" value="false"/>
-        <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
-        <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-        <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
-        <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
-        <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
-        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
-        <property name="Topic" value="TestTopic"/>
-        <property name="JMSConnFactory" value="/jms/cf/another"/>
-                
-        <parser-ref name="SampleJMSParser"/>
-    </stream>
+       <!-- mapping common message metadata fields one by one -->
+       <field name="Correlator" locator="MsgMetadata.Correlator" locator-type="Label"/>
+       <field name="CorrelatorBytes" locator="MsgMetadata.CorrelatorBytes" locator-type="Label"/>
+       <field name="DeliveryMode" locator="MsgMetadata.DeliveryMode" locator-type="Label"/>
+       <field name="Destination" locator="MsgMetadata.Destination" locator-type="Label"/>
+       <field name="Expiration" locator="MsgMetadata.Expiration" locator-type="Label"/>
+       <field name="MessageId" locator="MsgMetadata.MessageId" locator-type="Label"/>
+       <field name="Priority" locator="MsgMetadata.Priority" locator-type="Label"/>
+       <field name="Redelivered" locator="MsgMetadata.Redelivered" locator-type="Label"/>
+       <field name="ReplyTo" locator="MsgMetadata.ReplyTo" locator-type="Label"/>
+       <field name="Timestamp" locator="MsgMetadata.Timestamp" locator-type="Label"/>
+       <field name="Type" locator="MsgMetadata.Type" locator-type="Label"/>
+       <!-- automatically puts all unmapped message metadata map entries as custom activity properties -->
+       <field name="AllRestMsgMetadataProps" locator="MsgMetadata.#" locator-type="Label"/>
+       <!-- automatically puts all resolved custom message properties map entries as custom activity properties -->
+       <field name="CustomMsgProps" locator="MsgMetadata.CustomMsgProps" locator-type="Label"/>
+       <!-- or mapping (some) custom message properties one by one-->
+       <!--<field name="CustomProp1" locator="MsgMetadata.CustomMsgProps.Property1" locator-type="Label"/>-->
+       <!--<field name="CustomProp2" locator="MsgMetadata.CustomMsgProps.Property2" locator-type="Label"/>-->
+       <!--<field name="CustomProp3" locator="MsgMetadata.CustomMsgProps.Property3" locator-type="Label"/>-->
+       <!-- and all what is left unmapped, map automatically -->
+       <!--<field name="AllRestCustomMsgProps" locator="MsgMetadata.CustomMsgProps.#" locator-type="Label"/>-->
+
+       <!-- mapping message metadata fields as map entries-->
+       <!-- automatically puts all resolved map entries as custom activity properties -->
+       <!--<field name="MsgMetadata" locator="MsgMetadata" locator-type="Label"/>-->
+   </parser>
+
+   <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
+       <property name="HaltIfNoParser" value="false"/>
+       <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
+       <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+       <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
+       <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
+       <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
+       <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+       <property name="Topic" value="TestTopic"/>
+       <property name="JMSConnFactory" value="/jms/cf/another"/>
+
+       <parser-ref name="SampleJMSParser"/>
+   </stream>
 </tnt-data-source>
 ```
 
@@ -2049,7 +2075,7 @@ complies your data format.
 
 This sample shows how to stream activity events received over JMS transport as map messages.
 
-Sample files can be found in `samples/jms-textmessage` directory.
+Sample files can be found in `samples/jms-mapmessage` directory.
 
 **NOTE:** in `run.bat/run.sh` file set variable `JMS_IMPL_LIBPATH` value to reference JMS implementation (`ActiveMQ`, `Solace`, `RabbitMQ` 
 and etc.) libraries used by your environment.
@@ -2061,7 +2087,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
+     <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
         <field name="Transport" locator="ActivityTransport" locator-type="Label"/>
         <field name="Location" locator="clientip" locator-type="Label"/>
         <field name="UserName" locator="auth" locator-type="Label"/>
@@ -2078,20 +2104,46 @@ Sample stream configuration:
         </field>
         <field name="ReasonCode" locator="response" locator-type="Label"/>
         <field name="MsgValue" locator="bytes" locator-type="Label"/>
-        <field name="Correlator" locator="Correlator" locator-type="Label"/>
+
+        <!-- mapping common message metadata fields one by one -->
+        <field name="Correlator" locator="MsgMetadata.Correlator" locator-type="Label"/>
+        <field name="CorrelatorBytes" locator="MsgMetadata.CorrelatorBytes" locator-type="Label"/>
+        <field name="DeliveryMode" locator="MsgMetadata.DeliveryMode" locator-type="Label"/>
+        <field name="Destination" locator="MsgMetadata.Destination" locator-type="Label"/>
+        <field name="Expiration" locator="MsgMetadata.Expiration" locator-type="Label"/>
+        <field name="MessageId" locator="MsgMetadata.MessageId" locator-type="Label"/>
+        <field name="Priority" locator="MsgMetadata.Priority" locator-type="Label"/>
+        <field name="Redelivered" locator="MsgMetadata.Redelivered" locator-type="Label"/>
+        <field name="ReplyTo" locator="MsgMetadata.ReplyTo" locator-type="Label"/>
+        <field name="Timestamp" locator="MsgMetadata.Timestamp" locator-type="Label"/>
+        <field name="Type" locator="MsgMetadata.Type" locator-type="Label"/>
+        <!-- automatically puts all unmapped message metadata map entries as custom activity properties -->
+        <field name="AllRestMsgMetadataProps" locator="MsgMetadata.#" locator-type="Label"/>
+        <!-- automatically puts all resolved custom message properties map entries as custom activity properties -->
+        <field name="CustomMsgProps" locator="MsgMetadata.CustomMsgProps" locator-type="Label"/>
+        <!-- or mapping (some) custom message properties one by one-->
+        <!--<field name="CustomProp1" locator="MsgMetadata.CustomMsgProps.Property1" locator-type="Label"/>-->
+        <!--<field name="CustomProp2" locator="MsgMetadata.CustomMsgProps.Property2" locator-type="Label"/>-->
+        <!--<field name="CustomProp3" locator="MsgMetadata.CustomMsgProps.Property3" locator-type="Label"/>-->
+        <!-- and all what is left unmapped, map automatically -->
+        <!--<field name="AllRestCustomMsgProps" locator="MsgMetadata.CustomMsgProps.#" locator-type="Label"/>-->
+
+        <!-- mapping message metadata fields as map entries-->
+        <!-- automatically puts all resolved map entries as custom activity properties -->
+        <!--<field name="MsgMetadata" locator="MsgMetadata" locator-type="Label"/>-->
     </parser>
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="HaltIfNoParser" value="false"/>
         <property name="java.naming.provider.url" value="tcp://localhost:61616"/>
-    <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
-    <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
-    <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
-    <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
-    <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
-    <property name="Topic" value="TestTopic"/>
-    <property name="JMSConnFactory" value="/jms/cf/another"/>
-                
+        <property name="java.naming.factory.initial" value="org.apache.activemq.jndi.ActiveMQInitialContextFactory"/>
+        <!--<property name="java.naming.security.username" value="[YOUR_USERNAME]"/>-->
+        <!--<property name="java.naming.security.principal" value="[YOUR_PRINCIPAL]"/>-->
+        <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
+        <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
+        <property name="Topic" value="TestTopic"/>
+        <property name="JMSConnFactory" value="/jms/cf/another"/>
+
         <parser-ref name="SampleJMSParser"/>
     </stream>
 </tnt-data-source>
@@ -2148,7 +2200,33 @@ Sample stream configuration:
         <field name="MsgBody" locator="ActivityData" locator-type="Label">
             <parser-ref name="SampleObjectParser"/>
         </field>
-        <field name="Correlator" locator="Correlator" locator-type="Label"/>
+
+        <!-- mapping common message metadata fields one by one -->
+        <field name="Correlator" locator="MsgMetadata.Correlator" locator-type="Label"/>
+        <field name="CorrelatorBytes" locator="MsgMetadata.CorrelatorBytes" locator-type="Label"/>
+        <field name="DeliveryMode" locator="MsgMetadata.DeliveryMode" locator-type="Label"/>
+        <field name="Destination" locator="MsgMetadata.Destination" locator-type="Label"/>
+        <field name="Expiration" locator="MsgMetadata.Expiration" locator-type="Label"/>
+        <field name="MessageId" locator="MsgMetadata.MessageId" locator-type="Label"/>
+        <field name="Priority" locator="MsgMetadata.Priority" locator-type="Label"/>
+        <field name="Redelivered" locator="MsgMetadata.Redelivered" locator-type="Label"/>
+        <field name="ReplyTo" locator="MsgMetadata.ReplyTo" locator-type="Label"/>
+        <field name="Timestamp" locator="MsgMetadata.Timestamp" locator-type="Label"/>
+        <field name="Type" locator="MsgMetadata.Type" locator-type="Label"/>
+        <!-- automatically puts all unmapped message metadata map entries as custom activity properties -->
+        <field name="AllRestMsgMetadataProps" locator="MsgMetadata.#" locator-type="Label"/>
+        <!-- automatically puts all resolved custom message properties map entries as custom activity properties -->
+        <field name="CustomMsgProps" locator="MsgMetadata.CustomMsgProps" locator-type="Label"/>
+        <!-- or mapping (some) custom message properties one by one-->
+        <!--<field name="CustomProp1" locator="MsgMetadata.CustomMsgProps.Property1" locator-type="Label"/>-->
+        <!--<field name="CustomProp2" locator="MsgMetadata.CustomMsgProps.Property2" locator-type="Label"/>-->
+        <!--<field name="CustomProp3" locator="MsgMetadata.CustomMsgProps.Property3" locator-type="Label"/>-->
+        <!-- and all what is left unmapped, map automatically -->
+        <!--<field name="AllRestCustomMsgProps" locator="MsgMetadata.CustomMsgProps.#" locator-type="Label"/>-->
+
+        <!-- mapping message metadata fields as map entries-->
+        <!-- automatically puts all resolved map entries as custom activity properties -->
+        <!--<field name="MsgMetadata" locator="MsgMetadata" locator-type="Label"/>-->
     </parser>
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">

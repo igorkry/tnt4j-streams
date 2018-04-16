@@ -39,8 +39,16 @@
         <field name="ReplyTo" locator="MsgMetadata.ReplyTo" locator-type="Label"/>
         <field name="Timestamp" locator="MsgMetadata.Timestamp" locator-type="Label"/>
         <field name="Type" locator="MsgMetadata.Type" locator-type="Label"/>
+        <!-- automatically puts all unmapped message metadata map entries as custom activity properties -->
+        <field name="AllRestMsgMetadataProps" locator="MsgMetadata.#" locator-type="Label"/>
         <!-- automatically puts all resolved custom message properties map entries as custom activity properties -->
         <field name="CustomMsgProps" locator="MsgMetadata.CustomMsgProps" locator-type="Label"/>
+        <!-- or mapping (some) custom message properties one by one-->
+        <!--<field name="CustomProp1" locator="MsgMetadata.CustomMsgProps.Property1" locator-type="Label"/>-->
+        <!--<field name="CustomProp2" locator="MsgMetadata.CustomMsgProps.Property2" locator-type="Label"/>-->
+        <!--<field name="CustomProp3" locator="MsgMetadata.CustomMsgProps.Property3" locator-type="Label"/>-->
+        <!-- and all what is left unmapped, map automatically -->
+        <!--<field name="AllRestCustomMsgProps" locator="MsgMetadata.CustomMsgProps.#" locator-type="Label"/>-->
 
         <!-- mapping message metadata fields as map entries-->
         <!-- automatically puts all resolved map entries as custom activity properties -->
