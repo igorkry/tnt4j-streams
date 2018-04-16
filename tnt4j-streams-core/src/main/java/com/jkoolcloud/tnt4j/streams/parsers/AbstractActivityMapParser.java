@@ -17,9 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,6 +49,36 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>map entry value - field/property value</li>
  * </ul>
  * <p>
+ * Using locator path token value {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN} you
+ * can make parser to get all yet parser un-touched map entries from that level and put it all as activity entity
+ * fields/properties by using map entry data as this:
+ * <ul>
+ * <li>map entry key - field/property name</li>
+ * <li>map entry value - field/property value</li>
+ * </ul>
+ * This allows user to map part of the entries manually and rest - automatically. Consider map has such entries:
+ * 
+ * <pre>
+ * entry1: key=key1, value=value1
+ * entry2: key=key2, value=value2
+ * entry3: key=key3, value=value3
+ * </pre>
+ * 
+ * then using parser configuration:
+ * 
+ * <pre>
+ * <field name="Message" locator="key2" locator-type="Label"/>
+ * <field name="AllRestMapEntries" locator="#" locator-type="Label"/>
+ * </pre>
+ * 
+ * you'll get such results:
+ * 
+ * <pre>
+ * properties Message=value2
+ * key1=value1
+ * key3=value3
+ * </pre>
+ * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
  * <ul>
@@ -78,6 +106,8 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * Constant defining key for map entry containing string representation of raw activity data.
 	 */
 	public static final String RAW_ACTIVITY_STRING_KEY = "RAW_ACTIVITY_STRING_ENTRY"; // NON-NLS
+
+	private Set<String[]> accessedPaths = new HashSet<>();
 
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
@@ -168,14 +198,14 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
 	 *
-	 * @see Utils#getMapValueByPath(String, String, java.util.Map)
+	 * @see Utils#getMapValueByPath(String, String, java.util.Map, Set)
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
-		val = Utils.getMapValueByPath(locStr, nodePathDelim, cData.getData());
+		val = Utils.getMapValueByPath(locStr, nodePathDelim, cData.getData(), accessedPaths);
 
 		return val;
 	}

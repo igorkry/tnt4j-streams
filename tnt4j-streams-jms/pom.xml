@@ -88,18 +88,24 @@
             <version>1.1.1</version>
         </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>org.apache.activemq</groupId>-->
-        <!--<artifactId>activemq-all</artifactId>-->
-        <!--<version>5.15.1</version>-->
-        <!--<scope>runtime</scope>-->
-        <!--</dependency>-->
-
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>
             <artifactId>tnt4j-streams-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.15.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.solacesystems</groupId>
+            <artifactId>sol-jms</artifactId>
+            <version>10.3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -38,6 +38,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.HexDump;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -366,7 +367,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Deserializes JSON data object ({@link String}, {@link java.io.Reader}, {@link java.io.InputStream}) into map
+	 * De-serializes JSON data object ({@link String}, {@link java.io.Reader}, {@link java.io.InputStream}) into map
 	 * structured data.
 	 *
 	 * @param jsonData
@@ -679,11 +680,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Reads all text availalbe to read from defined <tt>reader</tt>.
+	 * Reads all text available to read from defined {@code reader}.
 	 *
 	 * @param reader
 	 *            reader to use for reading
-	 * @return tests string raed from <tt>reader</tt>
+	 * @return tests string read from {@code reader}
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -1577,11 +1578,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Resolves map contained value by provided map keys path.
 	 * <p>
-	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} and path
-	 * level value is {@code 0}.
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}, path
+	 * level value is {@code 0} and accessed paths set is (@code null}.
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1590,10 +1594,37 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return path resolved map contained value
 	 *
 	 * @see #getNodePath(String, String)
-	 * @see #getMapValueByPath(String, Map, int)
+	 * @see #getMapValueByPath(String, Map, int, Set)
 	 */
 	public static Object getMapValueByPath(String path, Map<String, ?> dataMap) {
-		return getMapValueByPath(path, dataMap, 0);
+		return getMapValueByPath(path, dataMap, 0, null);
+	}
+
+	/**
+	 * Resolves map contained value by provided map keys path.
+	 * <p>
+	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} and path
+	 * level value is {@code 0}.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
+	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
+	 *
+	 * @param path
+	 *            map keys path string referencing wanted value
+	 * @param dataMap
+	 *            data map to get value from
+	 * @param accessedPaths
+	 *            set of accessed map paths
+	 * @return path resolved map contained value
+	 *
+	 * @see #getNodePath(String, String)
+	 * @see #getMapValueByPath(String, Map, int, Set)
+	 */
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap, Set<String[]> accessedPaths) {
+		return getMapValueByPath(path, dataMap, 0, accessedPaths);
 	}
 
 	/**
@@ -1603,6 +1634,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1610,13 +1644,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            data map to get value from
 	 * @param level
 	 *            path level
+	 * @param accessedPaths
+	 *            set of accessed map paths
 	 * @return path resolved map contained value
 	 *
 	 * @see #getNodePath(String, String)
-	 * @see #getMapValueByPath(String, String, Map, int)
+	 * @see #getMapValueByPath(String, String, Map, int, Set)
 	 */
-	public static Object getMapValueByPath(String path, Map<String, ?> dataMap, int level) {
-		return getMapValueByPath(path, StreamsConstants.DEFAULT_PATH_DELIM, dataMap, level);
+	public static Object getMapValueByPath(String path, Map<String, ?> dataMap, int level,
+			Set<String[]> accessedPaths) {
+		return getMapValueByPath(path, StreamsConstants.DEFAULT_PATH_DELIM, dataMap, level, accessedPaths);
 	}
 
 	/**
@@ -1626,6 +1663,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1633,13 +1673,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            path delimiter
 	 * @param dataMap
 	 *            data map to get value from
+	 * @param accessedPaths
+	 *            set of accessed map paths
 	 * @return path resolved map contained value
 	 *
 	 * @see #getNodePath(String, String)
-	 * @see #getMapValueByPath(String, String, Map, int)
+	 * @see #getMapValueByPath(String, String, Map, int, Set)
 	 */
-	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap) {
-		return getMapValueByPath(path, pathDelim, dataMap, 0);
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap,
+			Set<String[]> accessedPaths) {
+		return getMapValueByPath(path, pathDelim, dataMap, 0, accessedPaths);
 	}
 
 	/**
@@ -1647,6 +1690,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path string referencing wanted value
@@ -1656,13 +1702,16 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            data map to get value from
 	 * @param level
 	 *            path level
+	 * @param accessedPaths
+	 *            set of accessed map paths
 	 * @return path resolved map contained value
 	 *
 	 * @see #getNodePath(String, String)
-	 * @see #getMapValueByPath(String[], Map, int)
+	 * @see #getMapValueByPath(String[], Map, int, Set)
 	 */
-	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap, int level) {
-		return getMapValueByPath(getNodePath(path, pathDelim), dataMap, level);
+	public static Object getMapValueByPath(String path, String pathDelim, Map<String, ?> dataMap, int level,
+			Set<String[]> accessedPaths) {
+		return getMapValueByPath(getNodePath(path, pathDelim), dataMap, level, accessedPaths);
 	}
 
 	/**
@@ -1672,17 +1721,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path tokens array referencing wanted value
 	 * @param dataMap
 	 *            data map to get value from
+	 * @param accessedPaths
+	 *            set of accessed map paths
 	 * @return path resolved map contained value
 	 *
-	 * @see #getMapValueByPath(String[], Map, int)
+	 * @see #getMapValueByPath(String[], Map, int, Set)
 	 */
-	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap) {
-		return getMapValueByPath(path, dataMap, 0);
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap, Set<String[]> accessedPaths) {
+		return getMapValueByPath(path, dataMap, 0, accessedPaths);
 	}
 
 	/**
@@ -1690,6 +1744,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_UNMAPPED_TOKEN}, then
+	 * all yet un-accessed (not contained in {@code accessedPaths} set) map entries are returned for that path level.
 	 *
 	 * @param path
 	 *            map keys path tokens array referencing wanted value
@@ -1697,30 +1754,39 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            data map to get value from
 	 * @param level
 	 *            path level
+	 * @param accessedPaths
+	 *            set of accessed map paths
 	 * @return path resolved map contained value
 	 */
 	@SuppressWarnings("unchecked")
-	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap, int level) {
+	public static Object getMapValueByPath(String[] path, Map<String, ?> dataMap, int level,
+			Set<String[]> accessedPaths) {
 		if (ArrayUtils.isEmpty(path) || dataMap == null) {
 			return null;
 		}
 
+		Object val;
 		if (StreamsConstants.MAP_NODE_TOKEN.equals(path[level])) {
-			return dataMap;
-		}
+			val = dataMap;
+		} else if (StreamsConstants.MAP_UNMAPPED_TOKEN.equals(path[level])) {
+			return getUnaccessedMapEntries(accessedPaths, dataMap);
+		} else {
+			val = dataMap.get(path[level]);
 
-		Object val = dataMap.get(path[level]);
-
-		if (level < path.length - 1 && val instanceof Map) {
-			val = getMapValueByPath(path, (Map<String, ?>) val, ++level);
-		} else if (level < path.length - 2 && val instanceof List) {
-			try {
-				int lii = Integer.parseInt(getItemIndexStr(path[level + 1]));
-				val = getMapValueByPath(path, (Map<String, ?>) ((List<?>) val).get(lii), level + 2);
-			} catch (NumberFormatException exc) {
+			if (level < path.length - 1 && val instanceof Map) {
+				val = getMapValueByPath(path, (Map<String, ?>) val, ++level, accessedPaths);
+			} else if (level < path.length - 2 && val instanceof List) {
+				try {
+					int lii = Integer.parseInt(getItemIndexStr(path[level + 1]));
+					val = getMapValueByPath(path, (Map<String, ?>) ((List<?>) val).get(lii), level + 2, accessedPaths);
+				} catch (NumberFormatException exc) {
+				}
 			}
 		}
 
+		if (accessedPaths != null) {
+			accessedPaths.add(path);
+		}
 		return val;
 	}
 
@@ -1728,12 +1794,105 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return indexToken.replaceAll("\\D+", ""); // NON-NLS
 	}
 
+	private static Map<String, ?> getUnaccessedMapEntries(Set<String[]> accessedPaths, Map<String, ?> dataMap) {
+		if (CollectionUtils.isEmpty(accessedPaths)) {
+			return dataMap;
+		}
+
+		Map<String, ?> unaccessedMap = copyMap(dataMap);
+
+		for (String[] ap : accessedPaths) {
+			removeMapValueByPath(ap, unaccessedMap);
+		}
+
+		return unaccessedMap;
+	}
+
 	/**
-	 * Extracts variable name from provided variable placeholder string <tt>varPlh</tt>.
+	 * Removed map contained entry by provided map keys path.
+	 * <p>
+	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then all
+	 * map entries at that path level is removed, e.g. path {@code "*"} is equivalent to {@link java.util.Map#clear()}.
+	 * 
+	 * @param path
+	 *            map keys path tokens array referencing wanted entry
+	 * @param dataMap
+	 *            data map to remove entry from
+	 * @return removed entry value, or {@code null} if no entry has been removed
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object removeMapValueByPath(String[] path, Map<String, ?> dataMap) {
+		if (ArrayUtils.isEmpty(path) || dataMap == null) {
+			return null;
+		}
+
+		Object val = null;
+		String lastLevel = path[path.length - 1];
+		String[] pathMinusOne = Arrays.copyOf(path, path.length - 1);
+
+		Object valueBeforeLast;
+		if (pathMinusOne.length == 0) {
+			valueBeforeLast = dataMap;
+		} else {
+			valueBeforeLast = getMapValueByPath(pathMinusOne, dataMap, 0, null);
+		}
+
+		if (valueBeforeLast instanceof Map) {
+			if (lastLevel == StreamsConstants.MAP_NODE_TOKEN) {
+				val = new HashMap<>((Map<String, ?>) valueBeforeLast); // return removed branch
+				((Map<String, ?>) valueBeforeLast).clear();
+			} else {
+				val = ((Map<String, ?>) valueBeforeLast).remove(lastLevel);
+			}
+
+			// clear empty branch
+			if (MapUtils.isEmpty((Map<String, ?>) valueBeforeLast)) {
+				removeMapValueByPath(pathMinusOne, dataMap);
+			}
+		}
+
+		return val;
+	}
+
+	/**
+	 * Makes a true copy of provided {@code oMap} instance. Map copy instance entries do not have references to original
+	 * map, so altering copy map entries will not affect original map.
+	 * <p>
+	 * Note: copied map is always a {@link java.util.HashMap}.
+	 *
+	 * @param oMap
+	 *            original map instance to copy
+	 * @param <K>
+	 *            map key type
+	 * @param <V>
+	 *            map value type
+	 * @return copy of {@code oMap}, or {@code null} if original map is {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	public static <K, V> Map<K, V> copyMap(Map<K, V> oMap) {
+		if (oMap == null) {
+			return null;
+		}
+
+		Map<K, V> cMap = new HashMap<>(oMap.size());
+
+		for (Map.Entry<K, V> ome : oMap.entrySet()) {
+			V oVal = ome.getValue();
+			if (oVal instanceof Map) {
+				oVal = (V) copyMap((Map<K, V>) oVal);
+			}
+			cMap.put(ome.getKey(), oVal);
+		}
+
+		return cMap;
+	}
+
+	/**
+	 * Extracts variable name from provided variable placeholder string {@code varPlh}.
 	 *
 	 * @param varPlh
 	 *            variable placeholder string
-	 * @return variable name found within placeholder string, or <tt>varPlh</tt> value if it is empty or does not start
+	 * @return variable name found within placeholder string, or {@code varPlh} value if it is empty or does not start
 	 *         with {@value #VAR_EXP_START_TOKEN}
 	 */
 	public static String getVarName(String varPlh) {
@@ -1747,11 +1906,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks if <tt>array</tt> and all its elements are empty.
+	 * Checks if {@code array} and all its elements are empty.
 	 *
 	 * @param array
 	 *            array instance to check
-	 * @return {@code true} if <tt>array</tt> is empty or all its elements are empty, {@code false} - otherwise
+	 * @return {@code true} if {@code array} is empty or all its elements are empty, {@code false} - otherwise
 	 *
 	 * @see #isEmpty(Object)
 	 */
@@ -1770,11 +1929,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks if <tt>collection</tt> and all its elements are empty.
+	 * Checks if {@code collection} and all its elements are empty.
 	 *
 	 * @param collection
 	 *            collection instance to check
-	 * @return {@code true} if <tt>collection</tt> is empty or all its elements are empty, {@code false} - otherwise
+	 * @return {@code true} if {@code collection} is empty or all its elements are empty, {@code false} - otherwise
 	 *
 	 * @see #isEmpty(Object)
 	 */
@@ -1793,7 +1952,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Checks if <tt>obj</tt> is empty considering when it is:
+	 * Checks if {@code obj} is empty considering when it is:
 	 * <ul>
 	 * <li>{@link String} - is {@code null} or equal to {@code ""}</li>
 	 * <li>{@code Array} - is {@code null} or length is {@code 0}</li>
@@ -1803,7 +1962,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param obj
 	 *            object to check
-	 * @return {@code true} if <tt>obj</tt> is empty, {@code false} - otherwise
+	 * @return {@code true} if {@code obj} is empty, {@code false} - otherwise
 	 */
 	public static boolean isEmpty(Object obj) {
 		if (obj == null) {
@@ -1823,7 +1982,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Resolves {@link java.io.InputStream} <tt>is</tt> referenced file name path.
+	 * Resolves {@link java.io.InputStream} {@code is} referenced file name path.
 	 * <p>
 	 * Supported {@link java.io.InputStream} types to resolve file path:
 	 * <ul>
@@ -1834,7 +1993,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param is
 	 *            input stream instance to resolve file path
-	 * @return the path of the <tt>is</tt> referenced file
+	 * @return the path of the {@code is} referenced file
 	 */
 	public static String resolveInputFilePath(InputStream is) {
 		if (is instanceof FileInputStream) {
@@ -1886,14 +2045,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Resolves {@link java.io.Reader} <tt>rdr</tt> referenced file name path.
+	 * Resolves {@link java.io.Reader} {@code rdr} referenced file name path.
 	 * <p>
 	 * Reader referenced file path can be resolved only if reader lock object is instance of {@link java.io.InputStream}
 	 * and falls under {@link #resolveInputFilePath(java.io.InputStream)} conditions.
 	 *
 	 * @param rdr
 	 *            reader instance to resolve file path
-	 * @return the path of the <tt>rdr</tt> referenced file
+	 * @return the path of the {@code rdr} referenced file
 	 *
 	 * @see #resolveInputFilePath(java.io.InputStream)
 	 */
@@ -1913,12 +2072,12 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Resolves Java object (POJO) instance field value defined by <tt>dataObj</tt> fields names <tt>path<tt> array.
+	 * Resolves Java object (POJO) instance field value defined by {@code dataObj} fields names {@code path} array.
 	 * <p>
-	 * If <tt>path</tt> level resolved value is primitive type ({@link Class#isPrimitive()}), then value resolution
+	 * If {@code path} level resolved value is primitive type ({@link Class#isPrimitive()}), then value resolution
 	 * terminates at that level.
 	 * <p>
-	 * Value resolution also terminates if path element index <tt>i</tt> is {@code i >= path.length}.
+	 * Value resolution also terminates if path element index {@code i} is {@code i >= path.length}.
 	 *
 	 * @param path
 	 *            fields path as array of objects field names
@@ -1955,14 +2114,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Converts provided object type <tt>value</tt> to a Boolean.
+	 * Converts provided object type {@code value} to a Boolean.
 	 * <p>
-	 * <tt>value</tt> will be converted to real boolean value only if string representation of it is {@code "true"} or
+	 * {@code value} will be converted to real boolean value only if string representation of it is {@code "true"} or
 	 * {@code "false"} (case insensitive). In all other cases {@code null} is returned.
 	 *
 	 * @param value
 	 *            object value to convert to a Boolean
-	 * @return boolean value resolved from provided <tt>value</tt>, or {@code null} if <tt>value</tt> does not represent
+	 * @return boolean value resolved from provided {@code value}, or {@code null} if {@code value} does not represent
 	 *         boolean
 	 */
 	public static Boolean getBoolean(Object value) {
@@ -1984,7 +2143,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Log a given resource bundle message with a specified severity and {@link java.lang.Throwable} details.
 	 * <p>
-	 * If <tt>logger</tt> log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
+	 * If {@code logger} log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
 	 * trace is logged. In other cases only exception messages are logged.
 	 *
 	 * @param logger
@@ -2015,7 +2174,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Log a given string message with a specified severity and {@link java.lang.Throwable} details.
 	 * <p>
-	 * If <tt>logger</tt> log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
+	 * If {@code logger} log level is set to {@link com.jkoolcloud.tnt4j.core.OpLevel#TRACE}, then full exception stack
 	 * trace is logged. In other cases only exception messages are logged.
 	 *
 	 * @param logger
@@ -2041,7 +2200,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Converts a provided string value <tt>str</tt> to a boolean value.
+	 * Converts a provided string value {@code str} to a boolean value.
 	 * 
 	 * <ul>
 	 * <li>{@code 'true'}, {@code 'on'}, {@code 'yes'}, {@code 't'}, {@code 'y'} (case insensitive) will return

@@ -52,6 +52,11 @@ public final class StreamsConstants {
 	public static final String MAP_NODE_TOKEN = "*"; // NON-NLS
 
 	/**
+	 * The constant for locator path node token meaning map entries not mapped manually.
+	 */
+	public static final String MAP_UNMAPPED_TOKEN = "#"; // NON-NLS
+
+	/**
 	 * Property name tokens delimiter for properties having multilevel map value.
 	 */
 	public static final String MAP_PROP_NAME_TOKENS_DELIM = "_"; // NON-NLS

@@ -37,15 +37,15 @@ public class UtilsTest {
 
 	@Test
 	public void testBase64Encode() {
-		final byte[] resultDecode = Utils.base64Decode(TEST.getBytes());
-		final byte[] resultEncode = Utils.base64Encode(resultDecode);
+		byte[] resultDecode = Utils.base64Decode(TEST.getBytes());
+		byte[] resultEncode = Utils.base64Encode(resultDecode);
 		assertArrayEquals(resultEncode, TEST.getBytes());
 	}
 
 	@Test
 	public void testBase64Decode() {
-		final byte[] resultEncode = Utils.base64Encode(TEST.getBytes());
-		final byte[] resultDecode = Utils.base64Decode(resultEncode);
+		byte[] resultEncode = Utils.base64Encode(TEST.getBytes());
+		byte[] resultDecode = Utils.base64Decode(resultEncode);
 		assertArrayEquals(resultDecode, TEST.getBytes());
 	}
 
@@ -63,7 +63,7 @@ public class UtilsTest {
 		Map<String, OpType> opTypes = new HashMap<>(opTypeCount);
 
 		for (int i = 0; i <= opTypeCount; i++) {
-			final OpType opType = Utils.mapOpType(i);
+			OpType opType = Utils.mapOpType(i);
 			if (opType == OpType.STOP) {
 				////////////////////////////
 				opTypes.put("END", opType); // NON-NLS
@@ -73,7 +73,7 @@ public class UtilsTest {
 			}
 		}
 
-		final Set<Map.Entry<String, OpType>> entrySet = opTypes.entrySet();
+		Set<Map.Entry<String, OpType>> entrySet = opTypes.entrySet();
 		for (Map.Entry<String, OpType> entry : entrySet) {
 			assertEquals(entry.getValue(), Utils.mapOpType(entry.getKey()));
 		}
@@ -81,11 +81,11 @@ public class UtilsTest {
 
 	@Test
 	public void testIsWildcardFileName() {
-		final String N_WILDC = "c:/Users/Default.migrated/AppData/Local/Microsoft/Windows/INetCache/"; // NON-NLS
-		final String WILDC = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
-		final String WILDC2 = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
-		final String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*"; // NON-NLS
-		final String EMPTY = "";
+		String N_WILDC = "c:/Users/Default.migrated/AppData/Local/Microsoft/Windows/INetCache/"; // NON-NLS
+		String WILDC = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
+		String WILDC2 = "c:/Windows/schemas/TSWorkSpace/*.*"; // NON-NLS
+		String WILDC3 = "c:/Windows/schemas/TSWorkSpa?e/*.*"; // NON-NLS
+		String EMPTY = "";
 
 		assertFalse(Utils.isWildcardString(N_WILDC));
 		assertTrue(Utils.isWildcardString(WILDC));
@@ -96,13 +96,14 @@ public class UtilsTest {
 
 	@Test
 	public void testGetFirstNewer() throws Exception {
-		final int count = 5;
+		int count = 5;
 		Long date = null;
 		List<File> files = new ArrayList<>();
 		for (int i = 0; i <= count; i++) {
 			File tempFile = File.createTempFile("TEST", ".TST");
-			if (count / 2 >= i)
+			if (count / 2 >= i) {
 				date = (new Date()).getTime();
+			}
 			files.add(tempFile);
 			Thread.sleep(300);
 		}
@@ -194,7 +195,7 @@ public class UtilsTest {
 		result = Utils.getTags(expected);
 		assertArrayEquals(expected, result);
 
-		final List<String> list = Arrays.asList(expected);
+		List<String> list = Arrays.asList(expected);
 		result = Utils.getTags(list);
 		assertArrayEquals(expected, result);
 
@@ -204,7 +205,6 @@ public class UtilsTest {
 
 	@Test
 	public void testCleanActivityData() {
-
 		// {\"sinkName\":\"TNT4JStreams\",\"chanelName\":\"memoryChannel\",\"headers\":{},\"body\":\"127.0.0.1
 		// - - [26/Nov/2015:16:26:21 +0200] \\\"POST
 		// /gvm_java/gvm/services/OperatorWebService HTTP/1.1\\\" 200 380\\r\"}
@@ -213,6 +213,34 @@ public class UtilsTest {
 		String expected = "line"; // NON-NLS
 		// assertEquals(expected, Utils.cleanActivityData(testStrig));
 		// assertEquals(expected, Utils.cleanActivityData(testStrig2));
+	}
+
+	@Test
+	public void testRemoveMapEntryByPath() {
+		Map<String, Object> root = new HashMap<>();
+
+		root.put("RootKey", "RootValue");
+
+		Map<String, Object> level1 = new HashMap<>();
+		level1.put("Level1Key", "Level1Value");
+		root.put("RootBranch", level1);
+
+		Map<String, Object> level2 = new HashMap<>();
+		level2.put("Level2Key", "Level2Value");
+		level1.put("Level1Branch", level2);
+
+		Set<String[]> accessedPaths = new HashSet<>();
+		System.out.println(Utils.getMapValueByPath("RootBranch.Level1Key", root, accessedPaths));
+		System.out.println(Utils.getMapValueByPath("RootBranch.Level1Branch", root, accessedPaths));
+		System.out.println(Utils.getMapValueByPath("RootBranch.Level1Branch.Level2Key", root, accessedPaths));
+		Object finalMapObj = Utils.getMapValueByPath("#", root, accessedPaths);
+
+		assertNotNull(finalMapObj);
+
+		Map<String, Object> finalMap = (Map<String, Object>) finalMapObj;
+
+		assertEquals(1, finalMap.size());
+		assertEquals("RootValue", finalMap.get("RootKey"));
 	}
 
 }

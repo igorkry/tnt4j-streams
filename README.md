@@ -1974,7 +1974,8 @@ how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-mapmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
+**NOTE:** in `run.bat/run.sh` file set variable `JMS_IMPL_LIBPATH` value to reference JMS implementation (`ActiveMQ`, `Solace`, `RabbitMQ` 
+and etc.) libraries used by your environment.
 
 Sample stream configuration:
 ```xml
@@ -2050,7 +2051,8 @@ This sample shows how to stream activity events received over JMS transport as m
 
 Sample files can be found in `samples/jms-textmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
+**NOTE:** in `run.bat/run.sh` file set variable `JMS_IMPL_LIBPATH` value to reference JMS implementation (`ActiveMQ`, `Solace`, `RabbitMQ` 
+and etc.) libraries used by your environment.
 
 Sample stream configuration:
 ```xml
@@ -2113,7 +2115,8 @@ also shows how to use stacked parsers technique to extract message payload data.
 
 Sample files can be found in `samples/jms-objectmessage` directory.
 
-**NOTE:** in `jms` module `pom.xml` file uncomment `activemq-all` dependency if you want to use ActiveMQ as JMS service
+**NOTE:** in `run.bat/run.sh` file set variable `JMS_IMPL_LIBPATH` value to reference JMS implementation (`ActiveMQ`, `Solace`, `RabbitMQ` 
+and etc.) libraries used by your environment.
 
 Sample stream configuration:
 ```xml
@@ -5161,10 +5164,33 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
-**NOTE:** Using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
+**NOTE:** using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
 as activity entity fields/properties by using map entry data as this:
 * map entry key  - field/property name
 * map entry value - field/property value 
+
+**NOTE:** using locator path token value `#` (e.g. `locator="#"`) you can make parser to get all yet parser un-touched map entries from that 
+level and put it all as activity entity fields/properties by using map entry data as this:
+* map entry key  - field/property name
+* map entry value - field/property value
+
+This allows user to map part of the entries manually and rest - automatically. Consider map has such entries:
+```
+entry1: key=key1, value=value1
+entry2: key=key2, value=value2
+entry3: key=key3, value=value3
+```
+then using parser configuration:
+```xml
+<field name="Message" locator="key2" locator-type="Label"/> 
+<field name="AllRestMapEntries" locator="#" locator-type="Label"/>      
+```
+you'll get such results:
+```properties
+Message=value2
+key1=value1
+key3=value3
+```
 
 #### Activity JSON parser
 

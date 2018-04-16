@@ -19,12 +19,21 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
+import javax.jms.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.JMSStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.solacesystems.jms.SolJmsUtility;
+import com.solacesystems.jms.SupportedProperty;
 
 /**
  * @author akausinis
@@ -51,4 +60,68 @@ public class JMSStreamTest {
 	// input.startStream();
 	// assertTrue(input.jmsDataReceiver.isAlive());
 	// }
+
+	@Test
+	@Ignore("integration test")
+	public void testSolaceCreate() throws Exception {
+		String[] args = { "smf://mr-91b692dvft.messaging.solace.cloud:21248", "solace-cloud-client@msgvpn-91b693373t",
+				"28ct4kn3vt44knm8nf0soghbg0" };
+
+		String CONNECTION_FACTORY_JNDI_NAME = "/jms/cf/another";
+
+		String[] split = args[1].split("@");
+
+		String host = args[0];
+		String vpnName = split[1];
+		String username = split[0];
+		String password = args[2];
+
+		Hashtable<String, Object> env = new Hashtable<>();
+		env.put(InitialContext.INITIAL_CONTEXT_FACTORY, "com.solacesystems.jndi.SolJNDIInitialContextFactory");
+		env.put(InitialContext.PROVIDER_URL, host);
+		env.put(Context.SECURITY_PRINCIPAL, username + '@' + vpnName);
+		env.put(Context.SECURITY_CREDENTIALS, password);
+
+		InitialContext initialContext = new InitialContext(env);
+		ConnectionFactory connectionFactory = (ConnectionFactory) initialContext.lookup(CONNECTION_FACTORY_JNDI_NAME);
+
+		Connection connection = connectionFactory.createConnection();
+		Session session = connection.createSession(false, SupportedProperty.SOL_CLIENT_ACKNOWLEDGE);
+
+		String TOPIC_NAME = "Marius";
+
+		TextMessage message = session.createTextMessage("Hello world!");
+
+		Destination q1 = (Destination) initialContext.lookup("JMS\\T1");
+		Destination q2 = (Destination) initialContext.lookup("JMS\\T2");
+		MessageProducer producer = session.createProducer(q1);
+
+		final CountDownLatch latch = new CountDownLatch(1);
+		MessageConsumer messageConsumer = session.createConsumer(q1);
+
+		messageConsumer.setMessageListener(new MessageListener() {
+			@Override
+			public void onMessage(Message message) {
+				try {
+					if (message instanceof TextMessage) {
+						System.out.printf("TextMessage received: '%s'%n", ((TextMessage) message).getText());
+					} else {
+						System.out.println("Message received.");
+					}
+					System.out.printf("Message Content:%n%s%n", SolJmsUtility.dumpMessage(message));
+					latch.countDown(); // unblock the main thread
+				} catch (JMSException ex) {
+					System.out.println("Error processing incoming message.");
+					ex.printStackTrace();
+				}
+			}
+		});
+
+		connection.start();
+
+		producer.send(q1, message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+		producer.send(q2, message, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
+
+		latch.await();
+	}
 }

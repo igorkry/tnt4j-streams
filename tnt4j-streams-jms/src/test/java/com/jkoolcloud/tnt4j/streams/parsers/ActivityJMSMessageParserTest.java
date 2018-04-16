@@ -26,8 +26,14 @@ import javax.jms.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jkoolcloud.tnt4j.streams.TestUtils;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.solacesystems.jms.message.SolTextMessage;
 
 /**
  * @author akausinis
@@ -90,6 +96,30 @@ public class ActivityJMSMessageParserTest extends ActivityMapParserTest {
 		assertNotEquals("Core resource bundle entry not found", keyCore, brbStr);
 		rbs1 = StreamsResources.getString(JMSStreamConstants.RESOURCE_BUNDLE_NAME, keyCore);
 		assertEquals("Core resource bundle entry found in jms", brbStr, rbs1);
+	}
+
+	@Test
+	public void testSolaceTextMessage() throws Exception {
+		TextMessage message = new SolTextMessage();
+
+		message.setJMSDeliveryMode(1);
+		message.setJMSDestination(new Queue() {
+			@Override
+			public String getQueueName() throws JMSException {
+				return "VMSTQ.TEST.REST.VENOM.DEV.00";
+			}
+		});
+		// ActivityField field1 = new ActivityField("ALL");
+		ActivityField field2 = new ActivityField("DESTINATION");
+		ActivityField field3 = new ActivityField("ALL_LEFT");
+		// field1.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "*"));
+		field2.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "MsgMetadata.Destination"));
+		field3.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "#"));
+		// parser.addField(field1);
+		parser.addField(field2);
+		parser.addField(field3);
+		ActivityInfo ai = parser.parse(new TestUtils.SimpleTestStream(), message);
+		assertNull(ai.getFieldValue("MsgMetadata.Destination"));
 	}
 
 }
