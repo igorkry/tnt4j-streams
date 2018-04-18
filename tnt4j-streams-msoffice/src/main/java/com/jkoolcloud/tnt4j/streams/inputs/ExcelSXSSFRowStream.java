@@ -197,11 +197,13 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	 *             if buffer queue is not initialized
 	 */
 	protected boolean checkAndAddToInputToBuffer(Row row, int rowNumber) throws IllegalStateException {
+		// NOTE: adding 1, since rowNumber is 0 based while for user convenience range starts from 1.
+		int rRowNum = rowNumber + 1;
 		// must pass rowNumber cause inputData.getRowNum() iterates whole sheet
-		if (rowRange == null || rowRange.inRange(rowNumber)) {
+		if (rowRange == null || rowRange.inRange(rRowNum)) {
 			return addInputToBuffer(row);
 		}
-		if (rowRange.getTo().compareTo(rowNumber) < 0) {
+		if (rowRange.getTo().compareTo(rRowNum) < 0) {
 			offerDieMarker();
 		}
 

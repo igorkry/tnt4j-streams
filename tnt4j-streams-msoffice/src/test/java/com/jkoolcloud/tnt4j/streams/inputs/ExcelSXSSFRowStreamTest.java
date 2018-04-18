@@ -59,7 +59,8 @@ public class ExcelSXSSFRowStreamTest {
 	public void testBigXSSFFileLimit10Records() throws Exception {
 		ExcelSXSSFRowStream stream = spy(new ExcelSXSSFRowStream());
 
-		Map<String, String> props = new HashMap<>(2);
+		Map<String, String> props = new HashMap<>(3);
+		props.put(StreamProperties.PROP_FILENAME, "./samples/xlsx-large/WA_Fn-UseC_-IT-Help-Desk.xlsx");
 		props.put(MsOfficeStreamProperties.PROP_SHEETS, "WA_Fn-UseC_-IT-Help-Desk");
 		props.put(StreamProperties.PROP_RANGE_TO_STREAM, "2:11");
 
