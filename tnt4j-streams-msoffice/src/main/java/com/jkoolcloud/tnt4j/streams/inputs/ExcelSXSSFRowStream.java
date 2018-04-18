@@ -202,7 +202,10 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 		// must pass rowNumber cause inputData.getRowNum() iterates whole sheet
 		if (rowRange == null || rowRange.inRange(rRowNum)) {
 			return addInputToBuffer(row);
+		} else {
+			skipFilteredActivities();
 		}
+
 		if (rowRange.getTo().compareTo(rRowNum) < 0) {
 			offerDieMarker();
 		}
