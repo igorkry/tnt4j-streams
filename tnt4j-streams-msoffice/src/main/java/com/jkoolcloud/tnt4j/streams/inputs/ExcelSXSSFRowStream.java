@@ -200,7 +200,7 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 		// NOTE: adding 1, since rowNumber is 0 based while for user convenience range starts from 1.
 		int rRowNum = rowNumber + 1;
 		// must pass rowNumber cause inputData.getRowNum() iterates whole sheet
-		if (rowRange == null || rowRange.inRange(rRowNum)) {
+		if (IntRange.inRange(rowRange, rRowNum)) {
 			return addInputToBuffer(row);
 		} else {
 			skipFilteredActivities();

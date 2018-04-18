@@ -104,4 +104,19 @@ public class IntRange extends Range<Integer> {
 
 		return new IntRange(from, to);
 	}
+
+	/**
+	 * Checks if number value is in range bounds inclusive using provided range instance {@code range}.
+	 *
+	 * @param range
+	 *            range instance to use for checking
+	 * @param num
+	 *            number value to check
+	 * @return flag indicating number is in range bounds inclusive, or {@code range} is {@code null}
+	 *
+	 * @see #inRange(Integer)
+	 */
+	public static boolean inRange(IntRange range, Integer num) {
+		return range == null || range.inRange(num);
+	}
 }

@@ -371,7 +371,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			while ((line = lnr.readLine()) != null && !isInputEnded()) {
 				lastReadTime = System.currentTimeMillis();
 				lineNumber = lnr.getLineNumber();
-				if (StringUtils.isNotEmpty(line) && inRange(lineNumber)) {
+				if (StringUtils.isNotEmpty(line) && IntRange.inRange(lineRange, lineNumber)) {
 					addActivityDataLine(line, sb, lineNumber);
 				} else {
 					skipFilteredActivities();
@@ -381,10 +381,6 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			if (sb.length() > 0) {
 				addLineToBuffer(sb, lineNumber);
 			}
-		}
-
-		private boolean inRange(int lineNumber) {
-			return lineRange == null || lineRange.inRange(lineNumber);
 		}
 
 		private void addActivityDataLine(String line, StringBuilder sb, int lineNumber) {

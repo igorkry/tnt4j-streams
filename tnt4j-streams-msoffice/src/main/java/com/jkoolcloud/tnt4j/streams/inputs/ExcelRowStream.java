@@ -136,7 +136,7 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 			}
 
 			activityPosition++;
-			if (!inRange(activityPosition)) {
+			if (!IntRange.inRange(rowRange, activityPosition)) {
 				// skip row if it is not in range
 				skipFilteredActivities();
 				rows.next();
@@ -152,9 +152,5 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 
 			return row;
 		}
-	}
-
-	private boolean inRange(int lineNumber) {
-		return rowRange == null || rowRange.inRange(lineNumber);
 	}
 }
