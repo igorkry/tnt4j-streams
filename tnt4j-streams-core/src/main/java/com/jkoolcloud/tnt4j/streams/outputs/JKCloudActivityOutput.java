@@ -44,8 +44,8 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * <ul>
  * <li>ResolveServerFromDNS - flag indicating whether to resolve activity entity host name/IP from DNS server. Default
  * value - {@code false}. (Optional)</li>
- * <li>TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging
- * data from both parent and child entity fields. Default value - {@code false}. (Optional)</li>
+ * <li>SplitRelatives - flag indicating whether to send activity entity child entities independently merging data from
+ * both parent and child entity fields into produced entity. Default value - {@code false}. (Optional)</li>
  * <li>BuildSourceFQNFromStreamedData - flag indicating whether to set streamed activity entity {@link Source} FQN build
  * from activity fields data instead of default on configured in 'tnt4j.properties'. Default value - {@code true}.
  * (Optional)</li>
@@ -63,7 +63,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}";
 
 	private boolean resolveServer = false;
-	private boolean turnOutActivityChildren = false;
+	private boolean splitRelatives = false;
 	private boolean buildFQNFromData = true;
 	private String sourceFQN = null;
 
@@ -95,8 +95,9 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 
 		if (OutputProperties.PROP_RESOLVE_SERVER.equalsIgnoreCase(name)) {
 			resolveServer = Utils.toBoolean((String) value);
-		} else if (OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
-			turnOutActivityChildren = Utils.toBoolean((String) value);
+		} else if (OutputProperties.PROP_SPLIT_RELATIVES.equalsIgnoreCase(name)
+				|| OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
+			splitRelatives = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_BUILD_FQN_FROM_DATA.equalsIgnoreCase(name)) {
 			buildFQNFromData = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_SOURCE_FQN.equalsIgnoreCase(name)) {
@@ -116,7 +117,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 		ai.resolveServer(resolveServer);
 		String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
-		if (turnOutActivityChildren && ai.hasChildren()) {
+		if (splitRelatives && ai.hasChildren()) {
 			for (ActivityInfo cai : ai.getChildren()) {
 				cai.merge(ai);
 				Trackable t = cai.buildTrackable(tracker);

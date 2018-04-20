@@ -31,7 +31,7 @@
         <field name="EventType" value="ACTIVITY"/>
         <field name="Correlator" value="/Workflow/processId" locator-type="Label"/>
         <embedded-activity name="Feedback" locator="/Workflow/XMOFTSFeedBackList/XMOFTSFeedBack" locator-type="Label">
-            <parser-ref name="XMOFTSFeedBackParser" aggregation="Join"/>
+            <parser-ref name="XMOFTSFeedBackParser" aggregation="Relate"/>
         </embedded-activity>
     </parser>
 
@@ -44,14 +44,14 @@
         <!--<property name="UserName" value="[USER_NAME]"/>-->
         <!--<property name="Password" value="[USER_PASS]"/>-->
 
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
 
         <parser-ref name="MFTWorkflowParser"/>
     </stream>
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-wmq/samples/mft-tracking/msg_arch_dest_list_fixit.xml"/>-->
-    <!--<property name="TurnOutActivityChildren" value="true"/>-->
+    <!--<property name="SplitRelatives" value="true"/>-->
 
     <!--<parser-ref name="MFTWorkflowParser"/>-->
     <!--</stream>-->

@@ -343,13 +343,13 @@ sample:
         <.../>
         <embedded-activity name="InternalActivity" locator="OtherActivityData" locator-type="Label">
             <parser-ref name="AccessLogParserExt" aggregation="Merge"/>
-            <parser-ref name="AccessLogParserCommon" aggregation="Join"/>
+            <parser-ref name="AccessLogParserCommon" aggregation="Relate"/>
         </embedded-activity>
         <.../>
     </parser>
 
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
-        <!--<property name="TurnOutActivityChildren" value="true"/>-->
+        <!--<property name="SplitRelatives" value="true"/>-->
         <.../>
         <parser-ref name="SampleJMSParser"/>
     </stream>
@@ -494,13 +494,14 @@ Stacked parsers sample configuration tag `<parser-ref>` has attribute `aggregati
 data aggregation into parent activity. Attribute has two possible values:
 * `Merge` - resolved activity entity fields are merged into parent activity. **NOTE:** Parent activity entity will contain all fields 
 processed by all stacked parsers. This is default value when attribute `aggregation` definition is missing in configuration.
-* `Join` - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity 
-having collection of child activities resolved by stacked parsers.
+* `Relate` - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity 
+having collection of child activities resolved by stacked parsers. **NOTE:** this value has alias `Join` left for backward compatibility, 
+but it is not recommended to use it anymore and should be changed right away for existing configurations.
 
-For a `Join` type aggregation there is related stream output parameter `TurnOutActivityChildren`:
+For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
 ```xml
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
         <.../>
         <parser-ref name="SampleJMSParser"/>
 
@@ -514,7 +515,7 @@ or
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <java-object name="StreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
     </java-object>
     <.../>
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
@@ -524,8 +525,13 @@ or
     </stream>
 </tnt-data-source>
 ```
-It allows to sent as many activity entities to JKool as there are child activity entities resolved by stacked parsers, **merging** those 
-child activity entities with data from parent activity entity.
+It allows to send as many activity entities to JKool as there are child activity entities resolved by stacked parsers, **merging** those 
+child activity entities data with parent activity entity data. 
+
+This is useful when streamed data is aggregated in one data package, like JSON/XML data having some header values and array of payload 
+entries (see `mft-tracking` sample XML's), but you need only those payload entries maintaining some header data contained values to be set 
+to JKool. Or like in `mft_fte` sample, when MFT `transaction` progress event `transferSet` node having `source` and `destination` 
+definitions and you need to split them into separate events maintaining some `transaction` data values.  
 
 ### Field value transformations
 
@@ -3862,7 +3868,7 @@ Sample stream configuration:
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="MsgBody" locator="$" locator-type="Label" transparent="true" split="true">
-            <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
+            <parser-ref name="CollectdStatsDataParser" aggregation="Relate"/>
         </field>
         <field name="EventType" value="Activity"/>
         <field name="ApplName" value="collectd"/>
@@ -3938,7 +3944,7 @@ Sample stream configuration:
         <property name="ActivityDelim" value="EOF"/>
 
         <field name="MsgBody" locator="$.data" locator-type="Label" transparent="true" split="true">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
+            <parser-ref name="SnapshotParser" aggregation="Relate"/>
         </field>
 
         <field name="EventType" value="Activity"/>
@@ -4553,8 +4559,9 @@ Default value - `null`. (Optional)
  * `RetryStateCheck` - flag indicating whether tracker state check should be perform repeatedly. If `false`, then streaming process exits with 
  `java.lang.IllegalStateException`. Default value - `false`. (Optional)
  * `ResolveServerFromDNS` - flag indicating whether to resolve activity entity host name/IP from DNS server. Default value - `false`. (Optional)
- * `TurnOutActivityChildren` - flag indicating whether to send activity entity child entities independently merging data from both parent and 
- child entity fields. Default value - `false`. (Optional)
+ * `SplitRelatives` - flag indicating whether to send activity entity child entities independently merging data from both parent and child 
+ entity fields into produced entity. Default value - `false`. (Optional). **NOTE**: This value has alias `TurnOutActivityChildren` left for 
+ backward compatibility, but it is not recommended to use it anymore and it should be changed right away for existing configurations.
  * `BuildSourceFQNFromStreamedData` - flag indicating whether to set streamed activity entity `Source` FQN build from activity fields data 
  instead of default on configured in `tnt4j.properties`. Default value - `true`. (Optional)
  * `SourceFQN` - `Source` FQN pattern to be used when building it from streamed activity entity fields values. 
@@ -4572,7 +4579,7 @@ Default value - `null`. (Optional)
      <property name="TNT4JConfigZKNode" value="/samples/core/logstash"/>
      <property name="RetryStateCheck" value="true"/>
      <property name="ResolveServerFromDNS" value="true"/>
-     <property name="TurnOutActivityChildren" value="true"/>
+     <property name="SplitRelatives" value="true"/>
      <property name="BuildSourceFQNFromStreamedData" value="false"/>
      <property name="SourceFQN" value="APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}"/>
      <property name="SendStreamStates" value="false"/> 
@@ -4590,7 +4597,7 @@ under `java-object` tag referring output type class and referred from `stream` l
         </parser>
 
     <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
         ...
 
         <parser-ref name="ProgressEventParser"/>
@@ -4604,7 +4611,7 @@ or
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <java-object name="WmqStreamOutput" class="com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput">
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
     </java-object>
 
     <parser name="ProgressEventParser">

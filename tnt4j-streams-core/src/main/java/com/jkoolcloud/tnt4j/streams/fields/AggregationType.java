@@ -29,6 +29,14 @@ public enum AggregationType {
 
 	/**
 	 * Activity entity shall be added as a child into parent activity entity.
+	 *
+	 * @deprecated use {@link #Relate} instead.
 	 */
-	Join
+	@Deprecated
+	Join,
+
+	/**
+	 * Activity entity shall be added as a child into parent activity entity.
+	 */
+	Relate
 }

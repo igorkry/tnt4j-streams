@@ -31,7 +31,7 @@
         <field name="EventType" value="ACTIVITY"/>
         <field name="Correlator" value="/Workflow/processId" locator-type="Label"/>
         <embedded-activity name="Feedback" locator="/Workflow/XMOFTSFeedBackList/XMOFTSFeedBack" locator-type="Label">
-            <parser-ref name="XMOFTSFeedBackParser" aggregation="Join"/>
+            <parser-ref name="XMOFTSFeedBackParser" aggregation="Relate"/>
         </embedded-activity>
     </parser>
 

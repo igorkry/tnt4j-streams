@@ -5,7 +5,7 @@
 
     <parser name="JSONPayloadParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
         <field name="EventType" value="EVENT"/>
-
+        <field name="EventName" value="SampleEvent"/>
         <field name="QuoteProperties" locator="*" locator-type="Label"/>
     </parser>
 
@@ -14,13 +14,15 @@
 
         <field name="EventType" value="ACTIVITY"/>
         <embedded-activity name="Result" locator="$.query.results.quote" locator-type="Label">
-            <parser-ref name="JSONPayloadParser" aggregation="Join"/>
+            <parser-ref name="JSONPayloadParser" aggregation="Relate"/>
         </embedded-activity>
     </parser>
 
-    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="FileName" value="./tnt4j-streams-core/samples/multiple-JSON-events/message.json"/>
-        <property name="TurnOutActivityChildren" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="StartFromLatest" value="false"/>
+        <property name="SplitRelatives" value="false"/>
 
         <parser-ref name="ResponseParser"/>
     </stream>

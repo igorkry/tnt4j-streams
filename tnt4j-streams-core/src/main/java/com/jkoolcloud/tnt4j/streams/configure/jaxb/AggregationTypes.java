@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="Merge"/>
  *     &lt;enumeration value="Join"/>
+ *     &lt;enumeration value="Relate"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -54,12 +55,23 @@ public enum AggregationTypes {
 
 	/**
 	 * 
-	 * Add stacked parser resolved activity entity data to parent activity entity as child.
+	 * Add stacked parser resolved activity entity data to parent activity entity as child. Deprecated, use "Relate"
+	 * instead.
 	 * 
 	 * 
 	 */
 	@XmlEnumValue("Join")
-	JOIN("Join");
+	@Deprecated
+	JOIN("Join"),
+
+	/**
+	 *
+	 * Add stacked parser resolved activity entity data to parent activity entity as child.
+	 *
+	 *
+	 */
+	@XmlEnumValue("Relate")
+	RELATE("Relate");
 	private final String value;
 
 	AggregationTypes(String v) {

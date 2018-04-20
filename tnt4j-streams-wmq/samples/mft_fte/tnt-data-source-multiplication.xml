@@ -22,7 +22,7 @@
             <field-map-ref resource="MFT_MAPPINGS.EventName"/>
         </field>
 
-        <!-- Map Custom fields using filed map reference -->
+        <!-- Map Custom fields using field map reference -->
         <field name="SourceSystemName" locator="/transaction/sourceAgent/@agent" locator-type="Label">
             <field-map-ref resource="MFT_SDS_MAPPINGS.SourceSystemName"/>
         </field>
@@ -125,21 +125,21 @@
         <field name="MFT_DEST_AGNT" locator="/transaction/destinationAgent/@agent" locator-type="Label" required="false"/>
         <field name="MFT_TRF_FILE_SIZE" locator="/transaction/transferSet/@bytesSent" locator-type="Label" required="false"/>
 
-        <!-- Example of using 'Merge' attribute in stacked parser. This attribute defines method of resolved activity data aggregation into
-        parent activity.
-                'Merge' attribute - resolved activity entity fields are merged into parent activity. NOTE: Parent activity entity will
-                contain all fields processed by all stacked parsers. This is default value when attribute aggregation definition is missing
-                in configuration.-->
+        <!-- Example of using 'Merge' attribute in stacked parser. This attribute defines method of resolved activity data aggregation into the parent activity.
+                'Merge' attribute - resolved activity entity fields are merged into parent activity.
+				NOTE: Parent activity entity will contain all fields processed by all stacked parsers.
+				This is the default value when attribute aggregation definition is missing
+                in the configuration.-->
         <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
             <parser-ref name="RegExParser" aggregation="Merge"/>
         </field>
 
-        <!-- Example of using 'Join' attribute in stacked parser.
-                'Join' - resolved activity entities are collected as children of parent activity. As a result there will be one parent
+        <!-- Example of using 'Relate' attribute in stacked parser.
+                'Relate' - resolved activity entities are collected as children of parent activity. As a result there will be one parent
                 activity entity having collection of child activities resolved by stacked parsers.
-                For a Join type aggregation there is related stream output parameter TurnOutActivityChildren -->
+                For a Relate type aggregation there is related stream output parameter SplitRelatives -->
         <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
-            <parser-ref name="TransferSetParser" aggregation="Join"/>
+            <parser-ref name="TransferSetParser" aggregation="Relate"/>
         </embedded-activity>
     </parser>
 
@@ -227,9 +227,10 @@
         <property name="Channel" value="SYSTEM.DEF.SVRCONN"/>
         <property name="QueueManager" value="[QMGR]"/>
         <property name="Queue" value="FTE.TRANSFER.LOG"/>
-        <!-- TurnOutActivityChildren - flag indicating whether to send activity entity child entities independently merging data from both
+        <!-- SplitRelatives - flag indicating whether to send activity entity child entities independently merging data from both
         parent and child entity fields. Default value - false. (Optional) -->
-        <property name="TurnOutActivityChildren" value="true"/>
+        <property name="SplitRelatives" value="true"/>
+
         <parser-ref name="CompletedEventParser"/>
         <parser-ref name="StartedEventParser"/>
         <parser-ref name="ProgressEventParser"/>

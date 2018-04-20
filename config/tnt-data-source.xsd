@@ -1016,6 +1016,15 @@
             <xs:enumeration value="Join">
                 <xs:annotation>
                     <xs:documentation>
+                        Add stacked parser resolved activity entity data to parent activity entity as child. Deprecated, use "Relate"
+                        instead.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Relate">
+                <xs:annotation>
+                    <xs:documentation>
                         Add stacked parser resolved activity entity data to parent activity entity as child.
                     </xs:documentation>
                 </xs:annotation>

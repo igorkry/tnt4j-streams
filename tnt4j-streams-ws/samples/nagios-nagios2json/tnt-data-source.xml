@@ -19,7 +19,7 @@
         <property name="ActivityDelim" value="EOF"/>
 
         <embedded-activity name="MsgBody" locator="$.data" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
+            <parser-ref name="SnapshotParser" aggregation="Relate"/>
         </embedded-activity>
 
         <field name="EventType" value="Activity"/>

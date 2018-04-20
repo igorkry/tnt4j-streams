@@ -21,7 +21,7 @@
         <property name="ActivityDelim" value="EOF"/>
 
         <embedded-activity name="MsgBody" locator="$" locator-type="Label">
-            <parser-ref name="CollectdStatsDataParser" aggregation="Join"/>
+            <parser-ref name="CollectdStatsDataParser" aggregation="Relate"/>
         </embedded-activity>
         <field name="EventType" value="Activity"/>
         <field name="ApplName" value="collectd"/>

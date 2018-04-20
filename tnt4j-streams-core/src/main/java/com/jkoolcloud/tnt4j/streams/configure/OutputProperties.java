@@ -39,8 +39,16 @@ public interface OutputProperties {
 
 	/**
 	 * Constant for name of built-in {@value} property.
+	 *
+	 * @deprecated use {@link #PROP_SPLIT_RELATIVES} instead
 	 */
+	@Deprecated
 	String PROP_TURN_OUT_CHILDREN = "TurnOutActivityChildren"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_SPLIT_RELATIVES = "SplitRelatives"; // NON-NLS
 
 	/**
 	 * Constant for name of built-in {@value} property.
