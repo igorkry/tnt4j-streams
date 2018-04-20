@@ -526,7 +526,20 @@ or
 </tnt-data-source>
 ```
 It allows to send as many activity entities to JKool as there are child activity entities resolved by stacked parsers, **merging** those 
-child activity entities data with parent activity entity data. 
+child activity entities data with parent activity entity data. E.g. when parser builds activity entities relations like this (4 entities in 
+total):
+```
+ParentActivity
+    + ChildEvent1
+    + ChildEvent2
+    + ChildEvent3     
+```
+stream output will send such entities to JKool (3 entities in total):
+```
+Event1 having ChilEvent1 + ParentActivity data
+Event2 having ChilEvent2 + ParentActivity data
+Event3 having ChilEvent3 + ParentActivity data
+``` 
 
 This is useful when streamed data is aggregated in one data package, like JSON/XML data having some header values and array of payload 
 entries (see `mft-tracking` sample XML's), but you need only those payload entries maintaining some header data contained values to be set 
