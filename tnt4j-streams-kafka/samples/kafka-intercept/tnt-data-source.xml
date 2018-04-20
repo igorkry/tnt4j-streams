@@ -203,7 +203,7 @@
         <field name="EventName" locator="$.operation" locator-type="Label"/>
 
         <embedded-activity name="Snapshots" locator="$.snapshots.[*]" locator-type="Label">
-            <parser-ref name="SnapshotParser" aggregation="Join"/>
+            <parser-ref name="SnapshotParser" aggregation="Relate"/>
         </embedded-activity>
     </parser>
 
