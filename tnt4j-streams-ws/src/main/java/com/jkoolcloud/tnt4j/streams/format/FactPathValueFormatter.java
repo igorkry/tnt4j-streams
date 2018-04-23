@@ -37,15 +37,15 @@ import com.jkoolcloud.tnt4j.utils.Utils;
  * This formatter supports the following configuration properties (in addition to those supported by
  * {@link com.jkoolcloud.tnt4j.streams.format.FactNameValueFormatter}):
  * <ul>
- * <li>DuplicateKeySuffix - . Default value - {@code "_"}. (Optional)</li>
+ * <li>DuplicateKeySuffix - suffix value for duplicate path level keys. Default value - {@code "_"}. (Optional)</li>
  * <li>PathLevelAttributes - configures produced path tokens sequence. Format is:
  * {@code event.formatter.PathLevelAttributes[.CONDITION]: fieldName1; fieldName2, fieldName4; fieldName6;...;fieldNameN},
  * where:
  * <ul>
- * <li>{@code CONDITION} is path build condition having format {@code fieldName.fieldValue} (Optional)</li>
- * <li>{@code fieldNameX} is name of activity entity field or property</li>
- * <li>{@code ;} is path level delimiter</li>
- * <li>{@code ,} is path token field/property names delimiter (path adds first found non-null value)</li>
+ * <li>{@code CONDITION} - path build condition having format {@code fieldName.fieldValue} (Optional)</li>
+ * <li>{@code fieldNameX} - name of activity entity field or property</li>
+ * <li>{@code ;} - path level delimiter</li>
+ * <li>{@code ,} - path token field/property names delimiter (path adds first found non-null value)</li>
  * </ul>
  * E.g. {@code event.formatter.PathLevelAttributes.CastIronType.Jobs: CastIronType; CastIronStatus; Resource; Name}
  * {@code event.formatter.PathLevelAttributes.CastIronType.Logs: CastIronType; Name; Severity}. Default value -
@@ -58,14 +58,20 @@ import com.jkoolcloud.tnt4j.utils.Utils;
  */
 public class FactPathValueFormatter extends FactNameValueFormatter {
 
+	/**
+	 * Default duplicate path level key values suffix {@value}.
+	 */
 	public static final String UNIQUE_SUFFIX = "_"; // NON-NLS
 
-	protected String uniqueSuffix = UNIQUE_SUFFIX;
-	protected Map<Condition, String[][]> pathLevelAttrKeys = new TreeMap<>();
+	private String uniqueSuffix = UNIQUE_SUFFIX;
+	private Map<Condition, String[][]> pathLevelAttrKeys = new TreeMap<>();
 
 	private Comparator<Snapshot> snapshotComparator;
 	private Comparator<Property> propertyComparator;
 
+	/**
+	 * Constructs a new instance of {@code FactPathValueFormatter}.
+	 */
 	public FactPathValueFormatter() {
 		super();
 	}

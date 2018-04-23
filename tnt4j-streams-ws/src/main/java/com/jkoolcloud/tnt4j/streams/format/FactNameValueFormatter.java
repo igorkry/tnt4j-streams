@@ -43,42 +43,72 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * {@link com.jkoolcloud.tnt4j.format.DefaultFormatter}):
  * <ul>
  * <li>KeyReplacements - configures produced property key replacement symbols. Format is:
- * {@code event.formatter.KeyReplacements: "s1"-&gt"rs1" "s2"-&gt"rs" ... "sn"-&gt"rsN"}, where:
+ * {@code event.formatter.KeyReplacements: "s1"->"rs1" "s2"->"rs" ... "sn"->"rsN"}, where:
  * <ul>
- * <li>{@code sX} is symbol to be replaced</li>
- * <li>{@code rsX} replacement symbol</li>
+ * <li>{@code sX} - symbol to be replaced</li>
+ * <li>{@code rsX} - replacement symbol</li>
  * </ul>
- * E.g. {@code event.formatter.KeyReplacements: " "-&gt"_" "\""-&gt"'" "/"-&gt"%"}. Default value -
- * {@code " "-&gt"_" "\""-&gt"'" "/"-&gt"%" "="-&gt"\" ","-&gt"!"}. (Optional)</li>
+ * E.g. {@code event.formatter.KeyReplacements: " "->"_" "\""->"'" "/"->"%"}. Default value -
+ * {@code " "->"_" "\""->"'" "/"->"%" "="->"\" ","->"!"}. (Optional)</li>
  * <li>ValueReplacements - configures produced property value replacement symbols. Format is:
- * {@code event.formatter.ValueReplacements: "s1"-&gt"rs1" "s2"-&gt"rs" ... "sn"-&gt"rsN"}, where:
+ * {@code event.formatter.ValueReplacements: "s1"->"rs1" "s2"->"rs" ... "sn"->"rsN"}, where:
  * <ul>
- * <li>{@code sX} is symbol to be replaced</li>
- * <li>{@code rsX} replacement symbol</li>
+ * <li>{@code sX} - symbol to be replaced</li>
+ * <li>{@code rsX} - replacement symbol</li>
  * </ul>
- * E.g. {@code event.formatter.ValueReplacements: "\r"-&gt"\\r" "\n"-&gt"\\n" ";"-&gt"|" ","-&gt"|" "["-&gt"{("
- * "]"-&gt")}" "\""-&gt"'"}. Default value - {@code "\r"-&gt"\\r" "\n"-&gt"\\n" ";"-&gt"|" ","-&gt"|" "["-&gt"{("
- * "]"-&gt")}" "\""-&gt"'"}. (Optional)</li>
+ * E.g. {@code event.formatter.ValueReplacements: "\r"->"\\r" "\n"->"\\n" ";"->"|" ","->"|" "["->"{(" "]"->")}"
+ * "\""->"'"}. Default value - {@code "\r"->"\\r" "\n"->"\\n" ";"->"|" ","->"|" "["->"{(" "]"->")}" "\""->"'"}.
+ * (Optional)</li>
  * </ul>
  *
  *
  * @version $Revision: 1 $
  */
 public class FactNameValueFormatter extends DefaultFormatter {
-	public static final String LF = "\n"; // NON-NLS
-	public static final String CR = "\r"; // NON-NLS
-	public static final String FIELD_SEP = ","; // NON-NLS
-	public static final String END_SEP = LF;
-	public static final String PATH_DELIM = "\\"; // NON-NLS
-	public static final String EQ = "="; // NON-NLS
-	public static final String FS_REP = "!"; // NON-NLS
+	/**
+	 * Line-feed symbol {@value}.
+	 */
+	protected static final String LF = "\n"; // NON-NLS
+	/**
+	 * Carriage-return symbol {@value}.
+	 */
+	protected static final String CR = "\r"; // NON-NLS
+	/**
+	 * Field separator symbol {@value}.
+	 */
+	protected static final String FIELD_SEP = ","; // NON-NLS
+	/**
+	 * Formatted data package end symbol {@value}.
+	 */
+	protected static final String END_SEP = LF;
+	/**
+	 * Property path delimiter symbol {@value}.
+	 */
+	protected static final String PATH_DELIM = "\\"; // NON-NLS
+	/**
+	 * Equality symbol {@value}.
+	 */
+	protected static final String EQ = "="; // NON-NLS
+	/**
+	 * Fields separator symbol {@value}.
+	 */
+	protected static final String FS_REP = "!"; // NON-NLS
 
 	private static final String SELF_SNAP_NAME = "Self"; // NON-NLS
 	private static final String SELF_SNAP_ID = SELF_SNAP_NAME + "@" + PropertySnapshot.CATEGORY_DEFAULT; // NON-NLS
 
+	/**
+	 * Property key replacement symbols map.
+	 */
 	protected Map<String, String> keyReplacements = new HashMap<>();
+	/**
+	 * Property value replacement symbols map.
+	 */
 	protected Map<String, String> valueReplacements = new HashMap<>();
 
+	/**
+	 * Constructs a new instance of {@code FactNameValueFormatter}.
+	 */
 	public FactNameValueFormatter() {
 		super("time.stamp={2},level={1},source={3},msg=\"{0}\""); // NON-NLS
 
