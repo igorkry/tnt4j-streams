@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams;
+package com.jkoolcloud.tnt4j.streams.format;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-
-import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandlerTest;
-import com.jkoolcloud.tnt4j.streams.format.AllFormatTests;
-import com.jkoolcloud.tnt4j.streams.inputs.AllInputsTests;
 
 /**
  * @author akausinis
  * @version 1.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigParserHandlerTest.class, AllFormatTests.class, AllInputsTests.class })
-public class AllWsStreamTests {
+@Suite.SuiteClasses({ FactNameValueFormatterTest.class })
+public class AllFormatTests {
 }

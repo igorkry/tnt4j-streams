@@ -16,10 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.format;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.ObjectName;
 
@@ -76,19 +73,19 @@ public class FactNameValueFormatter extends DefaultFormatter {
 
 		nvString.append("OBJ:Streams");
 		// ------------------------------------------------------------- name
-		toString(nvString, event.getSource()).append(PATH_DELIM).append(event.getName()).append(PATH_DELIM)
-				.append("Events").append(FIELD_SEP);
+		toString(nvString, event.getSource()).append(PATH_DELIM).append("Events").append(FIELD_SEP);
 
-		// toString(nvString, StreamFieldType.EventName.name(), event.getOperation().getName());
-		toString(nvString, StreamFieldType.Severity.name(), event.getSeverity());
-		toString(nvString, StreamFieldType.StartTime.name(), event.getOperation().getStartTime());
-		toString(nvString, StreamFieldType.EndTime.name(), event.getOperation().getEndTime());
-		toString(nvString, StreamFieldType.Message.name(), event.getMessage());
-		toString(nvString, StreamFieldType.Correlator.name(), event.getCorrelator());
+		toString(nvString, getTrackableStr(event, StreamFieldType.EventName.name()), event.getOperation().getName());
+		toString(nvString, getTrackableStr(event, StreamFieldType.Severity.name()), event.getSeverity());
+		toString(nvString, getTrackableStr(event, StreamFieldType.StartTime.name()),
+				event.getOperation().getStartTime());
+		toString(nvString, getTrackableStr(event, StreamFieldType.EndTime.name()), event.getOperation().getEndTime());
+		toString(nvString, getTrackableStr(event, StreamFieldType.Message.name()), event.getMessage());
+		toString(nvString, getTrackableStr(event, StreamFieldType.Correlator.name()), event.getCorrelator());
 
 		Collection<Property> pList = getProperties(event.getOperation());
 		for (Property prop : pList) {
-			toString(nvString, prop);
+			toString(nvString, event, prop);
 		}
 
 		if (event.getOperation().getSnapshot(SELF_SNAP_ID) == null) {
@@ -105,7 +102,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 
 		Collection<Snapshot> sList = getSnapshots(event.getOperation());
 		for (Snapshot snap : sList) {
-			toString(nvString, snap);
+			toString(nvString, event, snap);
 		}
 
 		return nvString.append(END_SEP).toString();
@@ -127,18 +124,18 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		StringBuilder nvString = new StringBuilder(1024);
 
 		nvString.append("OBJ:Streams");
-		toString(nvString, activity.getSource()).append("\\Activities").append(FIELD_SEP);
+		toString(nvString, activity.getSource()).append(PATH_DELIM).append("Activities").append(FIELD_SEP);
 
-		toString(nvString, StreamFieldType.EventName.name(), activity.getName());
-		toString(nvString, StreamFieldType.Severity.name(), activity.getSeverity());
-		toString(nvString, StreamFieldType.StartTime.name(), activity.getStartTime());
-		toString(nvString, StreamFieldType.EndTime.name(), activity.getEndTime());
-		toString(nvString, StreamFieldType.ResourceName.name(), activity.getResource());
-		toString(nvString, StreamFieldType.Correlator.name(), activity.getCorrelator());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.EventName.name()), activity.getName());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.Severity.name()), activity.getSeverity());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.StartTime.name()), activity.getStartTime());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.EndTime.name()), activity.getEndTime());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.ResourceName.name()), activity.getResource());
+		toString(nvString, getTrackableStr(activity, StreamFieldType.Correlator.name()), activity.getCorrelator());
 
 		Collection<Property> pList = getProperties(activity);
 		for (Property prop : pList) {
-			toString(nvString, prop);
+			toString(nvString, activity, prop);
 		}
 
 		if (activity.getSnapshot(SELF_SNAP_ID) == null) {
@@ -150,10 +147,49 @@ public class FactNameValueFormatter extends DefaultFormatter {
 
 		Collection<Snapshot> sList = getSnapshots(activity);
 		for (Snapshot snap : sList) {
-			toString(nvString, snap);
+			toString(nvString, activity, snap);
 		}
 
 		return nvString.append(END_SEP).toString();
+	}
+
+	private String getTrackableStr(Trackable t, String pKey) {
+		if (t == null) {
+			return pKey;
+		}
+
+		return getKeyStr(getTrackablePath(t), pKey);
+	}
+
+	private String getTrackablePath(Trackable activity) {
+		StringBuilder pathBuilder = new StringBuilder(128);
+		Object pv;
+
+		if (pathLevelAttrKeys != null) {
+			for (Map.Entry<Condition, String[][]> entry : pathLevelAttrKeys.entrySet()) {
+				if (entry.getKey().evaluate(Utils.toString(activity.getFieldValue(entry.getKey().variable)))) {
+					for (String[] levelAttrKeys : entry.getValue()) {
+						inner: for (String pKey : levelAttrKeys) {
+							pv = activity.getFieldValue(pKey);
+							if (pv != null) {
+								appendPath(pathBuilder, pv);
+								break inner;
+							}
+						}
+					}
+					break; // handle first
+				}
+			}
+		}
+
+		return pathBuilder.toString();
+	}
+
+	protected StringBuilder appendPath(StringBuilder pathBuilder, Object pathToken) {
+		if (pathToken != null) {
+			pathBuilder.append(pathBuilder.length() > 0 ? PATH_DELIM : "").append(Utils.toString(pathToken));
+		}
+		return pathBuilder;
 	}
 
 	private Snapshot getSelfSnapshot(Operation op) {
@@ -186,7 +222,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 
 		// ------------------------------------------------------ category, id or name
 		nvString.append("OBJ:Metrics").append(PATH_DELIM).append(snapshot.getCategory()).append(FIELD_SEP);
-		toString(nvString, snapshot).append(END_SEP);
+		toString(nvString, (Trackable) null, snapshot).append(END_SEP);
 
 		return nvString.toString();
 	}
@@ -266,11 +302,11 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	 *
 	 * @see #getUniquePropertyKey(String, com.jkoolcloud.tnt4j.core.Property[], int)
 	 */
-	protected StringBuilder toString(StringBuilder nvString, Snapshot snap) {
+	protected StringBuilder toString(StringBuilder nvString, Trackable t, Snapshot snap) {
 		Collection<Property> list = getProperties(snap);
 		Property[] pArray = new Property[list.size()];
 		pArray = list.toArray(pArray);
-		String sName = getSnapName(snap);
+		String sName = getTrackableStr(t, getSnapName(snap));
 		for (int i = 0; i < pArray.length; i++) {
 			Property p = pArray[i];
 			if (p.isTransient()) {
@@ -286,9 +322,9 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		return nvString;
 	}
 
-	protected StringBuilder toString(StringBuilder nvString, Property prop) {
+	protected StringBuilder toString(StringBuilder nvString, Trackable t, Property prop) {
 		if (!prop.isTransient()) {
-			String pKey = prop.getKey(), pArray;
+			String pKey = getTrackableStr(t, prop.getKey());
 			Object value = prop.getValue();
 
 			return toString(nvString, pKey, value);
@@ -362,20 +398,20 @@ public class FactNameValueFormatter extends DefaultFormatter {
 			return getSnapNameStr((ObjectName) nameObj);
 		}
 
-		return getSnapNameStr(String.valueOf(nameObj));
+		return getSnapNameStr(Utils.toString(nameObj));
 	}
 
 	/**
 	 * Makes decorated string representation of {@link Snapshot} name.
 	 *
-	 * @param snap
+	 * @param trackable
 	 *            snapshot instance
 	 * @return decorated string representation of snapshot name
 	 *
 	 * @see #getSnapNameStr(String)
 	 */
-	protected String getSnapName(Snapshot snap) {
-		return snap.getName();
+	protected String getSnapName(Trackable trackable) {
+		return trackable.getName();
 	}
 
 	private boolean isEmpty(Property p) {
@@ -443,6 +479,23 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		}
 
 		uniqueSuffix = Utils.getString("DuplicateKeySuffix", settings, uniqueSuffix);
+
+		// pValue = com.jkoolcloud.tnt4j.utils.Utils.getString("PathLevelAttributes", settings, "");
+		Map<String, Object> pathLevelAttributes = Utils.getAttributes("PathLevelAttributes", settings);
+
+		for (Map.Entry<String, Object> entry : pathLevelAttributes.entrySet()) {
+			String[] split = entry.getKey().split("\\.");
+			Condition condition;
+			switch (split.length) {
+			case 3:
+				condition = new Condition(split[1], split[2]);
+				break;
+			default:
+				condition = new Condition();
+				break;
+			}
+			pathLevelAttrKeys.put(condition, initPathLevelAttrKeys(String.valueOf(entry.getValue())));
+		}
 	}
 
 	/**
@@ -504,5 +557,85 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		}
 
 		return null;
+	}
+
+	private String[][] initPathLevelAttrKeys(String levelsStr) {
+		String[][] pathLevelAttrKeys = null;
+		List<List<String>> levelList = new ArrayList<>();
+		List<String> attrsList;
+
+		String[] levels = levelsStr.split(";");
+
+		for (String level : levels) {
+			level = level.trim();
+
+			if (!level.isEmpty()) {
+				String[] levelAttrs = level.split(",");
+				attrsList = new ArrayList<>(levelAttrs.length);
+
+				for (String lAttr : levelAttrs) {
+					lAttr = lAttr.trim();
+
+					if (!lAttr.isEmpty()) {
+						attrsList.add(lAttr);
+					}
+				}
+
+				if (!attrsList.isEmpty()) {
+					levelList.add(attrsList);
+				}
+			}
+		}
+
+		pathLevelAttrKeys = new String[levelList.size()][];
+		String[] levelAttrs;
+		int i = 0;
+		for (List<String> level : levelList) {
+			levelAttrs = new String[level.size()];
+			levelAttrs = level.toArray(levelAttrs);
+
+			pathLevelAttrKeys[i++] = levelAttrs;
+		}
+		return pathLevelAttrKeys;
+	}
+
+	private class Condition implements Comparable<Condition> {
+		boolean all = true;
+		String variable;
+		String value;
+
+		public Condition() {
+			all = true;
+		}
+
+		public Condition(String variable, String value) {
+			this();
+			if (value != null && variable != null) {
+				this.variable = variable;
+				this.value = value;
+				all = false;
+			}
+		}
+
+		public boolean evaluate(String variable) {
+			if (all) {
+				return true;
+			}
+			return value != null && value.equals(variable);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (all) {
+				return true;
+			}
+			return obj != null && obj instanceof Condition && ((Condition) obj).value.equals(value)
+					&& ((Condition) obj).variable.equals(variable);
+		}
+
+		@Override
+		public int compareTo(Condition o) {
+			return o.all ? -1 : 1; // ensures "all" is last
+		}
 	}
 }

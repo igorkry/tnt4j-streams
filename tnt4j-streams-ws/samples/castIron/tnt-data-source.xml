@@ -12,6 +12,7 @@
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif"/>
 
         <field name="EventType" value="Event"/>
+        <field name="CastIronType" value="Logs"/>
 
         <!-- System: hardware, resources,network,security,orchestration,deployment -->
         <field name="EventName" locator="/*[local-name() = 'logs']/*[local-name() = 'system']" locator-type="Label"/>
@@ -70,6 +71,19 @@
             <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
         </field>
 
+        <field name="CastIronStatus" locator="/*/*/*/ns4:status" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="ERRORED"/>
+            <field-map source="2" target="RUNNING"/>
+            <field-map source="3" target="CANCELLING"/>
+            <field-map source="4" target="TERMINATED"/>
+            <field-map source="5" target="CANCELLED"/>
+            <field-map source="6" target="SUSPENDED"/>
+            <field-map source="7" target="CRASHED"/>
+            <field-map source="8" target="SUSPENDING"/>
+            <field-map source="" target="UNKNOWN"/>
+        </field>
+
         <field name="StartTime" locator="/ns3:logs/ns2:timestamp" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT" required="false"/>
 
@@ -87,7 +101,7 @@
 
         <embedded-activity name="Logs"
                            locator="/S:Envelope/S:Body/*/*" locator-type="Label">
-            <parser-ref name="LogsParser" aggregation="Join"/>
+            <parser-ref name="LogsParser" aggregation="Relate"/>
         </embedded-activity>
 
     </parser>
@@ -102,6 +116,7 @@
         <property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
 
         <field name="EventType" value="Activity"/>
+        <field name="CastIronType" value="Jobs"/>
 
         <field name="StartTime" locator="/*[local-name() = 'jobs']/@startTime" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
@@ -128,9 +143,22 @@
             <field-map source="" target="INFO"/><!-- UNKNOWN = 101 -->
         </field>
 
+        <field name="CastIronStatus" locator="/*[local-name() = 'jobs']/@status" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="ERRORED"/>
+            <field-map source="2" target="RUNNING"/>
+            <field-map source="3" target="CANCELLING"/>
+            <field-map source="4" target="TERMINATED"/>
+            <field-map source="5" target="CANCELLED"/>
+            <field-map source="6" target="SUSPENDED"/>
+            <field-map source="7" target="CRASHED"/>
+            <field-map source="8" target="SUSPENDING"/>
+            <field-map source="" target="UNKNOWN"/>
+        </field>
+
         <embedded-activity name="JobEvents"
                            locator="/S:Envelope/S:Body/*/*/*" locator-type="Label">
-            <parser-ref name="JobEventsParser" aggregation="Join"/>
+            <parser-ref name="JobEventsParser" aggregation="Relate"/>
         </embedded-activity>
 
     </parser>
@@ -145,7 +173,7 @@
 
         <embedded-activity name="Jobs"
                            locator="/S:Envelope/S:Body/*/*" locator-type="Label">
-            <parser-ref name="JobsParser" aggregation="Join"/>
+            <parser-ref name="JobsParser" aggregation="Relate"/>
         </embedded-activity>
 
     </parser>
@@ -346,14 +374,14 @@
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchJobsResponse.xml"/>-->
-    <!--<property name="TurnOutActivityChildren" value="False"/>-->
+    <!--<property name="SplitRelatives" value="false"/>-->
 
     <!--<parser-ref name="SearchJobsResponseParser"/>-->
     <!--</stream>-->
 
     <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchLogsResponse.xml"/>-->
-    <!--<property name="TurnOutActivityChildren" value="true"/>-->
+    <!--<property name="SplitRelatives" value="true"/>-->
 
     <!--<parser-ref name="SearchLogsResponseParser"/>-->
     <!--</stream>-->
