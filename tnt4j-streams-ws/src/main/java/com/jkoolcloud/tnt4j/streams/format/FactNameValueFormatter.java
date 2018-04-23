@@ -16,9 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.format;
 
-import java.util.*;
-
-import javax.management.ObjectName;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,51 +38,70 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * {@code "OBJ:name-value-prefix,name1=value1,....,nameN=valueN"}.
  * </p>
  * Newline is added at the end of each line.
+ * <p>
+ * This formatter supports the following configuration properties (in addition to those supported by
+ * {@link com.jkoolcloud.tnt4j.format.DefaultFormatter}):
+ * <ul>
+ * <li>KeyReplacements - configures produced property key replacement symbols. Format is:
+ * {@code event.formatter.KeyReplacements: "s1"-&gt"rs1" "s2"-&gt"rs" ... "sn"-&gt"rsN"}, where:
+ * <ul>
+ * <li>{@code sX} is symbol to be replaced</li>
+ * <li>{@code rsX} replacement symbol</li>
+ * </ul>
+ * E.g. {@code event.formatter.KeyReplacements: " "-&gt"_" "\""-&gt"'" "/"-&gt"%"}. Default value -
+ * {@code " "-&gt"_" "\""-&gt"'" "/"-&gt"%" "="-&gt"\" ","-&gt"!"}. (Optional)</li>
+ * <li>ValueReplacements - configures produced property value replacement symbols. Format is:
+ * {@code event.formatter.ValueReplacements: "s1"-&gt"rs1" "s2"-&gt"rs" ... "sn"-&gt"rsN"}, where:
+ * <ul>
+ * <li>{@code sX} is symbol to be replaced</li>
+ * <li>{@code rsX} replacement symbol</li>
+ * </ul>
+ * E.g. {@code event.formatter.ValueReplacements: "\r"-&gt"\\r" "\n"-&gt"\\n" ";"-&gt"|" ","-&gt"|" "["-&gt"{("
+ * "]"-&gt")}" "\""-&gt"'"}. Default value - {@code "\r"-&gt"\\r" "\n"-&gt"\\n" ";"-&gt"|" ","-&gt"|" "["-&gt"{("
+ * "]"-&gt")}" "\""-&gt"'"}. (Optional)</li>
+ * </ul>
+ *
  *
  * @version $Revision: 1 $
- *
  */
 public class FactNameValueFormatter extends DefaultFormatter {
-	public static final String LF = "\n";
-	public static final String CR = "\r";
-	public static final String FIELD_SEP = ",";
+	public static final String LF = "\n"; // NON-NLS
+	public static final String CR = "\r"; // NON-NLS
+	public static final String FIELD_SEP = ","; // NON-NLS
 	public static final String END_SEP = LF;
-	public static final String PATH_DELIM = "\\";
-	public static final String EQ = "=";
-	public static final String FS_REP = "!";
-	public static final String UNIQUE_SUFFIX = "_";
+	public static final String PATH_DELIM = "\\"; // NON-NLS
+	public static final String EQ = "="; // NON-NLS
+	public static final String FS_REP = "!"; // NON-NLS
 
-	private static final String SELF_SNAP_NAME = "Self";
-	private static final String SELF_SNAP_ID = SELF_SNAP_NAME + "@" + PropertySnapshot.CATEGORY_DEFAULT;
-
-	protected String uniqueSuffix = UNIQUE_SUFFIX;
+	private static final String SELF_SNAP_NAME = "Self"; // NON-NLS
+	private static final String SELF_SNAP_ID = SELF_SNAP_NAME + "@" + PropertySnapshot.CATEGORY_DEFAULT; // NON-NLS
 
 	protected Map<String, String> keyReplacements = new HashMap<>();
 	protected Map<String, String> valueReplacements = new HashMap<>();
 
 	public FactNameValueFormatter() {
-		super("time.stamp={2},level={1},source={3},msg=\"{0}\"");
+		super("time.stamp={2},level={1},source={3},msg=\"{0}\""); // NON-NLS
 
 		// adding mandatory value symbols replacements
-		valueReplacements.put(CR, "\\r");
-		valueReplacements.put(LF, "\\n");
+		valueReplacements.put(CR, "\\r"); // NON-NLS
+		valueReplacements.put(LF, "\\n"); // NON-NLS
 	}
 
 	@Override
 	public String format(TrackingEvent event) {
 		StringBuilder nvString = new StringBuilder(1024);
 
-		nvString.append("OBJ:Streams");
+		nvString.append("OBJ:Streams"); // NON-NLS
 		// ------------------------------------------------------------- name
-		toString(nvString, event.getSource()).append(PATH_DELIM).append("Events").append(FIELD_SEP);
+		toString(nvString, event.getSource()).append(PATH_DELIM).append("Events").append(FIELD_SEP); // NON-NLS
 
-		toString(nvString, getTrackableStr(event, StreamFieldType.EventName.name()), event.getOperation().getName());
-		toString(nvString, getTrackableStr(event, StreamFieldType.Severity.name()), event.getSeverity());
-		toString(nvString, getTrackableStr(event, StreamFieldType.StartTime.name()),
+		toString(nvString, getTrackableKey(event, StreamFieldType.EventName.name()), event.getOperation().getName());
+		toString(nvString, getTrackableKey(event, StreamFieldType.Severity.name()), event.getSeverity());
+		toString(nvString, getTrackableKey(event, StreamFieldType.StartTime.name()),
 				event.getOperation().getStartTime());
-		toString(nvString, getTrackableStr(event, StreamFieldType.EndTime.name()), event.getOperation().getEndTime());
-		toString(nvString, getTrackableStr(event, StreamFieldType.Message.name()), event.getMessage());
-		toString(nvString, getTrackableStr(event, StreamFieldType.Correlator.name()), event.getCorrelator());
+		toString(nvString, getTrackableKey(event, StreamFieldType.EndTime.name()), event.getOperation().getEndTime());
+		toString(nvString, getTrackableKey(event, StreamFieldType.Message.name()), event.getMessage());
+		toString(nvString, getTrackableKey(event, StreamFieldType.Correlator.name()), event.getCorrelator());
 
 		Collection<Property> pList = getProperties(event.getOperation());
 		for (Property prop : pList) {
@@ -93,7 +113,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 			if (event.getTag() != null) {
 				Set<String> tags = event.getTag();
 				if (!tags.isEmpty()) {
-					selfSnapshot.add("tag", tags);
+					selfSnapshot.add("tag", tags); // NON-NLS
 				}
 			}
 
@@ -123,15 +143,15 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	public String format(TrackingActivity activity) {
 		StringBuilder nvString = new StringBuilder(1024);
 
-		nvString.append("OBJ:Streams");
-		toString(nvString, activity.getSource()).append(PATH_DELIM).append("Activities").append(FIELD_SEP);
+		nvString.append("OBJ:Streams"); // NON-NLS
+		toString(nvString, activity.getSource()).append(PATH_DELIM).append("Activities").append(FIELD_SEP); // NON-NLS
 
-		toString(nvString, getTrackableStr(activity, StreamFieldType.EventName.name()), activity.getName());
-		toString(nvString, getTrackableStr(activity, StreamFieldType.Severity.name()), activity.getSeverity());
-		toString(nvString, getTrackableStr(activity, StreamFieldType.StartTime.name()), activity.getStartTime());
-		toString(nvString, getTrackableStr(activity, StreamFieldType.EndTime.name()), activity.getEndTime());
-		toString(nvString, getTrackableStr(activity, StreamFieldType.ResourceName.name()), activity.getResource());
-		toString(nvString, getTrackableStr(activity, StreamFieldType.Correlator.name()), activity.getCorrelator());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.EventName.name()), activity.getName());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.Severity.name()), activity.getSeverity());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.StartTime.name()), activity.getStartTime());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.EndTime.name()), activity.getEndTime());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.ResourceName.name()), activity.getResource());
+		toString(nvString, getTrackableKey(activity, StreamFieldType.Correlator.name()), activity.getCorrelator());
 
 		Collection<Property> pList = getProperties(activity);
 		for (Property prop : pList) {
@@ -140,7 +160,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 
 		if (activity.getSnapshot(SELF_SNAP_ID) == null) {
 			Snapshot selfSnapshot = getSelfSnapshot(activity);
-			selfSnapshot.add("id.count", activity.getIdCount());
+			selfSnapshot.add("id.count", activity.getIdCount()); // NON-NLS
 
 			activity.addSnapshot(selfSnapshot);
 		}
@@ -153,65 +173,26 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		return nvString.append(END_SEP).toString();
 	}
 
-	private String getTrackableStr(Trackable t, String pKey) {
-		if (t == null) {
-			return pKey;
-		}
-
-		return getKeyStr(getTrackablePath(t), pKey);
-	}
-
-	private String getTrackablePath(Trackable activity) {
-		StringBuilder pathBuilder = new StringBuilder(128);
-		Object pv;
-
-		if (pathLevelAttrKeys != null) {
-			for (Map.Entry<Condition, String[][]> entry : pathLevelAttrKeys.entrySet()) {
-				if (entry.getKey().evaluate(Utils.toString(activity.getFieldValue(entry.getKey().variable)))) {
-					for (String[] levelAttrKeys : entry.getValue()) {
-						inner: for (String pKey : levelAttrKeys) {
-							pv = activity.getFieldValue(pKey);
-							if (pv != null) {
-								appendPath(pathBuilder, pv);
-								break inner;
-							}
-						}
-					}
-					break; // handle first
-				}
-			}
-		}
-
-		return pathBuilder.toString();
-	}
-
-	protected StringBuilder appendPath(StringBuilder pathBuilder, Object pathToken) {
-		if (pathToken != null) {
-			pathBuilder.append(pathBuilder.length() > 0 ? PATH_DELIM : "").append(Utils.toString(pathToken));
-		}
-		return pathBuilder;
-	}
-
 	private Snapshot getSelfSnapshot(Operation op) {
 		Snapshot selfSnapshot = new PropertySnapshot(SELF_SNAP_NAME);
 
 		if (op.getCorrelator() != null) {
 			Set<String> cids = op.getCorrelator();
 			if (!cids.isEmpty()) {
-				selfSnapshot.add("corrid", cids);
+				selfSnapshot.add("corrid", cids); // NON-NLS
 			}
 		}
 		if (op.getUser() != null) {
 			selfSnapshot.add("user", op.getUser());
 		}
 		if (op.getLocation() != null) {
-			selfSnapshot.add("location", op.getLocation());
+			selfSnapshot.add("location", op.getLocation()); // NON-NLS
 		}
-		selfSnapshot.add("level", op.getSeverity());
-		selfSnapshot.add("pid", op.getPID());
-		selfSnapshot.add("tid", op.getTID());
-		selfSnapshot.add("snap.count", op.getSnapshotCount());
-		selfSnapshot.add("elapsed.usec", op.getElapsedTimeUsec());
+		selfSnapshot.add("level", op.getSeverity()); // NON-NLS
+		selfSnapshot.add("pid", op.getPID()); // NON-NLS
+		selfSnapshot.add("tid", op.getTID()); // NON-NLS
+		selfSnapshot.add("snap.count", op.getSnapshotCount()); // NON-NLS
+		selfSnapshot.add("elapsed.usec", op.getElapsedTimeUsec()); // NON-NLS
 
 		return selfSnapshot;
 	}
@@ -221,7 +202,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		StringBuilder nvString = new StringBuilder(1024);
 
 		// ------------------------------------------------------ category, id or name
-		nvString.append("OBJ:Metrics").append(PATH_DELIM).append(snapshot.getCategory()).append(FIELD_SEP);
+		nvString.append("OBJ:Metrics").append(PATH_DELIM).append(snapshot.getCategory()).append(FIELD_SEP); // NON-NLS
 		toString(nvString, (Trackable) null, snapshot).append(END_SEP);
 
 		return nvString.toString();
@@ -231,10 +212,10 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	public String format(long ttl, Source source, OpLevel level, String msg, Object... args) {
 		StringBuilder nvString = new StringBuilder(1024);
 
-		nvString.append("OBJ:Streams");
-		toString(nvString, source).append(PATH_DELIM).append("Message").append(FIELD_SEP);
-		nvString.append("Self").append(PATH_DELIM).append("level=").append(getValueStr(level)).append(FIELD_SEP);
-		nvString.append("Self").append(PATH_DELIM).append("msg-text=");
+		nvString.append("OBJ:Streams"); // NON-NLS
+		toString(nvString, source).append(PATH_DELIM).append("Message").append(FIELD_SEP); // NON-NLS
+		nvString.append("Self").append(PATH_DELIM).append("level=").append(getValueStr(level)).append(FIELD_SEP); // NON-NLS
+		nvString.append("Self").append(PATH_DELIM).append("msg-text="); // NON-NLS
 		Utils.quote(Utils.format(msg, args), nvString).append(END_SEP);
 		return nvString.toString();
 	}
@@ -283,37 +264,66 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		return snap.getSnapshot();
 	}
 
+	/**
+	 * Returns operation contained properties collection.
+	 *
+	 * @param operation
+	 *            operation instance
+	 * @return collection of operation properties
+	 */
 	protected Collection<Property> getProperties(Operation operation) {
 		return operation.getProperties();
 	}
 
 	/**
+	 * Makes decorated string representation of argument trackable and property key.
+	 *
+	 * @param t
+	 *            trackable instance
+	 * @param pKey
+	 *            field/property key string
+	 * @return decorated string representation of trackable contained field/property
+	 *
+	 * @see #getTrackableName(com.jkoolcloud.tnt4j.core.Trackable)
+	 * @see #getKeyStr(String, String)
+	 */
+	protected String getTrackableKey(Trackable t, String pKey) {
+		if (t == null) {
+			return pKey;
+		}
+
+		return getKeyStr(getTrackableName(t), pKey);
+	}
+
+	/**
+	 * Returns name for provided {@code trackable} instance.
+	 *
+	 * @param trackable
+	 *            trackable instance to get name for
+	 * @return name of provided trackable
+	 */
+	protected String getTrackableName(Trackable trackable) {
+		return trackable.getName();
+	}
+
+	/**
 	 * Makes string representation of snapshot and appends it to provided string builder.
-	 * <p>
-	 * In case snapshot properties have same key for "branch" and "leaf" nodes at same path level, than "leaf" node
-	 * property key value is appended by configuration defined (cfg. key {@code "DuplicateKeySuffix"}, default value
-	 * {@value #UNIQUE_SUFFIX}) suffix.
 	 *
 	 * @param nvString
 	 *            string builder instance to append
 	 * @param snap
 	 *            snapshot instance to represent as string
 	 * @return appended string builder reference
-	 *
-	 * @see #getUniquePropertyKey(String, com.jkoolcloud.tnt4j.core.Property[], int)
 	 */
 	protected StringBuilder toString(StringBuilder nvString, Trackable t, Snapshot snap) {
 		Collection<Property> list = getProperties(snap);
-		Property[] pArray = new Property[list.size()];
-		pArray = list.toArray(pArray);
-		String sName = getTrackableStr(t, getSnapName(snap));
-		for (int i = 0; i < pArray.length; i++) {
-			Property p = pArray[i];
+		String sName = getTrackableKey(t, getSnapName(snap));
+		for (Property p : list) {
 			if (p.isTransient()) {
 				continue;
 			}
 
-			String pKey = getUniquePropertyKey(p.getKey(), pArray, i);
+			String pKey = p.getKey();
 			Object value = p.getValue();
 
 			nvString.append(getKeyStr(sName, pKey));
@@ -322,9 +332,22 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		return nvString;
 	}
 
+	/**
+	 * Makes string representation of property and appends it to provided string builder.
+	 * 
+	 * @param nvString
+	 *            string builder instance to append
+	 * @param t
+	 *            trackable instance
+	 * @param prop
+	 *            property instance
+	 * @return appended string builder reference
+	 *
+	 * @see #toString(StringBuilder, String, Object)
+	 */
 	protected StringBuilder toString(StringBuilder nvString, Trackable t, Property prop) {
 		if (!prop.isTransient()) {
-			String pKey = getTrackableStr(t, prop.getKey());
+			String pKey = getTrackableKey(t, prop.getKey());
 			Object value = prop.getValue();
 
 			return toString(nvString, pKey, value);
@@ -333,37 +356,21 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		return nvString;
 	}
 
+	/**
+	 * Makes string representation of property by provided {@code key} and {@code value}.
+	 * 
+	 * @param nvString
+	 *            string builder instance to append
+	 * @param key
+	 *            property key
+	 * @param value
+	 *            property value
+	 * @return appended string builder reference
+	 */
 	protected StringBuilder toString(StringBuilder nvString, String key, Object value) {
 		nvString.append(key);
 		nvString.append(EQ).append(getValueStr(value)).append(FIELD_SEP);
 		return nvString;
-	}
-
-	/**
-	 * Gets property key value and makes it to be unique on same path level among all array properties.
-	 * <p>
-	 * In case of duplicate keys uniqueness is made by adding configuration defined (cfg. key
-	 * {@code "DuplicateKeySuffix"}, default value {@value #UNIQUE_SUFFIX}) suffix to property key value.
-	 *
-	 * @param pKey
-	 *            property key value
-	 * @param pArray
-	 *            properties array
-	 * @param pIdx
-	 *            property index in array
-	 * @return unique property key value
-	 */
-	protected String getUniquePropertyKey(String pKey, Property[] pArray, int pIdx) {
-		String ppKey;
-		for (int i = pIdx + 1; i < pArray.length; i++) {
-			ppKey = pArray[i].getKey();
-
-			if (ppKey.startsWith(pKey + PATH_DELIM)) {
-				pKey += uniqueSuffix;
-			}
-		}
-
-		return pKey;
 	}
 
 	/**
@@ -380,42 +387,16 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	}
 
 	/**
-	 * Makes decorated string representation of snapshot name by referenced object name using
-	 * {@link ObjectName#getCanonicalName()}.
-	 *
-	 * @param objName
-	 *            object name
-	 * @return decorated string representation of snapshot name
-	 *
-	 * @see #getSnapNameStr(String)
-	 */
-	protected String getSnapNameStr(ObjectName objName) {
-		return getSnapNameStr(objName.getCanonicalName());
-	}
-
-	private String getSnapNameStr(Object nameObj) {
-		if (nameObj instanceof ObjectName) {
-			return getSnapNameStr((ObjectName) nameObj);
-		}
-
-		return getSnapNameStr(Utils.toString(nameObj));
-	}
-
-	/**
 	 * Makes decorated string representation of {@link Snapshot} name.
 	 *
-	 * @param trackable
+	 * @param snap
 	 *            snapshot instance
 	 * @return decorated string representation of snapshot name
 	 *
 	 * @see #getSnapNameStr(String)
 	 */
-	protected String getSnapName(Trackable trackable) {
-		return trackable.getName();
-	}
-
-	private boolean isEmpty(Property p) {
-		return p == null || p.getValue() == null;
+	protected String getSnapName(Snapshot snap) {
+		return getSnapNameStr(snap.getName());
 	}
 
 	/**
@@ -464,37 +445,18 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	public void setConfiguration(Map<String, Object> settings) {
 		super.setConfiguration(settings);
 
-		String pValue = Utils.getString("KeyReplacements", settings, "");
+		String pValue = Utils.getString("KeyReplacements", settings, ""); // NON-NLS
 		if (StringUtils.isEmpty(pValue)) {
 			initDefaultKeyReplacements();
 		} else {
 			Utils.parseReplacements(pValue, keyReplacements);
 		}
 
-		pValue = Utils.getString("ValueReplacements", settings, "");
+		pValue = Utils.getString("ValueReplacements", settings, ""); // NON-NLS
 		if (StringUtils.isEmpty(pValue)) {
 			initDefaultValueReplacements();
 		} else {
 			Utils.parseReplacements(pValue, valueReplacements);
-		}
-
-		uniqueSuffix = Utils.getString("DuplicateKeySuffix", settings, uniqueSuffix);
-
-		// pValue = com.jkoolcloud.tnt4j.utils.Utils.getString("PathLevelAttributes", settings, "");
-		Map<String, Object> pathLevelAttributes = Utils.getAttributes("PathLevelAttributes", settings);
-
-		for (Map.Entry<String, Object> entry : pathLevelAttributes.entrySet()) {
-			String[] split = entry.getKey().split("\\.");
-			Condition condition;
-			switch (split.length) {
-			case 3:
-				condition = new Condition(split[1], split[2]);
-				break;
-			default:
-				condition = new Condition();
-				break;
-			}
-			pathLevelAttrKeys.put(condition, initPathLevelAttrKeys(String.valueOf(entry.getValue())));
 		}
 	}
 
@@ -511,9 +473,9 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	 * </ul>
 	 */
 	protected void initDefaultKeyReplacements() {
-		keyReplacements.put(" ", "_");
-		keyReplacements.put("\"", "'");
-		keyReplacements.put("/", "%");
+		keyReplacements.put(" ", "_"); // NON-NLS
+		keyReplacements.put("\"", "'"); // NON-NLS
+		keyReplacements.put("/", "%"); // NON-NLS
 		keyReplacements.put(EQ, PATH_DELIM);
 		keyReplacements.put(FIELD_SEP, FS_REP);
 	}
@@ -531,111 +493,10 @@ public class FactNameValueFormatter extends DefaultFormatter {
 	 * </ul>
 	 */
 	protected void initDefaultValueReplacements() {
-		valueReplacements.put(";", "|");
-		valueReplacements.put(",", "|");
-		valueReplacements.put("[", "{(");
-		valueReplacements.put("]", ")}");
-		valueReplacements.put("\"", "'");
-	}
-
-	/**
-	 * Finds snapshot contained property by defined property name ignoring case.
-	 *
-	 * @param snapshot
-	 *            property snapshot instance
-	 * @param propName
-	 *            property name
-	 * @return snapshot contained property
-	 */
-	public static Property getSnapPropertyIgnoreCase(Snapshot snapshot, String propName) {
-		if (snapshot != null) {
-			for (Property prop : snapshot.getSnapshot()) {
-				if (prop.getKey().equalsIgnoreCase(propName)) {
-					return prop;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	private String[][] initPathLevelAttrKeys(String levelsStr) {
-		String[][] pathLevelAttrKeys = null;
-		List<List<String>> levelList = new ArrayList<>();
-		List<String> attrsList;
-
-		String[] levels = levelsStr.split(";");
-
-		for (String level : levels) {
-			level = level.trim();
-
-			if (!level.isEmpty()) {
-				String[] levelAttrs = level.split(",");
-				attrsList = new ArrayList<>(levelAttrs.length);
-
-				for (String lAttr : levelAttrs) {
-					lAttr = lAttr.trim();
-
-					if (!lAttr.isEmpty()) {
-						attrsList.add(lAttr);
-					}
-				}
-
-				if (!attrsList.isEmpty()) {
-					levelList.add(attrsList);
-				}
-			}
-		}
-
-		pathLevelAttrKeys = new String[levelList.size()][];
-		String[] levelAttrs;
-		int i = 0;
-		for (List<String> level : levelList) {
-			levelAttrs = new String[level.size()];
-			levelAttrs = level.toArray(levelAttrs);
-
-			pathLevelAttrKeys[i++] = levelAttrs;
-		}
-		return pathLevelAttrKeys;
-	}
-
-	private class Condition implements Comparable<Condition> {
-		boolean all = true;
-		String variable;
-		String value;
-
-		public Condition() {
-			all = true;
-		}
-
-		public Condition(String variable, String value) {
-			this();
-			if (value != null && variable != null) {
-				this.variable = variable;
-				this.value = value;
-				all = false;
-			}
-		}
-
-		public boolean evaluate(String variable) {
-			if (all) {
-				return true;
-			}
-			return value != null && value.equals(variable);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (all) {
-				return true;
-			}
-			return obj != null && obj instanceof Condition && ((Condition) obj).value.equals(value)
-					&& ((Condition) obj).variable.equals(variable);
-		}
-
-		@Override
-		public int compareTo(Condition o) {
-			return o.all ? -1 : 1; // ensures "all" is last
-		}
+		valueReplacements.put(";", "|"); // NON-NLS
+		valueReplacements.put(",", "|"); // NON-NLS
+		valueReplacements.put("[", "{("); // NON-NLS
+		valueReplacements.put("]", ")}"); // NON-NLS
+		valueReplacements.put("\"", "'"); // NON-NLS
 	}
 }
