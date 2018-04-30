@@ -122,7 +122,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(namespaceAware);
 		// disabling obsolete and insecure DTD loading
-		domFactory.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
+		domFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 		// Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_DTD_GRAMMAR_FEATURE
 		domFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); // NON-NLS
 		// Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE
