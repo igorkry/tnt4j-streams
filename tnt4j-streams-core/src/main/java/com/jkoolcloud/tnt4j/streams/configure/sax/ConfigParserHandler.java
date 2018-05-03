@@ -1414,11 +1414,9 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	private void processParserRef(Attributes attrs) throws SAXException {
 		if (currField == null && currStream == null) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration2", PARSER_REF_ELMT,
-							Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, STREAM_ELMT)),
-					currParseLocation);
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration2", PARSER_REF_ELMT,
+					Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, STREAM_ELMT)), currParseLocation);
 		}
 
 		if (currParserRef != null) {
@@ -1676,8 +1674,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currLocatorData == null && currField == null && currParser == null) {
 			throw new SAXParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration2", FILTER_ELMT, Utils
-									.arrayToString(FIELD_LOC_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT)),
+							"ConfigParserHandler.malformed.configuration2", FILTER_ELMT,
+							Utils.arrayToString(FIELD_LOC_ELMT, FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT, PARSER_ELMT)),
 					currParseLocation);
 		}
 
@@ -1879,13 +1877,13 @@ public class ConfigParserHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
 			if (STREAM_ELMT.equals(qName)) {
-				currStream.setProperties(currProperties == null ? null : currProperties.entrySet());
+				currStream.setProperties(applyVariableProperties(currProperties));
 				if (currProperties != null) {
 					currProperties.clear();
 				}
 				currStream = null;
 			} else if (PARSER_ELMT.equals(qName)) {
-				currParser.setProperties(currProperties == null ? null : currProperties.entrySet());
+				currParser.setProperties(applyVariableProperties(currProperties));
 				if (currProperties != null) {
 					currProperties.clear();
 				}
@@ -1951,7 +1949,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					elementData = null;
 				}
 			} else if (CACHE_ELMT.equals(qName)) {
-				StreamsCache.setProperties(currProperties == null ? null : currProperties.entrySet());
+				StreamsCache.setProperties(applyVariableProperties(currProperties));
 				if (currProperties != null) {
 					currProperties.clear();
 				}
@@ -1994,6 +1992,44 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
+	private static Collection<Map.Entry<String, String>> applyVariableProperties(Map<String, String> propsMap) {
+		if (propsMap == null) {
+			return null;
+		}
+
+		Set<Map.Entry<String, String>> props = propsMap.entrySet();
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String value = prop.getValue();
+				if (value.startsWith("$")) { // NON-NLS
+					String variableName = value.substring(1);
+
+					// Try java properties first
+					String variableProperty = System.getProperty(variableName);
+
+					// then do env variables
+					if (variableProperty == null) {
+						variableProperty = System.getenv().get(variableName);
+					}
+
+					// then do env variables ignore case
+					if (variableProperty == null) {
+						ignorecaseloop: for (String property : System.getenv().keySet()) {
+							if (property.equalsIgnoreCase(variableName)) {
+								variableProperty = System.getenv(property);
+								break ignorecaseloop;
+							}
+						}
+					}
+
+					prop.setValue(variableProperty);
+				}
+			}
+		}
+
+		return props;
+	}
+
 	private void handleJavaObject(JavaObjectData javaObjectData) throws Exception {
 		if (javaObjectData == null) {
 			return;
@@ -2009,7 +2045,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			out.setName(javaObjectData.name);
 
 			if (MapUtils.isNotEmpty(currProperties)) {
-				out.setProperties(currProperties.entrySet());
+				out.setProperties(applyVariableProperties(currProperties));
 				currProperties.clear();
 			}
 		}
