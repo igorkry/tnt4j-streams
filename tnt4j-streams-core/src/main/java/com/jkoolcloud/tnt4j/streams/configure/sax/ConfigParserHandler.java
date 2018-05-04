@@ -1995,8 +1995,8 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	/**
-	 * Makes {@link java.util.Collection} of properties contained in provided {@code propsMap}. Also resolves values for
-	 * dynamically defined properties having format {@code ${env.prop.name}}.
+	 * Makes {@link java.util.Collection} of properties contained in provided {@code propsMap}. Also resolves and
+	 * fills-in values for dynamically defined properties values having format {@code ${env.prop.name}}.
 	 * <p>
 	 * Sequence of dynamic properties values resolution (stops on first non-null value):
 	 * <ul>
@@ -2007,7 +2007,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *
 	 * @param propsMap
 	 *            configuration defined properties map
-	 * @return set of (filled-in) properties, or {@code null} if {@code propsMap} is {@code null}
+	 * @return set of properties (filled-in if dynamic), or {@code null} if {@code propsMap} is {@code null}
 	 */
 	protected static Collection<Map.Entry<String, String>> applyVariableProperties(Map<String, String> propsMap) {
 		if (propsMap == null) {
