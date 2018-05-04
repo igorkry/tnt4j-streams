@@ -209,7 +209,7 @@ public class FactNameValueFormatter extends DefaultFormatter {
 		if (op.getCorrelator() != null) {
 			Set<String> cids = op.getCorrelator();
 			if (!cids.isEmpty()) {
-				selfSnapshot.add("corrid", cids); // NON-NLS
+				selfSnapshot.add("corr-id", cids); // NON-NLS
 			}
 		}
 		if (op.getUser() != null) {
