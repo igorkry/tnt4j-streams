@@ -33,6 +33,8 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
+import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -1992,7 +1994,22 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	private static Collection<Map.Entry<String, String>> applyVariableProperties(Map<String, String> propsMap) {
+	/**
+	 * Makes {@link java.util.Collection} of properties contained in provided {@code propsMap}. Also resolves values for
+	 * dynamically defined properties having format {@code ${env.prop.name}}.
+	 * <p>
+	 * Sequence of dynamic properties values resolution (stops on first non-null value):
+	 * <ul>
+	 * <li>Java System properties</li>
+	 * <li>OS environment variables (case insensitive)</li>
+	 * <li>TNT4J properties</li>
+	 * </ul>
+	 *
+	 * @param propsMap
+	 *            configuration defined properties map
+	 * @return set of (filled-in) properties, or {@code null} if {@code propsMap} is {@code null}
+	 */
+	protected static Collection<Map.Entry<String, String>> applyVariableProperties(Map<String, String> propsMap) {
 		if (propsMap == null) {
 			return null;
 		}
@@ -2001,18 +2018,22 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (CollectionUtils.isNotEmpty(props)) {
 			for (Map.Entry<String, String> prop : props) {
 				String value = prop.getValue();
-				if (value.startsWith("$")) { // NON-NLS
-					String variableName = value.substring(1);
+
+				ArrayList<String> variables = new ArrayList<>();
+				Utils.resolveCfgVariables(variables, value);
+
+				for (String variable : variables) {
+					String variableName = variable.substring(2, variable.length() - 1);
 
 					// Try java properties first
 					String variableProperty = System.getProperty(variableName);
 
-					// then do env variables
+					// then do env variables lookup
 					if (variableProperty == null) {
 						variableProperty = System.getenv().get(variableName);
 					}
 
-					// then do env variables ignore case
+					// then do env variables lookup ignore case
 					if (variableProperty == null) {
 						ignorecaseloop: for (String property : System.getenv().keySet()) {
 							if (property.equalsIgnoreCase(variableName)) {
@@ -2022,7 +2043,13 @@ public class ConfigParserHandler extends DefaultHandler {
 						}
 					}
 
-					prop.setValue(variableProperty);
+					// then tnt4j properties lookup
+					if (variableProperty == null) {
+						TrackerConfig trCfg = DefaultConfigFactory.getInstance().getConfig(ConfigParserHandler.class);
+						variableProperty = trCfg.getProperty(variableName);
+					}
+
+					prop.setValue(value.replace(variable, variableProperty));
 				}
 			}
 		}

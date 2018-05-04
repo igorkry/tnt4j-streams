@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -715,5 +713,33 @@ public class ConfigParserHandlerTest {
 		attrs.addAttribute("", "", "type", "", "java.lang.String"); // NON-NLS
 		test.getStreamsConfigData().addStream(my);
 		test.startElement("TEST_URL", "TEST_LOCALNAME", "tw-direct-feed", attrs); // NON-NLS
+	}
+
+	@Test
+	public void applyVariablePropertiesTest() {
+		final String VALUE = "${user.home}/abc/bcd";
+		final String VALUE1 = "file://${JAVA_HOME}/abc/bcd";
+
+		HashMap<String, String> propertiesMap = new HashMap<String, String>() {
+			{
+				put("filename", "*");
+				put("test", "${test}");
+				put("path", VALUE);
+				put("path2", VALUE1);
+
+			}
+		};
+		System.setProperty("test", "best");
+		Collection<Map.Entry<String, String>> entries = ConfigParserHandler.applyVariableProperties(propertiesMap);
+
+		HashMap<String, String> propertiesAfterApply = new HashMap<>();
+		for (Map.Entry<String, String> entry : entries) {
+			propertiesAfterApply.put(entry.getKey(), entry.getValue());
+		}
+
+		assertEquals("*", propertiesAfterApply.get("filename"));
+		assertEquals("best", propertiesAfterApply.get("test"));
+		assertEquals(VALUE.replace("${user.home}", System.getProperty("user.home")), propertiesAfterApply.get("path"));
+		assertEquals(VALUE1.replace("${JAVA_HOME}", System.getenv("JAVA_HOME")), propertiesAfterApply.get("path2"));
 	}
 }

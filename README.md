@@ -4435,11 +4435,11 @@ Or you can refer streams data source configuration file over System property nam
     -Dtnt4j.streams.config=./tnt4j-streams-core/samples/single-log/tnt-data-source.xml
 ```
 
-**NOTE:** `TNT4J-Streams` always performs `tnt-data-source` configuration XML validation against XSD schema. Found validation failures are 
-listed in `TNT4J-Streams` log as `WARNING` level entries. To disable this XML-XSD validation use system property 
+**NOTE:** `TNT4J-Streams` can perform `tnt-data-source` configuration XML validation against XSD schema. Found validation failures are 
+listed in `TNT4J-Streams` log as `WARNING` level entries. To enable this XML-XSD validation use system property 
 `com.jkoolcloud.tnt4j.streams.validate.config`:
 ```properties
-    -Dcom.jkoolcloud.tnt4j.streams.validate.config=false
+    -Dcom.jkoolcloud.tnt4j.streams.validate.config=true
 ```   
 
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
@@ -4492,6 +4492,31 @@ Note that `stream` uses `parser` reference:
     </stream>
 ```
 That is why sequence of configuration elements is critical and can't be swapped.
+
+**NOTE:** streams data source configuration token `<property>` supports resolving dynamic value from these sources (and in that particular 
+sequence of resolution, stopping on first non-null value):
+* Java system properties
+* OS environment variables (ignore property name case)
+* TNT4J properties
+
+To define dynamic property value resolution define property using pattern:
+```xml
+    <property name="PropName" value="${env.property.name}"/>
+```
+where `env.property.name` is property name from one of defined sources set, e.g.:
+```xml
+    <!-- Java system properties -->
+    <property name="UsedJava" value="${java.version}"/>
+    <!-- OS environment variables -->
+    <property name="JavaHome" value="${JAVA_HOME}"/>
+    <!-- TNT4J properties -->
+    <property name="SinkLogFile" value="${event.sink.factory.Filename}"/>
+```
+
+It is also possible to use dynamic property value resolution for a fragment of property value:
+```xml
+    <property name="FileName" value="${user.dir}/data/access.log"/>
+```   
 
 ### Streams configuration
 
