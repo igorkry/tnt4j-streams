@@ -496,7 +496,11 @@ data aggregation into parent activity. Attribute has two possible values:
 processed by all stacked parsers. This is default value when attribute `aggregation` definition is missing in configuration.
 * `Relate` - resolved activity entities are collected as children of parent activity. As a result there will be one parent activity entity 
 having collection of child activities resolved by stacked parsers. **NOTE:** this value has alias `Join` left for backward compatibility, 
-but it is not recommended to use it anymore and should be changed right away for existing configurations.
+but it is not recommended to use it anymore and should be changed right away for existing configurations. Activity entities can have these 
+relations:
+    * `ACTIVITY` - can have any entity as child: `ACTIVITY`, `EVENT`, `SNAPSHOT`
+    * `EVENT` - can have only `SNAPSHOT` as a child
+    * `SNAPSHOT` - can't have any child entities
 
 For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
 ```xml

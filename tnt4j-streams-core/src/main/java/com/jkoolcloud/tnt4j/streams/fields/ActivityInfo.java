@@ -1031,52 +1031,52 @@ public class ActivityInfo {
 	}
 
 	private static boolean addTrackableChild(Trackable pTrackable, Trackable chTrackable) {
-		if (pTrackable instanceof TrackingEvent) {
-			return addEventChild((TrackingEvent) pTrackable, chTrackable);
-		} else if (pTrackable instanceof Activity) {
-			return addActivityChild((Activity) pTrackable, chTrackable);
-		} else if (pTrackable instanceof Snapshot) {
-			return addSnapshotChild((Snapshot) pTrackable, chTrackable);
-		} else {
+		if (pTrackable != null && chTrackable != null) {
+			if (pTrackable instanceof TrackingEvent) {
+				TrackingEvent pEvent = (TrackingEvent) pTrackable;
+				if (chTrackable instanceof Snapshot) {
+					Snapshot chSnapshot = (Snapshot) chTrackable;
+					pEvent.getOperation().addSnapshot(chSnapshot);
+
+					return true;
+				}
+			} else if (pTrackable instanceof Activity) {
+				Activity pActivity = (Activity) pTrackable;
+				pActivity.add(chTrackable);
+
+				return chTrackable instanceof Snapshot;
+			}
+
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
-					pTrackable == null ? null : pTrackable.getClass());
+					"ActivityInfo.invalid.child", resolveTrackableType(chTrackable), resolveTrackableType(pTrackable),
+					resolveChildTypesFor(pTrackable));
 		}
 
 		return false;
 	}
 
-	private static boolean addEventChild(TrackingEvent event, Trackable chTrackable) {
-		if (chTrackable instanceof Snapshot) {
-			event.getOperation().addSnapshot((Snapshot) chTrackable);
-			return true;
+	private static String resolveTrackableType(Trackable trackable) {
+		if (trackable instanceof Activity) {
+			return OpType.ACTIVITY.name();
+		} else if (trackable instanceof TrackingEvent) {
+			return OpType.EVENT.name();
+		} else if (trackable instanceof Snapshot) {
+			return OpType.SNAPSHOT.name();
 		} else {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
-					event.getClass());
+			return trackable == null ? null : trackable.getClass().getName();
 		}
-
-		return false;
 	}
 
-	private static boolean addActivityChild(Activity activity, Trackable chTrackable) {
-		if (chTrackable != null) {
-			activity.add(chTrackable);
-			return chTrackable instanceof Snapshot;
+	private static String resolveChildTypesFor(Trackable trackable) {
+		if (trackable instanceof Activity) {
+			return "ACTIVITY, EVENT, SNAPSHOT"; // NON-NLS
+		} else if (trackable instanceof TrackingEvent) {
+			return "SNAPSHOT"; // NON-NLS
+		} else if (trackable instanceof Snapshot) {
+			return "NONE"; // NON-NLS
 		} else {
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(),
-					activity.getClass());
+			return "UNKNOWN"; // NON-NLS
 		}
-
-		return false;
-	}
-
-	private static boolean addSnapshotChild(Snapshot snapshot, Trackable chTrackable) {
-		LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"ActivityInfo.invalid.child", chTrackable == null ? null : chTrackable.getClass(), snapshot.getClass());
-
-		return false;
 	}
 
 	private static Trackable buildChild(Tracker tracker, ActivityInfo child, String parentId) {
