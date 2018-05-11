@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
@@ -35,10 +34,7 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
@@ -415,20 +411,20 @@ public class ActivityInfo {
 		if (fieldValue instanceof Trackable) {
 			addActivityProperty(field.getFieldTypeName(), fieldValue);
 		} else if (fieldValue instanceof Map) {
-			addPropertiesMap((Map<?, ?>) fieldValue, "");
+			addPropertiesMap(field, (Map<?, ?>) fieldValue, "");
 		} else {
 			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), field.getValueType());
 		}
 	}
 
-	private void addPropertiesMap(Map<?, ?> pMap, String propPrefix) {
+	private void addPropertiesMap(ActivityField field, Map<?, ?> pMap, String propPrefix) throws ParseException {
 		for (Map.Entry<?, ?> pme : pMap.entrySet()) {
 			String pKey = propPrefix + String.valueOf(pme.getKey());
 
 			if (pme.getValue() instanceof Map) {
-				addPropertiesMap((Map<?, ?>) pme.getValue(), pKey + StreamsConstants.MAP_PROP_NAME_TOKENS_DELIM);
+				addPropertiesMap(field, (Map<?, ?>) pme.getValue(), pKey + StreamsConstants.MAP_PROP_NAME_TOKENS_DELIM);
 			} else {
-				addActivityProperty(pKey, pme.getValue());
+				addActivityProperty(pKey, getPropertyValue(pme.getValue(), field));
 			}
 		}
 	}
@@ -1273,7 +1269,7 @@ public class ActivityInfo {
 		String valStr = Utils.toString(value);
 		valStr = StringUtils.trim(valStr);
 
-		return StringUtils.isEmpty(valStr) ? null : NumberUtils.createNumber(valStr);
+		return NumericFormatter.strToNumber(valStr);
 	}
 
 	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {

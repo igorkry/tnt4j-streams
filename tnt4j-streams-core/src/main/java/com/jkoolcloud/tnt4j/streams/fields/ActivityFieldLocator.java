@@ -578,7 +578,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 
 		// make a string eventually
 		Object pValue = getMappedValue(formatStringValue(value));
-		dataType = ActivityFieldDataType.String;
+		if (pValue instanceof String) {
+			dataType = ActivityFieldDataType.String;
+		}
+
 		return pValue;
 	}
 

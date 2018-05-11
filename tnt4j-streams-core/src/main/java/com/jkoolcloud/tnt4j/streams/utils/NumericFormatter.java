@@ -245,7 +245,7 @@ public class NumericFormatter {
 					}
 				} else {
 					try {
-						numValue = NumberUtils.createNumber(strValue);
+						numValue = strToNumber(strValue);
 						nfe = null;
 					} catch (NumberFormatException exc) {
 						nfe = exc;
@@ -271,6 +271,25 @@ public class NumericFormatter {
 		}
 
 		return scaleNumber(numValue, scale);
+	}
+
+	/**
+	 * Resolves number value from provided string.
+	 *
+	 * @param str
+	 *            string defining numeric value
+	 * @return number value built from provided {@code str}, or {@code null} if {@code str} is {@code null} or empty
+	 */
+	public static Number strToNumber(String str) {
+		if (StringUtils.isEmpty(str)) {
+			return null;
+		}
+
+		try {
+			return Integer.valueOf(str, 10);
+		} catch (Exception exc) {
+			return NumberUtils.createNumber(str);
+		}
 	}
 
 	/**
