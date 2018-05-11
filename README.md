@@ -501,12 +501,13 @@ relations:
     * `ACTIVITY` - can have any entity as child: `ACTIVITY`, `EVENT`, `SNAPSHOT`
     * `EVENT` - can have only `SNAPSHOT` as a child
     * `SNAPSHOT` - can't have any child entities
-Be sure that each parser or sub-parser that creates an activity entity to be sent to jKool/AP Insight as a JSON record has a field line
-```xml
-    <field name="EventType" value="vvvv"/>
-```
-where `vvvv` is one of values: `ACTIVITY`, `SNAPSHOT` or `EVENT` (`EVENT` also maps from values `OTHER`, `CALL`, `START`, `STOP`, `OPEN`, 
-`CLOSE`, `SEND`, `RECEIVE`, `INQUIRE`, `SET`, `BROWSE`, `ADD`, `UPDATE`, `REMOVE`, `CLEAR`, `DATAGRAM`).    
+
+    Be sure that each parser or sub-parser that creates an activity entity to be sent to jKool/AP Insight as a JSON record has a field line:
+    ```xml
+        <field name="EventType" value="vvvv"/>
+    ```
+    where `vvvv` is one of values: `ACTIVITY`, `SNAPSHOT` or `EVENT` (`EVENT` also maps from values `OTHER`, `CALL`, `START`, `STOP`, 
+    `OPEN`, `CLOSE`, `SEND`, `RECEIVE`, `INQUIRE`, `SET`, `BROWSE`, `ADD`, `UPDATE`, `REMOVE`, `CLEAR`, `DATAGRAM`).
 
 For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
 ```xml
