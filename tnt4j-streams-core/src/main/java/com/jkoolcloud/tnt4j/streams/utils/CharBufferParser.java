@@ -123,6 +123,29 @@ public abstract class CharBufferParser<I, O> {
 	}
 
 	/**
+	 * Read a char and assert the value. If read char is {@value #EOF} it is considered OK.
+	 *
+	 * @param cb
+	 *            char buffer containing text to read
+	 * @param c
+	 *            expected character
+	 *
+	 * @throws IOException
+	 *             if expected and found characters differs and found character is not {@value #EOF}
+	 *
+	 * @see #read(CharBuffer)
+	 */
+	protected static void expectOrEnd(CharBuffer cb, int c) throws IOException {
+		int pos = cb.position();
+		int d = read(cb);
+
+		if (d != c && d != EOF) {
+			throw new IOException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"CharBufferParser.unexpected.char", pos, (char) c, (char) d));
+		}
+	}
+
+	/**
 	 * Read a string and assert the value.
 	 * 
 	 * @param cb

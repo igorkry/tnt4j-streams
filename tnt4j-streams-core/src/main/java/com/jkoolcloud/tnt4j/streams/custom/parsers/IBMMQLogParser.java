@@ -331,7 +331,7 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			StringBuilder sb = new StringBuilder(16);
 			int c;
 
-			while ((c = read(cb)) != tc && c != -1) {
+			while ((c = read(cb)) != tc && c != EOF) {
 				sb.append((char) c);
 			}
 
