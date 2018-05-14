@@ -70,7 +70,6 @@
                 <ns3:message>platform.net.autohost</ns3:message>
                 <ns3:id>1</ns3:id>
                 <ns3:level>warning</ns3:level>
-                <ns3:timestamp>2017-08-07T10:32:52.384Z</ns3:timestamp>
                 <ns3:timestamp>2017-08-07T10:08:42Z</ns3:timestamp>
             </ns2:logs>
         </ns2:searchLogsResponse>

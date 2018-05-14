@@ -266,6 +266,9 @@
         <property name="SecurityCachedTokenKey" value="Token"/>
         <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
 
+        <!-- NOTE: when streaming to AutoPilot set "SendStreamStates" to false if stream START/STOP events are not in scope of interest -->
+        <!--<property name="SendStreamStates" value="false"/>-->
+
         <parser-ref name="SearchLogsResponseParser"/>
         <parser-ref name="LoginParser"/>
         <parser-ref name="LogsCountParser"/>
@@ -323,6 +326,9 @@
         <property name="SecurityCachedTokenKey" value="Token"/>
         <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
 
+        <!-- NOTE: when streaming to AutoPilot set "SendStreamStates" to false if stream START/STOP events are not in scope of interest -->
+        <!--<property name="SendStreamStates" value="false"/>-->
+
         <parser-ref name="SearchJobsResponseParser"/>
         <parser-ref name="LoginParser"/>
         <parser-ref name="JobsCountParser"/>
@@ -372,16 +378,20 @@
         </scenario>
     </stream>
 
-    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!-- CastIron Jobs search dump TEST stream -->
+    <!--<stream name="JobsFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchJobsResponse.xml"/>-->
-    <!--<property name="SplitRelatives" value="false"/>-->
+    <!--<property name="SplitRelatives" value="true"/>-->
+    <!--<property name="SendStreamStates" value="false"/>-->
 
     <!--<parser-ref name="SearchJobsResponseParser"/>-->
     <!--</stream>-->
 
-    <!--<stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
+    <!-- CastIron Logs search dump TEST stream -->
+    <!--<stream name="LogsFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">-->
     <!--<property name="FileName" value="./tnt4j-streams-ws/samples/castIron/responses/searchLogsResponse.xml"/>-->
     <!--<property name="SplitRelatives" value="true"/>-->
+    <!--<property name="SendStreamStates" value="false"/>-->
 
     <!--<parser-ref name="SearchLogsResponseParser"/>-->
     <!--</stream>-->
