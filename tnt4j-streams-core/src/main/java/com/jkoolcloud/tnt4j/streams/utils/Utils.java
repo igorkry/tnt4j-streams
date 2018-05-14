@@ -22,7 +22,8 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.FileSystem;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1542,14 +1543,14 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		if (activityFiles != null) {
 			Arrays.sort(activityFiles, new Comparator<File>() {
-				@Override
+			@Override
 				public int compare(File o1, File o2) {
 					long f1ct = o1.lastModified();
 					long f2ct = o2.lastModified();
 					// NOTE: we want files to be sorted oldest->newest (ASCENDING)
 					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
-				}
-			});
+			}
+		});
 
 			return activityFiles;
 		} else {
@@ -1579,7 +1580,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Resolves map contained value by provided map keys path.
 	 * <p>
 	 * Path delimiter value is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM}, path
-	 * level value is {@code 0} and accessed paths set is (@code null}.
+	 * level value is {@code 0} and accessed paths set is {@code null}.
 	 * <p>
 	 * If map keys path token is {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_NODE_TOKEN}, then
 	 * complete map instance is returned for that path level.
@@ -1972,7 +1973,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			return StringUtils.isEmpty((String) obj);
 		}
 		if (isArray(obj)) {
-			return ArrayUtils.getLength(obj) > 0;
+			return ArrayUtils.getLength(obj) == 0;
 		}
 		if (obj instanceof Collection) {
 			return CollectionUtils.isEmpty((Collection<?>) obj);

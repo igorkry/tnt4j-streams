@@ -5425,7 +5425,14 @@ This parser resolved data map may contain such entries:
 
 #### Activity Java object (POJO) parser
 
-This parser has no additional configuration properties.
+* `SupportedClass` - defines class name of parser supported objects. Parser can have multiple property definitions. It is useful when just 
+some specific set of objects has to be handled by this parser instead of all passed objects. (Optional)
+
+    sample:
+```xml
+    <property name="SupportedClass" value="org.apache.kafka.common.TopicPartition"/>
+    <property name="SupportedClass" value="com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.GeneralKafkaObject"/>
+```
 
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
 

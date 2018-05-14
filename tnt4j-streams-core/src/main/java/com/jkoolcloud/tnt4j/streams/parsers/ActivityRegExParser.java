@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>Pattern - contains the regular expression pattern that each data item is assumed to match. (Required)</li>
  * <li>MatchStrategy - defines <tt>pattern</tt> created <tt>matcher</tt> comparison strategy used against input data
  * string. Value can be one of: {@code "MATCH"} - pattern should match complete input string, or {@code "FIND"} -
- * pattern has to match subsequence within input string. Default value - '{@code MATCH}'. (Optional)</li>
+ * pattern has to match sub-sequence within input string. Default value - '{@code MATCH}'. (Optional)</li>
  * </ul>
  * <p>
  * This activity parser supports those activity field locator types:
