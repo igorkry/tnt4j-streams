@@ -16,17 +16,17 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -42,6 +42,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} as naming hierarchy separator: e.g.,
  * 'header.author.name'.
  * <p>
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
+ * <ul>
+ * <li>SupportedClass - defines class name of parser supported objects. Parser can have multiple property definitions.
+ * It is useful when just some specific set of objects has to be handled by this parser instead of all passed objects.
+ * (Optional)</li>
+ * </ul>
+ * <p>
  * This activity parser supports those activity field locator types:
  * <ul>
  * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
@@ -54,6 +62,8 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  */
 public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJavaObjectParser.class);
+
+	private Set<Class<?>> supportedClasses = new HashSet<>();
 
 	/**
 	 * Constructs a new ActivityJavaObjectParser.
@@ -71,19 +81,24 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
-		// if (CollectionUtils.isNotEmpty(props)) {
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
-		// // no any additional properties are required yet.
-		// if (false) {
-		// logger().log(OpLevel.DEBUG,
-		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-		// name, value);
-		// }
-		// }
-		// }
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+
+				if (ParserProperties.PROP_SUPPORTED_CLASS.equalsIgnoreCase(name)) {
+					try {
+						supportedClasses.add(Class.forName(value));
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
+					} catch (Throwable e) {
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityJavaObjectParser.resolve.class.failed", value, e.getLocalizedMessage());
+					}
+
+				}
+			}
+		}
 	}
 
 	/**
@@ -92,7 +107,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * <p>
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
-	 * <li>{@link java.lang.Object}</li>
+	 * <li>{@link java.lang.Object} - default case when no custom set of supported classes defined</li>
+	 * <li>Set of custom classes defined over parser property {@value ParserProperties#PROP_SUPPORTED_CLASS}</li>
 	 * </ul>
 	 *
 	 * @param data
@@ -101,12 +117,16 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 */
 	@Override
 	protected boolean isDataClassSupportedByParser(Object data) {
-		return Object.class.isInstance(data);
+		if (data == null || CollectionUtils.isEmpty(supportedClasses)) {
+			return Object.class.isInstance(data);
+		} else {
+			return supportedClasses.contains(data.getClass());
+		}
 	}
 
 	@Override
 	protected String toString(Object data) {
-		return ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
+		return data == null ? "null" : ToStringBuilder.reflectionToString(data, ToStringStyle.MULTI_LINE_STYLE);
 	}
 
 	/**

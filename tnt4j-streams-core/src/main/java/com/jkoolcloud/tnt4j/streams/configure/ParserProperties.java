@@ -94,4 +94,9 @@ public interface ParserProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_MATCH_STRATEGY = "MatchStrategy"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_SUPPORTED_CLASS = "SupportedClass"; // NON-NLS
 }

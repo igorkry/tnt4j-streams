@@ -504,6 +504,9 @@ public class ActivityInfo {
 	}
 
 	private static String getStringValue(Object value, ActivityField field) {
+		if (StringUtils.isNotEmpty(field.getFormattingPattern())) {
+			value = Utils.makeArray(value);
+		}
 		if (value instanceof Object[]) {
 			return formatValuesArray((Object[]) value, field);
 		} else if (value instanceof byte[]) {

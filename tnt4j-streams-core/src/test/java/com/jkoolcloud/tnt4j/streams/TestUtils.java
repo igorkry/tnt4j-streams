@@ -46,11 +46,11 @@ public final class TestUtils {
 		}
 	}
 
-	public static class SimpleTestStream extends AbstractBufferedStream<String> {
+	public static class SimpleTestStream extends AbstractBufferedStream<Object> {
 		private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TestUtils.class);
 
 		@Override
-		protected long getActivityItemByteSize(String activityItem) {
+		protected long getActivityItemByteSize(Object activityItem) {
 			return 0;
 		}
 
