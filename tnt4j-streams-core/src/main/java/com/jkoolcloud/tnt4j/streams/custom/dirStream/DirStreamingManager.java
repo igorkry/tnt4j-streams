@@ -109,7 +109,7 @@ public class DirStreamingManager {
 	private String fileWildcardName;
 
 	private ThreadPoolExecutor executorService;
-	private List<Runnable> runningJobs = Collections.synchronizedList(new ArrayList());
+	private List<Runnable> runningJobs = Collections.synchronizedList(new ArrayList<Runnable>());
 	private DirWatchdog dirWatchdog;
 
 	private String tnt4jCfgFilePath;
