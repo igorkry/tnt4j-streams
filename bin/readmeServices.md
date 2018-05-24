@@ -1,4 +1,8 @@
-##Service configuration
+## TNT4J-Streams as System Service configuration
+
+Supported operating systems:
+* *nix family operating systems: Linux distributions, UNIX
+* MS Windows
 
 ### *nix systems
 #### Automated install
@@ -39,7 +43,7 @@ parser configuration path.
     update-rc.d tnt4j-streams defaults
 ```
 
-### Windows system
+### MS Windows system
 #### Manual install
 
 1) Edit the script `installService.bat` and replace following tokens:
@@ -52,8 +56,8 @@ parser configuration path.
     * `<TNT4J_PROPERTIES>` = TNT4J event sink configuration
     * `<LOG4J_PROPERTIES>` = Logger configuration
 
-2) Run the modified scrip file, now you should be able to see your service as ordinary Windows services. You can start/stop/restart and 
-modify it over Windows services administration tool.
+2) Run the modified scrip file, now you should be able to see your service as ordinary MS Windows services. You can start/stop/restart and 
+modify it over MS Windows services administration tool.
 
 ##### Registry usage
 
@@ -66,7 +70,7 @@ Additional parameters are stored in the registry at:
 ```
 HKEY_LOCAL_MACHINE\SOFTWARE\Apache Software Foundation\ProcRun 2.0\<ServiceName>\Parameters
 ```
-On 64-bit Windows `procrun` always uses 32-bit registry view for storing the configuration. This means that parameters will be stored 
+On 64-bit MS Windows `procrun` always uses 32-bit registry view for storing the configuration. This means that parameters will be stored 
 under:
 ```
 HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Apache Software Foundation\ProcRun 2.0\<ServiceName>

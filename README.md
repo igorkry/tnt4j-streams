@@ -51,6 +51,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     just by applying configuration and without additional coding.
 
 * Redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator.
+* Run TNT4J-Streams as system daemon service. 
 
 Importing TNT4J-Streams project into IDE
 ======================================
@@ -78,6 +79,8 @@ Running TNT4J-Streams
 * As API integrated into your product
     * Write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in your code
+* As system daemon service. See ['TNT4J-Streams as System Service configuration'](./bin/readmeServices.md) for details how to run 
+TNT4J-Streams as your system service.
 
 ## TNT4J Events field mappings
 
