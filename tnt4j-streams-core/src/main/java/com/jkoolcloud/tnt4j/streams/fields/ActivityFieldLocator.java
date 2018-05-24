@@ -217,15 +217,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * @return {@code true} if any of provided locator types are equal to type of this locator
 	 */
 	public boolean isOfType(ActivityFieldLocatorType... types) {
-		if (types != null) {
-			for (ActivityFieldLocatorType alt : types) {
-				if (builtInType == alt) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		return Utils.isOneOf(builtInType, types);
 	}
 
 	/**

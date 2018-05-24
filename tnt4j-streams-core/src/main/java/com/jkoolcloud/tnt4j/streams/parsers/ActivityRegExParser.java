@@ -131,6 +131,8 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 	@Override
 	public void addField(ActivityField field) {
+		super.addField(field);
+
 		List<ActivityFieldLocator> locators = field.getLocators();
 		if (CollectionUtils.isEmpty(locators)) {
 			return;
@@ -138,21 +140,25 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 		List<ActivityFieldLocator> matchLocs = new ArrayList<>(5);
 		List<ActivityFieldLocator> groupLocs = new ArrayList<>(5);
 		for (ActivityFieldLocator locator : locators) {
-			ActivityFieldLocatorType locType = locator.getBuiltInType();
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityParser.adding.field", field); // Utils.getDebugString(field));
-			if (locType == ActivityFieldLocatorType.REMatchId) {
-				if (groupMap.containsKey(field)) {
-					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.conflicting.mapping", field));
+			if (locator.isOfType(ActivityFieldLocatorType.Label, ActivityFieldLocatorType.Index,
+					ActivityFieldLocatorType.REMatchId)) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.adding.field", field); // Utils.getDebugString(field));
+				if (locator.isOfType(ActivityFieldLocatorType.REMatchId)) {
+					if (groupMap.containsKey(field)) {
+						throw new IllegalArgumentException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"ActivityRegExParser.conflicting.mapping", field));
+					}
+					matchLocs.add(locator);
+				} else {
+					if (matchMap.containsKey(field)) {
+						throw new IllegalArgumentException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"ActivityRegExParser.conflicting.mapping", field));
+					}
+					groupLocs.add(locator);
 				}
-				matchLocs.add(locator);
-			} else {
-				if (matchMap.containsKey(field)) {
-					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-							StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityRegExParser.conflicting.mapping", field));
-				}
-				groupLocs.add(locator);
 			}
 		}
 		if (!matchLocs.isEmpty()) {
@@ -217,26 +223,32 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	@Override
 	protected void parseFields(ActivityContext cData) throws Exception {
 		// apply fields for parser
-		if (!matchMap.isEmpty()) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityRegExParser.applying.regex", matchMap.size());
-			Map<String, String> matches = findMatches(cData.getData());
+		for (ActivityField aField : fieldList) {
+			cData.setField(aField);
 
-			cData.put(MATCHES_KEY, matches);
-			resolveLocatorsValues(matchMap, cData);
-			cData.remove(MATCHES_KEY);
+			if (!matchMap.isEmpty()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityRegExParser.applying.regex", matchMap.size());
+				Map<String, String> matches = findMatches(cData.getData());
+
+				cData.put(MATCHES_KEY, matches);
+				resolveLocatorsValues(aField, cData, matchMap);
+				cData.remove(MATCHES_KEY);
+			}
+
+			resolveLocatorsValues(aField, cData, groupMap);
 		}
-
-		resolveLocatorsValues(groupMap, cData);
 	}
 
 	/**
 	 * Resolves and applies <tt>locMap</tt> defined locators mapped RegEx values.
-	 * 
-	 * @param locMap
-	 *            regex locators map
+	 *
+	 * @param field
+	 *            field instance to get locators
 	 * @param cData
 	 *            prepared activity data item parsing context
+	 * @param locMap
+	 *            regex locators map
 	 * @throws ParseException
 	 *             if exception occurs while resolving regex locators values
 	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
@@ -247,19 +259,18 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	protected void resolveLocatorsValues(Map<ActivityField, List<ActivityFieldLocator>> locMap, ActivityContext cData)
-			throws Exception {
-		ActivityField field;
+	protected void resolveLocatorsValues(ActivityField field, ActivityContext cData,
+			Map<ActivityField, List<ActivityFieldLocator>> locMap) throws Exception {
 		Object value;
-		for (Map.Entry<ActivityField, List<ActivityFieldLocator>> fieldMapEntry : locMap.entrySet()) {
-			field = fieldMapEntry.getKey();
-			cData.setField(field);
-			List<ActivityFieldLocator> locations = fieldMapEntry.getValue();
-
-			value = Utils.simplifyValue(parseLocatorValues(locations, cData));
-
-			applyFieldValue(field, value, cData);
+		List<ActivityFieldLocator> locations = locMap.get(field);
+		if (locations == null) {
+			value = parseLocatorValues(field, cData);
+		} else {
+			value = parseLocatorValues(locations, cData);
 		}
+
+		value = Utils.simplifyValue(value);
+		applyFieldValue(field, value, cData);
 	}
 
 	/**

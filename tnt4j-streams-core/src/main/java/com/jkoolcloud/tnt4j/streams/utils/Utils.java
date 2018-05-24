@@ -2229,4 +2229,30 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		return bValue;
 	}
+
+	/**
+	 * Checks if enumeration value {@code eValue} is one of {@code optValues}.
+	 *
+	 * @param eValue
+	 *            enumeration value
+	 * @param optValues
+	 *            array of enumeration values to match
+	 * @param <E>
+	 *            enumeration class type
+	 * @return {@code true} if {@code eValue} matches one of {@code optValues} element or both are {@code null},
+	 *         {@code false} - otherwise
+	 */
+	public static <E extends Enum<E>> boolean isOneOf(Enum<E> eValue, Enum<E>... optValues) {
+		if (optValues == null) {
+			return eValue == null;
+		}
+
+		for (Enum<E> oValue : optValues) {
+			if (oValue == eValue) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
