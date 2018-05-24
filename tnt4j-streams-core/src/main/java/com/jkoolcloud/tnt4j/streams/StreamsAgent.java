@@ -134,7 +134,12 @@ public final class StreamsAgent {
 		}
 	}
 
-	private static String pkgVersion() {
+	/**
+	 * Returns jKool LLC TNT4J-Streams package version.
+	 *
+	 * @return the version of the implementation, {@code null} is returned if it is not known
+	 */
+	static String pkgVersion() {
 		Package sPkg = StreamsAgent.class.getPackage();
 		return sPkg.getImplementationVersion();
 	}
@@ -479,6 +484,8 @@ public final class StreamsAgent {
 						"StreamsAgent.streams.stop.complete", (System.currentTimeMillis() - t1));
 			}
 		}
+
+		DefaultEventSinkFactory.shutdownAll();
 	}
 
 	/**
@@ -554,7 +561,7 @@ public final class StreamsAgent {
 	 *            command-line arguments
 	 * @return {@code true} if command-line arguments where valid to interpret, {@code false} - otherwise
 	 */
-	private static boolean processArgs(String... args) {
+	static boolean processArgs(String... args) {
 		for (String arg : args) {
 			if (StringUtils.isEmpty(arg)) {
 				continue;
@@ -627,5 +634,14 @@ public final class StreamsAgent {
 	 */
 	protected static void printUsage() {
 		System.out.println(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help"));
+	}
+
+	/**
+	 * Returns streams configuration file name/path.
+	 *
+	 * @return streams configuration file name
+	 */
+	static String getCfgFileName() {
+		return cfgFileName;
 	}
 }
