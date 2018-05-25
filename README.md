@@ -79,7 +79,7 @@ Running TNT4J-Streams
 * As API integrated into your product
     * Write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * use `StreamsAgent.runFromAPI(configFileName)` in your code
-* As system daemon service. See ['TNT4J-Streams as System Service configuration'](./bin/readmeServices.md) for details how to run 
+* As system daemon service. See ['TNT4J-Streams as System Service configuration'](./bin/service/readmeServices.md) for details how to run 
 TNT4J-Streams as your system service.
 
 ## TNT4J Events field mappings

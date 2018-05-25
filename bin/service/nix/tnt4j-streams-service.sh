@@ -47,7 +47,7 @@ LOG_OUT="$FILE_PATH/log/$NAME-jsvc.out"
 LOG_ERR="$FILE_PATH/log/$NAME-jsvc.err"
 
 # Path for the JAR's
-LIBPATH="$LIBPATH:$FILE_PATH/*:$FILE_PATH/../lib/*"
+LIBPATH="$LIBPATH:$FILE_PATH/*:$FILE_PATH/lib/*"
 
 #TNT4J event sinks configuration file
 TNT4J_PROPERTIES="$FILE_PATH/config/tnt4j.properties"
