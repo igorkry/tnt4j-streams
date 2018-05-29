@@ -1,0 +1,51 @@
+[
+    {
+        "d-1b1262cb-7659-b831-1ab7e598b3f1": {
+            "removedViewletIds": "[\"widget0628297d-f754-f469-7d8ee5b0f5e4\",\"widget5093dfa1-74d8-da5d-c6e00f0265a9\"]",
+            "dashboardDefinations": {
+                "d-1b1262cb-7659-b831-1ab7e598b3f1": {
+                    "noOfColumnsOnPage": 3,
+                    "viewletDefinations": [
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widget31baee7d-3449-2459-ee3434e21f60\":{\"redrawRequired\":false,\"viewletName\":\"MetricBeatEvents\",\"viewletQuery\":\"Get number of events group by eventname\",\"viewletType\":\"table\",\"isRealTime\":false,\"isSummary\":false,\"isAnalyze\":false,\"isConsole\":false,\"position\":{\"row\":1,\"column\":\"center\"},\"size\":340,\"realTimeSettings\":{\"isOn\":true,\"frequency\":20,\"windowSize\":50},\"chartSettings\":{\"legend\":{\"isVisible\":true},\"data\":{\"hiddenColumns\":[]}},\"dashboardID\":\"d-1b1262cb-7659-b831-1ab7e598b3f1\",\"pageSelected\":1}}"
+                        },
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widgetbbdf6d0b-bd3f-eef3-daf4ce1837e8\":{\"redrawRequired\":false,\"viewletName\":\"Processes\",\"viewletQuery\":\"get Event fields Close(Properties(&#39;system_process_name&#39;),StartTime), Close(Properties(&#39;system_process_pid&#39;),StartTime), Close(Properties(&#39;system_process_cpu_total_value&#39;),StartTime), Close(Properties(&#39;system_process_state&#39;),StartTime) for Latest 10 Minutes where EventName = &#39;system process&#39; group by Properties(&#39;system_process_pid&#39;) show as table get Event fields Close(Properties(&#39;system_process_name&#39;),StartTime), Close(Properties(&#39;system_process_pid&#39;),StartTime), Close(Properties(&#39;system_process_cpu_total_value&#39;),StartTime), Close(Properties(&#39;system_process_state&#39;),StartTime) for Latest 10 Minutes where EventName = &#39;system process&#39; group by Properties(&#39;system_process_pid&#39;) show as table\",\"viewletType\":\"table\",\"isRealTime\":false,\"isSummary\":false,\"isAnalyze\":false,\"isConsole\":false,\"position\":{\"row\":2,\"column\":\"west\"},\"size\":340,\"realTimeSettings\":{\"isOn\":true,\"frequency\":20,\"windowSize\":50},\"chartSettings\":{\"legend\":{\"isVisible\":true},\"data\":{\"hiddenColumns\":[]}},\"dashboardID\":\"d-1b1262cb-7659-b831-1ab7e598b3f1\",\"pageSelected\":1}}"
+                        },
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widgetc66d5d79-f5cb-e879-16cbea607cc2\":{\"redrawRequired\":false,\"viewletName\":\"CPU\",\"viewletQuery\":\"get Event fields Properties(&#39;system_cpu_total_pct&#39;), StartTime, Properties(&#39;system_cpu_user_pct&#39;) for This Day where EventName = &#39;system cpu&#39; order by StartTime show as linechart\",\"viewletType\":\"linechart\",\"isRealTime\":false,\"isSummary\":false,\"isAnalyze\":false,\"isConsole\":false,\"position\":{\"row\":1,\"column\":\"west\"},\"size\":340,\"realTimeSettings\":{\"isOn\":true,\"frequency\":20,\"windowSize\":50},\"chartSettings\":{\"legend\":{\"isVisible\":true}},\"dashboardID\":\"d-1b1262cb-7659-b831-1ab7e598b3f1\",\"pageSelected\":1}}"
+                        },
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widget5093dfa1-74d8-da5d-c6e00f0265a9\":{\"viewletName\":\"Uptime\",\"viewletQuery\":\"Get last event field properties(&#39;system_uptime_duration_ms&#39;) Where name in (&#39;system uptime&#39;) display as SUMMARY\",\"position\":{\"column\":\"center\",\"row\":1},\"settings\":{},\"viewletType\":\"summary\",\"isRealTime\":false,\"isSummary\":true,\"isAnalyze\":false}}"
+                        },
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widget7fefa7ed-d950-43bf-10c5ba45ece6\":{\"redrawRequired\":false,\"viewletName\":\"Memory\",\"viewletQuery\":\"Get Event fields properties(&#39;system_memory_actual_used_pct&#39;), properties(&#39;system_memory_swap_used_pct&#39;) for This Day where EventName = &#39;system memory&#39;\",\"viewletType\":\"table\",\"isRealTime\":false,\"isSummary\":false,\"isAnalyze\":false,\"isConsole\":false,\"position\":{\"row\":2,\"column\":\"east\"},\"size\":340,\"realTimeSettings\":{\"isOn\":true,\"frequency\":20,\"windowSize\":50},\"chartSettings\":{\"legend\":{\"isVisible\":true},\"data\":{\"hiddenColumns\":[]}},\"dashboardID\":\"d-1b1262cb-7659-b831-1ab7e598b3f1\",\"pageSelected\":1}}"
+                        }
+                    ],
+                    "panelSize": {
+                        "east": "33.02",
+                        "west": "33.02"
+                    },
+                    "pageId": "d-1b1262cb-7659-b831-1ab7e598b3f1",
+                    "pageName": "MetricBeats",
+                    "removedViewletDefinations": [
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widget0628297d-f754-f469-7d8ee5b0f5e4\":{\"viewletName\":\"Viewlet 7\",\"viewletQuery\":\"Get last event field properties(&#39;system_uptime_duration_ms&#39;) Where name in (&#39;system uptime&#39;)show as summary\",\"position\":{\"row\":1,\"column\":\"east\"},\"size\":112,\"settings\":{},\"viewletType\":\"table\",\"isRealTime\":false,\"isSummary\":false,\"isAnalyze\":false}}"
+                        },
+                        {
+                            "Version": 2,
+                            "viewletDefinations": "{\"widget5093dfa1-74d8-da5d-c6e00f0265a9\":{\"viewletName\":\"Uptime\",\"viewletQuery\":\"Get last event field properties(&#39;system_uptime_duration_ms&#39;) Where name in (&#39;system uptime&#39;) display as SUMMARY\",\"position\":{\"column\":\"center\",\"row\":1},\"settings\":{},\"viewletType\":\"summary\",\"isRealTime\":false,\"isSummary\":true,\"isAnalyze\":false}}"
+                        }
+                    ]
+                }
+            },
+            "viewletIds": "[\"widget31baee7d-3449-2459-ee3434e21f60\",\"widget5093dfa1-74d8-da5d-c6e00f0265a9\",\"widget7fefa7ed-d950-43bf-10c5ba45ece6\",\"widgetbbdf6d0b-bd3f-eef3-daf4ce1837e8\",\"widgetc66d5d79-f5cb-e879-16cbea607cc2\"]"
+        }
+    }
+]

@@ -1884,6 +1884,9 @@ to stream started Logstash server host and port, e.g.`localhost:5044`.
 
 Sample files can be found in `samples/elastic-beats` directory.
 
+`dashboards` directory contains exported JKool dashboard dedicated to visualize data for this sample. You can import it into your JKool 
+repository. 
+
 How to setup Elastic Beats environment see [`samples/elastic-beats/readme.md`](tnt4j-streams-elastic-beats/samples/elastic-beats/readme.md)
 
 `sampleMsg.json` file contains sample Elastic Beats provided Logstash message as JSON data prepared using configuration of this sample. This

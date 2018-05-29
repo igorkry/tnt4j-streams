@@ -16,3 +16,9 @@
     /metricbeat -c metricbeat.yml -e
 ```
  
+# Importing dashboard into your JKool repository
+
+You can import provided Dashboards into JKool:
+* Login your `jkool.jkoolcloud.com`
+* menu -> import/export -> dashboards -> import -> import dashboards -> chose file
+* select dashboard file from `samples/elastic-beats/dashboards` directory
