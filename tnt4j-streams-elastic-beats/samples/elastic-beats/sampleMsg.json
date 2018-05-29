@@ -1,0 +1,47 @@
+{
+    "@timestamp": "2018-05-29T07:25:42.155Z",
+    "@metadata": {
+        "beat": "metricbeat",
+        "type": "doc",
+        "version": "6.2.4"
+    },
+    "metricset": {
+        "name": "process",
+        "module": "system",
+        "rtt": 17868
+    },
+    "system": {
+        "process": {
+            "cmdline": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\" --type=gpu-process --field-trial-handle=1476,15597964917322560691,2742681934323617120,131072 --gpu-preferences=KAAAAAAAAACAAwCAAQAAAAAAAAAAAGAAEAAAAAAAAAAAAAAAAAAAACgAAAAEAAAAIAAAAAAAAAAoAAAAAAAAADAAAAAAAAAAOAAAAAAAAAAQAAAAAAAAAAAAAAAKAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAQAAAAoAAAAQAAAAAAAAAAEAAAALAAAA --service-request-channel-token=690771F5EFEEAA6263FB38E66DA00D41 --mojo-platform-channel-handle=1472 --ignored=\" --type=renderer \" /prefetch:2",
+            "cpu": {
+                "total": {
+                    "norm": {
+                        "pct": 0
+                    },
+                    "value": 65843,
+                    "pct": 0
+                },
+                "start_time": "2018-05-29T06:36:43.993Z"
+            },
+            "pid": 4400,
+            "memory": {
+                "rss": {
+                    "bytes": 411295744,
+                    "pct": 0.0241
+                },
+                "share": 0,
+                "size": 396374016
+            },
+            "pgid": 0,
+            "name": "chrome.exe",
+            "state": "running",
+            "username": "slabs-marius-PC\\slabs",
+            "ppid": 3232
+        }
+    },
+    "beat": {
+        "name": "slabs-marius-PC",
+        "hostname": "slabs-marius-PC",
+        "version": "6.2.4"
+    }
+}

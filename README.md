@@ -25,6 +25,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     * JAX-WS service
     * System command
     * MS Excel document
+    * Elastic Beats
 
 * Files (also HDFS) can be streamed:
     * as "whole at once" - when a stream starts, it reads file contents line by line meaning a single file line holds data of a single 
@@ -47,6 +48,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     * Collectd
     * Nagios
     * Fluentd
+    * Elastic Beats
 
     just by applying configuration and without additional coding.
 
@@ -1874,6 +1876,72 @@ Stream configuration states that `CharacterStream` referencing `LogstashJSONPars
 `LogstashJSONParser` transforms the received JSON data package to a Map data structure and maps map entries to activity event fields using 
 map entry key labels. The `ActivityDelim` property with value `EOL` indicates that every line in the parsed stream represents a single JSON 
 data package.
+
+#### Elastic Beats provided data
+
+This sample shows how to stream activity events from Elastic Beats. **NOTE**: Elastic Beats environment has to be configured to output data 
+to stream started Logstash server host and port, e.g.`localhost:5044`.
+
+Sample files can be found in `samples/elastic-beats` directory.
+
+How to setup Elastic Beats environment see [`samples/elastic-beats/readme.md`](tnt4j-streams-elastic-beats/samples/elastic-beats/readme.md)
+
+`sampleMsg.json` file contains sample Elastic Beats provided Logstash message as JSON data prepared using configuration of this sample. This
+sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
+
+Sample stream configuration:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="BeatsMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="EventType" value="EVENT"/>
+
+        <field name="StartTime">
+            <field-locator locator="@timestamp" locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                           timezone="GMT">
+            </field-locator>
+        </field>
+
+        <field name="EventName" formattingPattern="{0} {1}">
+            <field-locator locator="metricset.module" locator-type="Label"/>
+            <field-locator locator="metricset.name" locator-type="Label"/>
+        </field>
+
+        <field name="all" locator="*" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleBeatsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ElasticBeatsStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="RestartOnInputClose" value="true"/>
+
+        <!--Binding host-->
+        <!--<property name="Host" value="localhost"/>-->
+        <property name="Port" value="5044"/>
+        <!--Worker properties-->
+        <!--<property name="Timeout" value="30"/>-->
+        <!--<property name="ThreadCount" value="1"/>-->
+
+        <!--SSL properties-->
+        <!--<property name="SSLCertificateFilePath" value="/etc/pki/client/cert.key"/>-->
+        <!--<property name="SSLKeyFilePath" value="/etc/pki/client/cert.pem"/>-->
+        <!--<property name="PassPhrase" value="pass"/>-->
+
+        <parser-ref name="BeatsMessageParser"/>
+    </stream>
+</tnt-data-source>
+```
+
+Stream configuration states that `ElasticBeatsStream` referencing `BeatsMessageParser` shall be used.
+
+`ElasticBeatsStream` starts Logstash server on port defined using `Port` property. You can also define host for server to bind by using 
+`Host` property.
+
+`BeatsMessageParser` takes Map data structure provided by stream and maps map entries to activity event fields using map entry key labels. 
+Since there is no particular set of predefined fields defined for Elastic Beats data, in this sample we map them directly into activity 
+entity (`EVENT`) properties using locator `*` to have them all in JKool.    
 
 #### HTTP request file
 
@@ -5085,6 +5153,18 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 Also see ['Ms Excel Stream generic parameters'](#ms-excel-stream-generic-parameters).
 
+#### Elastic Beats Stream parameters
+
+ * `Host` - host name to bind for stream started Logstash server. Default value - `localhost`. (Optional)
+ * `Port` - port number to bind for stream started Logstash server. Default value - `5044`. (Optional)
+ * `SSLCertificateFilePath` - SSL certificate file path. (Optional)
+ * `SSLKeyFilePath` - SSL key file path. (Optional)
+ * `PassPhrase` - SSL key pass phrase. (Optional)
+ * `Timeout` - connection timeout in seconds. Default value - `30`. (Optional)
+ * `ThreadCount` - number of threads used by Logstash server. Default value - `1`. (Optional)
+ 
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
+
 ### Parsers configuration
 
 #### Generic parser parameters
@@ -5794,17 +5874,20 @@ How to Build TNT4J-Streams
 * (U) marked modules are utility modules (e.g., performs compiled assemblies packaging)
 
 Modules list:
-   * `Core` (M)
-   * `Flume-Plugin` (O)
-   * `Hdfs` (O)
-   * `JMS` (O)
-   * `Kafka` (O)
-   * `Mqtt` (O)
-   * `WMQ` (O)
-   * `WS` (O)
-   * `MsOffice` (O)
-   * `Samples` (O)
-   * `Distribution` (OU)
+   * `Core` (M) - major module implementing data streaming (collection and transformation) features.
+   * `Elastic-Beats` (O) - Elastic Beats provided data streaming module.
+   * `Flume-Plugin` (O) - Apache Flume provided data streaming module.
+   * `Fs` (O) - Java [FileSystem](https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html) based file systems provided data 
+   streaming module. 
+   * `Hdfs` (O) - HDFS (Apache Hadoop) provided data streaming module. 
+   * `JMS` (O) - JMS (Java Message Service) provided data streaming module.
+   * `Kafka` (O) - Apache Kafka provided data streaming module.
+   * `Mqtt` (O) - MQTT provided data streaming module.
+   * `MsOffice` (O) - MS Office Excel provided data streaming module.
+   * `WMQ` (O) - IBM MQ provided data streaming module.
+   * `WS` (O) - web-service (or OS command) provided data streaming module.
+   * `Samples` (O) - integration into custom API sample module.
+   * `Distribution` (OU) - distributable package build module.
 
 All optional modules (extensions) depends to `core` module and can't be build and run without it.
 
@@ -5812,7 +5895,7 @@ All optional modules (extensions) depends to `core` module and can't be build an
 **NOTE:** `Distribution` module performs `maven post build` release assemblies delivery to `../build/tnt4j-streams` directory.
 
 ## Requirements
-* JDK 1.7+
+* JDK 1.7+ (JDK 1.8+ for `Elastic-Beats` module)
 * [Apache Maven 3](https://maven.apache.org/)
 * [TNT4J](https://github.com/Nastel/TNT4J)
 * [JESL](https://github.com/Nastel/JESL)
@@ -5826,11 +5909,28 @@ case we would recommend to download those dependencies manually into module's `l
 running maven script `lib/pom.xml` with `install` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
 how to do this.
 
+#### `Elastic-Beats` module
+
+**NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` 
+by default. If you want to use it uncomment line `<module>tnt4j-streams-elastic-beats</module>` of `pom.xml` file. But `Elastic-Beats` 
+module will be ready to build only when manually downloaded libraries will be installed to local maven repository.
+
+What to download manually or copy from your existing IBM MQ installation:
+* Logstash Beats Input Plugin 5.0.13
+
+Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-elastic-beats/lib` directory like this:
+```
+    lib
+     |- logstash-input-beats-5.0.13.jar      
+```
+(O) marked libraries are optional
+
+
 #### `WMQ` module
 
-**NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` by 
-default. If you want to use it uncomment this line of `pom.xml` file. But `WMQ` module will be ready to build only when manually downloaded 
-libraries will be installed to local maven repository.
+**NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` 
+by default. If you want to use it uncomment line `<module>tnt4j-streams-wmq</module>` of `pom.xml` file. But `WMQ` module will be ready to 
+build only when manually downloaded libraries will be installed to local maven repository.
 
 What to download manually or copy from your existing IBM MQ installation:
 * IBM MQ 8.0 or 9.0
@@ -5904,7 +6004,9 @@ Maven tests run is disabled by default. To enable Maven to run tests set Maven c
 
 ## Running manually from IDE
 * in `core` module run JUnit test suite named `AllStreamsCoreTests`
+* in `elastic-beats` module run JUnit test suite named `AllElasticBeatsTests`
 * in `flume-plugin` module run JUnit test suite named `AllFlumeTests`
+* in `fs` module run JUnit test suite named `AllFsStreamTests`
 * in `hdfs` module run JUnit test suite named `AllHdfsStreamTests`
 * in `jms` module run JUnit test suite named `AllJMSStreamTests`
 * in `kafka` module run JUnit test suite named `AllKafkaStreamTests`

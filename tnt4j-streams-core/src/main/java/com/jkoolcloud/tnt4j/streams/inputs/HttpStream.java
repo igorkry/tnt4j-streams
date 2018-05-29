@@ -55,6 +55,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>a single activity event sent as form data (parameters keys/values set)</li>
  * <li>a byte array as request payload data (e.g., log file contents)</li>
  * </ul>
+ * <p>
  * Running this stream Http server is started on configuration defined port.
  * <p>
  * This activity stream requires parsers that can support {@link Map} data. On message reception message data is packed
@@ -111,26 +112,6 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	@Override
-	public Object getProperty(String name) {
-		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-			return serverPort;
-		}
-		if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-			return useSSL;
-		}
-		if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
-			return keystore;
-		}
-		if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
-			return keystorePass;
-		}
-		if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
-			return keyPass;
-		}
-		return super.getProperty(name);
-	}
-
-	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
@@ -151,6 +132,27 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+			return serverPort;
+		}
+		if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
+			return useSSL;
+		}
+		if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+			return keystore;
+		}
+		if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+			return keystorePass;
+		}
+		if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
+			return keyPass;
+		}
+
+		return super.getProperty(name);
 	}
 
 	@Override
@@ -223,6 +225,9 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		/**
 		 * Input request handler initialization - HTTP server configuration.
+		 *
+		 * @param params
+		 *            initialization parameters array
 		 *
 		 * @throws Exception
 		 *             if fails to initialize request handler and configure HTTP server

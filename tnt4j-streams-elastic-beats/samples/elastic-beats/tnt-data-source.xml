@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="BeatsMessageParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="EventType" value="EVENT"/>
+
+        <field name="StartTime">
+            <field-locator locator="@timestamp" locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                           timezone="GMT">
+            </field-locator>
+        </field>
+
+        <field name="EventName" formattingPattern="{0} {1}">
+            <field-locator locator="metricset.module" locator-type="Label"/>
+            <field-locator locator="metricset.name" locator-type="Label"/>
+        </field>
+
+        <field name="all" locator="*" locator-type="Label"/>
+    </parser>
+
+    <stream name="SampleBeatsStream" class="com.jkoolcloud.tnt4j.streams.inputs.ElasticBeatsStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="RestartOnInputClose" value="true"/>
+
+        <!--Binding host-->
+        <!--<property name="Host" value="localhost"/>-->
+        <property name="Port" value="5044"/>
+        <!--Worker properties-->
+        <!--<property name="Timeout" value="30"/>-->
+        <!--<property name="ThreadCount" value="1"/>-->
+
+        <!--SSL properties-->
+        <!--<property name="SSLCertificateFilePath" value="/etc/pki/client/cert.key"/>-->
+        <!--<property name="SSLKeyFilePath" value="/etc/pki/client/cert.pem"/>-->
+        <!--<property name="PassPhrase" value="pass"/>-->
+
+        <parser-ref name="BeatsMessageParser"/>
+    </stream>
+</tnt-data-source>
