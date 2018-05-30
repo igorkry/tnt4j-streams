@@ -43,6 +43,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="matchExp" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="aggregation" type="{}AggregationTypes" default="Merge" />
+ *       &lt;attribute name="applyOn" type="{}ParserApplyTypes" default="Field" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -60,14 +61,22 @@ public class FieldParserReference extends Reference {
 	@XmlAttribute(name = "aggregation")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	protected AggregationTypes aggregation;
+	@XmlAttribute(name = "applyOn")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	protected ParserApplyTypes applyOn;
 
 	public FieldParserReference() {
 		super();
 	}
 
 	public FieldParserReference(String name, AggregationTypes aType) {
+		this(name, aType, null);
+	}
+
+	public FieldParserReference(String name, AggregationTypes aType, ParserApplyTypes applyOn) {
 		super(name);
 		this.aggregation = aType;
+		this.applyOn = applyOn;
 	}
 
 	/**
@@ -128,6 +137,33 @@ public class FieldParserReference extends Reference {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setAggregation(AggregationTypes value) {
 		this.aggregation = value;
+	}
+
+	/**
+	 * Gets the value of the applyOn property.
+	 *
+	 * @return possible object is {@link ParserApplyTypes }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	public ParserApplyTypes getApplyOn() {
+		if (applyOn == null) {
+			return ParserApplyTypes.FIELD;
+		} else {
+			return applyOn;
+		}
+	}
+
+	/**
+	 * Sets the value of the applyOn property.
+	 *
+	 * @param value
+	 *            allowed object is {@link ParserApplyTypes }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-24T11:46:52+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setApplyOn(ParserApplyTypes value) {
+		this.applyOn = value;
 	}
 
 }

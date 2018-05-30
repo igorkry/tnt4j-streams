@@ -460,12 +460,15 @@ public class ActivityField extends AbstractFieldEntity {
 	 *            the stacked parser to add
 	 * @param aggregationType
 	 *            resolved activity entities aggregation type
+	 * @param applyOn
+	 *            stacked parser application phase name
 	 * @param matchExps
 	 *            match expressions list
 	 *
 	 * @return instance of this activity field
 	 */
-	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, List<String> matchExps) {
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String applyOn,
+			List<String> matchExps) {
 		if (parser != null) {
 			if (stackedParsers == null) {
 				stackedParsers = new LinkedHashSet<>(5);
@@ -473,7 +476,7 @@ public class ActivityField extends AbstractFieldEntity {
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityField.adding.stacked.parser", fieldTypeName, parser.getName());
-			ParserReference pRef = new ParserReference(parser, aggregationType);
+			ParserReference pRef = new ParserReference(parser, aggregationType, applyOn);
 			if (CollectionUtils.isNotEmpty(matchExps)) {
 				pRef.setMatchExpressions(matchExps);
 			}
@@ -490,15 +493,18 @@ public class ActivityField extends AbstractFieldEntity {
 	 *            the stacked parser to add
 	 * @param aggregationType
 	 *            resolved activity entities aggregation type
+	 * @param applyOn
+	 *            stacked parser application phase name
 	 * @param matchExps
 	 *            match expressions array
 	 *
 	 * @return instance of this activity field
 	 *
-	 * @see #addStackedParser(com.jkoolcloud.tnt4j.streams.parsers.ActivityParser, String, java.util.List)
+	 * @see #addStackedParser(com.jkoolcloud.tnt4j.streams.parsers.ActivityParser, String, String, java.util.List)
 	 */
-	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String... matchExps) {
-		return addStackedParser(parser, aggregationType, matchExps == null ? null : Arrays.asList(matchExps));
+	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String applyOn,
+			String... matchExps) {
+		return addStackedParser(parser, aggregationType, applyOn, matchExps == null ? null : Arrays.asList(matchExps));
 	}
 
 	/**
@@ -723,6 +729,7 @@ public class ActivityField extends AbstractFieldEntity {
 	public static class ParserReference {
 		private ActivityParser parser;
 		private AggregationType aggregationType;
+		private ParserApplyType applyOn;
 		private List<String> matchExpressions;
 
 		/**
@@ -732,7 +739,7 @@ public class ActivityField extends AbstractFieldEntity {
 		 *            referenced parser instance
 		 */
 		ParserReference(ActivityParser parser) {
-			this(parser, AggregationType.Merge);
+			this(parser, AggregationType.Merge, ParserApplyType.Field);
 		}
 
 		/**
@@ -742,10 +749,15 @@ public class ActivityField extends AbstractFieldEntity {
 		 *            referenced parser instance
 		 * @param aggregationType
 		 *            activity entity resolved fields aggregation type name
+		 * @param applyOn
+		 *            * stacked parser application phase type name
 		 */
-		ParserReference(ActivityParser parser, String aggregationType) {
-			this(parser, StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
-					: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType));
+		ParserReference(ActivityParser parser, String aggregationType, String applyOn) {
+			this(parser,
+					StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
+							: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType),
+					StringUtils.isEmpty(applyOn) ? ParserApplyType.Field
+							: Utils.valueOfIgnoreCase(ParserApplyType.class, applyOn));
 		}
 
 		/**
@@ -755,10 +767,13 @@ public class ActivityField extends AbstractFieldEntity {
 		 *            referenced parser instance
 		 * @param aggregationType
 		 *            activity entity resolved fields aggregation type
+		 * @param applyOn
+		 *            stacked parser application phase type
 		 */
-		ParserReference(ActivityParser parser, AggregationType aggregationType) {
+		ParserReference(ActivityParser parser, AggregationType aggregationType, ParserApplyType applyOn) {
 			this.parser = parser;
 			this.aggregationType = aggregationType;
+			this.applyOn = applyOn;
 		}
 
 		/**
@@ -777,6 +792,15 @@ public class ActivityField extends AbstractFieldEntity {
 		 */
 		public AggregationType getAggregationType() {
 			return aggregationType;
+		}
+
+		/**
+		 * Returns stacked parser application phase type.
+		 *
+		 * @return the stacked parser application phase type
+		 */
+		public ParserApplyType getApplyOn() {
+			return applyOn;
 		}
 
 		/**
@@ -816,7 +840,7 @@ public class ActivityField extends AbstractFieldEntity {
 
 		@Override
 		public String toString() {
-			return parser.getName() + ":" + aggregationType; // NON-NLS
+			return parser.getName() + ":" + aggregationType + ":" + applyOn; // NON-NLS
 		}
 	}
 }

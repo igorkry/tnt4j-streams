@@ -1032,6 +1032,32 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- Stacked parser application types enumeration definition -->
+    <xs:simpleType name="ParserApplyTypes">
+        <xs:annotation>
+            <xs:documentation>
+                Set of stacked parser application types.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Field">
+                <xs:annotation>
+                    <xs:documentation>
+                        Apply stacked parser on field resolved value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
+            <xs:enumeration value="Activity">
+                <xs:annotation>
+                    <xs:documentation>
+                        Apply stacked parser on activity entity stored value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Element <property> definition -->
     <xs:complexType name="Property">
         <xs:annotation>
@@ -1693,6 +1719,15 @@
                     <xs:annotation>
                         <xs:documentation>
                             Defines type of stacked parser resolved activity entity data aggregation into parent activity entity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+
+                <xs:attribute name="applyOn" use="optional" type="ParserApplyTypes" default="Field">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Defines on which value to apply stacked parser: resolved by field (before aggregating to activity entity),
+                            stored by activity entity.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>

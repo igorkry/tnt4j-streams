@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,6 +34,7 @@ import javax.xml.xpath.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
@@ -224,6 +226,17 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		try {
 			if (data instanceof Node) {
 				xmlDoc = (Node) data;
+
+				// make sure document has all namespace related data, since we can't assure if document producer took
+				// care on this
+				if (namespaceAware) {
+					Document tDoc = xmlDoc.getOwnerDocument();
+					Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
+					if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
+						xmlDoc = builder.parse(
+								new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
+					}
+				}
 			} else {
 				xmlString = getNextActivityString(data);
 				if (StringUtils.isEmpty(xmlString)) {
@@ -328,7 +341,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 		if (ActivityField.isDynamicAttr(locStr)) {
 			ActivityInfo ai = cData.getActivity();
-			locStr = StreamsCache.fillInKeyPattern(locStr, ai, this.getName());
+			locStr = StreamsCache.fillInKeyPattern(locStr, ai, getName());
 		}
 
 		if (StringUtils.isNotEmpty(locStr)) {

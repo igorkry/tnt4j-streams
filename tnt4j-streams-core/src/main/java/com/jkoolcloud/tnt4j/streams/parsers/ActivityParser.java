@@ -25,10 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.fields.AggregationType;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.matchers.Matchers;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -162,7 +159,9 @@ public abstract class ActivityParser {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.stacked.parser.applying", name, parserRef, field);
 				try {
-					applied = applyStackedParser(stream, ai, field, parserRef, value);
+					Object valueToParse = parserRef.getApplyOn() == ParserApplyType.Activity
+							? ai.getFieldValue(field.getFieldTypeName()) : value;
+					applied = applyStackedParser(stream, ai, field, parserRef, valueToParse);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.stacked.parser.applied", name, field, parserRef, applied);
@@ -213,7 +212,8 @@ public abstract class ActivityParser {
 			ActivityInfo sai = parserRef.getParser().parse(stream, value);
 
 			if (sai != null) {
-				if (parserRef.getAggregationType() == AggregationType.Join) {
+				if (parserRef.getAggregationType() == AggregationType.Join
+						|| parserRef.getAggregationType() == AggregationType.Relate) {
 					ai.addChild(sai);
 				} else {
 					ai.mergeAll(sai);
