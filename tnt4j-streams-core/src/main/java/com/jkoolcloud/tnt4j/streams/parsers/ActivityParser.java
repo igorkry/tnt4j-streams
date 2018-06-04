@@ -25,6 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.matchers.Matchers;
@@ -37,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  *
  * @version $Revision: 1 $
  */
-public abstract class ActivityParser {
+public abstract class ActivityParser implements NamedObject {
 	/**
 	 * Name of activity parser
 	 */
@@ -301,6 +302,7 @@ public abstract class ActivityParser {
 	 *
 	 * @return name string of activity parser
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -311,6 +313,7 @@ public abstract class ActivityParser {
 	 * @param name
 	 *            name string value
 	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}

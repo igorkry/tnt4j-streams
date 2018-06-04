@@ -33,11 +33,13 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.jkoolcloud.tnt4j.config.Configurable;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.configure.jaxb.ResourceReferenceType;
@@ -1655,6 +1657,10 @@ public class ConfigParserHandler extends DefaultHandler {
 					obj = Utils.createInstance(type, new Object[] { value }, String.class);
 				}
 			}
+
+			if (obj instanceof NamedObject) {
+				((NamedObject) obj).setName(name);
+			}
 			javaObjectData.addArg(obj);
 			javaObjectData.addType(type);
 		} catch (Exception exc) {
@@ -1887,15 +1893,11 @@ public class ConfigParserHandler extends DefaultHandler {
 		try {
 			if (STREAM_ELMT.equals(qName)) {
 				currStream.setProperties(applyVariableProperties(currProperties));
-				if (currProperties != null) {
-					currProperties.clear();
-				}
+				currProperties = null;
 				currStream = null;
 			} else if (PARSER_ELMT.equals(qName)) {
 				currParser.setProperties(applyVariableProperties(currProperties));
-				if (currProperties != null) {
-					currProperties.clear();
-				}
+				currProperties = null;
 				currParser = null;
 			} else if (FIELD_ELMT.equals(qName) || EMBEDDED_ACTIVITY_ELMT.equals(qName)) {
 				if (currField != null) {
@@ -1918,7 +1920,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (JAVA_OBJ_ELMT.equals(qName)) {
 				if (javaObjectData != null) {
 					handleJavaObject(javaObjectData);
-
+					currProperties = null;
 					javaObjectData = null;
 				}
 			} else if (PROPERTY_ELMT.equals(qName)) {
@@ -1961,9 +1963,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			} else if (CACHE_ELMT.equals(qName)) {
 				StreamsCache.setProperties(applyVariableProperties(currProperties));
-				if (currProperties != null) {
-					currProperties.clear();
-				}
+				currProperties = null;
 				processingCache = false;
 			} else if (CACHE_ENTRY_ELMT.equals(qName)) {
 				if (currCacheEntry != null) {
@@ -2118,13 +2118,30 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		javaObjectsMap.put(javaObjectData.name, obj);
 
+		if (obj instanceof NamedObject) {
+			((NamedObject) obj).setName(javaObjectData.name);
+		}
+
 		if (obj instanceof TNTStreamOutput) {
 			TNTStreamOutput<?> out = (TNTStreamOutput<?>) obj;
-			out.setName(javaObjectData.name);
 
 			if (MapUtils.isNotEmpty(currProperties)) {
 				out.setProperties(applyVariableProperties(currProperties));
-				currProperties.clear();
+			}
+		} else if (obj instanceof Configurable) {
+			Configurable cfgObj = (Configurable) obj;
+
+			if (MapUtils.isNotEmpty(currProperties)) {
+				String beanRefObj = currProperties.get(BEAN_REF_ATTR);
+				if (StringUtils.isNotEmpty(beanRefObj)) {
+					Map<String, Object> props = new HashMap<>(currProperties.size());
+					props.putAll(currProperties);
+					Object beanObj = resolveTransformationBean(String.valueOf(beanRefObj));
+					props.put(BEAN_REF_ATTR, beanObj);
+					cfgObj.setConfiguration(props);
+				} else {
+					cfgObj.setConfiguration(currProperties);
+				}
 			}
 		}
 	}
@@ -2232,7 +2249,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void handleFieldTransform(FieldTransformData currTransformData) throws SAXException {
 		String eDataVal = getElementData();
 
@@ -2256,22 +2272,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		ValueTransformation<Object, Object> transform;
 
 		if (StringUtils.isNotEmpty(currTransformData.beanRef)) {
-			Object tObj = javaObjectsMap.get(currTransformData.beanRef);
-
-			if (tObj == null) {
-				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ConfigParserHandler.undefined.reference", FIELD_TRANSFORM_ELMT, currTransformData.beanRef),
-						currParseLocation);
-			}
-
-			if (tObj instanceof ValueTransformation) {
-				transform = (ValueTransformation<Object, Object>) tObj;
-			} else {
-				throw new SAXNotSupportedException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ConfigParserHandler.not.extend.class", FIELD_TRANSFORM_ELMT, BEAN_REF_ATTR,
-								tObj.getClass().getName(), ValueTransformation.class.getName(), getLocationInfo()));
-			}
+			transform = resolveTransformationBean(currTransformData.beanRef);
 		} else {
 			transform = AbstractScriptTransformation.createScriptTransformation(currTransformData.name,
 					currTransformData.scriptLang, currTransformData.scriptCode, currTransformData.phase);
@@ -2281,6 +2282,26 @@ public class ConfigParserHandler extends DefaultHandler {
 			currLocatorData.valueTransforms.add(transform);
 		} else {
 			currField.addTransformation(transform);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private ValueTransformation<Object, Object> resolveTransformationBean(String beanRef) throws SAXException {
+		Object tObj = javaObjectsMap.get(beanRef);
+
+		if (tObj == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.undefined.reference", FIELD_TRANSFORM_ELMT, beanRef),
+					currParseLocation);
+		}
+
+		if (tObj instanceof ValueTransformation) {
+			return (ValueTransformation<Object, Object>) tObj;
+		} else {
+			throw new SAXNotSupportedException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ConfigParserHandler.not.extend.class", FIELD_TRANSFORM_ELMT,
+					BEAN_REF_ATTR, tObj.getClass().getName(), ValueTransformation.class.getName(), getLocationInfo()));
 		}
 	}
 

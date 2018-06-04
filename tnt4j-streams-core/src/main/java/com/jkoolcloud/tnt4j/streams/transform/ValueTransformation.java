@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 
 /**
@@ -28,13 +29,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  *
  * @version $Revision: 1 $
  */
-public interface ValueTransformation<V, T> {
-	/**
-	 * Returns name of transformation.
-	 *
-	 * @return name of transformation
-	 */
-	String getName();
+public interface ValueTransformation<V, T> extends NamedObject {
 
 	/**
 	 * Transforms provided data value applying some business rules.

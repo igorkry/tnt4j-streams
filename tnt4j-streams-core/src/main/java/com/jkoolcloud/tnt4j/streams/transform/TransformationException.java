@@ -36,6 +36,17 @@ public class TransformationException extends Exception {
 	}
 
 	/**
+	 * Constructs an {@code TransformationException} with the specified cause.
+	 *
+	 * @param cause
+	 *            the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
+	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
+	 */
+	public TransformationException(Throwable cause) {
+		super(cause);
+	}
+
+	/**
 	 * Constructs an {@code TransformationException} with the specified detail message and cause.
 	 *
 	 * @param message

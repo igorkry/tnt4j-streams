@@ -75,7 +75,7 @@ Running TNT4J-Streams
     * write streams configuration file. See ['Streams configuration'](#streams-configuration) chapter for more details
     * configure your loggers
     * use `bin/tnt4j-streams.bat` or `bin/tnt4j-streams.sh` to run standalone application
- 
+
      **NOTE:** in case you are using Java 9 as your runtime JVM and getting `java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException`, 
      add `java` command parameter `--add-modules java.xml.bind` to add JAXB classes to java classpath.
 * As API integrated into your product
@@ -456,7 +456,7 @@ placeholder `$fieldValue`.
     <matchExp>groovy:$fieldValue instanceof Map</matchExp>
     <matchExp>javascript:$fieldValue.length > 300</matchExp>
 </parser-ref>
-```   
+```
 
 Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
 activity entity field names. 
@@ -548,7 +548,7 @@ total):
 ParentActivity
     + ChildEvent1
     + ChildEvent2
-    + ChildEvent3     
+    + ChildEvent3
 ```
 stream output will send such entities to JKool (3 entities in total):
 ```
@@ -560,7 +560,7 @@ Event3 having ChilEvent3 + ParentActivity data
 This is useful when streamed data is aggregated in one data package, like JSON/XML data having some header values and array of payload 
 entries (see `mft-tracking` sample XML's), but you need only those payload entries maintaining some header data contained values to be set 
 to JKool. Or like in `mft_fte` sample, when MFT `transaction` progress event `transferSet` node having `source` and `destination` 
-definitions and you need to split them into separate events maintaining some `transaction` data values.  
+definitions and you need to split them into separate events maintaining some `transaction` data values.
 
 ### Field value transformations
 
@@ -1944,7 +1944,7 @@ Stream configuration states that `ElasticBeatsStream` referencing `BeatsMessageP
 
 `BeatsMessageParser` takes Map data structure provided by stream and maps map entries to activity event fields using map entry key labels. 
 Since there is no particular set of predefined fields defined for Elastic Beats data, in this sample we map them directly into activity 
-entity (`EVENT`) properties using locator `*` to have them all in JKool.    
+entity (`EVENT`) properties using locator `*` to have them all in JKool.
 
 #### HTTP request file
 
@@ -2835,10 +2835,10 @@ Sample stream configuration:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <!-- this sample is useful for tracing MQ activity using activity events and requires little or no alteration
-	 1) Verify Message, Payload and Correlator examples for desired settings
+     1) Verify Message, Payload and Correlator examples for desired settings
      2) Set the queue manager(s) to process in the stream section at the end of this file
-	 3) Review other fields as needed
-	 -->
+     3) Review other fields as needed
+     -->
 
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2873,9 +2873,9 @@ Sample stream configuration:
         <property name="TranslateNumValues" value="true"/>
 
         <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
-			  entire content, remove this section.  To capture a portion of the message, use an
-			  imbedded parser as shown in the example below).
-			  -->
+              entire content, remove this section.  To capture a portion of the message, use an
+              imbedded parser as shown in the example below).
+              -->
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="BytesToString" lang="groovy"><![CDATA[
                $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
@@ -3869,7 +3869,7 @@ field string mapping to TNT4J event field value.
 **NOTE:** `ExcelRowStream` uses DOM based MS Excel file reading, thus memory consumption for large file may be significant, but it allows 
 random cells access and precise formula evaluation. In case memory consumption is critical factor, use `ExcelSXSSFRowStream` instead of 
 `ExcelRowStream`. It uses Apache POI SXSSF API to read MS Excel as a stream consistently iterating over workbook sheets rows and cells. 
-Thus it may have some drawback on cell formula evaluation. For more information see [Apache POI spreadsheet documentation](https://poi.apache.org/spreadsheet/).     
+Thus it may have some drawback on cell formula evaluation. For more information see [Apache POI spreadsheet documentation](https://poi.apache.org/spreadsheet/).
 
 ##### Sheets
 
@@ -4139,7 +4139,7 @@ Sample stream configuration:
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
         <property name="HaltIfNoParser" value="false"/>
-        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.LOG"/>       
+        <property name="FileName" value="./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR*.LOG"/>
         <property name="RestoreState" value="false"/>
         <property name="FilePolling" value="true"/>
         <property name="FileReadDelay" value="20"/>
@@ -4203,7 +4203,7 @@ Sample stream configuration:
         <field name="Sequence" locator="$.ibm_sequence" locator-type="Label"/>
         <field name="RemoteHost" locator="$.ibm_remoteHost" locator-type="Label"/>
         <field name="Host" locator="$.host" locator-type="Label"/>
-        <field name="InstallationDir" locator="$.ibm_installationDir" locator-type="Label"/>        
+        <field name="InstallationDir" locator="$.ibm_installationDir" locator-type="Label"/>
     </parser>
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
@@ -4290,7 +4290,7 @@ provided string. **NOTE** that range lower bound is treated **inclusive** and up
  * `:x` - from the `beginning` of the string to character at the index `x` (**exclusive**)
  * `x:y` - from character at the index `x` (**inclusive**) to character at the index `y` (**exclusive**)
  * `x:` - from character at the index `x` (**inclusive**) to the `end` of the string
- 
+
 #### IBM MQ RFH2/JMS streaming
 
 This sample shows how to stream IBM MQ RFH2/JMS binary data as activity events.
@@ -4343,15 +4343,15 @@ Sample stream configuration:
 Stream configuration states that `RFH2JMSFileStream` referencing `RFH2Parser` shall be used. Stream reads message entries from 
 `./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin` file contents and passes it to parser. Since `ActivityRFH2Parser` is extension of map 
 parser it produces map having two entries with predefined keys: `rfh2Folders` for RFH2 folders data XML string, and `jmsMsgPayload` for JMS 
-message payload de-serialized object or bytes if serialisation can't be done.   
+message payload de-serialized object or bytes if serialisation can't be done.
 
 `RFH2Parser` resolves RFH2 folders and JMS message payload data into predefined fields `rfh2Folders` and `jmsMsgPayload`. Values of these 
 fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for further parsing into fields of `EVENT` named 
-`IBM_MQ_RFH2/JMS_PAYLOAD`.  
+`IBM_MQ_RFH2/JMS_PAYLOAD`.
 
 `RFH2FoldersParser` parser uses XPath expressions to resolve values.
-`JMSPayloadParser` copies all JMS MapMessage entries as fields of `EVENT` named `IBM_MQ_RFH2/JMS_PAYLOAD`.  
- 
+`JMSPayloadParser` copies all JMS MapMessage entries as fields of `EVENT` named `IBM_MQ_RFH2/JMS_PAYLOAD`.
+
 #### Fluentd logs streaming
 
 TODO 
@@ -4440,33 +4440,33 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
 ```properties
 # Stanza used for TNT4J-Streams sources
 {
-	source: com.jkoolcloud.tnt4j.streams
-	source.factory: com.jkoolcloud.tnt4j.source.SourceFactoryImpl
-	source.factory.GEOADDR: <YOUR GEO ADDRESS>
-	source.factory.DATACENTER: <YOUR DATA CENTER NAME>
-	source.factory.RootFQN: RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?
-	source.factory.RootSSN: tnt4j-streams
+    source: com.jkoolcloud.tnt4j.streams
+    source.factory: com.jkoolcloud.tnt4j.source.SourceFactoryImpl
+    source.factory.GEOADDR: <YOUR GEO ADDRESS>
+    source.factory.DATACENTER: <YOUR DATA CENTER NAME>
+    source.factory.RootFQN: RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?
+    source.factory.RootSSN: tnt4j-streams
 
-	tracker.factory: com.jkoolcloud.tnt4j.tracker.DefaultTrackerFactory
-	dump.sink.factory: com.jkoolcloud.tnt4j.dump.DefaultDumpSinkFactory
-	tracker.default.snapshot.category: TNT4J-Streams-event-snapshot
+    tracker.factory: com.jkoolcloud.tnt4j.tracker.DefaultTrackerFactory
+    dump.sink.factory: com.jkoolcloud.tnt4j.dump.DefaultDumpSinkFactory
+    tracker.default.snapshot.category: TNT4J-Streams-event-snapshot
 
-	# event sink configuration: destination and data format
-	<YOUR EVENT SINK CONFIGURATION: JKoolCloud, Kafka, MQTT, etc.>
+    # event sink configuration: destination and data format
+    <YOUR EVENT SINK CONFIGURATION: JKoolCloud, Kafka, MQTT, etc.>
 
-	event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
-	#event.formatter.Newline: true
+    event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
+    #event.formatter.Newline: true
 
-	# Configure default sink filter based on level and time (elapsed/wait)
-	##event.sink.factory.Filter: com.jkoolcloud.tnt4j.filters.EventLevelTimeFilter
-	##event.sink.factory.Filter.Level: TRACE
-	# Uncomment lines below to filter out events based on elapsed time and wait time
-	# Timed event/activities greater or equal to given values will be logged
-	##event.sink.factory.Filter.ElapsedUsec: 100
-	##event.sink.factory.Filter.WaitUsec: 100
+    # Configure default sink filter based on level and time (elapsed/wait)
+    ##event.sink.factory.Filter: com.jkoolcloud.tnt4j.filters.EventLevelTimeFilter
+    ##event.sink.factory.Filter.Level: TRACE
+    # Uncomment lines below to filter out events based on elapsed time and wait time
+    # Timed event/activities greater or equal to given values will be logged
+    ##event.sink.factory.Filter.ElapsedUsec: 100
+    ##event.sink.factory.Filter.WaitUsec: 100
 
-	tracking.selector: com.jkoolcloud.tnt4j.selector.DefaultTrackingSelector
-	tracking.selector.Repository: com.jkoolcloud.tnt4j.repository.FileTokenRepository
+    tracking.selector: com.jkoolcloud.tnt4j.selector.DefaultTrackingSelector
+    tracking.selector.Repository: com.jkoolcloud.tnt4j.repository.FileTokenRepository
 }
 ```
 
@@ -4525,7 +4525,7 @@ listed in `TNT4J-Streams` log as `WARNING` level entries. To enable this XML-XSD
 `com.jkoolcloud.tnt4j.streams.validate.config`:
 ```properties
     -Dcom.jkoolcloud.tnt4j.streams.validate.config=true
-```   
+```
 
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 
 [OS piped stream](#os-piped-stream).
@@ -4601,7 +4601,7 @@ where `env.property.name` is property name from one of defined sources set, e.g.
 It is also possible to use dynamic property value resolution for a fragment of property value:
 ```xml
     <property name="FileName" value="${user.dir}/data/access.log"/>
-```   
+```
 
 ### Streams configuration
 
@@ -4945,9 +4945,9 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     * MQSO_RESUME - if subscription name is defined
 
     (Optional)
-    
+
  * `CMQC.XXXXXXX_PROPERTY` - any `CMQC` defined Queue Manager connection property. You can define multiple `CMQC` connection properties per 
- `stream` definition, but only one per `property` definition. (Optional)    
+ `stream` definition, but only one per `property` definition. (Optional)
 
     sample:
 ```xml
@@ -5140,7 +5140,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 ```xml
     <property name="FileName" value="./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx"/>
     <property name="SheetsToProcess" value="Sheet(1|8|12)"/>
-    <property name="WorkbookPassword" value="xlsPass"/>        
+    <property name="WorkbookPassword" value="xlsPass"/>
 ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
@@ -5165,7 +5165,7 @@ Also see ['Ms Excel Stream generic parameters'](#ms-excel-stream-generic-paramet
  * `PassPhrase` - SSL key pass phrase. (Optional)
  * `Timeout` - connection timeout in seconds. Default value - `30`. (Optional)
  * `ThreadCount` - number of threads used by Logstash server. Default value - `1`. (Optional)
- 
+
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
 ### Parsers configuration
@@ -5390,7 +5390,7 @@ as activity entity fields/properties by using map entry data as this:
 * map entry value - field/property value
 
 Locator path token `*` can be omitted if last path token resolves to `java.util.Map` type value. However to get complete map for root path 
-level you must define it `locator="*"` anyway, since locator value can't be empty.    
+level you must define it `locator="*"` anyway, since locator value can't be empty.
 
 **NOTE:** using locator path token value `#` (e.g. `locator="#"`) you can make parser to get all yet parser un-touched map entries from that 
 level and put it all as activity entity fields/properties by using map entry data as this:
@@ -5406,7 +5406,7 @@ entry3: key=key3, value=value3
 then using parser configuration:
 ```xml
 <field name="Message" locator="key2" locator-type="Label"/> 
-<field name="AllRestMapEntries" locator="#" locator-type="Label"/>      
+<field name="AllRestMapEntries" locator="#" locator-type="Label"/>
 ```
 you'll get such results:
 ```properties
@@ -5523,7 +5523,7 @@ some specific set of objects has to be handled by this parser instead of all pas
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
 
 #### Activity String parser
- 
+
 This parser has no additional configuration properties.
 
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
@@ -5531,7 +5531,7 @@ Also see [Generic parser parameters](#generic-parser-parameters) regarding highe
 #### IBM MQ RFH2/JMS binary data parser
 
 This parser has no additional configuration properties.
- 
+
 Also see [Activity map parser](#activity-map-parser) regarding higher level parser configuration.
 
 This parser resolved data map may contain such entries:
@@ -5541,11 +5541,20 @@ by [Activity XML parser](activity-xml-parser)
 
 ### Pre-parsers
 
-`TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, supported by 
-stream used parser. Pre-parsers shall implement [`ActivityDataPreParser`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/preparsers/ActivityDataPreParser.java) 
+`TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, 
+supported by stream used parser. Pre-parsers shall implement [`ActivityDataPreParser`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/preparsers/ActivityDataPreParser.java) 
 interface.
 
-Sample stream configuration using pre-parsers:
+It is possible to define multiple pre-parsers for same parser instance. In that case pre-parser are applied sequentially (sequence is 
+defined by `reference` tags order within `parser` tag), where input of applied pre-parser is output of previous pre-parser. 
+
+#### XML From Binary Data Pre-parser
+
+What is does:
+* retrieves XML data from mixture of binary and string data (like `RFH2`)
+* makes incomplete XML string fragment as complete (DOM valid) XML string
+
+Sample stream configuration using `XMLFromBinDataPreParser` pre-parser:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <tnt-data-source
@@ -5587,6 +5596,47 @@ enumeration values:
 * `hexBinary` - binary data represented as bytes HEX codes sequence 
 * `string` - binary data represented as plain string
 * `bytes` - binary data as `byte[]` (default format value).
+
+#### Transformation Pre-parser
+
+What is does:
+* applies user defined transformation bean or script code to convert/alter parser input RAW activity data
+
+Used configuration properties:
+* `id` - transformation identifier. (Optional)
+* `lang` - transformation script language. (Optional)
+* `script` - code of transformation script (can't be mixed with `beanRef`). (Required)
+* `beanRef` - transformation bean reference (can't be mixed with `script`). (Required) 
+
+Sample stream configuration using `TransformationPreParser` pre-parser:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+
+    <java-object name="UnescapePreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.TransformationPreParser">
+        <property name="id" value="unescape"/>
+        <property name="lang" value="groovy"/>
+        <property name="script">
+            <![CDATA[
+               StringEscapeUtils.unescapeJava($fieldValue)
+            ]]>
+        </property>
+    </java-object>
+
+    <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <reference name="UnescapePreParser"/>
+
+        <.../>
+    </parser>
+</tnt-data-source>
+```
+
+`XML_Data_Parser` parser has reference to `UnescapePreParser` to un-escape (remove excessive `\"`) stream provided RAW activity string data.
+
+Also see [Field value transformations](#field-value-transformations) regarding use of streamed data transformations.
+**NOTE:** `TransformationPreParser` does not support transformation property `phase`, since it is always applied on parser input RAW 
+activity data before data gets parsed by enclosing parser.
 
 ### External resources import into stream configuration
 
@@ -5924,7 +5974,7 @@ What to download manually or copy from your existing IBM MQ installation:
 Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-elastic-beats/lib` directory like this:
 ```
     lib
-     |- logstash-input-beats-5.0.13.jar      
+     |- logstash-input-beats-5.0.13.jar
 ```
 (O) marked libraries are optional
 

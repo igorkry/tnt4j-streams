@@ -54,6 +54,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 
 /**
  * General utility methods used by TNT4J-Streams.
@@ -2254,5 +2255,27 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns name of named object instance or class name if object name is not defined.
+	 *
+	 * @param nObject
+	 *            named object instance
+	 * @return name of named object instance or class name if object name is not defined , {@code null} if
+	 *         {@code nObject} is {@code null}
+	 */
+	public static String getName(NamedObject nObject) {
+		if (nObject == null) {
+			return null;
+		}
+
+		String name = nObject.getName();
+
+		if (StringUtils.isEmpty(name)) {
+			name = nObject.getClass().getName();
+		}
+
+		return name;
 	}
 }

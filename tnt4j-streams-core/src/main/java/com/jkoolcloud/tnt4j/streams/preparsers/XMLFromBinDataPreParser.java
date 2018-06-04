@@ -56,7 +56,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  *
  * @version $Revision: 1 $
  */
-public class XMLFromBinDataPreParser implements ActivityDataPreParser<Document> {
+public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
 
 	private ActivityFieldFormatType format;

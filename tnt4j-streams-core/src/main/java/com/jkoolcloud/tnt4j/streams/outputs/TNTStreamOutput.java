@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 import java.util.Collection;
 import java.util.Map;
 
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 
 /**
@@ -32,7 +33,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @see TNTInputStream#setOutput(TNTStreamOutput)
  * @see com.jkoolcloud.tnt4j.tracker.Tracker
  */
-public interface TNTStreamOutput<T> {
+public interface TNTStreamOutput<T> extends NamedObject {
 
 	/**
 	 * Performs streamed activity item logging processing. To log activity item various implementations of
@@ -115,18 +116,4 @@ public interface TNTStreamOutput<T> {
 	 */
 	boolean isClosed();
 
-	/**
-	 * Sets output name value.
-	 * 
-	 * @param name
-	 *            output name value
-	 */
-	void setName(String name);
-
-	/**
-	 * Returns output name value.
-	 *
-	 * @return output name value
-	 */
-	String getName();
 }

@@ -260,9 +260,9 @@ public class FactPathValueFormatter extends FactNameValueFormatter {
 
 		uniqueSuffix = Utils.getString("DuplicateKeySuffix", settings, uniqueSuffix); // NON-NLS
 
-		Map<String, Object> pathLevelAttributes = Utils.getAttributes("PathLevelAttributes", settings); // NON-NLS
+		Map<String, ?> pathLevelAttributes = Utils.getAttributes("PathLevelAttributes", settings); // NON-NLS
 
-		for (Map.Entry<String, Object> entry : pathLevelAttributes.entrySet()) {
+		for (Map.Entry<String, ?> entry : pathLevelAttributes.entrySet()) {
 			String[] split = entry.getKey().split("\\."); // NON-NLS
 			Condition condition;
 			switch (split.length) {

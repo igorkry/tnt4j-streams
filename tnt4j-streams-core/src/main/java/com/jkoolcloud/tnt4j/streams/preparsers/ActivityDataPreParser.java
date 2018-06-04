@@ -16,15 +16,19 @@
 
 package com.jkoolcloud.tnt4j.streams.preparsers;
 
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
+
 /**
  * This interface defines common operations for RAW activity data pre-parsers.
  *
+ * @param <V>
+ *            the type of activity data to convert
  * @param <O>
  *            type of converted activity data
  *
  * @version $Revision: 1 $
  */
-public interface ActivityDataPreParser<O> {
+public interface ActivityDataPreParser<V, O> extends NamedObject {
 	/**
 	 * Converts RAW activity data to format activity data parser can handle.
 	 *
@@ -37,7 +41,7 @@ public interface ActivityDataPreParser<O> {
 	 * @see com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#preParse(com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream,
 	 *      Object)
 	 */
-	O preParse(Object data) throws Exception;
+	O preParse(V data) throws Exception;
 
 	/**
 	 * Returns whether this pre-parser supports the given format of the RAW activity data. This is used by activity
@@ -50,9 +54,18 @@ public interface ActivityDataPreParser<O> {
 	boolean isDataClassSupported(Object data);
 
 	/**
-	 * Returns type of converted activity data entries.
+	 * Returns "logical" type of converted activity data entries.
 	 *
-	 * @return type of converted activity data entries
+	 * @return "logical" type of converted activity data entries, or {@code "OBJECT"}/{@code null} if there is no
+	 *         particular type
 	 */
 	String dataTypeReturned();
+
+	/**
+	 * Returns flag indicating if pre-parser uses parent parser to read initial data from stream.
+	 * 
+	 * @return {@code true} if pre-parser uses parent parser to read data from stream, {@code false} - if pre-parser
+	 *         uses own stream provided data reading
+	 */
+	boolean isUsingParserForInput();
 }

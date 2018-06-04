@@ -90,7 +90,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private StreamFiltersGroup<ActivityInfo> activityFilter;
 
-	private List<ActivityDataPreParser<?>> preParsers;
+	private List<ActivityDataPreParser<Object, Object>> preParsers;
 
 	protected final Lock nextLock = new ReentrantLock();
 	protected final Lock filterLock = new ReentrantLock();
@@ -173,7 +173,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 */
 	protected boolean isDataClassSupportedByPreParser(Object data) {
 		if (CollectionUtils.isNotEmpty(preParsers)) {
-			for (ActivityDataPreParser<?> dp : preParsers) {
+			for (ActivityDataPreParser<?, ?> dp : preParsers) {
 				if (dp.isDataClassSupported(data)) {
 					return true;
 				}
@@ -404,9 +404,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Returns type of RAW activity data entries.
+	 * Returns "logical" type of RAW activity data entries.
 	 *
-	 * @return type of RAW activity data entries - TEXT
+	 * @return "logical" type of RAW activity data entries - TEXT
 	 */
 	@Override
 	protected String getActivityDataType() {
@@ -973,12 +973,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void addReference(Object refObject) {
 		if (refObject instanceof ActivityDataPreParser) {
 			if (preParsers == null) {
 				preParsers = new ArrayList<>();
 			}
-			preParsers.add((ActivityDataPreParser<?>) refObject);
+			preParsers.add((ActivityDataPreParser<Object, Object>) refObject);
 		} else {
 			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.unsupported.reference", getName(),
@@ -1003,14 +1004,23 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 			preParserLock.lock();
 			try {
-				for (ActivityDataPreParser<?> preParser : preParsers) {
+				ActivityDataPreParser<?, ?> fpParser = preParsers.get(0);
+				if (fpParser.isUsingParserForInput()) {
+					data = getNextActivityString(data);
+				}
+				for (ActivityDataPreParser<Object, Object> preParser : preParsers) {
 					boolean validData = preParser.isDataClassSupported(data);
-					if (validData && getActivityDataType().equals(preParser.dataTypeReturned())) {
+					boolean logicalValid = isLogicalTypeSupported(preParser.dataTypeReturned());
+					if (validData && logicalValid) {
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.pre.parsing.data", preParser.getClass().getSimpleName());
+								"ActivityParser.pre.parsing.data", Utils.getName(preParser));
 						data = preParser.preParse(data);
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.data.after.pre.parsing", getLogString(data));
+					} else {
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.pre.parsing.invalid", Utils.getName(preParser), validData, logicalValid,
+								getLogString(data));
 					}
 				}
 			} finally {
@@ -1019,6 +1029,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return data;
+	}
+
+	private boolean isLogicalTypeSupported(String logicalType) {
+		return logicalType == null || "OBJECT".equals(logicalType) || getActivityDataType().equals(logicalType); // NON-NLS
 	}
 
 	/**

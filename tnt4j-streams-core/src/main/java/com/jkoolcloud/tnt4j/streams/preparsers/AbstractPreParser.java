@@ -14,55 +14,53 @@
  * limitations under the License.
  */
 
-package com.jkoolcloud.tnt4j.streams.transform;
+package com.jkoolcloud.tnt4j.streams.preparsers;
 
 /**
- * Base class for abstract data value transformation.
+ * Base class for abstract activity RAW data value pre-parser.
  *
  * @param <V>
- *            the type of transformed data value
- * @param <T>
- *            the type of data after transformation
+ *            the type of activity data to convert
+ * @param <O>
+ *            type of converted activity data
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractValueTransformation<V, T> implements ValueTransformation<V, T> {
-	private String name;
-	private Phase phase;
+public abstract class AbstractPreParser<V, O> implements ActivityDataPreParser<V, O> {
 
-	/**
-	 * Returns transformation name.
-	 *
-	 * @return transformation name
-	 */
-	@Override
-	public String getName() {
-		return name;
+	private String name;
+
+	protected AbstractPreParser() {
 	}
 
 	/**
-	 * Sets transformation name.
+	 * Sets pre-parser name.
 	 *
 	 * @param name
-	 *            transformation name
+	 *            pre-parser name
 	 */
 	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Returns pre-parser name.
+	 *
+	 * @return pre-parser name
+	 */
 	@Override
-	public Phase getPhase() {
-		return phase;
+	public String getName() {
+		return name;
 	}
 
 	@Override
-	public void setPhase(Phase phase) {
-		this.phase = phase;
+	public String dataTypeReturned() {
+		return "OBJECT"; // NON-NLS
 	}
 
 	@Override
-	public String toString() {
-		return name + "@" + phase; // NON-NLS
+	public boolean isUsingParserForInput() {
+		return false;
 	}
 }

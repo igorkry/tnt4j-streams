@@ -27,6 +27,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
@@ -63,7 +64,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see java.util.concurrent.ExecutorService
  * @see com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput
  */
-public abstract class TNTInputStream<T, O> implements Runnable {
+public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 
 	private static final long DEFAULT_STREAM_TERMINATION_TIMEOUT = TimeUnit.SECONDS.toMillis(5);
 
@@ -842,6 +843,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 *
 	 * @return stream name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -852,6 +854,7 @@ public abstract class TNTInputStream<T, O> implements Runnable {
 	 * @param name
 	 *            stream name
 	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
