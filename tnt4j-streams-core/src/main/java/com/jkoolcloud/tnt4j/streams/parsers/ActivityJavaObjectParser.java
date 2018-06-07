@@ -108,7 +108,8 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * This parser supports the following class types (and all classes extending/implementing any of these):
 	 * <ul>
 	 * <li>{@link java.lang.Object} - default case when no custom set of supported classes defined</li>
-	 * <li>Set of custom classes defined over parser property {@value ParserProperties#PROP_SUPPORTED_CLASS}</li>
+	 * <li>Set of custom classes defined over parser property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.ParserProperties#PROP_SUPPORTED_CLASS}</li>
 	 * </ul>
 	 *
 	 * @param data
