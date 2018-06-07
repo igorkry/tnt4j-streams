@@ -21,7 +21,7 @@
         <jaxb.version>2.3.0</jaxb.version>
 
         <tnt4j.version>2.7</tnt4j.version>
-        <jesl.version>0.6</jesl.version>
+        <jesl.version>0.5</jesl.version>
 
         <httpcomponents.version>4.5.4</httpcomponents.version>
 
