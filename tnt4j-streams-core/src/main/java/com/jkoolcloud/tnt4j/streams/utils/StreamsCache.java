@@ -248,9 +248,18 @@ public final class StreamsCache {
 			if (persistenceOn) {
 				persist(valuesCache.asMap());
 			}
-			valuesCache.cleanUp();
+			valuesCache.invalidateAll();
 		}
 		cacheEntries.clear();
+	}
+
+	/**
+	 * Cleans cache stored values.
+	 */
+	public static void clearValues() {
+		if (valuesCache != null) {
+			valuesCache.invalidateAll();
+		}
 	}
 
 	/**
