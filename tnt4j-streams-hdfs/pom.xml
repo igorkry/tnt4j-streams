@@ -92,6 +92,12 @@
             <artifactId>hadoop-hdfs</artifactId>
             <version>${org.apache.hadoop.version}</version>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
