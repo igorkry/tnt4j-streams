@@ -11,5 +11,5 @@ set INTERCEPT_CONFIG=-Dinterceptors.config="%RUNDIR%..\..\config\intercept\inter
 set STREAMSOPTS=%LOG4JOPTS% %TNT4JOPTS% %PRODUCER_CONFIG% %CONSUMER_CONFIG% %INTERCEPT_CONFIG%
 
 @echo on
-java %STREAMSOPTS% -classpath "%LIBPATH%" com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptorsTest
+"%JAVA_HOME%\bin\java" %STREAMSOPTS% -classpath "%LIBPATH%" com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptorsTest
 pause
