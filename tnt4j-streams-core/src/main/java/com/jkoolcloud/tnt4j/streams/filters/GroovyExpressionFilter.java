@@ -39,7 +39,7 @@ import groovy.lang.GroovyShell;
 public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyExpressionFilter.class);
 
-	private GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+	private final GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 	/**
 	 * Constructs a new GroovyExpressionFilter. Handle type is set to
@@ -77,28 +77,30 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
-		Binding binding = shell.getContext();
+		synchronized (shell) {
+			Binding binding = shell.getContext();
 
-		// binding.getVariables().clear();
-		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
+			binding.getVariables().clear();
+			binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
-		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
-			for (String eVar : exprVars) {
-				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+			if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+				for (String eVar : exprVars) {
+					Property eKV = resolveFieldKeyAndValue(eVar, ai);
 
-				binding.setVariable(eKV.getKey(), eKV.getValue());
+					binding.setVariable(eKV.getKey(), eKV.getValue());
+				}
 			}
-		}
 
-		try {
-			boolean match = (boolean) shell.evaluate(getExpression());
+			try {
+				boolean match = (boolean) shell.evaluate(getExpression());
 
-			logEvaluationResult(binding.getVariables(), match);
+				logEvaluationResult(binding.getVariables(), match);
 
-			return isFilteredOut(getHandleType(), match);
-		} catch (Exception exc) {
-			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ExpressionFilter.filtering.failed", filterExpression), exc);
+				return isFilteredOut(getHandleType(), match);
+			} catch (Exception exc) {
+				throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ExpressionFilter.filtering.failed", filterExpression), exc);
+			}
 		}
 	}
 }

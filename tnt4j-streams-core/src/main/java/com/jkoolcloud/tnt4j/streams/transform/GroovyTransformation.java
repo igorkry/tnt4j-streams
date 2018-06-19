@@ -40,7 +40,7 @@ import groovy.lang.GroovyShell;
 public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyTransformation.class);
 
-	private GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+	private final GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 	/**
 	 * Constructs a new GroovyTransformation.
@@ -81,29 +81,33 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
-		Binding binding = shell.getContext();
+		synchronized (shell) {
+			Binding binding = shell.getContext();
 
-		// binding.getVariables().clear();
-		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
+			binding.getVariables().clear();
+			binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
-		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
-			for (String eVar : exprVars) {
-				Property eKV = resolveFieldKeyAndValue(eVar, ai);
+			if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+				for (String eVar : exprVars) {
+					Property eKV = resolveFieldKeyAndValue(eVar, ai);
 
-				binding.setVariable(eKV.getKey(), eKV.getValue());
+					binding.setVariable(eKV.getKey(), eKV.getValue());
+				}
 			}
-		}
 
-		try {
-			Object tValue = shell.evaluate(getExpression(),
-					StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
+			try {
+				Object tValue = shell.evaluate(getExpression(),
+						StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
 
-			logEvaluationResult(binding.getVariables(), tValue);
+				logEvaluationResult(binding.getVariables(), tValue);
 
-			return tValue;
-		} catch (Exception exc) {
-			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
+				return tValue;
+			} catch (Exception exc) {
+				throw new TransformationException(
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ValueTransformation.transformation.failed", getName(), getPhase()),
+						exc);
+			}
 		}
 	}
 }
