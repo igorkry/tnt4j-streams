@@ -1305,7 +1305,7 @@
     <xs:complexType name="FieldMap">
         <xs:annotation>
             <xs:documentation>
-                Maps a raw value from the activity string to the required field value for JKoolCloud.
+                Maps a raw value from the activity string to the required field value for jKoolCloud.
             </xs:documentation>
         </xs:annotation>
         <xs:attribute name="source" use="required" type="xs:string">
@@ -1337,8 +1337,8 @@
     <xs:complexType name="FieldMapRef">
         <xs:annotation>
             <xs:documentation>
-                Defines resource reference defining mapping of field value from the activity string to the required field value for JKool
-                Cloud.
+                Defines resource reference defining mapping of field value from the activity string to the required field value for
+                jKoolCloud.
             </xs:documentation>
         </xs:annotation>
         <xs:attribute name="resource" use="required" type="xs:string">
@@ -1395,7 +1395,7 @@
             <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
-                        Maps a field value from the activity string to the required field value for JKoolCloud.
+                        Maps a field value from the activity string to the required field value for jKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1403,7 +1403,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Defines resource reference defining mapping of field value from the activity string to the required field value for
-                        JKoolCloud.
+                        jKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1754,7 +1754,7 @@
             <xs:element name="field-map" type="FieldMap" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
-                        Maps a field value from the activity string to the required field value for JKoolCloud.
+                        Maps a field value from the activity string to the required field value for jKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1762,7 +1762,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Defines resource reference defining mapping of field value from the activity string to the required field value for
-                        JKoolCloud.
+                        jKoolCloud.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
@@ -1818,7 +1818,7 @@
         <xs:attribute name="transparent" use="optional" type="xs:boolean">
             <xs:annotation>
                 <xs:documentation>
-                    Specifies whether resolved field value should be added to produced JKool activity entity (activity/event/snapshot) data.
+                    Specifies whether resolved field value should be added to produced jKool activity entity (activity/event/snapshot) data.
                     If some stacked parser is used for a field it may be desired not to add such field raw data value to produced activity
                     data.
                 </xs:documentation>
@@ -1936,7 +1936,7 @@
         <xs:attribute name="transparent" use="prohibited" type="xs:boolean" fixed="true">
             <xs:annotation>
                 <xs:documentation>
-                    Specifies whether resolved field value should be added to produced JKool activity entity (activity/event/snapshot) data.
+                    Specifies whether resolved field value should be added to produced jKool activity entity (activity/event/snapshot) data.
                     If some stacked parser is used for a field it may be desired not to add such field raw data value to produced activity
                     data.
                 </xs:documentation>

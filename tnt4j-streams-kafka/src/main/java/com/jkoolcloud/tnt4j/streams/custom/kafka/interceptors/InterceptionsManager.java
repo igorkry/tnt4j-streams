@@ -49,7 +49,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>{@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.MetricsReporter} - to aggregate
  * and report Kafka metrics collected over interceptions and JMX to dedicated Kafka topic.</li>
  * <li>{@link com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter} - to trace
- * intercepted messages and send message related events to JKoolCloud.</li>
+ * intercepted messages and send message related events to jKoolCloud.</li>
  * </ul>
  * <p>
  * Interceptions configuration properties:

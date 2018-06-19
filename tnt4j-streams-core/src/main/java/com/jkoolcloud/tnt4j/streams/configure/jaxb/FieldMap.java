@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Maps a raw value from the activity string to the required field value for JKoolCloud.
+ * Maps a raw value from the activity string to the required field value for jKoolCloud.
  * 
  * 
  * <p>

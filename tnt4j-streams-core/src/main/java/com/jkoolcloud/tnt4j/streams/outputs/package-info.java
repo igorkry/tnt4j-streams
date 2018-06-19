@@ -15,7 +15,7 @@
  */
 
 /**
- * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams outputs: e.g., JKoolCloud.
+ * Contains the API (classes and interfaces) for the jKool LLC TNT4J-Streams outputs: e.g., jKoolCloud.
  * 
  * @author akausinis
  * @version 1.0

@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * additional transformations of the raw activity data collected for specific fields.
  * <p>
  * In particular, this class will convert the {@link StreamFieldType#TrackingId} and {@link StreamFieldType#Correlator}
- * fields values from a tokenized list of items into a value in the appropriate form required by the JKoolCloud.
+ * fields values from a tokenized list of items into a value in the appropriate form required by the jKoolCloud.
  * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link ActivityXmlParser}):

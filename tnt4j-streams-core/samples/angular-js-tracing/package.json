@@ -1,23 +1,23 @@
 {
-  "name": "tnt4j-angulatics-plugin",
-  "version": "1.0.0",
-  "description": "Angulatrics plugin for TNT4J-Streams",
-  "main": "angulartics-tnt4j.js",
-  "dependencies": {
-    "angulartics": "^1.0.3"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Nastel/tnt4j-streams.git"
-  },
-  "author": "JKool LLC",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/Nastel/tnt4j-streams/issues"
-  },
-  "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
+    "name": "tnt4j-angulatics-plugin",
+    "version": "1.0.0",
+    "description": "Angulatrics plugin for TNT4J-Streams",
+    "main": "angulartics-tnt4j.js",
+    "dependencies": {
+        "angulartics": "^1.0.3"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nastel/tnt4j-streams.git"
+    },
+    "author": "jKool LLC",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Nastel/tnt4j-streams/issues"
+    },
+    "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
 }

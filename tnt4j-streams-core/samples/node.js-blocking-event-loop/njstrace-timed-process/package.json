@@ -15,7 +15,7 @@
         "type": "git",
         "url": "git+https://github.com/Nastel/tnt4j-streams.git"
     },
-    "author": "JKool LLC",
+    "author": "jKool LLC",
     "license": "Apache-2.0",
     "bugs": {
         "url": "https://github.com/Nastel/tnt4j-streams/issues"

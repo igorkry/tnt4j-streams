@@ -84,7 +84,7 @@ public abstract class ActivityParser implements NamedObject {
 
 	/**
 	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
-	 * to JKoolCloud.
+	 * to jKoolCloud.
 	 *
 	 * @param stream
 	 *            parent stream

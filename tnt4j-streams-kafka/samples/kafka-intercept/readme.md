@@ -3,7 +3,7 @@
 ### Common
 
 If you are willing to run this sample having Kafka server running locally (default host/port is `localhost:9092`), the only thing you need 
-to configure is set your JKool repository token in TNT4J configuration (file `tnt4j.properties`):
+to configure is set your jKool repository token in TNT4J configuration (file `tnt4j.properties`):
 ```properties
 event.sink.factory.Token: YOUR-TOKEN
 ```
@@ -39,7 +39,7 @@ reported to dedicated Kafka topic):
       source: com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics
     ```
 * Set TNT4J to use `KafkaSink` to send interceptors collected statistics to dedicated Kafka topic (e.g. `tnt4j_kafka_interceptor_metrics`):
-    * referring Kafka producer configuration file  
+    * referring Kafka producer configuration file
     ```properties
       #### Kafka event sink factory configuration ####
       event.sink.factory: com.jkoolcloud.tnt4j.sink.impl.kafka.KafkaEventSinkFactory
@@ -60,16 +60,16 @@ reported to dedicated Kafka topic):
       event.sink.factory.key.serializer: org.apache.kafka.common.serialization.StringSerializer
       event.sink.factory.value.serializer: org.apache.kafka.common.serialization.StringSerializer
       #### Kafka event sink factory configuration end ####
-    ``` 
+    ```
 
 #### Interceptors configuration
 
 To configure interceptors use file `./config/intercept/interceptors.properties`. Configuration properties are:
 * `metrics.report.period` - period (in seconds) of Kafka interceptors (and JMX) collected metrics reporting to dedicated Kafka topic.
 * `metrics.report.delay` - delay (in seconds) before first metrics reporting is invoked. If not defined, it is equal to 
-`metrics.report.period`.  
-* `messages.tracer.trace` - flag indicating whether to trace (send to JKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
-JKool events fields mapping is hardcoded for now.   
+`metrics.report.period`.
+* `messages.tracer.trace` - flag indicating whether to trace (send to jKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
+jKool events fields mapping is hardcoded for now.
 
 
 ##### Kafka messages trace configuration over file
@@ -126,9 +126,9 @@ set it to match yours in those files:
 
 ### Using run scripts 
 
-1. run `runMetricsStreaming.bat(.sh)` - starts stream reading Kafka topic containing interceptors collected metrics and sending to JKool 
+1. run `runMetricsStreaming.bat(.sh)` - starts stream reading Kafka topic containing interceptors collected metrics and sending to jKool 
 2. run `runInterceptions.bat(.sh)` - starts producer and consumer applications having bound interceptors to collect Kafka metrics and post 
-it to Kafka stream listened topic. 
+it to Kafka stream listened topic.
 
 ### Using JUnit (for advanced users, like developers)
 
@@ -139,6 +139,6 @@ interceptors.
 
     InterceptionsManager has bound two InterceptionReporters: 
     * tnt - to collect and post metrics to Kafka topic
-    * stream - to stream intercepted data to JKool
+    * stream - to stream intercepted data to jKool
 
-2. To stream Kafka topic contained metrics to JKool, run `runMetricsStreaming.bat(.sh)` script.
+2. To stream Kafka topic contained metrics to jKool, run `runMetricsStreaming.bat(.sh)` script.

@@ -33,7 +33,7 @@
             <property name="event.sink.factory.Filename" value="logs/tnt4j-streams-activities_custom.log"/>
             <property name="source.factory.GEOADDR" value="Marijampole"/>
             <property name="source.factory.DATACENTER" value="Kazkas"/>
-            <property name="source.factory.APPL" value="JKoolUIDirStream"/>
+            <property name="source.factory.APPL" value="jKoolUIDirStream"/>
             <property name="source.factory.RootFQN"
                       value="RUNTIME=?#SERVER=?#NETADDR=?#DATACENTER=?#GEOADDR=?#APPL=?#USER=?"/>
             <property name="source.factory.RootSSN" value="TNT4J-Streams-dir_stream"/>

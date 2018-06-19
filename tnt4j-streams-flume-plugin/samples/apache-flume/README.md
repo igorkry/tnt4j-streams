@@ -20,11 +20,11 @@
 	 ```
 		"event.sink.factory.Token: ##############################"
 	 ```
-	 to yours JKoolCloud token
+	 by adding your jKoolCloud token
 
 	
 4. Run Flume:
-    ```
+    ```cmd
     [flume_path]/bin/flume-ng agent --conf ./conf/ -f conf/my-flume.properties -n agent
     ```
 

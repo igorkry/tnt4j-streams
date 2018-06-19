@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Defines resource reference defining mapping of field value from the activity string to the required field value for
- * JKoolCloud.
+ * jKoolCloud.
  * 
  * 
  * <p>

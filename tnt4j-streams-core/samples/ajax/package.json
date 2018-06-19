@@ -1,21 +1,21 @@
 {
-  "name": "tnt4j-ajax-interceptor",
-  "version": "1.0.0",
-  "description": "WebApp plugin to trace AJAX events and stream over TNT4J-Streams",
-  "main": "ajax-interceptor-tnt4j.js",
-  "dependencies": {},
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Nastel/tnt4j-streams.git"
-  },
-  "author": "JKool LLC",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/Nastel/tnt4j-streams/issues"
-  },
-  "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
+    "name": "tnt4j-ajax-interceptor",
+    "version": "1.0.0",
+    "description": "WebApp plugin to trace AJAX events and stream over TNT4J-Streams",
+    "main": "ajax-interceptor-tnt4j.js",
+    "dependencies": {},
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nastel/tnt4j-streams.git"
+    },
+    "author": "jKool LLC",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/Nastel/tnt4j-streams/issues"
+    },
+    "homepage": "https://github.com/Nastel/tnt4j-streams#readme"
 }

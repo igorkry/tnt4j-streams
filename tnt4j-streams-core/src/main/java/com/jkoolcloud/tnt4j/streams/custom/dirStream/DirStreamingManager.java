@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * configuration files (e.g., tnt-data-source*.xml) and invokes streaming actions on stream configuration files changes.
  * Stream configuration file name must also contain job identifier {@link UUID} set by job producer (e.g.,
  * tnt-data-source_123e4567-e89b-12d3-a456-426655440000.xml) to make events/actions correlations between all
- * participating pats: job producer, TNT4J-Streams API and JKoolCloud. Without identifier, stream job configurations
+ * participating pats: job producer, TNT4J-Streams API and jKoolCloud. Without identifier, stream job configurations
  * won't be processed.
  * <p>
  * Because streaming actions are invoked on stream configuration file changes, it is recommended to upload (make to be

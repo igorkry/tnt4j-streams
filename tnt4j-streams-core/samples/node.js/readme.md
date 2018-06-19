@@ -1,6 +1,6 @@
 # Why njsTrace with TNT4J streams
 
-Beyond all advantages JKoolCloud offers, `njsTrace` has a nice ability to instrument and monitor your `node.js`
+Beyond all advantages jKoolCloud offers, `njsTrace` has a nice ability to instrument and monitor your `node.js`
 applications. `njsTrace` "hijacks" `node.js` `Module._compile()` method, and then calls to the original `Module._compile()`
 with the instrumented code.
 

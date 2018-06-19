@@ -1,7 +1,7 @@
 ## Intercepting AJAX calls 
 
 Sometimes, especially when AJAX call fails on client side you wan't to know.
-In order to have JKoolCloud logged such events one may need to intercept all AJAX calls
+In order to have jKoolCloud logged such events one may need to intercept all AJAX calls
 
 ## Installation
 

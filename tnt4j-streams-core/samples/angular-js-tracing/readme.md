@@ -1,6 +1,6 @@
 # Introduction 
 
-Single page application using AngularJS tracking and analytics offers great challenge for developers. JKoolCloud offers
+Single page application using AngularJS tracking and analytics offers great challenge for developers. jKoolCloud offers
 Angulartics plugin to deal this with easy.
 
 # Installation
@@ -74,7 +74,7 @@ Put 'angulartics-tnt4j.js' under your script diretory './js'
 	
 ## Step 7
 
-Run TNT4J-streams application with configuration provided in this folder. Ensure your JKoolCloud tokens configured in
+Run TNT4J-streams application with configuration provided in this folder. Ensure your jKoolCloud tokens configured in
 `tnt4j.properties`
 	
 ## Step 8

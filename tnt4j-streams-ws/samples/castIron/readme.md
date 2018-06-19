@@ -2,7 +2,7 @@
 
 ### Overview
 
-`CastIronWsStream` pulls orchestration and log data from IBM Cast Iron instance and publishes it as JKoolCloud events.
+`CastIronWsStream` pulls orchestration and log data from IBM Cast Iron instance and publishes it as jKoolCloud events.
  
 To setup simple IBM Cast Iron orchestration you can see [this video tutorial](https://www.youtube.com/watch?v=ct8BoI8qlnY).
 
@@ -15,9 +15,9 @@ information about available operations and other WS related definitions.
 
 There is nothing to additionally install in your IBM Cast Iron installation. Just setup `tnt-data-source.xml` and `tnt4j.properties`. 
 
-* Within `tnt4j.properties` set `TOKEN` to one you have bound to your JKool user.
+* Within `tnt4j.properties` set `TOKEN` to one you have bound to your jKool user.
 
-* Within `tnt-data-source.xml` change your's IBM Cast Iron login parameters:                             
+* Within `tnt-data-source.xml` change your's IBM Cast Iron login parameters:
 ```xml
     <sec:username>admin</sec:username>
     <sec:password>slabs123!</sec:password>
