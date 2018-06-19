@@ -513,6 +513,11 @@ relations:
     ```
     where `vvvv` is one of values: `ACTIVITY`, `SNAPSHOT` or `EVENT` (`EVENT` also maps from values `OTHER`, `CALL`, `START`, `STOP`, 
     `OPEN`, `CLOSE`, `SEND`, `RECEIVE`, `INQUIRE`, `SET`, `BROWSE`, `ADD`, `UPDATE`, `REMOVE`, `CLEAR`, `DATAGRAM`).
+    **NOTE:** If none of the above values applies to your case, you may use `NOOP` value. Then, however, the activity entity JSON record will not be 
+    created and not sent to jKoolCloud, e.g.:
+    ```xml
+        <field name="EventType" value="NOOP"/>
+    ```    
 
 For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
 ```xml
@@ -541,7 +546,7 @@ or
     </stream>
 </tnt-data-source>
 ```
-It allows to send as many activity entities to JKool as there are child activity entities resolved by stacked parsers, **merging** those 
+It allows to send as many activity entities to jKool as there are child activity entities resolved by stacked parsers, **merging** those 
 child activity entities data with parent activity entity data. E.g. when parser builds activity entities relations like this (4 entities in 
 total):
 ```
@@ -550,7 +555,7 @@ ParentActivity
     + ChildEvent2
     + ChildEvent3
 ```
-stream output will send such entities to JKool (3 entities in total):
+stream output will send such entities to jKool (3 entities in total):
 ```
 Event1 having ChilEvent1 + ParentActivity data
 Event2 having ChilEvent2 + ParentActivity data
@@ -559,13 +564,13 @@ Event3 having ChilEvent3 + ParentActivity data
 
 This is useful when streamed data is aggregated in one data package, like JSON/XML data having some header values and array of payload 
 entries (see `mft-tracking` sample XML's), but you need only those payload entries maintaining some header data contained values to be set 
-to JKool. Or like in `mft_fte` sample, when MFT `transaction` progress event `transferSet` node having `source` and `destination` 
+to jKool. Or like in `mft_fte` sample, when MFT `transaction` progress event `transferSet` node having `source` and `destination` 
 definitions and you need to split them into separate events maintaining some `transaction` data values.
 
 ### Field value transformations
 
 In streams configuration you can define field or locator resolved values transformations. In general transformations performs resolved 
-activity value post-processing before sending it to [JKoolCloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
+activity value post-processing before sending it to [jKoolCloud](https://www.jkoolcloud.com/): e.g., extracts file name from resolved 
 activity file path.
 
 To pass a resolved field/locator value to a transformation script/expression, use the predefined variable placeholder `$fieldValue`. You can 
@@ -930,7 +935,7 @@ use this value when constructing actual XPath expression e.g., `/transaction/${D
 ### Caching of streamed data field values
 
 `TNT4J-Streams` provides temporary storage (i.e. cache) for a resolved activity fields values. It is useful when there are some related 
-activities streamed and particular JKool prepared activity entity requires data values form previously streamed activities.
+activities streamed and particular jKool prepared activity entity requires data values form previously streamed activities.
 
 Sample streamed values caching configuration:
 ```xml
@@ -1014,7 +1019,7 @@ Sample files can be found in `samples/single-log` directory.
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
 **NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -1070,7 +1075,7 @@ Sample files can be found in `samples/multiple-logs` directory.
 single order activity event.
 
 **NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Single Log file'](#single-log-file) with one single difference:
 ```xml
@@ -1088,7 +1093,7 @@ Sample files can be found in `samples/piping-stream` directory.
 `orders.log` file contains set of order activity events. Single file line defines data of single order activity event.
 
 **NOTE:** Records in this file are from year `2011`, e.g. `12 Jul 2011`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 `jk-pipe.bat` or `jk-pipe.sh` files are wrappers to `bin/tnt4j-streams` executables to minimize parameters. All what
  you need is to pass file name of stream parsers configuration, e.g., `parsers.xml`
@@ -1310,7 +1315,7 @@ Sample files can be found in `samples/apache-access-single-log` directory.
 `access.log` is sample Apache access log file depicting some HTTP server activity.
 
 **NOTE:** Records in this file are from year `2004`, e.g. `07/Mar/2004`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -1490,7 +1495,7 @@ Sample files can be found in `samples/apache-access-multi-log` directory.
 `localhost_access_log.[DATE].txt` is sample Apache access log files depicting some HTTP server activity.
 
 **NOTE:** Records in this file are from year `2015` ranging from April until November, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample configuration and sample idea is same as ['Apache Access log single file'](#apache-access-log-single-file) with one single 
 difference:
@@ -1884,7 +1889,7 @@ to stream started Logstash server host and port, e.g.`localhost:5044`.
 
 Sample files can be found in `samples/elastic-beats` directory.
 
-`dashboards` directory contains exported JKool dashboard dedicated to visualize data for this sample. You can import it into your JKool 
+`dashboards` directory contains exported jKool dashboard dedicated to visualize data for this sample. You can import it into your jKool 
 repository. 
 
 How to setup Elastic Beats environment see [`samples/elastic-beats/readme.md`](tnt4j-streams-elastic-beats/samples/elastic-beats/readme.md)
@@ -1944,7 +1949,7 @@ Stream configuration states that `ElasticBeatsStream` referencing `BeatsMessageP
 
 `BeatsMessageParser` takes Map data structure provided by stream and maps map entries to activity event fields using map entry key labels. 
 Since there is no particular set of predefined fields defined for Elastic Beats data, in this sample we map them directly into activity 
-entity (`EVENT`) properties using locator `*` to have them all in JKool.
+entity (`EVENT`) properties using locator `*` to have them all in jKool.
 
 #### HTTP request file
 
@@ -3736,7 +3741,7 @@ containing field `TomcatActive`.
 
 #### Redirecting TNT4J streams
 
-This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to [JKoolCloud](https://www.jkoolcloud.com/) 
+This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to [jKoolCloud](https://www.jkoolcloud.com/) 
 over single `TNT4J-Streams` stream instance.
 
 Sample files can be found in `samples/stream-jmx` directory.
@@ -3781,7 +3786,7 @@ accepted, stream reads incoming data from connection dedicated socket.
 `RestartOnInputClose` property indicates that stream should initiate new instance of server socket if listened one gets closed or fails to
 accept inbound connection.
 
-Stream referenced object `JMXRedirectOutput` sends JSON formatted data to [JKoolCloud](https://www.jkoolcloud.com/).
+Stream referenced object `JMXRedirectOutput` sends JSON formatted data to [jKoolCloud](https://www.jkoolcloud.com/).
 
 Stream also additionally sets one TNT4J framework property `event.formatter`. This allows us to use customized JSON formatter and avoid 
 additional JSON reformatting in default TNT4J data flow.
@@ -3812,7 +3817,7 @@ This sample shows how to stream MS Excel workbook rows as activity events.
 Sample files can be found in `samples/xlsx-rows` directory.
 
 **NOTE:** Records in this file are from year `2010`, e.g. `12 Jul 2010`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -3856,7 +3861,7 @@ workbook sheet row and passes it to parser.
 
 `SampleExcelRowsStream` reads data from `./tnt4j-streams-msoffice/samples/xlsx-rows/sample.xlsx` file.
 
-`RangeToStream` defines range of rows to be streamed from each matching sheet - `from firs row to the end`.
+`RangeToStream` defines range of rows to be streamed from each matching sheet - `from first row to the end`.
 
 `SheetsToProcess` property defines sheet name filtering mask using wildcard string. It is also allowed to use RegEx like
 `Sheet(1|3|5)` (in this case just sheets with names `Sheet1`, `Sheet3` and `Sheet5` will be processed).
@@ -3878,7 +3883,7 @@ This sample shows how to stream MS Excel workbook sheets as activity events.
 Sample files can be found in `samples/xlsx-sheets` directory.
 
 **NOTE:** Records in this file are from year `2010`, e.g. `12 Jul 2010`, so when sending the events data to 
-[JKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
+[jKoolCloud](https://www.jkoolcloud.com/), please do not forget to adjust the dashboard time frame to that period!
 
 Sample stream configuration:
 ```xml
@@ -4420,7 +4425,7 @@ Configuration data format is same for all sources now.
 
 Because TNT4J-Streams is based on TNT4J first you need to configure TNT4J (if have not done this yet).
 Default location of `tnt4j.properties` file is in project `config` directory. At least you must make one change:
-`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [JKoolCloud](https://www.jkoolcloud.com/) token assigned for you.
+`event.sink.factory.Token:YOUR-TOKEN` replace `YOUR-TOKEN` with [jKoolCloud](https://www.jkoolcloud.com/) token assigned for you.
 
 To define `tnt4j.properties` file location use system property `-Dtnt4j.config`, e.g., `-Dtnt4j.config="./config/tnt4j.properties"`.
 
@@ -4452,7 +4457,7 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
     tracker.default.snapshot.category: TNT4J-Streams-event-snapshot
 
     # event sink configuration: destination and data format
-    <YOUR EVENT SINK CONFIGURATION: JKoolCloud, Kafka, MQTT, etc.>
+    <YOUR EVENT SINK CONFIGURATION: jKoolCloud, Kafka, MQTT, etc.>
 
     event.formatter: com.jkoolcloud.tnt4j.format.JSONFormatter
     #event.formatter.Newline: true
@@ -4470,10 +4475,10 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
 }
 ```
 
-#### [JKoolCloud](https://www.jkoolcloud.com/) sink configuration
+#### [jKoolCloud](https://www.jkoolcloud.com/) sink configuration
 
 ```properties
-    #### JKoolCloud event sink factory configuration ####
+    #### jKoolCloud event sink factory configuration ####
     event.sink.factory: com.jkoolcloud.jesl.tnt4j.sink.JKCloudEventSinkFactory
     event.sink.factory.Filename: logs/tnt4j-streams-activities.log
 
@@ -4481,7 +4486,7 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
     #event.sink.factory.Url: https://data.jkoolcloud.com:6585
     #event.sink.factory.Url: https://data.jkoolcloud.com
     event.sink.factory.Token: <YOUR TOKEN>
-    #### JKoolCloud event sink factory configuration end ####
+    #### jKoolCloud event sink factory configuration end ####
 ```
 
 #### Kafka sink configuration
@@ -4691,7 +4696,7 @@ Default value - `null`. (Optional)
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
  * `SendStreamStates` - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output endpoint e.g. 
- [JKoolCloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional) 
+ [jKoolCloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional) 
 
      sample:
  ```xml
@@ -4764,7 +4769,8 @@ or
  * `StartFromLatest` - flag `true/false` indicating that streaming should be performed from latest file entry line. If `false` - then all 
  lines from available files are streamed on startup. Actual only if `FilePolling` or `RestoreState` properties are set to `true`. Default 
  value - `true`. (Optional)
- * `RangeToStream` - defines streamed data lines index range. Default value - `1:`. (Optional)
+ * `RangeToStream` - defines the colon-separated range of file line numbers that should be parsed and streamed to jKoolCloud. Default 
+ value - `1:`. (Optional)
  * `ActivityDelim` - defining activities data delimiter used by stream. Value can be: `EOL` - end of line, `EOF` - end of file/stream, or 
  any user defined symbol or string. Default value - `EOL`. (Optional)
  * `KeepLineSeparators` - flag indicating whether to return line separators at the end of read line. Default value - `false`. (Optional)
@@ -5147,7 +5153,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 ##### Ms Excel Rows Stream parameters
 
- * `RangeToStream` - defines streamed data rows index range. Default value - `1:`. (Optional)
+ * `RangeToStream` - defines the colon-separated range of spreadsheet row numbers that should be parsed and streamed to jKoolCloud. Default 
+ value - `1:`. (Optional)
 
     sample:
 ```xml
