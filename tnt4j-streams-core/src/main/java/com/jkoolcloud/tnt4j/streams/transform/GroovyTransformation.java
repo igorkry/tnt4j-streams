@@ -40,6 +40,8 @@ import groovy.lang.GroovyShell;
 public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyTransformation.class);
 
+	private GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+
 	/**
 	 * Constructs a new GroovyTransformation.
 	 *
@@ -79,7 +81,9 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
-		Binding binding = new Binding();
+		Binding binding = shell.getContext();
+
+		// binding.getVariables().clear();
 		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
@@ -89,8 +93,6 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 				binding.setVariable(eKV.getKey(), eKV.getValue());
 			}
 		}
-
-		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
 			Object tValue = shell.evaluate(getExpression(),

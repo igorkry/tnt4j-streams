@@ -39,6 +39,8 @@ import groovy.lang.GroovyShell;
 public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyExpressionFilter.class);
 
+	private GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+
 	/**
 	 * Constructs a new GroovyExpressionFilter. Handle type is set to
 	 * {@link com.jkoolcloud.tnt4j.streams.filters.HandleType#INCLUDE}.
@@ -75,7 +77,9 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
-		Binding binding = new Binding();
+		Binding binding = shell.getContext();
+
+		// binding.getVariables().clear();
 		binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
@@ -85,8 +89,6 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 				binding.setVariable(eKV.getKey(), eKV.getValue());
 			}
 		}
-
-		GroovyShell shell = new GroovyShell(binding, StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
 
 		try {
 			boolean match = (boolean) shell.evaluate(getExpression());
