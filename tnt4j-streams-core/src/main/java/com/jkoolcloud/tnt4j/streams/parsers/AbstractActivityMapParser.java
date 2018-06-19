@@ -110,7 +110,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 */
 	public static final String RAW_ACTIVITY_STRING_KEY = "RAW_ACTIVITY_STRING_ENTRY"; // NON-NLS
 
-	private Set<String[]> accessedPaths = new HashSet<>();
+	private static final String ACCESSED_PATHS_KEY = "ACCESSED_MAP_PATHS"; // NON-NLS
 
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
@@ -160,6 +160,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 
 		ActivityContext cData = new ActivityContext(stream, data, dataMap);
 		cData.setMessage(getRawDataAsMessage(dataMap));
+		cData.put(ACCESSED_PATHS_KEY, new HashSet<String[]>());
 
 		return cData;
 	}
@@ -204,10 +205,12 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	 * @see Utils#getMapValueByPath(String, String, java.util.Map, Set)
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) {
 		Object val = null;
 		String locStr = locator.getLocator();
+		Set<String[]> accessedPaths = (Set<String[]>) cData.get(ACCESSED_PATHS_KEY);
 		val = Utils.getMapValueByPath(locStr, nodePathDelim, cData.getData(), accessedPaths);
 
 		return val;
