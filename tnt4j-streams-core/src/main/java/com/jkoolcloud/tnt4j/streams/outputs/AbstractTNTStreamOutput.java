@@ -1,6 +1,5 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -84,11 +83,6 @@ public abstract class AbstractTNTStreamOutput<T> implements TNTStreamOutput<T> {
 	public void cleanup() {
 		closed = true;
 
-	}
-
-	@Override
-	public void logItem(T item) throws Exception {
-		notifyLogItem(item);
 	}
 
 	/**
