@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
+import javax.script.*;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
@@ -25,21 +27,19 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-
 /**
  * Data value filtering based on Groovy code/expressions.
  *
  * @version $Revision: 1 $
  *
- * @see Binding
- * @see GroovyShell#evaluate(String, String)
+ * @see javax.script.ScriptEngineManager#getEngineByName(String)
+ * @see javax.script.Compilable#compile(String)
+ * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyExpressionFilter.class);
 
-	private final GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+	private CompiledScript script;
 
 	/**
 	 * Constructs a new GroovyExpressionFilter. Handle type is set to
@@ -75,32 +75,43 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	protected void initFilter() {
+		super.initFilter();
+
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.GROOVY_LANG);
+		try {
+			script = ((Compilable) engine).compile(getExpression());
+		} catch (ScriptException exc) {
+			throw new IllegalArgumentException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ExpressionFilter.invalid.script", getHandledLanguage(), filterExpression),
+					exc);
+		}
+	}
+
+	@Override
 	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
-		synchronized (shell) {
-			Binding binding = shell.getContext();
+		Bindings bindings = new SimpleBindings();
+		bindings.put(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
-			binding.getVariables().clear();
-			binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
 
-			if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
-				for (String eVar : exprVars) {
-					Property eKV = resolveFieldKeyAndValue(eVar, ai);
-
-					binding.setVariable(eKV.getKey(), eKV.getValue());
-				}
+				bindings.put(eKV.getKey(), eKV.getValue());
 			}
+		}
 
-			try {
-				boolean match = (boolean) shell.evaluate(getExpression());
+		try {
+			boolean match = (boolean) script.eval(bindings);
 
-				logEvaluationResult(binding.getVariables(), match);
+			logEvaluationResult(bindings, match);
 
-				return isFilteredOut(getHandleType(), match);
-			} catch (Exception exc) {
-				throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ExpressionFilter.filtering.failed", filterExpression), exc);
-			}
+			return isFilteredOut(getHandleType(), match);
+		} catch (Exception exc) {
+			throw new FilterException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ExpressionFilter.filtering.failed", filterExpression), exc);
 		}
 	}
 }

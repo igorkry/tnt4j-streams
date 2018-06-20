@@ -18,12 +18,10 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,21 +61,20 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * then streaming process exits with {@link java.lang.IllegalStateException}. Default value - {@code false}.
  * (Optional)</li>
  * <li>SendStreamStates - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output
- * endpoint e.g. 'JKoolCloud'. Default value - {@code true}. (Optional)</li>
+ * endpoint e.g. 'jKoolCloud'. Default value - {@code true}. (Optional)</li>
  * </ul>
  *
  * @param <T>
  *            the type of incoming activity data from stream
  * @param <O>
- *            the type of outgoing activity data package to be sent to JKoolCloud
+ *            the type of outgoing activity data package to be sent to jKoolCloud
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> {
+public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutput<T> {
 
-	private static final String DEFAULT_SOURCE_NAME = "com.jkoolcloud.tnt4j.streams"; // NON-NLS
 	/**
-	 * Delay between retries to submit data package to JKoolCloud if some transmission failure occurs, in milliseconds.
+	 * Delay between retries to submit data package to jKoolCloud if some transmission failure occurs, in milliseconds.
 	 */
 	protected static final long CONN_RETRY_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
@@ -94,13 +91,9 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	private String tnt4jCfgPath;
 	private Map<String, String> tnt4jProperties;
 
-	private TNTInputStream<?, ?> stream;
 	private boolean retryStateCheck = false;
-
-	private boolean closed = false;
 	private boolean sendStreamStates = true;
 	private JKoolNotificationListener jKoolNotificationListener = new JKoolNotificationListener();
-	private String name;
 
 	/**
 	 * Constructs a new AbstractJKCloudOutput.
@@ -115,38 +108,16 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 *            output name value
 	 */
 	protected AbstractJKCloudOutput(String name) {
-		this.name = name;
+		super(name);
 	}
-
-	/**
-	 * Returns logger used by this stream output handler.
-	 *
-	 * @return parser logger
-	 */
-	protected abstract EventSink logger();
 
 	@Override
 	public void setStream(TNTInputStream<?, ?> inputStream) {
-		this.stream = inputStream;
+		super.setStream(inputStream);
 
 		if (sendStreamStates) {
-			stream.addStreamListener(jKoolNotificationListener);
+			getStream().addStreamListener(jKoolNotificationListener);
 		}
-	}
-
-	@Override
-	public TNTInputStream<?, ?> getStream() {
-		return stream;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	/**
@@ -293,15 +264,6 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 	}
 
-	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				setProperty(prop.getKey(), prop.getValue());
-			}
-		}
-	}
-
 	/**
 	 * Gets {@link Tracker} instance from {@link #trackersMap} matching {@link Thread#currentThread()} on which stream
 	 * output is running. If no tracker found in trackers map - new one is created.
@@ -336,7 +298,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				checkTracker(tracker);
 				trackersMap.put(getTrackersMapKey(t), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.built.new.tracker", name, getTrackerId(tracker),
+						"TNTStreamOutput.built.new.tracker", getName(), getTrackerId(tracker),
 						(t == null ? "null" : t.getId()), tracker);
 			}
 
@@ -356,19 +318,55 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 					Tracker tracker = te.getValue();
 					dumpTrackerStats(tracker);
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"TNTStreamOutput.tracker.close", name, getTrackerId(tracker), tracker);
+							"TNTStreamOutput.tracker.close", getName(), getTrackerId(tracker), tracker);
 					Utils.close(tracker);
+
+					if (tracker instanceof TrackingLogger) {
+						TrackingLogger.shutdown((TrackingLogger) tracker);
+					}
 				}
 
 				trackersMap.clear();
 			}
-			closed = true;
 		}
+		super.cleanup();
 	}
 
+	/**
+	 * Obtains and aggregates statistics form all used trackers.
+	 * 
+	 * @return a map of key/value statistic pairs aggregated from all used trackers statistics
+	 *
+	 * @see com.jkoolcloud.tnt4j.tracker.Tracker#getStats()
+	 */
 	@Override
-	public boolean isClosed() {
-		return closed;
+	public Map<String, Object> getStats() {
+		Map<String, Object> statsMap = new HashMap<>();
+		if (MapUtils.isNotEmpty(trackersMap)) {
+			for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
+				Tracker tracker = te.getValue();
+				Map<String, ?> tStats = tracker.getStats();
+
+				if (MapUtils.isNotEmpty(tStats)) {
+					for (Map.Entry<String, ?> tse : tStats.entrySet()) {
+						Object so = statsMap.get(tse.getKey());
+
+						if (so == null) {
+							so = tse.getValue();
+						} else {
+							if (so instanceof Number) {
+								Number sNum = (Number) so;
+								so = sNum.longValue() + ((Number) tse.getValue()).longValue();
+							}
+						}
+
+						statsMap.put(tse.getKey(), so);
+					}
+				}
+			}
+		}
+
+		return statsMap;
 	}
 
 	// protected void closeTracker(String aiSourceFQN, Tracker tracker) {
@@ -386,7 +384,8 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"TNTStreamOutput.tracker.statistics", name, getTrackerId(tracker), Utils.toString(tracker.getStats()));
+				"TNTStreamOutput.tracker.statistics", getName(), getTrackerId(tracker),
+				Utils.toString(tracker.getStats()));
 	}
 
 	/**
@@ -406,7 +405,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			} catch (IOException ioe) {
 				Utils.logThrowable(logger(), OpLevel.ERROR,
 						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"TNTStreamOutput.failed.to.open", name, tracker, ioe);
+						"TNTStreamOutput.failed.to.open", getName(), tracker, ioe);
 				throw ioe;
 			}
 		}
@@ -420,16 +419,16 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			String cfgFilePath = StringUtils.isEmpty(tnt4jCfgPath) ? tnt4jCfgPath
 					: tnt4jCfgPath.substring(FILE_PREFIX.length());
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTStreamOutput.init.cfg.file", name, StringUtils.isEmpty(cfgFilePath)
+					"TNTStreamOutput.init.cfg.file", getName(), StringUtils.isEmpty(cfgFilePath)
 							? System.getProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY) : cfgFilePath);
-			trackerConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
+			trackerConfig = DefaultConfigFactory.getInstance().getConfig(AbstractJKCloudOutput.class, SourceType.APPL,
 					cfgFilePath);
 
 			applyUserTNT4JProperties();
 		} else if (tnt4jCfgPath.startsWith(ZK_PREFIX)) {
 			String cfgNodePath = tnt4jCfgPath.substring(ZK_PREFIX.length());
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"TNTStreamOutput.zk.cfg.monitor.tnt4j", name, cfgNodePath);
+					"TNTStreamOutput.zk.cfg.monitor.tnt4j", getName(), cfgNodePath);
 
 			ZKConfigManager.handleZKStoredConfiguration(cfgNodePath, new ZKConfigManager.ZKConfigChangeListener() {
 				@Override
@@ -444,7 +443,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 
 	private void reconfigureTNT4J(Reader cfgReader) {
 		if (trackerConfig == null) {
-			trackerConfig = DefaultConfigFactory.getInstance().getConfig(DEFAULT_SOURCE_NAME, SourceType.APPL,
+			trackerConfig = DefaultConfigFactory.getInstance().getConfig(AbstractJKCloudOutput.class, SourceType.APPL,
 					cfgReader);
 
 			applyUserTNT4JProperties();
@@ -482,11 +481,11 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 		}
 		defaultSource.setSSN(trackerConfig.getSource().getSSN());
 
-		closed = false;
+		setClosed(false);
 	}
 
 	/**
-	 * Sends activity data package to JKoolCloud using the specified tracker. Performs resend after defined period of
+	 * Sends activity data package to jKoolCloud using the specified tracker. Performs resend after defined period of
 	 * time if initial sending fails.
 	 * 
 	 * @param tracker
@@ -496,7 +495,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @param activityData
 	 *            activity data to send
 	 * @throws Exception
-	 *             indicates an error when sending activity data to JKoolCloud
+	 *             indicates an error when sending activity data to jKoolCloud
 	 */
 	protected void recordActivity(Tracker tracker, long retryPeriod, O activityData) throws Exception {
 		if (tracker == null) {
@@ -550,7 +549,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 				"TNTStreamOutput.tracker.reopen", getTrackerId(tracker));
 		try {
 			tracker.reopen();
-		} catch (IOException exc) {
+		} catch (Throwable exc) {
 			Utils.logThrowable(logger(), OpLevel.ERROR,
 					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTStreamOutput.tracker.reopen.failed", getTrackerId(tracker), exc);
@@ -558,7 +557,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Performs activity data package sending (logging) to JKoolCloud and checks tracker event sink state if there was
+	 * Performs activity data package sending (logging) to jKoolCloud and checks tracker event sink state if there was
 	 * any communication errors.
 	 * 
 	 * @param tracker
@@ -566,7 +565,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	 * @param activityData
 	 *            activity data to send
 	 * @throws IOException
-	 *             if communication with JKoolCloud fails
+	 *             if communication with jKoolCloud fails
 	 *
 	 * @see #ensureTrackerOpened(com.jkoolcloud.tnt4j.tracker.Tracker)
 	 * @see #logJKCActivity(com.jkoolcloud.tnt4j.tracker.Tracker, Object)
@@ -604,7 +603,7 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 	}
 
 	/**
-	 * Logs given activity data using provided tracker to communicate JKoolCloud.
+	 * Logs given activity data using provided tracker to communicate jKoolCloud.
 	 * 
 	 * @param tracker
 	 *            communication gateway to use to record activity
@@ -626,12 +625,12 @@ public abstract class AbstractJKCloudOutput<T, O> implements TNTStreamOutput<T> 
 			sMsgEvent = tracker.newEvent(OpLevel.INFO, OpType.START, "Streaming-session-start-event", // NON-NLS
 					(String) null, "STREAM_START", // NON-NLS
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.status.msg"),
-					stream.getName(), status);
+					getStream().getName(), status);
 		} else {
 			sMsgEvent = tracker.newEvent(OpLevel.INFO, OpType.STOP, "Streaming-session-shutdown-event", // NON-NLS
 					(String) null, "STREAM_SHUTDOWN", // NON-NLS
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "TNTStreamOutput.status.msg"),
-					stream.getName(), status);
+					getStream().getName(), status);
 		}
 		sMsgEvent.setSource(defaultSource);
 

@@ -58,7 +58,7 @@
         <!--<property name="java.naming.security.credentials" value="[YOUR_PASSWORD]"/>-->
         <!--<property name="Queue" value="queue.SampleJMSQueue"/>-->
         <property name="Topic" value="TestTopic"/>
-        <property name="JMSConnFactory" value="/jms/cf/another"/>
+        <property name="JMSConnFactory" value="ConnectionFactory"/>
 
         <parser-ref name="SampleJMSParser"/>
     </stream>

@@ -79,11 +79,13 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 
 	private AtomicInteger currActivityIndex = new AtomicInteger(0);
 	private AtomicInteger skippedActivitiesCount = new AtomicInteger(0);
+	private AtomicInteger filteredActivitiesCount = new AtomicInteger(0);
 	private AtomicInteger lostActivitiesCount = new AtomicInteger(0);
 	private AtomicLong streamedBytesCount = new AtomicLong(0);
 	private AtomicBoolean failureFlag = new AtomicBoolean(false);
 	private long startTime = -1;
 	private long endTime = -1;
+	private long lastActivityTime = -1;
 	private String name;
 
 	private TNTStreamOutput<O> out;
@@ -519,6 +521,24 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	}
 
 	/**
+	 * Returns number of activity data items filtered by stream configuration.
+	 *
+	 * @return number of filtered activities
+	 */
+	public int getFilteredActivitiesCount() {
+		return filteredActivitiesCount.get();
+	}
+
+	/**
+	 * Increments processing filtered activity items count.
+	 *
+	 * @return new value of filtered items count
+	 */
+	protected int incrementFilteredActivitiesCount() {
+		return filteredActivitiesCount.incrementAndGet();
+	}
+
+	/**
 	 * Returns number of activity data items lost while streaming. Item may be lost if stream gets lack of storage
 	 * resources or some critical exception occurs.
 	 *
@@ -565,6 +585,17 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		long et = endTime < 0 ? System.currentTimeMillis() : endTime;
 
 		return startTime < 0 ? -1 : et - startTime;
+	}
+
+	/**
+	 * Returns average stream rate in activities per second.
+	 * 
+	 * @return average stream rate in activities per second
+	 */
+	public double getAverageActivityRate() {
+		long lat = lastActivityTime < 0 ? System.currentTimeMillis() : lastActivityTime;
+		long et = startTime < 0 ? 0 : lat - startTime;
+		return (double) getCurrentActivity() / TimeUnit.MILLISECONDS.toSeconds(et);
 	}
 
 	/**
@@ -721,7 +752,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 						}
 					} else {
 						if (streamExecutorService == null) {
-							processActivityItem(item, failureFlag);
+							processActivityItem_(item, failureFlag);
 						} else {
 							streamExecutorService
 									.submit(new ActivityItemProcessingTask(item, failureFlag, getActivityPosition()));
@@ -771,6 +802,8 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 			notifyStreamSuccess();
 		}
 
+		Map<String, ?> outStats = output().getStats();
+
 		try {
 			cleanup();
 		} catch (Throwable exc) {
@@ -787,6 +820,8 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 				"TNTInputStream.thread.ended", Thread.currentThread().getName());
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"TNTInputStream.stream.statistics", name, getStreamStatistics());
+		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"TNTInputStream.stream.out.statistics", name, outStats);
 
 		removeListeners();
 
@@ -806,6 +841,11 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 *             if any errors occurred while processing item
 	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
+
+	private void processActivityItem_(T item, AtomicBoolean failureFlag) throws Exception {
+		processActivityItem(item, failureFlag);
+		lastActivityTime = System.currentTimeMillis();
+	}
 
 	/**
 	 * Signals that streaming process has to be stopped/canceled and invokes status change event.
@@ -1065,7 +1105,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		@Override
 		public void run() {
 			try {
-				processActivityItem(item, failureFlag);
+				processActivityItem_(item, failureFlag);
 			} catch (Exception e) { // TODO: better handling
 				Utils.logThrowable(logger(), OpLevel.ERROR,
 						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -1183,9 +1223,11 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		private long bytesStreamed;
 
 		private long skippedActivities;
+		private long filteredActivities;
 		private long lostActivities;
 
 		private long elapsedTime;
+		private double averageActivitiesRate;
 
 		/**
 		 * Constructs a new StreamStats.
@@ -1199,8 +1241,10 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 			this.totalBytes = stream.getTotalBytes();
 			this.bytesStreamed = stream.getStreamedBytesCount();
 			this.skippedActivities = stream.getSkippedActivitiesCount();
+			this.filteredActivities = stream.getFilteredActivitiesCount();
 			this.lostActivities = stream.getLostActivitiesCount();
 			this.elapsedTime = stream.getElapsedTime();
+			this.averageActivitiesRate = stream.getAverageActivityRate();
 
 			if (activitiesTotal == -1) {
 				activitiesTotal = currActivity;
@@ -1259,12 +1303,30 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		}
 
 		/**
+		 * Returns average stream rate in activities per second.
+		 * 
+		 * @return average stream rate in activities per second
+		 */
+		public double getAverageActivitiesRate() {
+			return averageActivitiesRate;
+		}
+
+		/**
 		 * Returns number of activities skipped by stream.
 		 *
 		 * @return number of skipped activities
 		 */
 		public long getSkippedActivities() {
 			return skippedActivities;
+		}
+
+		/**
+		 * Returns number of activities filtered by stream.
+		 *
+		 * @return number of filtered activities
+		 */
+		public long getFilteredActivities() {
+			return filteredActivities;
 		}
 
 		/**
@@ -1285,8 +1347,9 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		public String toString() {
 			return "StreamStats {" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
 					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
-					+ skippedActivities + ", lost activities=" + lostActivities + ", elapsed time="
-					+ DurationFormatUtils.formatDurationHMS(elapsedTime) + '}'; // NON-NLS
+					+ skippedActivities + ", filtered activities=" + filteredActivities + ", lost activities=" // NON-NLS
+					+ lostActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) // NON-NLS
+					+ ", average rate=" + averageActivitiesRate + "act/sec}"; // NON-NLS
 		}
 	}
 }

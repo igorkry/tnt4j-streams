@@ -16,8 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
+import javax.script.*;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -26,21 +27,19 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-
 /**
  * Data value transformation based on Groovy code/expressions.
  *
  * @version $Revision: 1 $
  *
- * @see Binding
- * @see GroovyShell#evaluate(String, String)
+ * @see javax.script.ScriptEngineManager#getEngineByName(String)
+ * @see javax.script.Compilable#compile(String)
+ * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(GroovyTransformation.class);
 
-	private final GroovyShell shell = new GroovyShell(StreamsScriptingUtils.getDefaultGroovyCompilerConfig());
+	private CompiledScript script;
 
 	/**
 	 * Constructs a new GroovyTransformation.
@@ -79,35 +78,43 @@ public class GroovyTransformation extends AbstractScriptTransformation<Object> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	protected void initTransformation() {
+		super.initTransformation();
+
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.GROOVY_LANG);
+		try {
+			script = ((Compilable) engine).compile(getExpression());
+		} catch (ScriptException exc) {
+			throw new IllegalArgumentException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ScriptTransformation.invalid.script", getName(), getScriptCode()),
+					exc);
+		}
+	}
+
+	@Override
 	public Object transform(Object value, ActivityInfo ai) throws TransformationException {
-		synchronized (shell) {
-			Binding binding = shell.getContext();
+		Bindings bindings = new SimpleBindings();
+		bindings.put(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value); // NON-NLS
 
-			binding.getVariables().clear();
-			binding.setVariable(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
+		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
+			for (String eVar : exprVars) {
+				Property eKV = resolveFieldKeyAndValue(eVar, ai);
 
-			if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
-				for (String eVar : exprVars) {
-					Property eKV = resolveFieldKeyAndValue(eVar, ai);
-
-					binding.setVariable(eKV.getKey(), eKV.getValue());
-				}
+				bindings.put(eKV.getKey(), eKV.getValue());
 			}
+		}
 
-			try {
-				Object tValue = shell.evaluate(getExpression(),
-						StringUtils.isEmpty(getName()) ? "GroovyTransformScript" : getName()); // NON-NLS
+		try {
+			Object tValue = script.eval(bindings);
 
-				logEvaluationResult(binding.getVariables(), tValue);
+			logEvaluationResult(bindings, tValue);
 
-				return tValue;
-			} catch (Exception exc) {
-				throw new TransformationException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ValueTransformation.transformation.failed", getName(), getPhase()),
-						exc);
-			}
+			return tValue;
+		} catch (Exception exc) {
+			throw new TransformationException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ValueTransformation.transformation.failed", getName(), getPhase()), exc);
 		}
 	}
 }

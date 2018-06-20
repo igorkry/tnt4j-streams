@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import javax.script.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -33,11 +32,14 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
  * 
  * @version $Revision: 1 $
  *
- * @see ScriptEngineManager
- * @see ScriptEngine#eval(String)
+ * @see javax.script.ScriptEngineManager#getEngineByName(String)
+ * @see javax.script.Compilable#compile(String)
+ * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class JavaScriptExpressionFilter extends AbstractExpressionFilter<Object> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JavaScriptExpressionFilter.class);
+
+	private CompiledScript script;
 
 	/**
 	 * Constructs a new XPathExpressionFilter. Handle type is set to
@@ -73,23 +75,38 @@ public class JavaScriptExpressionFilter extends AbstractExpressionFilter<Object>
 	}
 
 	@Override
-	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
+	protected void initFilter() {
+		super.initFilter();
+
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.JAVA_SCRIPT_LANG);
-		factory.put(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
+		try {
+			script = ((Compilable) engine).compile(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
+		} catch (ScriptException exc) {
+			throw new IllegalArgumentException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ExpressionFilter.invalid.script", getHandledLanguage(), filterExpression),
+					exc);
+		}
+	}
+
+	@Override
+	public boolean doFilter(Object value, ActivityInfo ai) throws FilterException {
+		Bindings bindings = new SimpleBindings();
+		bindings.put(StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, value);
 
 		if (ai != null && CollectionUtils.isNotEmpty(exprVars)) {
 			for (String eVar : exprVars) {
 				Property eKV = resolveFieldKeyAndValue(eVar, ai);
 
-				factory.put(eKV.getKey(), eKV.getValue());
+				bindings.put(eKV.getKey(), eKV.getValue());
 			}
 		}
 
 		try {
-			boolean match = (boolean) engine.eval(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
+			boolean match = (boolean) script.eval(bindings);
 
-			logEvaluationResult(factory.getBindings(), match);
+			logEvaluationResult(bindings, match);
 
 			return isFilteredOut(getHandleType(), match);
 		} catch (Exception exc) {
