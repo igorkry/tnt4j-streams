@@ -1,7 +1,6 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -85,13 +84,4 @@ public abstract class AbstractTNTStreamOutput<T> implements TNTStreamOutput<T> {
 
 	}
 
-	/**
-	 * Returns empty statistics map.
-	 *
-	 * @return empty map
-	 */
-	@Override
-	public Map<String, Object> getStats() {
-		return Collections.emptyMap();
-	}
 }

@@ -332,43 +332,6 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 		super.cleanup();
 	}
 
-	/**
-	 * Obtains and aggregates statistics form all used trackers.
-	 * 
-	 * @return a map of key/value statistic pairs aggregated from all used trackers statistics
-	 *
-	 * @see com.jkoolcloud.tnt4j.tracker.Tracker#getStats()
-	 */
-	@Override
-	public Map<String, Object> getStats() {
-		Map<String, Object> statsMap = new HashMap<>();
-		if (MapUtils.isNotEmpty(trackersMap)) {
-			for (Map.Entry<String, Tracker> te : trackersMap.entrySet()) {
-				Tracker tracker = te.getValue();
-				Map<String, ?> tStats = tracker.getStats();
-
-				if (MapUtils.isNotEmpty(tStats)) {
-					for (Map.Entry<String, ?> tse : tStats.entrySet()) {
-						Object so = statsMap.get(tse.getKey());
-
-						if (so == null) {
-							so = tse.getValue();
-						} else {
-							if (so instanceof Number) {
-								Number sNum = (Number) so;
-								so = sNum.longValue() + ((Number) tse.getValue()).longValue();
-							}
-						}
-
-						statsMap.put(tse.getKey(), so);
-					}
-				}
-			}
-		}
-
-		return statsMap;
-	}
-
 	// protected void closeTracker(String aiSourceFQN, Tracker tracker) {
 	// String trackerId = getTrackersMapKey(Thread.currentThread(), aiSourceFQN);
 	// synchronized (trackersMap) {

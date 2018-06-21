@@ -802,8 +802,6 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 			notifyStreamSuccess();
 		}
 
-		Map<String, ?> outStats = output().getStats();
-
 		try {
 			cleanup();
 		} catch (Throwable exc) {
@@ -820,8 +818,6 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 				"TNTInputStream.thread.ended", Thread.currentThread().getName());
 		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"TNTInputStream.stream.statistics", name, getStreamStatistics());
-		logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"TNTInputStream.stream.out.statistics", name, outStats);
 
 		removeListeners();
 
