@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.transform;
 
-import javax.script.*;
+import javax.script.Bindings;
+import javax.script.CompiledScript;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -30,10 +33,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 /**
  * Data value transformation based on JavaScript code/expressions.
  * 
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
- * @see javax.script.ScriptEngineManager#getEngineByName(String)
- * @see javax.script.Compilable#compile(String)
+ * @see com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#compileJSScript(String)
  * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class JavaScriptTransformation extends AbstractScriptTransformation<Object> {
@@ -81,10 +83,8 @@ public class JavaScriptTransformation extends AbstractScriptTransformation<Objec
 	protected void initTransformation() {
 		super.initTransformation();
 
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.JAVA_SCRIPT_LANG);
 		try {
-			script = ((Compilable) engine).compile(StreamsScriptingUtils.addDefaultJSScriptImports(getExpression()));
+			script = StreamsScriptingUtils.compileJSScript(getExpression());
 		} catch (ScriptException exc) {
 			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,

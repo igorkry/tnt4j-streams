@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
-import javax.script.*;
+import javax.script.Bindings;
+import javax.script.CompiledScript;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -30,10 +33,9 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 /**
  * Data value filtering based on Groovy code/expressions.
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
- * @see javax.script.ScriptEngineManager#getEngineByName(String)
- * @see javax.script.Compilable#compile(String)
+ * @see com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils#compileGroovyScript(String)
  * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
@@ -78,10 +80,8 @@ public class GroovyExpressionFilter extends AbstractExpressionFilter<Object> {
 	protected void initFilter() {
 		super.initFilter();
 
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName(StreamsScriptingUtils.GROOVY_LANG);
 		try {
-			script = ((Compilable) engine).compile(getExpression());
+			script = StreamsScriptingUtils.compileGroovyScript(getExpression());
 		} catch (ScriptException exc) {
 			throw new IllegalArgumentException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,

@@ -18,16 +18,21 @@ package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.util.*;
 
+import javax.script.*;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
+
+import groovy.lang.GroovyClassLoader;
 
 /**
  * General scripting utility methods used by TNT4J-Streams.
  * 
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public final class StreamsScriptingUtils {
 	/**
@@ -59,6 +64,9 @@ public final class StreamsScriptingUtils {
 	private static String DEFAULT_JS_CODE_IMPORTS;
 
 	private static final Set<String> DEFAULT_IMPORT_PACKAGES = new HashSet<>();
+
+	private static ScriptEngine GROOVY_SCRIPT_ENGINE;
+	private static ScriptEngine JS_SCRIPT_ENGINE;
 
 	static {
 		initDefaultImportPackages();
@@ -118,11 +126,11 @@ public final class StreamsScriptingUtils {
 	}
 
 	/**
-	 * Wraps JS script code with default set of Java API imported packages.
+	 * Appends JS script code with default set of Java API imported packages.
 	 *
 	 * @param script
 	 *            script code to wrap with default imports
-	 * @return default imports wrapped JS script code
+	 * @return default imports appended JS script code
 	 */
 	public static String addDefaultJSScriptImports(String script) {
 		if (DEFAULT_JS_CODE_IMPORTS == null) {
@@ -188,13 +196,13 @@ public final class StreamsScriptingUtils {
 		if (CollectionUtils.isNotEmpty(expVars)) {
 			for (String eVar : expVars) {
 				String vph = phMap.get(eVar);
-				StreamsScriptingUtils.appendVariable(varStr, eVar, vars.get(vph));
+				appendVariable(varStr, eVar, vars.get(vph));
 			}
 		}
 
 		Object fValue = vars.get(FIELD_VALUE_VARIABLE_EXPR);
 		if (fValue != null) {
-			StreamsScriptingUtils.appendVariable(varStr, FIELD_VALUE_VARIABLE_EXPR, fValue);
+			appendVariable(varStr, FIELD_VALUE_VARIABLE_EXPR, fValue);
 		}
 
 		if (varStr.length() > 0) {
@@ -242,5 +250,63 @@ public final class StreamsScriptingUtils {
 		}
 
 		return Utils.toString(obj);
+	}
+
+	/**
+	 * Compiles Groovy script code ready for later execution.
+	 *
+	 * @param scriptCode
+	 *            Groovy script code string
+	 * @return compiled instance of Groovy script code
+	 * 
+	 * @throws ScriptException
+	 *             if compilation fails
+	 *
+	 * @see javax.script.ScriptEngineManager#getEngineByName(String)
+	 * @see javax.script.Compilable#compile(String)
+	 */
+	public static CompiledScript compileGroovyScript(String scriptCode) throws ScriptException {
+		if (GROOVY_SCRIPT_ENGINE == null) {
+			GROOVY_SCRIPT_ENGINE = initGroovyScriptEngine();
+		}
+
+		return ((Compilable) GROOVY_SCRIPT_ENGINE).compile(scriptCode);
+	}
+
+	private static ScriptEngine initGroovyScriptEngine() {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName(GROOVY_LANG);
+		((GroovyScriptEngineImpl) engine).setClassLoader(new GroovyClassLoader(
+				Thread.currentThread().getContextClassLoader(), getDefaultGroovyCompilerConfig()));
+
+		return engine;
+	}
+
+	/**
+	 * Compiles JavaScript script code ready for later execution.
+	 *
+	 * @param scriptCode
+	 *            JavaScript script code string
+	 * @return compiled instance of JavaScript script code
+	 *
+	 * @throws ScriptException
+	 *             if compilation fails
+	 *
+	 * @see javax.script.ScriptEngineManager#getEngineByName(String)
+	 * @see javax.script.Compilable#compile(String)
+	 */
+	public static CompiledScript compileJSScript(String scriptCode) throws ScriptException {
+		if (JS_SCRIPT_ENGINE == null) {
+			JS_SCRIPT_ENGINE = initJSScriptEngine();
+		}
+
+		return ((Compilable) JS_SCRIPT_ENGINE).compile(addDefaultJSScriptImports(scriptCode));
+	}
+
+	private static ScriptEngine initJSScriptEngine() {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
+
+		return engine;
 	}
 }
