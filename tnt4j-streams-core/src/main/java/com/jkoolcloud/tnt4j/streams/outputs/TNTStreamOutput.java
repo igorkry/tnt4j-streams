@@ -116,10 +116,4 @@ public interface TNTStreamOutput<T> extends NamedObject {
 	 */
 	boolean isClosed();
 
-	/**
-	 * Obtain all available output statistics.
-	 *
-	 * @return a map of key/value statistic pairs
-	 */
-	Map<String, Object> getStats();
 }
