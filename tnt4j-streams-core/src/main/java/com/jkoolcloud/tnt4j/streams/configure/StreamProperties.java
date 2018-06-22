@@ -207,4 +207,14 @@ public interface StreamProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_KEEP_LINE_SEPARATORS = "KeepLineSeparators"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_PING_LOG_ACTIVITY_COUNT = "PingLogActivityCount"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_PING_LOG_ACTIVITY_DELAY = "PingLogActivityDelay"; // NON-NLS
 }

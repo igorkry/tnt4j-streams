@@ -102,6 +102,9 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	private int executorsTerminationTimeout = DEFAULT_EXECUTORS_TERMINATION_TIMEOUT;
 	private int executorRejectedTaskOfferTimeout = DEFAULT_EXECUTOR_REJECTED_TASK_TIMEOUT;
 
+	private int pingLogActivitiesCount = -1;
+	private int pingLogActivitiesDelay = -1;
+
 	private Thread sh;
 
 	/**
@@ -207,6 +210,10 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 					executorsTerminationTimeout = Integer.parseInt(value);
 				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
 					boundedExecutorModel = Utils.toBoolean(value);
+				} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_COUNT.equalsIgnoreCase(name)) {
+					pingLogActivitiesCount = Integer.parseInt(value);
+				} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_DELAY.equalsIgnoreCase(name)) {
+					pingLogActivitiesDelay = Integer.parseInt(value);
 				}
 			}
 		}
@@ -257,6 +264,12 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		}
 		if (StreamProperties.PROP_STREAM_NAME.equals(name)) {
 			return this.name;
+		}
+		if (StreamProperties.PROP_PING_LOG_ACTIVITY_COUNT.equals(name)) {
+			return this.pingLogActivitiesCount;
+		}
+		if (StreamProperties.PROP_PING_LOG_ACTIVITY_DELAY.equals(name)) {
+			return this.pingLogActivitiesDelay;
 		}
 
 		return null;
@@ -594,8 +607,8 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 */
 	public double getAverageActivityRate() {
 		long lat = lastActivityTime < 0 ? System.currentTimeMillis() : lastActivityTime;
-		long et = startTime < 0 ? 0 : lat - startTime;
-		return (double) getCurrentActivity() / TimeUnit.MILLISECONDS.toSeconds(et);
+		double et = startTime < 0 ? 0 : lat - startTime;
+		return (getCurrentActivity() / et) * 1000;
 	}
 
 	/**
@@ -838,9 +851,22 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 */
 	protected abstract void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception;
 
+	private AtomicInteger cai = new AtomicInteger(0);
+	private long lastLogTime = System.currentTimeMillis();
+
 	private void processActivityItem_(T item, AtomicBoolean failureFlag) throws Exception {
 		processActivityItem(item, failureFlag);
+		endTransaction();
 		lastActivityTime = System.currentTimeMillis();
+
+		// TODO: make ping logger class running separate thread.
+		if ((pingLogActivitiesCount > 0 && cai.incrementAndGet() % pingLogActivitiesCount == 0)
+				|| (pingLogActivitiesDelay > 0
+						&& lastActivityTime - lastLogTime > TimeUnit.SECONDS.toMillis(pingLogActivitiesDelay))) {
+			lastLogTime = System.currentTimeMillis();
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTInputStream.stream.statistics", name, getStreamStatistics());
+		}
 	}
 
 	/**
@@ -1341,11 +1367,11 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 		 */
 		@Override
 		public String toString() {
-			return "StreamStats {" + "activities total=" + activitiesTotal + ", current activity=" + currActivity // NON-NLS
-					+ ", total bytes=" + totalBytes + ", bytes streamed=" + bytesStreamed + ", skipped activities=" // NON-NLS
-					+ skippedActivities + ", filtered activities=" + filteredActivities + ", lost activities=" // NON-NLS
-					+ lostActivities + ", elapsed time=" + DurationFormatUtils.formatDurationHMS(elapsedTime) // NON-NLS
-					+ ", average rate=" + averageActivitiesRate + "act/sec}"; // NON-NLS
+			return "[" + "activities.total=" + activitiesTotal + ", activities.current=" + currActivity // NON-NLS
+					+ ", activities.skipped=" + skippedActivities + ", activities.filtered=" + filteredActivities // NON-NLS
+					+ ", activities.lost=" + lostActivities + ", bytes.total=" + totalBytes + ", bytes.streamed=" // NON-NLS
+					+ bytesStreamed + ", time.elapsed=" + DurationFormatUtils.formatDurationHMS(elapsedTime) // NON-NLS
+					+ ", rate.average=" + String.format("%.2f", averageActivitiesRate) + "aps]"; // NON-NLS
 		}
 	}
 }
