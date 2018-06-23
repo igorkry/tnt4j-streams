@@ -856,7 +856,6 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 
 	private void processActivityItem_(T item, AtomicBoolean failureFlag) throws Exception {
 		processActivityItem(item, failureFlag);
-		endTransaction();
 		lastActivityTime = System.currentTimeMillis();
 
 		// TODO: make ping logger class running separate thread.
