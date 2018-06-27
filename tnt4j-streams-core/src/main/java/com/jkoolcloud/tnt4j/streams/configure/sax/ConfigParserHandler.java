@@ -2596,6 +2596,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 
 			locators.add(afl);
+			if (field != null) {
+				field.addLocator(afl);
+			}
 		}
 
 		private void addTransformation(ValueTransformation<Object, Object> aft) {
