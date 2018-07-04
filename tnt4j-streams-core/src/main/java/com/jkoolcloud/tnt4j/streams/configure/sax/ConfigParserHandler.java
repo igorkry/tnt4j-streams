@@ -337,10 +337,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	@SuppressWarnings("rawtypes")
 	private StreamFiltersGroup currFilter = null;
 
-	private boolean currFieldHasLocValAttr = false;
-	// private boolean currFieldHasLocElmt = false;
-	// private boolean currFieldHasMapElmt = false;
-
 	private StreamsConfigData streamsConfigData = null;
 	private Map<String, Object> javaObjectsMap = null;
 
@@ -401,9 +397,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		currField = null;
 		currFilter = null;
 		currLocatorData = null;
-		currFieldHasLocValAttr = false;
-		// currFieldHasLocElmt = false;
-		// currFieldHasMapElmt = false;
 		processingTNT4JProperties = false;
 		streamsConfigData = new StreamsConfigData();
 		javaObjectsMap = new HashMap<>();
@@ -664,10 +657,6 @@ public class ConfigParserHandler extends DefaultHandler {
 							"ConfigParserHandler.malformed.configuration2", FIELD_ELMT, PARSER_ELMT),
 					currParseLocation);
 		}
-		currField = new ActivityFieldData();
-		currFieldHasLocValAttr = false;
-		// currFieldHasLocElmt = false;
-		// currFieldHasMapElmt = false;
 
 		String field = null;
 		ActivityFieldDataType dataType = null;
@@ -749,9 +738,10 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		ActivityFieldLocator afl;
 		ActivityField af = new ActivityField(field);
+		currField = new ActivityFieldData(af);
 
 		if (value != null) {
-			currFieldHasLocValAttr = true;
+			currField.hasLocValAttr = true;
 			afl = new ActivityFieldLocator(value);
 			afl.setRadix(radix);
 			afl.setRequired(reqVal);
@@ -772,7 +762,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 			currField.addLocator(afl);
 		} else if (StringUtils.isNotEmpty(locator)) {
-			currFieldHasLocValAttr = true;
+			currField.hasLocValAttr = true;
 			String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM))
 					: new String[] { locator };
 			for (String loc : locators) {
@@ -814,7 +804,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		af.setRequired(reqVal);
 		af.setTransparent(transparent);
 		af.setSplitCollection(split);
-		currField.field = af;
 	}
 
 	/**
@@ -896,8 +885,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					currParseLocation);
 		}
 
-		currField = new ActivityFieldData();
-
 		String field = null;
 		String locatorType = null;
 		String locator = null;
@@ -929,6 +916,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		ActivityFieldLocator afl;
 		ActivityField af = new ActivityField(field);
+		currField = new ActivityFieldData(af);
 
 		String[] locators = currParser.canHaveDelimitedLocators() ? locator.split(Pattern.quote(LOC_DELIM))
 				: new String[] { locator };
@@ -946,7 +934,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		af.setRequired(reqVal);
 		af.setTransparent(transparent);
 		af.setSplitCollection(split);
-		currField.field = af;
 	}
 
 	/**
@@ -968,12 +955,12 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.malformed.configuration2", FIELD_LOC_ELMT,
 					Utils.arrayToString(FIELD_ELMT, EMBEDDED_ACTIVITY_ELMT)), currParseLocation);
 		}
-		if (!currField.field.hasDynamicAttrs() && currFieldHasLocValAttr) {
+		if (!currField.field.hasDynamicAttrs() && currField.hasLocValAttr) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.has.both", FIELD_ELMT, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
 					getLocationInfo()));
 		}
-		// if (currFieldHasMapElmt) {
+		// if (currField.hasMapElmt) {
 		// throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 		// "ConfigParserHandler.element.has.both2", FIELD_ELMT, FIELD_LOC_ELMT, FIELD_MAP_ELMT,
 		// getLocationInfo()));
@@ -1033,7 +1020,7 @@ public class ConfigParserHandler extends DefaultHandler {
 						currParseLocation);
 			}
 		}
-		// currFieldHasLocElmt = true;
+		// currField.hasLocElmt = true;
 
 		elementData = new StringBuilder();
 	}
@@ -1053,12 +1040,12 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.malformed.configuration2", FIELD_MAP_ELMT,
 					Utils.arrayToString(FIELD_ELMT, FIELD_LOC_ELMT)), currParseLocation);
 		}
-		// if (currFieldHasLocElmt && currLocatorData == null) {
+		// if (currField.hasLocElmt && currLocatorData == null) {
 		// throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 		// "ConfigParserHandler.element.has.both2", FIELD_ELMT, FIELD_LOC_ELMT, FIELD_MAP_ELMT,
 		// getLocationInfo()));
 		// }
-		if (CollectionUtils.isEmpty(currField.locators) && currLocatorData == null) {
+		if (CollectionUtils.isEmpty(currField.getLocators()) && currLocatorData == null) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.no.binding", FIELD_MAP_ELMT, FIELD_LOC_ELMT, getLocationInfo()));
 		}
@@ -1085,9 +1072,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			currLocatorData.valueMapItems.add(new FieldLocatorData.ValueMapData(source, target,
 					StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type)));
 		} else {
-			// currFieldHasMapElmt = true;
-			if (currField.locators != null) {
-				for (ActivityFieldLocator loc : currField.locators) {
+			// currField.hasMapElmt = true;
+			if (currField.getLocators() != null) {
+				for (ActivityFieldLocator loc : currField.getLocators()) {
 					loc.addValueMap(source, target,
 							StringUtils.isEmpty(type) ? null : ActivityFieldMappingType.valueOf(type));
 				}
@@ -1112,7 +1099,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					Utils.arrayToString(FIELD_ELMT, FIELD_LOC_ELMT)), currParseLocation);
 		}
 
-		if (CollectionUtils.isEmpty(currField.locators) && currLocatorData == null) {
+		if (CollectionUtils.isEmpty(currField.getLocators()) && currLocatorData == null) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.no.binding", FIELD_MAP_REF_ELMT, FIELD_LOC_ELMT, getLocationInfo()));
 		}
@@ -1904,9 +1891,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					handleActivityField(currField, qName);
 					currParser.addField(currField.field);
 					currField = null;
-					currFieldHasLocValAttr = false;
-					// currFieldHasLocElmt = false;
-					// currFieldHasMapElmt = false;
 				}
 			} else if (FIELD_LOC_ELMT.equals(qName)) {
 				if (currLocatorData != null) {
@@ -2067,7 +2051,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void handleActivityField(ActivityFieldData aFieldData, String qName) throws SAXException {
-		if (CollectionUtils.isEmpty(aFieldData.locators)) {
+		if (CollectionUtils.isEmpty(aFieldData.getLocators())) {
 			throw new SAXException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ConfigParserHandler.element.must.have", qName, LOCATOR_ATTR, VALUE_ATTR, FIELD_LOC_ELMT,
 					getLocationInfo(), aFieldData.field.getFieldTypeName()));
@@ -2084,25 +2068,21 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
-		for (ActivityFieldLocator afl : aFieldData.locators) {
-			currField.field.addLocator(afl);
-		}
-
 		if (aFieldData.transformations != null) {
 			boolean transformationsAdded = false;
-			if (aFieldData.locators.size() == 1 && aFieldData.transformations.size() == 1) {
+			if (aFieldData.getLocators().size() == 1 && aFieldData.transformations.size() == 1) {
 				ValueTransformation<Object, Object> aft = aFieldData.transformations.get(0);
 
 				if (aft.getPhase() == ValueTransformation.Phase.RAW
 						|| aft.getPhase() == ValueTransformation.Phase.FORMATTED) {
-					aFieldData.locators.get(0).addTransformation(aft);
+					aFieldData.getLocators().get(0).addTransformation(aft);
 					transformationsAdded = true;
 				}
 			}
 
 			if (!transformationsAdded) {
 				for (ValueTransformation<Object, Object> aft : aFieldData.transformations) {
-					currField.field.addTransformation(aft);
+					aFieldData.field.addTransformation(aft);
 				}
 			}
 		}
@@ -2587,18 +2567,22 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private static class ActivityFieldData {
 		ActivityField field;
-		List<ActivityFieldLocator> locators;
 		List<ValueTransformation<Object, Object>> transformations;
 
-		private void addLocator(ActivityFieldLocator afl) {
-			if (locators == null) {
-				locators = new ArrayList<>();
-			}
+		private boolean hasLocValAttr = false;
+		// private boolean hasLocElmt = false;
+		// private boolean hasMapElmt = false;
 
-			locators.add(afl);
-			if (field != null) {
-				field.addLocator(afl);
-			}
+		ActivityFieldData(ActivityField field) {
+			this.field = field;
+		}
+
+		private void addLocator(ActivityFieldLocator afl) {
+			field.addLocator(afl);
+		}
+
+		private List<ActivityFieldLocator> getLocators() {
+			return field.getLocators();
 		}
 
 		private void addTransformation(ValueTransformation<Object, Object> aft) {
@@ -2611,8 +2595,11 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		private void reset() {
 			field = null;
-			locators.clear();
 			transformations.clear();
+
+			hasLocValAttr = false;
+			// hasLocElmt = false;
+			// hasMapElmt = false;
 		}
 	}
 }
