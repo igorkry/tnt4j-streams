@@ -9,7 +9,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
 
-    <!-- this is a sample imbedded parser to extract a field from the messages based on XML tag
+    <!-- this is a sample embedded parser to extract a field from the messages based on XML tag
           For this example, you want to extract the item and price from the message
                     <?xml version="1.0" encoding="utf-8"?>
                         <Sample>
@@ -40,17 +40,17 @@
 
         <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
 			  entire content, remove this section.  To capture a portion of the message, use an
-			  imbedded parser as shown in the example below).
+			  embedded parser as shown in the example below).
 			  -->
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="BytesToString" lang="groovy"><![CDATA[
                $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
-            ]]></field-transform>
+            ]]></field-transform>            
         </field>
-
-        <!--  Uncomment the following to pass a binary copy of the message data with the event   -->
-        <!--field name="BinaryMessage" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary"-->
-
+		
+	    <!--  Uncomment the following to pass a binary copy of the message data with the event   -->
+	    <!--field name="BinaryMessage" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary"-->
+		  
         <!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
 
         <!--field name="MessageFormats"
@@ -59,9 +59,9 @@
                         <parser-ref name="XML_Data_Parser" aggregation="Merge"/>
         </field-->
 
-        <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
+         <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
             The examples of setting the correlator
-            1) Using message id and correlator for applications which use this common MQ pattern
+            1) Using message id and correlation id for applications which use this common MQ pattern
             2) Using the Connection id to correlate all data from a single MQ connection
             3) Using message content such as an order or trade ID
             -->
@@ -73,16 +73,17 @@
                     <value handle="exclude" format="hexBinary">0x000000000000000000000000000000000000000000000000</value>
                 </filter>
             </field-locator>
-            <!-- * always collect msgid for correlator  -->
+            <!-- * always collect msgid for correlator, remove if applications do not create unique message ids   -->
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
 
             <!-- (2) uncomment this if you want stitching across the entire application connection.
                  Note, this correlates across commit boundaries so should not be used for long running applications -->
             <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
 
-            <!-- (3) Content based correlator - use fields from the payload extracted by imbedded parser above -->
+            <!-- (3) Content based correlator - use fields from the payload extracted by embedded parser above -->
             <!--field-locator locator="OrderID" locator-type="Activity"/-->
         </field>
+
 
         <!-- The following fields should be reviewed but default selection should be sufficient in most cases -->
         <!-- ================================================================================================ -->
@@ -190,8 +191,8 @@
                 ts:getFileName($fieldValue)
             </field-transform>
         </field>
-
-        <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+		
+		<field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
                units="Microseconds" transparent="true"/>
 
         <!-- time calculations, use highrestime is available (not all calls have it) -->
@@ -206,30 +207,28 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
-
-        <!-- some events may not have elapsed time, default to 0 -->
-        <field name="ElapsedTime" value="">
-            <field-transform name="ElapTransform" lang="groovy"><![CDATA[
-               	${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
-            ]]></field-transform>
+		
+        <field name="PutTime" separator=" " datatype="DateTime" format="yyyyMMdd HHmmss">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
         </field>
-        <!-- also record elapsed time independently as a number only, not time stamp -->
-        <field name="ElapsedTime_us" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds"/>
-
-        <!-- start time and end times are only precise to seconds so use highrestime if available -->
+	
+	<field name="ElapsedTime" value="0"/>
+		
+		<!-- record actual elapsed time as a number only, not time stamp -->
+		<field name="QMgrOpDuration" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds">
+			<field-transform name="ElapTransform" lang="groovy"><![CDATA[
+               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec} ]]></field-transform> 
+			</field>
+        <!-- start time is only precise to seconds so use highrestime if available -->
         <field name="StartTime" value="">
-            <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
+            <field-transform lang="groovy" name="StartTimeTransform"><![CDATA[
                 ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
             ]]></field-transform>
         </field>
         <field name="EndTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
-                ${HighresTime} != null && ${ElapsedTime} != null
-                    ? ${HighresTime} + ${ElapsedTime}
-                    : (${ElapsedTime} != null
-                        ? ${EndTimeSec} + ${ElapsedTime}
-                        : ${EndTimeSec})
-            ]]></field-transform>
+                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}]]></field-transform>
         </field>
 
         <!-- activity trace fields -->
@@ -283,10 +282,6 @@
         <field name="ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
         <field name="CodedCharSetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
         <field name="Encoding" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
-        <field name="PutTime" separator=" " datatype="DateTime" format="yyyyMMdd HHmmss">
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
-        </field>
         <field name="SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label" datatype="Number"/>
         <field name="Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/>
         <field name="ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
@@ -304,7 +299,7 @@
 
     </parser>
 
-    <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
+        <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
 
     <!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
 
