@@ -141,7 +141,7 @@ public class TNTInputStreamTest {
 	//
 	@Test
 	public void testApplyParsers() throws Exception {
-		final ActivityParser parser = mock(ActivityParser.class);
+		ActivityParser parser = mock(ActivityParser.class);
 		String[] tags = { "TestTag" }; // NON-NLS
 		String[] falseTags = { "TestTagNot" }; // NON-NLS
 		when(parser.getTags()).thenReturn(tags);
@@ -169,7 +169,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void testInputListeners() {
-		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
+		InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		ts.addStreamListener(inputStreamListenerMock);
 		ts.notifyProgressUpdate(1, 10);
 		verify(inputStreamListenerMock).onProgressUpdate(ts, 1, 10);
@@ -189,8 +189,8 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void addInputTaskListenerNullTest() {
-		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
-		final Runnable runnable = mock(Runnable.class);
+		StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
+		Runnable runnable = mock(Runnable.class);
 		ts.addStreamTasksListener(null);
 		ts.notifyStreamTaskRejected(runnable);
 		verify(streamTaskListenerMock, never()).onReject(eq(ts), any(Runnable.class));
@@ -206,7 +206,7 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void removeStreamListenerTest() {
-		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
+		InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
 		ts.addStreamListener(inputStreamListenerMock);
 		ts.removeStreamListener(inputStreamListenerMock);
 		ts.notifyProgressUpdate(1, 10);
@@ -215,8 +215,8 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void removeStreamTasksListenerTest() {
-		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
-		final Runnable runnable = mock(Runnable.class);
+		StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
+		Runnable runnable = mock(Runnable.class);
 		ts.addStreamTasksListener(streamTaskListenerMock);
 		ts.removeStreamTasksListener(streamTaskListenerMock);
 		ts.notifyStreamTaskRejected(runnable);
@@ -232,16 +232,18 @@ public class TNTInputStreamTest {
 		assertEquals(ts.getStreamedBytesCount(), ts.getStreamStatistics().getBytesStreamed());
 		assertEquals(ts.getElapsedTime() == -1 ? 0 : ts.getElapsedTime(), ts.getStreamStatistics().getElapsedTime());
 		assertEquals(ts.getSkippedActivitiesCount(), ts.getStreamStatistics().getSkippedActivities());
+		assertEquals(ts.getFilteredActivitiesCount(), ts.getStreamStatistics().getFilteredActivities());
 		assertEquals(ts.getLostActivitiesCount(), ts.getStreamStatistics().getLostActivities());
+		assertEquals(ts.getAverageActivityRate(), ts.getStreamStatistics().getAverageActivitiesRate(), 0.01);
 	}
 
 	@Test
 	@Ignore("Mixed")
 	public void cleanUpTest() {
-		final InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
-		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
-		final Runnable runnable = mock(Runnable.class);
-		final List<Runnable> list = Collections.singletonList(runnable);
+		InputStreamListener inputStreamListenerMock = mock(InputStreamListener.class);
+		StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
+		Runnable runnable = mock(Runnable.class);
+		List<Runnable> list = Collections.singletonList(runnable);
 		ts.addStreamListener(inputStreamListenerMock);
 		ts.addStreamTasksListener(streamTaskListenerMock);
 		ts.cleanup();
@@ -260,13 +262,13 @@ public class TNTInputStreamTest {
 
 	@Test
 	public void testInputTaskListener() {
-		final StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
-		final Runnable runnable = mock(Runnable.class);
+		StreamTasksListener streamTaskListenerMock = mock(StreamTasksListener.class);
+		Runnable runnable = mock(Runnable.class);
 		ts.addStreamTasksListener(streamTaskListenerMock);
 		ts.notifyStreamTaskRejected(runnable);
 		verify(streamTaskListenerMock).onReject(eq(ts), any(Runnable.class));
 
-		final List<Runnable> list = Collections.singletonList(runnable);
+		List<Runnable> list = Collections.singletonList(runnable);
 		ts.notifyStreamTasksDropOff(list);
 		verify(streamTaskListenerMock).onDropOff(ts, list);
 
@@ -289,8 +291,9 @@ public class TNTInputStreamTest {
 
 		@Override
 		public String getNextItem() throws Exception {
-			if (used)
+			if (used) {
 				return null;
+			}
 			used = true;
 			return "TEST"; // NON-NLS
 		}
@@ -313,14 +316,20 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
+		public Object getProperty(String name) {
+			return null;
+		}
+
+		@Override
 		public void addField(ActivityField field) {
 		}
 
 		@Override
 		public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
 				throws IllegalStateException, ParseException {
-			if (data.equals("TESTPARSEEXCEPTION")) // NON-NLS
+			if (data.equals("TESTPARSEEXCEPTION")) { // NON-NLS
 				throw new ParseException("TESTPARSEEXCEPTION", 0); // NON-NLS
+			}
 			return ai;
 		}
 
