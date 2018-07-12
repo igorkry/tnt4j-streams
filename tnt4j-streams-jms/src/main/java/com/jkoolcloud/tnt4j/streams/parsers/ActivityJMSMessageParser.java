@@ -145,6 +145,15 @@ public class ActivityJMSMessageParser extends AbstractActivityMapParser {
 		}
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		if (JMSParserProperties.PROP_CONV_TO_STRING.equalsIgnoreCase(name)) {
+			return convertToString;
+		}
+
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Makes map object containing activity object data collected from JMS message payload data.
 	 *

@@ -84,6 +84,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected String activityDelim = ActivityDelim.EOL.name();
 
 	/**
+	 * Property defining activities composite data (like map) field path tokens delimiter. Default value is
+	 * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#MAP_PROP_NAME_TOKENS_DELIM}. When streaming to
+	 * AutoPilot it is recommended to use {@code "\"} delimiter.
+	 */
+	protected String compositeDelim = StreamsConstants.MAP_PROP_NAME_TOKENS_DELIM;
+
+	/**
 	 * Property indicating that all attributes are required by default.
 	 */
 	protected boolean requireAll = false;
@@ -124,9 +131,33 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"ActivityParser.setting", name, value);
 					}
+				} else if (ParserProperties.PROP_COMPOSITE_DELIM.equalsIgnoreCase(name)) {
+					if (StringUtils.isNotEmpty(value)) {
+						compositeDelim = value;
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityParser.setting", name, value);
+					}
 				}
 			}
 		}
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
+			return useActivityAsMessage;
+		}
+		if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+			return activityDelim;
+		}
+		if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
+			return requireAll;
+		}
+		if (ParserProperties.PROP_COMPOSITE_DELIM.equalsIgnoreCase(name)) {
+			return compositeDelim;
+		}
+
+		return null;
 	}
 
 	/**
@@ -221,6 +252,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		} else {
 			fieldList.add(field);
 		}
+		field.referParser(this);
 	}
 
 	private void validateDuplicateFields(ActivityField field) {
@@ -322,6 +354,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"ActivityParser.removing.field", field); // Utils.getDebugString(field));
 		fieldList.remove(field);
+		field.referParser(null);
 	}
 
 	/**

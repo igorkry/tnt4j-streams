@@ -114,6 +114,18 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		}
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		if (WmqParserProperties.PROP_TRANSLATE_NUM_VALUES.equalsIgnoreCase(name)) {
+			return translateNumValues;
+		}
+		if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+			return sigDelim;
+		}
+
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
 	 * determine if the parser can parse the data in the format that the stream has it.

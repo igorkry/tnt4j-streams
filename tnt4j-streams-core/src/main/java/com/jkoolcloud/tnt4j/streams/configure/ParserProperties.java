@@ -99,4 +99,9 @@ public interface ParserProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_SUPPORTED_CLASS = "SupportedClass"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_COMPOSITE_DELIM = "CompositeStructDelim"; // NON-NLS
 }

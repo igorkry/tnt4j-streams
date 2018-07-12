@@ -191,6 +191,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		if (ParserProperties.PROP_NAMESPACE_AWARE.equalsIgnoreCase(name)) {
+			return namespaceAware;
+		}
+
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to
 	 * determine if the parser can parse the data in the format that the stream has it.

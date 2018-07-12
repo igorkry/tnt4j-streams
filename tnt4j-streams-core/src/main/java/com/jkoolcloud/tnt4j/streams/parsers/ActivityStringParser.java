@@ -111,6 +111,11 @@ public class ActivityStringParser extends GenericActivityParser<String> {
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		return super.getProperty(name);
+	}
+
+	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		String dataStr = getNextActivityString(data);
 		if (StringUtils.isEmpty(dataStr)) {

@@ -117,6 +117,21 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
+			return fieldDelim;
+		}
+		if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
+			return pattern;
+		}
+		if (ParserProperties.PROP_STRIP_QUOTES.equalsIgnoreCase(name)) {
+			return stripQuotes;
+		}
+
+		return super.getProperty(name);
+	}
+
+	@Override
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

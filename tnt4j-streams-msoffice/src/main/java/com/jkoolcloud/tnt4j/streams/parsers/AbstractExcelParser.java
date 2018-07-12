@@ -58,6 +58,11 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		// }
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Evaluates and returns cell contained value.
 	 *

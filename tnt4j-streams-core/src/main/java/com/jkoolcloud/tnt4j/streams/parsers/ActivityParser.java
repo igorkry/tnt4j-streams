@@ -75,6 +75,19 @@ public abstract class ActivityParser implements NamedObject {
 	public abstract void setProperties(Collection<Map.Entry<String, String>> props);
 
 	/**
+	 * Get value of specified property. If subclasses override {@link #setProperties(java.util.Collection)}, they should
+	 * generally override this method as well to return the value of custom properties, and invoke the base class method
+	 * to handle any built-in properties.
+	 * 
+	 * @param name
+	 *            name of property whose value is to be retrieved
+	 * @return value for property, or {@code null} if property does not exist
+	 *
+	 * @see #setProperties(java.util.Collection)
+	 */
+	public abstract Object getProperty(String name);
+
+	/**
 	 * Add an activity field definition to the set of fields supported by this parser.
 	 *
 	 * @param field

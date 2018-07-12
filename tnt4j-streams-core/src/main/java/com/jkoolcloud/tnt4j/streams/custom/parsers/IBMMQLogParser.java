@@ -107,6 +107,11 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		return super.getProperty(name);
+	}
+
+	@Override
 	public boolean canHaveDelimitedLocators() {
 		return false;
 	}

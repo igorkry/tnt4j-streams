@@ -249,6 +249,18 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 		}
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		if (PROP_APACHE_LOG_PATTERN.equalsIgnoreCase(name)) {
+			return apacheLogPattern;
+		}
+		if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
+			return userRegexMappings;
+		}
+
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Makes log entry parsing RegEx from defined Apache access log configuration pattern string.
 	 *

@@ -150,6 +150,15 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
+			return nodePathDelim;
+		}
+
+		return super.getProperty(name);
+	}
+
+	@Override
 	protected ActivityContext prepareItem(TNTInputStream<?, ?> stream, Object data) throws ParseException {
 		Map<String, Object> dataMap = getDataMap(data);
 		if (MapUtils.isEmpty(dataMap)) {

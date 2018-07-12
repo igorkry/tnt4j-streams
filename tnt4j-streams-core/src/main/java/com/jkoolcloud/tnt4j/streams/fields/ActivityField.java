@@ -55,6 +55,7 @@ public class ActivityField extends AbstractFieldEntity {
 	private Map<String, ActivityFieldLocator> dynamicLocators = null;
 
 	private ActivityFieldLocator groupLocator;
+	private ActivityParser parser;
 
 	/**
 	 * Constructs a new activity field entry.
@@ -94,6 +95,27 @@ public class ActivityField extends AbstractFieldEntity {
 	@Override
 	protected EventSink logger() {
 		return LOGGER;
+	}
+
+	/**
+	 * Returns activity parser instance enclosing this field.
+	 *
+	 * @param parser
+	 *            parser instance enclosing this field
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#addField(ActivityField)
+	 */
+	public void referParser(ActivityParser parser) {
+		this.parser = parser;
+	}
+
+	/**
+	 * Returns activity parser instance enclosing this field.
+	 *
+	 * @return parser instance enclosing this field
+	 */
+	public ActivityParser getParser() {
+		return parser;
 	}
 
 	/**

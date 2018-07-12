@@ -130,6 +130,18 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		if (ParserProperties.PROP_PATTERN.equalsIgnoreCase(name)) {
+			return pattern;
+		}
+		if (ParserProperties.PROP_MATCH_STRATEGY.equalsIgnoreCase(name)) {
+			return matchStrategy;
+		}
+
+		return super.getProperty(name);
+	}
+
+	@Override
 	public void addField(ActivityField field) {
 		super.addField(field);
 

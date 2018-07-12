@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.format.JSONFormatter;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
+import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
@@ -41,7 +42,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
- * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to JKoolCloud.
+ * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKoolCloud.
  *
  * @version $Revision: 3 $
  */
@@ -101,7 +102,7 @@ public class ActivityInfo {
 
 	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
-	 * the JKoolCloud.
+	 * the jKoolCloud.
 	 *
 	 * @param field
 	 *            field to apply
@@ -422,7 +423,8 @@ public class ActivityInfo {
 			String pKey = propPrefix + String.valueOf(pme.getKey());
 
 			if (pme.getValue() instanceof Map) {
-				addPropertiesMap(field, (Map<?, ?>) pme.getValue(), pKey + StreamsConstants.MAP_PROP_NAME_TOKENS_DELIM);
+				addPropertiesMap(field, (Map<?, ?>) pme.getValue(),
+						pKey + field.getParser().getProperty(ParserProperties.PROP_COMPOSITE_DELIM));
 			} else {
 				addActivityProperty(pKey, getPropertyValue(pme.getValue(), field));
 			}
@@ -781,7 +783,7 @@ public class ActivityInfo {
 	/**
 	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
-	 * the specified tracker for this activity data entity to be sent to JKoolCloud.
+	 * the specified tracker for this activity data entity to be sent to jKoolCloud.
 	 *
 	 * @param tracker
 	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
@@ -820,7 +822,7 @@ public class ActivityInfo {
 	/**
 	 * Creates the appropriate data package {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity},
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
-	 * the specified tracker for this activity data entity to be sent to JKoolCloud.
+	 * the specified tracker for this activity data entity to be sent to jKoolCloud.
 	 * <p>
 	 * Does same as {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} where
 	 * {@code chTrackables} list is {@code null}.

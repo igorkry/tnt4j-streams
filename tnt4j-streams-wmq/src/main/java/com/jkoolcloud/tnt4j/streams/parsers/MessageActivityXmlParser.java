@@ -88,6 +88,15 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 		}
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		if (WmqParserProperties.PROP_SIG_DELIM.equalsIgnoreCase(name)) {
+			return sigDelim;
+		}
+
+		return super.getProperty(name);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>

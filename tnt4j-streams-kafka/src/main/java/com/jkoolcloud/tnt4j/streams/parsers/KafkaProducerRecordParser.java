@@ -108,6 +108,11 @@ public class KafkaProducerRecordParser extends GenericActivityParser<ProducerRec
 	}
 
 	@Override
+	public Object getProperty(String name) {
+		return super.getProperty(name);
+	}
+
+	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
