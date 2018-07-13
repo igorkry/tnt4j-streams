@@ -76,13 +76,30 @@
         <field name="ChecksumMethod" locator="//*/checksum/@method" locator-type="Label" required="false"/>
     </parser>
 
+    <parser name="TransferSetItemParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <field name="ResultCode" locator="/item/status/@resultCode" locator-type="Label" datatype="Number" transparent="true"/>
+
+        <field name="ReasonCode" separator="">
+            <field-locator locator="ResultCode" locator-type="Activity" datatype="Number"/>
+        </field>
+        <field name="CompCode" locator="ResultCode" locator-type="Activity">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
+        </field>
+        <field name="Severity" locator="ResultCode" locator-type="Activity">
+            <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
+        </field>
+
+        <embedded-activity name="TRANSFERSET" locator="/item/*" locator-type="Label">
+            <parser-ref name="TransferSetParser" aggregation="Relate"/>
+        </embedded-activity>
+    </parser>
+
     <parser name="ProgressEventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
         <property name="SignatureDelim" value="#!#"/>
         <property name="RequireDefault" value="false"/>
 
         <field name="EventType" value="NOOP"/>
 
-        <field name="Filter" locator="/transaction/action/text()[. = 'progress']" locator-type="Label" required="true"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
         <field name="ApplName" separator=":">
@@ -93,15 +110,7 @@
         <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
         <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
-        <field name="ReasonCode" separator="">
-            <field-locator locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label" datatype="Number"/>
-        </field>
-        <field name="CompCode" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
-            <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
-        </field>
-        <field name="Severity" locator="/transaction/transferSet/item/status/@resultCode" locator-type="Label">
-            <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
-        </field>
+
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
         <field name="Exception" separator="">
             <field-locator locator="/transaction/transferSet/item/status/supplement" locator-type="Label" required="false"/>
@@ -138,8 +147,8 @@
                 'Relate' - resolved activity entities are collected as children of parent activity. As a result there will be one parent
                 activity entity having collection of child activities resolved by stacked parsers.
                 For a Relate type aggregation there is related stream output parameter SplitRelatives -->
-        <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item/*" locator-type="Label">
-            <parser-ref name="TransferSetParser" aggregation="Relate"/>
+        <embedded-activity name="TRANSFERSET" locator="/transaction/transferSet/item" locator-type="Label">
+            <parser-ref name="TransferSetItemParser" aggregation="Merge"/>
         </embedded-activity>
     </parser>
 
@@ -149,7 +158,6 @@
 
         <field name="EventType" value="EVENT"/>
         <field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/>
-        <field name="Filter" locator="/transaction/action/text()[. = 'started']" locator-type="Label" required="true"/>
         <field name="EventName" value="Started"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -185,7 +193,6 @@
         <!-- Correlator will be set from TrackingId.
              UnComment if Correlator is different from TrackingId -->
         <!--	<field name="Correlator" locator="/transaction/@ID" locator-type="Label" datatype="String" format="string"/> -->
-        <field name="Filter" locator="/transaction/action/text()[. = 'completed']" locator-type="Label" required="true"/>
         <field name="EventName" value="completed"/>
         <field name="UserName" locator="/transaction/originator/userID" locator-type="Label"/>
         <field name="Location" locator="/transaction/originator/hostName" locator-type="Label"/>
@@ -204,13 +211,15 @@
         <field name="ServerOs" locator="/transaction/sourceAgent/systemInfo/@name" locator-type="Label"/>
         <field name="StartTime" locator="/transaction/action/@time" locator-type="Label" datatype="DateTime"
                format="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" timezone="GMT"/>
+        <field name="ResultCode" locator="/item/status/@resultCode" locator-type="Label" datatype="Number" transparent="true"/>
+
         <field name="ReasonCode" separator="">
-            <field-locator locator="/transaction/status/@resultCode" locator-type="Label" datatype="Number"/>
+            <field-locator locator="ResultCode" locator-type="Activity" datatype="Number"/>
         </field>
-        <field name="CompCode" locator="/transaction/status/@resultCode" locator-type="Label">
+        <field name="CompCode" locator="ResultCode" locator-type="Activity">
             <field-map-ref resource="MFT_MAPPINGS.CompCode"/>
         </field>
-        <field name="Severity" locator="/transaction/status/@resultCode" locator-type="Label">
+        <field name="Severity" locator="ResultCode" locator-type="Activity">
             <field-map-ref resource="MFT_MAPPINGS.CompCode3"/>
         </field>
         <field name="Exception" separator="">
@@ -218,6 +227,20 @@
         </field>
         <field name="MFT_JOB_NAME" locator="/transaction/job/name" locator-type="Label" required="false">
             <parser-ref name="RegExParser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <parser name="MsgSwitchParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <field name="message-text" locator="/transaction" locator-type="Label" transparent="true">
+            <parser-ref name="CompletedEventParser" aggregation="Merge">
+                <matchExp>XPATH:/transaction/action/text()[. = 'completed']</matchExp>
+            </parser-ref>
+            <parser-ref name="ProgressEventParser" aggregation="Merge">
+                <matchExp>XPATH:/transaction/action/text()[. = 'progress']</matchExp>
+            </parser-ref>
+            <parser-ref name="StartedEventParser" aggregation="Merge">
+                <matchExp>XPATH:/transaction/action/text()[. = 'started']</matchExp>
+            </parser-ref>
         </field>
     </parser>
 
@@ -231,9 +254,7 @@
         parent and child entity fields. Default value - false. (Optional) -->
         <property name="SplitRelatives" value="true"/>
 
-        <parser-ref name="CompletedEventParser"/>
-        <parser-ref name="StartedEventParser"/>
-        <parser-ref name="ProgressEventParser"/>
+        <parser-ref name="MsgSwitchParser"/>
 
         <!-- Example to enable executor service to process activities data items
              asynchronously or not. Default value for boolean properties is "false".

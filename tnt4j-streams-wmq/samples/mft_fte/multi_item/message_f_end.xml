@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transaction ID="414d5120425357464e514d3120202020a674d95a155bd321" agentRole="sourceAgent" version="6.00"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TransferLog.xsd">
+    <action time="2018-07-10T16:04:51.197Z">completed</action>
+    <sourceAgent QMgr="BSWFNQM1" agent="BSWFN.APP01.AGENT" agentType="STANDARD">
+        <systemInfo architecture="amd64" name="Linux" version="3.0.101-108.35-default"/>
+    </sourceAgent>
+    <destinationAgent QMgr="BSSHPSQM1" agent="BSECE.APP01.AGENT" agentType="STANDARD">
+        <systemInfo architecture="amd64" name="Windows Server 2012 R2" version="6.3"/>
+    </destinationAgent>
+    <originator>
+        <hostName>dc1sthsmqts003.blmgmt.whc.</hostName>
+        <userID>hs-patirc</userID>
+        <mqmdUserID>mqm</mqmdUserID>
+    </originator>
+    <status resultCode="0">
+        <supplement>BFGRP0032I: The file transfer request has successfully completed.</supplement>
+    </status>
+    <transferSet bytesSent="130367" startTime="2018-07-10T16:04:48.365Z" total="5">
+        <metaDataSet>
+            <metaData key="com.ibm.wmqfte.SourceAgent">BSWFN.APP01.AGENT</metaData>
+            <metaData key="com.ibm.wmqfte.DestinationAgent">BSECE.APP01.AGENT</metaData>
+            <metaData key="com.ibm.wmqfte.MqmdUser">mqm</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingUser">hs-patirc</metaData>
+            <metaData key="com.ibm.wmqfte.OriginatingHost">dc1sthsmqts003.blmgmt.whc.</metaData>
+            <metaData key="com.ibm.wmqfte.TransferId">414d5120425357464e514d3120202020a674d95a155bd321</metaData>
+            <metaData key="com.ibm.wmqfte.JobName">BSWFNTOECEJOB01</metaData>
+            <metaData key="com.ibm.wmqfte.Priority">3</metaData>
+        </metaDataSet>
+    </transferSet>
+    <job>
+        <name>BSWFNTOECEJOB01</name>
+    </job>
+    <statistics>
+        <actualStartTime>2018-07-10T16:04:49.433Z</actualStartTime>
+        <retryCount>0</retryCount>
+        <numFileFailures>0</numFileFailures>
+        <numFileWarnings>0</numFileWarnings>
+    </statistics>
+</transaction>
