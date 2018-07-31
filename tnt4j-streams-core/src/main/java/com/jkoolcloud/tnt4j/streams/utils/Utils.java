@@ -467,6 +467,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return tag strings array, or {@code null} if arrays can't be made
 	 */
 	public static String[] getTags(Object tagsData) {
+		if (tagsData == null) {
+			return null;
+		}
 		if (tagsData instanceof byte[]) {
 			return new String[] { encodeHex((byte[]) tagsData) };
 		} else if (tagsData instanceof String) {
@@ -494,6 +497,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		return null;
 	}
+
 
 	/**
 	 * Makes Hex string representation (starting '0x') of byte array.
