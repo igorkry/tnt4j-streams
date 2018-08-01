@@ -66,19 +66,23 @@
            3) Using message content such as an order or trade ID
            -->
 
-        <!-- (1) Extract MQ correlation id and message id as correlators, except when hex "0" in CORREL_ID  -->
+        <!-- (1) Extract MQ correlation id and message id as correlators, except when hex "00"  -->
         <field name="Correlator">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" required="false">
                 <filter name="CorrelValueFilter">
                     <value handle="exclude" format="hexBinary">0x000000000000000000000000000000000000000000000000</value>
                 </filter>
             </field-locator>
-            <!-- * always collect msgid for correlator, remove if applications do not create unique message ids   -->
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+            <!-- * Collect msgid for correlator, remove if applications do not create unique message ids   -->
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary">
+                <filter name="MsgidValueFilter">
+                    <value handle="exclude" format="hexBinary">0x000000000000000000000000000000000000000000000000</value>
+                </filter>
+            </field-locator>
 
             <!-- (2) uncomment this if you want stitching across the entire application connection.
                  Note, this correlates across commit boundaries so should not be used for long running applications -->
-            <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+            <!--field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/-->
 
             <!-- (3) Content based correlator - use fields from the payload extracted by embedded parser above -->
             <!--field-locator locator="OrderID" locator-type="Activity"/-->
@@ -103,6 +107,7 @@
             <field-map source="MQXF_BACK" target="MQBACK"/>
             <field-map source="MQXF_INQ" target="MQINQ"/>
             <field-map source="MQXF_CB" target="MQCB"/>
+            <!-- To report the actual name for other MQ calls, comment out the following line -->	
             <field-map source="" target="OTHER"/>
         </field>
 
@@ -150,18 +155,21 @@
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
         <field name="ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
+	<field name="ResolvedObjectString" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_OBJECT_STRING" locator-type="Label"/>
 
         <field name="DerivedName" value="" transparent="true">
             <field-transform lang="groovy" name="ResTransform"><![CDATA[
                 ${ResolvedQName} != null
                     ? ${ResolvedQName}
-                    : (${ObjectName} != null ? ${ObjectName} : ${QMgrName})
+                    : (${ResolvedObjectString} != null ? ${ResolvedObjectString} 
+					: (${ObjectName} != null ? ${ObjectName} : ${QMgrName}))
             ]]></field-transform>
         </field>
 
         <field name="ResourceName" formattingPattern="{0}={1}">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label">
                 <field-map source="MQOT_Q" target="QUEUE"/>
+                <field-map source="MQOT_TOPIC" target="TOPIC"/>
                 <field-map source="MQOT_NAMELIST" target="NAMELIST"/>
                 <field-map source="MQOT_PROCESS" target="PROCESS"/>
                 <field-map source="MQOT_STORAGE_CLASS" target="STORAGE_CLASS"/>
