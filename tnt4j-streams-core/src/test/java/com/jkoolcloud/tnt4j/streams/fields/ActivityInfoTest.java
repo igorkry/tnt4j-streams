@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.*;
+import com.jkoolcloud.tnt4j.streams.filters.DefaultValueFilter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
