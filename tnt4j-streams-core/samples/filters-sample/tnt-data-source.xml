@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="$.event" locator-type="Label"/>
+        <field name="StartTime" locator="$.timestamp"  locator-type="Label" datatype="Timestamp" units="Miliseconds"/>
+        <field name="Resource" locator="$.detail" locator-type="Label"/>
+		<field name="Correlator">
+		  <field-locator locator="Resource" locator-type="Activity">
+				<filter name="Filter">
+                    <value handle="exclude" format="string">W entrance</value>
+                    <value handle="exclude" format="string">SW entrance</value>
+                </filter>
+				<!-- The filter above will filter out values containing "W entrance" and "SW entrance" adding to correlator-->			
+		  </field-locator>
+		  <field-locator locator="EventName" locator-type="Activity">
+		  </field-locator>
+		 		  
+		</field>
+		
+		<field name="Weekday" locator="$.weekday" locator-type="Label">
+				<filter name="Filter">
+                    <value handle="exclude" evaluation="regex" format="string">Mo.</value>
+                </filter>
+		</field>
+		<!-- The filter above will filter out whoole activity containing regex "Mo." (Mo(any character))-->			
+		
+		
+    </parser>
+
+    <stream name="MultipleEvents" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./events/event*.json"/>
+
+        <parser-ref name="EventParser"/>
+    </stream>
+
+</tnt-data-source>
