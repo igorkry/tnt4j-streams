@@ -166,6 +166,38 @@ public class ActivityInfoTest {
 		}
 	}
 
+	@Test
+	public void addCorrelatorNullTest() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("Correlator");
+		// ActivityField af2 = new ActivityField("Correlator2");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		// testLocator.formatValue("1");
+
+		ActivityFieldLocator locator = new ActivityFieldLocator();
+		locator.setDataType(ActivityFieldDataType.Binary);
+		DefaultValueFilter filter = new DefaultValueFilter("EXCLUDE", "IS", "string", "0000");
+
+		// locator.setFilter(filterGroup);
+		af.addLocator(locator);
+		af.setRequired("false");
+
+		Object[] byteZero = { new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, null };
+
+		ai.applyField(af, "1111");
+		ai.applyField(af, "2222");
+		ai.applyField(af, null);
+		ai.applyField(af, byteZero);
+
+		System.out.println(ai.getFieldValue("Correlator"));
+
+		assertTrue(ai.getFieldValue("Correlator").toString().split(",").length == 3);
+		// should not be [1111, 2222, 000000000000000000000000000000000000000000000000, null]
+		// should be [1111, 2222, 000000000000000000000000000000000000000000000000]
+
+	}
+	
 	private Object getTestValueForClass(Class<?> clazz) {
 		final String className = clazz.getName();
 		if (className.equals("java.lang.String")) { // NON-NLS
