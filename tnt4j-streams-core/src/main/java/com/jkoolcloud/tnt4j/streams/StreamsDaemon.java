@@ -45,12 +45,13 @@ public class StreamsDaemon implements Daemon {
 	public void init(DaemonContext daemonContext) throws DaemonInitException, Exception {
 		String[] arguments = daemonContext.getArguments();
 		LOGGER.log(OpLevel.INFO,
-				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsDaemon.init"), arguments);
+				StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsDaemon.init"),
+				(Object[]) arguments);
 
 		if (!Utils.isEmpty(arguments)) {
 			LOGGER.log(OpLevel.INFO,
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsDaemon.processing.args"),
-					arguments);
+					(Object[]) arguments);
 
 			StreamsAgent.processArgs(arguments);
 		} else {

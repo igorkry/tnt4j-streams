@@ -314,7 +314,7 @@ public class NumericFormatter {
 	 * Number formatting context values.
 	 */
 	private static class FormatterContext {
-		private static final String GENERIC_NUMBER_PATTERN = "###,###.###"; // NON-NLS
+		// private static final String GENERIC_NUMBER_PATTERN = "###,###.###"; // NON-NLS
 
 		private String pattern;
 		private String locale;

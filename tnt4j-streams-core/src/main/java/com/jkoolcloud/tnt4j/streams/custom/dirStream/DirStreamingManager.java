@@ -287,6 +287,7 @@ public class DirStreamingManager {
 	 * @param jobCfgFile
 	 *            streaming job configuration file
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	protected void handleJobConfigChange(File jobCfgFile) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"DirStreamingManager.job.changed", jobCfgFile);
@@ -315,6 +316,7 @@ public class DirStreamingManager {
 	 * @param jobCfgFile
 	 *            streaming job configuration file
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	protected void handleJobConfigRemoval(File jobCfgFile) {
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"DirStreamingManager.job.deleted", jobCfgFile);

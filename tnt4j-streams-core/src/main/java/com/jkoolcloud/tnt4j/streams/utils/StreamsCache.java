@@ -581,6 +581,7 @@ public final class StreamsCache {
 			}
 		}
 
+		@SuppressWarnings("unused")
 		private MapEntry() {
 		} // Required by JAXB
 

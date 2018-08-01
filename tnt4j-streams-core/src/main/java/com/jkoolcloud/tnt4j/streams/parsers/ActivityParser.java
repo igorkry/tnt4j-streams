@@ -214,6 +214,7 @@ public abstract class ActivityParser implements NamedObject {
 	 * @throws ParseException
 	 *             if an error occurs while parsing provided activity data <tt>value</tt>
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
 			ActivityField.ParserReference parserRef, Object value) throws ParseException {
 		boolean dataMatch = parserRef.getParser().isDataClassSupported(value);

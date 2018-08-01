@@ -240,7 +240,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				// care on this
 				if (namespaceAware) {
 					Document tDoc = xmlDoc.getOwnerDocument();
-					Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
+					// Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
 					if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
 						xmlDoc = builder.parse(
 								new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));

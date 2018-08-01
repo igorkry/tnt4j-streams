@@ -89,6 +89,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 		return LOGGER;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setProperty(String name, Object value) {
 		super.setProperty(name, value);

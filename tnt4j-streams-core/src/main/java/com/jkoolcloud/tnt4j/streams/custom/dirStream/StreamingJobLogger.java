@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.custom.dirStream;
 import java.io.File;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamingStatus;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 

@@ -87,7 +87,6 @@ public class StringMatcher implements Matcher {
 	 *             <tt>expression</tt> can't be evaluated for other reasons
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public boolean evaluate(String expression, Object data) throws Exception {
 		boolean invert = expression.charAt(0) == '!';
 		String methodName = expression.substring(invert ? 1 : 0, expression.indexOf("(")); // NON-NLS

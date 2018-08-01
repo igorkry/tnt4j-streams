@@ -16,15 +16,45 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.*;
-import java.nio.file.FileSystem;
-import java.util.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2247,7 +2277,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return {@code true} if {@code eValue} matches one of {@code optValues} element or both are {@code null},
 	 *         {@code false} - otherwise
 	 */
-	public static <E extends Enum<E>> boolean isOneOf(Enum<E> eValue, Enum<E>... optValues) {
+	@SafeVarargs
+	public static <E extends Enum<E>> boolean isOneOf(Enum<E> eValue, Enum<E>...optValues) {
 		if (optValues == null) {
 			return eValue == null;
 		}
@@ -2257,7 +2288,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				return true;
 			}
 		}
-
 		return false;
 	}
 

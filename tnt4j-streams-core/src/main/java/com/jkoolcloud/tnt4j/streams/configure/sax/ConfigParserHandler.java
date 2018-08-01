@@ -2503,6 +2503,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			return typesArray;
 		}
 
+		@SuppressWarnings("unused")
 		private void reset() {
 			name = "";
 			className = "";
@@ -2593,6 +2594,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			transformations.add(aft);
 		}
 
+		@SuppressWarnings("unused")
 		private void reset() {
 			field = null;
 			transformations.clear();

@@ -96,6 +96,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public Object getProperty(String name) {
 		if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
