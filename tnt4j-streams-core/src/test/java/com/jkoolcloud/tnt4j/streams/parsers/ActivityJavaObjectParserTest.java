@@ -73,6 +73,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.parse(stream, null));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueExceptionTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -81,6 +82,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -88,6 +90,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.getLocatorValue(stream, null, ""));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenLocatorIsEmptyTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -96,6 +99,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenTypeisStreamPropTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -109,6 +113,7 @@ public class ActivityJavaObjectParserTest {
 		assertEquals(5, testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getFieldValueWhenDataIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -117,6 +122,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, null));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getFieldValueWhenPathIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
@@ -125,6 +131,7 @@ public class ActivityJavaObjectParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@Ignore("Not finished")
 	public void getFieldValueTest() throws Exception {
@@ -133,9 +140,10 @@ public class ActivityJavaObjectParserTest {
 				"testName.testNumber"); // NON-NLS
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
-		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
+		testParser.getLocatorValue(stream, fieldLocator, prop);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	@Ignore("Not finished")
 	public void getFieldValueWhenTwoSameFieldsTest() throws Exception {
@@ -149,6 +157,7 @@ public class ActivityJavaObjectParserTest {
 		assertEquals("Excpected value does not match", prop.isActive, locValue);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getFieldValueWhenOneFieldTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();

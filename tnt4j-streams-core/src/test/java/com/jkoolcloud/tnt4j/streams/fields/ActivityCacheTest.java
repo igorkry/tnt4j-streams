@@ -44,7 +44,7 @@ public class ActivityCacheTest {
 
 	private static final String PROGRESS_FILE = "./samples/cached-values/eventFirst.json"; // NON-NLS
 	private static final String START_FILE = "./samples/cached-values/eventSecond.json"; // NON-NLS
-	private static final String END_FILE = "./samples/cached-values/eventThird.json"; // NON-NLS
+	// private static final String END_FILE = "./samples/cached-values/eventThird.json"; // NON-NLS
 
 	private static final Integer TEST_PORT = 9595;
 
@@ -71,12 +71,12 @@ public class ActivityCacheTest {
 		verify(streamListener, times(2)).onStatusChange(any(TNTInputStream.class), (StreamStatus) any());
 	}
 
-	private static void sendRequest(HttpClient client, String file) throws Exception {
+	private static HttpResponse sendRequest(HttpClient client, String file) throws Exception {
 		URI url = makeURI();
 		HttpPost post = new HttpPost(url);
 
 		post.setEntity(EntityBuilder.create().setText(getFileContents(file)).build());
-		final HttpResponse returned = client.execute(post);
+		return client.execute(post);
 	}
 
 	private static URI makeURI() {

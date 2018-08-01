@@ -73,6 +73,6 @@ public class PipedStreamTest {
 		PipedStream pipedStream = new PipedStream();
 		pipedStream.startStream();
 		pipedStream.cleanup();
-		String line = pipedStream.getNextItem();
+		pipedStream.getNextItem();
 	}
 }

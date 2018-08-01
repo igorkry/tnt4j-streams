@@ -721,12 +721,12 @@ public class ConfigParserHandlerTest {
 		final String VALUE1 = "file://${JAVA_HOME}/abc/bcd";
 
 		HashMap<String, String> propertiesMap = new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
 			{
 				put("filename", "*");
 				put("test", "${test}");
 				put("path", VALUE);
 				put("path2", VALUE1);
-
 			}
 		};
 		System.setProperty("test", "best");

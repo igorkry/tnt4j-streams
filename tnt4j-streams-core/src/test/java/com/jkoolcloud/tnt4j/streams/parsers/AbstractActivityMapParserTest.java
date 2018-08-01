@@ -70,6 +70,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.parse(stream, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -81,6 +82,7 @@ public class AbstractActivityMapParserTest {
 		assertEquals("hello", testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenFieldLocatorNullTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -91,6 +93,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, null, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenLocatorEmptyTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -102,6 +105,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueTypeTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -113,6 +117,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenDataIsNullTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -121,6 +126,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, null));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValuePathTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -132,6 +138,7 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValuePathListTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -146,7 +153,7 @@ public class AbstractActivityMapParserTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void getLocatorValueNumberExceptionTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
 		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
@@ -158,6 +165,7 @@ public class AbstractActivityMapParserTest {
 		assertEquals(myMap.get("333"), output); // NON-NLS
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueInstanceTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();
@@ -168,6 +176,7 @@ public class AbstractActivityMapParserTest {
 		assertEquals("TEST1", testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueEmptyLocatorTest() throws Exception {
 		ActivityMapParser testParser = new ActivityMapParser();

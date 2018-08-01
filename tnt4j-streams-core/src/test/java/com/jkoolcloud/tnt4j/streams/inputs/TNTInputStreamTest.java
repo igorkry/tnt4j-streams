@@ -17,11 +17,24 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,7 +42,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.TestUtils;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
@@ -65,7 +77,7 @@ public class TNTInputStreamTest {
 		when(ai.isFilteredOut()).thenReturn(false);
 
 		Thread.sleep(500);
-		Trackable trackable = verify(ai).buildTrackable(any(Tracker.class));
+		verify(ai).buildTrackable(any(Tracker.class));
 		ts.halt(true);
 		ts.cleanup();
 	}

@@ -66,6 +66,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 		assertNull(parser.parse(stream, data));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testGetLocatorValueAsProperty() throws ParseException {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);
@@ -74,6 +75,7 @@ public class ActivityTokenParserTest extends GenericActivityParserTestBase {
 		verify(stream).getProperty(any(String.class));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testGetLocatorAsIndex() throws ParseException {
 		final TNTInputStream<?, ?> stream = mock(TNTInputStream.class);

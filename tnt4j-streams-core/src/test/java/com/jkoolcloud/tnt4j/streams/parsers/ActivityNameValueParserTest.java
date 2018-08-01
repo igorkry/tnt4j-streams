@@ -41,6 +41,7 @@ public class ActivityNameValueParserTest {
 	@Test
 	public void testSetProperties() {
 		Map<String, String> propertiesMap = new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
 			{
 				put(ParserProperties.PROP_FLD_DELIM, "\n");
 				put(ParserProperties.PROP_VAL_DELIM, "="); // NON-NLS

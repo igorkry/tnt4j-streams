@@ -93,6 +93,7 @@ public class ActivityJsonParserTest {
 		assertNull(parser.parse(stream, jsonString));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -103,6 +104,7 @@ public class ActivityJsonParserTest {
 		parser.getLocatorValue(stream, aLocator, jsonContext);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -112,6 +114,7 @@ public class ActivityJsonParserTest {
 		assertNull(parser.getLocatorValue(stream, null, jsonContext));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenLocatorEmptyTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -122,6 +125,7 @@ public class ActivityJsonParserTest {
 		assertNull(parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenTypeExpectedTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -137,6 +141,7 @@ public class ActivityJsonParserTest {
 		assertEquals(5, parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueStartsWithJsonPathTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -147,6 +152,7 @@ public class ActivityJsonParserTest {
 		assertEquals("OK", parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueJsonPathIsListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);
@@ -158,6 +164,7 @@ public class ActivityJsonParserTest {
 		testData.equals(parser.getLocatorValue(stream, aLocator, jsonContext));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueJsonPathIsEmptyListTest() throws Exception {
 		ActivityJsonParser parser = Mockito.mock(ActivityJsonParser.class, Mockito.CALLS_REAL_METHODS);

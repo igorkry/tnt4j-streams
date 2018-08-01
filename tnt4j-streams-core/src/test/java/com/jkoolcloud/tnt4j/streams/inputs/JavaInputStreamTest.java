@@ -18,8 +18,6 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.InputStream;
-
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -38,7 +36,6 @@ public class JavaInputStreamTest {
 	@Test
 	public void addReferenceTest() throws Exception {
 		JavaInputStream my = Mockito.mock(JavaInputStream.class, Mockito.CALLS_REAL_METHODS);
-		InputStream reference;
-		// my.addReference(reference);
+		assertEquals(0, my.getActivityPosition());
 	}
 }

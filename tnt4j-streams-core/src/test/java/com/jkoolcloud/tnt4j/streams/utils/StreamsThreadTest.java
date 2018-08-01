@@ -138,7 +138,7 @@ public class StreamsThreadTest {
 			Thread.sleep(50);
 		} catch (InterruptedException e) {
 		}
-		final Thread.State state = thread.getState();
+		thread.getState();
 		assertTrue(System.currentTimeMillis() - testStartTime >= sleepTime);
 	}
 

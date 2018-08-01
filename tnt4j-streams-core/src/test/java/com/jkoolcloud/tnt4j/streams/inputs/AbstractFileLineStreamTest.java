@@ -30,7 +30,6 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
  * @version 1.0
  */
 public class AbstractFileLineStreamTest {
-	private boolean inputEnded = false;
 	private FileLineStream afls = new FileLineStream();
 
 	@Test

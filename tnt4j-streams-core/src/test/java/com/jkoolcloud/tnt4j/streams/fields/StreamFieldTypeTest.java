@@ -43,8 +43,4 @@ public class StreamFieldTypeTest {
 			}
 		}
 	}
-
-	private enum TestEnum {
-		TEST
-	}
 }

@@ -32,7 +32,6 @@ import com.jkoolcloud.tnt4j.core.OpType;
  */
 public class UtilsTest {
 
-	private static final int FILE_WR_LINES = 100;
 	private static final String TEST = "TEST"; // NON-NLS
 
 	@Test
@@ -97,12 +96,11 @@ public class UtilsTest {
 	@Test
 	public void testGetFirstNewer() throws Exception {
 		int count = 5;
-		Long date = null;
 		List<File> files = new ArrayList<>();
 		for (int i = 0; i <= count; i++) {
 			File tempFile = File.createTempFile("TEST", ".TST");
 			if (count / 2 >= i) {
-				date = (new Date()).getTime();
+				(new Date()).getTime();
 			}
 			files.add(tempFile);
 			Thread.sleep(300);
@@ -131,6 +129,7 @@ public class UtilsTest {
 	@Test
 	public void testFromJsonToMap() {
 		Map<String, String> testMap = new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
 			{
 				put("TEST", "TESTVAL"); // NON-NLS
 				put("TEST2", "TESTVAL2"); // NON-NLS
@@ -208,9 +207,6 @@ public class UtilsTest {
 		// {\"sinkName\":\"TNT4JStreams\",\"chanelName\":\"memoryChannel\",\"headers\":{},\"body\":\"127.0.0.1
 		// - - [26/Nov/2015:16:26:21 +0200] \\\"POST
 		// /gvm_java/gvm/services/OperatorWebService HTTP/1.1\\\" 200 380\\r\"}
-		String testStrig = "line\\r"; // NON-NLS
-		String testStrig2 = "line\\n"; // NON-NLS
-		String expected = "line"; // NON-NLS
 		// assertEquals(expected, Utils.cleanActivityData(testStrig));
 		// assertEquals(expected, Utils.cleanActivityData(testStrig2));
 	}
@@ -237,6 +233,7 @@ public class UtilsTest {
 
 		assertNotNull(finalMapObj);
 
+		@SuppressWarnings("unchecked")
 		Map<String, Object> finalMap = (Map<String, Object>) finalMapObj;
 
 		assertEquals(1, finalMap.size());

@@ -106,6 +106,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		setProperty(parser, ParserProperties.PROP_REQUIRE_ALL, true);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValue() throws Exception {
 		TNTInputStream<?, ?> stream = mock(TNTInputStream.class);

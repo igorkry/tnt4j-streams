@@ -38,8 +38,8 @@ public class TimestampFormatterTest {
 		Number testNum = 100000L;
 		for (TimeUnit fromUnits : TimeUnit.values()) {
 			for (TimeUnit toUnits : TimeUnit.values()) {
-				Number convert = TimestampFormatter.convert(testNum, fromUnits, toUnits);
-				Number convertBack = TimestampFormatter.convert(testNum, toUnits, fromUnits);
+				TimestampFormatter.convert(testNum, fromUnits, toUnits);
+				TimestampFormatter.convert(testNum, toUnits, fromUnits);
 			}
 		}
 	}

@@ -56,6 +56,7 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 		final StringReader reader = UtilsTest.toReader(testString);
 		final ByteArrayInputStream inputStream = UtilsTest.toInputStream(testString);
 		List<Object> testCases = new ArrayList<Object>() {
+			private static final long serialVersionUID = 1L;
 			{
 				add(expectedString);
 				add(expectedString.getBytes());
@@ -81,8 +82,6 @@ public abstract class GenericActivityParserTestBase extends ActivityParserTestBa
 	@Test(expected = IllegalArgumentException.class)
 	public void getNextStringWhenOtherInstanceTest() {
 		GenericActivityParser<?> gParser = (GenericActivityParser<?>) parser;
-		String stringToBeParsed = "Testing some tests"; // NON-NLS
 		gParser.getNextActivityString(555);
 	}
-
 }
