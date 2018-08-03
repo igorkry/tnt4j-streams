@@ -39,6 +39,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
 
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -123,14 +126,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	protected void intXPath(Map<String, String> uNamespaces) throws ParserConfigurationException {
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(namespaceAware);
-		// disabling obsolete and insecure DTD loading
-		domFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		// Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_DTD_GRAMMAR_FEATURE
-		domFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); // NON-NLS
-		// Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE
-		domFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); // NON-NLS
+		domFactory.setValidating(false);
 
 		builder = domFactory.newDocumentBuilder();
+		builder.setEntityResolver(new EntityResolver() {
+			@Override
+			public InputSource resolveEntity(String publicId, String systemId) {
+				return new InputSource(new StringReader(""));
+			}
+		});
 		xPath = StreamsXMLUtils.getStreamsXPath();
 
 		if (namespaces == null) {
