@@ -767,8 +767,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 						if (streamExecutorService == null) {
 							processActivityItem_(item, failureFlag);
 						} else {
-							streamExecutorService
-									.submit(new ActivityItemProcessingTask(item, failureFlag, getActivityPosition()));
+							streamExecutorService.submit(new ActivityItemProcessingTask(item, failureFlag, getActivityPosition()));
 						}
 					}
 				} catch (IllegalStateException ise) {
@@ -776,7 +775,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"TNTInputStream.failed.record.activity.at", getActivityPosition(), ise);
 					failureFlag.set(true);
-					notifyFailed(null, ise, null);
+					notifyFailed(ise.getMessage(), ise, null);
 					halt(false);
 				} catch (Exception exc) {
 					Utils.logThrowable(logger(), OpLevel.ERROR,
@@ -790,12 +789,12 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 					incrementSkippedActivitiesCount();
 				}
 			}
-		} catch (Exception e) {
-			Utils.logThrowable(logger(), OpLevel.ERROR,
+		} catch (Throwable e) {
+			Utils.logThrowable(logger(), OpLevel.CRITICAL,
 					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTInputStream.fatal.stream.failure", name, e);
 			failureFlag.set(true);
-			notifyFailed(null, e, null);
+			notifyFailed(e.getMessage(), e, null);
 		} finally {
 			shutdownStream();
 		}

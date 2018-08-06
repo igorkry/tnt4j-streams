@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.*;
@@ -41,6 +42,7 @@ import org.w3c.dom.*;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -123,7 +125,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 * @throws ParserConfigurationException
 	 *             if any errors configuring the parser
 	 */
-	protected void intXPath(Map<String, String> uNamespaces) throws ParserConfigurationException {
+	protected synchronized void intXmlParser(Map<String, String> uNamespaces) throws ParserConfigurationException {
 		DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 		domFactory.setNamespaceAware(namespaceAware);
 		domFactory.setValidating(false);
@@ -135,8 +137,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				return new InputSource(new StringReader(""));
 			}
 		});
+		
 		xPath = StreamsXMLUtils.getStreamsXPath();
-
 		if (namespaces == null) {
 			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
 				namespaces = (NamespaceMap) xPath.getNamespaceContext();
@@ -145,10 +147,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				xPath.setNamespaceContext(namespaces);
 			}
 		}
-
 		namespaces.setPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 		namespaces.setPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
-
 		namespaces.addPrefixUriMappings(uNamespaces);
 	}
 
@@ -189,7 +189,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		try {
-			intXPath(uNamespaces);
+			intXmlParser(uNamespaces);
 		} catch (ParserConfigurationException exc) {
 			throw new RuntimeException(exc);
 		}
@@ -246,8 +246,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					Document tDoc = xmlDoc.getOwnerDocument();
 					// Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
 					if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
-						xmlDoc = builder.parse(
-								new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
+						xmlDoc = parseXmlDoc(new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
 					}
 				}
 			} else {
@@ -255,12 +254,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				builderLock.lock();
-				try {
-					xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
-				} finally {
-					builderLock.unlock();
-				}
+				xmlDoc = parseXmlDoc(IOUtils.toInputStream(xmlString, Utils.UTF8));
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -347,7 +341,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
-			AtomicBoolean formattingNeeded) throws ParseException {
+	        AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
 		Node xmlDoc = cData.getData();
@@ -360,13 +354,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		if (StringUtils.isNotEmpty(locStr)) {
 			Node nodeDocument = cropDocumentForNode(xmlDoc);
 			try {
-				XPathExpression expr;
-				xPathLock.lock();
-				try {
-					expr = xPath.compile(locStr);
-				} finally {
-					xPathLock.unlock();
-				}
+				XPathExpression expr = getXPathExpr(locStr);
 
 				if (nodeDocument != null) { // try expression relative to node
 					val = resolveValueOverXPath(nodeDocument, expr);
@@ -387,16 +375,41 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityXMLParser.xPath.exception"), 0);
+				        "ActivityXMLParser.xPath.exception"), 0);
 				pe.initCause(exc);
-
 				throw pe;
 			}
 		}
-
 		return val;
 	}
 
+	private Node parseXmlDoc(InputStream  ins) throws SAXException, IOException {
+		builderLock.lock();
+		try {
+			return builder.parse(ins);
+		} finally {
+			builderLock.unlock();
+		}		
+	}
+	
+	private Document getNewDocument() {
+		builderLock.lock();
+		try {
+			return builder.newDocument();
+		} finally {
+			builderLock.unlock();
+		}		
+	}
+	
+	private XPathExpression getXPathExpr(String locStr) throws XPathExpressionException {
+		xPathLock.lock();
+		try {
+			return xPath.compile(locStr);
+		} finally {
+			xPathLock.unlock();
+		}		
+	}
+	
 	private static Object getTextOnDemand(Node node, ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		if (!isDataSupportedByStackedParser(cData.getField(), node)) {
@@ -426,33 +439,24 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 
 			val = Utils.simplifyValue(valuesList);
 		}
-
 		return val;
 	}
 
 	private Node cropDocumentForNode(Node xmlDoc) throws ParseException {
 		if (xmlDoc.getParentNode() != null) { // if node is not document root node
 			try {
-				Document nodeXmlDoc;
-				builderLock.lock();
-				try {
-					nodeXmlDoc = builder.newDocument();
-				} finally {
-					builderLock.unlock();
-				}
+				Document nodeXmlDoc = getNewDocument();
 				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
 				nodeXmlDoc.appendChild(importedNode);
 
 				return nodeXmlDoc;
 			} catch (Exception exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityXmlParser.xmlDocument.parse.error"), 0);
+				        "ActivityXmlParser.xmlDocument.parse.error"), 0);
 				pe.initCause(exc);
-
 				throw pe;
 			}
 		}
-
 		return null;
 	}
 
