@@ -167,18 +167,17 @@ public class ActivityInfoTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void addCorrelatorNullTest() throws ParseException {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField af = new ActivityField("Correlator");
 		// ActivityField af2 = new ActivityField("Correlator2");
-		@SuppressWarnings("unused")
 		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
 		// testLocator.formatValue("1");
 
 		ActivityFieldLocator locator = new ActivityFieldLocator();
 		locator.setDataType(ActivityFieldDataType.Binary);
-		@SuppressWarnings("unused")
 		DefaultValueFilter filter = new DefaultValueFilter("EXCLUDE", "IS", "string", "0000");
 
 		// locator.setFilter(filterGroup);
