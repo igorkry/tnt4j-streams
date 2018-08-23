@@ -235,8 +235,10 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	@Override
 	protected void parseFields(ActivityContext cData) throws Exception {
 		// apply fields for parser
+		boolean resolved;
 		for (ActivityField aField : fieldList) {
 			cData.setField(aField);
+			resolved = false;
 
 			if (!matchMap.isEmpty()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -244,11 +246,12 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 				Map<String, String> matches = findMatches(cData.getData());
 
 				cData.put(MATCHES_KEY, matches);
-				resolveLocatorsValues(aField, cData, matchMap);
+				resolved = resolveLocatorsValues(aField, cData, matchMap);
 				cData.remove(MATCHES_KEY);
 			}
-
-			resolveLocatorsValues(aField, cData, groupMap);
+			if (!resolved) {
+				resolved = resolveLocatorsValues(aField, cData, groupMap);
+			}
 		}
 	}
 
@@ -261,6 +264,7 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 *            prepared activity data item parsing context
 	 * @param locMap
 	 *            regex locators map
+	 * @return {@code true} if locators has resolved non-{@code null} value, {@code false} - otherwise
 	 * @throws ParseException
 	 *             if exception occurs while resolving regex locators values
 	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
@@ -271,7 +275,7 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
 	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	protected void resolveLocatorsValues(ActivityField field, ActivityContext cData,
+	protected boolean resolveLocatorsValues(ActivityField field, ActivityContext cData,
 			Map<ActivityField, List<ActivityFieldLocator>> locMap) throws Exception {
 		Object value;
 		List<ActivityFieldLocator> locations = locMap.get(field);
@@ -283,6 +287,8 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 		value = Utils.simplifyValue(value);
 		applyFieldValue(field, value, cData);
+
+		return value != null;
 	}
 
 	/**
@@ -387,15 +393,19 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 	private static String groupIndex(String locStr, Matcher matcher) {
 		int loc = Integer.parseInt(locStr);
-		if (loc >= 0 && loc <= matcher.groupCount()) {
+		try {
 			return matcher.group(loc);
+		} catch (IndexOutOfBoundsException exc) {
+			return null;
 		}
-
-		return null;
 	}
 
 	private static String groupName(String locStr, Matcher matcher) {
-		return matcher.group(locStr);
+		try {
+			return matcher.group(locStr);
+		} catch (NullPointerException | IllegalArgumentException exc) {
+			return null;
+		}
 	}
 
 	/**
