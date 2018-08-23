@@ -176,7 +176,22 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 
 	@Override
 	protected long getActivityItemByteSize(Row activityItem) {
-		return activityItem == null ? 0 : activityItem.toString().getBytes().length;
+		return activityItem == null ? 0 : getRowByteSize(activityItem);
+	}
+
+	private static long getRowByteSize(Row activityItem) {
+		Iterator<Cell> cells = activityItem.cellIterator();
+		if (cells == null) {
+			return 0;
+		}
+
+		long rowSize = 0;
+		while (cells.hasNext()) {
+			Cell cell = cells.next();
+			rowSize += cell.toString().getBytes().length;
+		}
+
+		return rowSize;
 	}
 
 	@Override
@@ -328,7 +343,6 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 					String sheetName = sIter.getSheetName();
 					boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheetName).matches();
 					if (!match) {
-						skipFilteredActivities();
 						continue;
 					}
 
