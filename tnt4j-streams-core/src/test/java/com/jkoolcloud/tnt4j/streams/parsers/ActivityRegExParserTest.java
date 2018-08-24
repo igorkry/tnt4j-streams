@@ -71,7 +71,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 	public void addField() {
 		ActivityField field = new ActivityField("Test"); // NON-NLS
 		ActivityFieldLocator locator = mock(ActivityFieldLocator.class);
-		when(locator.getType()).thenReturn(ActivityFieldLocatorType.REMatchId.name());
+		when(locator.getType()).thenReturn(ActivityFieldLocatorType.Label.name());
 		field.addLocator(locator);
 		parser.addField(field);
 	}
@@ -120,7 +120,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFieldExceptionTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "REMatchId"); // NON-NLS
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchId"); // NON-NLS
 		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchId"); // NON-NLS
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
@@ -131,7 +131,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void addFieldExceptionOtherTest() {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "REMatchId"); // NON-NLS
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "REMatchId"); // NON-NLS
 		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "REMatchId"); // NON-NLS
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator2);
@@ -165,9 +165,9 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void parseWhenMatchGroupsTest() throws Exception {
-		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "0"); // NON-NLS
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1"); // NON-NLS
-		ActivityFieldLocator locator3 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "2"); // NON-NLS
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1"); // NON-NLS
+		ActivityFieldLocator locator3 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "2"); // NON-NLS
 		ActivityField af1 = new ActivityField("test1"); // NON-NLS
 		ActivityField af2 = new ActivityField("test2"); // NON-NLS
 		ActivityField af3 = new ActivityField("test3"); // NON-NLS
@@ -178,6 +178,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 		parser.addField(af2);
 		parser.addField(af3);
 		setProperty(parser, ParserProperties.PROP_PATTERN, "(\\d+)"); // NON-NLS
+		setProperty(parser, ParserProperties.PROP_MATCH_STRATEGY, "FIND"); // NON-NLS
 		ActivityInfo ai = parser.parse(stream, "1111"); // NON-NLS
 		assertEquals(ai.getFieldValue("test1"), "1111"); // NON-NLS
 		assertEquals(ai.getFieldValue("test2"), "1111"); // NON-NLS
@@ -192,8 +193,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void parseMatchMapOneEntryTest() throws Exception {
-		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "0"); // NON-NLS
-		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1"); // NON-NLS
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "0"); // NON-NLS
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "1"); // NON-NLS
 		ActivityFieldLocator locator3 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "2"); // NON-NLS
 		ActivityFieldLocator locator4 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "0"); // NON-NLS
 		ActivityField af1 = new ActivityField("test1"); // NON-NLS
@@ -209,6 +210,7 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 		parser.addField(af3);
 		parser.addField(af4);
 		setProperty(parser, ParserProperties.PROP_PATTERN, "\\d+"); // NON-NLS
+		setProperty(parser, ParserProperties.PROP_MATCH_STRATEGY, "FIND"); // NON-NLS
 		ActivityInfo ai = parser.parse(stream, "1111555999"); // NON-NLS
 		assertEquals(ai.getFieldValue("test1"), "1111555999"); // NON-NLS
 		assertEquals(ai.getFieldValue("test2"), null); // NON-NLS
@@ -218,8 +220,8 @@ public class ActivityRegExParserTest extends ActivityParserTestBase {
 
 	@Test
 	public void parseMatchMapTwoEntriesTest() throws Exception {
-		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "1");
-		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.REMatchId, "2");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1");
+		ActivityFieldLocator locator1 = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "2");
 		ActivityField af = new ActivityField("test"); // NON-NLS
 		af.addLocator(locator);
 		af.addLocator(locator1);

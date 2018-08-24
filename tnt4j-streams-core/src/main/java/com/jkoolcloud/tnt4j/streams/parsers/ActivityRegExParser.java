@@ -31,13 +31,11 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is a string of fields as defined by the
@@ -63,7 +61,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
  * </ul>
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRegExParser.class);
@@ -79,17 +77,6 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	 * Defines strategy used to verify if {@link #pattern} created {@link Matcher} matches input data string.
 	 */
 	protected Strategy matchStrategy = Strategy.MATCH;
-
-	/**
-	 * Defines the mapping of activity fields to the regular expression group location(s) in the raw data, cached
-	 * activity data or stream properties from which to extract its value.
-	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> groupMap = new HashMap<>();
-	/**
-	 * Defines the mapping of activity fields to the regular expression match sequence(s) in the raw data from which to
-	 * extract its value.
-	 */
-	protected final Map<ActivityField, List<ActivityFieldLocator>> matchMap = new HashMap<>();
 
 	/**
 	 * Constructs a new ActivityRegExParser.
@@ -142,46 +129,6 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	}
 
 	@Override
-	public void addField(ActivityField field) {
-		super.addField(field);
-
-		List<ActivityFieldLocator> locators = field.getLocators();
-		if (CollectionUtils.isEmpty(locators)) {
-			return;
-		}
-		List<ActivityFieldLocator> matchLocs = new ArrayList<>(5);
-		List<ActivityFieldLocator> groupLocs = new ArrayList<>(5);
-		for (ActivityFieldLocator locator : locators) {
-			if (locator.isOfType(ActivityFieldLocatorType.Label, ActivityFieldLocatorType.Index,
-					ActivityFieldLocatorType.REMatchId)) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.adding.field", field); // Utils.getDebugString(field));
-				if (locator.isOfType(ActivityFieldLocatorType.REMatchId)) {
-					if (groupMap.containsKey(field)) {
-						throw new IllegalArgumentException(
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-										"ActivityRegExParser.conflicting.mapping", field));
-					}
-					matchLocs.add(locator);
-				} else {
-					if (matchMap.containsKey(field)) {
-						throw new IllegalArgumentException(
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-										"ActivityRegExParser.conflicting.mapping", field));
-					}
-					groupLocs.add(locator);
-				}
-			}
-		}
-		if (!matchLocs.isEmpty()) {
-			matchMap.put(field, matchLocs);
-		}
-		if (!groupLocs.isEmpty()) {
-			groupMap.put(field, groupLocs);
-		}
-	}
-
-	@Override
 	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
 		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -207,6 +154,11 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 		ActivityContext cData = new ActivityContext(stream, data, matcher);
 		cData.setMessage(dataStr);
 
+		if (matchStrategy == Strategy.FIND) {
+			Map<String, String> matches = findMatches(matcher);
+			cData.put(MATCHES_KEY, matches);
+		}
+
 		return cData;
 	}
 
@@ -225,70 +177,12 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 		if (matchStrategy == Strategy.FIND) {
 			match = matcher.find();
+			matcher.reset();
 		} else {
 			match = matcher.matches();
 		}
 
 		return match;
-	}
-
-	@Override
-	protected void parseFields(ActivityContext cData) throws Exception {
-		// apply fields for parser
-		boolean resolved;
-		for (ActivityField aField : fieldList) {
-			cData.setField(aField);
-			resolved = false;
-
-			if (!matchMap.isEmpty()) {
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityRegExParser.applying.regex", matchMap.size());
-				Map<String, String> matches = findMatches(cData.getData());
-
-				cData.put(MATCHES_KEY, matches);
-				resolved = resolveLocatorsValues(aField, cData, matchMap);
-				cData.remove(MATCHES_KEY);
-			}
-			if (!resolved) {
-				resolved = resolveLocatorsValues(aField, cData, groupMap);
-			}
-		}
-	}
-
-	/**
-	 * Resolves and applies <tt>locMap</tt> defined locators mapped RegEx values.
-	 *
-	 * @param field
-	 *            field instance to get locators
-	 * @param cData
-	 *            prepared activity data item parsing context
-	 * @param locMap
-	 *            regex locators map
-	 * @return {@code true} if locators has resolved non-{@code null} value, {@code false} - otherwise
-	 * @throws ParseException
-	 *             if exception occurs while resolving regex locators values
-	 * @throws com.jkoolcloud.tnt4j.streams.parsers.MissingFieldValueException
-	 *             if required locator value has not been resolved
-	 *
-	 * @see #parseLocatorValues(java.util.List,
-	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
-	 * @see #applyFieldValue(com.jkoolcloud.tnt4j.streams.fields.ActivityField, Object,
-	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
-	 */
-	protected boolean resolveLocatorsValues(ActivityField field, ActivityContext cData,
-			Map<ActivityField, List<ActivityFieldLocator>> locMap) throws Exception {
-		Object value;
-		List<ActivityFieldLocator> locations = locMap.get(field);
-		if (locations == null) {
-			value = parseLocatorValues(field, cData);
-		} else {
-			value = parseLocatorValues(locations, cData);
-		}
-
-		value = Utils.simplifyValue(value);
-		applyFieldValue(field, value, cData);
-
-		return value != null;
 	}
 
 	/**

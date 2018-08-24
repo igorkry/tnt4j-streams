@@ -436,6 +436,7 @@
                 <xs:annotation>
                     <xs:documentation>
                         Locator value is the value for the specified regular expression match group identifier: sequence position or name.
+                        Deprecated - use "Label" instead.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -1459,6 +1460,7 @@
                     </xs:annotation>
                 </xs:attribute>
 
+                <!-- TODO: rename to "applyOn" -->
                 <xs:attribute name="phase" use="optional" type="ValueResolutionPhases" default="formatted">
                     <xs:annotation>
                         <xs:documentation>
