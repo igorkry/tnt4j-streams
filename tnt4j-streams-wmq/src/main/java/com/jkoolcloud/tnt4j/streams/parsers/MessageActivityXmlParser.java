@@ -130,14 +130,14 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		StreamFieldType fieldType = field.getFieldType();
 		if (fieldType != null && WmqStreamConstants.VT_SIGNATURE.equalsIgnoreCase(field.getValueType())) {
-			switch (fieldType) {
-			case Correlator:
-			case TrackingId:
-				value = WmqUtils.computeSignature(value, sigDelim, logger());
-				break;
-			default:
-				break;
-			}
+			// switch (fieldType) {
+			// case Correlator:
+			// case TrackingId:
+			value = WmqUtils.computeSignature(value, sigDelim, logger());
+			// break;
+			// default:
+			// break;
+			// }
 		}
 
 		super.applyFieldValue(ai, field, value);
