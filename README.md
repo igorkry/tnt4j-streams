@@ -5293,31 +5293,22 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
 For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
 `field` tag `value-type` attribute value has to be set to `signature`.
 
-The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
-* Message Type (**`Number`**)
-* Message Format (**`String`**)
-* Message ID (**`byte[]`** or **`String`**)
-* Message User (**`String`**)
-* Message Application Type (**`String`**)
-* Message Application Name (**`String`**)
-* Message Date (**`String`**)
-* Message Time (**`String`**)
-* Correlator ID (**`byte[]`** or **`String`**)
-
-Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`.
-
 Sample of field definition for signature calculation:
 ```xml
     <field name="TrackingId" separator="#!#" value-type="signature"> 
         <field-locator locator="/messaging_operation/MsgType" locator-type="Label" datatype="Number"/> 
         <field-locator locator="/messaging_operation/MsgFormat" locator-type="Label"/> 
         <field-locator locator="/messaging_operation/MsgId" locator-type="Label" datatype="Binary" format="hexBinary"/> 
-        <field-locator locator="/messaging_operation/MsgUser" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/MsgUser" locator-type="Label">
+            <field-transform name="UserIdLowerCase" lang="groovy">
+                StringUtils.lowerCase($fieldValue)
+            </field-transform>
+        </field-locator> 
         <field-locator locator="/messaging_operation/MsgPutApplType" locator-type="Label"/> 
         <field-locator locator="/messaging_operation/MsgPutApplName" locator-type="Label"/> 
         <field-locator locator="/messaging_operation/MsgPutDate" locator-type="Label"/> 
         <field-locator locator="/messaging_operation/MsgPutTime" locator-type="Label"/> 
-        <field-locator locator="/messaging_operation/Correlator" locator-type="Label"/> 
+        <field-locator locator="/messaging_operation/Correlator" locator-type="Label" datatype="Binary" format="hexBinary"/> 
     </field>
 ``` 
 
@@ -5469,31 +5460,22 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
 `field` tag `value-type` attribute value has to be set to `signature`.
 
-The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
-* Message Type (**`Number`**)
-* Message Format (**`String`**)
-* Message ID (**`byte[]`** or **`String`**)
-* Message User (**`String`**)
-* Message Application Type (**`String`**)
-* Message Application Name (**`String`**)
-* Message Date (**`String`**)
-* Message Time (**`String`**)
-* Correlator ID (**`byte[]`** or **`String`**)
-
-Individual items can be omitted, but must contain a place holder (except for trailing items) `<field-locator value=""/>`.
-
 Sample of field definition for signature calculation:
 ```xml
     <field name="Correlator" value-type="signature"> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" format="bytes"/> 
-        <field-locator locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/> 
+        <field-locator locator="MQCACF_USER_IDENTIFIER" locator-type="Label">
+            <field-transform name="UserIdLowerCase" lang="groovy">
+                StringUtils.lowerCase($fieldValue)
+            </field-transform>
+        </field-locator> 
         <field-locator locator="MQIA_APPL_TYPE" locator-type="Label"/> 
         <field-locator locator="MQCACF_APPL_NAME" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label"/> 
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="String" format="bytes"/> 
     </field>
 ``` 
 

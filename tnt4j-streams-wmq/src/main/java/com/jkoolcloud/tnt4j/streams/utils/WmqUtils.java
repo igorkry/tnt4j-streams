@@ -175,31 +175,13 @@ public class WmqUtils {
 	 * identify a message. In order to identify a message within two different transports, the streams for each
 	 * transport must provide the same values.
 	 *
-	 * @param msgType
-	 *            message type
-	 * @param msgFormat
-	 *            message format
-	 * @param msgId
-	 *            message identifier
-	 * @param userId
-	 *            user that originated the message
-	 * @param putApplType
-	 *            type of application that originated the message
-	 * @param putApplName
-	 *            name of application that originated the message
-	 * @param putDate
-	 *            date (GMT) the message was originated
-	 * @param putTime
-	 *            time (GMT) the message was originated
-	 * @param correlId
-	 *            message correlator
+	 * @param elements
+	 *            elements array to calculate signature
 	 * @return unique message signature
 	 */
-	public static String computeSignature(MessageType msgType, String msgFormat, byte[] msgId, String userId,
-			String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
+	public static String computeSignature(Object... elements) {
 		synchronized (MSG_DIGEST) {
-			return computeSignature(MSG_DIGEST, msgType, msgFormat, msgId, userId, putApplType, putApplName, putDate,
-					putTime, correlId);
+			return computeSignature(MSG_DIGEST, elements);
 		}
 	}
 
@@ -213,55 +195,28 @@ public class WmqUtils {
 	 *
 	 * @param _msgDigest
 	 *            message type
-	 * @param msgType
-	 *            message type
-	 * @param msgFormat
-	 *            message format
-	 * @param msgId
-	 *            message identifier
-	 * @param userId
-	 *            user that originated the message
-	 * @param putApplType
-	 *            type of application that originated the message
-	 * @param putApplName
-	 *            name of application that originated the message
-	 * @param putDate
-	 *            date (GMT) the message was originated
-	 * @param putTime
-	 *            time (GMT) the message was originated
-	 * @param correlId
-	 *            message correlator
+	 * @param elements
+	 *            elements array to calculate signature
 	 * @return unique message signature
 	 */
-	public static String computeSignature(MessageDigest _msgDigest, MessageType msgType, String msgFormat, byte[] msgId,
-			String userId, String putApplType, String putApplName, String putDate, String putTime, byte[] correlId) {
+	public static String computeSignature(MessageDigest _msgDigest, Object... elements) {
 		_msgDigest.reset();
-		if (msgType != null) {
-			_msgDigest.update(String.valueOf(msgType.value()).getBytes());
-		}
-		if (msgFormat != null) {
-			_msgDigest.update(msgFormat.trim().getBytes());
-		}
-		if (msgId != null) {
-			_msgDigest.update(msgId);
-		}
-		if (userId != null) {
-			_msgDigest.update(userId.trim().toLowerCase().getBytes());
-		}
-		if (putApplType != null) {
-			_msgDigest.update(putApplType.trim().getBytes());
-		}
-		if (putApplName != null) {
-			_msgDigest.update(putApplName.trim().getBytes());
-		}
-		if (putDate != null) {
-			_msgDigest.update(putDate.trim().getBytes());
-		}
-		if (putTime != null) {
-			_msgDigest.update(putTime.trim().getBytes());
-		}
-		if (correlId != null) {
-			_msgDigest.update(correlId);
+
+		if (elements != null) {
+			for (Object element : elements) {
+				if (element instanceof MessageType) {
+					_msgDigest.update(String.valueOf(((MessageType) element).value()).getBytes());
+				} else if (element instanceof byte[]) {
+					_msgDigest.update((byte[]) element);
+				} else if (element instanceof String) {
+					_msgDigest.update(((String) element).trim().getBytes());
+				} else if (element.getClass().isEnum()) {
+					_msgDigest.update(((Enum<?>) element).name().getBytes());
+				} else {
+					String elemStr = Utils.toString(element);
+					_msgDigest.update(elemStr.trim().getBytes());
+				}
+			}
 		}
 
 		return Utils.base64EncodeStr(_msgDigest.digest());
@@ -272,23 +227,7 @@ public class WmqUtils {
 	 * the message from the specified value, which is assumed to be a string containing the inputs required for the
 	 * message signature calculation, with each input separated by the delimiter specified using parameter
 	 * {@code sigDelim}.
-	 * <p>
-	 * The signature items MUST be specified in the following order (meaning of field value is not so important, but
-	 * data types must match):
-	 * <ol>
-	 * <li>Message Type - {@link Integer}</li>
-	 * <li>Message Format - {@link String}</li>
-	 * <li>Message ID - {@code byte[]} or {@link String}</li>
-	 * <li>Message User - {@link String}</li>
-	 * <li>Message Application Type - {@link String}</li>
-	 * <li>Message Application Name - {@link String}</li>
-	 * <li>Message Date - {@link String}</li>
-	 * <li>Message Time - {@link String}</li>
-	 * <li>Correlator ID - {@code byte[]} or {@link String}</li>
-	 * </ol>
-	 * <p>
-	 * Individual items can be omitted, but must contain a place holder (except for trailing items).
-	 *
+	 * 
 	 * @param value
 	 *            value object to retrieve signature fields data
 	 * @param sigDelim
@@ -298,7 +237,7 @@ public class WmqUtils {
 	 * @return unique message signature, or {@code null} if <tt>value</tt> contained signature calculation items are
 	 *         empty
 	 *
-	 * @see #computeSignature(MessageType, String, byte[], String, String, String, String, String, byte[])
+	 * @see #computeSignature(Object...)
 	 */
 	public static Object computeSignature(Object value, String sigDelim, EventSink logger) {
 		Object[] sigItems = null;
@@ -312,69 +251,20 @@ public class WmqUtils {
 		}
 
 		if (Utils.isEmptyContent(sigItems)) {
+			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"MessageActivityXmlParser.msg.signature.empty");
 			return null;
 		}
 
-		MessageType msgType = null;
-		String msgFormat = null;
-		byte[] msgId = null;
-		String msgUser = null;
-		String msgApplType = null;
-		String msgApplName = null;
-		String msgPutDate = null;
-		String msgPutTime = null;
-		byte[] correlId = null;
-		for (int i = 0; i < sigItems.length; i++) {
-			Object item = sigItems[i];
-			if (item == null) {
-				continue;
-			}
-			switch (i) {
-			case 0:
-				msgType = MessageType.valueOf(
-						item instanceof Number ? ((Number) item).intValue() : Integer.parseInt(item.toString()));
-				break;
-			case 1:
-				msgFormat = item.toString();
-				break;
-			case 2:
-				msgId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-				break;
-			case 3:
-				msgUser = item.toString();
-				break;
-			case 4:
-				msgApplType = item.toString();
-				break;
-			case 5:
-				msgApplName = item.toString();
-				break;
-			case 6:
-				msgPutDate = item.toString();
-				break;
-			case 7:
-				msgPutTime = item.toString();
-				break;
-			case 8:
-				correlId = item instanceof byte[] ? (byte[]) item : item.toString().getBytes();
-				break;
-			default:
-				break;
-			}
-		}
-
-		if (isEmptyItems(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
-				correlId)) {
+		if (isEmptyItems(sigItems)) {
+			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"MessageActivityXmlParser.msg.signature.empty2", sigItems);
 			return null;
 		}
 
-		value = computeSignature(msgType, msgFormat, msgId, msgUser, msgApplType, msgApplName, msgPutDate, msgPutTime,
-				correlId);
+		value = computeSignature(sigItems);
 		logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"MessageActivityXmlParser.msg.signature", value, msgType, msgFormat,
-				msgId == null ? "null" : Utils.encodeHex(msgId), msgId == null ? "null" : new String(msgId), msgUser,
-				msgApplType, msgApplName, msgPutDate, msgPutTime, correlId == null ? "null" : Utils.encodeHex(correlId),
-				correlId == null ? "null" : new String(correlId));
+				"MessageActivityXmlParser.msg.signature", value, sigItems.length, Utils.toStringDeep(sigItems));
 
 		return value;
 	}
