@@ -128,7 +128,7 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 			dataMap.put(RAW_ACTIVITY_STRING_KEY, rfh2.toString());
 		} catch (Exception exc) {
 			Utils.logThrowable(logger(), OpLevel.ERROR,
-					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 					"ActivityRFH2Parser.rfh2.parse.failed", exc);
 		} finally {
 			if (closeWhenDone) {

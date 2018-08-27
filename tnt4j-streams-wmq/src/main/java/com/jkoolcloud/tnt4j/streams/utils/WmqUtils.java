@@ -251,19 +251,19 @@ public class WmqUtils {
 		}
 
 		if (Utils.isEmptyContent(sigItems)) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MessageActivityXmlParser.msg.signature.empty");
 			return null;
 		}
 
 		if (isEmptyItems(sigItems)) {
-			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 					"MessageActivityXmlParser.msg.signature.empty2", sigItems);
 			return null;
 		}
 
 		value = computeSignature(sigItems);
-		logger.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+		logger.log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 				"MessageActivityXmlParser.msg.signature", value, sigItems.length, Utils.toStringDeep(sigItems));
 
 		return value;
