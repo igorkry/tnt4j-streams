@@ -121,12 +121,8 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 		return StringUtils.isEmpty(ppExpression) ? filterExpression : ppExpression;
 	}
 
-	/**
-	 * Returns filter handle type.
-	 *
-	 * @return filter handle type
-	 */
-	protected HandleType getHandleType() {
+	@Override
+	public HandleType getHandleType() {
 		return handleType;
 	}
 

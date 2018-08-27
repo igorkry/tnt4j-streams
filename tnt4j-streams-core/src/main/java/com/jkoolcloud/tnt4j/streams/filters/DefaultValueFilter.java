@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,11 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 	}
 
 	@Override
+	public HandleType getHandleType() {
+		return handleType;
+	}
+
+	@Override
 	public StreamFilterType getFilterType() {
 		return StreamFilterType.VALUE;
 	}
@@ -128,7 +133,8 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 			match = equals(valuesSet, fvStr);
 		}
 
-		return isFilteredOut(handleType, match);
+		boolean filteredOut = isFilteredOut(handleType, match);
+		return filteredOut;
 	}
 
 	/**
@@ -233,7 +239,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("DefaultValueFilter{"); // NON-NLS
+		StringBuilder sb = new StringBuilder("DefaultValueFilter{"); // NON-NLS
 		sb.append("handleType=").append(handleType); // NON-NLS
 		sb.append(", evalType=").append(evalType); // NON-NLS
 		if (format != null) {

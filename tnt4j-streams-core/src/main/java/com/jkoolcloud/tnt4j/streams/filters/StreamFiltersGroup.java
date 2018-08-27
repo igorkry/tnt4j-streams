@@ -34,7 +34,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 public class StreamFiltersGroup<T> implements StreamEntityFilter<T> {
 	private String name;
 
-	private List<StreamEntityFilter<T>> activityFilters = new ArrayList<>();
+	private List<AbstractEntityFilter<T>> activityFilters = new ArrayList<>();
+	private boolean filteredByDefault = false;
 
 	/**
 	 * Constructs a new StreamFiltersGroup.
@@ -61,7 +62,11 @@ public class StreamFiltersGroup<T> implements StreamEntityFilter<T> {
 	 * @param filter
 	 *            filter instance to be added to group
 	 */
-	public void addFilter(StreamEntityFilter<T> filter) {
+	public void addFilter(AbstractEntityFilter<T> filter) {
+		if (filter.getHandleType() == HandleType.INCLUDE) {
+			// if the filter group contains include filter not matching should be excluded
+			filteredByDefault = true;
+		}
 		activityFilters.add(filter);
 	}
 
@@ -71,20 +76,33 @@ public class StreamFiltersGroup<T> implements StreamEntityFilter<T> {
 	 * @param filter
 	 *            filter instance to be removed from group
 	 */
-	public void removeFilter(StreamEntityFilter<T> filter) {
+	public void removeFilter(AbstractEntityFilter<T> filter) {
 		activityFilters.remove(filter);
 	}
 
 	@Override
 	public boolean doFilter(T value, ActivityInfo ai) throws FilterException {
 		if (CollectionUtils.isNotEmpty(activityFilters)) {
-			for (StreamEntityFilter<T> aFilter : activityFilters) {
-				if (aFilter.doFilter(value, ai)) {
-					return true;
+			for (AbstractEntityFilter<T> aFilter : activityFilters) {
+				boolean filtered;
+				try {
+					filtered = aFilter.doFilter(value, ai);
+				} catch (Throwable e) {
+					filtered = filteredByDefault;
+				}
+				if (filtered) {
+					if (aFilter.getHandleType() == HandleType.EXCLUDE) {
+						return true;
+					}
+				} else {
+					if (aFilter.getHandleType() == HandleType.INCLUDE) {
+						return false;
+					}
 				}
 			}
 		}
 
-		return false;
+		return filteredByDefault;
 	}
+
 }

@@ -50,4 +50,11 @@ public abstract class AbstractEntityFilter<T> implements StreamEntityFilter<T> {
 	 * Performs filter initialization.
 	 */
 	protected abstract void initFilter();
+
+	/**
+	 * Returns filter handle type.
+	 *
+	 * @return filter handle type
+	 */
+	public abstract HandleType getHandleType();
 }
