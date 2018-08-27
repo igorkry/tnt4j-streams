@@ -105,8 +105,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 * message signature calculation, with each input separated by the delimiter specified in property
 	 * {@code SignatureDelim}.
 	 * <p>
-	 * To initiate signature calculation, {@code field} "value type" attribute must be set to
-	 * {@value com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants#VT_SIGNATURE}.
+	 * To initiate signature calculation as a field value, {@code field} tag {@code value-type} attribute value has be
+	 * set to {@value com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants#VT_SIGNATURE}.
 	 * <p>
 	 * The signature items MUST be specified in the following order (meaning of field value is not so important, but
 	 * data types must match):
@@ -128,16 +128,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	 */
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
-		StreamFieldType fieldType = field.getFieldType();
-		if (fieldType != null && WmqStreamConstants.VT_SIGNATURE.equalsIgnoreCase(field.getValueType())) {
-			// switch (fieldType) {
-			// case Correlator:
-			// case TrackingId:
+		if (WmqStreamConstants.VT_SIGNATURE.equalsIgnoreCase(field.getValueType())) {
 			value = WmqUtils.computeSignature(value, sigDelim, logger());
-			// break;
-			// default:
-			// break;
-			// }
 		}
 
 		super.applyFieldValue(ai, field, value);

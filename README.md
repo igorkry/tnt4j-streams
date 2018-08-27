@@ -5290,8 +5290,8 @@ Also see ['Activity XML parser'](#activity-xml-parser) and [Generic parser param
 
 ##### MQ message signature calculation
 
-For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
-calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
+For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
+`field` tag `value-type` attribute value has to be set to `signature`.
 
 The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
 * Message Type (**`Number`**)
@@ -5466,8 +5466,8 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 ##### MQ message signature calculation
 
-For MQ messages it is possible to calculate message signature from message fields. Activity fields `Correlator` or `TrackingId` are used to 
-calculate signature. To initiate signature calculation set `field` `value-type` attribute value `signature`.
+For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
+`field` tag `value-type` attribute value has to be set to `signature`.
 
 The signature items MUST be specified in the following order (meaning of field value is not so important, but data types must match):
 * Message Type (**`Number`**)
