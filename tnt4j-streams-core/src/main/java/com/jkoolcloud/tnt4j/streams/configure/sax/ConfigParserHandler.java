@@ -120,7 +120,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String PARSER_REF_ELMT = "parser-ref"; // NON-NLS
+	protected static final String PARSER_REF_ELMT = "parser-ref"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -1550,7 +1550,18 @@ public class ConfigParserHandler extends DefaultHandler {
 		return refObjName;
 	}
 
-	private Object findReference(String refName) {
+	/**
+	 * Finds referenced object instance by reference name.
+	 * <p>
+	 * Reference name usually is object name returned by {@code getName()} method and defined in stream configuration
+	 * {@code <tnt-data-source>} over XML {@code <stream>}, {@code <parser>} and {@code <java-object>} tags attribute
+	 * {@code name="ObjName"} .
+	 *
+	 * @param refName
+	 *            reference name
+	 * @return referenced object instance, or {@code null} if reference not found
+	 */
+	protected Object findReference(String refName) {
 		Object refObject = streamsConfigData == null ? null : streamsConfigData.getParser(refName);
 		if (refObject == null) {
 			refObject = streamsConfigData == null ? null : streamsConfigData.getStream(refName);
@@ -2042,7 +2053,9 @@ public class ConfigParserHandler extends DefaultHandler {
 						variableProperty = trCfg.getProperty(variableName);
 					}
 
-					prop.setValue(value.replace(variable, variableProperty));
+					if (variableProperty != null) {
+						prop.setValue(value.replace(variable, variableProperty));
+					}
 				}
 			}
 		}
