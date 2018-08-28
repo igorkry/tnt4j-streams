@@ -14,7 +14,7 @@
                     <?xml version="1.0" encoding="utf-8"?>
                         <Sample>
                           <Order>
-                            <orderid>A12T67903Z</orderid>   
+                            <orderid>A12T67903Z</orderid>
                             <item>Deck of Cards</item>
                             <price>2.50</price>
                             <quantity>3</quantity>
@@ -107,7 +107,7 @@
             <field-map source="MQXF_BACK" target="MQBACK"/>
             <field-map source="MQXF_INQ" target="MQINQ"/>
             <field-map source="MQXF_CB" target="MQCB"/>
-            <!-- To report the actual name for other MQ calls, comment out the following line -->	
+            <!-- To report the actual name for other MQ calls, comment out the following line -->
             <field-map source="" target="OTHER"/>
         </field>
 
@@ -146,16 +146,11 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
-
-            <!-- filter out any that don't create tracking ID -->
-            <filter name="TrackingFilter">
-                <value handle="exclude" format="string">1B2M2Y8AsgTpgAmY7PhCfg==</value>
-            </filter>
         </field>
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
         <field name="ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
-	<field name="ResolvedObjectString" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_OBJECT_STRING" locator-type="Label"/>
+        <field name="ResolvedObjectString" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_OBJECT_STRING" locator-type="Label"/>
 
         <field name="DerivedName" value="" transparent="true">
             <field-transform lang="groovy" name="ResTransform"><![CDATA[

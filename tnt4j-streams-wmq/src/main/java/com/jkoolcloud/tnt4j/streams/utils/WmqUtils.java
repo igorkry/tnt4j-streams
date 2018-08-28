@@ -252,19 +252,25 @@ public class WmqUtils {
 
 		if (Utils.isEmptyContent(sigItems)) {
 			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"MessageActivityXmlParser.msg.signature.empty");
+					"WmqUtils.msg.signature.null.elements");
 			return null;
 		}
 
 		if (isEmptyItems(sigItems)) {
 			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"MessageActivityXmlParser.msg.signature.empty2", sigItems);
+					"WmqUtils.msg.signature.empty.elements", sigItems);
 			return null;
 		}
 
 		value = computeSignature(sigItems);
 		logger.log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-				"MessageActivityXmlParser.msg.signature", value, sigItems.length, Utils.toStringDeep(sigItems));
+				"WmqUtils.msg.signature", value, sigItems.length, Utils.toStringDeep(sigItems));
+
+		if ("1B2M2Y8AsgTpgAmY7PhCfg==".equals(value)) { // NON-NLS
+			logger.log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
+					"WmqUtils.msg.signature.md5.default.value", value);
+			return null;
+		}
 
 		return value;
 	}
