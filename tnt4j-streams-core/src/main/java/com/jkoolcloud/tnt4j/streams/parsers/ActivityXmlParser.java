@@ -16,11 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +35,6 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.*;
-
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -137,7 +132,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				return new InputSource(new StringReader(""));
 			}
 		});
-		
+
 		xPath = StreamsXMLUtils.getStreamsXPath();
 		if (namespaces == null) {
 			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
@@ -246,7 +241,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					Document tDoc = xmlDoc.getOwnerDocument();
 					// Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
 					if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
-						xmlDoc = parseXmlDoc(new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
+						xmlDoc = parseXmlDoc(
+								new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
 					}
 				}
 			} else {
@@ -338,13 +334,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 *             value
 	 *
 	 * @see ActivityFieldLocator#formatValue(Object)
+	 * @see #getTextOnDemand(org.w3c.dom.Node, com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext,
+	 *      java.util.concurrent.atomic.AtomicBoolean)
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,
-	        AtomicBoolean formattingNeeded) throws ParseException {
+			AtomicBoolean formattingNeeded) throws ParseException {
 		Object val = null;
 		String locStr = locator.getLocator();
-		Node xmlDoc = cData.getData();
 
 		if (ActivityField.isDynamicAttr(locStr)) {
 			ActivityInfo ai = cData.getActivity();
@@ -352,14 +350,16 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		if (StringUtils.isNotEmpty(locStr)) {
-			Node nodeDocument = cropDocumentForNode(xmlDoc);
+			Object rawData = cData.getRawData();
+			Node xmlDoc = rawData instanceof Node ? ((Node) rawData).getOwnerDocument() : null;
+			Node nodeDocument = cData.getData();
 			try {
 				XPathExpression expr = getXPathExpr(locStr);
 
 				if (nodeDocument != null) { // try expression relative to node
 					val = resolveValueOverXPath(nodeDocument, expr);
 				}
-				if (val == null) { // otherwise try on complete document
+				if (val == null && xmlDoc != null) { // otherwise try on complete document
 					val = resolveValueOverXPath(xmlDoc, expr);
 				}
 
@@ -375,7 +375,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				        "ActivityXMLParser.xPath.exception"), 0);
+						"ActivityXMLParser.xPath.exception"), 0);
 				pe.initCause(exc);
 				throw pe;
 			}
@@ -383,34 +383,45 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		return val;
 	}
 
-	private Node parseXmlDoc(InputStream  ins) throws SAXException, IOException {
+	private Node parseXmlDoc(InputStream ins) throws SAXException, IOException {
 		builderLock.lock();
 		try {
 			return builder.parse(ins);
 		} finally {
 			builderLock.unlock();
-		}		
+		}
 	}
-	
-	private Document getNewDocument() {
-		builderLock.lock();
-		try {
-			return builder.newDocument();
-		} finally {
-			builderLock.unlock();
-		}		
-	}
-	
+
 	private XPathExpression getXPathExpr(String locStr) throws XPathExpressionException {
 		xPathLock.lock();
 		try {
 			return xPath.compile(locStr);
 		} finally {
 			xPathLock.unlock();
-		}		
+		}
 	}
-	
-	private static Object getTextOnDemand(Node node, ActivityFieldLocator locator, ActivityContext cData,
+
+	/**
+	 * Retrieves provided {@code node} XML text, if this parser bound stacked parser does not support {@link Node} type
+	 * data. When stacked parser supports {@link Node} type data, parameters defined {@code node} instance is returned.
+	 *
+	 * @param node
+	 *            XML document node to retrieve text on demand
+	 * @param locator
+	 *            activity field locator
+	 * @param cData
+	 *            activity object XML DOM document
+	 * @param formattingNeeded
+	 *            flag to set if value formatting is not needed
+	 * @return resolved textual value formatted based on the locator's formatting properties, or parameter {@code node}
+	 *         defined {@link Node} if stacked parser supports that type of data
+	 * @throws ParseException
+	 *             if exception occurs applying locator format properties to specified value
+	 *
+	 * @see #getTextContent(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator, org.w3c.dom.Node,
+	 *      java.util.concurrent.atomic.AtomicBoolean)
+	 */
+	protected Object getTextOnDemand(Node node, ActivityFieldLocator locator, ActivityContext cData,
 			AtomicBoolean formattingNeeded) throws ParseException {
 		if (!isDataSupportedByStackedParser(cData.getField(), node)) {
 			return getTextContent(locator, node, formattingNeeded);
@@ -440,24 +451,6 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 			val = Utils.simplifyValue(valuesList);
 		}
 		return val;
-	}
-
-	private Node cropDocumentForNode(Node xmlDoc) throws ParseException {
-		if (xmlDoc.getParentNode() != null) { // if node is not document root node
-			try {
-				Document nodeXmlDoc = getNewDocument();
-				Node importedNode = nodeXmlDoc.importNode(xmlDoc, true);
-				nodeXmlDoc.appendChild(importedNode);
-
-				return nodeXmlDoc;
-			} catch (Exception exc) {
-				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
-				        "ActivityXmlParser.xmlDocument.parse.error"), 0);
-				pe.initCause(exc);
-				throw pe;
-			}
-		}
-		return null;
 	}
 
 	/**
