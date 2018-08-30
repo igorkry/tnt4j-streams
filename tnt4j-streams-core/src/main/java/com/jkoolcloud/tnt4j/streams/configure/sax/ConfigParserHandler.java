@@ -56,10 +56,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements the SAX DefaultHandler for parsing TNT4J-Streams configuration.
@@ -2244,6 +2241,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private void handleFieldTransform(FieldTransformData currTransformData) throws SAXException {
 		String eDataVal = getElementData();
+		checkScriptExpression(eDataVal);
 
 		if (eDataVal != null) {
 			if (StringUtils.isNotEmpty(currTransformData.beanRef) && eDataVal.length() > 0) {
@@ -2275,6 +2273,21 @@ public class ConfigParserHandler extends DefaultHandler {
 			currLocatorData.valueTransforms.add(transform);
 		} else {
 			currField.addTransformation(transform);
+		}
+	}
+
+	private void checkScriptExpression(String expString) throws SAXException {
+		if (StringUtils.isEmpty(expString)) {
+			return;
+		}
+
+		boolean valid = StreamsScriptingUtils.isScriptExpressionValid(expString);
+		if (!valid) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.invalid.expression.token", expString,
+							StreamsScriptingUtils.FIELD_VALUE_VARIABLE_EXPR, "${FIELD_NAME}"), // NON-NLS
+					currParseLocation);
 		}
 	}
 
@@ -2323,6 +2336,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	@SuppressWarnings("unchecked")
 	private void handleFilterExpression(FilterExpressionData feData) throws SAXException {
 		String eDataVal = getElementData();
+		checkScriptExpression(eDataVal);
 
 		if (eDataVal != null) {
 			feData.expression = eDataVal;
@@ -2367,8 +2381,9 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(currCacheEntry.value, VALUE_ELMT);
 	}
 
-	private void handleMatchExp(ParserRefData parserRefData) {
+	private void handleMatchExp(ParserRefData parserRefData) throws SAXException {
 		String eDataVal = getElementData();
+		checkScriptExpression(eDataVal);
 
 		if (StringUtils.isNotEmpty(eDataVal)) {
 			parserRefData.addMatcherExp(eDataVal);

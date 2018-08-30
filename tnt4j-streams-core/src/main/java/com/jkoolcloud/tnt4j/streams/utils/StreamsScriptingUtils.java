@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.script.*;
 
@@ -59,6 +60,9 @@ public final class StreamsScriptingUtils {
 
 	private static final String SCRIPTING_CFG_PROPERTIES = "scripting.properties"; // NON-NLS
 	private static final String IMPORT_PACKAGES_PROP_KEY_SUFFIX = ".scripting.import.packages"; // NON-NLS
+
+	private static final Pattern VALID_SCRIPT_EXP_PATTERN = Pattern.compile("(?s).*\\$(fieldValue\\b)(?s).*"); // NON-NLS
+	private static final Pattern FIELD_VALUE_PLACEHOLDER_PATTERN = Pattern.compile("(?s).*\\$\\w+(?s).*"); // NON-NLS
 
 	private static CompilerConfiguration DEFAULT_GROOVY_CONFIGURATION;
 	private static String DEFAULT_JS_CODE_IMPORTS;
@@ -233,8 +237,8 @@ public final class StreamsScriptingUtils {
 	/**
 	 * Returns the appropriate string representation for the specified object.
 	 * <p>
-	 * If <tt>obj</tt> is {@link String}, it gets surrounded by {@code "} chars. If <tt>obj</tt> is
-	 * {@link java.lang.Character}, it gets surrounded by {@code '} character.
+	 * If <tt>obj</tt> is {@link String}, it gets surrounded by {@code "} chars. If <tt>obj</tt> is {@link Character},
+	 * it gets surrounded by {@code '} character.
 	 *
 	 * @param obj
 	 *            object to convert to string representation
@@ -259,7 +263,7 @@ public final class StreamsScriptingUtils {
 	 *            Groovy script code string
 	 * @return compiled instance of Groovy script code
 	 * 
-	 * @throws ScriptException
+	 * @throws javax.script.ScriptException
 	 *             if compilation fails
 	 *
 	 * @see javax.script.ScriptEngineManager#getEngineByName(String)
@@ -289,7 +293,7 @@ public final class StreamsScriptingUtils {
 	 *            JavaScript script code string
 	 * @return compiled instance of JavaScript script code
 	 *
-	 * @throws ScriptException
+	 * @throws javax.script.ScriptException
 	 *             if compilation fails
 	 *
 	 * @see javax.script.ScriptEngineManager#getEngineByName(String)
@@ -308,5 +312,33 @@ public final class StreamsScriptingUtils {
 		ScriptEngine engine = factory.getEngineByName(JAVA_SCRIPT_LANG);
 
 		return engine;
+	}
+
+	/**
+	 * Checks if provided script expression string {@code expString} containing value reference placeholders (starting
+	 * {@code '$'} symbol) matches valid script expression pattern:
+	 * <ul>
+	 * <li>expression referenced field value is defined using placeholder {@value #FIELD_VALUE_VARIABLE_EXPR} (case
+	 * sensitive)</li>
+	 * <li>expression referenced activity fields are defined using placeholder {@code ${FIELD_NAME}}, where
+	 * {@code FIELD_NAME} is parser defined filed name or cache entry name</li>
+	 * </ul>
+	 *
+	 * @param expString
+	 *            script expression string to check
+	 * @return {@code true} is provided script expression matches valid value reference placeholders pattern or
+	 *         placeholders are not present in expression, {@code false} - if does not match or expression is
+	 *         {@code null}
+	 */
+	public static boolean isScriptExpressionValid(String expString) {
+		if (expString == null) {
+			return false;
+		}
+
+		if (FIELD_VALUE_PLACEHOLDER_PATTERN.matcher(expString).matches()) {
+			return VALID_SCRIPT_EXP_PATTERN.matcher(expString).matches();
+		} else {
+			return true;
+		}
 	}
 }
