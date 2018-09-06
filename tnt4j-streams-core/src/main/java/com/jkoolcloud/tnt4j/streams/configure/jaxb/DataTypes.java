@@ -36,6 +36,8 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="Number"/>
  *     &lt;enumeration value="DateTime"/>
  *     &lt;enumeration value="Timestamp"/>
+ *     &lt;enumeration value="Generic"/>
+ *     &lt;enumeration value="AsInput"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -108,7 +110,7 @@ public enum DataTypes {
 	 *
 	 */
 	@XmlEnumValue("AsInput")
-	ASINPUT("AsInput");
+	AS_INPUT("AsInput");
 
 	private final String value;
 

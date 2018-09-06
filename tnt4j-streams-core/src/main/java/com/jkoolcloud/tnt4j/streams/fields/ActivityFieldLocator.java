@@ -52,6 +52,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	private String timeZone = null;
 	private Object cfgValue = null;
 	private String id = null;
+	private String charset = null;
 
 	private ActivityFieldLocatorType builtInType = null;
 	private ActivityFieldFormatType builtInFormat = null;
@@ -400,6 +401,25 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
+	 * Gets the charset name for binary data to be used when converting to string.
+	 *
+	 * @return charset name
+	 */
+	public String getCharset() {
+		return charset;
+	}
+
+	/**
+	 * Sets the charset name for binary data to be used when converting to string.
+	 *
+	 * @param charset
+	 *            the charset name to set
+	 */
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+
+	/**
 	 * Gets field locator identifier.
 	 *
 	 * @return field locator identifier
@@ -578,7 +598,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
-	 * Formats field value as {@link String} based on the definition of the field locator format.
+	 * Formats field value as {@link String} based on the definition of the field locator format and charset.
 	 * <p>
 	 * Formatting is performed if raw field value is of type {@code byte[]}.
 	 * <p>
@@ -586,7 +606,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * <ul>
 	 * <li>{@link ActivityFieldFormatType#base64Binary} - {@link Utils#base64EncodeStr(byte[])}</li>
 	 * <li>{@link ActivityFieldFormatType#hexBinary} - {@link Utils#encodeHex(byte[])}</li>
-	 * <li>{@link ActivityFieldFormatType#string} - {@link Utils#getString(byte[])}</li>
+	 * <li>{@link ActivityFieldFormatType#string} - {@link Utils#getString(byte[], String)}</li>
 	 * <li>{@link ActivityFieldFormatType#bytes} - {@link Utils#toHexString(byte[])}</li>
 	 * </ul>
 	 *
@@ -606,7 +626,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			} else if (builtInFormat == ActivityFieldFormatType.bytes) {
 				return Utils.toHexString((byte[]) value);
 			} else { // if (builtInFormat == ActivityFieldFormatType.string) {
-				return Utils.getString((byte[]) value);
+				return Utils.getString((byte[]) value, charset);
 			}
 		}
 
@@ -732,6 +752,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			cafl.cfgValue = cfgValue;
 			cafl.requiredVal = requiredVal;
 			cafl.id = id;
+			cafl.charset = charset;
 
 			cafl.builtInType = builtInType;
 			cafl.builtInFormat = builtInFormat;

@@ -88,11 +88,49 @@ TNT4J-Streams as your system service.
 
 Mapping of streamed data to activity event fields are performed by parser. To map field value you have to define
 `field` tag in parser configuration:
-* `name` attribute defines activity event field name
-* `locator` attribute defines location of data value from streamed data
-* `format` attribute defines format of data value
-* `value` attribute defines predefined (hardcoded) value of field
-* `field-map` tag is used to perform manual mapping from streamed data value `source` to field value `target.`
+* attributes:
+    * `name` - defines activity event field name
+    * `locator` - defines location of data value from streamed data
+    * `locator-type` - defines type of attribute `locator`. Set of supported values:
+        * `StreamProp` 
+        * `Index` 
+        * `Label` 
+        * `Range` 
+        * `Cache` 
+        * `Activity`
+    * `format` - defines format type or representation that value is expected to be in (e.g. binary, date/time string, decimal format, etc.).
+    Set of supported values:
+        * `base64Binary`
+        * `hexBinary` 
+        * `string`
+        * any decimal or time format pattern   
+    * `value` - defines predefined (hardcoded) value of field
+    * `datatype` - defines how to interpret field resolved value. Set of supported values:
+        * `String` 
+        * `Binary`
+        * `Number`
+        * `DateTime`
+        * `Timestamp`
+        * `Generic`
+        * `AsInput`
+    * `radix` - for numeric values, defines the radix that the value is specified in (ignored if format is specified)
+    * `units` - defines the units of value to be represented. Set of supported values:
+        * `Days`
+        * `Hours`
+        * `Minutes`
+        * `Seconds`
+        * `Milliseconds`
+        * `Microseconds`
+        * `Nanoseconds` 
+    * `timezone` - defines the time zone that a date/time string is represented in (when not specified, date/time string is assumed to be in 
+    local time zone)
+    * `locale` - defines locale for data formatter to use
+    * `required` - indicates whether field non-null value resolution is required for this field
+    * `id` - field identifier
+    * `cacheKey` - cache key to store resolved field value
+    * `charset` - defines charset name for binary data value 
+* tags:
+    * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
 
 sample:
 ```xml
@@ -5451,6 +5489,9 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
     <property name="TranslateNumValues" value="false"/>
     <property name="SignatureDelim" value="#"/>
 ```
+
+**NOTE:** when locator data type is set to `String` and PCF parameter contains binary (`byte[]`) value, conversion from binary to string 
+value is performed using PCF parameter defined charset (`CCSID`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 

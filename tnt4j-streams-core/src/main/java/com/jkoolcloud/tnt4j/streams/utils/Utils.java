@@ -16,24 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.net.ServerSocket;
+import java.net.*;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,20 +26,9 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
+import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -528,7 +502,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return null;
 	}
 
-
 	/**
 	 * Makes Hex string representation (starting '0x') of byte array.
 	 *
@@ -568,19 +541,40 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * can't be constructed using UTF-8 charset, then the platform's default charset is used.
 	 *
 	 * @param strBytes
-	 *            The bytes to be decoded into characters
+	 *            the bytes to be decoded into characters
+	 * @return string constructed from specified byte array
+	 *
+	 * @see #getString(byte[], String)
+	 */
+	public static String getString(byte[] strBytes) {
+		return getString(strBytes, UTF8);
+	}
+
+	/**
+	 * Makes a new {@link String} by decoding the specified array of bytes using {@code charsetName} defined charset. If
+	 * {@link String} can't be constructed using defined charset, then the platform's default charset is used.
+	 *
+	 * @param strBytes
+	 *            the bytes to be decoded into characters
+	 * @param charsetName
+	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use default
+	 *            UFT-8
 	 * @return string constructed from specified byte array
 	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
 	 */
-	public static String getString(byte[] strBytes) {
+	public static String getString(byte[] strBytes, String charsetName) {
+		if (StringUtils.isEmpty(charsetName)) {
+			charsetName = UTF8;
+		}
+
 		try {
-			return new String(strBytes, Charset.forName(UTF8));
+			return new String(strBytes, Charset.forName(charsetName));
 		} catch (UnsupportedCharsetException uce) {
 			try {
-				return new String(strBytes, UTF8);
+				return new String(strBytes, charsetName);
 			} catch (UnsupportedEncodingException uee) {
 				return new String(strBytes);
 			}

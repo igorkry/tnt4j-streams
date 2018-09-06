@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Map;
@@ -284,15 +285,21 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	/**
-	 * Resolves PCF parameter value. If parser property `TranslateNumValues` is set to {@code true} - then if possible,
-	 * resolved numeric value gets translated to corresponding MQ constant name.
+	 * Resolves PCF parameter value.
+	 * <p>
+	 * If parser property `TranslateNumValues` is set to {@code true} - then if possible, resolved numeric value gets
+	 * translated to corresponding MQ constant name.
+	 * <p>
+	 * When locator data type is set to {@code "String"} and PCF parameter contains binary ({@code byte[]}) value,
+	 * conversion from binary to string value is performed using PCF parameter defined charset.
 	 *
 	 * @param fDataType
 	 *            field data type
 	 * @param param
 	 *            PCF parameter to resolve value from
-	 *
 	 * @return resolved PCF parameter value
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.utils.WmqUtils#getString(byte[], int)
 	 */
 	protected Object resolvePCFParamValue(ActivityFieldDataType fDataType, PCFParameter param) {
 		if (param == null) {
@@ -303,6 +310,15 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 		if (val instanceof String) {
 			val = ((String) val).trim();
+		} else if (val instanceof byte[] && fDataType == ActivityFieldDataType.String) {
+			try {
+				val = WmqUtils.getString((byte[]) val, param.characterSet());
+			} catch (UnsupportedEncodingException exc) {
+				logger().log(OpLevel.WARNING,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"ActivityPCFParser.unsupported.encoding"),
+						param.getParameterName(), param.getParameter(), param.characterSet());
+			}
 		}
 
 		if (isValueTranslatable(fDataType)) {
@@ -517,7 +533,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			mqiStruct.readFromBuffer(structData, 0, 4, true, env.getNativeCharSet(), new JmqiTls());
 			if (logger().isSet(OpLevel.DEBUG)) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-						"ActivityPCFParser.built.structure", PCFConstants.lookupParameter(structParam.getParameter()),
+						"ActivityPCFParser.built.structure", structParam.getParameterName(), structParam.getParameter(),
 						mqiToString(mqiStruct, env));
 			}
 

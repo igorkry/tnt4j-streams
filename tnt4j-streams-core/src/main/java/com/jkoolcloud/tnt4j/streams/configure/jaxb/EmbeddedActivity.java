@@ -132,9 +132,9 @@ public class EmbeddedActivity {
 	}
 
 	public void addFieldLocator(String locator, String locatorType, DataTypes datatype, BigInteger radix, String units,
-			String timezone, String format, String locale, String value) {
-		getFieldLocator()
-				.add(new FieldLocator(locator, locatorType, datatype, radix, units, timezone, format, locale, value));
+			String timezone, String format, String locale, String value, String charset) {
+		getFieldLocator().add(new FieldLocator(locator, locatorType, datatype, radix, units, timezone, format, locale,
+				value, charset));
 	}
 
 	/**

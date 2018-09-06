@@ -34,6 +34,10 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
+	private final static QName _StreamParserRef_QNAME = new QName("", "parser-ref");
+	private final static QName _StreamTnt4JProperties_QNAME = new QName("", "tnt4j-properties");
+	private final static QName _StreamProperty_QNAME = new QName("", "property");
+	private final static QName _StreamReference_QNAME = new QName("", "reference");
 	private final static QName _FieldLocatorFieldTransform_QNAME = new QName("", "field-transform");
 	private final static QName _FieldLocatorFieldMap_QNAME = new QName("", "field-map");
 	private final static QName _FieldLocatorFieldMapRef_QNAME = new QName("", "field-map-ref");
@@ -237,6 +241,43 @@ public class ObjectFactory {
 	 */
 	public Stream.Tnt4JProperties createStreamTnt4JProperties() {
 		return new Stream.Tnt4JProperties();
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Reference }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "parser-ref", scope = Stream.class)
+	public JAXBElement<Reference> createStreamParserRef(Reference value) {
+		return new JAXBElement<Reference>(_StreamParserRef_QNAME, Reference.class, Stream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Stream.Tnt4JProperties }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "tnt4j-properties", scope = Stream.class)
+	public JAXBElement<Stream.Tnt4JProperties> createStreamTnt4JProperties(Stream.Tnt4JProperties value) {
+		return new JAXBElement<Stream.Tnt4JProperties>(_StreamTnt4JProperties_QNAME, Stream.Tnt4JProperties.class,
+				Stream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link StreamProperty }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "property", scope = Stream.class)
+	public JAXBElement<StreamProperty> createStreamProperty(StreamProperty value) {
+		return new JAXBElement<StreamProperty>(_StreamProperty_QNAME, StreamProperty.class, Stream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Reference }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "reference", scope = Stream.class)
+	public JAXBElement<Reference> createStreamReference(Reference value) {
+		return new JAXBElement<Reference>(_StreamReference_QNAME, Reference.class, Stream.class, value);
 	}
 
 	/**

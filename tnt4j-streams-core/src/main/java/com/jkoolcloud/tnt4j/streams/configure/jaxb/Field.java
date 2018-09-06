@@ -137,6 +137,9 @@ public class Field {
 	@XmlAttribute(name = "cacheKey")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String cacheKey;
+	@XmlAttribute(name = "charset")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String charset;
 
 	public Field() {
 	}
@@ -160,7 +163,7 @@ public class Field {
 	}
 
 	public Field(String name, String locator, String locatorType, DataTypes datatype, String format, String units,
-			String timezone, String locale, BigInteger radix, String value, String separator) {
+			String timezone, String locale, BigInteger radix, String value, String separator, String charset) {
 		this.name = name;
 		this.locator = locator;
 		this.locatorType = locatorType;
@@ -172,6 +175,7 @@ public class Field {
 		this.radix = radix;
 		this.value = value;
 		this.separator = separator;
+		this.charset = charset;
 	}
 
 	/**
@@ -208,9 +212,9 @@ public class Field {
 	}
 
 	public void addFieldLocator(String locator, String locatorType, DataTypes datatype, BigInteger radix, String units,
-			String timezone, String format, String locale, String value) {
-		getFieldLocator()
-				.add(new FieldLocator(locator, locatorType, datatype, radix, units, timezone, format, locale, value));
+			String timezone, String format, String locale, String value, String charset) {
+		getFieldLocator().add(new FieldLocator(locator, locatorType, datatype, radix, units, timezone, format, locale,
+				value, charset));
 	}
 
 	/**
@@ -674,6 +678,29 @@ public class Field {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTimezone(String value) {
 		this.timezone = value;
+	}
+
+	/**
+	 * Gets the value of the charset property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getCharset() {
+		return charset;
+	}
+
+	/**
+	 * Sets the value of the charset property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setCharset(String value) {
+		this.charset = value;
 	}
 
 	/**

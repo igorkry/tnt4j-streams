@@ -1300,6 +1300,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attribute name="charset" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Specifies charset name for binary data value.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:attributeGroup>
 
     <!-- Element <field-map> definition -->

@@ -39,12 +39,12 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="FieldLocator">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
+ *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="field-map" type="{}FieldMap" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-map-ref" type="{}FieldMapRef" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-transform" type="{}FieldTransform" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="filter" type="{}Filter" minOccurs="0"/>
- *       &lt;/sequence>
+ *       &lt;/choice>
  *       &lt;attGroup ref="{}FieldLocatorAttributes"/>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -102,12 +102,15 @@ public class FieldLocator {
 	@XmlAttribute(name = "cacheKey")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String cacheKey;
+	@XmlAttribute(name = "charset")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected String charset;
 
 	public FieldLocator() {
 	}
 
 	public FieldLocator(String locator, String locatorType, DataTypes datatype, BigInteger radix, String units,
-			String timezone, String format, String locale, String value) {
+			String timezone, String format, String locale, String value, String charset) {
 		this.locator = locator;
 		this.locatorType = locatorType;
 		this.datatype = datatype;
@@ -117,6 +120,7 @@ public class FieldLocator {
 		this.format = format;
 		this.locale = locale;
 		this.value = value;
+		this.charset = charset;
 	}
 
 	/**
@@ -295,6 +299,29 @@ public class FieldLocator {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setTimezone(String value) {
 		this.timezone = value;
+	}
+
+	/**
+	 * Gets the value of the charset property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public String getCharset() {
+		return charset;
+	}
+
+	/**
+	 * Sets the value of the charset property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setCharset(String value) {
+		this.charset = value;
 	}
 
 	/**

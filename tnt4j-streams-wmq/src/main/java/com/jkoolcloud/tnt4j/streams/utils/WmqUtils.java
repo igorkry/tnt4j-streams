@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
@@ -23,6 +24,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
+import com.ibm.mq.headers.CCSID;
+import com.ibm.mq.headers.Charsets;
 import com.ibm.mq.pcf.MQCFGR;
 import com.ibm.mq.pcf.MQCFIN;
 import com.ibm.mq.pcf.PCFContent;
@@ -319,5 +322,34 @@ public class WmqUtils {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the charset corresponding to the specified {@code ccsid} Coded Charset Identifier.
+	 *
+	 * @param ccsid
+	 *            coded charset identifier
+	 * @return charset name mapped from coded charset identifier
+	 * @throws UnsupportedEncodingException
+	 *             if there is no charset mapping for the supplied {@code ccsid}
+	 */
+	public static String getCharsetName(int ccsid) throws UnsupportedEncodingException {
+		return CCSID.getCodepage(ccsid);
+	}
+
+	/**
+	 * Converts byte array content in the specified {@code ccsid} into a Java {@link java.lang.String}.
+	 *
+	 * @param strBytes
+	 *            the byte array to convert
+	 * @param ccsid
+	 *            coded charset identifier
+	 * @return the string made from provided bytes using defined {@code ccsid}
+	 * @throws UnsupportedEncodingException
+	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
+	 *             from the charset
+	 */
+	public static String getString(byte[] strBytes, int ccsid) throws UnsupportedEncodingException {
+		return Charsets.convert(strBytes, ccsid);
 	}
 }

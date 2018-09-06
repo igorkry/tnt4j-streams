@@ -309,9 +309,11 @@ public class ActivityField extends AbstractFieldEntity {
 	 *            locale for formatter to use
 	 * @param timeZone
 	 *            the timeZone to set
+	 * @param charset
+	 *            the charset name for binary data
 	 */
 	public void setGroupLocator(int radix, String reqVal, ActivityFieldDataType dataType, String units, String format,
-			String locale, String timeZone) {
+			String locale, String timeZone, String charset) {
 		groupLocator = new ActivityFieldLocator();
 		groupLocator.setRadix(radix);
 		groupLocator.setRequired(reqVal);
@@ -326,6 +328,9 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 		if (StringUtils.isNotEmpty(timeZone)) {
 			groupLocator.setTimeZone(timeZone);
+		}
+		if (StringUtils.isNotEmpty(charset)) {
+			groupLocator.setCharset(charset);
 		}
 	}
 
@@ -679,6 +684,7 @@ public class ActivityField extends AbstractFieldEntity {
 		tField.stackedParsers = stackedParsers;
 		tField.valueType = fillDynamicAttr(valueType, dValues, valueIndex);
 		tField.transparent = transparent;
+		tField.parser = parser;
 
 		return tField;
 	}

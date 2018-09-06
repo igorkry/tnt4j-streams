@@ -242,6 +242,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
+	private static final String CHARSET_ATTR = "charset"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
 	private static final String SOURCE_ATTR = "source";
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -672,6 +676,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		boolean transparent = false;
 		boolean split = false;
 		String id = null;
+		String charset = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -709,6 +714,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				split = Utils.toBoolean(attValue);
 			} else if (ID_ATTR.equals(attName)) {
 				id = attValue;
+			} else if (CHARSET_ATTR.equals(attName)) {
+				charset = attValue;
 			} else {
 				unknownAttribute(FIELD_ELMT, attName);
 			}
@@ -757,6 +764,9 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (StringUtils.isNotEmpty(id)) {
 				afl.setId(id);
 			}
+			if (StringUtils.isNotEmpty(charset)) {
+				afl.setCharset(charset);
+			}
 			currField.addLocator(afl);
 		} else if (StringUtils.isNotEmpty(locator)) {
 			currField.hasLocValAttr = true;
@@ -782,11 +792,14 @@ public class ConfigParserHandler extends DefaultHandler {
 					if (StringUtils.isNotEmpty(id)) {
 						afl.setId(id);
 					}
+					if (StringUtils.isNotEmpty(charset)) {
+						afl.setCharset(charset);
+					}
 					currField.addLocator(afl);
 				}
 			}
 		} else if (StringUtils.isEmpty(locator)) {
-			af.setGroupLocator(radix, reqVal, dataType, units, format, locale, timeZone);
+			af.setGroupLocator(radix, reqVal, dataType, units, format, locale, timeZone, charset);
 		}
 
 		if (separator != null) {

@@ -106,7 +106,7 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 		}
 
 		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-				"WmqStreamPCF.adding.pcf.param", paramId, Utils.toString(val));
+				"WmqStreamPCF.adding.pcf.param", PCFConstants.lookupParameter(paramId), paramId, Utils.toString(val));
 
 		PCFParameter paramV = msg.getParameter(paramId);
 		if (paramV == null) {
@@ -125,13 +125,13 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 			} else if (val instanceof String[]) {
 				msg.addParameter(paramId, (String[]) val);
 			} else {
-				throw new IllegalArgumentException(
-						StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
-								"WmqStreamPCF.parameter.incompatible", paramId, val.getClass().getSimpleName()));
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.parameter.incompatible",
+						PCFConstants.lookupParameter(paramId), paramId, val.getClass().getSimpleName()));
 			}
 		} else {
 			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WmqStreamPCF.parameter.exists", PCFConstants.lookupParameter(paramId), paramV.getValue(),
+					"WmqStreamPCF.parameter.exists", PCFConstants.lookupParameter(paramId), paramId, paramV.getValue(),
 					Utils.toString(val));
 		}
 	}
