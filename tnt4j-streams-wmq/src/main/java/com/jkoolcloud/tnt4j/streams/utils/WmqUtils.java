@@ -328,13 +328,13 @@ public class WmqUtils {
 	 * Returns the charset corresponding to the specified {@code ccsid} Coded Charset Identifier.
 	 *
 	 * @param ccsid
-	 *            coded charset identifier
+	 *            coded charset identifier, or {@code null} to get default ({@code ccsid=0}) charset name
 	 * @return charset name mapped from coded charset identifier
 	 * @throws UnsupportedEncodingException
 	 *             if there is no charset mapping for the supplied {@code ccsid}
 	 */
-	public static String getCharsetName(int ccsid) throws UnsupportedEncodingException {
-		return CCSID.getCodepage(ccsid);
+	public static String getCharsetName(Number ccsid) throws UnsupportedEncodingException {
+		return CCSID.getCodepage(ccsid == null ? 0 : ccsid.intValue());
 	}
 
 	/**
@@ -343,13 +343,13 @@ public class WmqUtils {
 	 * @param strBytes
 	 *            the byte array to convert
 	 * @param ccsid
-	 *            coded charset identifier
+	 *            coded charset identifier, or {@code null} to use default ({@code ccsid=0}) charset
 	 * @return the string made from provided bytes using defined {@code ccsid}
 	 * @throws UnsupportedEncodingException
 	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
 	 *             from the charset
 	 */
-	public static String getString(byte[] strBytes, int ccsid) throws UnsupportedEncodingException {
-		return Charsets.convert(strBytes, ccsid);
+	public static String getString(byte[] strBytes, Number ccsid) throws UnsupportedEncodingException {
+		return Charsets.convert(strBytes, ccsid == null ? 0 : ccsid.intValue());
 	}
 }
