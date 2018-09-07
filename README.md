@@ -3044,7 +3044,7 @@ Sample stream configuration:
              This example uses the message type, format and message id plus the date and time the message was put.
              For most applications, this will be sufficient to be unique -->
 
-z       <field name="TrackingIdNorm" separator="#!#" value-type="signature" required="false" transparent="true">
+            <field name="TrackingIdNorm" separator="#!#" value-type="signature" required="false" transparent="true">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
