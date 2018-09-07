@@ -4529,6 +4529,50 @@ sinks are meant to act in sync, especially when sink (e.g., `JKCloud`, `Mqtt`, `
     #### jKoolCloud event sink factory configuration end ####
 ```
 
+##### Configuring activities log to be rolling (over SLF4J)
+
+If your `TNT4J` event sink configuration has `Filename` property, e.g.:
+```properties
+#### jKoolCloud event sink factory configuration ####
+event.sink.factory: com.jkoolcloud.jesl.tnt4j.sink.JKCloudEventSinkFactory
+event.sink.factory.Filename: ./logs/tnt4j-streams-activities.log
+...
+```
+then all streamed activities are logged into one text file just by adding logged activity to the end of that file. But over some time file 
+can grow in size dramatically - gigabytes of log. To overcome this issue, for `SocketEventSink` and `JKCloudEventSink` it is possible to 
+configure activities log to be logged over `LOG4J/SLF4J` making activities log to be rolled upon your demand - daily or hitting size limit. 
+
+Configuration requires two steps:
+1. alter `log4j.properties` file:
+    1. add dedicated appender
+    ```properties
+    ### branch for sink written activity entities logger ###
+    log4j.appender.activities_log=org.apache.log4j.RollingFileAppender
+    log4j.appender.activities_log.File=logs/tnt4j-streams-activities.log
+    log4j.appender.activities_log.maxFileSize=10MB
+    log4j.appender.activities_log.maxBackupIndex=3
+    log4j.appender.activities_log.layout=org.apache.log4j.PatternLayout
+    log4j.appender.activities_log.layout.ConversionPattern=%m%n
+    ```
+
+    2. setup logger
+    ```properties
+    #### streamed activity entities logger ####
+    log4j.logger.com.jkoolcloud.tnt4j.streams.activities_log=INFO, activities_log
+    log4j.additivity.com.jkoolcloud.tnt4j.streams.activities_log=false
+    ```
+
+2. alter `tnt4j.properties` file:
+    1. define `LogSink` for `SocketEventSink` or `JKCloudEventSink` (replace previous `event.sink.factory.Filename` definition)
+    ```properties
+    #### jKoolCloud event sink factory configuration ####
+    event.sink.factory: com.jkoolcloud.jesl.tnt4j.sink.JKCloudEventSinkFactory
+    #event.sink.factory.Filename: ./logs/tnt4j-streams-activities.log
+    ##### streamed activity entities logging over SLF4J sink #####
+    ##### NOTE: logger name should match log4j.properties defined logger name mapped to use 'activities_log' appender #####
+    event.sink.factory.LogSink: slf4j:com.jkoolcloud.tnt4j.streams.activities_log
+    ```
+
 #### Kafka sink configuration
 
 ```properties
