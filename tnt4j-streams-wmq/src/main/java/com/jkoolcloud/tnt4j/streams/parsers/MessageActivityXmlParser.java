@@ -113,6 +113,8 @@ public class MessageActivityXmlParser extends ActivityXmlParser {
 	@Override
 	protected void applyFieldValue(ActivityInfo ai, ActivityField field, Object value) throws ParseException {
 		if (WmqStreamConstants.VT_SIGNATURE.equalsIgnoreCase(field.getValueType())) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+					"ActivityPCFParser.calculating.signature"), field);
 			value = WmqUtils.computeSignature(value, sigDelim, logger());
 		}
 
