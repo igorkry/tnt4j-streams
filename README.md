@@ -5515,6 +5515,8 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
+##### Wildcard locators
+
 **NOTE:** using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
 as activity entity fields/properties by using map entry data as this:
 * map entry key  - field/property name
@@ -5545,6 +5547,7 @@ Message=value2
 key1=value1
 key3=value3
 ```
+Using `#` locator without any manual map entry mapping is equivalent to `*` locator. 
 
 #### Activity JSON parser
 
@@ -5567,6 +5570,42 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 ```xml
     <property name="ConvertToString" value="true"/>
 ```
+
+Additional JMS message fields and mapping supported by this parser:
+* `MsgMetadata` - JMS message metadata map containing those fields:
+    * `Correlator` - message correlation identifier
+    * `CorrelatorBytes` - message correlation identifier bytes value
+    * `DeliveryMode` - message delivery mode number
+    * `Destination` - destination name this message was received from
+    * `Expiration` - message's expiration time
+    * `MessageId` - message identifier string
+    * `Priority` - message priority level number
+    * `Redelivered` - indication flag of whether this message is being redelivered
+    * `ReplyTo` - destination name to which a reply to this message should be sent
+    * `Timestamp` - timestamp in milliseconds
+    * `Type` - message type name supplied by the client when the message was sent
+    * `CustomMsgProps` - map of custom JMS message properties added into JMS message while message was produced, so properties naming is 
+    arbitrary upon message producer application.
+* since JMS message parser is extension of ['Activity map parser'](#activity-map-parser), it supports map entry 
+['Wildcard locators'](#wildcard-locators): 
+    * `*` - maps all JMS message resolved map entries to activity entity data, e.g.:
+    ```xml
+          <field name="AllMsgCustomProps" locator="MsgMetadata.CustomMsgProps.*" locator-type="Label"/>
+    ```     
+    this will add all `MsgMetadata.CustomMsgProps` map entries as JKool activity entity fields/properties without any additional manual 
+    mapping, taking field/property name from map entry name and value from map entry value.
+    * `#` - maps set of unmapped JMS message resolved map entries to activity entity data, e.g.:
+    ```xml
+          <field name="Correlator" locator="MsgMetadata.Correlator" locator-type="Label"/>
+          <field name="Destination" locator="MsgMetadata.Destination" locator-type="Label"/>
+          <field name="MessageId" locator="MsgMetadata.MessageId" locator-type="Label"/>
+          <field name="Priority" locator="MsgMetadata.Priority" locator-type="Label"/>
+          <!-- automatically puts all unmapped message metadata map entries as custom activity properties -->
+          <field name="AllRestMsgMetadataProps" locator="MsgMetadata.#" locator-type="Label"/>
+    ```
+    this will add all manually unmapped `MsgMetadata` map entries as JKool activity entity fields/properties, taking field/property name 
+    from map entry name and value from map entry value. **NOTE:** Using `#` locator without any manual map entry mapping is equivalent to 
+    `*` locator.
 
 Also see ['Activity map parser'](#activity-map-parser) and [Generic parser parameters](#generic-parser-parameters).
 
