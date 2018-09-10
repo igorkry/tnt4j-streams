@@ -14,7 +14,7 @@
                     <?xml version="1.0" encoding="utf-8"?>
                         <Sample>
                           <Order>
-                            <orderid>A12T67903Z</orderid>   
+                            <orderid>A12T67903Z</orderid>
                             <item>Deck of Cards</item>
                             <price>2.50</price>
                             <quantity>3</quantity>
@@ -58,27 +58,29 @@
                 datatype="String"  format="string" transparent="true">
                         <parser-ref name="XML_Data_Parser" aggregation="Merge"/>
         </field-->
- 
+
         <!-- if message has transmission queue header, use original message id and correlation id -->
         <field name="MsgIdNorm" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary" transparent="true"/>
-        <field name="CorrelIdNorm" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" transparent="true"/>
+        <field name="CorrelIdNorm" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"
+               transparent="true"/>
         <field name="MsgIdXQH" locator="MQGACF_ACTIVITY_TRACE.MQBACF_XQH_MSG_ID" locator-type="Label" datatype="Binary" transparent="true"/>
-        <field name="CorrelIdXQH" locator="MQGACF_ACTIVITY_TRACE.MQBACF_XQH_CORREL_ID" locator-type="Label" datatype="Binary" transparent="true"/>
- 
-        <field name="MsgId"  value=""  datatype="Binary">
-        <field-transform lang="groovy" name="MsgidTransform"><![CDATA[
+        <field name="CorrelIdXQH" locator="MQGACF_ACTIVITY_TRACE.MQBACF_XQH_CORREL_ID" locator-type="Label" datatype="Binary"
+               transparent="true"/>
+
+        <field name="MsgId" value="" datatype="Binary">
+            <field-transform lang="groovy" name="MsgidTransform"><![CDATA[
                 ${MsgIdXQH} != null
                     ? ${MsgIdXQH} : ${MsgIdNorm}
             ]]></field-transform>
         </field>
 
-        <field name="CorrelId"  value=""  datatype="Binary">
-        <field-transform lang="groovy" name="CorridTransform"><![CDATA[
+        <field name="CorrelId" value="" datatype="Binary">
+            <field-transform lang="groovy" name="CorridTransform"><![CDATA[
                 ${CorrelIdXQH} != null
                     ? ${CorrelIdXQH} : ${CorrelIdNorm}
             ]]></field-transform>
         </field>
- 
+
         <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
            The examples of setting the correlator
            1) Using message id and correlation id for applications which use this common MQ pattern
@@ -98,7 +100,7 @@
             <!-- Collect correlId for correlator, remove if applications do not create unique message ids -->
             <field-locator locator="CorrelId" locator-type="Activity">
                 <filter name="CorrelidValueFilter">
-                     <value handle="exclude">000000000000000000000000000000000000000000000000</value>
+                    <value handle="exclude">000000000000000000000000000000000000000000000000</value>
                 </filter>
             </field-locator>
 
@@ -129,7 +131,7 @@
             <field-map source="MQXF_BACK" target="MQBACK"/>
             <field-map source="MQXF_INQ" target="MQINQ"/>
             <field-map source="MQXF_CB" target="MQCB"/>
-            <!-- To report the actual name for other MQ calls, comment out the following line -->	
+            <!-- To report the actual name for other MQ calls, comment out the following line -->
             <field-map source="" target="OTHER"/>
         </field>
 
@@ -169,14 +171,14 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_XQH_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_XQH_PUT_TIME" locator-type="Label"/>
         </field>
-        <field name="TrackingId"  value="" >
-        <field-transform lang="groovy" name="TrackTransform"><![CDATA[
+        <field name="TrackingId" value="">
+            <field-transform lang="groovy" name="TrackTransform"><![CDATA[
                 ${TrackingIdXQH} != null
                     ? ${TrackingIdXQH}
                     : (${TrackingIdNorm} != null ? ${TrackingIdNorm} : null )
             ]]></field-transform>
         </field>
- 
+
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="RemoteQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_XQH_REMOTE_Q_MGR" locator-type="Label"/>
         <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
