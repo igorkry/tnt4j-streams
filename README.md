@@ -103,7 +103,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
         * `base64Binary`
         * `hexBinary` 
         * `string`
-        * any decimal or time format pattern   
+        * any decimal or time format pattern
     * `value` - defines predefined (hardcoded) value of field
     * `datatype` - defines how to interpret field resolved value. Set of supported values:
         * `String` 
@@ -558,7 +558,7 @@ relations:
     created and not sent to jKoolCloud, e.g.:
     ```xml
         <field name="EventType" value="NOOP"/>
-    ```    
+    ```
 
 For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
 ```xml
@@ -2899,7 +2899,7 @@ Sample stream configuration:
                     <?xml version="1.0" encoding="utf-8"?>
                         <Sample>
                           <Order>
-                            <orderid>A12T67903Z</orderid>   
+                            <orderid>A12T67903Z</orderid>
                             <item>Deck of Cards</item>
                             <price>2.50</price>
                             <quantity>3</quantity>
@@ -5591,7 +5591,7 @@ Additional JMS message fields and mapping supported by this parser:
     * `*` - maps all JMS message resolved map entries to activity entity data, e.g.:
     ```xml
           <field name="AllMsgCustomProps" locator="MsgMetadata.CustomMsgProps.*" locator-type="Label"/>
-    ```     
+    ```
     this will add all `MsgMetadata.CustomMsgProps` map entries as JKool activity entity fields/properties without any additional manual 
     mapping, taking field/property name from map entry name and value from map entry value.
     * `#` - maps set of unmapped JMS message resolved map entries to activity entity data, e.g.:
@@ -5622,8 +5622,35 @@ Also see ['Activity map parser'](#activity-map-parser) and [Generic parser param
     <property name="SignatureDelim" value="#"/>
 ```
 
-**NOTE:** when locator data type is set to `String` and PCF parameter contains binary (`byte[]`) value, conversion from binary to string 
-value is performed using PCF parameter defined charset (`CCSID`).
+**NOTE:** when PCF parameter contains binary (`byte[]`) value and locator data type is set to `String` having attribute `charset` undefined, 
+conversion from binary to string value is performed using PCF parameter defined charset (`CCSID`). If PCF parameter provided charset 
+parameter does not provide correct charset identifier (e.g. value is 0, but streams are run on different platform comparing to message 
+source platform), then to convert binary value to String use `charset` attribute, e.g.:
+```xml
+    <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" charset="IBM500"/>
+```
+or it can be transformed using transformation like this:
+```xml
+    <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary">
+        <field-transform name="MsgIdToString" lang="groovy"><![CDATA[
+            Utils.getString($fieldValue, "IBM500")
+        ]]>
+        </field-transform>
+    </field>
+```
+to convert binary message payload to string, use transformation like this:
+```xml
+    <field name="MQTrace_CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"/>
+    <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
+        <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
+            WmqUtils.getString($fieldValue, ${MQTrace_CodedCharsetId})
+        ]]>
+        </field-transform>
+    </field>
+```
+**NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
+* `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set
+* `Utils.getString` - second parameter is Java supported charset name (string).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 

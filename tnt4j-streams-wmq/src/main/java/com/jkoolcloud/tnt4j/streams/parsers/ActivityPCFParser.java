@@ -168,7 +168,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		Object val = null;
 		String locStr = locator.getLocator();
 		String[] path = Utils.getNodePath(locStr, StreamsConstants.DEFAULT_PATH_DELIM);
-		val = getParamValue(locator.getDataType(), path, cData.getData(), 0, cData);
+		val = getParamValue(locator, path, cData.getData(), 0, cData);
 
 		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 				"ActivityPCFParser.resolved.pcf.value", locStr, toString(val));
@@ -179,8 +179,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	/**
 	 * Resolves PCF parameter value from provided {@link PCFContent}: {@link PCFMessage} or {@link MQCFGR}.
 	 *
-	 * @param fDataType
-	 *            field data type
+	 * @param locator
+	 *            field locator activity field locator
 	 * @param path
 	 *            parameter path as array of MQ PCF/MQI parameter identifiers
 	 * @param pcfContent
@@ -194,7 +194,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected Object getParamValue(ActivityFieldDataType fDataType, String[] path, PCFContent pcfContent, int i,
+	protected Object getParamValue(ActivityFieldLocator locator, String[] path, PCFContent pcfContent, int i,
 			ActivityContext cData) throws ParseException {
 		if (ArrayUtils.isEmpty(path) || pcfContent == null) {
 			return null;
@@ -204,19 +204,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		String paramStr = path[i];
 
 		if (i == 0 && paramStr.equals(HEAD_MQCFH)) {
-			val = resolvePCFHeaderValue(fDataType, path[i + 1], (PCFMessage) pcfContent);
+			val = resolvePCFHeaderValue(locator, path[i + 1], (PCFMessage) pcfContent);
 		} else {
 			try {
 				Integer paramId = WmqUtils.getParamId(paramStr);
 				PCFParameter param = pcfContent.getParameter(paramId);
 
 				if (!isLastPathToken(path, i) && param instanceof MQCFGR) {
-					val = getParamValue(fDataType, path, (MQCFGR) param, ++i, cData);
+					val = getParamValue(locator, path, (MQCFGR) param, ++i, cData);
 				} else {
 					if (isMqiStructParam(paramStr) && !isLastPathToken(path, i)) {
-						val = resolveMqiStructValue(fDataType, param, path, i, pcfContent, cData);
+						val = resolveMqiStructValue(locator, param, path, i, pcfContent, cData);
 					} else {
-						val = resolvePCFParamValue(fDataType, param);
+						val = resolvePCFParamValue(locator, param);
 					}
 				}
 			} catch (NoSuchElementException exc) {
@@ -248,28 +248,28 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				: ((MQCFGR) pcfContent).getParameter();
 	}
 
-	private Object resolvePCFHeaderValue(ActivityFieldDataType fDataType, String hAttrName, PCFMessage pcfMsg) {
+	private Object resolvePCFHeaderValue(ActivityFieldLocator locator, String hAttrName, PCFMessage pcfMsg) {
 		Object val = null;
 		if ("command".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCommand();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQCMD_.*"); // NON-NLS
 			}
 		} else if ("msgseqnumber".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getMsgSeqNumber();
 		} else if ("control".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getControl();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQCFC_.*"); // NON-NLS
 			}
 		} else if ("compcode".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCompCode();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookupCompCode((Integer) val);
 			}
 		} else if ("reason".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getReason();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookupReasonCode((Integer) val);
 			}
 		} else if ("parametercount".equals(hAttrName.toLowerCase())) { // NON-NLS
@@ -290,18 +290,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * If parser property `TranslateNumValues` is set to {@code true} - then if possible, resolved numeric value gets
 	 * translated to corresponding MQ constant name.
 	 * <p>
-	 * When locator data type is set to {@code "String"} and PCF parameter contains binary ({@code byte[]}) value,
-	 * conversion from binary to string value is performed using PCF parameter defined charset.
+	 * When PCF parameter contains binary ({@code byte[]}) value and locator data type is set to {@code "String"} having
+	 * attribute "charset" undefined, conversion from binary to string value is performed using PCF parameter defined
+	 * charset.
 	 *
-	 * @param fDataType
-	 *            field data type
+	 * @param locator
+	 *            activity field locator
 	 * @param param
 	 *            PCF parameter to resolve value from
 	 * @return resolved PCF parameter value
 	 *
-	 * @see com.jkoolcloud.tnt4j.streams.utils.WmqUtils#getString(byte[], int)
+	 * @see com.jkoolcloud.tnt4j.streams.utils.WmqUtils#getString(byte[], Object)
 	 */
-	protected Object resolvePCFParamValue(ActivityFieldDataType fDataType, PCFParameter param) {
+	protected Object resolvePCFParamValue(ActivityFieldLocator locator, PCFParameter param) {
 		if (param == null) {
 			return null;
 		}
@@ -310,8 +311,13 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 		if (val instanceof String) {
 			val = ((String) val).trim();
-		} else if (val instanceof byte[] && fDataType == ActivityFieldDataType.String) {
+		} else if (val instanceof byte[] && isStringLocatorWithoutCharset(locator)) {
 			try {
+				logger().log(OpLevel.DEBUG,
+						StreamsResources.getString(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+								"ActivityPCFParser.converting.pcf.binary.value"),
+						param.getParameterName(), param.getParameter(), WmqUtils.getCharsetName(param.characterSet()),
+						param.characterSet());
 				val = WmqUtils.getString((byte[]) val, param.characterSet());
 			} catch (UnsupportedEncodingException exc) {
 				logger().log(OpLevel.WARNING,
@@ -321,7 +327,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			}
 		}
 
-		if (isValueTranslatable(fDataType)) {
+		if (isValueTranslatable(locator.getDataType())) {
 			switch (param.getParameter()) {
 			case MQConstants.MQIA_APPL_TYPE:
 				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
@@ -435,12 +441,16 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	}
 
+	private boolean isStringLocatorWithoutCharset(ActivityFieldLocator locator) {
+		return locator.getDataType() == ActivityFieldDataType.String && StringUtils.isEmpty(locator.getCharset());
+	}
+
 	/**
 	 * Builds MQI structure from PCF parameter contained binary data and resolves field locator referenced value from
 	 * that structure.
 	 *
-	 * @param fDataType
-	 *            field data type
+	 * @param locator
+	 *            activity field locator
 	 * @param param
 	 *            PCF parameter to use raw data to build MQI structure
 	 * @param path
@@ -455,7 +465,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
 	 */
-	protected Object resolveMqiStructValue(ActivityFieldDataType fDataType, PCFParameter param, String[] path, int i,
+	protected Object resolveMqiStructValue(ActivityFieldLocator locator, PCFParameter param, String[] path, int i,
 			PCFContent pcfContent, ActivityContext cData) throws ParseException {
 		if (param == null) {
 			return null;
@@ -483,7 +493,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			}
 		}
 
-		return resolveMqiStructParamValue(mqiStruct, path, ++i, param.getJmqiEnv(), fDataType);
+		return resolveMqiStructParamValue(mqiStruct, path, ++i, param.getJmqiEnv(), locator);
 	}
 
 	private MqiStructure buildMqiStructureFromBinData(PCFParameter structParam) throws JmqiException {
@@ -565,14 +575,14 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private Object resolveMqiStructParamValue(MqiStructure mqiStruct, String[] path, int i, JmqiEnvironment env,
-			ActivityFieldDataType fDataType) throws ParseException {
+			ActivityFieldLocator locator) throws ParseException {
 		Object val = null;
 
 		if (path[i].equalsIgnoreCase(mqiStruct.getClass().getSimpleName())) {
 			if (isLastPathToken(path, i)) {
 				val = mqiToString(mqiStruct, env);
 			} else {
-				val = resolveMqiStructParamValue(mqiStruct, path, i + 1, fDataType);
+				val = resolveMqiStructParamValue(mqiStruct, path, i + 1, locator);
 
 				if (val instanceof String) {
 					val = ((String) val).trim();
@@ -585,33 +595,33 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMqiStructParamValue(MqiStructure mqiSruct, String[] path, int i,
-			ActivityFieldDataType fDataType) throws ParseException {
+	private Object resolveMqiStructParamValue(MqiStructure mqiSruct, String[] path, int i, ActivityFieldLocator locator)
+			throws ParseException {
 		Object val = null;
 		if (mqiSruct instanceof MQMD) {
-			val = resolveMQMDValue((MQMD) mqiSruct, path[i], fDataType);
+			val = resolveMQMDValue((MQMD) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQPMO) {
-			val = resolveMQPMOValue((MQPMO) mqiSruct, path[i], fDataType);
+			val = resolveMQPMOValue((MQPMO) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQGMO) {
-			val = resolveMQGMOValue((MQGMO) mqiSruct, path[i], fDataType);
+			val = resolveMQGMOValue((MQGMO) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQCNO) {
-			val = resolveMQCNOValue((MQCNO) mqiSruct, path[i], fDataType);
+			val = resolveMQCNOValue((MQCNO) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQCD) {
-			val = resolveMQCDValue((MQCD) mqiSruct, path[i], fDataType);
+			val = resolveMQCDValue((MQCD) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQCBD) {
-			val = resolveMQCBDValue((MQCBD) mqiSruct, path[i], fDataType);
+			val = resolveMQCBDValue((MQCBD) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQCBC) {
-			val = resolveMQCBCValue((MQCBC) mqiSruct, path[i], fDataType);
+			val = resolveMQCBCValue((MQCBC) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQBO) {
-			val = resolveMQBOValue((MQBO) mqiSruct, path[i], fDataType);
+			val = resolveMQBOValue((MQBO) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQSD) {
-			val = resolveMQSDValue((MQSD) mqiSruct, path[i], fDataType);
+			val = resolveMQSDValue((MQSD) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQSTS) {
-			val = resolveMQSTSValue((MQSTS) mqiSruct, path[i], fDataType);
+			val = resolveMQSTSValue((MQSTS) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQCSP) {
-			val = resolveMQCSPValue((MQCSP) mqiSruct, path[i], fDataType);
+			val = resolveMQCSPValue((MQCSP) mqiSruct, path[i], locator);
 		} else if (mqiSruct instanceof MQSCO) {
-			val = resolveMQSCOValue((MQSCO) mqiSruct, path[i], fDataType);
+			val = resolveMQSCOValue((MQSCO) mqiSruct, path[i], locator);
 		} else {
 			try {
 				val = Utils.getFieldValue(path, mqiSruct, i);
@@ -630,7 +640,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMQMDValue(MQMD mqmd, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQMDValue(MQMD mqmd, String fName, ActivityFieldLocator locator) {
 		Object val = null;
 
 		switch (fName.toLowerCase()) {
@@ -648,7 +658,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "codedcharsetid": // NON-NLS
 			val = mqmd.getCodedCharSetId();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
 			}
 			break;
@@ -657,25 +667,25 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "encoding": // NON-NLS
 			val = mqmd.getEncoding();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
 			}
 			break;
 		case "expiry": // NON-NLS
 			val = mqmd.getExpiry();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
 			}
 			break;
 		case "feedback": // NON-NLS
 			val = mqmd.getFeedback();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
 			}
 			break;
 		case "format": // NON-NLS
 			val = mqmd.getFormat();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
 			}
 			break;
@@ -685,7 +695,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "msgflags": // NON-NLS
 			val = mqmd.getMsgFlags();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
 			}
 			break;
@@ -697,7 +707,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "msgtype": // NON-NLS
 			val = mqmd.getMsgType();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
 			}
 			break;
@@ -706,19 +716,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "originallength": // NON-NLS
 			val = mqmd.getOriginalLength();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
 			}
 			break;
 		case "persistence": // NON-NLS
 			val = mqmd.getPersistence();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
 			}
 			break;
 		case "priority": // NON-NLS
 			val = mqmd.getPriority();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
 			}
 			break;
@@ -727,7 +737,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "putappltype": // NON-NLS
 			val = mqmd.getPutApplType();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
 			}
 			break;
@@ -745,7 +755,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "report": // NON-NLS
 			val = mqmd.getReport();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
 			}
 			break;
@@ -754,7 +764,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "version": // NON-NLS
 			val = mqmd.getVersion();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQMD_VERSION_.*"); // NON-NLS
 			}
 			break;
@@ -765,19 +775,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMQPMOValue(MQPMO mqpmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQPMOValue(MQPMO mqpmo, String fName, ActivityFieldLocator locator) {
 		Object val = null;
 
 		switch (fName.toLowerCase()) {
 		case "action": // NON-NLS
 			val = mqpmo.getAction();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
 			}
 			break;
 		case "context": // NON-NLS
 			val = mqpmo.getContext();
-			// if (isValueTranslatable(fDataType)) {
+			// if (isValueTranslatable(locator.getDataType())) {
 			// val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
 			// }
 			break;
@@ -789,19 +799,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "newmsghandle": // NON-NLS
 			val = mqpmo.getNewMsgHandle();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
 		case "options": // NON-NLS
 			val = mqpmo.getOptions();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
 			}
 			break;
 		case "originalmsghandle": // NON-NLS
 			val = mqpmo.getOriginalMsgHandle();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
@@ -810,7 +820,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "putmsgrecfields": // NON-NLS
 			val = mqpmo.getPutMsgRecFields();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQPMRF_.*"); // NON-NLS
 			}
 			break;
@@ -831,7 +841,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "version": // NON-NLS
 			val = mqpmo.getVersion();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQPMO_VERSION_.*"); // NON-NLS
 			}
 			break;
@@ -842,25 +852,25 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldLocator locator) {
 		Object val = null;
 
 		switch (fName.toLowerCase()) {
 		case "groupstatus": // NON-NLS
 			val = mqgmo.getGroupStatus();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQGS_.*"); // NON-NLS
 			}
 			break;
 		case "matchoptions": // NON-NLS
 			val = mqgmo.getMatchOptions();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQMO_.*"); // NON-NLS
 			}
 			break;
 		case "msghandle": // NON-NLS
 			val = mqgmo.getMessageHandle();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
@@ -869,7 +879,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "options": // NON-NLS
 			val = mqgmo.getOptions();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
 			}
 			break;
@@ -878,19 +888,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "returnedlength": // NON-NLS
 			val = mqgmo.getReturnedLength();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQRL_.*"); // NON-NLS
 			}
 			break;
 		case "segmentation": // NON-NLS
 			val = mqgmo.getSegmentation();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQSEG_.*"); // NON-NLS
 			}
 			break;
 		case "segmentstatus": // NON-NLS
 			val = mqgmo.getSegmentStatus();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQSS_.*"); // NON-NLS
 			}
 			break;
@@ -899,13 +909,13 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "waitinterval": // NON-NLS
 			val = mqgmo.getWaitInterval();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQWI_.*"); // NON-NLS
 			}
 			break;
 		case "version": // NON-NLS
 			val = mqgmo.getVersion();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQGMO_VERSION_.*"); // NON-NLS
 			}
 			break;
@@ -916,7 +926,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMQCNOValue(MQCNO mqcno, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCNOValue(MQCNO mqcno, String fName, ActivityFieldLocator locator) {
 		Object val = null;
 
 		switch (fName.toLowerCase()) {
@@ -937,13 +947,13 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "options": // NON-NLS
 			val = mqcno.getOptions();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
 			}
 			break;
 		case "version": // NON-NLS
 			val = mqcno.getVersion();
-			if (isValueTranslatable(fDataType)) {
+			if (isValueTranslatable(locator.getDataType())) {
 				val = MQConstants.lookup(val, "MQCNO_VERSION_.*"); // NON-NLS
 			}
 			break;
@@ -954,35 +964,35 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		return val;
 	}
 
-	private Object resolveMQCDValue(MQCD mqcd, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCDValue(MQCD mqcd, String fName, ActivityFieldLocator locator) {
 		return mqcd; // TODO
 	}
 
-	private Object resolveMQCBDValue(MQCBD mqcbd, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCBDValue(MQCBD mqcbd, String fName, ActivityFieldLocator locator) {
 		return mqcbd; // TODO
 	}
 
-	private Object resolveMQCBCValue(MQCBC mqcbc, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCBCValue(MQCBC mqcbc, String fName, ActivityFieldLocator locator) {
 		return mqcbc; // TODO
 	}
 
-	private Object resolveMQBOValue(MQBO mqbo, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQBOValue(MQBO mqbo, String fName, ActivityFieldLocator locator) {
 		return mqbo; // TODO
 	}
 
-	private Object resolveMQSDValue(MQSD mqsd, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSDValue(MQSD mqsd, String fName, ActivityFieldLocator locator) {
 		return mqsd; // TODO
 	}
 
-	private Object resolveMQSTSValue(MQSTS mqsts, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSTSValue(MQSTS mqsts, String fName, ActivityFieldLocator locator) {
 		return mqsts; // TODO
 	}
 
-	private Object resolveMQCSPValue(MQCSP mqcsp, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQCSPValue(MQCSP mqcsp, String fName, ActivityFieldLocator locator) {
 		return mqcsp; // TODO
 	}
 
-	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldDataType fDataType) {
+	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldLocator locator) {
 		return mqsco; // TODO
 	}
 
