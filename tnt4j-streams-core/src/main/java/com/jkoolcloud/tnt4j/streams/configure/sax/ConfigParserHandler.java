@@ -2170,11 +2170,25 @@ public class ConfigParserHandler extends DefaultHandler {
 				currProperties = new HashMap<>();
 			}
 			String cpv = currProperties.get(currProperty.name);
-			if (cpv != null) {
+			if (cpv != null && !isPropValueAlreadyAdded(cpv, currProperty.value)) {
 				currProperty.value = cpv + StreamsConstants.MULTI_PROPS_DELIMITER + currProperty.value;
 			}
 			currProperties.put(currProperty.name, currProperty.value);
 		}
+	}
+
+	private static boolean isPropValueAlreadyAdded(String cpv, String propValue) {
+		if (cpv != null) {
+			String[] pva = cpv.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+
+			for (String pvt : pva) {
+				if (pvt.equals(propValue)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private void handleFieldLocator(FieldLocatorData currLocatorData) throws SAXException {

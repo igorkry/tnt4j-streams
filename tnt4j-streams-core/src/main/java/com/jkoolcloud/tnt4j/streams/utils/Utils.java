@@ -471,9 +471,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @return tag strings array, or {@code null} if arrays can't be made
 	 */
 	public static String[] getTags(Object tagsData) {
-		if (tagsData == null) {
-			return null;
-		}
 		if (tagsData instanceof byte[]) {
 			return new String[] { encodeHex((byte[]) tagsData) };
 		} else if (tagsData instanceof String) {
@@ -495,7 +492,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 				return tags.toArray(new String[tags.size()]);
 			}
-		} else {
+		} else if (tagsData != null) {
 			return new String[] { toString(tagsData) };
 		}
 
@@ -542,7 +539,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param strBytes
 	 *            the bytes to be decoded into characters
-	 * @return string constructed from specified byte array
+	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
 	 * @see #getString(byte[], String)
 	 */
@@ -559,13 +556,17 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param charsetName
 	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use default
 	 *            UFT-8
-	 * @return string constructed from specified byte array
+	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
 	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
 	 */
 	public static String getString(byte[] strBytes, String charsetName) {
+		if (strBytes == null) {
+			return null;
+		}
+
 		if (StringUtils.isEmpty(charsetName)) {
 			charsetName = UTF8;
 		}

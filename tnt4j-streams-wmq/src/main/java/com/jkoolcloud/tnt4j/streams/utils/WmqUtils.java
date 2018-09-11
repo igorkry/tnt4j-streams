@@ -344,23 +344,26 @@ public class WmqUtils {
 	 *            the byte array to convert
 	 * @param ccsid
 	 *            coded charset identifier, or {@code null} to use default ({@code ccsid=0}) charset
-	 * @return the string made from provided bytes using defined {@code ccsid}
+	 * @return the string made from provided bytes using defined {@code ccsid}, or {@code null} if {@code strBytes} is
+	 *         {@code null}
 	 * @throws UnsupportedEncodingException
 	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
 	 *             from the charset
 	 */
 	public static String getString(byte[] strBytes, Object ccsid) throws UnsupportedEncodingException {
+		if (strBytes == null) {
+			return null;
+		}
+
 		return Charsets.convert(strBytes, getCCSID(ccsid));
 	}
 
 	private static int getCCSID(Object ccsidObj) throws UnsupportedEncodingException {
-		int ccsid = 0;
-
 		if (ccsidObj instanceof Number) {
-			ccsid = ((Number) ccsid).intValue();
+			return ((Number) ccsidObj).intValue();
 		} else if (ccsidObj instanceof String) {
 			try {
-				ccsid = Integer.parseInt((String) ccsidObj);
+				return Integer.parseInt((String) ccsidObj);
 			} catch (NumberFormatException exc) {
 				UnsupportedEncodingException te = new UnsupportedEncodingException();
 				te.initCause(exc);
@@ -368,6 +371,6 @@ public class WmqUtils {
 			}
 		}
 
-		return ccsid;
+		return 0;
 	}
 }
