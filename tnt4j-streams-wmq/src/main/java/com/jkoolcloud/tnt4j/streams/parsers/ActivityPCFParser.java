@@ -250,33 +250,34 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	private Object resolvePCFHeaderValue(ActivityFieldLocator locator, String hAttrName, PCFMessage pcfMsg) {
 		Object val = null;
+		Object mappedValue = null;
 		if ("command".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCommand();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQCMD_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCMD_.*"); // NON-NLS
 			}
 		} else if ("msgseqnumber".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getMsgSeqNumber();
 		} else if ("control".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getControl();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQCFC_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCFC_.*"); // NON-NLS
 			}
 		} else if ("compcode".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCompCode();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookupCompCode((Integer) val);
+				mappedValue = MQConstants.lookupCompCode((Integer) val);
 			}
 		} else if ("reason".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getReason();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookupReasonCode((Integer) val);
+				mappedValue = MQConstants.lookupReasonCode((Integer) val);
 			}
 		} else if ("parametercount".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getParameterCount();
 		}
 
-		return val;
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private boolean isValueTranslatable(ActivityFieldDataType fDataType) {
@@ -328,112 +329,117 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		}
 
 		if (isValueTranslatable(locator.getDataType())) {
+			Object mappedValue = null;
 			switch (param.getParameter()) {
 			case MQConstants.MQIA_APPL_TYPE:
-				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_API_CALLER_TYPE:
-				val = MQConstants.lookup(val, "MQXACT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQXACT_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_API_ENVIRONMENT:
-				val = MQConstants.lookup(val, "MQXE_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQXE_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_APPL_FUNCTION_TYPE:
-				val = MQConstants.lookup(val, "MQFUN_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQFUN_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIA_PLATFORM:
-				val = MQConstants.lookup(val, "MQPL_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPL_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_OPERATION_ID:
-				val = MQConstants.lookup(val, "MQXF_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQXF_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_OBJECT_TYPE:
 			case MQConstants.MQIACF_RESOLVED_TYPE:
-				val = MQConstants.lookup(val, "MQOT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQOT_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_COMP_CODE:
-				val = MQConstants.lookup(val, "MQCC_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCC_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_MSG_TYPE:
-				val = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_REASON_CODE:
-				val = MQConstants.lookupReasonCode((Integer) val);
+				mappedValue = MQConstants.lookupReasonCode((Integer) val);
 				break;
 			case MQConstants.MQIA_CODED_CHAR_SET_ID:
-				val = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_ENCODING:
-				val = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_EXPIRY:
-				val = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_FEEDBACK:
-				val = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_MSG_FLAGS:
-				val = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_ORIGINAL_LENGTH:
-				val = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_PERSISTENCE:
-				val = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_PRIORITY:
-				val = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_REPORT:
-				val = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_VERSION:
-				val = MQConstants.lookup(val, "MQMD_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQMD_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_OPEN_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQOO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQOO_.*"); // NON-NLS
 				break;
 			// case MQConstants.MQIACF_OPTIONS:
 			// break;
 			// case MQConstants.MQIACF_BROKER_OPTIONS:
 			// break;
 			case MQConstants.MQIACF_REGISTRATION_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQREGO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQREGO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_PUBLICATION_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQPUBO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQPUBO_.*"); // NON-NLS
 				break;
 			// case MQConstants.MQIACF_REG_REG_OPTIONS:
 			// break;
 			case MQConstants.MQIACF_DELETE_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQDELO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQDELO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_CONNECT_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_AUTH_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQAUTHOPT_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQAUTHOPT_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_SUB_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQSO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQSO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_MQCB_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQCBO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQCBO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_CLOSE_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQCO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQCO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_GET_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_PUT_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
 				break;
 			case MQConstants.MQIACF_SUBRQ_OPTIONS:
-				val = MQConstants.decodeOptions((int) val, "MQSRO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQSRO_.*"); // NON-NLS
 				break;
 			default:
 				break;
+			}
+
+			if (mappedValue != null) {
+				val = mappedValue;
 			}
 		}
 
@@ -642,6 +648,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	private Object resolveMQMDValue(MQMD mqmd, String fName, ActivityFieldLocator locator) {
 		Object val = null;
+		Object mappedValue = null;
 
 		switch (fName.toLowerCase()) {
 		case "accountingtoken": // NON-NLS
@@ -659,7 +666,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "codedcharsetid": // NON-NLS
 			val = mqmd.getCodedCharSetId();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCCSI_.*"); // NON-NLS
 			}
 			break;
 		case "correlid": // NON-NLS
@@ -668,25 +675,25 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "encoding": // NON-NLS
 			val = mqmd.getEncoding();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQENC_.*"); // NON-NLS
 			}
 			break;
 		case "expiry": // NON-NLS
 			val = mqmd.getExpiry();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQEI_.*"); // NON-NLS
 			}
 			break;
 		case "feedback": // NON-NLS
 			val = mqmd.getFeedback();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQFB_.*"); // NON-NLS
 			}
 			break;
 		case "format": // NON-NLS
 			val = mqmd.getFormat();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQFMT_.*"); // NON-NLS
 			}
 			break;
 		case "groupid": // NON-NLS
@@ -696,7 +703,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "msgflags": // NON-NLS
 			val = mqmd.getMsgFlags();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQMF_.*"); // NON-NLS
 			}
 			break;
 		case "msgid": // NON-NLS
@@ -708,7 +715,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "msgtype": // NON-NLS
 			val = mqmd.getMsgType();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQMT_.*"); // NON-NLS
 			}
 			break;
 		case "offset": // NON-NLS
@@ -717,19 +724,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "originallength": // NON-NLS
 			val = mqmd.getOriginalLength();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQOL_.*"); // NON-NLS
 			}
 			break;
 		case "persistence": // NON-NLS
 			val = mqmd.getPersistence();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPER_.*"); // NON-NLS
 			}
 			break;
 		case "priority": // NON-NLS
 			val = mqmd.getPriority();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPRI_.*"); // NON-NLS
 			}
 			break;
 		case "putapplname": // NON-NLS
@@ -738,7 +745,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "putappltype": // NON-NLS
 			val = mqmd.getPutApplType();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQAT_.*"); // NON-NLS
 			}
 			break;
 		case "putdate": // NON-NLS
@@ -756,7 +763,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "report": // NON-NLS
 			val = mqmd.getReport();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQRO_.*"); // NON-NLS
 			}
 			break;
 		case "useridentifier": // NON-NLS
@@ -765,30 +772,31 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "version": // NON-NLS
 			val = mqmd.getVersion();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQMD_VERSION_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQMD_VERSION_.*"); // NON-NLS
 			}
 			break;
 		default:
 			break;
 		}
 
-		return val;
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQPMOValue(MQPMO mqpmo, String fName, ActivityFieldLocator locator) {
 		Object val = null;
+		Object mappedValue = null;
 
 		switch (fName.toLowerCase()) {
 		case "action": // NON-NLS
 			val = mqpmo.getAction();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
 			}
 			break;
 		case "context": // NON-NLS
 			val = mqpmo.getContext();
 			// if (isValueTranslatable(locator.getDataType())) {
-			// val = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
+			// mappedValue = MQConstants.lookup(val, "MQACTP_.*"); // NON-NLS
 			// }
 			break;
 		case "invaliddestcount": // NON-NLS
@@ -800,19 +808,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "newmsghandle": // NON-NLS
 			val = mqpmo.getNewMsgHandle();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
 		case "options": // NON-NLS
 			val = mqpmo.getOptions();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQPMO_.*"); // NON-NLS
 			}
 			break;
 		case "originalmsghandle": // NON-NLS
 			val = mqpmo.getOriginalMsgHandle();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
 		case "sublevel": // NON-NLS
@@ -821,7 +829,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "putmsgrecfields": // NON-NLS
 			val = mqpmo.getPutMsgRecFields();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQPMRF_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQPMRF_.*"); // NON-NLS
 			}
 			break;
 		case "recspresent": // NON-NLS
@@ -842,36 +850,37 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "version": // NON-NLS
 			val = mqpmo.getVersion();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQPMO_VERSION_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQPMO_VERSION_.*"); // NON-NLS
 			}
 			break;
 		default:
 			break;
 		}
 
-		return val;
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQGMOValue(MQGMO mqgmo, String fName, ActivityFieldLocator locator) {
 		Object val = null;
+		Object mappedValue = null;
 
 		switch (fName.toLowerCase()) {
 		case "groupstatus": // NON-NLS
 			val = mqgmo.getGroupStatus();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQGS_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQGS_.*"); // NON-NLS
 			}
 			break;
 		case "matchoptions": // NON-NLS
 			val = mqgmo.getMatchOptions();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQMO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQMO_.*"); // NON-NLS
 			}
 			break;
 		case "msghandle": // NON-NLS
 			val = mqgmo.getMessageHandle();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQHM_.*"); // NON-NLS
 			}
 			break;
 		case "msgtoken": // NON-NLS
@@ -880,7 +889,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "options": // NON-NLS
 			val = mqgmo.getOptions();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQGMO_.*"); // NON-NLS
 			}
 			break;
 		case "resolvedqname": // NON-NLS
@@ -889,19 +898,19 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "returnedlength": // NON-NLS
 			val = mqgmo.getReturnedLength();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQRL_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQRL_.*"); // NON-NLS
 			}
 			break;
 		case "segmentation": // NON-NLS
 			val = mqgmo.getSegmentation();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQSEG_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQSEG_.*"); // NON-NLS
 			}
 			break;
 		case "segmentstatus": // NON-NLS
 			val = mqgmo.getSegmentStatus();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQSS_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQSS_.*"); // NON-NLS
 			}
 			break;
 		case "signal2": // NON-NLS
@@ -910,24 +919,25 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "waitinterval": // NON-NLS
 			val = mqgmo.getWaitInterval();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQWI_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQWI_.*"); // NON-NLS
 			}
 			break;
 		case "version": // NON-NLS
 			val = mqgmo.getVersion();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQGMO_VERSION_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQGMO_VERSION_.*"); // NON-NLS
 			}
 			break;
 		default:
 			break;
 		}
 
-		return val;
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQCNOValue(MQCNO mqcno, String fName, ActivityFieldLocator locator) {
 		Object val = null;
+		Object mappedValue = null;
 
 		switch (fName.toLowerCase()) {
 		case "clientconn": // NON-NLS
@@ -948,20 +958,20 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		case "options": // NON-NLS
 			val = mqcno.getOptions();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
+				mappedValue = MQConstants.decodeOptions((int) val, "MQCNO_.*"); // NON-NLS
 			}
 			break;
 		case "version": // NON-NLS
 			val = mqcno.getVersion();
 			if (isValueTranslatable(locator.getDataType())) {
-				val = MQConstants.lookup(val, "MQCNO_VERSION_.*"); // NON-NLS
+				mappedValue = MQConstants.lookup(val, "MQCNO_VERSION_.*"); // NON-NLS
 			}
 			break;
 		default:
 			break;
 		}
 
-		return val;
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQCDValue(MQCD mqcd, String fName, ActivityFieldLocator locator) {
