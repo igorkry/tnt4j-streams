@@ -17,7 +17,9 @@
 package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.CCSID;
 import com.ibm.mq.headers.Charsets;
+import com.ibm.mq.headers.MQDLH;
+import com.ibm.mq.headers.MQXQH;
 import com.ibm.mq.pcf.MQCFGR;
 import com.ibm.mq.pcf.MQCFIN;
 import com.ibm.mq.pcf.PCFContent;
@@ -339,6 +343,9 @@ public class WmqUtils {
 
 	/**
 	 * Converts byte array content in the specified {@code ccsid} into a Java {@link java.lang.String}.
+	 * <p>
+	 * Does all the same as {@link #getString(byte[], Object, boolean)} setting {@code stripHeaders} parameter to
+	 * {@code false}.
 	 *
 	 * @param strBytes
 	 *            the byte array to convert
@@ -349,13 +356,43 @@ public class WmqUtils {
 	 * @throws UnsupportedEncodingException
 	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
 	 *             from the charset
+	 *
+	 * @see #getString(byte[], Object, boolean)
 	 */
 	public static String getString(byte[] strBytes, Object ccsid) throws UnsupportedEncodingException {
+		return getString(strBytes, ccsid, false);
+	}
+
+	/**
+	 * Converts byte array content in the specified {@code ccsid} into a Java {@link java.lang.String}.
+	 *
+	 * @param strBytes
+	 *            the byte array to convert
+	 * @param ccsid
+	 *            coded charset identifier, or {@code null} to use default ({@code ccsid=0}) charset
+	 * @param stripHeaders
+	 *            flag indicating to remove found DLH and XQH headers data leaving only actual message payload data
+	 * @return the string made from provided bytes using defined {@code ccsid}, or {@code null} if {@code strBytes} is
+	 *         {@code null}
+	 * @throws UnsupportedEncodingException
+	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
+	 *             from the charset
+	 *
+	 * @see #getPayloadOffset(byte[])
+	 * @see com.ibm.mq.headers.Charsets#convert(byte[], int, int, int)
+	 */
+	public static String getString(byte[] strBytes, Object ccsid, boolean stripHeaders)
+			throws UnsupportedEncodingException {
 		if (strBytes == null) {
 			return null;
 		}
 
-		return Charsets.convert(strBytes, getCCSID(ccsid));
+		int offset = 0;
+		if (stripHeaders) {
+			offset = getPayloadOffset(strBytes);
+		}
+
+		return Charsets.convert(strBytes, offset, strBytes.length - offset, getCCSID(ccsid));
 	}
 
 	private static int getCCSID(Object ccsidObj) throws UnsupportedEncodingException {
@@ -372,5 +409,46 @@ public class WmqUtils {
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Returns message payload data offset index within binary message data. Returned {@code 0} indicates whole message
+	 * data is payload having no excessive DLH or XQH data within.
+	 *
+	 * @param msgData
+	 *            message binary data
+	 * @return message payload data offset index within binary message data
+	 */
+	public static int getPayloadOffset(byte[] msgData) {
+		if (msgData == null || msgData.length < 4) {
+			return 0;
+		}
+
+		String structId = new String(msgData, 0, 4, StandardCharsets.UTF_8);
+
+		switch (structId) {
+		case "XQH ": // NON-NLS
+			return MQXQH.SIZE;
+		case "DLH ": // NON-NLS
+			return MQDLH.SIZE;
+		default:
+			return 0;
+		}
+	}
+
+	/**
+	 * Strips off found DLH and XQH headers data from binary message data and returns only message payload binary data.
+	 *
+	 * @param msgData
+	 *            message binary data
+	 * @return message binary payload data
+	 */
+	public static byte[] getMsgPayload(byte[] msgData) {
+		int structLength = getPayloadOffset(msgData);
+		if (structLength > 0 && structLength < msgData.length) {
+			return Arrays.copyOfRange(msgData, structLength, msgData.length);
+		}
+
+		return msgData;
 	}
 }
