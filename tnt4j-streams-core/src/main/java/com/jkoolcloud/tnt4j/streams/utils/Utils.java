@@ -19,10 +19,6 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -534,32 +530,32 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Makes a new {@link String} by decoding the specified array of bytes using the UTF-8 charset. If {@link String}
-	 * can't be constructed using UTF-8 charset, then the platform's default charset is used.
+	 * Makes a new {@link String} by decoding the specified array of bytes using using system default
+	 * {@link java.nio.charset.Charset#defaultCharset()} charset.
 	 *
 	 * @param strBytes
 	 *            the bytes to be decoded into characters
 	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
-	 * @see #getString(byte[], String)
+	 * @see #getString(byte[], java.nio.charset.Charset)
 	 */
 	public static String getString(byte[] strBytes) {
-		return getString(strBytes, UTF8);
+		return getString(strBytes, (Charset) null);
 	}
 
 	/**
 	 * Makes a new {@link String} by decoding the specified array of bytes using {@code charsetName} defined charset. If
-	 * {@link String} can't be constructed using defined charset, then the platform's default charset is used.
+	 * {@link String} can't be constructed using defined charset, then system default
+	 * {@link java.nio.charset.Charset#defaultCharset()} charset is used.
 	 *
 	 * @param strBytes
 	 *            the bytes to be decoded into characters
 	 * @param charsetName
-	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use default
-	 *            UFT-8
+	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use system
+	 *            default charset
 	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
-	 * @see String#String(byte[], String)
 	 * @see String#String(byte[])
 	 */
 	public static String getString(byte[] strBytes, String charsetName) {
@@ -568,17 +564,43 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		if (StringUtils.isEmpty(charsetName)) {
-			charsetName = UTF8;
+			charsetName = Charset.defaultCharset().name();
 		}
 
 		try {
 			return new String(strBytes, Charset.forName(charsetName));
-		} catch (UnsupportedCharsetException uce) {
-			try {
-				return new String(strBytes, charsetName);
-			} catch (UnsupportedEncodingException uee) {
-				return new String(strBytes);
-			}
+		} catch (UnsupportedCharsetException exc) {
+			return new String(strBytes);
+		}
+	}
+
+	/**
+	 * Makes a new {@link String} by decoding specified array of bytes using {@code charset} defined charset. If
+	 * {@link String} can't be constructed using defined charset, then system default
+	 * {@link java.nio.charset.Charset#defaultCharset()} charset is used.
+	 *
+	 * @param strBytes
+	 *            the bytes to be decoded into characters
+	 * @param charset
+	 *            charset instance to use for decoding, or {@code null} to use system default charset
+	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
+	 *
+	 * @see String#String(byte[], java.nio.charset.Charset)
+	 * @see String#String(byte[])
+	 */
+	public static String getString(byte[] strBytes, Charset charset) {
+		if (strBytes == null) {
+			return null;
+		}
+
+		if (charset == null) {
+			charset = Charset.defaultCharset();
+		}
+
+		try {
+			return new String(strBytes, charset);
+		} catch (Throwable exc) {
+			return new String(strBytes);
 		}
 	}
 

@@ -129,7 +129,8 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     property `RequireDefault`.
     * `id` - field identifier
     * `cacheKey` - cache key to store resolved field value
-    * `charset` - defines charset name for binary data value 
+    * `charset` - defines [Java supported](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) charset/encoding 
+    name for binary data value. Default value is streams runner JVM default charset (in most cases - `UTF8`).
 * tags:
     * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
 
@@ -5670,8 +5671,10 @@ In this case if `DLH`/`XQH` headers data has CCSID value defined (` > 0`) within
 binary to String. If headers data does not define CCSID value, second parameter value is used.
  
 **NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
-* `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set
-* `Utils.getString` - second parameter is Java supported charset name (string).
+* `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set, or `null` to use WMQ system default encoding (in 
+most cases it will be `UTF-8`)
+* `Utils.getString` - second parameter is [Java supported](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
+charset/encoding name (string), or `null` to use streams runner JVM default charset (in most cases - `UTF-8`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
