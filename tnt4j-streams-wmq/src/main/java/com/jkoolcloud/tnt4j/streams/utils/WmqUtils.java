@@ -378,7 +378,7 @@ public class WmqUtils {
 	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
 	 *             from the charset
 	 *
-	 * @see #getPayloadOffset(byte[])
+	 * @see #getPayloadOffsetAndCCSID(byte[])
 	 * @see com.ibm.mq.headers.Charsets#convert(byte[], int, int, int)
 	 */
 	public static String getString(byte[] strBytes, Object ccsid, boolean stripHeaders)
@@ -389,7 +389,11 @@ public class WmqUtils {
 
 		int offset = 0;
 		if (stripHeaders) {
-			offset = getPayloadOffset(strBytes);
+			int[] hd = getPayloadOffsetAndCCSID(strBytes);
+			offset = hd[0];
+			if (offset > 0 && hd[1] > 0) {
+				ccsid = hd[1];
+			}
 		}
 
 		return Charsets.convert(strBytes, offset, strBytes.length - offset, getCCSID(ccsid));
@@ -413,27 +417,53 @@ public class WmqUtils {
 
 	/**
 	 * Returns message payload data offset index within binary message data. Returned {@code 0} indicates whole message
-	 * data is payload having no excessive DLH or XQH data within.
+	 * data is payload, having no excessive DLH or XQH data within.
 	 *
 	 * @param msgData
 	 *            message binary data
 	 * @return message payload data offset index within binary message data
+	 *
+	 * @see #getPayloadOffsetAndCCSID(byte[])
 	 */
 	public static int getPayloadOffset(byte[] msgData) {
-		if (msgData == null || msgData.length < 4) {
-			return 0;
+		return getPayloadOffsetAndCCSID(msgData)[0];
+	}
+
+	/**
+	 * Returns message payload data offset index within binary message data, and CCSID defined in DLH/XQH structures
+	 * used to encode payload data.
+	 * <p>
+	 * Returned offset {@code 0} indicates whole message data is payload, having no excessive DLH or XQH data within.
+	 *
+	 * @param msgData
+	 *            message binary data
+	 * @return array of two integers, where first element is payload data offset and second element is payload data
+	 *         CCSID
+	 */
+	public static int[] getPayloadOffsetAndCCSID(byte[] msgData) {
+		return getPayloadOffsetAndCCSID(msgData, 0, 0);
+	}
+
+	private static int[] getPayloadOffsetAndCCSID(byte[] msgData, int offset, int ccsid) {
+		if (msgData == null || msgData.length < offset + 4) {
+			return new int[] { offset, ccsid };
 		}
 
-		String structId = new String(msgData, 0, 4, StandardCharsets.UTF_8);
+		String structId = new String(msgData, offset, 4, StandardCharsets.UTF_8);
 
 		switch (structId) {
 		case "XQH ": // NON-NLS
-			return MQXQH.SIZE;
+			return getPayloadOffsetAndCCSID(msgData, offset + MQXQH.SIZE, getInt(msgData, offset + 132));
 		case "DLH ": // NON-NLS
-			return MQDLH.SIZE;
+			return getPayloadOffsetAndCCSID(msgData, offset + MQDLH.SIZE, getInt(msgData, offset + 112));
 		default:
-			return 0;
+			return new int[] { offset, ccsid };
 		}
+	}
+
+	private static int getInt(byte[] bytes, int offset) {
+		return ((0xFF & bytes[offset]) << 24) | ((0xFF & bytes[offset + 1]) << 16) | ((0xFF & bytes[offset + 2]) << 8)
+				| (0xFF & bytes[offset + 3]);
 	}
 
 	/**
@@ -444,7 +474,7 @@ public class WmqUtils {
 	 * @return message binary payload data
 	 */
 	public static byte[] getMsgPayload(byte[] msgData) {
-		int structLength = getPayloadOffset(msgData);
+		int structLength = getPayloadOffsetAndCCSID(msgData)[0];
 		if (structLength > 0 && structLength < msgData.length) {
 			return Arrays.copyOfRange(msgData, structLength, msgData.length);
 		}
