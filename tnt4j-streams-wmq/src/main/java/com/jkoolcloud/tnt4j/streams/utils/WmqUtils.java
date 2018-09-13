@@ -365,6 +365,10 @@ public class WmqUtils {
 
 	/**
 	 * Converts byte array content in the specified {@code ccsid} into a Java {@link java.lang.String}.
+	 * <p>
+	 * If {@code stripHeaders} flag is set to {@code true}, and DLH/XQH headers data has CCSID value defined
+	 * ({@code > 0}) within, then that CCSID value is used to convert payload from binary to string. In all other cases,
+	 * parameter {@code ccsid} defined value is used.
 	 *
 	 * @param strBytes
 	 *            the byte array to convert

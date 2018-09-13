@@ -2,7 +2,7 @@
 
 * Open Elastic Beats configuration file, e.g. `metricbeat.yml`, `filebat.yml`, etc.
 * Configure Beats output to Logstash:
-```properties     
+```properties
     # The Logstash hosts
     hosts: ["localhost:5044"]
 ```
@@ -11,7 +11,7 @@
  
 * Configure `TNT4J-Streams` (set jKool token if not yet)
 * Run `TNT4J-Streams` sample `elastic-beats` with your parser configuration
-* Start `metricbeat`  
+* Start `metricbeat`
 ```cmd
     /metricbeat -c metricbeat.yml -e
 ```

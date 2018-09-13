@@ -13,7 +13,7 @@ All the rest configuration is for advanced use cases: different kafka server hos
 ```properties
 source: com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics
 ```
-if there is no such it must be you have an old build of streams or you have not built `tnt4j-streams-kafka` module.      
+if there is no such it must be you have an old build of streams or you have not built `tnt4j-streams-kafka` module.
 
 ### Advanced
 

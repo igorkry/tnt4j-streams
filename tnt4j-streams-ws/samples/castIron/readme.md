@@ -23,7 +23,7 @@ There is nothing to additionally install in your IBM Cast Iron installation. Jus
     <sec:password>slabs123!</sec:password>
 ```
 							
-and specify your CI WebService endpoint URL like:   
+and specify your CI WebService endpoint URL like:
 ```xml
     <property name="WsEndpoint" value="https://192.168.3.3/ws"/>
 ``` 
@@ -59,4 +59,4 @@ To configure host and port properties of your running `AutoPilot` instance chang
 ```properties
     event.sink.factory.EventSinkFactory.Host: 127.0.0.1
 	event.sink.factory.EventSinkFactory.Port: 6001
-```  
+```

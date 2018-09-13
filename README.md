@@ -4466,7 +4466,7 @@ See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` mo
     <dependency>
         <groupId>com.jkoolcloud.tnt4j.logger</groupId>
         <artifactId>tnt4j-log4j12</artifactId>
-        <version>0.1</version>
+        <version>0.3.1</version>
         <scope>runtime</scope>
     </dependency>
 ```
@@ -4481,7 +4481,7 @@ See [`Readme.md`](tnt4j-streams-samples/README.md) of `tnt4j-streams-samples` mo
     <dependency>
         <groupId>com.jkoolcloud.tnt4j.logger</groupId>
         <artifactId>tnt4j-logback</artifactId>
-        <version>0.1</version>
+        <version>0.3</version>
         <scope>runtime</scope>
     </dependency>
 ```
@@ -5629,7 +5629,7 @@ source platform), then to convert binary value to String use `charset` attribute
 ```xml
     <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" charset="IBM500"/>
 ```
-or it can be transformed using transformation like this:
+and it would be equivalent to this transformation:
 ```xml
     <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary">
         <field-transform name="MsgIdToString" lang="groovy"><![CDATA[
@@ -5638,7 +5638,7 @@ or it can be transformed using transformation like this:
         </field-transform>
     </field>
 ```
-to convert binary message payload to string, use transformation like this:
+Also to convert binary WMQ message payload to string using CCSIDs, use transformation like this:
 ```xml
     <field name="MQTrace_CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"/>
     <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
@@ -5648,6 +5648,19 @@ to convert binary message payload to string, use transformation like this:
         </field-transform>
     </field>
 ```
+Or even more advanced case, stripping `DLH` and `XQH` structures data from binary data, leaving only message payload data as result:
+```xml
+   <field name="MQTrace_CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"/>
+   <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
+       <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
+           WmqUtils.getString($fieldValue, ${MQTrace_CodedCharsetId}, true)
+       ]]>
+       </field-transform>
+   </field>
+```
+In this case if `DLH`/`XQH` headers data has CCSID value defined (` > 0`) within, then that CCSID value is used to convert payload from 
+binary to String. If headers data does not define CCSID value, second parameter value is used.
+ 
 **NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
 * `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set
 * `Utils.getString` - second parameter is Java supported charset name (string).
@@ -5676,7 +5689,7 @@ Sample of field definition for signature calculation:
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/> 
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="String" format="bytes"/> 
     </field>
-``` 
+```
 
 #### IBM MQ Error log entries parser
 
