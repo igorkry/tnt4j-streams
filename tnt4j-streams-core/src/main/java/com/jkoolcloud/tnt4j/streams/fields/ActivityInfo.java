@@ -612,7 +612,7 @@ public class ActivityInfo {
 	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
 	 */
 	public Object addActivityProperty(String propName, Object propValue, boolean transient_) {
-		return addActivityProperty(new Property(propName, wrapPropertyValue(propValue), transient_));
+		return addActivityProperty(new Property(propName, propValue, transient_));
 	}
 
 	/**
@@ -635,7 +635,7 @@ public class ActivityInfo {
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(String propName, Object propValue, String valueType) {
-		return addActivityProperty(new Property(propName, wrapPropertyValue(propValue),
+		return addActivityProperty(new Property(propName, propValue,
 				StringUtils.isEmpty(valueType) ? getDefaultValueType(propValue) : valueType));
 	}
 
@@ -679,14 +679,6 @@ public class ActivityInfo {
 		}
 
 		return ValueTypes.VALUE_TYPE_NONE;
-	}
-
-	private static Object wrapPropertyValue(Object propValue) {
-		if (propValue instanceof UsecTimestamp) {
-			return ((UsecTimestamp) propValue).getTimeUsec();
-		}
-
-		return propValue;
 	}
 
 	/**
