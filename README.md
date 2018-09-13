@@ -125,7 +125,8 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     * `timezone` - defines the time zone that a date/time string is represented in (when not specified, date/time string is assumed to be in 
     local time zone)
     * `locale` - defines locale for data formatter to use
-    * `required` - indicates whether field non-null value resolution is required for this field
+    * `required` - indicates whether a non-null value resolution is required for this field. If present, it takes precedence over the parser 
+    property `RequireDefault`.
     * `id` - field identifier
     * `cacheKey` - cache key to store resolved field value
     * `charset` - defines charset name for binary data value 
@@ -355,6 +356,12 @@ is same as:
 ```xml
     <field name="UserName" locator="4" locator-type="Index"/>
 ```
+
+**NOTE:** obsolete (yet backward compatible) locator types:
+* `REGroupName` - now should be changed to `Label` 
+* `REGroupNum` - now should be changed to `Index`
+* `REMatchId` - now should be changed to `Label`
+* `REMatchNum` - now should be changed to `Index`
 
 ### Stacked parsers
 
@@ -5318,8 +5325,9 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  configuration. Default value - `false`. (Optional)
  * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
  file/stream. Default value - `EOL`. (Optional)
- * `RequireDefault` - indicates that all parser fields/locators by default requires to resolve non-null value. Default value - `false`. 
- (Optional).
+ * `RequireDefault` - indicates that all parser fields/locators by default are required to resolve to non-null values. Default value - 
+ `false`. (Optional). The `field` attribute `required="true"` (or `false`) may be used to take precedence over the `RequireDefault` 
+ property. See `required` attribute definition in [`TNT4J Events field mappings'](#tnt4j-events-field-mappings).
 
     sample:
 ```xml
