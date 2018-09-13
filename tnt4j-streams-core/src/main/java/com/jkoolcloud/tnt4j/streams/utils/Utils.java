@@ -555,22 +555,20 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            default charset
 	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
+	 * @throws java.nio.charset.UnsupportedCharsetException
+	 *             if no support for the named charset is available in this instance of the JVM
+	 *
 	 * @see String#String(byte[], java.nio.charset.Charset)
-	 * @see String#String(byte[])
 	 */
-	public static String getString(byte[] strBytes, String charsetName) {
+	public static String getString(byte[] strBytes, String charsetName) throws UnsupportedCharsetException {
 		if (strBytes == null) {
 			return null;
 		}
 
 		if (StringUtils.isEmpty(charsetName)) {
-			charsetName = Charset.defaultCharset().name();
-		}
-
-		try {
+			return new String(strBytes, Charset.defaultCharset());
+		} else {
 			return new String(strBytes, Charset.forName(charsetName));
-		} catch (UnsupportedCharsetException exc) {
-			return new String(strBytes);
 		}
 	}
 
@@ -585,23 +583,10 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            charset instance to use for decoding, or {@code null} to use system default charset
 	 * @return string constructed from specified byte array, or {@code null} if {@code strBytes} is {@code null}
 	 *
-	 * @see String#String(byte[], java.nio.charset.Charset)
-	 * @see String#String(byte[])
+	 * @see org.apache.commons.lang3.StringUtils#toEncodedString(byte[], java.nio.charset.Charset)
 	 */
 	public static String getString(byte[] strBytes, Charset charset) {
-		if (strBytes == null) {
-			return null;
-		}
-
-		if (charset == null) {
-			charset = Charset.defaultCharset();
-		}
-
-		try {
-			return new String(strBytes, charset);
-		} catch (Throwable exc) {
-			return new String(strBytes);
-		}
+		return strBytes == null ? null : StringUtils.toEncodedString(strBytes, charset);
 	}
 
 	/**
