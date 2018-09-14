@@ -1,4 +1,4 @@
-# Introduction 
+# Introduction
 
 Single page application using AngularJS tracking and analytics offers great challenge for developers. jKoolCloud offers
 Angulartics plugin to deal this with easy.
@@ -32,17 +32,17 @@ Angulartics - analytics for AngularJS applications.
 * Bower
 
 If you don't have these, you can simply fallow instructions on [AngularJS Tutorial](https://docs.angularjs.org/tutorial#get-started)
-	
+
 ## Step 1
-	
+
 Clone angular-phonecat tutorial app.
-	
+
 `git clone --depth=14 https://github.com/angular/angular-phonecat.git`
 
 ## Step 2
 
 Install all dependencies.
-	
+
 * `npm install`
 * `bower install`
 
@@ -57,28 +57,27 @@ bower install angulartics
 ## Step 4
 
 Put 'angulartics-tnt4j.js' under your script diretory './js'
-	
+
 ## Step 5
-	
+
 'cd angular-phonecat\app\' and edit `index.html` to add `angulartics-tnt4j` and `angulartics` scripts.
-	
+
 ```html
     <script src="js/angulartics-tnt4j.js"></script>
     <script src="bower_components/angulartics/dist/angulartics.min.js"></script>
 ```
-	
+
 ## Step 6
 
 `cd js` and edit `app.js` to add `angulartics-tnt4j` and `angulartics` dependencies to existing app.
 
-	
 ## Step 7
 
 Run TNT4J-streams application with configuration provided in this folder. Ensure your jKoolCloud tokens configured in
 `tnt4j.properties`
-	
+
 ## Step 8
-	
+
 Allow CORS access:
 * Edit `package.json`
 
@@ -89,20 +88,20 @@ Allow CORS access:
 * Allow CORS in browser:
 
     e.g., in Chrome add [plugin](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi)
-	
+
 ## Step 9
-	
+
 Run included web-server 'npm start' and access `http://localhost:8000/app/`
-	
+
 Now all angular Routed pages are tracked.
-	
+
 ## Step 10
 
 Assume you want to add one's every image click:
 Edit phone-detail.html
-	
+
 and add `analytics-on="click" analytics-event="Image View"` to `img`
-	
+
 ```html
     <ul class="phone-thumbs">
         <li ng-repeat="img in phone.images">

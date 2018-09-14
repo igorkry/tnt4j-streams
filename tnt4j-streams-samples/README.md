@@ -1,6 +1,6 @@
 # TNT4J-Streams API use samples
 
-## Custom 
+## Custom
 
 This sample shows how to integrate TNT4J-Streams into your custom API.
 

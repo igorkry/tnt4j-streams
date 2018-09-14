@@ -22,13 +22,11 @@
 		```
 	 by adding your jKoolCloud token
 
-	
 4. Run Flume:
     ```cmd
     [flume_path]/bin/flume-ng agent --conf ./conf/ -f conf/my-flume.properties -n agent
     ```
 
-	
 # Q & A
 
 Q: 	My log is not parsed correctly?
@@ -36,11 +34,7 @@ Q: 	My log is not parsed correctly?
 A: 	Default sample is for on common Apache log format.
 	In order to change ir you may need to change <parser> or its <properties>
 	Look in documentation for more examples.
-	
+
 Q: 	Can I stream to different machine?
 
 A: Yes. Change host and/or port where TNT4J-Streams is running.
-			
-		
-	
-	

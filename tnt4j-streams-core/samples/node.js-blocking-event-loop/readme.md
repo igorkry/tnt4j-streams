@@ -31,7 +31,6 @@ JsTimedProcess comes with timeout option (in this case 10);
 If you want to send only error traces to [jKoolCloud](https://www.jkoolcloud.com) use option "true" in Tnt4jStreamsFormatter;
 `njsTrace` comes with filter witch files to instrument, and if function arguments should be inspected;
 
-
 ```js
 JsTimedProcess = require('njstrace-timed-process')(10); // Timeout value
 var Tnt4jStreamsFormatter = require('njstrace-tnt4j-formatter').Tnt4jStreamsFormatter;							// ################# Tnt4JFormatter

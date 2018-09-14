@@ -4,7 +4,7 @@ Beyond all advantages jKoolCloud offers, `njsTrace` has a nice ability to instru
 applications. `njsTrace` "hijacks" `node.js` `Module._compile()` method, and then calls to the original `Module._compile()`
 with the instrumented code.
 
-In this way you don't need to change your application code to have analytics in your application. 
+In this way you don't need to change your application code to have analytics in your application.
 
 # Installation
 
@@ -32,4 +32,3 @@ of data otherwise.
 In this example instrumentation happens on http-server. 
 Put everything you want to instrument in formatter argument;
 For more information read the `njsTrace` [documentation](https://github.com/ValYouW/njsTrace).
-

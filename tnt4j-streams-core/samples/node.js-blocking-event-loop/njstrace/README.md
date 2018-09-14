@@ -15,7 +15,6 @@ var njstrace = require('njstrace').inject();
 ```
 Lets take a look at the following 2 files dummy "app":
 
-
 **main.js**
 ```javascript
 // *** main.js ***
@@ -101,7 +100,6 @@ below).
     * If Boolean, indicates whether NJSTrace will log (to the console) its progress.
     * If string, a path to an output file (absolute or relative to current working directory).
     * If function, a custom log function, gets a single {string} argument.
-
 
 * `inspectArgs {boolean}` - Whether njstrace should inspect the traced functions arguments and return values. `default: true` 
   **NOTE:** Inspecting the arguments is done by passing the function's `arguments` object to a tracer method, passing the arguments object 

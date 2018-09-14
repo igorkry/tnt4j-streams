@@ -25,8 +25,8 @@ parameters, e.g., `servicestatustypes=31`
     </step>
 ```
 
-3. If needed change fields mapping for reported data to comply your needs. 
+3. If needed change fields mapping for reported data to comply your needs.
 
 ## Sample report data
- 
+
 Sample report data is available in `report.json` file. 

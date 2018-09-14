@@ -1,4 +1,4 @@
-## Interceptors sample configuration 
+## Interceptors sample configuration
 
 ### Common
 
@@ -71,7 +71,6 @@ To configure interceptors use file `./config/intercept/interceptors.properties`.
 * `messages.tracer.trace` - flag indicating whether to trace (send to jKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
 jKool events fields mapping is hardcoded for now.
 
-
 ##### Kafka messages trace configuration over file
 
 When messaging tracing is enabled, it generates quite noticeable overhead and you're able to control tracing process using topic: 
@@ -90,10 +89,10 @@ Provided configuration should be OK to start with. In the distributed systems ad
 `messages.tracer.kafka.group.id` must be unique, in order to all interceptors get the commands, otherwise results will be unpredictable.
 `messages.tracer.kafka.client.id` should not duplicate with other consumers in the same JVM, as you'll get many warnings about MBeans not 
 being registered.
- 
+
 All other `messages.tracer.kafka.<KAFKA_CONUMER_PROP_NAME>` options are subject depending on your environment configuration.
 
-To enable trace of all messages from any topic, set `messages.tracer.trace flag enabled`. 
+To enable trace of all messages from any topic, set `messages.tracer.trace flag enabled`.
 
 ##### Kafka trace control topic commands
 
@@ -118,13 +117,13 @@ set it to match yours in those files:
 * `consumer.properties` file property `bootstrap.servers` 
 * `producer.properties` file property `bootstrap.servers`
 * `tnt4j.properties` file property `event.sink.factory.bootstrap.servers`
-* `tnt-data-source.xml` file Kafka stream property `bootstrap.servers` 
+* `tnt-data-source.xml` file Kafka stream property `bootstrap.servers`
 
 ## Running interceptors sample
 
 **NOTE:** before running this sample, ensure your Kafka server instance is running.
 
-### Using run scripts 
+### Using run scripts
 
 1. run `runMetricsStreaming.bat(.sh)` - starts stream reading Kafka topic containing interceptors collected metrics and sending to jKool 
 2. run `runInterceptions.bat(.sh)` - starts producer and consumer applications having bound interceptors to collect Kafka metrics and post 
@@ -133,7 +132,7 @@ it to Kafka stream listened topic.
 ### Using JUnit (for advanced users, like developers)
 
 1. To run interceptions sample run JUnit `InterceptionsManagerTest.interceptionsTest`. It runs sample producer/consumer app with bound 
-interceptors. 
+interceptors.
 
     **NOTE:** JUnit test now is configured to use working dir `./tnt4j-streams/tnt4j-streams-kafka`
 

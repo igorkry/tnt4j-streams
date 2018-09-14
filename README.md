@@ -53,7 +53,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     just by applying configuration and without additional coding.
 
 * Redirect streamed data from different TNT4J based producer APIs like `tnt4j-stream-*` - to be TNT4J based streams concentrator.
-* Run TNT4J-Streams as system daemon service. 
+* Run TNT4J-Streams as system daemon service.
 
 Importing TNT4J-Streams project into IDE
 ======================================
@@ -129,7 +129,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     property `RequireDefault`.
     * `id` - field identifier
     * `cacheKey` - cache key to store resolved field value
-    * `charset` - defines [Java supported](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) charset/encoding 
+    * `charset` - defines [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
     name for binary data value. Default value is streams runner JVM default charset (in most cases - `UTF8`).
 * tags:
     * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
@@ -453,7 +453,7 @@ Sample:
                 ${ObjectName} == "PAYMENTS_QUEUE"
             ]]></matchExp>
         </parser-ref>
-``` 
+```
 
 Types of data match evaluation expressions:
 * `String` (default) - it must contain a method name from the `StringUtils` class and arguments. The method's first parameter is implied 
@@ -508,7 +508,7 @@ placeholder `$fieldValue`.
 ```
 
 Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
-activity entity field names. 
+activity entity field names.
 
 Types of context evaluation expressions:
 * `Groovy` (default) - should contain valid `Groovy` language based **boolean** expression.
@@ -609,7 +609,7 @@ stream output will send such entities to jKool (3 entities in total):
 Event1 having ChilEvent1 + ParentActivity data
 Event2 having ChilEvent2 + ParentActivity data
 Event3 having ChilEvent3 + ParentActivity data
-``` 
+```
 
 This is useful when streamed data is aggregated in one data package, like JSON/XML data having some header values and array of payload 
 entries (see `mft-tracking` sample XML's), but you need only those payload entries maintaining some header data contained values to be set 
@@ -640,7 +640,7 @@ Token body is used to define transformation script/expression code.
 
 Valid transformation configuration should define `beanRef`, or have script/expression code defined in token body data (`<![CDATA[]]>`).
 
-##### TNT4J-Streams predefined custom XPath functions 
+##### TNT4J-Streams predefined custom XPath functions
 
 To use TNT4J-Streams predefined functions namespace `ts:` shall be used.
 
@@ -706,7 +706,7 @@ Use samples of `ts:getObjectName()` (consider XPath `/transaction/transferSet/it
     </parser>
 ```
 
-#### Stream elements transformations 
+#### Stream elements transformations
 
 * Field value transformation
 ```xml
@@ -922,7 +922,7 @@ Defining dynamic `field` parameters sample:
         <.../>
     </parser>
     <.../>
-``` 
+```
 
 Sample shows how to dynamically define field `name` and `value-type` parameters referencing values resolved by `FieldNameLoc` and 
 `ValueTypeLoc` locators.
@@ -940,7 +940,7 @@ Defining combined `field` parameters values:
         </field>
     </parser>
     <.../>
-``` 
+```
 
 In this sample field name value is combined from dynamic `${FieldNameLoc}` and static `_attr` parts.
 
@@ -964,7 +964,7 @@ Sample of using another `field` resolved value in locator definition:
         </field>
     </parser>
     <.../>
-``` 
+```
 
 Sample configuration defines parser field `Direction` resolving value e.g., `source` or `destination`. Then field `ResourceName` locators 
 use this value when constructing actual XPath expression e.g., `/transaction/${Direction}Agent/@agent` to resolve value from XML data.
@@ -1939,7 +1939,7 @@ to stream started Logstash server host and port, e.g.`localhost:5044`.
 Sample files can be found in `samples/elastic-beats` directory.
 
 `dashboards` directory contains exported jKool dashboard dedicated to visualize data for this sample. You can import it into your jKool 
-repository. 
+repository.
 
 How to setup Elastic Beats environment see [`samples/elastic-beats/readme.md`](tnt4j-streams-elastic-beats/samples/elastic-beats/readme.md)
 
@@ -2951,13 +2951,13 @@ Sample stream configuration:
                 datatype="String"  format="string" transparent="true">
                         <parser-ref name="XML_Data_Parser" aggregation="Merge"/>
         </field-->
- 
+
         <!-- if message has transmission queue header, use original message id and correlation id -->
         <field name="MsgIdNorm" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary" transparent="true"/>
         <field name="CorrelIdNorm" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary" transparent="true"/>
         <field name="MsgIdXQH" locator="MQGACF_ACTIVITY_TRACE.MQBACF_XQH_MSG_ID" locator-type="Label" datatype="Binary" transparent="true"/>
         <field name="CorrelIdXQH" locator="MQGACF_ACTIVITY_TRACE.MQBACF_XQH_CORREL_ID" locator-type="Label" datatype="Binary" transparent="true"/>
- 
+
         <field name="MsgId"  value=""  datatype="Binary">
         <field-transform lang="groovy" name="MsgidTransform"><![CDATA[
                 ${MsgIdXQH} != null
@@ -2971,7 +2971,7 @@ Sample stream configuration:
                     ? ${CorrelIdXQH} : ${CorrelIdNorm}
             ]]></field-transform>
         </field>
- 
+
         <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
            The examples of setting the correlator
            1) Using message id and correlation id for applications which use this common MQ pattern
@@ -3069,7 +3069,7 @@ Sample stream configuration:
                     : (${TrackingIdNorm} != null ? ${TrackingIdNorm} : null )
             ]]></field-transform>
         </field>
- 
+
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="RemoteQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_XQH_REMOTE_Q_MGR" locator-type="Label"/>
         <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
@@ -3903,7 +3903,7 @@ referring file containing logged trackables in JSON format:
             <property name="event.formatter" value="com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter"/>
         </tnt4j-properties>
     </stream>
-``` 
+```
 
 #### MS Excel document
 
@@ -4252,7 +4252,7 @@ Sample stream configuration:
         <parser-ref name="MQErrLogParser"/>
     </stream>
 </tnt-data-source>
-``` 
+```
 
 Stream configuration states that `FileStream` referencing `MQErrLogParser` shall be used. Stream reads IBM MQ error log entries from 
 `./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.LOG` file contents and passes it to parser.
@@ -4320,7 +4320,7 @@ Sample stream configuration:
         <parser-ref name="MQErrLogJSONParser"/>
     </stream>
 </tnt-data-source>
-``` 
+```
 
 Stream configuration states that `FileStream` referencing `MQErrLogJSONParser` shall be used. Stream reads JSON formatted IBM MQ error log 
 entries (one per line) from `./tnt4j-streams-core/samples/ibm-mq-err-log/AMQERR01.JSON` file contents and passes it to parser.
@@ -4378,7 +4378,7 @@ Sample stream configuration:
         <parser-ref name="StrRangesParser"/>
     </stream>
 </tnt-data-source>
-``` 
+```
 
 Stream configuration states that `FileStream` referencing `StrRangesParser` shall be used. Stream reads message entries from 
 `./tnt4j-streams-core/samples/string-ranges/strings.txt` file contents and passes it to parser.
@@ -4440,7 +4440,7 @@ Sample stream configuration:
         <parser-ref name="RFH2Parser"/>
     </stream>
 </tnt-data-source>
-``` 
+```
 
 Stream configuration states that `RFH2JMSFileStream` referencing `RFH2Parser` shall be used. Stream reads message entries from 
 `./tnt4j-streams-wmq/samples/rfh2_jms/rfh2_jms.bin` file contents and passes it to parser. Since `ActivityRFH2Parser` is extension of map 
@@ -4456,7 +4456,7 @@ fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for furt
 
 #### Fluentd logs streaming
 
-TODO 
+TODO
 
 #### Integrating TNT4J-Streams into custom API
 
@@ -4597,7 +4597,7 @@ event.sink.factory.Filename: ./logs/tnt4j-streams-activities.log
 ```
 then all streamed activities are logged into one text file just by adding logged activity to the end of that file. But over some time file 
 can grow in size dramatically - gigabytes of log. To overcome this issue, for `SocketEventSink` and `JKCloudEventSink` it is possible to 
-configure activities log to be logged over `LOG4J/SLF4J` making activities log to be rolled upon your demand - daily or hitting size limit. 
+configure activities log to be logged over `LOG4J/SLF4J` making activities log to be rolled upon your demand - daily or hitting size limit.
 
 Configuration requires two steps:
 1. alter `log4j.properties` file:
@@ -4837,7 +4837,7 @@ Default value - `null`. (Optional)
  Format is: `SourceType1=${FieldName1}#SourceType2=${FieldName2}#SourceType3=${FieldName3}...`. 
  Default value - `APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}`. (Optional)
  * `SendStreamStates` - flag indicating whether to send stream status change messages (`startup`/`shutdown`) to output endpoint e.g. 
- [jKoolCloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional) 
+ [jKoolCloud](https://www.jkoolcloud.com/). Default value - `true`. (Optional)
 
      sample:
  ```xml
@@ -4852,7 +4852,7 @@ Default value - `null`. (Optional)
      <property name="BuildSourceFQNFromStreamedData" value="false"/>
      <property name="SourceFQN" value="APPL=${ApplName}#USER=${UserName}#SERVER=${ServerName}"/>
      <property name="SendStreamStates" value="false"/> 
- ``` 
+ ```
 
 **NOTE:** stream output configuration parameters can be defined under `stream` tag (will drill down to default stream output instance), or 
 under `java-object` tag referring output type class and referred from `stream` like this:
@@ -4959,7 +4959,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
     sample:
 ```xml
     <property name="InputCloseable" value="false"/>
-``` 
+```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parseable streams parameters'](#parseable-streams-parameters).
 
@@ -5077,7 +5077,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  (Optional)
  * `OpenOptions` - defines open options value used to access queue or topic. It can define numeric options value or concatenation of MQ 
  constant names/values delimited by `|` symbol. If options definition starts with `!`, it means that this options set should be used as 
- complete and passed to Queue Manager without changes. By default these open options are appended to predefined set of: 
+ complete and passed to Queue Manager without changes. By default these open options are appended to predefined set of:
 
     Predefined set of open options for queue:
     * MQOO_FAIL_IF_QUIESCING
@@ -5129,7 +5129,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
     <property name="TraceOperations" value="MQXF_(GET|PUT|CLOSE)"/>
     <property name="ExcludedRC" value="MQRC_NO_MSG_AVAILABLE|30737"/>
     <property name="SuppressBrowseGets" value="true"/>
-``` 
+```
 
 Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
 
@@ -5214,7 +5214,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
  defined sequence - waiting for prior request to complete before issuing next. Default value - `false`. (Optional)
  * List of custom WS Stream requests configuration properties. Put variable placeholder in request/step configuration (e.g. `${WsEndpoint}`) 
  and put property with same name into stream properties list (e.g. `<property name="WsEndpoint" value="https://192.168.3.3/ws"/>`) to have 
- value mapped into request data. (Optional) 
+ value mapped into request data. (Optional)
 
     sample:
 ```xml
@@ -5335,7 +5335,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="UseActivityDataAsMessageForUnset" value="true"/>
     <property name="ActivityDelim" value="EOF"/>
     <property name="RequireDefault" value="true"/>
-``` 
+```
 
 #### Activity Name-Value parser
 
@@ -5449,7 +5449,7 @@ Sample of field definition for signature calculation:
         <field-locator locator="/messaging_operation/MsgPutTime" locator-type="Label"/> 
         <field-locator locator="/messaging_operation/Correlator" locator-type="Label" datatype="Binary" format="hexBinary"/> 
     </field>
-``` 
+```
 
 #### Apache access log parser
 
@@ -5520,7 +5520,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     sample:
 ```xml
     <property name="LocPathDelim" value="/"/>
-``` 
+```
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
@@ -5556,7 +5556,7 @@ Message=value2
 key1=value1
 key3=value3
 ```
-Using `#` locator without any manual map entry mapping is equivalent to `*` locator. 
+Using `#` locator without any manual map entry mapping is equivalent to `*` locator.
 
 #### Activity JSON parser
 
@@ -5580,8 +5580,8 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     <property name="ConvertToString" value="true"/>
 ```
 
-Additional JMS message fields and mapping supported by this parser:
-* `MsgMetadata` - JMS message metadata map containing those fields:
+Additional JMS message fields and mappings are supported by these locators for this parser:
+* `MsgMetadata` - JMS message metadata map containing these fields:
     * `Correlator` - message correlation identifier
     * `CorrelatorBytes` - message correlation identifier bytes value
     * `DeliveryMode` - message delivery mode number
@@ -5602,7 +5602,12 @@ Additional JMS message fields and mapping supported by this parser:
           <field name="AllMsgCustomProps" locator="MsgMetadata.CustomMsgProps.*" locator-type="Label"/>
     ```
     this will add all `MsgMetadata.CustomMsgProps` map entries as JKool activity entity fields/properties without any additional manual 
-    mapping, taking field/property name from map entry name and value from map entry value.
+    mapping, taking field/property name from map entry name and value from map entry value. The same way you can map all `MsgMetadata` map 
+    entries into activity entity fields/properties (note omitted locator `.*` token, see ['Wildcard locators'](#wildcard-locators) for 
+    details):
+    ```xml
+          <field name="MsgMetadata" locator="MsgMetadata" locator-type="Label"/>
+    ```
     * `#` - maps set of unmapped JMS message resolved map entries to activity entity data, e.g.:
     ```xml
           <field name="Correlator" locator="MsgMetadata.Correlator" locator-type="Label"/>
@@ -5669,12 +5674,12 @@ Or even more advanced case, stripping `DLH` and `XQH` structures data from binar
 ```
 In this case if `DLH`/`XQH` headers data has CCSID value defined (` > 0`) within, then that CCSID value is used to convert payload from 
 binary to String. If headers data does not define CCSID value, second parameter value is used.
- 
+
 **NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
 * `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set, or `null` to use WMQ system default encoding (in 
 most cases it will be `UTF-8`)
-* `Utils.getString` - second parameter is [Java supported](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
-charset/encoding name (string), or `null` to use streams runner JVM default charset (in most cases - `UTF-8`).
+* `Utils.getString` - second parameter is [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
+name (string), or `null` to use streams runner JVM default charset (in most cases - `UTF-8`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
@@ -5685,20 +5690,20 @@ For MQ messages it is possible to calculate message signature from message field
 
 Sample of field definition for signature calculation:
 ```xml
-    <field name="Correlator" value-type="signature"> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" format="bytes"/> 
+    <field name="Correlator" value-type="signature">
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/>
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="String" format="bytes"/>
         <field-locator locator="MQCACF_USER_IDENTIFIER" locator-type="Label">
             <field-transform name="UserIdLowerCase" lang="groovy">
                 StringUtils.lowerCase($fieldValue)
             </field-transform>
-        </field-locator> 
-        <field-locator locator="MQIA_APPL_TYPE" locator-type="Label"/> 
-        <field-locator locator="MQCACF_APPL_NAME" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/> 
-        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="String" format="bytes"/> 
+        </field-locator>
+        <field-locator locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field-locator locator="MQCACF_APPL_NAME" locator-type="Label"/>
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
+        <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="String" format="bytes"/>
     </field>
 ```
 
@@ -5761,7 +5766,7 @@ supported by stream used parser. Pre-parsers shall implement [`ActivityDataPrePa
 interface.
 
 It is possible to define multiple pre-parsers for same parser instance. In that case pre-parser are applied sequentially (sequence is 
-defined by `reference` tags order within `parser` tag), where input of applied pre-parser is output of previous pre-parser. 
+defined by `reference` tags order within `parser` tag), where input of applied pre-parser is output of previous pre-parser.
 
 #### XML From Binary Data Pre-parser
 
@@ -5821,7 +5826,7 @@ Used configuration properties:
 * `id` - transformation identifier. (Optional)
 * `lang` - transformation script language. (Optional)
 * `script` - code of transformation script (can't be mixed with `beanRef`). (Required)
-* `beanRef` - transformation bean reference (can't be mixed with `script`). (Required) 
+* `beanRef` - transformation bean reference (can't be mixed with `script`). (Required)
 
 Sample stream configuration using `TransformationPreParser` pre-parser:
 ```xml
@@ -5979,7 +5984,7 @@ configuration data changes, making it possible to apply new configuration on run
 
 ### Uploading configuration data to ZooKeeper
 
-To upload files contained `TNT4J-Streams` configuration to ZooKeeper nodes there is utility called `ZKConfigInit`. It has those program 
+To upload files contained `TNT4J-Streams` configuration to ZooKeeper nodes there is utility called `ZKConfigInit`. It has these program 
 arguments:
 * `-f:` - defines file reference containing uploader utility configuration. (Required)
 * `-c` - indicates to clean ZooKeeper nodes contained TNT4J-Streams configuration. (Optional)
@@ -6057,7 +6062,7 @@ config.stream.zk.path=/samples/core/single-log
 `-Dtnt4j.config` defined configuration file will be used.
 
 `config.tnt4j-kafka.zk.path` property is reserved to define ZK node path containing TNT4J-Kafka configuration data. It is not currently 
-used. //TBD 
+used. //TBD
 
 `config.stream.zk.path` property defines ZK node path containing stream configuration data. If absent program argument `-f:` defined 
 configuration file will be used.
@@ -6127,7 +6132,7 @@ Also see [Loading ZooKeeper stored configuration data](#loading-zookeeper-stored
 When using registry style ZooKeeper configuration, missing configuration entities ZK nodes data is automatically uploaded on demand from 
 entity configuration file property (ending `.cfg.file`) referenced file.
 
-To run `TNT4J-Streams` using registry style ZooKeeper configuration define those program arguments: `-z:<cfg_file> -sid:<stream_id>`, e.g.,
+To run `TNT4J-Streams` using registry style ZooKeeper configuration define these program arguments: `-z:<cfg_file> -sid:<stream_id>`, e.g.,
 ```cmd
 -z:.\config\streams-zk.properties -sid:samples.core.single-log
 ```
@@ -6193,7 +6198,6 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-ela
 ```
 (O) marked libraries are optional
 
-
 #### `WMQ` module
 
 **NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` 
@@ -6253,7 +6257,7 @@ missing dependencies try to delete local maven repository by hand: e.g., on MS W
 directory.
 
 **NOTE:** in case you are using Java 9 as your compiler and getting `java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException`, add 
-`javac` command parameter `--add-modules java.xml.bind` to add JAXB classes to java classpath. 
+`javac` command parameter `--add-modules java.xml.bind` to add JAXB classes to java classpath.
 
 ## Running samples
 

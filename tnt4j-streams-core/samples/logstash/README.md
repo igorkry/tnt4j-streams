@@ -16,7 +16,7 @@
 	**NOTE:** parsers can be mapped to activity event data from different sources using tags.
 	One parser can be mapped to multiple tags. If no tag is defined for parser then such parser
 	is applied to all activities.
-	
+
 4. Start TNT4J-Streams agent by running run.bat
 
 5. Copy sample configuration to [logstashdir]/bin/ (or other directory of your choice)
