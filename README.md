@@ -129,8 +129,10 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     property `RequireDefault`.
     * `id` - field identifier
     * `cacheKey` - cache key to store resolved field value
-    * `charset` - defines [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
-    name for binary data value. Default value is streams runner JVM default charset (in most cases - `UTF8`).
+    * `charset` - defines a [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
+    name (in string format) for field Raw binary data; used to convert between Unicode and a number of other character encodings. Default 
+    value is the running streams JVM default charset (in most cases `UTF8`).
+
 * tags:
     * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
 
@@ -1670,10 +1672,10 @@ Sample files can be found in `tnt4j-streams/tnt4j-streams-hdfs/samples/hdfs-zip-
 
 To stream HDFS zipped file lines `HdfsZipLineStream` shall be used. `FileName` is defined using URI starting `hdfs://`.
 
-#### Apache Flume RAW data
+#### Apache Flume Raw data
 
-This sample shows how to stream activity events from redirected Apache Flume output RAW data. Apache Flume output is
-configured to send RAW output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
+This sample shows how to stream activity events from redirected Apache Flume output Raw data. Apache Flume output is
+configured to send Raw output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
 to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/apache-flume` directory.
@@ -1801,10 +1803,10 @@ separator. `ActivityDelim` property indicates that every line in parsed string r
 Details on `AccessLogParserCommon` (or `ApacheAccessLogParser` in general) can be found in samples section 
 ['Apache Access log single file'](#apache-access-log-single-file) and parsers configuration section ['Apache access log parser'](#apache-access-log-parser).
 
-#### Logstash RAW data
+#### Logstash Raw data
 
-This sample shows how to stream activity events from redirected Logstash output RAW data. Logstash output is
-configured to send RAW output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
+This sample shows how to stream activity events from redirected Logstash output Raw data. Logstash output is
+configured to send Raw output data as JSON to `localhost:9595`. Sample also shows how to use stacked parsers technique
 to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
@@ -4101,7 +4103,7 @@ should skip unparseable entries. Stream puts received request payload data as `b
 
 `CollectdReqBodyParser` maps `collectd` report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) 
 carrying system metrics data. Each snapshot is parsed using stacked `CollectdStatsDataParser` parser (map parser because parent JSON parser 
-already made map data structures from RAW `collectd` report JSON data).
+already made map data structures from Raw `collectd` report JSON data).
 
 `CollectdStatsDataParser` maps map entries to snapshot fields `EventName`, `Category`, `ServerName`, `StartTime`. Also this parser uses 
 dynamic field named `${FieldNameLoc}`. Attribute values containing variable expressions `${}` indicates that these attributes can have 
@@ -4193,7 +4195,7 @@ Nagios sends report as activity wrapping multiple metrics (snapshots).
 
 `ResponseParser` maps Nagios report JSON data to activity (field `EventType`) containing set of snapshots (field `MsgBody`) carrying system 
 state/metrics data. Each snapshot is parsed using stacked `SnapshotParser` parser (map parser because parent JSON parser already made map 
-data structures from RAW Nagios report JSON data).
+data structures from Raw Nagios report JSON data).
 
 `SnapshotParser` maps map entries to snapshot fields `ApplName`, `EventName`, `Status`, `Message`, `Category`, `Duration` and `StartTime`.
 `Status` and `Duration` fields also defines value types: `Status` is `enum`, `Duration` is `age`.
@@ -4793,9 +4795,9 @@ These parameters are applicable to all types of streams.
 
 ##### Parseable streams parameters
 
-These parameters are applicable to streams which uses parsers to parse incoming RAW activity data.
+These parameters are applicable to streams which uses parsers to parse incoming Raw activity data.
 
- * `HaltIfNoParser` - if set to `true`, stream will halt if none of the parsers can parse activity object RAW data.
+ * `HaltIfNoParser` - if set to `true`, stream will halt if none of the parsers can parse activity object Raw data.
  If set to `false` - puts log entry and continues. Default value - `false`. (Optional)
  * `GroupingActivityName` - name of ACTIVITY entity used to group excel workbook streamed events. (Optional)
 
@@ -4808,7 +4810,7 @@ These parameters are applicable to streams which uses parsers to parse incoming 
 ##### Buffered streams parameters
 
  * `BufferSize` - maximal buffer queue capacity. Default value - `1024`. (Optional)
- * `BufferDropWhenFull` - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ * `BufferDropWhenFull` - flag indicating to drop buffer queue offered Raw activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
      sample:
@@ -5259,7 +5261,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * `RestartOnInputClose` - flag indicating to restart Server Socket (open new instance) if listened one gets closed or fails to accept 
  connection. (Optional)
  * `BufferSize` - maximal buffer queue capacity. Default value - `1024`. (Optional)
- * `BufferDropWhenFull` - flag indicating to drop buffer queue offered RAW activity data entries when queue gets full. 
+ * `BufferDropWhenFull` - flag indicating to drop buffer queue offered Raw activity data entries when queue gets full. 
  Default value - `false`. (Optional)
 
     sample:
@@ -5320,8 +5322,8 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Generic parser parameters
 
- * `UseActivityDataAsMessageForUnset` - flag indicating weather RAW activity data shall be put into field `Message` if there is no mapping 
- defined for that field in stream parser configuration or value was not resolved by parser from RAW activity data. **NOTE:** it is 
+ * `UseActivityDataAsMessageForUnset` - flag indicating weather Raw activity data shall be put into field `Message` if there is no mapping 
+ defined for that field in stream parser configuration or value was not resolved by parser from Raw activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
  * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
@@ -5526,8 +5528,8 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
 ##### Wildcard locators
 
-**NOTE:** using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and put it all 
-as activity entity fields/properties by using map entry data as this:
+**NOTE:** using locator path token value `*` (e.g. `locator="*"`) you can make parser to take all map entries from that level and output 
+them as activity entity fields/properties by using map entry data as follows:
 * map entry key  - field/property name
 * map entry value - field/property value
 
@@ -5535,11 +5537,11 @@ Locator path token `*` can be omitted if last path token resolves to `java.util.
 level you must define it `locator="*"` anyway, since locator value can't be empty.
 
 **NOTE:** using locator path token value `#` (e.g. `locator="#"`) you can make parser to get all yet parser un-touched map entries from that 
-level and put it all as activity entity fields/properties by using map entry data as this:
+level and output them as activity entity fields/properties by using map entry data as follows:
 * map entry key  - field/property name
 * map entry value - field/property value
 
-This allows user to map part of the entries manually and rest - automatically. Consider map has such entries:
+This allows the user to map part of the entries manually and the remainder automatically. Consider a map having the following entries:
 ```
 entry1: key=key1, value=value1
 entry2: key=key2, value=value2
@@ -5550,7 +5552,7 @@ then using parser configuration:
 <field name="Message" locator="key2" locator-type="Label"/> 
 <field name="AllRestMapEntries" locator="#" locator-type="Label"/>
 ```
-you'll get such results:
+you'll get the following results:
 ```properties
 Message=value2
 key1=value1
@@ -5678,8 +5680,9 @@ binary to String. If headers data does not define CCSID value, second parameter 
 **NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
 * `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set, or `null` to use WMQ system default encoding (in 
 most cases it will be `UTF-8`)
-* `Utils.getString` - second parameter is [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
-name (string), or `null` to use streams runner JVM default charset (in most cases - `UTF-8`).
+* `Utils.getString` - second parameter is a [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
+name (in string format) for field Raw binary data; used to convert between Unicode and a number of other character encodings. If no second 
+parameter is specified, the default value is the running streams JVM default charset (in most cases `UTF8`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
@@ -5761,7 +5764,7 @@ by [Activity XML parser](activity-xml-parser)
 
 ### Pre-parsers
 
-`TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert RAW activity data to format, 
+`TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert Raw activity data to format, 
 supported by stream used parser. Pre-parsers shall implement [`ActivityDataPreParser`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/preparsers/ActivityDataPreParser.java) 
 interface.
 
@@ -5782,7 +5785,7 @@ Sample stream configuration using `XMLFromBinDataPreParser` pre-parser:
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
     <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
-        <!--IF RAW ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. SEE BELOW -->
+        <!--IF Raw ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. SEE BELOW -->
         <!--<param name="format" value="base64Binary" type="com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType"/>-->
         <!--<param name="format" value="base64Binary" type="java.lang.String"/>-->
     </java-object>
@@ -5809,8 +5812,8 @@ Sample configuration defines `FileStream` reading binary data from `RFH2.dump` f
 `RFH2XMLParser` parser has reference to `XMLFromRFH2PreParser`. This pre-parser builds valid XML from provided binary data having fragmented 
 XML data like `RFH2` structure from IBM MQ.
 
-**NOTE:** If RAW activity data is not `byte[]` but appears to be encoded (e.g., BASE64), use pre-parser property `foramat` to define RAW activity data 
-format. It may be one of [`ActivityFieldFormatType`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/fields/ActivityFieldFormatType.java) 
+**NOTE:** If Raw activity data is not `byte[]` but appears to be encoded (e.g., BASE64), use pre-parser property `foramat` to define Raw 
+activity data format. It may be one of [`ActivityFieldFormatType`](./tnt4j-streams-core/src/main/java/com/jkoolcloud/tnt4j/streams/fields/ActivityFieldFormatType.java) 
 enumeration values: 
 * `base64Binary` - BASE64 encoded binary data
 * `hexBinary` - binary data represented as bytes HEX codes sequence 
@@ -5820,7 +5823,7 @@ enumeration values:
 #### Transformation Pre-parser
 
 What is does:
-* applies user defined transformation bean or script code to convert/alter parser input RAW activity data
+* applies user defined transformation bean or script code to convert/alter parser input Raw activity data
 
 Used configuration properties:
 * `id` - transformation identifier. (Optional)
@@ -5852,10 +5855,10 @@ Sample stream configuration using `TransformationPreParser` pre-parser:
 </tnt-data-source>
 ```
 
-`XML_Data_Parser` parser has reference to `UnescapePreParser` to un-escape (remove excessive `\"`) stream provided RAW activity string data.
+`XML_Data_Parser` parser has reference to `UnescapePreParser` to un-escape (remove excessive `\"`) stream provided Raw activity string data.
 
 Also see [Field value transformations](#field-value-transformations) regarding use of streamed data transformations.
-**NOTE:** `TransformationPreParser` does not support transformation property `phase`, since it is always applied on parser input RAW 
+**NOTE:** `TransformationPreParser` does not support transformation property `phase`, since it is always applied on parser input Raw 
 activity data before data gets parsed by enclosing parser.
 
 ### External resources import into stream configuration
