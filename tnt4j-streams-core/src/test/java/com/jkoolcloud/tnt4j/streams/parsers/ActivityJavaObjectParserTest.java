@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.jkoolcloud.tnt4j.streams.TestUtils;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
@@ -37,10 +38,12 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
  * @version 1.0
  */
 public class ActivityJavaObjectParserTest {
+	ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
+	AbstractBufferedStream<?> stream = Mockito.mock(TestUtils.SimpleTestStream.class, Mockito.CALLS_REAL_METHODS);
 
 	@Test
 	public void setPropertiesTest() {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
+
 		HashMap<String, String> myMap = new HashMap<>();
 		myMap.put(ParserProperties.PROP_LOC_PATH_DELIM, "TEST_DELIM"); // NON-NLS
 		Collection<Map.Entry<String, String>> props = myMap.entrySet();
@@ -49,27 +52,21 @@ public class ActivityJavaObjectParserTest {
 
 	@Test
 	public void setPropertiesWhenNullTest() {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		testParser.setProperties(null);
 	}
 
 	@Test
 	public void isDataClassSupportedTest() throws Exception {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		assertTrue(testParser.isDataClassSupported("TEST")); // NON-NLS
 	}
 
 	@Test
 	public void parseTest() throws Exception {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		testParser.parse(stream, "test"); // NON-NLS
 	}
 
 	@Test
 	public void parseWhenDataNullTest() throws Exception {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		assertNull(testParser.parse(stream, null));
 	}
 
@@ -77,8 +74,7 @@ public class ActivityJavaObjectParserTest {
 	@Test
 	public void getLocatorValueExceptionTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "555"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "555"); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
@@ -86,16 +82,14 @@ public class ActivityJavaObjectParserTest {
 	@Test
 	public void getLocatorValueWhenLocatorIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		assertNull(testParser.getLocatorValue(stream, null, ""));
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValueWhenLocatorIsEmptyTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "");
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "");
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
@@ -105,7 +99,6 @@ public class ActivityJavaObjectParserTest {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp,
 				"ExecutorThreadsQuantity"); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_HALT_ON_PARSER, String.valueOf(true));
 		props.put(StreamProperties.PROP_EXECUTOR_THREADS_QTY, "5");
@@ -114,43 +107,39 @@ public class ActivityJavaObjectParserTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getFieldValueWhenDataIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "test"); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "test"); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, null));
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getFieldValueWhenPathIsNullTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "."); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "."); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, ""));
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	@Ignore("Not finished")
 	public void getFieldValueTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index,
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label,
 				"testName.testNumber"); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
 		testParser.getLocatorValue(stream, fieldLocator, prop);
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	@Ignore("Not finished")
 	public void getFieldValueWhenTwoSameFieldsTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index,
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label,
 				"testNumber.isActive"); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		MyClasTest prop = new MyClasTest();
 		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
 		assertNotNull(locValue);
@@ -158,23 +147,14 @@ public class ActivityJavaObjectParserTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getFieldValueWhenOneFieldTest() throws Exception {
 		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "testNumber"); // NON-NLS
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "testNumber"); // NON-NLS
 		MyClasTest prop = new MyClasTest();
 		Object locValue = testParser.getLocatorValue(stream, fieldLocator, prop);
 		assertNotNull(locValue);
 		assertEquals("Excpected value does not match", prop.testNumber, locValue);
-	}
-
-	@Ignore("Not finished")
-	@Test
-	public void parsePreparedItemTest() throws Exception {
-		ActivityJavaObjectParser testParser = new ActivityJavaObjectParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		testParser.parse(stream, "");
 	}
 
 	public class MyClasTest {

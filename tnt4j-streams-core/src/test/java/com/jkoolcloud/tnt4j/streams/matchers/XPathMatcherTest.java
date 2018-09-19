@@ -59,4 +59,18 @@ public class XPathMatcherTest {
 		assertTrue(Matchers.evaluate("xpath:contains(/Request/messageDetails/tag21, 'VOLUME')", xml));
 		assertFalse(Matchers.evaluate("xpath:contains(/Request/messageDetails/tag21, 'V0LUME')", xml));
 	}
+
+	@Test
+	public void evaluateAdvanced2() throws Exception {
+		assertFalse(Matchers.evaluate("xpath:/source",
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><destination exist=\"overwrite\" type=\"file\">                <file last-modified=\"2018-07-10T16:04:49.944Z\" size=\"4360\">                    \\\\hwsenas1\\ECE\\Copypri\\CSEC\\WorkForceNow\\G3AKSDWE6SA97N23_2018-07-10-12-00-06-620_WORKER_WFNTOHC_2018.JSON                </file>                <checksum method=\"MD5\">8debe5e7a05106ca1087d021e2561e7a</checksum>            </destination>\n"));
+		assertTrue(Matchers.evaluate("xpath:/destination",
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><destination exist=\"overwrite\" type=\"file\">                <file last-modified=\"2018-07-10T16:04:49.944Z\" size=\"4360\">                    \\\\hwsenas1\\ECE\\Copypri\\CSEC\\WorkForceNow\\G3AKSDWE6SA97N23_2018-07-10-12-00-06-620_WORKER_WFNTOHC_2018.JSON                </file>                <checksum method=\"MD5\">8debe5e7a05106ca1087d021e2561e7a</checksum>            </destination>\n"));
+		assertFalse(Matchers.evaluate("xpath://source",
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><destination exist=\"overwrite\" type=\"file\">                <file last-modified=\"2018-07-10T16:04:49.944Z\" size=\"4360\">                    \\\\hwsenas1\\ECE\\Copypri\\CSEC\\WorkForceNow\\G3AKSDWE6SA97N23_2018-07-10-12-00-06-620_WORKER_WFNTOHC_2018.JSON                </file>                <checksum method=\"MD5\">8debe5e7a05106ca1087d021e2561e7a</checksum>            </destination>\n"));
+		assertTrue(Matchers.evaluate("xpath://destination",
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><destination exist=\"overwrite\" type=\"file\">                <file last-modified=\"2018-07-10T16:04:49.944Z\" size=\"4360\">                    \\\\hwsenas1\\ECE\\Copypri\\CSEC\\WorkForceNow\\G3AKSDWE6SA97N23_2018-07-10-12-00-06-620_WORKER_WFNTOHC_2018.JSON                </file>                <checksum method=\"MD5\">8debe5e7a05106ca1087d021e2561e7a</checksum>            </destination>\n"));
+
+	}
+
 }

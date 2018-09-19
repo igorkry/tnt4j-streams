@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.*;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.jkoolcloud.tnt4j.streams.TestUtils;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
@@ -35,6 +36,10 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
  * @version 1.0
  */
 public class AbstractActivityMapParserTest {
+
+	ActivityMapParser testParser = new ActivityMapParser();
+	AbstractBufferedStream<?> stream = Mockito.mock(TestUtils.SimpleTestStream.class, Mockito.CALLS_REAL_METHODS);
+
 	@Test
 	public void setPropertiesTest() {
 		AbstractActivityMapParser testParser = Mockito.mock(ActivityMapParser.class, Mockito.CALLS_REAL_METHODS);
@@ -47,15 +52,12 @@ public class AbstractActivityMapParserTest {
 
 	@Test
 	public void parseWhenDataIsNullTest() throws Exception {
-		AbstractActivityMapParser testParser = Mockito.mock(ActivityMapParser.class, Mockito.CALLS_REAL_METHODS);
 		TNTInputStream<?, ?> my = Mockito.mock(TNTInputStream.class, Mockito.CALLS_REAL_METHODS);
 		assertNull(testParser.parse(my, null));
 	}
 
 	@Test
 	public void parseTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> myMap = new HashMap<>();
 		myMap.put("test", "OK"); // NON-NLS
 		myMap.put("status", "finished"); // NON-NLS
@@ -64,8 +66,6 @@ public class AbstractActivityMapParserTest {
 
 	@Test
 	public void parseWhenDataIsEmptyTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> myMap = new HashMap<>();
 		assertNull(testParser.parse(stream, myMap));
 	}
@@ -73,9 +73,7 @@ public class AbstractActivityMapParserTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "555"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "555"); // NON-NLS
 		Map<String, String> myMap = new HashMap<>();
 		myMap.put("test", "OK"); // NON-NLS
 		myMap.put("555", "hello"); // NON-NLS
@@ -85,8 +83,6 @@ public class AbstractActivityMapParserTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenFieldLocatorNullTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		Map<String, String> myMap = new HashMap<>();
 		myMap.put("test", "OK"); // NON-NLS
 		myMap.put("status", "finished"); // NON-NLS
@@ -94,11 +90,9 @@ public class AbstractActivityMapParserTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValueWhenLocatorEmptyTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "");
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "");
 		Map<String, String> myMap = new HashMap<>();
 		myMap.put("test", "OK"); // NON-NLS
 		myMap.put("status", "finished"); // NON-NLS
@@ -108,8 +102,6 @@ public class AbstractActivityMapParserTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueTypeTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
 		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.StreamProp, "333"); // NON-NLS
 		Map<String, String> myMap = new HashMap<>();
 		myMap.put("test", "OK"); // NON-NLS
@@ -120,18 +112,14 @@ public class AbstractActivityMapParserTest {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void getLocatorValueWhenDataIsNullTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "333"); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, null));
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValuePathTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333.555"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "333.555"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("333", new HashMap<String, String>()); // NON-NLS
 		myMap.put("555", Arrays.asList("test1")); // NON-NLS
@@ -139,11 +127,9 @@ public class AbstractActivityMapParserTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValuePathListTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333.0.222"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "333.0.222"); // NON-NLS
 		Map<String, Object> testMap = new HashMap<>();
 		testMap.put("test_key", "test_value"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
@@ -152,12 +138,10 @@ public class AbstractActivityMapParserTest {
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
-	@Test
+	@Test(expected = NumberFormatException.class)
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void getLocatorValueNumberExceptionTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333.test.222"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "333.test.222"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("333", Arrays.asList("test1", "test2", "test3")); // NON-NLS
 		myMap.put("status", "TEST"); // NON-NLS
@@ -166,24 +150,29 @@ public class AbstractActivityMapParserTest {
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValueInstanceTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "333.test.222"); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "333"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("333", "TEST1"); // NON-NLS
 		assertEquals("TEST1", testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(expected = NumberFormatException.class)
 	public void getLocatorValueEmptyLocatorTest() throws Exception {
-		ActivityMapParser testParser = new ActivityMapParser();
-		AbstractBufferedStream<?> stream = Mockito.mock(AbstractBufferedStream.class, Mockito.CALLS_REAL_METHODS);
-		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "."); // NON-NLS
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "1"); // NON-NLS
 		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("333", "TEST1"); // NON-NLS
 		assertNull(testParser.getLocatorValue(stream, fieldLocator, myMap));
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getLocatorValueIndexAsTypeTest() throws Exception {
+		ActivityFieldLocator fieldLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Index, "1"); // NON-NLS
+		Map<String, Object> myMap = new HashMap<>();
+		myMap.put("333", "TEST1"); // NON-NLS
+		testParser.getLocatorValue(stream, fieldLocator, myMap);
+	}
+
 }
