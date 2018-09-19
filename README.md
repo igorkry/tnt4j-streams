@@ -4461,7 +4461,7 @@ fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for furt
 
 ##### SFTP file feed
 
-This sample shows how to stream `SFTP` provided file characters feed data as activity events.
+This sample shows how to stream `sftp:` scheme provided file characters feed data as activity events.
 
 Sample files can be found in `samples/sftp-file-feed` directory (`tnt4j-streams-fs` module).
 
@@ -4469,7 +4469,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/sftp-file-feed
 
 ##### SCP(SSH) file feed
 
-This sample shows how to stream `SCP` (over SSH) provided file characters feed data as activity events.
+This sample shows how to stream `scp:` scheme (over SSH) provided file characters feed data as activity events.
 
 Sample files can be found in `samples/ssh-file-feed` directory (`tnt4j-streams-fs` module).
 
@@ -4477,7 +4477,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-feed/
 
 ##### SCP(SSH) file lines
 
-This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+This sample shows how to stream `scp:` scheme (over SSH) provided file lines as activity events.
 
 Sample files can be found in `samples/ssh-file-lines` directory (`tnt4j-streams-fs` module).
 
@@ -4485,7 +4485,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-lines
 
 ##### Zip file lines
 
-This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+This sample shows how to stream `zip:` scheme provided file lines as activity events.
 
 Sample files can be found in `samples/zip-fs-file-lines` directory (`tnt4j-streams-fs` module).
 
