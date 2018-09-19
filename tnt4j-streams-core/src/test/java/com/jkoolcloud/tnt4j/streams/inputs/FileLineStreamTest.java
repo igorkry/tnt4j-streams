@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,14 +52,14 @@ public class FileLineStreamTest {
 	public void searchFilesTest() throws Exception {
 		TestFileList files = new TestFileList(false);
 
-		final String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST"; // NON-NLS
+		String fileName = files.get(0).getParentFile() + File.separator + files.getPrefix() + "*.TST"; // NON-NLS
 
 		Map<String, String> props = new HashMap<>(2);
 		props.put(StreamProperties.PROP_FILENAME, fileName);
 		props.put(StreamProperties.PROP_RESTORE_STATE, String.valueOf(false));
 		fls.setProperties(props.entrySet());
 		fls.startStream();
-		final AbstractFileLineStream<File>.FileWatcher fileWatcher = fls.createFileWatcher();
+		AbstractFileLineStream<Path>.FileWatcher fileWatcher = fls.createFileWatcher();
 		// TODO assert smth
 		fileWatcher.shutdown();
 

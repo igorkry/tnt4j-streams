@@ -16,7 +16,16 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
+import java.util.Collections;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,7 +52,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
-public class FileLineStream extends AbstractFileLineStream<File> {
+public class FileLineStream extends AbstractFileLineStream<Path> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileLineStream.class);
 
 	/**
@@ -59,18 +68,23 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 	}
 
 	@Override
-	protected FileWatcher createFileWatcher() {
-		return new CommonFileWatcher();
+	protected FileWatcher createFileWatcher() throws Exception {
+		try {
+			URL url = new URL(fileName);
+			return new CommonFileWatcher(url.toURI());
+		} catch (MalformedURLException | URISyntaxException exc) {
+			return new CommonFileWatcher();
+		}
 	}
 
-	private static int[] getFilesTotals(File[] activityFiles) {
+	private static int[] getFilesTotals(Path[] activityFiles) throws IOException {
 		int tbc = 0;
 		int tlc = 0;
 		if (ArrayUtils.isNotEmpty(activityFiles)) {
-			for (File f : activityFiles) {
-				tbc += f.length();
+			for (Path f : activityFiles) {
+				tbc += Files.size(f);
 				try {
-					tlc += Utils.countLines(new FileInputStream(f));
+					tlc += Utils.countLines(Files.newInputStream(f, StandardOpenOption.READ));
 				} catch (IOException exc) {
 				}
 			}
@@ -79,16 +93,48 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		return new int[] { tbc, tlc };
 	}
 
+	@Override
+	public Object getProperty(String name) {
+		return super.getProperty(name);
+	}
+
 	/**
 	 * Files changes watcher thread. It reads changes from defined files using last modification timestamp of file.
 	 */
-	private class CommonFileWatcher extends FileWatcher {
+	protected class CommonFileWatcher extends FileWatcher {
+
+		/**
+		 * File system object used to access files.
+		 */
+		protected FileSystem fs;
+
+		/**
+		 * Constructs a new CommonFileWatcher for default OS file system.
+		 */
+		CommonFileWatcher() {
+			this(FileSystems.getDefault());
+		}
 
 		/**
 		 * Constructs a new CommonFileWatcher.
+		 * 
+		 * @param fs
+		 *            file system to be used to access files.
 		 */
-		CommonFileWatcher() {
-			super("FileLineStream.FileWatcher"); // NON-NLS
+		CommonFileWatcher(FileSystem fs) {
+			super("FileLineStream.FileWatcher.FileSystem." + fs.getClass().getSimpleName()); // NON-NLS
+
+			this.fs = fs;
+		}
+
+		/**
+		 * Constructs a new CommonFileWatcher.
+		 *
+		 * @param fUri
+		 *            file URI.
+		 */
+		CommonFileWatcher(URI fUri) throws IOException {
+			this(FileSystems.newFileSystem(fUri, Collections.<String, Object> emptyMap()));
 		}
 
 		/**
@@ -105,13 +151,13 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		 */
 		@Override
 		protected void initialize(Object... params) throws Exception {
-			availableFiles = Utils.listFilesByName(fileName);
+			availableFiles = Utils.listFilesByName(fileName, fs);
 			updateDataTotals(availableFiles);
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileLineStream.found.files", availableFiles.length, fileName);
 
-			File file;
+			Path file;
 			stateHandler = storeState ? new FileStreamStateHandler(availableFiles, FileLineStream.this.getName())
 					: null;
 			if (isStoredStateAvailable()) {
@@ -125,14 +171,31 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 
 			setFileToRead(file);
 
-			if (startFromLatestActivity && fileToRead != null) {
-				lastModifTime = fileToRead.lastModified();
-				lineNumber = Utils.countLines(new FileInputStream(fileToRead));
+			FileTime lastModifiedTime = Files.getLastModifiedTime(fileToRead, LinkOption.NOFOLLOW_LINKS);
+			if (startFromLatestActivity && fileToRead != null && lastModifiedTime != null) {
+				lastModifTime = lastModifiedTime.toMillis();
+				lineNumber = Utils.countLines(Files.newInputStream(fileToRead));
 			}
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileLineStream.stream.file.watcher.initialized", FileLineStream.this.getName(),
-					file.getAbsolutePath(), lineNumber < 0 ? 0 : lineNumber);
+					file.toAbsolutePath(), lineNumber < 0 ? 0 : lineNumber);
+		}
+
+		/**
+		 * Closes openend file system.
+		 *
+		 * @throws Exception
+		 *             if fails to close opened resources due to internal error
+		 */
+		@Override
+		void closeInternals() throws Exception {
+			super.closeInternals();
+
+			try {
+				Utils.close(fs);
+			} catch (UnsupportedOperationException exc) {
+			}
 		}
 
 		/**
@@ -157,21 +220,20 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 		protected void readFileChanges() {
 			if (fileToRead != null) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"FileLineStream.reading.changes", fileToRead.getAbsolutePath(),
-						lineNumber < 0 ? 0 : lineNumber);
+						"FileLineStream.reading.changes", fileToRead.toAbsolutePath(), lineNumber < 0 ? 0 : lineNumber);
 			} else {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.reading.no.file");
 				return;
 			}
 
-			if (!fileToRead.canRead()) {
+			if (!Files.isReadable(fileToRead)) {
 				logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.cant.access");
 
-				boolean swapped = swapToNextFile();
-
-				if (!swapped) {
+				try {
+					swapToNextFile();
+				} catch (IOException e) {
 					logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.next.not.found");
 
@@ -179,7 +241,12 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 					return;
 				}
 			} else {
-				long flm = fileToRead.lastModified();
+				long flm = 0;
+				try {
+					flm = Files.getLastModifiedTime(fileToRead, LinkOption.NOFOLLOW_LINKS).toMillis();
+				} catch (IOException e) {
+				}
+
 				if (flm > lastModifTime) {
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.file.updated", getPeriodInSeconds(flm), getPeriodInSeconds(lastReadTime));
@@ -188,12 +255,13 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 				} else {
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.file.not.changed");
-					boolean swapped = swapToNextFile();
+					boolean swapped = false;
 
-					if (!swapped) {
+					try {
+						swapped = swapToNextFile();
+					} catch (IOException e) {
 						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.no.changes");
-
+								"FileLineStream.no.changes", e.getMessage());
 						return;
 					}
 				}
@@ -222,13 +290,13 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			}
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.changes.read.end", fileToRead.getAbsolutePath(), lineNumber);
+					"FileLineStream.changes.read.end", fileToRead.toAbsolutePath(), lineNumber);
 		}
 
 		private LineNumberReader rollToCurrentLine() throws IOException {
 			LineNumberReader lnr;
 			try {
-				lnr = new LineNumberReader(new FileReader(fileToRead));
+				lnr = new LineNumberReader(Files.newBufferedReader(fileToRead, Charset.defaultCharset()));
 			} catch (Exception exc) {
 				logger().log(OpLevel.ERROR, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.reader.error");
@@ -240,7 +308,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			return skipOldLines(lnr);
 		}
 
-		private LineNumberReader skipOldLines(LineNumberReader lnr) throws IOException {
+		LineNumberReader skipOldLines(LineNumberReader lnr) throws IOException {
 			boolean skipFail = false;
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
@@ -270,26 +338,25 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			return lnr;
 		}
 
-		private boolean swapToPrevFile() {
+		private boolean swapToPrevFile() throws IOException {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileLineStream.will.swap.to.previous", fileName);
 
 			if (Utils.isWildcardString(fileName)) {
-				availableFiles = Utils.searchFiles(fileName);
+				availableFiles = Utils.searchFiles(fileName, fs);
 				updateDataTotals(availableFiles);
-
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.found.files", availableFiles.length, fileName);
 
-				File prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
+				Path prevFile = ArrayUtils.getLength(availableFiles) < 2 ? null
 						: availableFiles[availableFiles.length - 2];
 
 				if (prevFile != null) {
 					setFileToRead(prevFile);
-					lastModifTime = prevFile.lastModified();
+					lastModifTime = Files.getLastModifiedTime(prevFile, LinkOption.NOFOLLOW_LINKS).toMillis();
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.swapping.to.previous", lineNumber, prevFile.getAbsolutePath());
+							"FileLineStream.swapping.to.previous", lineNumber, prevFile.toAbsolutePath());
 				} else {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.previous");
@@ -301,26 +368,26 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			return false;
 		}
 
-		private boolean swapToNextFile() {
+		private boolean swapToNextFile() throws IOException {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileLineStream.will.swap.to.next", fileName);
 
 			if (Utils.isWildcardString(fileName)) {
-				availableFiles = Utils.searchFiles(fileName);
+				availableFiles = Utils.searchFiles(fileName, fs);
 				updateDataTotals(availableFiles);
 
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"FileLineStream.found.files", availableFiles.length, fileName);
 
-				File nextFile = Utils.getFirstNewer(availableFiles, lastModifTime);
+				Path nextFile = Utils.getFirstNewer(availableFiles, lastModifTime);
 
 				if (nextFile != null) {
 					setFileToRead(nextFile);
-					lastModifTime = nextFile.lastModified();
+					lastModifTime = Files.getLastModifiedTime(nextFile, LinkOption.NOFOLLOW_LINKS).toMillis();
 					lineNumber = 0;
 
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"FileLineStream.swapping.to.next", nextFile.getAbsolutePath());
+							"FileLineStream.swapping.to.next", nextFile.toAbsolutePath());
 				} else {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.next");
@@ -332,7 +399,7 @@ public class FileLineStream extends AbstractFileLineStream<File> {
 			return false;
 		}
 
-		private void updateDataTotals(File[] activityFiles) {
+		private void updateDataTotals(Path[] activityFiles) throws IOException {
 			int[] totals = getFilesTotals(activityFiles);
 			totalBytesCount = totals[0];
 			totalLinesCount = totals[1];

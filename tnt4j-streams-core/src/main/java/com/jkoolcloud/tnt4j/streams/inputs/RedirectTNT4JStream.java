@@ -163,14 +163,14 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 				String value = prop.getValue();
 				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
 					if (socketPort != null) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
+						throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 					}
 					fileName = value;
 				} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
 					if (StringUtils.isNotEmpty(fileName)) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
+						throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
 								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 					}
@@ -384,7 +384,8 @@ public class RedirectTNT4JStream extends TNTInputStream<String, String> {
 		super.cleanup();
 	}
 
-	private void cleanupStreamInternals() {
+	@Override
+	protected void cleanupStreamInternals() {
 		if (feedsProducer != null) {
 			feedsProducer.halt();
 		}

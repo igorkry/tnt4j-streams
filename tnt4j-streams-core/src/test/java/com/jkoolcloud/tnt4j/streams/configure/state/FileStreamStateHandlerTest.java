@@ -19,14 +19,16 @@ package com.jkoolcloud.tnt4j.streams.configure.state;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.LineNumberReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -59,16 +61,18 @@ public class FileStreamStateHandlerTest {
 		FileStreamStateHandler rwd = new FileStreamStateHandler();
 
 		File testFilesDir = new File(samplesDir, "/multiple-logs/");
-		File[] testFiles = testFilesDir.listFiles((FilenameFilter) new WildcardFileFilter("orders*")); // NON-NLS
+		Path path = Paths.get(testFilesDir.getAbsolutePath());
+		Path[] testFiles = Utils.searchFiles(testFilesDir.getAbsolutePath().toString() + File.separator + "orders*",
+				null); // NON-NLS
 		FileAccessState newFAS = new FileAccessState();
 
 		int count = 0;
-		File fileToSearchFor = null;
+		Path fileToSearchFor = null;
 		int lineLastRead = 0;
 		File fileWritten = null;
-		for (File testFile : testFiles) {
+		for (Path testFile : testFiles) {
 			count++;
-			FileReader in;
+			BufferedReader in;
 			LineNumberReader reader;
 
 			Long fileCRC = rwd.getFileCrc(testFile);
@@ -77,7 +81,7 @@ public class FileStreamStateHandlerTest {
 				fileToSearchFor = testFile;
 			}
 
-			in = new FileReader(testFile);
+			in = Files.newBufferedReader(testFile, Charset.defaultCharset());
 			reader = new LineNumberReader(in);
 			reader.setLineNumber(0);
 			String line = reader.readLine();
@@ -85,10 +89,10 @@ public class FileStreamStateHandlerTest {
 			while (line != null) {
 				count2++;
 				Checksum crcLine = new CRC32();
-				final byte[] bytes4Line = line.getBytes();
+				byte[] bytes4Line = line.getBytes();
 				crcLine.update(bytes4Line, 0, bytes4Line.length);
-				final long lineCRC = crcLine.getValue();
-				final int lineNumber = reader.getLineNumber();
+				long lineCRC = crcLine.getValue();
+				int lineNumber = reader.getLineNumber();
 				System.out.println("for " + lineNumber + " line CRC is " + lineCRC); // NON-NLS
 				if (count2 == 3) {
 					newFAS.currentLineCrc = lineCRC;
@@ -102,9 +106,9 @@ public class FileStreamStateHandlerTest {
 			Utils.close(reader);
 		}
 
-		final File findLastProcessed = rwd.findStreamingFile(newFAS, testFiles);
+		Path findLastProcessed = rwd.findStreamingFile(newFAS, testFiles);
 		assertEquals(fileToSearchFor, findLastProcessed);
-		final int lineLastReadRecorded = rwd.checkLine(findLastProcessed, newFAS);
+		int lineLastReadRecorded = rwd.checkLine(findLastProcessed, newFAS);
 		assertEquals(lineLastRead, lineLastReadRecorded);
 		fileWritten.delete();
 	}

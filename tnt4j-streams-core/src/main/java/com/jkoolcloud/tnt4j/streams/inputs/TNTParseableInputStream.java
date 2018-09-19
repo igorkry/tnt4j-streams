@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,19 +70,13 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
-					haltIfNoParser = Utils.toBoolean(value);
-				} else if (StreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
-					groupingActivityName = value;
-				}
-			}
+		if (StreamProperties.PROP_HALT_ON_PARSER.equalsIgnoreCase(name)) {
+			haltIfNoParser = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_GROUPING_ACTIVITY_NAME.equalsIgnoreCase(name)) {
+			groupingActivityName = value;
 		}
 	}
 
@@ -139,14 +132,14 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			return;
 		}
 
+		addTaggedParser(parser.getName(), parser);
+
 		String[] tags = parser.getTags();
 
 		if (ArrayUtils.isNotEmpty(tags)) {
 			for (String tag : tags) {
 				addTaggedParser(tag, parser);
 			}
-		} else {
-			addTaggedParser(parser.getName(), parser);
 		}
 	}
 
@@ -320,7 +313,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 * {@inheritDoc}
 	 * <p>
 	 * Performs parsing of raw activity data to {@link ActivityInfo} data package, which can be transformed to
-	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to JKoolCloud using TNT4J and JESL APIs.
+	 * {@link com.jkoolcloud.tnt4j.core.Trackable} object and sent to jKoolCloud using TNT4J and JESL APIs.
 	 */
 	@Override
 	protected void processActivityItem(T item, AtomicBoolean failureFlag) throws Exception {

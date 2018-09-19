@@ -19,12 +19,13 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -46,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * This activity stream requires parsers that can support type of activity data feed input as the source for activity
  * data.
- *
+ * <p>
  * NOTE: there can be only one parser referenced with this kind of stream! Because next item returned by this stream is
  * raw input source and parseable value is retrieved inside parser, there is no way to rewind reader position if first
  * parser fails to parse RAW activity data.
@@ -72,7 +73,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see ActivityParser#isDataClassSupported(Object)
  */
 public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseableInputStream<T> {
-	private String fileName = null;
+	/**
+	 * Stream attribute defining file name.
+	 */
+	protected String fileName = null;
 	private Integer socketPort = null;
 
 	private FeedInput feedInput;
@@ -126,7 +130,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	 *            input source to read data from
 	 */
 	public void setInputSource(R source) {
-		this.rawInputSource = source;
+		rawInputSource = source;
 	}
 
 	/**
@@ -181,31 +185,36 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-					if (socketPort != null) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
-					}
-					fileName = value;
-				} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(fileName)) {
-						throw new IllegalStateException(StreamsResources.getStringFormatted(
-								StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
-								StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
-					}
-					socketPort = Integer.valueOf(value);
-				} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
-					restartOnInputClose = Utils.toBoolean(value);
-				}
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			if (socketPort != null) {
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+						StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
 			}
+			fileName = value;
+		} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(fileName)) {
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.cannot.set.both",
+						StreamProperties.PROP_FILENAME, StreamProperties.PROP_PORT));
+			}
+			socketPort = Integer.valueOf(value);
+		} else if (StreamProperties.PROP_RESTART_ON_CLOSE.equalsIgnoreCase(name)) {
+			restartOnInputClose = Utils.toBoolean(value);
+		}
+	}
+
+	@Override
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
+
+		if (StringUtils.isEmpty(fileName) && socketPort == null) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_FILENAME,
+					StreamProperties.PROP_PORT));
 		}
 	}
 
@@ -213,13 +222,19 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	protected void initialize() throws Exception {
 		super.initialize();
 
-		if (StringUtils.isEmpty(fileName) && socketPort == null) {
-			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-					"TNTInputStream.property.undefined.one.of", StreamProperties.PROP_FILENAME,
-					StreamProperties.PROP_PORT));
-		}
+		feedInput = socketPort == null ? new FileInput(fileName, getFileSystem()) : new SocketInput(socketPort);
+	}
 
-		feedInput = socketPort == null ? new FileInput(fileName) : new SocketInput(socketPort);
+	/**
+	 * Returns {@link java.nio.file.FileSystem} instance used by this stream.
+	 *
+	 * @return the file system instance to be used
+	 *
+	 * @throws Exception
+	 *             if file system can't be initialized, or file system configuration is malformed
+	 */
+	protected FileSystem getFileSystem() throws Exception {
+		return FileSystems.getDefault();
 	}
 
 	/**
@@ -304,7 +319,8 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 		super.cleanup();
 	}
 
-	private void cleanupStreamInternals() {
+	@Override
+	protected void cleanupStreamInternals() {
 		Utils.close(rawInputSource);
 		Utils.close(dataFeed);
 
@@ -321,7 +337,10 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 		}
 	}
 
-	private interface FeedInput {
+	/**
+	 * Interface defining feed input.
+	 */
+	protected interface FeedInput {
 		/**
 		 * Opens input stream from available input resource.
 		 *
@@ -356,7 +375,7 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 
 		private int socketPort;
 
-		public SocketInput(int socketPort) {
+		private SocketInput(int socketPort) {
 			this.socketPort = socketPort;
 		}
 
@@ -401,25 +420,28 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	}
 
 	private class FileInput implements FeedInput {
-		private Iterator<File> files;
-		private File file;
+		private Iterator<Path> files;
+		private Path file;
+		private boolean halt = false;
 
 		private String fileName;
+		private FileSystem fs;
 
-		public FileInput(String fileName) {
+		private FileInput(String fileName, FileSystem fs) throws IOException {
 			this.fileName = fileName;
+			this.fs = fs;
 
-			files = Arrays.asList(Utils.listFilesByName(fileName)).iterator();
+			files = Arrays.asList(Utils.listFilesByName(fileName, fs)).iterator();
 		}
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			while (true) {
+			while (!halt) {
 				if (files.hasNext()) {
 					file = files.next();
-					if (file.exists()) {
+					if (Files.exists(file)) {
 						try {
-							FileInputStream fis = new FileInputStream(file);
+							InputStream fis = Files.newInputStream(file);
 							logger().log(OpLevel.INFO,
 									StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 									"FeedInputStream.opening.file", file);
@@ -434,6 +456,8 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 							"FeedInputStream.no.more.files"));
 				}
 			}
+
+			return null;
 		}
 
 		@Override
@@ -448,7 +472,12 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 
 		@Override
 		public void shutdown() {
+			halt = true;
 
+			try {
+				Utils.close(fs);
+			} catch (UnsupportedOperationException exc) {
+			}
 		}
 
 		@Override

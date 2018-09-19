@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <resource-ref id="AccessLogParserCommon" type="Parser"
+                  uri="../../../tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserCommon.xml"/>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileSystemCharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <!-- <property name="FileName" value="ssh.unix://osboxes@172.16.6.26:22/home/osboxes/single-log/orders.log"/> -->
+
+        <property name="FileName" value="ssh.unix:///home/osboxes/single-log/orders.log"/>
+
+        <property name="UserName" value="osboxes"/>
+        <property name="Host" value="172.16.6.64"/>
+        <property name="Port" value="22"/>
+        <property name="Password" value="slabs"/>
+
+        <property name="StrictHostKeyChecking" value="no"/>
+        <!--<property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>-->
+        <!--<property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>-->
+
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>

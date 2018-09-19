@@ -16,7 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs.io;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -37,12 +42,12 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  *
  * @see FileInputStream
- * @see Utils#listFilesByName(String)
+ * @see Utils#listFilesByName(String, java.nio.file.FileSystem)
  */
 public class FilesInputStream extends InputStream {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileLineStream.class);
 
-	private Iterator<File> files;
+	private Iterator<Path> files;
 	private InputStream fis;
 
 	/**
@@ -52,7 +57,11 @@ public class FilesInputStream extends InputStream {
 	 *            system-dependent file name or wildcard file name pattern to read matching files
 	 */
 	public FilesInputStream(String fileName) {
-		files = Arrays.asList(Utils.listFilesByName(fileName)).iterator();
+		try {
+			files = Arrays.asList(Utils.listFilesByName(fileName)).iterator();
+		} catch (IOException e) {
+			nextFileStream();
+		}
 
 		nextFileStream();
 	}
@@ -67,14 +76,17 @@ public class FilesInputStream extends InputStream {
 
 		while (true) {
 			if (files.hasNext()) {
-				File f = files.next();
-				if (f.exists()) {
+				Path f = files.next();
+				if (Files.exists(f)) {
 					try {
-						fis = new FileInputStream(f);
+						fis = Files.newInputStream(f);
 						break;
 					} catch (FileNotFoundException exc) {
 						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 								"FeedInputStream.file.not.found", f);
+					} catch (IOException e) {
+						LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"FeedInputStream.file.not.found", f); // tODO
 					}
 				}
 			} else {

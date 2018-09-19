@@ -23,7 +23,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.Feed;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.StreamFeed;
-import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 
 /**
  * Implements a byte arrays based activity stream, where raw input source is {@link InputStream}. This class wraps the
@@ -36,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
  * @version $Revision: 1 $
  *
  * @see StreamFeed
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class BytesInputStream extends FeedInputStream<InputStream, BufferedInputStream> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(BytesInputStream.class);

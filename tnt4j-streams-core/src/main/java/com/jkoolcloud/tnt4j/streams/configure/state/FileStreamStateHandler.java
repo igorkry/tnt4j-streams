@@ -16,10 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.state;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 
 import javax.xml.bind.JAXBException;
 
@@ -31,7 +33,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  *
  * @version $Revision: 1 $
  */
-public class FileStreamStateHandler extends AbstractFileStreamStateHandler<File> {
+public class FileStreamStateHandler extends AbstractFileStreamStateHandler<Path> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileStreamStateHandler.class);
 
 	/**
@@ -50,7 +52,7 @@ public class FileStreamStateHandler extends AbstractFileStreamStateHandler<File>
 	 * @param streamName
 	 *            stream name
 	 */
-	public FileStreamStateHandler(File[] activityFiles, String streamName) {
+	public FileStreamStateHandler(Path[] activityFiles, String streamName) {
 		super(activityFiles, streamName);
 	}
 
@@ -60,18 +62,18 @@ public class FileStreamStateHandler extends AbstractFileStreamStateHandler<File>
 	}
 
 	@Override
-	String getParent(File[] activityFiles) {
-		return activityFiles[0].getParent();
+	String getParent(Path[] activityFiles) {
+		return activityFiles[0].getParent().toString();
 	}
 
 	@Override
-	Reader openFile(File file) throws IOException {
-		return new FileReader(file);
+	Reader openFile(Path file) throws IOException {
+		return Files.newBufferedReader(file, Charset.defaultCharset());
 	}
 
 	@Override
 	public boolean isStreamedFileAvailable() {
-		return file != null && file.isFile();
+		return file != null && Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS);
 	}
 
 	@Override

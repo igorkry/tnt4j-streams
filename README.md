@@ -9,7 +9,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
 
 * Supports the following data sources:
     * File
-    * Character stream over TCP/IP
+    * Characters/bytes feed stream from file or over TCP/IP
     * HDFS
     * MQTT
     * HTTP
@@ -19,15 +19,16 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     * Logstash
     * WMQ (IBM MQ)
     * OS pipes
-    * Zipped files (HDFS also)
+    * Zipped files (also from HDFS)
     * Standard Java InputStream/Reader
     * JAX-RS service (JSON/XML)
     * JAX-WS service
     * System command
     * MS Excel document
     * Elastic Beats
+    * FileSystem (JSR-203 compliant) provided files (accessing remote files over SCP/SSH, SFTP, etc.) 
 
-* Files (also HDFS) can be streamed:
+* Files (including provided by HDFS and JSR-203 FileSystem) can be streamed:
     * as "whole at once" - when a stream starts, it reads file contents line by line meaning a single file line holds data of a single 
     activity event. After file reading completes - the stream stops.
     * using file polling - when some application uses file to write data at runtime, stream waits for file changes. When file changes, 
@@ -1811,7 +1812,7 @@ to extract log entry data from JSON envelope.
 
 Sample files can be found in `samples/logstash` directory.
 
-How to setup sample environment see [`samples/logstash/README.MD`](tnt4j-streams-core/samples/logstash/README.MD)
+How to setup sample environment see [`samples/logstash/README.md`](./tnt4j-streams-core/samples/logstash/README.md)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -1884,7 +1885,7 @@ send parsed Apache Access log entry data as JSON to `localhost:9595`.
 
 Sample files can be found in `samples/logstash-parsed` directory.
 
-How to setup sample environment see [`samples/logstash-parsed/README.MD`](tnt4j-streams-core/samples/logstash-parsed/README.MD)
+How to setup sample environment see [`samples/logstash-parsed/README.md`](./tnt4j-streams-core/samples/logstash-parsed/README.md)
 
 `messages.json` file contains sample Logstash output JSON data package prepared using configuration of this sample. This
 sample JSON is for you to see and better understand parsers mappings. Do not use it as Logstash input!
@@ -4456,6 +4457,42 @@ fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for furt
 `RFH2FoldersParser` parser uses XPath expressions to resolve values.
 `JMSPayloadParser` copies all JMS MapMessage entries as fields of `EVENT` named `IBM_MQ_RFH2/JMS_PAYLOAD`.
 
+#### JSR-203 FileSystem
+
+##### SFTP file feed
+
+This sample shows how to stream `SFTP` provided file characters feed data as activity events.
+
+Sample files can be found in `samples/sftp-file-feed` directory (`tnt4j-streams-fs` module).
+
+See sample [data source configuration](./tnt4j-streams-fs/samples/sftp-file-feed/tnt-data-source.xml).
+
+##### SCP(SSH) file feed
+
+This sample shows how to stream `SCP` (over SSH) provided file characters feed data as activity events.
+
+Sample files can be found in `samples/ssh-file-feed` directory (`tnt4j-streams-fs` module).
+
+See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-feed/tnt-data-source.xml).
+
+##### SCP(SSH) file lines
+
+This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+
+Sample files can be found in `samples/ssh-file-lines` directory (`tnt4j-streams-fs` module).
+
+See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-lines/tnt-data-source.xml).
+
+##### Zip file lines
+
+This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+
+Sample files can be found in `samples/zip-fs-file-lines` directory (`tnt4j-streams-fs` module).
+
+`sample.zip` file contains set of compressed Apache access log files.
+
+See sample [data source configuration](./tnt4j-streams-fs/samples/zip-fs-file-lines/tnt-data-source.xml).
+
 #### Fluentd logs streaming
 
 TODO
@@ -4899,7 +4936,7 @@ or
 </tnt-data-source>
 ```
 
-#### File line stream parameters (and Hdfs)
+#### File line stream parameters (also from Hdfs)
 
  * `FileName` - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
  * `FilePolling` - flag `true/false` indicating whether files should be polled for changes or not. If not, then files
@@ -4934,7 +4971,7 @@ In case using Hdfs file name is defined using URL like `hdfs://[host]:[port]/[pa
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
-#### Character stream parameters
+#### Characters/Bytes feed stream parameters
 
  * `FileName` - the system-dependent file name. (Required - just one `FileName` or `Port`)
  * `Port` - port number to accept character stream over TCP/IP. (Required - just one `FileName` or `Port`)
@@ -4954,6 +4991,104 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 **NOTE:** there can be ony one parser referenced to this stream.
 
+#### JSR-203 FileSystem streams parameters
+
+Supported file systems:
+ * `SCP` - schemes `ssh.unix:`, `scp:` and `ssh:`
+ * `SFTP` - scheme `sftp:`
+ * `ZIP` - schemes `zip:` and `jar:`
+ * `FILE` - scheme `file:`
+ * any other JSR-203 compliant (requires manually add file system implementing libs to classpath), but those are not tested and may not 
+ work "out of the box"
+
+##### JSR-203 File Characters/Bytes feed stream parameters
+
+ * `FileName` - the system-dependent file name: path or URI. (Required)
+ * `RestartOnInputClose` - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
+ * `Host` - remote machine host name/IP address. Default value - `localhost`. (Optional - can be defined over stream property `FileName`, 
+ e.g. `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Port` - remote machine port number to accept connection. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `UserName` - remote machine authorized user name. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Password` - remote machine authorized user password. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Scheme` - file access protocol scheme name. Default value - `scp`. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ssh.unix:///[FILE_PATH]`
+ * `StrictHostKeyChecking` - flag indicating whether strictly check add remote host keys changes against ssh know hosts.
+    * If flag value is set to `yes`, ssh will never automatically add host keys to the `~/.ssh/known_hosts` file and will refuse to connect 
+    to a host whose host key has changed. This provides maximum protection against trojan horse attacks, but can be troublesome when the 
+    `/etc/ssh/ssh_known_hosts` file is poorly maintained or connections to new hosts are frequently made. This option forces the user to 
+    manually add all new hosts.
+    * If flag value is set to `no`, ssh will automatically add new host keys to the user known hosts files.
+ 
+    The host keys of known hosts will be verified automatically in all cases. The flag value must be set to `yes` or  `no`. Default value - 
+    `no`. (Optional)
+ * `IdentityFromPrivateKey` - private key file to be used for remote machine secure connection initialization. (Optional)
+ * `KnownHosts` - known hosts file path. (Optional)
+ * `ResolveAbsolutePath` - flag indicating whether to resolve absolute file path when relative one is provided. Default value - `false`. 
+ (Optional)
+ * set of target JSR-203 compliant `FileSystemProvider` supported properties
+
+    sample:
+```xml
+    <property name="FileName" value="ssh.unix:///home/osboxes/single-log/orders.log"/>
+    <property name="RestartOnInputClose" value="true"/>
+    <property name="UserName" value="osboxes"/>
+    <property name="Host" value="172.16.6.26"/>
+    <property name="Port" value="22"/>
+    <property name="Password" value="slabs"/>
+    <property name="StrictHostKeyChecking" value="no"/>
+    <property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>
+    <property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>
+    <property name="ResolveAbsolutePath" value="true"/>
+```
+
+Also see ['Generic streams parameters'](#generic-streams-parameters).
+
+##### JSR-203 File line stream parameters
+
+ * `FileName` - the system-dependent file name or file name pattern defined using wildcard character `*`: path or URI. (Required)
+ * `Host` - remote machine host name/IP address. Default value - `localhost`. (Optional - can be defined over stream property `FileName`, 
+ e.g. `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Port` - remote machine port number to accept connection. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `UserName` - remote machine authorized user name. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Password` - remote machine authorized user password. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ftp://username:password@hostname:port/[FILE_PATH]`
+ * `Scheme` - file access protocol scheme name. Default value - `scp`. (Optional - can be defined over stream property `FileName`, e.g. 
+ `ssh.unix:///[FILE_PATH]`
+ * `StrictHostKeyChecking` - flag indicating whether strictly check add remote host keys changes against ssh know hosts.
+    * If flag value is set to `yes`, ssh will never automatically add host keys to the `~/.ssh/known_hosts` file and will refuse to connect 
+    to a host whose host key has changed. This provides maximum protection against trojan horse attacks, but can be troublesome when the 
+    `/etc/ssh/ssh_known_hosts` file is poorly maintained or connections to new hosts are frequently made. This option forces the user to 
+    manually add all new hosts.
+    * If flag value is set to `no`, ssh will automatically add new host keys to the user known hosts files.
+ 
+    The host keys of known hosts will be verified automatically in all cases. The flag value must be set to `yes` or  `no`. Default value - 
+    `no`. (Optional)
+ * `IdentityFromPrivateKey` - private key file to be used for remote machine secure connection initialization. (Optional)
+ * `KnownHosts` - known hosts file path. (Optional)
+ * `ResolveAbsolutePath` - flag indicating whether to resolve absolute file path when relative one is provided. Default value - `false`. 
+ (Optional)
+ * set of target JSR-203 compliant `FileSystemProvider` supported properties
+
+    sample:
+```xml
+    <property name="FileName" value="ssh.unix:///home/osboxes/single-log/orders.log"/>
+    <property name="UserName" value="osboxes"/>
+    <property name="Host" value="172.16.6.26"/>
+    <property name="Port" value="22"/>
+    <property name="Password" value="slabs"/>
+    <property name="StrictHostKeyChecking" value="no"/>
+    <property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>
+    <property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>
+    <property name="ResolveAbsolutePath" value="true"/>
+```
+
+Also see ['File line stream parameters (also from Hdfs)'](#file-line-stream-parameters-also-from-hdfs)
+
 #### Standard Java input stream parameters
 
  * `InputCloseable` - flag indicating if stream has to close input when stream is closing. Default value - `true`. (Optional)
@@ -4969,7 +5104,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Parse
 
 This stream does not have any additional configuration parameters.
 
-Also see ['Standard Java input stream parameters'](#standard-java-input-stream parameters).
+Also see ['Standard Java input stream parameters'](#standard-java-input-stream-parameters).
 
 #### Http stream parameters
 
@@ -5135,7 +5270,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters).
 
 Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
 
-#### Zipped file line stream parameters (and Hdfs)
+#### Zipped file line stream parameters (also from Hdfs)
 
  * `FileName` - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
  and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
@@ -5684,6 +5819,16 @@ most cases it will be `UTF-8`)
 name (in string format) for field Raw binary data; used to convert between Unicode and a number of other character encodings. If no second 
 parameter is specified, the default value is the running streams JVM default charset (in most cases `UTF8`).
 
+**NOTE:** A CCSID used in an expression should be a decimal number without a leading zero `0`, which in Java means an `octal` representation 
+of the number; most likely not what you wanted. Example: Test if a received MQ message is `EBCDIC` code page `37`. If `037` (CCSID name 
+alias) value is used, the comparison would be against decimal value `31`, not `37`, and would never match. Sample transformation:
+```xml
+    <field-transform name="MsgEbcdicOrNot" lang="groovy"><![CDATA[
+        ${MQTrace_CodedCharsetId} == 37 ? $fieldValue : "MSG NOT EBCDIC"
+    ]]>
+    </field-transform>
+```
+
 Also see [Generic parser parameters](#generic-parser-parameters).
 
 ##### MQ message signature calculation
@@ -5759,7 +5904,7 @@ Also see [Activity map parser](#activity-map-parser) regarding higher level pars
 
 This parser resolved data map may contain such entries:
 * `rfh2Folders` - RFH2 folders data XML string. Root element for this XML is `<rfh2Folders>`. Further XPath based parsing can be processed 
-by [Activity XML parser](activity-xml-parser)
+by [Activity XML parser](#activity-xml-parser)
 * `jmsMsgPayload` - JMS JMS message payload data: de-serialized object or bytes if serialisation can't be done.
 
 ### Pre-parsers
@@ -6153,7 +6298,7 @@ Modules list:
    * `Core` (M) - major module implementing data streaming (collection and transformation) features.
    * `Elastic-Beats` (O) - Elastic Beats provided data streaming module.
    * `Flume-Plugin` (O) - Apache Flume provided data streaming module.
-   * `Fs` (O) - Java [FileSystem](https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html) based file systems provided data 
+   * `Fs` (O) - JSR-203 compliant [FileSystem](https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html) provided files data 
    streaming module. 
    * `Hdfs` (O) - HDFS (Apache Hadoop) provided data streaming module. 
    * `JMS` (O) - JMS (Java Message Service) provided data streaming module.

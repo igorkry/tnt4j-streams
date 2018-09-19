@@ -182,7 +182,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	}
 
 	/**
-	 * Set configuration properties for activity stream.
+	 * Sets configuration properties for this activity stream.
 	 * <p>
 	 * This method is invoked by the configuration loader in response to the {@code property} configuration elements. It
 	 * is invoked once per stream definition, with all property names and values specified for this stream. Subclasses
@@ -192,14 +192,32 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 * @param props
 	 *            configuration properties to set
 	 *
+	 * @see #setProperty(String, String)
 	 * @see #applyProperties()
 	 * @see #initialize()
 	 */
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		if (CollectionUtils.isNotEmpty(props)) {
 			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
+				setProperty(prop.getKey(), prop.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Sets configuration property for this activity stream.
+	 *
+	 * @param name
+	 *            property name
+	 * @param value
+	 *            property value
+	 *
+	 * @throws java.lang.IllegalArgumentException
+	 *             if configuration property can't be applied
+	 *
+	 * @see #setProperties(java.util.Collection)
+	 */
+	public void setProperty(String name, String value) {
 				if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
 					useExecutorService = Utils.toBoolean(value);
 				} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
@@ -215,10 +233,8 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 				} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_DELAY.equalsIgnoreCase(name)) {
 					pingLogActivitiesDelay = Integer.parseInt(value);
 				}
-			}
-		}
 
-		output().setProperties(props);
+		output().setProperty(name, value);
 	}
 
 	/**
@@ -241,7 +257,7 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 *            name of property whose value is to be retrieved
 	 * @return value for property, or {@code null} if property does not exist
 	 *
-	 * @see #setProperties(java.util.Collection)
+	 * @see #setProperty(String, String)
 	 */
 	public Object getProperty(String name) {
 		if (StreamProperties.PROP_DATETIME.equals(name)) {
@@ -697,11 +713,16 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 * {@link #run()} method, it must call this at end of {@link #run()} method before returning.
 	 */
 	protected void cleanup() {
+		cleanupStreamInternals();
+
 		if (out != null) {
 			out.cleanup();
 		}
 
 		StreamsCache.unreferStream();
+	}
+
+	protected void cleanupStreamInternals() {
 	}
 
 	private void removeListeners() {

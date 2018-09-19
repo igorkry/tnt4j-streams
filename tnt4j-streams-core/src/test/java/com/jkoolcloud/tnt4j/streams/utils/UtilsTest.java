@@ -207,6 +207,9 @@ public class UtilsTest {
 		// {\"sinkName\":\"TNT4JStreams\",\"chanelName\":\"memoryChannel\",\"headers\":{},\"body\":\"127.0.0.1
 		// - - [26/Nov/2015:16:26:21 +0200] \\\"POST
 		// /gvm_java/gvm/services/OperatorWebService HTTP/1.1\\\" 200 380\\r\"}
+		// String testStrig = "line\\r"; // NON-NLS
+		// String testStrig2 = "line\\n"; // NON-NLS
+		// String expected = "line"; // NON-NLS
 		// assertEquals(expected, Utils.cleanActivityData(testStrig));
 		// assertEquals(expected, Utils.cleanActivityData(testStrig2));
 	}
@@ -238,6 +241,12 @@ public class UtilsTest {
 
 		assertEquals(1, finalMap.size());
 		assertEquals("RootValue", finalMap.get("RootKey"));
+	}
+
+	@Test
+	public void searchFilesTest() throws IOException {
+		String exampleFilesPath = ".." + "/config/*.properties"; // NON-NLS
+		Utils.searchFiles(exampleFilesPath);
 	}
 
 }

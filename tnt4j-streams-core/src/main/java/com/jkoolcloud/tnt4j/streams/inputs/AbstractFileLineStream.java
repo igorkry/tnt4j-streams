@@ -69,7 +69,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * {@code false}. (Optional)</li>
  * </ul>
  *
- * @version $Revision: 2 $
+ * @version $Revision: 3 $
  *
  * @see ActivityParser#isDataClassSupported(Object)
  */
@@ -179,6 +179,11 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		lineRange = IntRange.getRange(rangeValue);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see #initializeFs()
+	 */
 	@Override
 	public void initialize() throws Exception {
 		super.initialize();
@@ -195,8 +200,27 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"FileLineStream.initializing.stream", fileName);
 
+		initializeFs();
+
 		fileWatcher = createFileWatcher();
 		fileWatcher.initialize();
+	}
+
+	/**
+	 * Initializes stream used file system environment.
+	 * <p>
+	 * This method is called by default {@link #initialize()} method to perform any necessary file system initialization
+	 * before the stream starts reading files, including verifying that all required properties are set. If subclasses
+	 * override this method to perform any custom file system initialization, they must also call the base class method.
+	 * <p>
+	 * Default implementation does nothing, since default file system does not require any additional initialization.
+	 * 
+	 * @throws Exception
+	 *             indicates that stream is not configured properly and cannot continue
+	 *
+	 * @see #initialize()
+	 */
+	protected void initializeFs() throws Exception {
 	}
 
 	@Override
@@ -252,8 +276,11 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	 * Constructs a new file watcher instance specific for this stream.
 	 *
 	 * @return file watcher instance
+	 *
+	 * @throws java.lang.Exception
+	 *             if file watcher can't be initialized or initialization fails
 	 */
-	protected abstract FileWatcher createFileWatcher();
+	protected abstract FileWatcher createFileWatcher() throws Exception;
 
 	@Override
 	protected boolean isInputEnded() {

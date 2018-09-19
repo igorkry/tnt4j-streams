@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <resource-ref id="AccessLogParserCommon" type="Parser"
+                  uri="../../../tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserCommon.xml"/>
+    <resource-ref id="AccessLogParserExt" type="Parser"
+                  uri="../../../tnt4j-streams-core/samples/apache-access-single-log/AccessLogParserExt.xml"/>
+
+    <stream name="SampleZipFileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileSystemLineStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="zip:file:///./tnt4j-streams-fs/samples/zip-fs-file-lines/sample.zip!/*"/>
+
+        <parser-ref name="AccessLogParserExt"/>
+        <parser-ref name="AccessLogParserCommon"/>
+    </stream>
+</tnt-data-source>

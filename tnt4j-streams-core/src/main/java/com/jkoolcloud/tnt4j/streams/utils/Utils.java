@@ -368,6 +368,34 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		return last;
 	}
 
+	public static Path getFirstNewer(Path[] files, Long lastModif) throws IOException {
+		Path last = null;
+
+		if (ArrayUtils.isNotEmpty(files)) {
+			boolean changeDir = (Files.getLastModifiedTime(files[0], LinkOption.NOFOLLOW_LINKS)
+					.compareTo(Files.getLastModifiedTime(files[files.length - 1], LinkOption.NOFOLLOW_LINKS)) < 0);
+
+			for (int i = changeDir ? files.length - 1 : 0; changeDir ? i >= 0
+					: i < files.length; i = changeDir ? i - 1 : i + 1) {
+				Path f = files[i];
+				if (Files.isReadable(f)) {
+					if (lastModif == null) {
+						last = f;
+						break;
+					} else {
+						if (Files.getLastModifiedTime(f).toMillis() >= lastModif) {
+							last = f;
+						} else {
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return last;
+	}
+
 	/**
 	 * De-serializes JSON data object ({@link String}, {@link java.io.Reader}, {@link java.io.InputStream}) into map
 	 * structured data.
@@ -1563,36 +1591,93 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
 	 * should be performed, e.g., C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
 	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
-	 * modification timestamp in ascending order.
+	 * modification timestamp in ascending order. Used file system is {@link java.nio.file.FileSystems#getDefault()}.
 	 *
 	 * @param namePattern
 	 *            name pattern to find files
 	 *
 	 * @return array of found files
 	 *
+	 * @see #listFilesByName(String, java.nio.file.FileSystem)
+	 */
+	public static Path[] searchFiles(String namePattern) throws IOException {
+		return searchFiles(namePattern, FileSystems.getDefault());
+	}
+
+	/**
+	 * Searches for files matching name pattern. Name pattern also may contain path of directory, where file search
+	 * should be performed, e.g., C:/Tomcat/logs/localhost_access_log.*.txt. If no path is defined (just file name
+	 * pattern) then files are searched in {@code System.getProperty("user.dir")}. Files array is ordered by file
+	 * modification timestamp in ascending order.
+	 *
+	 * @param namePattern
+	 *            name pattern to find files
+	 * @param fs
+	 *            file system to use
+	 *
+	 * @return array of found files
+	 *
 	 * @see WildcardFileFilter#WildcardFileFilter(String)
 	 * @see File#listFiles(FilenameFilter)
 	 */
-	public static File[] searchFiles(String namePattern) {
-		File f = new File(namePattern);
-		File dir = f.getAbsoluteFile().getParentFile();
-		File[] activityFiles = dir.listFiles((FilenameFilter) new WildcardFileFilter(f.getName()));
+	public static Path[] searchFiles(String namePattern, FileSystem fs) throws IOException {
+		if (fs == null) {
+			fs = FileSystems.getDefault();
+		}
+		Path f;
+		Path dir;
+		String glob;
+		try {
+			f = fs.getPath(namePattern);
+			dir = f.toAbsolutePath().getParent();
+			glob = "*";
+		} catch (InvalidPathException e) {
+			int lastSeparator = Math.max(namePattern.lastIndexOf(fs.getSeparator()), namePattern.lastIndexOf("/"));
+			if (lastSeparator != -1) {
+				dir = fs.getPath(namePattern.substring(0, lastSeparator));
+				glob = namePattern.substring(lastSeparator + 1);
+			} else {
+				dir = fs.getPath(".");
+				glob = namePattern;
+			}
+		}
 
-		if (activityFiles != null) {
-			Arrays.sort(activityFiles, new Comparator<File>() {
+		List<Path> files = new ArrayList<>();
+		try (DirectoryStream<Path> activityFiles = Files.newDirectoryStream(dir, glob)) {
+			for (Path p : activityFiles) {
+				if (!Files.isDirectory(p)) {
+					files.add(p);
+				}
+			}
+		}
+
+		Collections.sort(files, new Comparator<Path>() {
 			@Override
-				public int compare(File o1, File o2) {
-					long f1ct = o1.lastModified();
-					long f2ct = o2.lastModified();
-					// NOTE: we want files to be sorted oldest->newest (ASCENDING)
-					return f1ct < f2ct ? -1 : (f1ct == f2ct ? 0 : 1);
+			public int compare(Path o1, Path o2) {
+				try {
+					return Files.getLastModifiedTime(o1).compareTo(Files.getLastModifiedTime(o2));
+				} catch (IOException e) {
+					// handle exception
+					return 0;
+				}
 			}
 		});
 
-			return activityFiles;
-		} else {
-			return new File[0];
-		}
+		return files.toArray(new Path[files.size()]);
+	}
+
+	/**
+	 * Returns list of files matching provided file name. If file name contains wildcard symbols, then
+	 * {@link #searchFiles(String)} is invoked. Used file system is {@link java.nio.file.FileSystems#getDefault()}.
+	 *
+	 * @param fileName
+	 *            file name pattern to list matching files
+	 * @return array of files matching file name
+	 *
+	 * @see #listFilesByName(String, java.nio.file.FileSystem)
+	 */
+	public static Path[] listFilesByName(String fileName) throws IOException {
+		return listFilesByName(fileName, FileSystems.getDefault());
 	}
 
 	/**
@@ -1601,15 +1686,20 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param fileName
 	 *            file name pattern to list matching files
+	 * @param fs
+	 *            file system to use
 	 * @return array of files matching file name
 	 *
 	 * @see #searchFiles(String)
 	 */
-	public static File[] listFilesByName(String fileName) {
+	public static Path[] listFilesByName(String fileName, FileSystem fs) throws IOException {
+		if (fs == null) {
+			fs = FileSystems.getDefault();
+		}
 		if (isWildcardString(fileName)) {
-			return searchFiles(fileName);
+			return searchFiles(fileName, fs);
 		} else {
-			return new File[] { new File(fileName) };
+			return new Path[] { fs.getPath(fileName) };
 		}
 	}
 
@@ -2280,7 +2370,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *         {@code false} - otherwise
 	 */
 	@SafeVarargs
-	public static <E extends Enum<E>> boolean isOneOf(Enum<E> eValue, Enum<E>...optValues) {
+	public static <E extends Enum<E>> boolean isOneOf(Enum<E> eValue, Enum<E>... optValues) {
 		if (optValues == null) {
 			return eValue == null;
 		}
@@ -2290,6 +2380,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				return true;
 			}
 		}
+
 		return false;
 	}
 

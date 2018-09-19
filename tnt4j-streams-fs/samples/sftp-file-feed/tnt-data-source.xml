@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="TokenParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityTokenParser">
+        <property name="FieldDelim" value=";"/>
+
+        <field name="Line" locator="1"/>
+        <field name="EventType" value="EVENT"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileSystemCharacterStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <!-- <property name="FileName" value="sftp://demo@test.rebex.net:22/readme.txt"/> -->
+
+        <property name="FileName" value="sftp:///readme.txt"/>
+
+        <property name="UserName" value="demo"/>
+        <property name="Host" value="test.rebex.net"/>
+        <property name="Port" value="22"/>
+        <property name="Password" value="password"/>
+
+        <property name="StrictHostKeyChecking" value="no"/>
+        <!--<property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>-->
+        <!--<property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>-->
+
+        <parser-ref name="TokenParser"/>
+    </stream>
+</tnt-data-source>
