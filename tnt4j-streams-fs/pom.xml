@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.jkoolcloud.tnt4j.streams</groupId>
         <artifactId>tnt4j-streams</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
+        <version>1.4.0</version>
     </parent>
     <packaging>jar</packaging>
 
@@ -106,11 +106,11 @@
             <artifactId>jsch-nio</artifactId>
             <version>jsch-nio-1.0.7</version>
         </dependency>
-		<dependency>
-			<groupId>com.github.robtimus</groupId>
-			<artifactId>sftp-fs</artifactId>
-			<version>sftp-fs-1.2.1</version>
-		</dependency>
+        <dependency>
+            <groupId>com.github.robtimus</groupId>
+            <artifactId>sftp-fs</artifactId>
+            <version>sftp-fs-1.2.1</version>
+        </dependency>
         <!-- HTTP file system support -->
         <!--<dependency>-->
         <!--<groupId>com.github.magicDGS</groupId>-->
