@@ -4461,7 +4461,7 @@ fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for furt
 
 ##### SFTP file feed
 
-This sample shows how to stream `sftp:` file system  provided file characters feed data as activity events.
+This sample shows how to stream `sftp:` file system provided file characters feed data as activity events.
 
 Sample files can be found in `samples/sftp-file-feed` directory (`tnt4j-streams-fs` module).
 
