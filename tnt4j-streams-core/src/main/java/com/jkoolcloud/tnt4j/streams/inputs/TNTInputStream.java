@@ -52,6 +52,11 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <li>ExecutorsTerminationTimeout - time to wait (in seconds) for a task to be inserted into bounded queue if max.
  * queue size is reached. Default value - {@code 20}. (Optional, actual only if {@code ExecutorsBoundedModel} is set to
  * {@code true})</li>
+ * <li>PingLogActivityCount - defines repetitive number of streamed activity entities to put "ping" log entry with
+ * stream statistics. Default value - {@code -1} meaning "NEVER". (Optional, can be OR'ed with
+ * {@code PingLogActivityDelay})</li>
+ * <li>PingLogActivityDelay - defines repetitive interval in seconds between "ping" log entries with stream statistics.
+ * Default value - {@code -1} meaning "NEVER". (Optional, can be OR'ed with {@code PingLogActivityCount})</li>
  * </ul>
  *
  * @param <T>
@@ -218,21 +223,21 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 	 * @see #setProperties(java.util.Collection)
 	 */
 	public void setProperty(String name, String value) {
-				if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
-					useExecutorService = Utils.toBoolean(value);
-				} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
-					executorThreadsQty = Integer.parseInt(value);
-				} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
-					executorRejectedTaskOfferTimeout = Integer.parseInt(value);
-				} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
-					executorsTerminationTimeout = Integer.parseInt(value);
-				} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
-					boundedExecutorModel = Utils.toBoolean(value);
-				} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_COUNT.equalsIgnoreCase(name)) {
-					pingLogActivitiesCount = Integer.parseInt(value);
-				} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_DELAY.equalsIgnoreCase(name)) {
-					pingLogActivitiesDelay = Integer.parseInt(value);
-				}
+		if (StreamProperties.PROP_USE_EXECUTOR_SERVICE.equalsIgnoreCase(name)) {
+			useExecutorService = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_EXECUTOR_THREADS_QTY.equalsIgnoreCase(name)) {
+			executorThreadsQty = Integer.parseInt(value);
+		} else if (StreamProperties.PROP_EXECUTOR_REJECTED_TASK_OFFER_TIMEOUT.equalsIgnoreCase(name)) {
+			executorRejectedTaskOfferTimeout = Integer.parseInt(value);
+		} else if (StreamProperties.PROP_EXECUTORS_TERMINATION_TIMEOUT.equalsIgnoreCase(name)) {
+			executorsTerminationTimeout = Integer.parseInt(value);
+		} else if (StreamProperties.PROP_EXECUTORS_BOUNDED.equalsIgnoreCase(name)) {
+			boundedExecutorModel = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_COUNT.equalsIgnoreCase(name)) {
+			pingLogActivitiesCount = Integer.parseInt(value);
+		} else if (StreamProperties.PROP_PING_LOG_ACTIVITY_DELAY.equalsIgnoreCase(name)) {
+			pingLogActivitiesDelay = Integer.parseInt(value);
+		}
 
 		output().setProperty(name, value);
 	}

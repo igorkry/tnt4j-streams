@@ -23,9 +23,10 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
- * Implements a character arrays based activity stream, where raw input source is {@link java.nio.file.FileSystem}
- * provided file {@link java.io.Reader} or {@link java.io.InputStream} (via {@link java.io.InputStreamReader}). This
- * class wraps the raw {@link java.io.Reader} with a {@link com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed}.
+ * Implements a character arrays based activity stream, where raw input source is JSR-203 compliant
+ * {@link java.nio.file.FileSystem} provided file {@link java.io.Reader} or {@link java.io.InputStream} (via
+ * {@link java.io.InputStreamReader}). This class wraps the raw {@link java.io.Reader} with a
+ * {@link com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed}.
  * <p>
  * This activity stream requires parsers that can support {@link java.io.Reader}s as the source for activity data.
  * <p>

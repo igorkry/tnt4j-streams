@@ -4461,7 +4461,7 @@ fields are passed to `RFH2FoldersParser` and `JMSPayloadParser` parsers for furt
 
 ##### SFTP file feed
 
-This sample shows how to stream `SFTP` provided file characters feed data as activity events.
+This sample shows how to stream `sftp:` file system  provided file characters feed data as activity events.
 
 Sample files can be found in `samples/sftp-file-feed` directory (`tnt4j-streams-fs` module).
 
@@ -4469,7 +4469,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/sftp-file-feed
 
 ##### SCP(SSH) file feed
 
-This sample shows how to stream `SCP` (over SSH) provided file characters feed data as activity events.
+This sample shows how to stream `scp:` file system (over SSH) provided file characters feed data as activity events.
 
 Sample files can be found in `samples/ssh-file-feed` directory (`tnt4j-streams-fs` module).
 
@@ -4477,7 +4477,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-feed/
 
 ##### SCP(SSH) file lines
 
-This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+This sample shows how to stream `scp:` file system (over SSH) provided file lines as activity events.
 
 Sample files can be found in `samples/ssh-file-lines` directory (`tnt4j-streams-fs` module).
 
@@ -4485,7 +4485,7 @@ See sample [data source configuration](./tnt4j-streams-fs/samples/ssh-file-lines
 
 ##### Zip file lines
 
-This sample shows how to stream `SCP` (over SSH) provided file lines as activity events.
+This sample shows how to stream `zip:` file system provided file lines as activity events.
 
 Sample files can be found in `samples/zip-fs-file-lines` directory (`tnt4j-streams-fs` module).
 
@@ -4806,6 +4806,10 @@ These parameters are applicable to all types of streams.
     Actual only if `UseExecutors` is set to `true`
         * `ExecutorRejectedTaskOfferTimeout` - time to wait (in seconds) for a task to be inserted into bounded queue if max. queue size is 
         reached. Default value - `20sec`. (Optional) Actual only if `ExecutorsBoundedModel` is set to `true`.
+* `PingLogActivityCount` - defines repetitive number of streamed activity entities to put "ping" log entry with stream statistics. Default 
+value - `-1` meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityDelay`.
+* `PingLogActivityDelay` - defines repetitive interval in seconds between "ping" log entries with stream statistics. Default value - `-1` 
+meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityCount`.
 
     sample:
 ```xml
@@ -4814,6 +4818,9 @@ These parameters are applicable to all types of streams.
     <property name="ExecutorsTerminationTimeout" value="20"/>
     <property name="ExecutorsBoundedModel" value="true"/>
     <property name="ExecutorRejectedTaskOfferTimeout" value="20"/>
+    <!-- to define "ping" log entry on every 200th streamed activity entity, or if 30sec. elapsed since last "ping" entry -->
+    <property name="PingLogActivityCount" value="200"/>
+    <property name="PingLogActivityDelay" value="30"/>
 ```
 
 ##### Stream cache related parameters
@@ -5001,10 +5008,7 @@ Supported file systems:
  * any other JSR-203 compliant (requires manually add file system implementing libs to classpath), but those are not tested and may not 
  work "out of the box"
 
-##### JSR-203 File Characters/Bytes feed stream parameters
-
- * `FileName` - the system-dependent file name: path or URI. (Required)
- * `RestartOnInputClose` - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
+General stream configuration parameters:
  * `Host` - remote machine host name/IP address. Default value - `localhost`. (Optional - can be defined over stream property `FileName`, 
  e.g. `ftp://username:password@hostname:port/[FILE_PATH]`
  * `Port` - remote machine port number to accept connection. (Optional - can be defined over stream property `FileName`, e.g. 
@@ -5021,7 +5025,7 @@ Supported file systems:
     `/etc/ssh/ssh_known_hosts` file is poorly maintained or connections to new hosts are frequently made. This option forces the user to 
     manually add all new hosts.
     * If flag value is set to `no`, ssh will automatically add new host keys to the user known hosts files.
- 
+
     The host keys of known hosts will be verified automatically in all cases. The flag value must be set to `yes` or  `no`. Default value - 
     `no`. (Optional)
  * `IdentityFromPrivateKey` - private key file to be used for remote machine secure connection initialization. (Optional)
@@ -5029,65 +5033,49 @@ Supported file systems:
  * `ResolveAbsolutePath` - flag indicating whether to resolve absolute file path when relative one is provided. Default value - `false`. 
  (Optional)
  * set of target JSR-203 compliant `FileSystemProvider` supported properties
+
+   sample:
+```xml
+    <property name="Host" value="172.16.6.26"/>
+    <property name="Port" value="22"/>
+    <property name="UserName" value="osboxes"/>
+    <property name="Password" value="slabs"/>
+    <property name="Scheme" value="sftp"/>
+    <property name="StrictHostKeyChecking" value="no"/>
+    <property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>
+    <property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>
+    <property name="ResolveAbsolutePath" value="true"/>
+```
+
+##### JSR-203 File Characters/Bytes feed stream parameters
+
+JSR-203 File Characters feed stream class name is `com.jkoolcloud.tnt4j.streams.inputs.FileSystemCharacterStream`.
+
+JSR-203 File Bytes feed stream class name is `com.jkoolcloud.tnt4j.streams.inputs.FileSystemByteInputStream`.
+
+ * `FileName` - the system-dependent file name: path or URI. (Required)
+ * `RestartOnInputClose` - flag indicating to restart stream if input socked gets closed. Default value - `false`. (Optional)
 
     sample:
 ```xml
     <property name="FileName" value="ssh.unix:///home/osboxes/single-log/orders.log"/>
     <property name="RestartOnInputClose" value="true"/>
-    <property name="UserName" value="osboxes"/>
-    <property name="Host" value="172.16.6.26"/>
-    <property name="Port" value="22"/>
-    <property name="Password" value="slabs"/>
-    <property name="StrictHostKeyChecking" value="no"/>
-    <property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>
-    <property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>
-    <property name="ResolveAbsolutePath" value="true"/>
 ```
 
-Also see ['Generic streams parameters'](#generic-streams-parameters).
+Also see [JSR-203 FileSystem streams parameters](#jsr-203-filesystem-streams-parameters) and ['Generic streams parameters'](#generic-streams-parameters).
 
 ##### JSR-203 File line stream parameters
 
+JSR-203 File Line stream class name is `com.jkoolcloud.tnt4j.streams.inputs.FileSystemLineStream`.
+
  * `FileName` - the system-dependent file name or file name pattern defined using wildcard character `*`: path or URI. (Required)
- * `Host` - remote machine host name/IP address. Default value - `localhost`. (Optional - can be defined over stream property `FileName`, 
- e.g. `ftp://username:password@hostname:port/[FILE_PATH]`
- * `Port` - remote machine port number to accept connection. (Optional - can be defined over stream property `FileName`, e.g. 
- `ftp://username:password@hostname:port/[FILE_PATH]`
- * `UserName` - remote machine authorized user name. (Optional - can be defined over stream property `FileName`, e.g. 
- `ftp://username:password@hostname:port/[FILE_PATH]`
- * `Password` - remote machine authorized user password. (Optional - can be defined over stream property `FileName`, e.g. 
- `ftp://username:password@hostname:port/[FILE_PATH]`
- * `Scheme` - file access protocol scheme name. Default value - `scp`. (Optional - can be defined over stream property `FileName`, e.g. 
- `ssh.unix:///[FILE_PATH]`
- * `StrictHostKeyChecking` - flag indicating whether strictly check add remote host keys changes against ssh know hosts.
-    * If flag value is set to `yes`, ssh will never automatically add host keys to the `~/.ssh/known_hosts` file and will refuse to connect 
-    to a host whose host key has changed. This provides maximum protection against trojan horse attacks, but can be troublesome when the 
-    `/etc/ssh/ssh_known_hosts` file is poorly maintained or connections to new hosts are frequently made. This option forces the user to 
-    manually add all new hosts.
-    * If flag value is set to `no`, ssh will automatically add new host keys to the user known hosts files.
- 
-    The host keys of known hosts will be verified automatically in all cases. The flag value must be set to `yes` or  `no`. Default value - 
-    `no`. (Optional)
- * `IdentityFromPrivateKey` - private key file to be used for remote machine secure connection initialization. (Optional)
- * `KnownHosts` - known hosts file path. (Optional)
- * `ResolveAbsolutePath` - flag indicating whether to resolve absolute file path when relative one is provided. Default value - `false`. 
- (Optional)
- * set of target JSR-203 compliant `FileSystemProvider` supported properties
 
     sample:
 ```xml
     <property name="FileName" value="ssh.unix:///home/osboxes/single-log/orders.log"/>
-    <property name="UserName" value="osboxes"/>
-    <property name="Host" value="172.16.6.26"/>
-    <property name="Port" value="22"/>
-    <property name="Password" value="slabs"/>
-    <property name="StrictHostKeyChecking" value="no"/>
-    <property name="KnownHosts" value="/home/joe/.ssh/known_hosts"/>
-    <property name="IdentityFromPrivateKey" value="/home/joe/.ssh/id_dsa"/>
-    <property name="ResolveAbsolutePath" value="true"/>
 ```
 
-Also see ['File line stream parameters (also from Hdfs)'](#file-line-stream-parameters-also-from-hdfs)
+Also see [JSR-203 FileSystem streams parameters](#jsr-203-filesystem-streams-parameters) and ['File line stream parameters (also from Hdfs)'](#file-line-stream-parameters-also-from-hdfs)
 
 #### Standard Java input stream parameters
 

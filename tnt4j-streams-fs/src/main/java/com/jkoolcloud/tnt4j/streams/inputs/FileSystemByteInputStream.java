@@ -23,9 +23,9 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 
 /**
- * Implements a byte arrays based activity stream, where raw input source is {@link java.nio.file.FileSystem} provided
- * file {@link java.io.InputStream}. This class wraps the raw {@link java.io.InputStream} with a
- * {@link com.jkoolcloud.tnt4j.streams.inputs.feeds.StreamFeed}.
+ * Implements a byte arrays based activity stream, where raw input source is JSR-203 compliant
+ * {@link java.nio.file.FileSystem} provided file {@link java.io.InputStream}. This class wraps the raw
+ * {@link java.io.InputStream} with a {@link com.jkoolcloud.tnt4j.streams.inputs.feeds.StreamFeed}.
  * <p>
  * This activity stream requires parsers that can support {@link java.io.InputStream}s as the source for activity data.
  * <p>

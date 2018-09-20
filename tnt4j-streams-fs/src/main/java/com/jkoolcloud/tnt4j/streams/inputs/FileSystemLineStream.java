@@ -23,9 +23,9 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
- * Implements a {@link java.nio.file.FileSystem} provided files lines activity stream, where each line of the file is
- * assumed to represent a single activity or event which should be recorded. Stream reads changes from defined files
- * every "FileReadDelay" property defined seconds (default is 15sec.).
+ * Implements a JSR-203 compliant {@link java.nio.file.FileSystem} provided files lines activity stream, where each line
+ * of the file is assumed to represent a single activity or event which should be recorded. Stream reads changes from
+ * defined files every "FileReadDelay" property defined seconds (default is 15sec.).
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
