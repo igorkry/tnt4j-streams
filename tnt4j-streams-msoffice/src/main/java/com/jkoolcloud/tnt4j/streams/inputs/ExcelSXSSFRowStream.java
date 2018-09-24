@@ -221,9 +221,9 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 			skipFilteredActivities();
 		}
 
-		if (rowRange.getTo().compareTo(rRowNum) < 0) {
-			offerDieMarker();
-		}
+		// if (rowRange.getTo().compareTo(rRowNum) < 0) {
+		// //TODO jump to next available sheet
+		// }
 
 		return false;
 	}
@@ -270,6 +270,7 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 							"ExcelSXSSFRowStream.file.read.failed", fileName, e);
 				}
 				ended = true;
+				offerDieMarker();
 			}
 		});
 		excelFileReader.start();

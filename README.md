@@ -5895,6 +5895,19 @@ This parser resolved data map may contain such entries:
 by [Activity XML parser](#activity-xml-parser)
 * `jmsMsgPayload` - JMS JMS message payload data: de-serialized object or bytes if serialisation can't be done.
 
+#### Activity MS Excel parser
+
+* `UseFormattedCellValue` - indicator flag stating to use formatted cell value (always `String`) as field/locator RAW data. When this flag 
+is set to `true` - original cell value provided by Apache POI API is used e.g., making all numeric cells values as decimals (`double`) what 
+is not very comfortable when entered cell value is `integer`. Default value - `false`. (Optional)
+
+    sample:
+```xml
+    <property name="UseFormattedCellValue" value="true"/>
+```
+
+Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
+
 ### Pre-parsers
 
 `TNT4J-Streams` architecture has entity `pre-parser` defining data transformation algorithm to convert Raw activity data to format, 

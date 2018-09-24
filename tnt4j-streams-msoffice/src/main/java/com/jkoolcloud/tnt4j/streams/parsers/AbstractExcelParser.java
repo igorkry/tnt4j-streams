@@ -18,9 +18,16 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.*;
+
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.streams.configure.MsOfficeParserProperties;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Base class for abstract activity data parser that assumes each activity data item can MS Excel
@@ -29,37 +36,52 @@ import org.apache.poi.ss.usermodel.*;
  * represented by a {@link org.apache.poi.ss.usermodel.Cell} and the sheet name and cell identifier (row number and
  * column letter) is used to map cell(s) contained data into its corresponding activity field.
  * <p>
- * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
- * parsers).
+ * This parser supports the following configuration properties (in addition to those supported by
+ * {@link GenericActivityParser}):
+ * <ul>
+ * <li>UseFormattedCellValue - indicator flag stating to use formatted cell value (always {@link java.lang.String}) as
+ * field/locator RAW data. When this flag is set to {@code true} - original cell value provided by Apache POI API is
+ * used e.g., making all numeric cells values as decimals ({@code double}) what is not very comfortable when entered
+ * cell value is integer. Default value - {@code false}. (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
 public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 
+	private boolean useFormattedCellValue = false;
+
+	private DataFormatter formatter;
+	protected final Lock formatLock = new ReentrantLock();
 	private FormulaEvaluator evaluator;
-	protected final ReentrantLock evaluationLock = new ReentrantLock();
+	protected final Lock evaluationLock = new ReentrantLock();
 
 	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
-		// if (CollectionUtils.isNotEmpty(props)) {
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
-		// // no any additional properties are required yet.
-		// if (false) {
-		// logger().log(OpLevel.DEBUG,
-		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-		// name, value);
-		// }
-		// }
-		// }
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				String name = prop.getKey();
+				String value = prop.getValue();
+
+				if (MsOfficeParserProperties.PROP_USE_FORMATTED_VALUE.equalsIgnoreCase(name)) {
+					useFormattedCellValue = Utils.toBoolean(value);
+
+					logger().log(OpLevel.DEBUG,
+							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
+							name, value);
+				}
+			}
+		}
 	}
 
 	@Override
 	public Object getProperty(String name) {
+		if (MsOfficeParserProperties.PROP_USE_FORMATTED_VALUE.equalsIgnoreCase(name)) {
+			return useFormattedCellValue;
+		}
+
 		return super.getProperty(name);
 	}
 
@@ -71,6 +93,26 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	 * @return evaluated cell value
 	 */
 	protected Object getCellValue(Cell cell) {
+		if (useFormattedCellValue) {
+			return getFormattedCellValue(cell);
+		} else {
+			return getOriginalCellValue(cell);
+		}
+	}
+
+	private String getFormattedCellValue(Cell cell) {
+		formatLock.lock();
+		try {
+			if (formatter == null) {
+				formatter = new DataFormatter();
+			}
+			return formatter.formatCellValue(cell, getEvaluator(cell));
+		} finally {
+			formatLock.unlock();
+		}
+	}
+
+	private Object getOriginalCellValue(Cell cell) {
 		switch (cell.getCellTypeEnum()) {
 		case BOOLEAN:
 			return cell.getBooleanCellValue();
@@ -87,8 +129,7 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		}
 	}
 
-	private Object evaluateCellFormula(Cell cell) {
-		CellValue cellValue;
+	private FormulaEvaluator getEvaluator(Cell cell) {
 		evaluationLock.lock();
 		try {
 			if (evaluator == null) {
@@ -96,7 +137,17 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 				evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 			}
 
-			cellValue = evaluator.evaluate(cell);
+			return evaluator;
+		} finally {
+			evaluationLock.unlock();
+		}
+	}
+
+	private Object evaluateCellFormula(Cell cell) {
+		CellValue cellValue;
+		evaluationLock.lock();
+		try {
+			cellValue = getEvaluator(cell).evaluate(cell);
 		} finally {
 			evaluationLock.unlock();
 		}
