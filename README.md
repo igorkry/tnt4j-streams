@@ -6315,7 +6315,7 @@ defined dependencies automatically.
 ### Manually installed dependencies
 Some of required and optional dependencies may be not available in public [Maven Repository](http://repo.maven.apache.org/maven2/). In this 
 case we would recommend to download those dependencies manually into module's `lib` directory and install into local maven repository by 
-running maven script `lib/pom.xml` with `install` goal. For example see [`tnt4j-streams/tnt4j-streams-wmq/lib/pom.xml`](tnt4j-streams-wmq/lib/pom.xml) 
+running maven script `lib/pom.xml` with `install` goal. For example see [`tnt4j-streams/tnt4j-streams-elastic-beats/lib/pom.xml`](tnt4j-streams-elastic-beats/lib/pom.xml) 
 how to do this.
 
 #### `Elastic-Beats` module
@@ -6331,37 +6331,6 @@ Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-ela
 ```
     lib
      |- logstash-input-beats-5.0.13.jar
-```
-(O) marked libraries are optional
-
-#### `WMQ` module
-
-**NOTE:** Because this module requires manually downloaded libraries, it is commented out in main project pom file `tnt4j-streams/pom.xml` 
-by default. If you want to use it uncomment line `<module>tnt4j-streams-wmq</module>` of `pom.xml` file. But `WMQ` module will be ready to 
-build only when manually downloaded libraries will be installed to local maven repository.
-
-What to download manually or copy from your existing IBM MQ installation:
-* IBM MQ 8.0 or 9.0
-
-Download the above libraries and place into the `tnt4j-streams/tnt4j-streams-wmq/lib` directory like this:
-```
-    lib
-     + ibm.mq-v8.0
-         |- com.ibm.mq.allclient.jar
-         |- com.ibm.mq.traceControl.jar
-         |- fscontext.jar
-         |- jms.jar
-         |- JSON4J.jar
-         |- providerutil.jar
-     + ibm.mq-v9.0
-         |- bcpkix-jdk15on-152.jar
-         |- bcprov-jdk15on-152.jar
-         |- com.ibm.mq.allclient.jar
-         |- com.ibm.mq.traceControl.jar
-         |- fscontext.jar
-         |- jms.jar
-         |- JSON4J.jar
-         |- providerutil.jar
 ```
 (O) marked libraries are optional
 
