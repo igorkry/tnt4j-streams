@@ -49,7 +49,8 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
 /**
  * Implements an activity data parser that assumes each activity data item is an {@link PCFContent} ({@link PCFMessage}
  * or {@link MQCFGR}) where each field is represented by a PCF parameter and the PCF parameter MQ constant name/value is
- * used to map each field into its corresponding activity field.
+ * used to map each field into its corresponding activity field. PCF parameter data contained Mqi structures are also
+ * supported to retrieve values.
  * <p>
  * PCF message can have grouped parameters - all message will have header {@link MQCFH} and may have {@link MQCFGR} type
  * parameters. To access PCF message header fields use 'MQCFH' expression with header field name separated using
@@ -65,8 +66,9 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * <li>TranslateNumValues - indicates that parser should translate resolved numeric values to corresponding MQ constant
  * names if possible and field/locator data type is 'String' (meaning translated value can be assigned to field). If
  * value of particular field should be left as number (e.g., {@code ReasonCode}), use field/locator attribute
- * {@code datatype="Number"}. (Optional)</li>
- * <li>SignatureDelim - signature fields delimiter. (Optional)</li>
+ * {@code datatype="Number"}. Default value - {@code true}. (Optional)</li>
+ * <li>SignatureDelim - signature fields delimiter. Default value - {@value GenericActivityParser#DEFAULT_DELIM}.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -178,6 +180,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	/**
 	 * Resolves PCF parameter value from provided {@link PCFContent}: {@link PCFMessage} or {@link MQCFGR}.
+	 * <p>
+	 * Having last locator path token referring {@link MQCFGR} structure and field bound stacked parser supports
+	 * {@link MQCFGR} type data, complete structure is returned. In other cases
+	 * {@link com.ibm.mq.pcf.PCFParameter#getValue()} is used to retrieve PCF parameter value.
+	 * <p>
+	 * PCF parameter data contained Mqi structures are also supported to retrieve values.
 	 *
 	 * @param locator
 	 *            field locator activity field locator
@@ -193,6 +201,11 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 *
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
+	 *
+	 * @see #resolvePCFParamValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator, com.ibm.mq.pcf.PCFParameter)
+	 * @see #resolveMqiStructValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator,
+	 *      com.ibm.mq.pcf.PCFParameter, String[], int, com.ibm.mq.pcf.PCFContent,
+	 *      com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected Object getParamValue(ActivityFieldLocator locator, String[] path, PCFContent pcfContent, int i,
 			ActivityContext cData) throws ParseException {
@@ -210,11 +223,15 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				Integer paramId = WmqUtils.getParamId(paramStr);
 				PCFParameter param = pcfContent.getParameter(paramId);
 
-				if (!isLastPathToken(path, i) && param instanceof MQCFGR) {
-					val = getParamValue(locator, path, (MQCFGR) param, ++i, cData);
-				} else {
-					if (isMqiStructParam(paramStr) && !isLastPathToken(path, i)) {
+				if (!isLastPathToken(path, i)) {
+					if (param instanceof MQCFGR) {
+						val = getParamValue(locator, path, (MQCFGR) param, ++i, cData);
+					} else if (isMqiStructParam(paramStr)) {
 						val = resolveMqiStructValue(locator, param, path, i, pcfContent, cData);
+					}
+				} else {
+					if (param instanceof MQCFGR && isDataSupportedByStackedParser(cData.getField(), param)) {
+						val = param;
 					} else {
 						val = resolvePCFParamValue(locator, param);
 					}
@@ -301,6 +318,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 *            PCF parameter to resolve value from
 	 * @return resolved PCF parameter value
 	 *
+	 * @see #getParamValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator, String[],
+	 *      com.ibm.mq.pcf.PCFContent, int, com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 * @see com.jkoolcloud.tnt4j.streams.utils.WmqUtils#getString(byte[], Object)
 	 */
 	protected Object resolvePCFParamValue(ActivityFieldLocator locator, PCFParameter param) {
@@ -470,6 +489,9 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * @return resolved MQI structure value
 	 * @throws ParseException
 	 *             if exception occurs while resolving raw data value
+	 *
+	 * @see #getParamValue(com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator, String[],
+	 *      com.ibm.mq.pcf.PCFContent, int, com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
 	protected Object resolveMqiStructValue(ActivityFieldLocator locator, PCFParameter param, String[] path, int i,
 			PCFContent pcfContent, ActivityContext cData) throws ParseException {

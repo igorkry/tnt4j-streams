@@ -3314,8 +3314,8 @@ covered by this set will be filtered out from activities stream.
 
 `SuppressBrowseGets` property defines flag indicating whether to exclude WMQ **BROWSE** type **GET** operation traces from streaming.
 
-`TraceEventsParser` is of type `WmqTraceParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
-MQCFGR PCF structures.
+`TraceEventsParser` is of type `ActivityPCFParser` meaning that it will parse PCF messages containing MQ Trace Events data contained within 
+`MQCFGR` PCF structures.
 
 `TranslateNumValues` property defines that parser should translate resolved numeric values to corresponding MQ constant names if possible.
 

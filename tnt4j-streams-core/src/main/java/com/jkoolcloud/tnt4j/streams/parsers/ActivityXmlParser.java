@@ -134,6 +134,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		});
 
 		xPath = StreamsXMLUtils.getStreamsXPath();
+
 		if (namespaces == null) {
 			if (xPath.getNamespaceContext() instanceof NamespaceMap) {
 				namespaces = (NamespaceMap) xPath.getNamespaceContext();
@@ -142,8 +143,10 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				xPath.setNamespaceContext(namespaces);
 			}
 		}
+
 		namespaces.setPrefixUriMapping(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
 		namespaces.setPrefixUriMapping("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI); // NON-NLS
+
 		namespaces.addPrefixUriMappings(uNamespaces);
 	}
 
@@ -402,8 +405,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	}
 
 	/**
-	 * Retrieves provided {@code node} XML text, if this parser bound stacked parser does not support {@link Node} type
-	 * data. When stacked parser supports {@link Node} type data, parameters defined {@code node} instance is returned.
+	 * Retrieves provided {@code node} XML text, if field bound stacked parser does not support {@link Node} type data.
+	 * When stacked parser supports {@link Node} type data, parameters defined {@code node} instance is returned.
 	 *
 	 * @param node
 	 *            XML document node to retrieve text on demand

@@ -311,8 +311,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		for (int i = 0; i < fieldList.size(); i++) {
 			ActivityField af = fieldList.get(i);
 
-			boolean fActivity = af.hasActivityLocators() || af.hasActivityTransformations();
-			boolean fCache = af.hasCacheLocators() || af.isResolvingValueOverTransformation();
+			boolean fNoValueLocators = af.isResolvingValueOverTransformation();
+			boolean fActivity = af.hasActivityLocators() || (af.hasActivityTransformations() && !fNoValueLocators);
+			boolean fCache = af.hasCacheLocators() || fNoValueLocators;
 			boolean fRAW = !fActivity && !fCache;
 
 			if (fRAW) {
