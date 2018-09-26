@@ -43,15 +43,15 @@
           embedded parser as shown in the example below).  Messages are translated to a local character 
             set and if a XQH/DLH exist, they are removed.
           -->
-            
+
         <field name="CodedCharSetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
-         <field name="CodedCharSetValue" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number" transparent="true"/>
-          <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
-               <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
+        <field name="CodedCharSetValue" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"
+               transparent="true"/>
+        <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
+            <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
                     WmqUtils.getString($fieldValue, ${CodedCharSetValue},true)
-                    ]]>
-               </field-transform>
-          </field>
+            ]]></field-transform>
+        </field>
 
         <!--  Uncomment the following to pass a binary copy of the message data with the event   -->
         <!--field name="BinaryMessage" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary"-->
@@ -216,9 +216,9 @@
             Using DerivedName will use the resolved queue name when it is available. 
             Using MQCACF_OBJECT_NAME will use the alias, dynamic or remote queue used by the application. 
                Using MQCACF_RESOLVED_LOCAL_Q_NAME will use a local resolved queue associated with the request -->
-            <field-locator locator="DerivedName" locator-type="Activity"/> 
+            <field-locator locator="DerivedName" locator-type="Activity"/>
             <!--field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/> -->
-               <!--field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME" locator-type="Label"/>  -->
+            <!--field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_NAME" locator-type="Label"/>  -->
         </field>
 
         <!-- general message fields -->
@@ -236,8 +236,8 @@
                 ts:getFileName($fieldValue)
             </field-transform>
         </field>
-          
-          <field name="ChannelType" locator="MQIACH_CHANNEL_TYPE" locator-type="Label">
+
+        <field name="ChannelType" locator="MQIACH_CHANNEL_TYPE" locator-type="Label">
             <field-map source="1" target="SENDER"/>
             <field-map source="2" target="SERVER"/>
             <field-map source="3" target="RECEIVER"/>
@@ -245,18 +245,17 @@
             <field-map source="7" target="SVRCONN"/>
             <field-map source="8" target="CLUSRCVR"/>
             <field-map source="9" target="CLUSSDR"/>
-          </field>
-          
-          <!-- provide application name without path for tracking -->
-           <field name="ChannelName" locator="MQCACH_CHANNEL_NAME" locator-type="Label"/>
-              
-          <field name="ApplName" value="">
+        </field>
+
+        <!-- provide application name without path for tracking -->
+        <field name="ChannelName" locator="MQCACH_CHANNEL_NAME" locator-type="Label"/>
+
+        <field name="ApplName" value="">
             <field-transform lang="groovy" name="ApplTransform"><![CDATA[
                 ${ChannelType} == null ? ${ProgramName} : ${ChannelType}+"_"+${ChannelName}
             ]]></field-transform>
-        </field>     
-                
-                
+        </field>
+
         <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
                units="Microseconds" transparent="true"/>
 
@@ -276,14 +275,15 @@
         <field name="PutTime" formattingPattern="{0} {1}" format="yyyyMMdd HHmmss" datatype="DateTime">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
-        </field> 
+        </field>
 
         <field name="ElapsedTime" value="0"/>
 
         <!-- record actual elapsed time as a number only, not time stamp -->
         <field name="QMgrOpDuration" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds">
             <field-transform name="ElapTransform" lang="groovy"><![CDATA[
-               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec} ]]></field-transform>
+               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
+            ]]></field-transform>
         </field>
         <!-- start time is only precise to seconds so use highrestime if available -->
         <field name="StartTime" value="">
@@ -293,7 +293,8 @@
         </field>
         <field name="EndTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
-                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}]]></field-transform>
+                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}
+            ]]></field-transform>
         </field>
 
         <!-- activity trace fields -->
@@ -333,7 +334,7 @@
             <field-map source="MQCC_WARNING" target="WARNING"/>
             <field-map source="" target="ERROR"/>
         </field>
-        
+
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
         <field name="ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
         <field name="OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
