@@ -272,7 +272,7 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
         </field>
 
-        <field name="PutTime" formattingPattern="{0} {1}" format="yyyyMMdd HHmmss" datatype="DateTime">
+        <field name="PutTime" formattingPattern="{0} {1}" format="yyyyMMdd HHmmssSS" datatype="DateTime" timezone="GMT">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
         </field>
