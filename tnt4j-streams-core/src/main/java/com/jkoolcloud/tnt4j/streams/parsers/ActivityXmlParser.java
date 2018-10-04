@@ -486,13 +486,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		if (attrsMap != null && attrsMap.getLength() > 0) {
 			ActivityFieldLocator locCopy = locator.clone();
 
-			Node attr = attrsMap.getNamedItem(DATA_TYPE_ATTR);
+			Node attr = getFormattingAttr(attrsMap, DATA_TYPE_ATTR);
 			String attrVal = attr == null ? null : attr.getTextContent();
 			if (StringUtils.isNotEmpty(attrVal)) {
 				locCopy.setDataType(ActivityFieldDataType.valueOf(attrVal));
 			}
 
-			attr = attrsMap.getNamedItem(FORMAT_ATTR);
+			attr = getFormattingAttr(attrsMap, FORMAT_ATTR);
 			attrVal = attr == null ? null : attr.getTextContent();
 			if (StringUtils.isNotEmpty(attrVal)) {
 				attr = attrsMap.getNamedItem(LOCALE_ATTR);
@@ -501,7 +501,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				locCopy.setFormat(attrVal, StringUtils.isEmpty(attrLVal) ? locator.getLocale() : attrLVal);
 			}
 
-			attr = attrsMap.getNamedItem(UNITS_ATTR);
+			attr = getFormattingAttr(attrsMap, UNITS_ATTR);
 			attrVal = attr == null ? null : attr.getTextContent();
 			if (StringUtils.isNotEmpty(attrVal)) {
 				locCopy.setUnits(attrVal);
@@ -514,6 +514,21 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 		}
 
 		return strValue.trim();
+	}
+
+	private static Node getFormattingAttr(NamedNodeMap attrsMap, String attrName) {
+		if (attrsMap != null) {
+			int attrsCount = attrsMap.getLength();
+
+			for (int i = 0; i < attrsCount; i++) {
+				Node attr = attrsMap.item(i);
+				if (attr.getNodeName().equalsIgnoreCase(attrName)) {
+					return attr;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**

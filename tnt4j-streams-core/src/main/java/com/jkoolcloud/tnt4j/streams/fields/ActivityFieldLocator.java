@@ -16,12 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -651,15 +653,18 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * @see ActivityFieldFormatType
 	 */
 	protected Object formatBinaryValue(Object value) {
-		if (value != null) {
+		if (value instanceof String) {
 			if (builtInFormat == ActivityFieldFormatType.base64Binary) {
 				value = Utils.base64Decode(String.valueOf(value));
 			} else if (builtInFormat == ActivityFieldFormatType.hexBinary) {
 				value = Utils.decodeHex(String.valueOf(value));
-			} else if (builtInFormat == ActivityFieldFormatType.string) {
+			} else { // if (builtInFormat == ActivityFieldFormatType.string) {
 				value = String.valueOf(value).getBytes();
 			}
 		}
+		// else if (value instanceof Serializable) {
+		// return SerializationUtils.serialize((Serializable) value);
+		// }
 
 		return value;
 	}

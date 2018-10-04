@@ -250,9 +250,7 @@ public class WmqUtils {
 		Object[] sigItems = null;
 		if (value instanceof String) {
 			String sigStr = (String) value;
-			if (sigStr.contains(sigDelim)) {
-				sigItems = sigStr.split(Pattern.quote(sigDelim));
-			}
+			sigItems = sigStr.split(Pattern.quote(sigDelim));
 		} else {
 			sigItems = Utils.makeArray(value);
 		}
