@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import static org.junit.Assert.*;
 
 import java.security.MessageDigest;
+import java.util.Date;
 
 import org.junit.Test;
 
@@ -59,6 +60,22 @@ public class WmqUtilsTest {
 	public void testComputeSignatureValueNull() throws Exception {
 		assertNull(WmqUtils.computeSignature(null, ",", DefaultEventSinkFactory.defaultEventSink(WmqUtilsTest.class))); // NON-NLS
 
+	}
+
+	@Test
+	public void testComputeSignatureValueBArray() throws Exception {
+		Object sig = WmqUtils.computeSignature(new byte[] { 0x15, 0x22, 0x34 }, ",",
+				DefaultEventSinkFactory.defaultEventSink(WmqUtilsTest.class)); // NON-NLS
+
+		assertEquals(sig, "BlVu5i3AhAbaIdNXGjx2wg==");
+	}
+
+	@Test
+	public void testComputeSignatureValueOArray() throws Exception {
+		Object sig = WmqUtils.computeSignature(new Object[] { "Something", 0x22, new Date(123456789) }, ",",
+				DefaultEventSinkFactory.defaultEventSink(WmqUtilsTest.class)); // NON-NLS
+
+		assertEquals(sig, "21ZQKAr6Gq2B2T4Qu7IQqg==");
 	}
 
 	@Test

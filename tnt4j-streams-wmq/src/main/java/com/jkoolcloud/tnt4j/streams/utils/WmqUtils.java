@@ -248,13 +248,13 @@ public class WmqUtils {
 	 */
 	public static Object computeSignature(Object value, String sigDelim, EventSink logger) {
 		Object[] sigItems = null;
-		if (value instanceof Object[]) {
-			sigItems = (Object[]) value;
-		} else if (value instanceof String) {
+		if (value instanceof String) {
 			String sigStr = (String) value;
 			if (sigStr.contains(sigDelim)) {
 				sigItems = sigStr.split(Pattern.quote(sigDelim));
 			}
+		} else {
+			sigItems = Utils.makeArray(value);
 		}
 
 		if (Utils.isEmptyContent(sigItems)) {
