@@ -65,6 +65,9 @@
                             <include>*-javadoc.jar</include>
                             <include>*-all.jar</include>
                         </includes>
+                        <excludes>
+                            <exclude>original-*.jar</exclude>
+                        </excludes>
                     </fileSet>
                 </fileSets>
             </sources>
