@@ -35,6 +35,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -50,6 +51,17 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * string. Value can be one of: {@code "MATCH"} - pattern should match complete input string, or {@code "FIND"} -
  * pattern has to match sub-sequence within input string. Default value - '{@code MATCH}'. (Optional)</li>
  * </ul>
+ * <p>
+ * When {@code "MatchStrategy=FIND"} is used and regex returns multiple matches, is it possible to access individual
+ * match group by defining {@code "Label"} type locator delimiting match index ({@code 1} can be omitted since it is
+ * default one) and group descriptor (index or name) using delimiter {@code "."} e.g.:
+ * <ul>
+ * <li>{@code locator="2.2" locator-type="Label"} will return group indexed {@code 2} for match {@code 2}</li>
+ * <li>{@code locator="3.groupName" locator-type="Label"} will return group named {@code "groupName"} for match
+ * {@code 3}
+ * </ul>
+ * Note that match index starts from {@code 1} while group indices starts from {@code 0} (group {@code 0} usually means
+ * {@code "Full match"}).
  * <p>
  * This activity parser supports those activity field locator types:
  * <ul>
@@ -164,7 +176,7 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 
 	/**
 	 * Checks if <tt>matcher</tt> matches input data string using parser defined matching strategy.
-	 * 
+	 *
 	 * @param matcher
 	 *            matcher instance to use
 	 * @return {@code true} if matcher matches input data string using parser defined matching strategy
@@ -204,17 +216,19 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 			Map<String, String> matches = new HashMap<>(10);
 
 			matcher.reset();
+			int mi = 0;
 			while (matcher.find()) {
+				mi++;
 				int gc = matcher.groupCount();
 				for (int gi = 0; gi <= gc; gi++) {
 					String matchStr = matcher.group(gi);
 					if (matchStr != null) {
-						addMatchEntry(matches, String.valueOf(gi), matchStr);
+						addMatchEntry(matches, makeMatchKey(mi, gi), matchStr);
 
 						if (MapUtils.isNotEmpty(namedGroupsMap)) {
 							for (Map.Entry<String, Integer> namedGroup : namedGroupsMap.entrySet()) {
 								if (gi == namedGroup.getValue()) {
-									addMatchEntry(matches, namedGroup.getKey(), matchStr);
+									addMatchEntry(matches, makeMatchKey(mi, namedGroup.getKey()), matchStr);
 								}
 							}
 						}
@@ -231,6 +245,19 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 			pe.initCause(e);
 			throw pe;
 		}
+	}
+
+	/**
+	 * Builds match key string using provided match index and group identifier.
+	 *
+	 * @param mi
+	 *            match index
+	 * @param gid
+	 *            group identifier: index or name
+	 * @return match key string
+	 */
+	protected static String makeMatchKey(int mi, Object gid) {
+		return mi + StreamsConstants.DEFAULT_PATH_DELIM + gid;
 	}
 
 	private void addMatchEntry(Map<String, String> matches, String matchKey, String matchStr) {
@@ -263,7 +290,7 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 		if (StringUtils.isNotEmpty(locStr)) {
 			if (cData.containsKey(MATCHES_KEY)) {
 				Map<String, String> matches = (Map<String, String>) cData.get(MATCHES_KEY);
-				val = matches.get(locStr);
+				val = getMatch(matches, locStr);
 			} else {
 				Matcher matcher = cData.getData();
 				ActivityFieldLocatorType locType = locator.getBuiltInType();
@@ -283,6 +310,25 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 		}
 
 		return val;
+	}
+
+	/**
+	 * Finds match value in regex matches map using provided locator string.
+	 * <p>
+	 * If locator string does not contain match-group delimiter, default match index {@code 1} is used.
+	 *
+	 * @param matches
+	 *            regex matches map
+	 * @param locStr
+	 *            locator string:
+	 * @return matches map contained value
+	 */
+	private static Object getMatch(Map<String, String> matches, String locStr) {
+		if (!locStr.contains(StreamsConstants.DEFAULT_PATH_DELIM)) {
+			return matches.get(makeMatchKey(1, locStr));
+		} else {
+			return matches.get(locStr);
+		}
 	}
 
 	private static String groupIndex(String locStr, Matcher matcher) {

@@ -5093,7 +5093,7 @@ Also see [Generic parser parameters](#generic-parser-parameters).
 
  * `Pattern` - contains the regular expression pattern that each data item is assumed to match. (Required)
  * `MatchStrategy` - defines `pattern` created `matcher` comparison strategy used against input data string. Value can be one of: `MATCH` - 
- pattern should match complete input string, or `FIND` - pattern has to match subsequence within input string. Default value - `MATCH`. 
+ pattern should match complete input string, or `FIND` - pattern has to match sub-sequence within input string. Default value - `MATCH`. 
  (Optional)
 
     sample:
@@ -5109,6 +5109,14 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     ]]></property>
     <property name="MatchStrategy" value="MATCH"/>
 ```
+**NOTE:** when `MatchStrategy=FIND` is used and regex returns multiple matches, is it possible to access individual match group by defining 
+`Label` type locator delimiting match index (`1` can be omitted since it is default one) and group descriptor (index or name) using 
+delimiter `.` e.g.:
+
+* `locator="2.2" locator-type="Label"` will return group indexed `2` for match `2`
+* `locator="3.groupName" locator-type="Label"` will return group named `groupName` for match `3`
+
+Note that match index starts from `1` while group indices starts from `0` (group `0` usually means `Full match`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
