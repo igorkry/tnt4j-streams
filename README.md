@@ -5109,14 +5109,14 @@ Also see [Generic parser parameters](#generic-parser-parameters).
     ]]></property>
     <property name="MatchStrategy" value="MATCH"/>
 ```
-**NOTE:** when `MatchStrategy=FIND` is used and regex returns multiple matches, is it possible to access individual match group by defining 
-`Label` type locator delimiting match index (`1` can be omitted since it is default one) and group descriptor (index or name) using 
-delimiter `.` e.g.:
+**NOTE:** When `MatchStrategy=FIND` is used and regex returns multiple matches, it is possible to access an individual match group by 
+defining the `Label` type locator match index (`1` can be omitted since it is the default) and a group descriptor (an index or name), 
+following the match index after a period delimiter `.` e.g.,
 
-* `locator="2.2" locator-type="Label"` will return group indexed `2` for match `2`
-* `locator="3.groupName" locator-type="Label"` will return group named `groupName` for match `3`
+* `locator="2.2" locator-type="Label"` will return the group indexed by `2` for match `2`
+* `locator="3.groupName" locator-type="Label"` will return the group named `groupName` for match `3`
 
-Note that match index starts from `1` while group indices starts from `0` (group `0` usually means `Full match`).
+Note that the match index starts from `1`, while the group index starts from `0` (group `0` usually means `Full match`).
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
