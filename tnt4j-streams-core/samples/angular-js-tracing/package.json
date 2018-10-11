@@ -4,7 +4,7 @@
     "description": "Angulatrics plugin for TNT4J-Streams",
     "main": "angulartics-tnt4j.js",
     "dependencies": {
-        "angulartics": "^1.0.3"
+        "angulartics": "^1.2.1"
     },
     "devDependencies": {},
     "scripts": {

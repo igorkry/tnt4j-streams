@@ -77,7 +77,7 @@ Tracer.prototype.onExit = function(args) {
 };
 
 /**
- * Called when the code hits a "catch" clause (e.g., in try-catch).
+ * Called when the code hits a "catch" clause (i.e in try-catch).
  * @param {NJSTrace.catchClauseArgs} args - The event args
  * @protected
  */

@@ -22,7 +22,7 @@ module.exports = function match(filepath, patterns) {
 
 function processPatterns(patterns, filepath) {
 	var match = false;
-	patterns.forEach(function(pattern) {
+	patterns.forEach(function processPattern(pattern) {
 		// If the first character is ! mark this as exclusion
 		var exclusion = pattern.indexOf('!') === 0;
 

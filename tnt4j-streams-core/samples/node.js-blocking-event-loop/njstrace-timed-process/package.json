@@ -4,8 +4,8 @@
     "description": "njstrace add-on for blocked event loop detecting",
     "main": "jsTimedProcess.js",
     "dependencies": {
-        "idgen": "^2.0",
-        "njstrace": "^0.0.3"
+        "idgen": "^2.1.0",
+        "njstrace": "file:../njstrace"
     },
     "devDependencies": {},
     "scripts": {

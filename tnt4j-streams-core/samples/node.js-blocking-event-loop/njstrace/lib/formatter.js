@@ -40,7 +40,7 @@ Object.defineProperties(Formatter.prototype, {
 	 * See "stdout" property on {@link Formatter.Config}
 	 * @memberOf! Formatter.prototype
 	 */
-	'stdout': {
+	stdout: {
 		get: function() { return this.config.stdout; },
 		set: function(value) {
 			this.config.stdout = value;

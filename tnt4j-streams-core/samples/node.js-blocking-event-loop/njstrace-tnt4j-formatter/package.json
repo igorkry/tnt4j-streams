@@ -4,8 +4,8 @@
     "description": "njstrace formatter for TNT4J-Streams",
     "main": "njsTraceFormatter-tnt4j.js",
     "dependencies": {
-        "njstrace": "^0.0.3",
-        "request": "^2.74.0"
+        "njstrace": "file:../njstrace",
+        "request": "^2.80.0"
     },
     "devDependencies": {},
     "scripts": {

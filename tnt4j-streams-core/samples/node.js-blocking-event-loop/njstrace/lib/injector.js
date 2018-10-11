@@ -1,6 +1,6 @@
 var util = require('util'),
 	falafel = require('falafel'),
-	Syntax = require('falafel/node_modules/esprima').Syntax;
+	Syntax = require('./syntax.js');
 
 var TRACE_ENTRY = 'var __njsEntryData__ = __njsTraceEntry__({file: %s, name: %s, line: %s, args: %s});';
 var TIMED_FUNCTION_ENTRY = '\n var jsProcess = new JsTimedProcess({entryData: __njsEntryData__, line: %s});\n';
@@ -24,7 +24,7 @@ function Injector(njsTrace) {
  * @returns {boolean}
  */
 Injector.prototype.isFunctionNode = function(node) {
-	return (node.type === Syntax.FunctionDeclaration || node.type === Syntax.FunctionExpression) && node.range;
+	return (node.type === Syntax.FunctionDeclaration || node.type === Syntax.FunctionExpression || node.type === Syntax.ArrowFunctionExpression) && node.range;
 };
 
 /**
@@ -38,7 +38,7 @@ Injector.prototype.getFunctionName = function(node) {
 		return;
 	}
 
-	// Not all functions have ids (e.g., Anonymous functions), in case we do have id we can get it and stop.
+	// Not all functions have ids (i.e Anonymous functions), in case we do have id we can get it and stop.
 	if (node.id) {
 		return node.id.name;
 	}
@@ -91,16 +91,20 @@ Injector.prototype.getFunctionName = function(node) {
  * @param {string} code - The JS code to trace
  * @param {Boolean} wrapFunctions - Whether to wrap functions in try/catch
  * @param {boolean} includeArguments - Whether a traced function arguments and return values should be passed to the tracer
- * @param {boolean} wrappedFile - Whether this entire file is wrapped in a function (e.g., like node is wrapping the modules in a function)
+ * @param {boolean} wrappedFile - Whether this entire file is wrapped in a function (i.e like node is wrapping the modules in a function)
  * @returns {string} The modified JS code text
  */
 Injector.prototype.injectTracing = function(filename, code, wrapFunctions, includeArguments, wrappedFile) {
 	var self = this;
     var traceExit;
-	var output = falafel(code, {range: true, loc: true}, function(node) {
+	var output = falafel(code, {ranges: true, locations: true, ecmaVersion: 8}, function processASTNode(node) {
+		// In wrapped files the first line is the wrapper function so we need to offset location to get the real lines in user-world
+		var startLine = wrappedFile ? node.loc.start.line - 1 : node.loc.start.line;
+		var retLine = wrappedFile ? node.loc.end.line - 1 : node.loc.end.line;
+
 		// If we have name this is a function
 		var name = self.getFunctionName(node);
-		if (name) {
+		if (name && node.body.type === Syntax.BlockStatement) { // Not supporting arrow functions with no body
 			self.njs.log('  Instrumenting ', name, 'line:', node.loc.start.line);
 
 			// Separate the function declaration ("function foo") from function body ("{...}");
@@ -109,22 +113,26 @@ Injector.prototype.injectTracing = function(filename, code, wrapFunctions, inclu
 			origFuncBody = origFuncBody.slice(1, origFuncBody.length - 1); // Remove the open and close braces "{}"
 
 			// If this file is wrapped in a function and this is the first line, it means that this is the call
-			// to the file wrapper function, in this case we don't want to pass the arguments (as this function is hidden from the user)
+			// to the file wrapper function, in this case we don't want to instrument it (as this function is hidden from the user and also creates a mess with async/await)
 			// In reality it means that this is the function that Node is wrapping all the modules with and call it when
 			// the module is being required.
-			// We also ignore arguments if we explicitly told to do so
-			var args = (wrappedFile && node.loc.start.line === 1) || !includeArguments ? 'null' : 'arguments';
+			if (wrappedFile && node.loc.start.line === 1) {return;}
+
+			var args = 'null';
+			if (includeArguments) {
+				args = '[' + node.params.map(p => p.name).join(',') + ']';
+			}
 
 			// put our TRACE_ENTRY as the first line of the function and TRACE_EXIT as last line
-			var traceEntry = util.format(TRACE_ENTRY, JSON.stringify(filename), JSON.stringify(name), node.loc.start.line, args);
-			traceExit = util.format(TRACE_EXIT, 'false', node.loc.end.line, 'null');
-			timedFunctionEntry = util.format(TIMED_FUNCTION_ENTRY, node.loc.end.line);
+			var traceEntry = util.format(TRACE_ENTRY, JSON.stringify(filename), JSON.stringify(name), startLine, args);
+			traceExit = util.format(TRACE_EXIT, 'false', retLine, 'null');
+			timedFunctionEntry = util.format(TIMED_FUNCTION_ENTRY, retLine);
 
 			var newFuncBody = '\n' + traceEntry + '\n' + timedFunctionEntry + '\n' + origFuncBody + '\n' + traceExit + '\n';
 
 			if (wrapFunctions) {
-				var traceEX = util.format(TRACE_EXIT, 'true', node.loc.start.line, 'null');
-				node.update(funcDec + '{ \ntry {' + newFuncBody + '} catch(__njsEX__) {\n' + traceEX + '\nthrow __njsEX__;\n ' + ' }\n}');
+				var traceEX = util.format(TRACE_EXIT, 'true', startLine, 'null');
+				node.update(funcDec + '{ \ntry {' + newFuncBody + '} catch(__njsEX__) {\n' + traceEX + '\nthrow __njsEX__;\n}\n}');
 			} else {
 				node.update(funcDec + '{' + newFuncBody + '}');
 			}
@@ -138,12 +146,11 @@ Injector.prototype.injectTracing = function(filename, code, wrapFunctions, inclu
 				// Use a random variable name
 				var tmpVar = '__njsTmp' + Math.floor(Math.random()*10000) + '__';
 
-				// We wrap the entire thing in a new block for cases when the return stmt is not in a block (e.g., "if (x>0) return;").
-				traceExit = util.format(TRACE_EXIT, 'false',node.loc.start.line, includeArguments ? tmpVar : 'null');
-				
+				// We wrap the entire thing in a new block for cases when the return stmt is not in a block (i.e "if (x>0) return;").
+				traceExit = util.format(TRACE_EXIT, 'false', startLine, includeArguments ? tmpVar : 'null');
 				node.update('{\n '+  TIMED_FUNCTION_EXIT  +' var ' + tmpVar + ' = ' + node.argument.source() + ';\n' + traceExit + '\nreturn ' + tmpVar + ';\n}');
 			} else {
-                traceExit = util.format(TRACE_EXIT, 'false', node.loc.start.line, 'null');
+                traceExit = util.format(TRACE_EXIT, 'false', startLine, 'null');
 				node.update('{' + TIMED_FUNCTION_EXIT + traceExit + node.source() + '}');
 			}
 
@@ -154,6 +161,7 @@ Injector.prototype.injectTracing = function(filename, code, wrapFunctions, inclu
 			node.body.update('{\n' + ON_CATCH + '\n' + origCatch + '\n}');
 		}
 	});
+
 	return output.toString();
 };
 
