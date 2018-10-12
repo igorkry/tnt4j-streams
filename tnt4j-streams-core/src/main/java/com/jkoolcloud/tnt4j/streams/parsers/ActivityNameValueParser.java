@@ -27,8 +27,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrMatcher;
-import org.apache.commons.lang3.text.StrTokenizer;
+import org.apache.commons.text.StringTokenizer;
+import org.apache.commons.text.matcher.StringMatcher;
+import org.apache.commons.text.matcher.StringMatcherFactory;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -67,7 +68,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	 * Contains the field separator (set by {@code FieldDelim} property) - Default:
 	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}
 	 */
-	protected StrMatcher fieldDelim = StrMatcher.charSetMatcher(DEFAULT_DELIM);
+	protected StringMatcher fieldDelim = StringMatcherFactory.INSTANCE.charSetMatcher(DEFAULT_DELIM);
 
 	/**
 	 * Contains the name/value separator (set by {@code ValueDelim} property) - Default: "="
@@ -115,7 +116,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 				String name = prop.getKey();
 				String value = prop.getValue();
 				if (ParserProperties.PROP_FLD_DELIM.equalsIgnoreCase(name)) {
-					fieldDelim = StringUtils.isEmpty(value) ? null : StrMatcher.charSetMatcher(value);
+					fieldDelim = StringUtils.isEmpty(value) ? null
+							: StringMatcherFactory.INSTANCE.charSetMatcher(value);
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.setting", name, value);
 				} else if (ParserProperties.PROP_VAL_DELIM.equalsIgnoreCase(name)) {
@@ -203,8 +205,9 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	}
 
 	private Map<String, String> delimit(String dataStr) {
-		StrTokenizer tk = stripQuotes ? new StrTokenizer(dataStr, fieldDelim, StrMatcher.doubleQuoteMatcher())
-				: new StrTokenizer(dataStr, fieldDelim);
+		StringTokenizer tk = stripQuotes
+				? new StringTokenizer(dataStr, fieldDelim, StringMatcherFactory.INSTANCE.doubleQuoteMatcher())
+				: new StringTokenizer(dataStr, fieldDelim);
 		tk.setIgnoreEmptyTokens(false);
 		String[] fields = tk.getTokenArray();
 		if (ArrayUtils.isEmpty(fields)) {
