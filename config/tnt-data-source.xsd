@@ -1308,6 +1308,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attribute name="emptyAsNull" use="optional" type="xs:boolean" default="true">
+            <xs:annotation>
+                <xs:documentation>
+                    Flag indicating an empty value (i.e. string "") shall be treated as null.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:attributeGroup>
 
     <!-- Element <field-map> definition -->
@@ -1579,7 +1587,7 @@
                             <xs:attribute name="format" use="optional" type="DataFormatsAll">
                                 <xs:annotation>
                                     <xs:documentation>
-                                        Defines what value for mat should be used for comparison.
+                                        Defines what data format should be used for comparison.
                                     </xs:documentation>
                                 </xs:annotation>
                             </xs:attribute>
@@ -2023,7 +2031,7 @@
         <xs:attribute name="tags" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Tags list (separated using ',') for a parser. Tags are used to map incoming parseable data package with parser instance
+                    Tags list (delimited using ',') for a parser. Tags are used to map incoming parseable data package with parser instance
                     dedicated to parse it.
                 </xs:documentation>
             </xs:annotation>
@@ -2041,7 +2049,15 @@
         <xs:attribute name="default-data-type" use="optional" type="DataTypes" default="String">
             <xs:annotation>
                 <xs:documentation>
-                    Specifies default data type bound to fields of this parser.
+                    Specifies default "datatype" attribute value bound for all fields/locators of this parser.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute name="default-emptyAsNull" use="optional" type="xs:boolean" default="true">
+            <xs:annotation>
+                <xs:documentation>
+                    Specifies default "emptyAsNull" attribute value for all fields/locators of this parser.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>

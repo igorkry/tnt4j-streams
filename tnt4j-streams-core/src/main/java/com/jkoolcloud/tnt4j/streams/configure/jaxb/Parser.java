@@ -48,6 +48,7 @@ import javax.xml.bind.annotation.*;
  *       &lt;attribute name="tags" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="manualFieldsOrder" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
  *       &lt;attribute name="default-data-type" type="{}DataTypes" default="String" />
+ *       &lt;attribute name="default-emptyAsNull" type="{http://www.w3.org/2001/XMLSchema}boolean" default="true"  />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -84,6 +85,9 @@ public class Parser {
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
+	@XmlAttribute(name = "default-emptyAsNull")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	protected Boolean defaultEmptyAsNull = true;
 	@XmlAttribute(name = "class", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T04:53:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String clazz;
@@ -343,6 +347,33 @@ public class Parser {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-01-22T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setDefaultDataType(DataTypes value) {
 		this.defaultDataType = value;
+	}
+
+	/**
+	 * Gets the value of the defaultEmptyAsNull property.
+	 *
+	 * @return possible object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public boolean isDefaultEmptyAsNull() {
+		if (defaultEmptyAsNull == null) {
+			return false;
+		} else {
+			return defaultEmptyAsNull;
+		}
+	}
+
+	/**
+	 * Sets the value of the defaultEmptyAsNull property.
+	 *
+	 * @param value
+	 *            allowed object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-09-15T02:53:24+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setDefaultEmptyAsNull(Boolean value) {
+		this.defaultEmptyAsNull = value;
 	}
 
 	/**

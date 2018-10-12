@@ -42,6 +42,8 @@ public abstract class AbstractFieldEntity {
 	 */
 	protected String requiredVal = ""; /* string to allow no value */
 
+	protected boolean emptyAsNull = true;
+
 	/**
 	 * Field entity transformations list used to transform values.
 	 */
@@ -98,6 +100,32 @@ public abstract class AbstractFieldEntity {
 	 */
 	public boolean isRequired() {
 		return "true".equalsIgnoreCase(requiredVal); // NON-NLS
+	}
+
+	/**
+	 * Determines whether resolved empty value shall be treated as {@code null}.
+	 * <p>
+	 * Empty values are one of:
+	 * <ul>
+	 * <li>String equal to {@code ""}</li>
+	 * <li>Array having all {@code null} elements</li>
+	 * <li>Collection having all {@code null} elements</li>
+	 * </ul>
+	 *
+	 * @return flag indicating resolved empty value shall be treated as {@code null}
+	 */
+	public boolean isEmptyAsNull() {
+		return emptyAsNull;
+	}
+
+	/**
+	 * Sets flag indicating resolved empty value shall be treated as {@code null}.
+	 * 
+	 * @param emptyAsNull
+	 *            flag indicating resolved empty value shall be treated as {@code null}
+	 */
+	public void setEmptyAsNull(boolean emptyAsNull) {
+		this.emptyAsNull = emptyAsNull;
 	}
 
 	/**

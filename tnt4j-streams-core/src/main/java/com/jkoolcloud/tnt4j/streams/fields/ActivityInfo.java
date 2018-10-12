@@ -35,7 +35,10 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.*;
+import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
@@ -163,6 +166,12 @@ public class ActivityInfo {
 		fieldValue = transform(field, fieldValue);
 		fieldValue = filterFieldValue(field, fieldValue);
 
+		if (fieldValue != null && field.isEmptyAsNull() && Utils.isEmptyContent(fieldValue, true)) {
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.field.empty.as.null", field, Utils.toStringDump(fieldValue));
+			fieldValue = null;
+		}
+
 		if (!field.isTransparent()) {
 			setFieldValue(field, fieldValue);
 		} else {
@@ -286,7 +295,7 @@ public class ActivityInfo {
 	 *             if there are any errors with conversion to internal format
 	 */
 	public void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
-		if (isValueEmpty(fieldValue)) {
+		if (Utils.isNullValue(fieldValue)) {
 			return;
 		}
 
@@ -392,20 +401,6 @@ public class ActivityInfo {
 		} else {
 			addCustomActivityProperty(field, fieldValue);
 		}
-	}
-
-	private static boolean isValueEmpty(Object fieldValue) {
-		if (fieldValue != null) {
-			Object[] va = fieldValue instanceof Object[] ? (Object[]) fieldValue : new Object[] { fieldValue };
-
-			for (Object ve : va) {
-				if (ve != null) {
-					return false;
-				}
-			}
-		}
-
-		return true;
 	}
 
 	private void addCustomActivityProperty(ActivityField field, Object fieldValue) throws ParseException {

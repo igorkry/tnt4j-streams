@@ -47,6 +47,7 @@ public abstract class ActivityParser implements NamedObject {
 	private String[] tags;
 
 	private ActivityFieldDataType defaultDataType;
+	private boolean defaultEmptyAsNull = true;
 
 	/**
 	 * Constructs a new ActivityParser.
@@ -393,12 +394,31 @@ public abstract class ActivityParser implements NamedObject {
 	}
 
 	/**
-	 * Sets default data type to be used by parser bound fields.
+	 * Sets default data type to be used by parser bound fields/locators.
 	 * 
 	 * @param defaultDataType
-	 *            default data type to be used by parser bound fields
+	 *            default data type to be used by parser bound fields/locators
 	 */
 	public void setDefaultDataType(ActivityFieldDataType defaultDataType) {
 		this.defaultDataType = defaultDataType;
+	}
+
+	/**
+	 * Returns default "empty as null" attribute value for all fields/locators of this parser.
+	 * 
+	 * @return default attribute flag value
+	 */
+	public boolean isDefaultEmptyAsNull() {
+		return defaultEmptyAsNull;
+	}
+
+	/**
+	 * Sets default "empty as null" attribute value for all fields/locators of this parser.
+	 *
+	 * @param defaultEmptyAsNull
+	 *            default attribute flag value
+	 */
+	public void setDefaultEmptyAsNull(boolean defaultEmptyAsNull) {
+		this.defaultEmptyAsNull = defaultEmptyAsNull;
 	}
 }

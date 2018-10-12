@@ -1126,6 +1126,23 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Returns the appropriate string representation for the specified object.
+	 * <p>
+	 * If {@code data} is byte array, HEX dump representation is returned.
+	 *
+	 * @param data
+	 *            object to convert to string representation
+	 * @return string representation of object
+	 */
+	public static String toStringDump(Object data) {
+		if (data instanceof byte[]) {
+			return toHexDump((byte[]) data);
+		}
+
+		return toString(data);
+	}
+
+	/**
 	 * Makes a HEX dump string representation of provided bytes array. Does all the same as
 	 * {@link #toHexDump(byte[], int, int)} setting {@code len} parameter to {@code 0}.
 	 *
@@ -2080,11 +2097,86 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Checks if {@code obj} is empty ans has empty content considering when it is:
+	 * <ul>
+	 *
+	 * <li>{@link String} - is {@code null} or equal to {@code ""}</li>
+	 * <li>{@code Array} - is {@code null}, length is {@code 0} or has all empty elements</li>
+	 * <li>{@link Collection} - is {@code null}, length is {@code 0} or has all empty elements</li>
+	 * <li>{@link Map} - is {@code null} or length is {@code 0}</li>
+	 * <li>{@link Object} - is {@code null}</li>
+	 * </ul>
+	 *
+	 * @param obj
+	 *            object to check
+	 * @param whitespaceStringEmpty
+	 *            flag indicating string having all whitespace symbols shall be treated as empty
+	 * @return {@code true} if {@code obj} is empty or all array/collection elements has empty content, {@code false} -
+	 *         otherwise
+	 *
+	 * @see #isEmptyContent(Object[])
+	 * @see #isEmptyContent(java.util.Collection)
+	 */
+	public static boolean isEmptyContent(Object obj, boolean whitespaceStringEmpty) {
+		if (obj == null) {
+			return true;
+		}
+		if (obj instanceof String) {
+			String str = (String) obj;
+			return whitespaceStringEmpty ? StringUtils.trimToNull(str) == null : StringUtils.isEmpty(str);
+		}
+		if (isArray(obj)) {
+			boolean empty = ArrayUtils.getLength(obj) == 0;
+			if (!empty && obj instanceof Object[]) {
+				empty = isEmptyContent((Object[]) obj);
+			}
+			return empty;
+		}
+		if (obj instanceof Collection) {
+			Collection<?> cObj = (Collection<?>) obj;
+			return CollectionUtils.isEmpty(cObj) && isEmptyContent(cObj);
+		}
+		if (obj instanceof Map) {
+			return MapUtils.isEmpty((Map<?, ?>) obj);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if {@code obj} is empty considering when it is:
+	 * <ul>
+	 * <li>{@code Array} - is {@code null}, length is {@code 0} or all elements are {@code null}</li>
+	 * <li>{@link Collection} - is {@code null}, length is {@code 0} or all elements are {@code null}</li>
+	 * <li>{@link Object} - is {@code null}</li>
+	 * </ul>
+	 *
+	 * @param obj
+	 *            object to check
+	 * @return {@code true} if {@code obj} is {@code null} or all array/collection elements are {@code null},
+	 *         {@code false} - otherwise
+	 */
+	public static boolean isNullValue(Object obj) {
+		if (obj != null) {
+			Object[] va = Utils.makeArray(obj);
+
+			for (Object ve : va) {
+				if (ve != null) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Checks if {@code obj} is empty considering when it is:
 	 * <ul>
 	 * <li>{@link String} - is {@code null} or equal to {@code ""}</li>
 	 * <li>{@code Array} - is {@code null} or length is {@code 0}</li>
 	 * <li>{@link Collection} - is {@code null} or length is {@code 0}</li>
+	 * <li>{@link Map} - is {@code null} or length is {@code 0}</li>
 	 * <li>{@link Object} - is {@code null}</li>
 	 * </ul>
 	 *
@@ -2104,6 +2196,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 		if (obj instanceof Collection) {
 			return CollectionUtils.isEmpty((Collection<?>) obj);
+		}
+		if (obj instanceof Map) {
+			return MapUtils.isEmpty((Map<?, ?>) obj);
 		}
 
 		return false;

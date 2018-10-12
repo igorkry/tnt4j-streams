@@ -310,7 +310,15 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				}
 			}
 
-			applyFieldValue(aField, Utils.simplifyValue(values), cData);
+			Object val = Utils.simplifyValue(values);
+
+			// if (val != null && aField.isEmptyAsNull() && Utils.isEmptyContent(val, true)) {
+			// logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			// "ActivityParser.field.empty.as.null", aField, toString(val));
+			// val = null;
+			// }
+
+			applyFieldValue(aField, val, cData);
 			if (locators != null && savedFormats != null) {
 				for (int li = 0; li < locators.size(); li++) {
 					ActivityFieldLocator loc = locators.get(li);

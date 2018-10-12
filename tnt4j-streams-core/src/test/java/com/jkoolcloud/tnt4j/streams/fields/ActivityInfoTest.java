@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -63,13 +65,14 @@ public class ActivityInfoTest {
 				assertEquals("Value not equal", value.valueExpected, result);
 			}
 		}
+		activityInfo.setEventName("TestActivity");
 		return activityInfo;
 	}
 
 	private TestPair fillInField(StreamFieldType field, ActivityInfo activityInfo, OpType trackableType)
 			throws ParseException, NoSuchMethodException, SecurityException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException {
-		ActivityField activityField = new ActivityField(field.name(), ActivityFieldDataType.String);
+		ActivityField activityField = new ActivityField(field.name());
 		TestPair valueT = new TestPair();
 		switch (field) {
 		// special cases
@@ -113,13 +116,15 @@ public class ActivityInfoTest {
 	}
 
 	@Test
-	public void buildTrackableTest() throws Exception {
+	public void testBuildTrackable() throws Exception {
 		Tracker tracker = mock(Tracker.class);
 		UUIDFactory uiFactory = mock(UUIDFactory.class);
 		TrackerConfig tConfig = mock(TrackerConfig.class);
 		TrackingEvent tEvent = mock(TrackingEvent.class);
 		TrackingActivity tActivity = mock(TrackingActivity.class);
 		PropertySnapshot snapshot = mock(PropertySnapshot.class);
+
+		when(tActivity.getName()).thenReturn("TestActivity");
 
 		when(tracker.getConfiguration()).thenReturn(tConfig);
 		when(tracker.newEvent(any(OpLevel.class), any(String.class), any(String.class), any(String.class),
@@ -153,7 +158,7 @@ public class ActivityInfoTest {
 	}
 
 	@Test
-	public void mergeTest() throws Exception {
+	public void testMerge() throws Exception {
 		ActivityInfo activityInfo = new ActivityInfo();
 		ActivityInfo activityInfoToMerge = new ActivityInfo();
 		for (StreamFieldType field : StreamFieldType.values()) {
@@ -169,7 +174,7 @@ public class ActivityInfoTest {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void addCorrelatorNullTest() throws ParseException {
+	public void testAddCorrelatorNull() throws ParseException {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField af = new ActivityField("Correlator");
 		// ActivityField af2 = new ActivityField("Correlator2");
@@ -194,14 +199,14 @@ public class ActivityInfoTest {
 
 		System.out.println(ai.getFieldValue("Correlator"));
 
-		assertTrue(ai.getFieldValue("Correlator").toString().split(",").length == 3);
+		assertTrue("Incorrect resolved correlators count",
+				ai.getFieldValue("Correlator").toString().split(",").length == 3);
 		// should not be [1111, 2222, 000000000000000000000000000000000000000000000000, null]
 		// should be [1111, 2222, 000000000000000000000000000000000000000000000000]
-
 	}
-	
+
 	private Object getTestValueForClass(Class<?> clazz) {
-		final String className = clazz.getName();
+		String className = clazz.getName();
 		if (className.equals("java.lang.String")) { // NON-NLS
 			return "TEST"; // NON-NLS
 		} else if (className.equals("[Ljava.lang.String;")) { // NON-NLS
@@ -229,4 +234,206 @@ public class ActivityInfoTest {
 		public Object valueExpected;
 	}
 
+	/**
+	 * Test applying field value with simple value
+	 */
+	@Test
+	public void testApplyFieldSimpleValue() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator"));
+
+		ai.applyField(af, "TestValue");
+		Object value = ai.getFieldValue("TestField");
+		assertEquals(value, "TestValue");
+		assertEquals(value, ai.getFieldValue("TestField"));
+	}
+
+	/**
+	 * Test applying field value with array value, should return simplified value
+	 */
+	@Test
+	public void testApplyFieldSingleArrayValue() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		af.addLocator(locator);
+
+		String[] fieldValue = { "TestValue" };
+		ai.applyField(af, fieldValue);
+		Object value = ai.getFieldValue("TestField");
+		assertEquals(value, ai.formatValue(af, af.getGroupLocator(), fieldValue[0]));
+		assertEquals(value, ai.getFieldValue("TestField"));
+	}
+
+	/**
+	 * Test applying field value with array value, should return concatenated value if locator =1
+	 */
+	@Test
+	public void testApplyFieldMultipleArrayValue() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		af.addLocator(locator);
+
+		String[] fieldValue = { "TestValue", "TestValue2" };
+		ai.applyField(af, fieldValue);
+		Object value = ai.getFieldValue("TestField");
+		String testString = Arrays.toString(fieldValue);
+		assertEquals(value, testString.substring(1, testString.length() - 1).replace(" ", ""));
+		assertEquals(value, ai.getFieldValue("TestField"));
+	}
+
+	/**
+	 * Test applying field value with single array value, should return first element
+	 */
+	@Test
+	public void testApplyFieldSimpleArrayValueMultipleLocator() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator2");
+
+		af.addLocator(locator);
+		af.addLocator(locator2);
+
+		String[] fieldValue = { "TestValue" };
+		ai.applyField(af, fieldValue);
+		Object value = ai.getFieldValue("TestField");
+		String testString = Arrays.toString(fieldValue);
+		assertEquals(value, fieldValue[0]);
+		assertEquals(value, ai.getFieldValue("TestField"));
+	}
+
+	/**
+	 * Test applying field value when value array size not equals locators size, should fail
+	 */
+	@Test(expected = ParseException.class)
+	public void testApplyFieldArrayValueMultipleLocatorSizeMismatch() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator locator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		ActivityFieldLocator locator2 = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator2");
+
+		af.addLocator(locator);
+		af.addLocator(locator2);
+
+		String[] fieldValue = { "TestValue", "TestValue", "TestValue", };
+		ai.applyField(af, fieldValue);
+		Object value = ai.getFieldValue("TestField");
+		String testString = Arrays.toString(fieldValue);
+		assertEquals(value, fieldValue[0]);
+		assertEquals(value, ai.getFieldValue("TestField"));
+	}
+
+	@Test
+	public void testApplyFieldTransperentLocator() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		af.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator"));
+		af.setTransparent(true);
+
+		ai.applyField(af, "TestValue");
+		Object value = ai.getFieldValue("TestField");
+		assertEquals(value, "TestValue");
+		assertEquals(value, ai.getFieldValue("TestField"));
+		assertFalse(ai.toString().contains("TestValue"));
+	}
+
+	@Test
+	public void testGenericFieldNumber() throws Exception {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		// testLocator.formatValue("1");
+		af.addLocator(testLocator);
+
+		ai.applyField(af, "1");
+		assertTrue(ai.getFieldValue("TestField") instanceof Integer);
+	}
+
+	@Test
+	public void testGenericFieldNumberFloat() throws Exception {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		// testLocator.formatValue("1");
+		af.addLocator(testLocator);
+
+		ai.applyField(af, "1.0333");
+		assertTrue(ai.getFieldValue("TestField") instanceof Float);
+	}
+
+	@Test
+	public void testGenericFieldNotNumber() throws Exception {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		// testLocator.formatValue("1");
+		af.addLocator(testLocator);
+
+		ai.applyField(af, "1aaa");
+		assertTrue(ai.getFieldValue("TestField") instanceof String);
+	}
+
+	@Test
+	public void testAddCorrelatorNull2() throws ParseException {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("Correlator");
+		// ActivityField af2 = new ActivityField("Correlator2");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		// testLocator.formatValue("1");
+
+		ActivityFieldLocator locator = new ActivityFieldLocator();
+		locator.setDataType(ActivityFieldDataType.Binary);
+		DefaultValueFilter filter = new DefaultValueFilter("EXCLUDE", "IS", "string", "0000");
+
+		// locator.setFilter(filterGroup);
+		af.addLocator(locator);
+		af.setRequired("false");
+
+		Object[] byteZero = { new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, null };
+
+		ai.applyField(af, "1111");
+		ai.applyField(af, "2222");
+		ai.applyField(af, null);
+		ai.applyField(af, byteZero);
+
+		System.out.println(ai.getFieldValue("Correlator"));
+
+		assertTrue("Incorrect resolved correlators count",
+				ai.getFieldValue("Correlator").toString().split(",").length == 3);
+		// should not be [1111, 2222, 000000000000000000000000000000000000000000000000, null]
+		// should be [1111, 2222, 000000000000000000000000000000000000000000000000]
+	}
+
+	@Test
+	public void testEmptyAsNull() throws Exception {
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("TestField");
+		af.setEmptyAsNull(true);
+
+		ai.applyField(af, new Object[] { "", null, "" });
+		Object fVal = ai.getFieldValue("TestField");
+		assertNull("Non-null value for field", fVal);
+
+		List<Object> coll = new ArrayList<>();
+		coll.add("");
+		coll.add(null);
+		coll.add("");
+		ai.applyField(af, coll);
+		fVal = ai.getFieldValue("TestField");
+		assertNull("Non-null value for field", fVal);
+
+		af.setEmptyAsNull(false);
+
+		ai.applyField(af, new Object[] { "", null, "" });
+		fVal = ai.getFieldValue("TestField");
+		assertEquals("Unexpected field value", ",,", fVal);
+
+		ai.applyField(af, coll);
+		fVal = ai.getFieldValue("TestField");
+		assertEquals("Unexpected field value", ",,", fVal);
+	}
 }

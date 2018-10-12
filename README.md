@@ -133,6 +133,8 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     * `charset` - defines a [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
     name (in string format) for field Raw binary data; used to convert between Unicode and a number of other character encodings. Default 
     value is the running streams JVM default charset (in most cases `UTF8`).
+    * `emptyAsNull` - flag indicating an empty resolved value (i.e. string `""`, `0` size array/collection, array/collection having all 
+    `null` or `""` elements) shall be mapped as `null`. Default value - `true`.
 
 * tags:
     * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
@@ -5049,6 +5051,26 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 #### Generic parser parameters
 
+##### Attributes
+
+ * `tags` - tags list (delimited using `,`) for a parser. Tags are used to map incoming parseable data package with parser instance 
+ dedicated to parse it. 
+ * `manualFieldsOrder` - flag indicating whether configuration defined fields order shall be preserved in streaming process. By default 
+ fields are ordered by value resolution type: RAW activity data values, activity entity fields values, cache entries values. Default 
+ value - `false`.
+ * `default-data-type` - specifies default `datatype` attribute value bound for all fields/locators of this parser. Default 
+ value - `String`. See See ['TNT4J Events field mappings'](#tnt4j-events-field-mappings) for attribute `datatype` details.
+ * `default-emptyAsNull` - specifies default `emptyAsNull` attribute value for all fields/locators of this parser. Default value - `true`.
+
+    sample:
+```xml
+    <parser name="TestParser" class="com.my.company.ActivityTestParser" tags="Kafka,Http" manualFieldsOrder="true" default-data-type="Generic" default-emptyAsNull="false">
+    ...
+    </parser>
+```
+
+##### Properties
+
  * `UseActivityDataAsMessageForUnset` - flag indicating weather Raw activity data shall be put into field `Message` if there is no mapping 
  defined for that field in stream parser configuration or value was not resolved by parser from Raw activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
@@ -5057,7 +5079,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  file/stream. Default value - `EOL`. (Optional)
  * `RequireDefault` - indicates that all parser fields/locators by default are required to resolve to non-null values. Default value - 
  `false`. (Optional). The `field` attribute `required="true"` (or `false`) may be used to take precedence over the `RequireDefault` 
- property. See `required` attribute definition in [`TNT4J Events field mappings'](#tnt4j-events-field-mappings).
+ property. See `required` attribute definition in ['TNT4J Events field mappings'](#tnt4j-events-field-mappings).
 
     sample:
 ```xml

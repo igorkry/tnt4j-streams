@@ -105,6 +105,9 @@ public class FieldLocator {
 	@XmlAttribute(name = "charset")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String charset;
+	@XmlAttribute(name = "emptyAsNull")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected Boolean emptyAsNull = true;
 
 	public FieldLocator() {
 	}
@@ -460,6 +463,29 @@ public class FieldLocator {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setCacheKey(String value) {
 		this.cacheKey = value;
+	}
+
+	/**
+	 * Gets the value of the emptyAsNull property.
+	 *
+	 * @return possible object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public Boolean isEmptyAsNull() {
+		return emptyAsNull;
+	}
+
+	/**
+	 * Sets the value of the emptyAsNull property.
+	 *
+	 * @param value
+	 *            allowed object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setEmptyAsNull(Boolean value) {
+		this.emptyAsNull = value;
 	}
 
 }

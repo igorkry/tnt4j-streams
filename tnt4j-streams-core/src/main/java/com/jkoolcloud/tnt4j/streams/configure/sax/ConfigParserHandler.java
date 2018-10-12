@@ -246,6 +246,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
+	private static final String EMPTY_AS_NULL = "emptyAsNull"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
 	private static final String SOURCE_ATTR = "source";
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
@@ -323,6 +327,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
 	private static final String DEFAULT_TYPE_ATTR = "default-data-type"; // NON-NLS
+	/**
+	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
+	 */
+	private static final String DEFAULT_EMPTY_AS_NULL = "default-emptyAsNull"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration entity {@value}.
 	 */
@@ -593,6 +601,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String tags = null;
 		boolean autoSort = true;
 		ActivityFieldDataType defaultDataType = null;
+		boolean defaultEmptyAsNull = true;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -606,6 +615,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				autoSort = !Utils.toBoolean(attValue);
 			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
 				defaultDataType = ActivityFieldDataType.valueOf(attValue);
+			} else if (DEFAULT_EMPTY_AS_NULL.equals(attName)) {
+				defaultEmptyAsNull = Utils.toBoolean(attValue);
 			} else {
 				unknownAttribute(PARSER_ELMT, attName);
 			}
@@ -634,6 +645,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			currParser.setTags(tags);
 			((GenericActivityParser<?>) currParser).setAutoSort(autoSort);
 			currParser.setDefaultDataType(defaultDataType);
+			currParser.setDefaultEmptyAsNull(defaultEmptyAsNull);
 			streamsConfigData.addParser(currParser);
 		}
 	}
@@ -677,6 +689,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		boolean split = false;
 		String id = null;
 		String charset = null;
+		Boolean emptyAsNull = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -716,6 +729,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				id = attValue;
 			} else if (CHARSET_ATTR.equals(attName)) {
 				charset = attValue;
+			} else if (EMPTY_AS_NULL.equals(attName)) {
+				emptyAsNull = Utils.toBoolean(attValue);
 			} else {
 				unknownAttribute(FIELD_ELMT, attName);
 			}
@@ -738,6 +753,9 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		if (dataType == null) {
 			dataType = currParser.getDefaultDataType();
+		}
+		if (emptyAsNull == null) {
+			emptyAsNull = currParser.isDefaultEmptyAsNull();
 		}
 
 		ActivityFieldLocator afl;
@@ -767,6 +785,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (StringUtils.isNotEmpty(charset)) {
 				afl.setCharset(charset);
 			}
+			afl.setEmptyAsNull(emptyAsNull);
 			currField.addLocator(afl);
 		} else if (StringUtils.isNotEmpty(locator)) {
 			currField.hasLocValAttr = true;
@@ -795,6 +814,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					if (StringUtils.isNotEmpty(charset)) {
 						afl.setCharset(charset);
 					}
+					afl.setEmptyAsNull(emptyAsNull);
 					currField.addLocator(afl);
 				}
 			}
@@ -814,6 +834,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		af.setRequired(reqVal);
 		af.setTransparent(transparent);
 		af.setSplitCollection(split);
+		af.setEmptyAsNull(emptyAsNull);
 	}
 
 	/**
@@ -1003,6 +1024,10 @@ public class ConfigParserHandler extends DefaultHandler {
 				currLocatorData.reqVal = attValue;
 			} else if (ID_ATTR.equals(attName)) {
 				currLocatorData.id = attValue;
+			} else if (CHARSET_ATTR.equals(attName)) {
+				currLocatorData.charset = attValue;
+			} else if (EMPTY_AS_NULL.equals(attName)) {
+				currLocatorData.emptyAsNull = Utils.toBoolean(attValue);
 			} else {
 				unknownAttribute(FIELD_LOC_ELMT, attName);
 			}
@@ -1010,6 +1035,9 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		if (currLocatorData.dataType == null) {
 			currLocatorData.dataType = currParser.getDefaultDataType();
+		}
+		if (currLocatorData.emptyAsNull == null) {
+			currLocatorData.emptyAsNull = currParser.isDefaultEmptyAsNull();
 		}
 
 		// make sure any fields that are required based on other fields are specified
@@ -2245,6 +2273,10 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currLocatorData.filter != null) {
 			afl.setFilter(currLocatorData.filter);
 		}
+		if (currLocatorData.charset != null) {
+			afl.setCharset(currLocatorData.charset);
+		}
+		afl.setEmptyAsNull(currLocatorData.emptyAsNull == null ? true : currLocatorData.emptyAsNull);
 
 		currField.addLocator(afl);
 	}
@@ -2469,6 +2501,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		int radix;
 		String reqVal;
 		String id;
+		String charset;
+		Boolean emptyAsNull = null;
 
 		List<ValueMapData> valueMapItems;
 		List<ValueTransformation<Object, Object>> valueTransforms;
@@ -2490,6 +2524,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			radix = 10;
 			reqVal = ""; /* string to allow override */
 			id = null;
+			charset = null;
+			emptyAsNull = null;
 
 			if (valueMapItems == null) {
 				valueMapItems = new ArrayList<>();

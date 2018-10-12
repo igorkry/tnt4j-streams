@@ -224,11 +224,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 * @return string representation of object
 	 */
 	protected String toString(Object data) {
-		if (data instanceof byte[]) {
-			return Utils.toHexDump((byte[]) data);
-		}
-
-		return Utils.toString(data);
+		return Utils.toStringDump(data);
 	}
 
 	public void setAutoSort(boolean autoSort) {
@@ -613,6 +609,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			cData.setField(aField);
 			value = Utils.simplifyValue(parseLocatorValues(aField, cData));
 
+			// if (value != null && aField.isEmptyAsNull() && Utils.isEmptyContent(value, true)) {
+			// logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+			// "ActivityParser.field.empty.as.null", aField, toString(value));
+			// value = null;
+			// }
+
 			applyFieldValue(aField, value, cData);
 		}
 	}
@@ -897,6 +899,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
 				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.locator.resolved", locStr, toString(val));
+
+				if (val != null && locator.isEmptyAsNull() && Utils.isEmptyContent(val, true)) {
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.locator.empty.as.null", locStr, toString(val));
+					val = null;
+				}
 			}
 
 			val = transformValue(val, locator, cData, locStr, ValueTransformation.Phase.RAW);

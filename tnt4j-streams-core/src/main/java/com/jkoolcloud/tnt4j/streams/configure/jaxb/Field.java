@@ -52,6 +52,8 @@ import javax.xml.bind.annotation.*;
  *       &lt;attribute name="transparent" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="value-type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="split" type="{http://www.w3.org/2001/XMLSchema}boolean" />
+ *       &lt;attribute name="charset" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="emptyAsNull" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -140,6 +142,9 @@ public class Field {
 	@XmlAttribute(name = "charset")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String charset;
+	@XmlAttribute(name = "emptyAsNull")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	protected Boolean emptyAsNull = true;
 
 	public Field() {
 	}
@@ -839,6 +844,29 @@ public class Field {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setCacheKey(String value) {
 		this.cacheKey = value;
+	}
+
+	/**
+	 * Gets the value of the emptyAsNull property.
+	 *
+	 * @return possible object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public Boolean isEmptyAsNull() {
+		return emptyAsNull;
+	}
+
+	/**
+	 * Sets the value of the emptyAsNull property.
+	 *
+	 * @param value
+	 *            allowed object is {@link Boolean }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-06-02T02:29:59+03:00", comments = "JAXB RI v2.2.4-2")
+	public void setEmptyAsNull(Boolean value) {
+		this.emptyAsNull = value;
 	}
 
 }
