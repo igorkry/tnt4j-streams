@@ -21,6 +21,8 @@
                            </Order>
                         </Sample>
                         -->
+    <resource-ref id="MQRC_MAPPINGS" type="ValuesMap" uri="mqrc_mappings.json"/>
+     
     <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="NamespaceAware" value="false"/>
         <property name="RequireDefault" value="false"/>
@@ -353,6 +355,9 @@
         
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
         <!-- translate Reason Code to something more meaningful -->
+        <field name="Exception" locator="ReasonCode" locator-type="Activity">
+            <field-map-ref resource="MQRC_MAPPINGS.Exception"/>
+        </field>
         <field name="ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
         <field name="OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
         <field name="GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
