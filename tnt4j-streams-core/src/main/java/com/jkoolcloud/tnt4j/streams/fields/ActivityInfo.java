@@ -722,12 +722,14 @@ public class ActivityInfo {
 	 *         parsed from stream.
 	 */
 	public String getSourceFQN(String pattern) {
-		Map<SourceType, String> fqnMap = getFQNMap(pattern);
+		Collection<String> fqnTokens = getFQNTokens(pattern);
 
 		StringBuilder fqnB = new StringBuilder();
 
-		for (Map.Entry<SourceType, String> fqnE : fqnMap.entrySet()) {
-			addSourceValue(fqnB, fqnE.getKey(), getFQNValue(fqnE.getValue()));
+		for (String fqnT : fqnTokens) {
+			String[] pair = fqnT.split("=");
+			SourceType type = SourceType.valueOf(pair[0]);
+			addSourceValue(fqnB, type, getFQNValue(pair[1]));
 		}
 
 		String fqn = fqnB.toString();
@@ -735,17 +737,15 @@ public class ActivityInfo {
 		return StringUtils.isEmpty(fqn) ? null : fqn;
 	}
 
-	private static Map<SourceType, String> getFQNMap(String fqnPattern) {
-		Map<SourceType, String> fqnMap = new LinkedHashMap<>();
+	private static Collection<String> getFQNTokens(String fqnPattern) {
+		Collection<String> fqnTokens = new ArrayList<>();
 		StringTokenizer tk = new StringTokenizer(fqnPattern, "#");
 		while (tk.hasMoreTokens()) {
-			String sName = tk.nextToken();
-			String[] pair = sName.split("=");
-			SourceType type = SourceType.valueOf(pair[0]);
-			fqnMap.put(type, pair[1]);
+			String sToken = tk.nextToken();
+			fqnTokens.add(sToken);
 		}
 
-		return fqnMap;
+		return fqnTokens;
 	}
 
 	private String getFQNValue(String val) {
@@ -759,7 +759,7 @@ public class ActivityInfo {
 	}
 
 	private static void addSourceValue(StringBuilder sb, SourceType type, String value) {
-		if (StringUtils.isNotEmpty(StringUtils.trim(value))) {
+		if (StringUtils.trimToNull(value) != null) {
 			if (sb.length() > 0) {
 				sb.append('#'); // NON-NLS
 			}
@@ -1037,7 +1037,7 @@ public class ActivityInfo {
 
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityInfo.invalid.child", resolveTrackableType(chTrackable), resolveTrackableType(pTrackable),
-					resolveChildTypesFor(pTrackable));
+					resolveChildTypesFor(pTrackable), chTrackable.getTrackingId(), pTrackable.getTrackingId());
 		}
 
 		return false;
