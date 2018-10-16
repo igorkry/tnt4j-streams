@@ -367,6 +367,9 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * Sets the format string defining how to interpret the raw data field value.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
+	 * <p>
+	 * Format for numeric values also can be one of number types enumerators: {@code "integer"},
+	 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 	 *
 	 * @param format
 	 *            the format string for interpreting raw data value

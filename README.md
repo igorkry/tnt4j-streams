@@ -104,7 +104,8 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
         * `base64Binary`
         * `hexBinary` 
         * `string`
-        * any decimal or time format pattern
+        * any decimal or time format pattern, i.e. `#####0.000`
+        * one of number type enumerators: `integer`, `long`, `double`, `float`, `short` and `byte` 
     * `value` - defines predefined (hardcoded) value of field
     * `datatype` - defines how to interpret field resolved value. Set of supported values:
         * `String` 

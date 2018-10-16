@@ -20,6 +20,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -55,11 +56,16 @@ public class NumericFormatter {
 
 	/**
 	 * Creates a number formatter/parser for numbers using the specified format pattern.
+	 * <p>
+	 * Pattern also can be one of number types enumerators: {@code "integer"},
+	 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 	 *
 	 * @param pattern
 	 *            format pattern - can be set to {@code null} to use default representation
 	 * @param locale
 	 *            locale for decimal format to use, or {@code null} if default locale shall be used
+	 *
+	 * @see #setPattern(String, String)
 	 */
 	public NumericFormatter(String pattern, String locale) {
 		setPattern(pattern, locale);
@@ -104,6 +110,9 @@ public class NumericFormatter {
 
 	/**
 	 * Sets the format pattern string for this formatter.
+	 * <p>
+	 * Pattern also can be one of number types enumerators: {@code "integer"},
+	 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 	 *
 	 * @param pattern
 	 *            format pattern - can be set to {@code null} to use default representation
@@ -153,6 +162,9 @@ public class NumericFormatter {
 	/**
 	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
 	 * defined.
+	 * <p>
+	 * Pattern also can be one of number types enumerators: {@code "integer"},
+	 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 	 *
 	 * @param pattern
 	 *            number format pattern
@@ -174,6 +186,9 @@ public class NumericFormatter {
 	/**
 	 * Formats the specified object using the defined pattern, or using the default numeric formatting if no pattern was
 	 * defined.
+	 * <p>
+	 * Pattern also can be one of number types enumerators: {@code "integer"},
+	 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 	 *
 	 * @param pattern
 	 *            number format pattern
@@ -221,6 +236,22 @@ public class NumericFormatter {
 		Number numValue = null;
 		if (value instanceof Number) {
 			numValue = (Number) value;
+
+			if (formatter != null) {
+				if (FormatterContext.INT.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.intValue();
+				} else if (FormatterContext.LONG.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.longValue();
+				} else if (FormatterContext.DOUBLE.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.doubleValue();
+				} else if (FormatterContext.FLOAT.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.floatValue();
+				} else if (FormatterContext.SHORT.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.shortValue();
+				} else if (FormatterContext.BYTE.equalsIgnoreCase(formatter.pattern)) {
+					numValue = numValue.byteValue();
+				}
+			}
 		} else {
 			String strValue = Utils.toString(value).trim();
 			if (StringUtils.isEmpty(strValue)) {
@@ -314,6 +345,13 @@ public class NumericFormatter {
 	 * Number formatting context values.
 	 */
 	private static class FormatterContext {
+		private static String INT = "integer"; // NON-NLS
+		private static String LONG = "long"; // NON-NLS
+		private static String DOUBLE = "double"; // NON-NLS
+		private static String FLOAT = "float"; // NON-NLS
+		private static String SHORT = "short"; // NON-NLS
+		private static String BYTE = "byte"; // NON-NLS
+
 		// private static final String GENERIC_NUMBER_PATTERN = "###,###.###"; // NON-NLS
 
 		private String pattern;
@@ -321,7 +359,10 @@ public class NumericFormatter {
 		private NumberFormat format;
 
 		/**
-		 * Creates a number formatter context using defined <tt>pattern</tt></> and default locale.
+		 * Creates a number formatter context using defined format <tt>pattern</tt></> and default locale.
+		 * <p>
+		 * Pattern also can be one of number types enumerators: {@code "integer"},
+		 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 		 *
 		 * @param pattern
 		 *            format pattern - can be set to {@code null} to use default representation.
@@ -331,7 +372,10 @@ public class NumericFormatter {
 		}
 
 		/**
-		 * Creates a number formatter context using defined <tt>pattern</tt></> and <tt>locale</tt>.
+		 * Creates a number formatter context using defined format <tt>pattern</tt></> and <tt>locale</tt>.
+		 * <p>
+		 * Pattern also can be one of number types enumerators: {@code "integer"},
+		 * {@code "long"},{@code "double"},{@code "float"},{@code "short"} and {@code "byte"}.
 		 *
 		 * @param pattern
 		 *            format pattern - can be set to {@code null} to use default representation.
@@ -342,8 +386,17 @@ public class NumericFormatter {
 			this.pattern = pattern;
 			this.locale = locale;
 
-			format = StringUtils.isEmpty(pattern) ? null : StringUtils.isEmpty(locale) ? new DecimalFormat(pattern)
-					: new DecimalFormat(pattern, new DecimalFormatSymbols(Utils.getLocale(locale)));
+			Locale loc = Utils.getLocale(locale);
+
+			if (INT.equalsIgnoreCase(pattern) || LONG.equalsIgnoreCase(pattern) || BYTE.equalsIgnoreCase(pattern)
+					|| SHORT.equalsIgnoreCase(pattern)) {
+				format = loc == null ? NumberFormat.getIntegerInstance() : NumberFormat.getIntegerInstance(loc);
+			} else if (DOUBLE.equalsIgnoreCase(pattern) || FLOAT.equalsIgnoreCase(pattern)) {
+				format = loc == null ? NumberFormat.getNumberInstance() : NumberFormat.getNumberInstance(loc);
+			} else {
+				format = StringUtils.isEmpty(pattern) ? null : loc == null ? new DecimalFormat(pattern)
+						: new DecimalFormat(pattern, DecimalFormatSymbols.getInstance(loc));
+			}
 		}
 
 		/**
