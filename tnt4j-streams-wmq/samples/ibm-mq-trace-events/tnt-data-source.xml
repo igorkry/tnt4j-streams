@@ -22,7 +22,7 @@
                         </Sample>
                         -->
     <resource-ref id="MQRC_MAPPINGS" type="ValuesMap" uri="mqrc_mappings.json"/>
-     
+
     <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="NamespaceAware" value="false"/>
         <property name="RequireDefault" value="false"/>
@@ -35,7 +35,7 @@
 
     </parser>
 
-    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser"  manualFieldsOrder="true">
+    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser" manualFieldsOrder="true">
         <property name="TranslateNumValues" value="true"/>
         <property name="RequireDefault" value="false"/>
 
@@ -44,12 +44,13 @@
           embedded parser as shown in the example below).  Messages are translated to a local character 
           set and if a XQH/DLH exist, they are removed.
           -->
-            
+
         <field name="CodedCharSetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
-        <field name="CodedCharSetValue" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number" transparent="true"/>
+        <field name="CodedCharSetValue" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"
+               transparent="true"/>
         <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
             <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
-                    WmqUtils.getString($fieldValue, ${CodedCharSetValue},true)
+                WmqUtils.getString($fieldValue, ${CodedCharSetValue},true)
             ]]></field-transform>
         </field>
 
@@ -183,7 +184,7 @@
                     : (${TrackingIdNorm} != null ? ${TrackingIdNorm} : null )
             ]]></field-transform>
         </field>
-        
+
         <!-- Extract the fields that identify where the message is destined -->
         <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
         <field name="RemoteQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_XQH_REMOTE_Q_MGR" locator-type="Label"/>
@@ -200,13 +201,13 @@
                      ObjectName - name supplied by application (can be alias or remote)
                      ResolvedQName - name of queue where message is destined to arrive (a local queue possibly on a remote system)
                      ResolvedLocalQName - name on target queue on local queue manager (local or transmit queue)  -->
-        <field name="TargetName" locator="ObjectName" locator-type="Activity" transparent="true"/> 
+        <field name="TargetName" locator="ObjectName" locator-type="Activity" transparent="true"/>
 
         <!-- The following will use the TargetName as name for resource if it exists, unless
-                   The message is flowing over a transmssion queue where the destination name will be used
+                   The message is flowing over a transmission queue where the destination name will be used
                    The messages is being published to a topic string 
                    The target doesnt exist  -->
-                   
+
         <field name="DerivedName" value="" transparent="true">
             <field-transform lang="groovy" name="ResTransform"><![CDATA[
                 ${RemoteQName} != null
@@ -217,7 +218,7 @@
         </field>
 
         <!-- ResourceName identifies the target for events and views such as topology.  -->
-        
+
         <!-- to not include qmgr name as part of resource name, change the following line 
               from  {0}={1}.{2} and comment MQCA_Q_MGR_NAME in the following section -->
         <field name="ResourceName" formattingPattern="{0}={1}.{2}">
@@ -230,13 +231,12 @@
                 <field-map source="MQOT_Q_MGR" target="QMGR"/>
                 <field-map source="" target="QMGR"/>
             </field-locator>
-            
+
             <!-- comment the following to not include qmgr name in ResourceName -->
             <field-locator locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
             <!-- Always include the most applicable name in the call -->
-            <field-locator locator="DerivedName" locator-type="Activity"/> 
-            
-           
+            <field-locator locator="DerivedName" locator-type="Activity"/>
+
         </field>
 
         <!-- general message fields -->
@@ -254,7 +254,7 @@
                 ts:getFileName($fieldValue)
             </field-transform>
         </field>
-          
+
         <field name="ChannelType" locator="MQIACH_CHANNEL_TYPE" locator-type="Label">
             <field-map source="1" target="SENDER"/>
             <field-map source="2" target="SERVER"/>
@@ -264,17 +264,16 @@
             <field-map source="8" target="CLUSRCVR"/>
             <field-map source="9" target="CLUSSDR"/>
         </field>
-          
+
         <!-- provide application name without path for tracking -->
         <field name="ChannelName" locator="MQCACH_CHANNEL_NAME" locator-type="Label"/>
-              
+
         <field name="ApplName" value="">
             <field-transform lang="groovy" name="ApplTransform"><![CDATA[
                 ${ChannelType} == null ? ${ProgramName} : ${ChannelType}+"_"+${ChannelName}
             ]]></field-transform>
-        </field>     
-                
-                
+        </field>
+
         <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
                units="Microseconds" transparent="true"/>
 
@@ -301,19 +300,19 @@
         <!-- record actual elapsed time as a number only, not time stamp -->
         <field name="QMgrOpDuration" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds">
             <field-transform name="ElapTransform" lang="groovy"><![CDATA[
-               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}]]>
-             </field-transform>
+               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
+            ]]></field-transform>
         </field>
         <!-- start time is only precise to seconds so use highrestime if available -->
         <field name="StartTime" value="">
             <field-transform lang="groovy" name="StartTimeTransform"><![CDATA[
-                ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}]]>
-             </field-transform>
+                ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
+            ]]></field-transform>
         </field>
         <field name="EndTime" value="">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
-                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}]]>
-             </field-transform>
+                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}
+            ]]></field-transform>
         </field>
 
         <!-- activity trace fields -->
@@ -353,7 +352,7 @@
             <field-map source="MQCC_WARNING" target="WARNING"/>
             <field-map source="" target="ERROR"/>
         </field>
-        
+
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
         <!-- translate Reason Code to something more meaningful -->
         <field name="Exception" locator="ReasonCode" locator-type="Activity">
@@ -390,10 +389,7 @@
         <field name="UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label" datatype="Number"/>
         <field name="MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label" datatype="Number"/>
 
-            
-          
     </parser>
-
 
     <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
 

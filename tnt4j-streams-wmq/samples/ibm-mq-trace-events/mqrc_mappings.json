@@ -1,6 +1,6 @@
 {
     "Exception": {
-        "0":"",
+        "0": "",
         "2001": "MQRC_ALIAS_BASE_Q_TYPE_ERROR",
         "2002": "MQRC_ALREADY_CONNECTED",
         "2003": "MQRC_BACKED_OUT",
@@ -531,6 +531,6 @@
         "6127": "MQRC_INCONSISTENT_OPEN_OPTIONS",
         "6128": "MQRC_WRONG_VERSION",
         "6129": "MQRC_REFERENCE_ERROR"
-        
-        }
+
+    }
 }
