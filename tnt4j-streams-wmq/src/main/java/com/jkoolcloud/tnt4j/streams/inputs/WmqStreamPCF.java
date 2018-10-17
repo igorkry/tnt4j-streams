@@ -16,12 +16,14 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+
 import com.ibm.mq.MQMessage;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.PCFConstants;
 import com.ibm.mq.pcf.PCFContent;
 import com.ibm.mq.pcf.PCFMessage;
-import com.ibm.mq.pcf.PCFParameter;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
@@ -70,37 +72,46 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 				"WmqStreamPCF.adding.mq.to.pcf");
 
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_REPORT, mqMsg.report);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_MSG_TYPE, mqMsg.messageType);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_EXPIRY, mqMsg.expiry);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_FEEDBACK, mqMsg.feedback);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_ENCODING, mqMsg.encoding);
-		addParameterIfAbsent(msgData, MQConstants.MQIA_CODED_CHAR_SET_ID, mqMsg.characterSet);
-		addParameterIfAbsent(msgData, MQConstants.MQCACH_FORMAT_NAME, mqMsg.format);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_PRIORITY, mqMsg.priority);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_PERSISTENCE, mqMsg.persistence);
-		addParameterIfAbsent(msgData, MQConstants.MQBACF_MSG_ID, mqMsg.messageId);
-		addParameterIfAbsent(msgData, MQConstants.MQBACF_CORREL_ID, mqMsg.correlationId);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_BACKOUT_COUNT, mqMsg.backoutCount);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_REPLY_TO_Q, mqMsg.replyToQueueName);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_REPLY_TO_Q_MGR, mqMsg.replyToQueueManagerName);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_USER_IDENTIFIER, mqMsg.userId);
-		addParameterIfAbsent(msgData, MQConstants.MQBACF_ACCOUNTING_TOKEN, mqMsg.accountingToken);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_APPL_IDENTITY_DATA, mqMsg.applicationIdData);
-		addParameterIfAbsent(msgData, MQConstants.MQIA_APPL_TYPE, mqMsg.putApplicationType);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_APPL_NAME, mqMsg.putApplicationName);
-		addParameterIfAbsent(msgData, MQConstants.MQCACF_APPL_ORIGIN_DATA, mqMsg.applicationOriginData);
-		addParameterIfAbsent(msgData, MQConstants.MQBACF_GROUP_ID, mqMsg.groupId);
-		addParameterIfAbsent(msgData, MQConstants.MQIACH_MSG_SEQUENCE_NUMBER, mqMsg.messageSequenceNumber);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_OFFSET, mqMsg.offset);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_MSG_FLAGS, mqMsg.messageFlags);
-		addParameterIfAbsent(msgData, MQConstants.MQIACF_ORIGINAL_LENGTH, mqMsg.originalLength);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_REPORT, mqMsg.report);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_MSG_TYPE, mqMsg.messageType);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_EXPIRY, mqMsg.expiry);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_FEEDBACK, mqMsg.feedback);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_ENCODING, mqMsg.encoding);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIA_CODED_CHAR_SET_ID, mqMsg.characterSet);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACH_FORMAT_NAME, mqMsg.format);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_PRIORITY, mqMsg.priority);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_PERSISTENCE, mqMsg.persistence);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQBACF_MSG_ID, mqMsg.messageId);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQBACF_CORREL_ID, mqMsg.correlationId);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_BACKOUT_COUNT, mqMsg.backoutCount);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_REPLY_TO_Q, mqMsg.replyToQueueName);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_REPLY_TO_Q_MGR, mqMsg.replyToQueueManagerName);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_USER_IDENTIFIER, mqMsg.userId);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQBACF_ACCOUNTING_TOKEN, mqMsg.accountingToken);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_APPL_IDENTITY_DATA, mqMsg.applicationIdData);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIA_APPL_TYPE, mqMsg.putApplicationType);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_APPL_NAME, mqMsg.putApplicationName);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_APPL_ORIGIN_DATA, mqMsg.applicationOriginData);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQBACF_GROUP_ID, mqMsg.groupId);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACH_MSG_SEQUENCE_NUMBER, mqMsg.messageSequenceNumber);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_OFFSET, mqMsg.offset);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_MSG_FLAGS, mqMsg.messageFlags);
+		addMQMDParameterToPCFMessage(msgData, MQConstants.MQIACF_ORIGINAL_LENGTH, mqMsg.originalLength);
 
-		// addParameterIfAbsent(msgData, MQConstants.MQCACF_PUT_DATE, mqMsg.putDateTime);
-		// addParameterIfAbsent(msgData, MQConstants.MQCACF_PUT_TIME, mqMsg.putDateTime);
+		if (mqMsg.putDateTime != null) {
+			String putDTString = DateFormatUtils.format(mqMsg.putDateTime, WmqStreamConstants.PUT_DATE_TIME_PATTERN);
+			String[] putDTTokens = putDTString.split(" "); // NON-NLS
+
+			if (putDTTokens.length > 0 && StringUtils.isNotEmpty(putDTTokens[0])) {
+				addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_PUT_DATE, putDTTokens[0]);
+			}
+			if (putDTTokens.length > 1 && StringUtils.isNotEmpty(putDTTokens[1])) {
+				addMQMDParameterToPCFMessage(msgData, MQConstants.MQCACF_PUT_TIME, putDTTokens[1]);
+			}
+		}
 	}
 
-	private void addParameterIfAbsent(PCFMessage msg, int paramId, Object val) {
+	private void addMQMDParameterToPCFMessage(PCFMessage msg, int paramId, Object val) {
 		if (val == null) {
 			return;
 		}
@@ -108,31 +119,28 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
 				"WmqStreamPCF.adding.pcf.param", PCFConstants.lookupParameter(paramId), paramId, Utils.toString(val));
 
-		PCFParameter paramV = msg.getParameter(paramId);
-		if (paramV == null) {
-			if (val instanceof Integer) {
-				msg.addParameter(paramId, (int) val);
-			} else if (val instanceof Long) {
-				msg.addParameter(paramId, (long) val);
-			} else if (val instanceof byte[]) {
-				msg.addParameter(paramId, (byte[]) val);
-			} else if (val instanceof int[]) {
-				msg.addParameter(paramId, (int[]) val);
-			} else if (val instanceof String) {
-				msg.addParameter(paramId, (String) val);
-			} else if (val instanceof long[]) {
-				msg.addParameter(paramId, (long[]) val);
-			} else if (val instanceof String[]) {
-				msg.addParameter(paramId, (String[]) val);
-			} else {
-				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-						WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.parameter.incompatible",
-						PCFConstants.lookupParameter(paramId), paramId, val.getClass().getSimpleName()));
-			}
+		if (val instanceof Integer) {
+			msg.addParameter(getMQMDParamId(paramId), (int) val);
+		} else if (val instanceof Long) {
+			msg.addParameter(getMQMDParamId(paramId), (long) val);
+		} else if (val instanceof byte[]) {
+			msg.addParameter(getMQMDParamId(paramId), (byte[]) val);
+		} else if (val instanceof int[]) {
+			msg.addParameter(getMQMDParamId(paramId), (int[]) val);
+		} else if (val instanceof String) {
+			msg.addParameter(getMQMDParamId(paramId), (String) val);
+		} else if (val instanceof long[]) {
+			msg.addParameter(getMQMDParamId(paramId), (long[]) val);
+		} else if (val instanceof String[]) {
+			msg.addParameter(getMQMDParamId(paramId), (String[]) val);
 		} else {
-			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-					"WmqStreamPCF.parameter.exists", PCFConstants.lookupParameter(paramId), paramId, paramV.getValue(),
-					Utils.toString(val));
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					WmqStreamConstants.RESOURCE_BUNDLE_NAME, "WmqStreamPCF.parameter.incompatible",
+					PCFConstants.lookupParameter(paramId), paramId, val.getClass().getSimpleName()));
 		}
+	}
+
+	private static int getMQMDParamId(int paramId) {
+		return WmqStreamConstants.PCF_MQMD_HEADER + paramId;
 	}
 }

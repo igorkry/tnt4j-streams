@@ -77,6 +77,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityPCFParser.class);
 
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
+	private static final String HEAD_MQMD = "MQMD"; // NON-NLS
 	private static final Pattern STRUCT_ATTR_PATTERN = Pattern.compile("MQB\\w+_MQ\\w+_STRUCT"); // NON-NLS
 	private static final String MQ_TMP_CTX_STRUCT_PREF = "MQ_TMP_CTX_"; // NON-NLS
 
@@ -218,6 +219,8 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 		if (i == 0 && paramStr.equals(HEAD_MQCFH)) {
 			val = resolvePCFHeaderValue(locator, path[i + 1], (PCFMessage) pcfContent);
+		} else if (i == 0 && paramStr.equalsIgnoreCase(HEAD_MQMD)) {
+			val = resolveMDMQHeaderValue(locator, path[i + 1], (PCFMessage) pcfContent);
 		} else {
 			try {
 				Integer paramId = WmqUtils.getParamId(paramStr);
@@ -300,6 +303,79 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private boolean isValueTranslatable(ActivityFieldDataType fDataType) {
 		return translateNumValues
 				&& (fDataType == ActivityFieldDataType.String || fDataType == ActivityFieldDataType.Generic);
+	}
+
+	private Object resolveMDMQHeaderValue(ActivityFieldLocator locator, String hAttrName, PCFMessage pcfMsg)
+			throws ParseException {
+		try {
+			Integer paramId = getMQMDParamId(hAttrName);
+			PCFParameter param = pcfMsg.getParameter(WmqStreamConstants.PCF_MQMD_HEADER + paramId);
+
+			return resolvePCFParamValue(locator, param);
+		} catch (NoSuchElementException exc) {
+			throw new ParseException(StreamsResources.getStringFormatted(WmqStreamConstants.RESOURCE_BUNDLE_NAME,
+					"ActivityPCFParser.unresolved.mqmd.parameter", hAttrName), getPCFPosition(pcfMsg));
+		}
+	}
+
+	private static Integer getMQMDParamId(String mqmdParamId) throws NoSuchElementException {
+		if ("Report".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_REPORT;
+		} else if ("MsgType".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_MSG_TYPE;
+		} else if ("Expiry".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_EXPIRY;
+		} else if ("Feedback".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_FEEDBACK;
+		} else if ("Encoding".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_ENCODING;
+		} else if ("CodedCharSetId".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIA_CODED_CHAR_SET_ID;
+		} else if ("Format".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACH_FORMAT_NAME;
+		} else if ("Priority".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_PRIORITY;
+		} else if ("Persistence".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_PERSISTENCE;
+		} else if ("MsgId".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQBACF_MSG_ID;
+		} else if ("CorrelId".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQBACF_CORREL_ID;
+		} else if ("BackoutCount".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_BACKOUT_COUNT;
+		} else if ("ReplyToQ".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_REPLY_TO_Q;
+		} else if ("ReplyToQMgr".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_REPLY_TO_Q_MGR;
+		} else if ("UserIdentifier".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_USER_IDENTIFIER;
+		} else if ("AccountingToken".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQBACF_ACCOUNTING_TOKEN;
+		} else if ("ApplIdentityData".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_APPL_IDENTITY_DATA;
+		} else if ("PutApplType".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIA_APPL_TYPE;
+		} else if ("PutApplName".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_APPL_NAME;
+		} else if ("PutDate".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_PUT_DATE;
+		} else if ("PutTime".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_PUT_TIME;
+		} else if ("ApplOriginData".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQCACF_APPL_ORIGIN_DATA;
+		} else if ("GroupId".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQBACF_GROUP_ID;
+		} else if ("MsgSeqNumber".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACH_MSG_SEQUENCE_NUMBER;
+		} else if ("Offset".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_OFFSET;
+		} else if ("MsgFlags".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_MSG_FLAGS;
+		} else if ("OriginalLength".equalsIgnoreCase(mqmdParamId)) { // NON-NLS
+			return MQConstants.MQIACF_ORIGINAL_LENGTH;
+		} else {
+			return WmqUtils.getParamId(mqmdParamId);
+		}
 	}
 
 	/**

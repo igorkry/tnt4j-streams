@@ -36,11 +36,28 @@ public final class WmqStreamConstants {
 	 * Custom PCF parameter identifier to store processed PCF message trace entry index.
 	 */
 	public static final int TRACE_MARKER = 929292929;
+	/**
+	 * Custom PCF parameter identifier to store {@link com.ibm.mq.MQMessage} MQMD header values.
+	 */
+	public static final int PCF_MQMD_HEADER = 932100000;
 
 	/**
 	 * Field "value type" attribute value identifying to initialize WMQ message signature calculation.
 	 */
 	public static final String VT_SIGNATURE = "signature"; // NON-NLS
+
+	/**
+	 * PUT_DATE attribute value format pattern.
+	 */
+	public static final String PUT_DATE_PATTERN = "yyyyMMdd"; // NON-NLS
+	/**
+	 * PUT_TIME attribute value format pattern.
+	 */
+	public static final String PUT_TIME_PATTERN = "HHmmssSS"; // NON-NLS
+	/**
+	 * PUT_DATE and PUT_TIME attributes concatenated value format pattern.
+	 */
+	public static final String PUT_DATE_TIME_PATTERN = PUT_DATE_PATTERN + " " + PUT_TIME_PATTERN; // NON-NLS
 
 	private WmqStreamConstants() {
 	}
