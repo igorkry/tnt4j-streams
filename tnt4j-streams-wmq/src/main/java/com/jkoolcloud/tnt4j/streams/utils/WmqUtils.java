@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
@@ -146,7 +148,7 @@ public class WmqUtils {
 	 * 
 	 * @param trace
 	 *            wmq activity trace PCF data
-	 * @return resolved reason code, or {@code null} if no reson code parameter found in PCF content
+	 * @return resolved reason code, or {@code null} if no reason code parameter found in PCF content
 	 */
 	public static Integer getRC(PCFContent trace) {
 		Integer traceRC = null;
@@ -158,6 +160,8 @@ public class WmqUtils {
 		return traceRC;
 	}
 
+	private static Map<String, Integer> PCF_PARAMS_CACHE = new HashMap<>();
+
 	/**
 	 * Translates PCF parameter MQ constant name to constant numeric value.
 	 *
@@ -167,11 +171,19 @@ public class WmqUtils {
 	 * @return PCF parameter MQ constant numeric value
 	 */
 	public static Integer getParamId(String paramIdStr) throws NoSuchElementException {
-		try {
-			return Integer.parseInt(paramIdStr);
-		} catch (NumberFormatException nfe) {
-			return MQConstants.getIntValue(paramIdStr);
+		Integer paramId = PCF_PARAMS_CACHE.get(paramIdStr);
+
+		if (paramId == null) {
+			try {
+				paramId = Integer.parseInt(paramIdStr);
+			} catch (NumberFormatException nfe) {
+				paramId = MQConstants.getIntValue(paramIdStr);
+			}
+
+			PCF_PARAMS_CACHE.put(paramIdStr, paramId);
 		}
+
+		return paramId;
 	}
 
 	/**

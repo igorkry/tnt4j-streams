@@ -61,7 +61,7 @@ public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
 		handleMQMDParameters(msgData, mqMsg);
 
 		logger().log(OpLevel.TRACE, StreamsResources.getBundle(WmqStreamConstants.RESOURCE_BUNDLE_NAME),
-				"WmqStream.message.data", msgData.size(), msgData.toString());
+				"WmqStream.message.data", msgData.size(), msgData);
 
 		return msgData;
 	}
