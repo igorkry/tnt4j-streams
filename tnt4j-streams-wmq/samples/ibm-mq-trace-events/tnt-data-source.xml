@@ -356,9 +356,9 @@
         <!-- translate Reason Code to something more meaningful -->
         <field name="RcText" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label"/>
         <field name="Exception" value="">
-             <field-transform lang="groovy" name="RCTransform"><![CDATA[
-                ${ReasonCode} != 0 ? ${RcText} : ""]]>
-             </field-transform>
+            <field-transform lang="groovy" name="RCTransform"><![CDATA[
+                ${ReasonCode} != 0 ? ${RcText} : ""
+            ]]></field-transform>
         </field>
         <field name="ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
         <field name="OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
