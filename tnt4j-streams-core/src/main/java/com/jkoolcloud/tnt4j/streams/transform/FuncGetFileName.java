@@ -19,9 +19,10 @@ package com.jkoolcloud.tnt4j.streams.transform;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Data value transformation function resolving file name from provided file path.
@@ -42,9 +43,6 @@ public class FuncGetFileName extends AbstractFunction<String> {
 	 */
 	public static final String FUNCTION_NAME = "getFileName"; // NON-NLS
 
-	private static final char UNIX_PATH_SEPARATOR = '/';
-	private static final char WIN_PATH_SEPARATOR = '\\';
-
 	/**
 	 * Constructs a new getFileName() function instance.
 	 */
@@ -53,15 +51,16 @@ public class FuncGetFileName extends AbstractFunction<String> {
 	}
 
 	/**
-	 * Resolves file name from provided file path. File path can be provided as {@link String}, {@link Node} or
-	 * {@link NodeList} (first node item containing file path).
+	 * Resolves file name from provided file path. File path can be provided as {@link java.lang.String},
+	 * {@link org.w3c.dom.Node} or {@link org.w3c.dom.NodeList} (first node item containing file path).
 	 *
 	 * @param args
 	 *            arguments list containing file path as first item
 	 * @return file name resolved from provided path
 	 *
-	 * @see Node
-	 * @see NodeList
+	 * @see org.w3c.dom.Node
+	 * @see org.w3c.dom.NodeList
+	 * @see Utils#getFileName(String)
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
@@ -86,11 +85,6 @@ public class FuncGetFileName extends AbstractFunction<String> {
 			}
 		}
 
-		if (StringUtils.isEmpty(filePath)) {
-			return filePath;
-		}
-
-		return filePath.substring(filePath.lastIndexOf(UNIX_PATH_SEPARATOR) + 1)
-				.substring(filePath.lastIndexOf(WIN_PATH_SEPARATOR) + 1);
+		return Utils.getFileName(filePath);
 	}
 }

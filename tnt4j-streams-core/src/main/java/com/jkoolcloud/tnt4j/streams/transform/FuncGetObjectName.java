@@ -19,10 +19,10 @@ package com.jkoolcloud.tnt4j.streams.transform;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Data value transformation function resolving object name from provided fully qualified object name.
@@ -49,8 +49,6 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 	 */
 	public static final String FUNCTION_NAME = "getObjectName"; // NON-NLS
 
-	private static final String OBJ_NAME_TOKEN_DELIMITERS = "@#$"; // NON-NLS
-
 	/**
 	 * Constructs a new getObjectName() function instance.
 	 */
@@ -60,10 +58,10 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 
 	/**
 	 * Resolves desired object name from provided fully qualified object name. Fully qualified object name can be
-	 * provided as {@link String}, {@link org.w3c.dom.Node} or {@link org.w3c.dom.NodeList} (first node item containing
-	 * object name).
+	 * provided as {@link java.lang.String}, {@link org.w3c.dom.Node} or {@link org.w3c.dom.NodeList} (first node item
+	 * containing object name).
 	 * <p>
-	 * function arguments sequence:
+	 * Function arguments sequence:
 	 * <ul>
 	 * <li>1 - fully qualified object name. Required.</li>
 	 * <li>2 - resolution options: DEFAULT, BEFORE, AFTER, REPLACE, SECTION, FULL. Optional.</li>
@@ -77,6 +75,7 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 	 *
 	 * @see org.w3c.dom.Node
 	 * @see org.w3c.dom.NodeList
+	 * @see Utils#resolveObjectName(String, String...)
 	 */
 	@Override
 	@SuppressWarnings("rawtypes")
@@ -101,74 +100,19 @@ public class FuncGetObjectName extends AbstractFunction<String> {
 			}
 		}
 
-		if (StringUtils.isEmpty(objectFQN)) {
-			return objectFQN;
-		}
-
-		return resolveObjectName(objectFQN, args);
+		return Utils.resolveObjectName(objectFQN, toArray(args));
 	}
 
-	private static String resolveObjectName(String objectName, List<?> args) {
-		String option = args.size() > 1 ? (String) args.get(1) : null;
-		Options opt;
-
-		try {
-			opt = StringUtils.isEmpty(option) ? Options.DEFAULT : Options.valueOf(option.toUpperCase());
-		} catch (IllegalArgumentException exc) {
-			opt = Options.DEFAULT;
+	private static String[] toArray(List<?> args) {
+		if (args == null) {
+			return null;
 		}
 
-		switch (opt) {
-		case FULL:
-			break;
-		case BEFORE:
-			String sSymbol = args.size() > 2 ? (String) args.get(2) : null;
-			if (StringUtils.isNotEmpty(sSymbol)) {
-				objectName = StringUtils.substringBefore(objectName, sSymbol);
-			}
-			break;
-		case AFTER:
-			sSymbol = args.size() > 2 ? (String) args.get(2) : null;
-			if (StringUtils.isNotEmpty(sSymbol)) {
-				objectName = StringUtils.substringAfter(objectName, sSymbol);
-			}
-			break;
-		case REPLACE:
-			sSymbol = args.size() > 2 ? (String) args.get(2) : null;
-			if (StringUtils.isNotEmpty(sSymbol)) {
-				String rSymbol = args.size() > 3 ? (String) args.get(3) : null;
-				objectName = StringUtils.replaceChars(objectName, sSymbol, rSymbol == null ? "" : rSymbol);
-			}
-			break;
-		case SECTION:
-			String idxStr = args.size() > 2 ? (String) args.get(2) : null;
-			int idx;
-			try {
-				idx = Integer.parseInt(idxStr);
-			} catch (Exception exc) {
-				idx = -1;
-			}
-
-			if (idx >= 0) {
-				sSymbol = args.size() > 3 ? (String) args.get(3) : null;
-				String[] onTokens = StringUtils.split(objectName,
-						StringUtils.isEmpty(sSymbol) ? OBJ_NAME_TOKEN_DELIMITERS : sSymbol);
-				objectName = idx < ArrayUtils.getLength(onTokens) ? onTokens[idx] : objectName;
-			}
-			break;
-		case DEFAULT:
-		default:
-			idx = StringUtils.indexOfAny(objectName, OBJ_NAME_TOKEN_DELIMITERS);
-			if (idx > 0) {
-				objectName = StringUtils.substring(objectName, 0, idx);
-			}
-			break;
+		String[] strings = new String[args.size() - 1];
+		for (int i = 1; i < args.size(); i++) {
+			strings[i - 1] = (String) args.get(i);
 		}
 
-		return objectName;
-	}
-
-	enum Options {
-		DEFAULT, BEFORE, AFTER, REPLACE, SECTION, FULL
+		return strings;
 	}
 }

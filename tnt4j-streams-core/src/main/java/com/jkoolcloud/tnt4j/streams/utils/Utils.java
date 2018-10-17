@@ -2500,4 +2500,110 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		return name;
 	}
+
+	private static final char UNIX_PATH_SEPARATOR = '/';
+	private static final char WIN_PATH_SEPARATOR = '\\';
+
+	/**
+	 * Resolves file name from provided file path string.
+	 * 
+	 * @param path
+	 *            file path
+	 * @return file name resolved from provided path, or {@code null} if path is {@code null}
+	 */
+	public static String getFileName(String path) {
+		if (StringUtils.isEmpty(path)) {
+			return path;
+		}
+
+		return path.substring(path.lastIndexOf(UNIX_PATH_SEPARATOR) + 1)
+				.substring(path.lastIndexOf(WIN_PATH_SEPARATOR) + 1);
+	}
+
+	private static final String OBJ_NAME_TOKEN_DELIMITERS = "@#$"; // NON-NLS
+
+	/**
+	 * Resolves desired object name from provided fully qualified object name.
+	 * <p>
+	 * Function arguments sequence:
+	 * <ul>
+	 * <li>1 - resolution options: DEFAULT, BEFORE, AFTER, REPLACE, SECTION, FULL. Optional.</li>
+	 * <li>2 - search symbols. Optional.</li>
+	 * <li>3 - replacement symbols. Optional</li>
+	 * </ul>
+	 *
+	 * @param objectName
+	 *            fully qualified object name
+	 * @param args
+	 *            function arguments list
+	 * @return object name resolved form provided fully qualified object name, or {@code null} if fully qualified object
+	 *         name is {@code null}
+	 */
+	public static String resolveObjectName(String objectName, String... args) {
+		if (StringUtils.isEmpty(objectName)) {
+			return objectName;
+		}
+
+		String option = args == null || args.length < 1 ? null : args[0];
+		ObjNameOptions opt;
+
+		try {
+			opt = StringUtils.isEmpty(option) ? ObjNameOptions.DEFAULT : ObjNameOptions.valueOf(option.toUpperCase());
+		} catch (IllegalArgumentException exc) {
+			opt = ObjNameOptions.DEFAULT;
+		}
+
+		switch (opt) {
+		case FULL:
+			break;
+		case BEFORE:
+			String sSymbol = args == null || args.length < 2 ? null : args[1];
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				objectName = StringUtils.substringBefore(objectName, sSymbol);
+			}
+			break;
+		case AFTER:
+			sSymbol = args == null || args.length < 2 ? null : args[1];
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				objectName = StringUtils.substringAfter(objectName, sSymbol);
+			}
+			break;
+		case REPLACE:
+			sSymbol = args == null || args.length < 2 ? null : args[1];
+			if (StringUtils.isNotEmpty(sSymbol)) {
+				String rSymbol = args == null || args.length < 3 ? args[2] : null;
+				objectName = StringUtils.replaceChars(objectName, sSymbol, rSymbol == null ? "" : rSymbol);
+			}
+			break;
+		case SECTION:
+			String idxStr = args == null || args.length < 2 ? null : args[1];
+			int idx;
+			try {
+				idx = Integer.parseInt(idxStr);
+			} catch (Exception exc) {
+				idx = -1;
+			}
+
+			if (idx >= 0) {
+				sSymbol = args == null || args.length < 3 ? args[2] : null;
+				String[] onTokens = StringUtils.split(objectName,
+						StringUtils.isEmpty(sSymbol) ? OBJ_NAME_TOKEN_DELIMITERS : sSymbol);
+				objectName = idx < ArrayUtils.getLength(onTokens) ? onTokens[idx] : objectName;
+			}
+			break;
+		case DEFAULT:
+		default:
+			idx = StringUtils.indexOfAny(objectName, OBJ_NAME_TOKEN_DELIMITERS);
+			if (idx > 0) {
+				objectName = StringUtils.substring(objectName, 0, idx);
+			}
+			break;
+		}
+
+		return objectName;
+	}
+
+	private enum ObjNameOptions {
+		DEFAULT, BEFORE, AFTER, REPLACE, SECTION, FULL
+	}
 }

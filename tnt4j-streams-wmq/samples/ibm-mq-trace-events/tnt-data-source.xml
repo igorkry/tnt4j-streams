@@ -210,7 +210,7 @@
         <field name="DerivedName" value="" transparent="true">
             <field-transform lang="groovy" name="ResTransform"><![CDATA[
                 ${RemoteQName} != null
-                    ? ${RemoteQName} 
+                    ? ${RemoteQName}
                     : (${ResolvedObjectString} != null ? ${ResolvedObjectString}
                     : (${TargetName} != null ? ${TargetName} : ${QMgrName}))
             ]]></field-transform>
@@ -249,8 +249,8 @@
 
         <!-- provide application name without path for tracking -->
         <field name="ProgramName" locator="MQCACF_APPL_NAME" locator-type="Label">
-            <field-transform name="pgmName" lang="xpath">
-                ts:getFileName($fieldValue)
+            <field-transform name="pgmName" lang="groovy">
+                Utils.getFileName($fieldValue)
             </field-transform>
         </field>
 
