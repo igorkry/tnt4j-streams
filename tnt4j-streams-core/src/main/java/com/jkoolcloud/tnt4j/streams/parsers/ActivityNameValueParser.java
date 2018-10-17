@@ -199,7 +199,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 
 		Map<String, String> nameValues = entryPattern == null ? delimit(dataStr) : regex(dataStr);
 		ActivityContext cData = new ActivityContext(stream, data, nameValues);
-		cData.setMessage(getRawDataAsMessage(nameValues));
+		// cData.setMessage(getRawDataAsMessage(nameValues));
 
 		return cData;
 	}

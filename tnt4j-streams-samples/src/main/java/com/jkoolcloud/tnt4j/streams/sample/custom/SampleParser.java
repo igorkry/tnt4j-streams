@@ -115,7 +115,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 		logger().log(OpLevel.DEBUG, "Split input into {0} fields", fields.length); // NON-NLS
 
 		ActivityContext cData = new ActivityContext(stream, data, fields);
-		cData.setMessage(getRawDataAsMessage(fields));
+		// cData.setMessage(getRawDataAsMessage(fields));
 
 		return cData;
 	}

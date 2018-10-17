@@ -168,7 +168,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		}
 
 		ActivityContext cData = new ActivityContext(stream, data, dataMap);
-		cData.setMessage(getRawDataAsMessage(dataMap));
+		// cData.setMessage(getRawDataAsMessage(dataMap));
 		cData.put(ACCESSED_PATHS_KEY, new HashSet<String[]>());
 
 		return cData;

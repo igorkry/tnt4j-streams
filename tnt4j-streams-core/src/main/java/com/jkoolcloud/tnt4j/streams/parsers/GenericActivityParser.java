@@ -465,11 +465,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			return null;
 		}
 
-		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"ActivityParser.parsing.data", getLogString(cData.getMessage()));
+		if (logger().isSet(OpLevel.DEBUG)) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.parsing.data", getLogString(getDataAsMessage(cData)));
+		}
 
 		ActivityInfo ai = parsePreparedItem(cData);
-		fillInMessageData(stream, ai, cData.getMessage());
+		fillInMessageData(stream, ai, cData);
 		postParse(cData);
 
 		String parentId = (String) StreamsCache
@@ -483,6 +485,21 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return ai;
+	}
+
+	private String getDataAsMessage(ActivityContext cData) {
+		if (cData == null) {
+			return null;
+		}
+
+		String msg = cData.getMessage();
+
+		if (msg == null) {
+			msg = getRawDataAsMessage(cData.getData());
+			cData.setMessage(msg);
+		}
+
+		return msg;
 	}
 
 	/**
@@ -499,7 +516,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		T aData = (T) data;
 
 		ActivityContext cData = new ActivityContext(stream, data, aData);
-		cData.setMessage(getRawDataAsMessage(aData));
+		// cData.setMessage(getRawDataAsMessage(aData));
 
 		return cData;
 	}
@@ -630,17 +647,17 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            stream providing activity data
 	 * @param ai
 	 *            converted activity info
-	 * @param dataStr
-	 *            raw activity data string
+	 * @param cData
+	 *            parsing context data package
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 */
-	protected void fillInMessageData(TNTInputStream<?, ?> stream, ActivityInfo ai, String dataStr)
+	protected void fillInMessageData(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityContext cData)
 			throws ParseException {
-		if (useActivityAsMessage && ai.getMessage() == null && dataStr != null) {
+		if (useActivityAsMessage && ai.getMessage() == null) {
 			// save entire activity string as message data
 			ActivityField field = new ActivityField(StreamFieldType.Message.name());
-			applyFieldValue(stream, ai, field, dataStr);
+			applyFieldValue(stream, ai, field, getDataAsMessage(cData));
 		}
 	}
 

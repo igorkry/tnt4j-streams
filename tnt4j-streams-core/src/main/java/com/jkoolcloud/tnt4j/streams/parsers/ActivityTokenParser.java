@@ -173,7 +173,7 @@ public class ActivityTokenParser extends GenericActivityParser<String[]> {
 				"ActivityParser.split", fields.length);
 
 		ActivityContext cData = new ActivityContext(stream, data, fields);
-		cData.setMessage(getRawDataAsMessage(fields));
+		// cData.setMessage(getRawDataAsMessage(fields));
 
 		return cData;
 	}

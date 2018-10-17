@@ -123,7 +123,7 @@ public class ActivityStringParser extends GenericActivityParser<String> {
 		}
 
 		ActivityContext cData = new ActivityContext(stream, data, dataStr);
-		cData.setMessage(dataStr);
+		// cData.setMessage(dataStr);
 
 		return cData;
 	}
