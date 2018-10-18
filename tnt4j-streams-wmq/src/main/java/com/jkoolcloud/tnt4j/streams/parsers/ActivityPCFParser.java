@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,13 +53,31 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * used to map each field into its corresponding activity field. PCF parameter data contained Mqi structures are also
  * supported to retrieve values.
  * <p>
- * PCF message can have grouped parameters - all message will have header {@link MQCFH} and may have {@link MQCFGR} type
- * parameters. To access PCF message header fields use 'MQCFH' expression with header field name separated using
- * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} (e.g., 'MQCFH.CompCode'). To access
- * inner {@link MQCFGR} (or inner inner and so on) parameters use group parameter MQ constant name/value with grouped
- * parameter MQ constant name/value separated using
+ * PCF message can have grouped parameters - all messages will have header {@link MQCFH} and set of PCF parameters. It
+ * also may have {@link MQCFGR} type parameters and parameters containing binary data for MQI structures (named
+ * 'MQBACF_XXXXX_STRUCT', where 'XXXXX'` is MQI structure name).
+ * <p>
+ * To access PCF message header fields use 'MQCFH' expression with header field name delimited using
+ * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} (e.g., 'MQCFH.CompCode').
+ * <p>
+ * To access PCF message parameters use MQ constant name/value (e.g., 'MQCACF_APPL_NAME' or '3024').
+ * <p>
+ * To access inner {@link MQCFGR} (or inner inner and so on) parameters use group parameter MQ constant name/value with
+ * grouped parameter MQ constant name/value delimited using
  * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} (e.g.,
  * 'MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE').
+ * <p>
+ * In case PCF parameter refers MQI structure, inner (or inner inner and so on) structure fields can be accessed by
+ * adding {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} delimited MQI structure fields
+ * names to locator path after root MQI structure parameter identifier (e.g.,
+ * 'MQGACF_ACTIVITY_TRACE.MQBACF_MQMD_STRUCT.MsgId' or
+ * 'MQGACF_ACTIVITY_TRACE.MQBACF_MQCNO_STRUCT.clientConn.userIdentifier')
+ * <p>
+ * Additionally {@link com.ibm.mq.pcf.PCFMessage} may contain {@link com.ibm.mq.MQMD} data copied from transport
+ * {@link com.ibm.mq.MQMessage}. To access transport message {@link com.ibm.mq.MQMD} header values use 'MQMD' expression
+ * with field name (or relative PCF parameter constant) delimited using
+ * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} (e.g., 'MQMD.PutApplName',
+ * 'MQMD.MQCACF_APPL_NAME' or 'MQMD.3024').
  * <p>
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
@@ -78,7 +97,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
 	private static final String HEAD_MQMD = "MQMD"; // NON-NLS
-	private static final Pattern STRUCT_ATTR_PATTERN = Pattern.compile("MQB\\w+_MQ\\w+_STRUCT"); // NON-NLS
+	private static final Pattern STRUCT_ATTR_PATTERN = Pattern.compile("MQBACF_(\\w{4,5})_STRUCT"); // NON-NLS
 	private static final String MQ_TMP_CTX_STRUCT_PREF = "MQ_TMP_CTX_"; // NON-NLS
 
 	private boolean translateNumValues = true;
@@ -381,7 +400,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	/**
 	 * Resolves PCF parameter value.
 	 * <p>
-	 * If parser property `TranslateNumValues` is set to {@code true} - then if possible, resolved numeric value gets
+	 * If parser property 'TranslateNumValues' is set to {@code true} - then if possible, resolved numeric value gets
 	 * translated to corresponding MQ constant name.
 	 * <p>
 	 * When PCF parameter contains binary ({@code byte[]}) value and locator data type is set to {@code "String"} having
@@ -597,7 +616,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			}
 		}
 
-		return resolveMqiStructParamValue(mqiStruct, path, ++i, param.getJmqiEnv(), locator);
+		return resolveMqiStructParamValue(mqiStruct, path, i, param.getJmqiEnv(), locator);
 	}
 
 	private MqiStructure buildMqiStructureFromBinData(PCFParameter structParam) throws JmqiException {
@@ -681,17 +700,20 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	private Object resolveMqiStructParamValue(MqiStructure mqiStruct, String[] path, int i, JmqiEnvironment env,
 			ActivityFieldLocator locator) throws ParseException {
 		Object val = null;
+		Matcher structMatcher = STRUCT_ATTR_PATTERN.matcher(path[i]);
 
-		if (path[i].equalsIgnoreCase(mqiStruct.getClass().getSimpleName())) {
-			if (isLastPathToken(path, i)) {
-				val = mqiToString(mqiStruct, env);
-			} else {
-				val = resolveMqiStructParamValue(mqiStruct, path, i + 1, locator);
+		if (structMatcher.matches() && structMatcher.groupCount() > 0) {
+			if (structMatcher.group(1).equalsIgnoreCase(mqiStruct.getClass().getSimpleName())) {
+				if (isLastPathToken(path, i)) {
+					val = mqiToString(mqiStruct, env);
+				} else {
+					val = resolveMqiStructParamValue(mqiStruct, path, i + 1, locator);
 
-				if (val instanceof String) {
-					val = ((String) val).trim();
-				} else if (val instanceof MqiStructure) {
-					val = mqiToString((MqiStructure) val, env);
+					if (val instanceof String) {
+						val = ((String) val).trim();
+					} else if (val instanceof MqiStructure) {
+						val = mqiToString((MqiStructure) val, env);
+					}
 				}
 			}
 		}
@@ -866,6 +888,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 			break;
 		case "useridentifier": // NON-NLS
 			val = mqmd.getUserIdentifier();
+			break;
+		case "unmappableaction": // NON-NLS
+			val = mqmd.getUnmappableAction();
+			break;
+		case "unmappablereplacement": // NON-NLS
+			val = mqmd.getUnMappableReplacement();
 			break;
 		case "version": // NON-NLS
 			val = mqmd.getVersion();
@@ -1065,6 +1093,9 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 				mappedValue = MQConstants.lookup(val, "MQCNO_VERSION_.*"); // NON-NLS
 			}
 			break;
+		case "ccdturl": // NON-NLS
+			val = mqcno.getCCDTUrl();
+			break;
 		default:
 			break;
 		}
@@ -1077,15 +1108,141 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private Object resolveMQCBDValue(MQCBD mqcbd, String fName, ActivityFieldLocator locator) {
-		return mqcbd; // TODO
+		Object val = null;
+		Object mappedValue = null;
+
+		switch (fName.toLowerCase()) {
+		case "callbacktype": // NON-NLS
+			val = mqcbd.getCallbackType();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCBT_.*"); // NON-NLS
+			}
+			break;
+		case "callbackarea": // NON-NLS
+			val = mqcbd.getCallbackArea();
+			break;
+		case "callbackfunction": // NON-NLS
+			val = mqcbd.getCallbackFunction();
+			break;
+		case "callbackname": // NON-NLS
+			val = mqcbd.getCallbackName();
+			break;
+		case "maxmsglength": // NON-NLS
+			val = mqcbd.getMaxMsgLength();
+			break;
+		case "inhibitese": // NON-NLS
+			val = mqcbd.inhibitESE();
+			break;
+		case "options": // NON-NLS
+			val = mqcbd.getOptions();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.decodeOptions((int) val, "MQCBD0_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqcbd.getVersion();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCBD_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQCBCValue(MQCBC mqcbc, String fName, ActivityFieldLocator locator) {
-		return mqcbc; // TODO
+		Object val = null;
+		Object mappedValue = null;
+
+		switch (fName.toLowerCase()) {
+		case "calltype": // NON-NLS
+			val = mqcbc.getCallType();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCBCT_.*"); // NON-NLS
+			}
+			break;
+		case "hobj": // NON-NLS
+			val = mqcbc.getHobj();
+			break;
+		case "callbackarea": // NON-NLS
+			val = mqcbc.getCallbackArea();
+			break;
+		case "connectionarea": // NON-NLS
+			val = mqcbc.getConnectionArea();
+			break;
+		case "compcode": // NON-NLS
+			val = mqcbc.getCompCode();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookupCompCode((Integer) val); // NON-NLS
+			}
+			break;
+		case "reason": // NON-NLS
+			val = mqcbc.getReason();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookupReasonCode((Integer) val); // NON-NLS
+			}
+			break;
+		case "state": // NON-NLS
+			val = mqcbc.getState();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCS_.*"); // NON-NLS
+			}
+			break;
+		case "datalength": // NON-NLS
+			val = mqcbc.getDataLength();
+			break;
+		case "bufferlength": // NON-NLS
+			val = mqcbc.getBufferLength();
+			break;
+		case "flags": // NON-NLS
+			val = mqcbc.getFlags();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCBCF_.*"); // NON-NLS
+			}
+			break;
+		case "reconnectdelay": // NON-NLS
+			val = mqcbc.getReconnectDelay();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQRD_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqcbc.getVersion();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCBC_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQBOValue(MQBO mqbo, String fName, ActivityFieldLocator locator) {
-		return mqbo; // TODO
+		Object val = null;
+		Object mappedValue = null;
+
+		switch (fName.toLowerCase()) {
+		case "options": // NON-NLS
+			val = mqbo.getOptions();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.decodeOptions((int) val, "MQBO_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqbo.getVersion();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQBO_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQSDValue(MQSD mqsd, String fName, ActivityFieldLocator locator) {
@@ -1093,11 +1250,115 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private Object resolveMQSTSValue(MQSTS mqsts, String fName, ActivityFieldLocator locator) {
-		return mqsts; // TODO
+		Object val = null;
+		Object mappedValue = null;
+
+		switch (fName.toLowerCase()) {
+		case "putsuccesscount": // NON-NLS
+			val = mqsts.getPutSuccessCount();
+			break;
+		case "putwarningcount": // NON-NLS
+			val = mqsts.getPutWarningCount();
+			break;
+		case "putfailurecount": // NON-NLS
+			val = mqsts.getPutFailureCount();
+			break;
+		case "objectType": // NON-NLS
+			val = mqsts.getObjectType();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQOT_.*"); // NON-NLS
+			}
+			break;
+		case "compcode": // NON-NLS
+			val = mqsts.getCompCode();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookupCompCode((Integer) val); // NON-NLS
+			}
+			break;
+		case "reason": // NON-NLS
+			val = mqsts.getReason();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookupReasonCode((Integer) val); // NON-NLS
+			}
+			break;
+		case "objectname": // NON-NLS
+			val = mqsts.getObjectName();
+			break;
+		case "objectqmgrname": // NON-NLS
+			val = mqsts.getObjectQMgrName();
+			break;
+		case "resolvedobjectname": // NON-NLS
+			val = mqsts.getResolvedObjectName();
+			break;
+		case "resolvedqmgrname": // NON-NLS
+			val = mqsts.getResolvedQMgrName();
+			break;
+		case "objectstring": // NON-NLS
+			val = mqsts.getObjectString();
+			if (val != null) {
+				val = ((MQCHARV) val).getVsString();
+			}
+			break;
+		case "subname": // NON-NLS
+			val = mqsts.getSubName();
+			if (val != null) {
+				val = ((MQCHARV) val).getVsString();
+			}
+			break;
+		case "openoptions": // NON-NLS
+			val = mqsts.getOpenOptions();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.decodeOptions((int) val, "MQOO_.*"); // NON-NLS
+			}
+			break;
+		case "suboptions": // NON-NLS
+			val = mqsts.getSubOptions();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.decodeOptions((int) val, "MQSO_.*"); // NON-NLS
+			}
+			break;
+		case "version": // NON-NLS
+			val = mqsts.getVersion();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQSTS_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return mappedValue != null ? mappedValue : val;
 	}
 
 	private Object resolveMQCSPValue(MQCSP mqcsp, String fName, ActivityFieldLocator locator) {
-		return mqcsp; // TODO
+		Object val = null;
+		Object mappedValue = null;
+
+		switch (fName.toLowerCase()) {
+		case "authenticationtype": // NON-NLS
+			val = mqcsp.getAuthenticationType();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCSP_AUTH_.*"); // NON-NLS
+			}
+			break;
+		case "cspuserid": // NON-NLS
+			val = mqcsp.getCspUserId();
+			break;
+		case "csppassword": // NON-NLS
+			val = mqcsp.getCspPassword();
+			break;
+		case "version": // NON-NLS
+			val = mqcsp.getVersion();
+			if (isValueTranslatable(locator.getDataType())) {
+				mappedValue = MQConstants.lookup(val, "MQCSP_VERSION_.*"); // NON-NLS
+			}
+			break;
+		default:
+			break;
+		}
+
+		return mappedValue != null ? mappedValue : val;
+
 	}
 
 	private Object resolveMQSCOValue(MQSCO mqsco, String fName, ActivityFieldLocator locator) {

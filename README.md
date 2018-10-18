@@ -5454,6 +5454,26 @@ alias) value is used, the comparison would be against decimal value `31`, not `3
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
+##### PCF parameter locators
+
+PCF message can have grouped parameters - all messages will have header `MQCFH` and set of PCF parameters. It also may have `MQCFGR` type 
+parameters and parameters containing binary data for MQI structures (named `MQBACF_XXXXX_STRUCT`, where `XXXXX` is MQI structure name). 
+See [PCF command messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.adm.doc/q020010_.html) as PCF message 
+reference. 
+* To access PCF message header fields use `MQCFH` expression with header field name delimited using `.` (e.g., `MQCFH.CompCode`). 
+See [MQCFH - PCF header](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.ref.adm.doc/q088600_.html) as field names 
+reference.
+* To access PCF message parameters use MQ constant name/value (e.g., `MQCACF_APPL_NAME` or `3024`).
+* To access inner `MQCFGR` (or inner inner and so on) parameters use group parameter MQ constant name/value with grouped parameter MQ 
+constant name/value delimited using `.` (e.g., `MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE`).
+* In case PCF parameter refers `MQI` structure, inner (or inner inner and so on) structure fields can be accessed by adding `.` delimited 
+MQI structure fields names to locator path after root MQI structure parameter identifier (e.g., 
+`MQGACF_ACTIVITY_TRACE.MQBACF_MQMD_STRUCT.MsgId` or `MQGACF_ACTIVITY_TRACE.MQBACF_MQCNO_STRUCT.clientConn.userIdentifier`). 
+See [Data types used in the MQI](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.ref.dev.doc/q093560_.html) as field 
+names reference.
+* Additionally `PCFMessage` may contain `MQMD` data copied from transport `MQMessage`. To access transport message `MQMD` header values use 
+`MQMD` expression with field name (or relative PCF parameter constant) delimited using `.` (e.g., `MQMD.PutApplName`, `MQMD.MQCACF_APPL_NAME` or `MQMD.3024`).
+
 ##### MQ message signature calculation
 
 For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
