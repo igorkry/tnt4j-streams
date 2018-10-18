@@ -220,7 +220,7 @@
 
         <!-- to not include qmgr name as part of resource name, change the following line 
               from  {0}={1}.{2} and comment MQCA_Q_MGR_NAME in the following section -->
-        <field name="ResourceName" formattingPattern="{0}={1}.{2}">
+        <field name="ResourceName" formattingPattern="{0}={1}:{2}">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label">
                 <field-map source="MQOT_Q" target="QUEUE"/>
                 <field-map source="MQOT_TOPIC" target="TOPIC"/>
@@ -269,7 +269,7 @@
 
         <field name="ApplName" value="">
             <field-transform lang="groovy" name="ApplTransform"><![CDATA[
-                ${ChannelType} == null ? ${ProgramName} : ${ChannelType}+"_"+${ChannelName}
+                ${ChannelType} == null ? ${ProgramName} : "CHL:"+${ChannelType}+":"+${ChannelName}
             ]]></field-transform>
         </field>
 
