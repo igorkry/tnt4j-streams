@@ -88,11 +88,11 @@
             <artifactId>com.ibm.mq.allclient</artifactId>
             <version>${ibm.mq.version}</version>
         </dependency>
-        <dependency>
-            <groupId>javax.resource</groupId>
-            <artifactId>javax.resource-api</artifactId>
-            <version>1.7</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>javax.resource</groupId>-->
+        <!--<artifactId>javax.resource-api</artifactId>-->
+        <!--<version>1.7</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>com.jkoolcloud.tnt4j.streams</groupId>

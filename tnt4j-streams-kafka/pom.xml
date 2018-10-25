@@ -14,9 +14,10 @@
     <artifactId>tnt4j-streams-kafka</artifactId>
 
     <properties>
-        <kafka.version>0.11.0.2</kafka.version>
-        <!--<kafka.version>1.0.1</kafka.version>-->
-        <!--<kafka.version>1.1.0</kafka.version>-->
+        <!--<kafka.version>0.11.0.3</kafka.version>-->
+        <!--<kafka.version>1.0.2</kafka.version>-->
+        <kafka.version>1.1.1</kafka.version>
+        <!--<kafka.version>2.0.0</kafka.version>-->
         <kafka.clients.version>${kafka.version}</kafka.clients.version>
     </properties>
 
@@ -172,7 +173,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
+            <artifactId>kafka_2.12</artifactId>
             <version>${kafka.version}</version>
         </dependency>
         <!--<dependency>-->
