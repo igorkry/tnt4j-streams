@@ -62,8 +62,7 @@ public final class StreamsScriptingUtils {
 	private static final String SCRIPTING_CFG_PROPERTIES = "scripting.properties"; // NON-NLS
 	private static final String IMPORT_PACKAGES_PROP_KEY_SUFFIX = ".scripting.import.packages"; // NON-NLS
 
-	private static final Pattern VALID_SCRIPT_EXP_PATTERN = Pattern.compile("(?s).*\\$(fieldValue\\b)(?s).*"); // NON-NLS
-	private static final Pattern FIELD_VALUE_PLACEHOLDER_PATTERN = Pattern.compile("(?s).*\\$\\w+(?s).*"); // NON-NLS
+	private static final Pattern FIELD_VALUE_PLACEHOLDER_PATTERN = Pattern.compile("\\$(\\w+\\b)"); // NON-NLS
 	private static final Pattern FIELD_PLACEHOLDER_PATTERN = Pattern.compile("\\{\\w+\\}"); // NON-NLS
 
 	private static CompilerConfiguration DEFAULT_GROOVY_CONFIGURATION;
@@ -337,19 +336,22 @@ public final class StreamsScriptingUtils {
 			return false;
 		}
 
-		if (FIELD_VALUE_PLACEHOLDER_PATTERN.matcher(expString).matches()) {
-			return VALID_SCRIPT_EXP_PATTERN.matcher(expString).matches();
-		} else {
-			Matcher m = FIELD_PLACEHOLDER_PATTERN.matcher(expString);
-			while (m.find()) {
-				int phSIdx = m.start();
+		Matcher m = FIELD_PLACEHOLDER_PATTERN.matcher(expString);
+		while (m.find()) {
+			int phSIdx = m.start();
 
-				if (phSIdx == 0 || expString.charAt(phSIdx - 1) != '$') {
-					return false;
-				}
+			if (phSIdx == 0 || expString.charAt(phSIdx - 1) != '$') {
+				return false;
 			}
-
-			return true;
 		}
+
+		m = FIELD_VALUE_PLACEHOLDER_PATTERN.matcher(expString);
+		while (m.find()) {
+			if (!FIELD_VALUE_VARIABLE_EXPR.equals(m.group())) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
