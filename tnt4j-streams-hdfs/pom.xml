@@ -89,15 +89,9 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
+            <artifactId>hadoop-hdfs-client</artifactId>
             <version>${org.apache.hadoop.version}</version>
             <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

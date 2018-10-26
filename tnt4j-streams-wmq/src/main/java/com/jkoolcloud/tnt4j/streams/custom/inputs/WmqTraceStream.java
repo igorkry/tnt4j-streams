@@ -23,7 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.pcf.*;
+import com.ibm.mq.headers.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;

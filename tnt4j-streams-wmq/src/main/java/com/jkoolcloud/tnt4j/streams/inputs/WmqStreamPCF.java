@@ -21,9 +21,9 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.ibm.mq.MQMessage;
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.pcf.PCFConstants;
-import com.ibm.mq.pcf.PCFContent;
-import com.ibm.mq.pcf.PCFMessage;
+import com.ibm.mq.headers.pcf.PCFConstants;
+import com.ibm.mq.headers.pcf.PCFContent;
+import com.ibm.mq.headers.pcf.PCFMessage;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;

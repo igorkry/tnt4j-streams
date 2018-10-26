@@ -32,10 +32,10 @@ import com.ibm.mq.headers.CCSID;
 import com.ibm.mq.headers.Charsets;
 import com.ibm.mq.headers.MQDLH;
 import com.ibm.mq.headers.MQXQH;
-import com.ibm.mq.pcf.MQCFGR;
-import com.ibm.mq.pcf.MQCFIN;
-import com.ibm.mq.pcf.PCFContent;
-import com.ibm.mq.pcf.PCFParameter;
+import com.ibm.mq.headers.pcf.MQCFGR;
+import com.ibm.mq.headers.pcf.MQCFIN;
+import com.ibm.mq.headers.pcf.PCFContent;
+import com.ibm.mq.headers.pcf.PCFParameter;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.MessageType;
@@ -115,8 +115,8 @@ public class WmqUtils {
 	 *
 	 * @param param
 	 *            PCF parameter to check
-	 * @return {@code true} if parameter is of type {@link com.ibm.mq.pcf.MQCFGR} and parameter's parameter field value
-	 *         is {@code MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
+	 * @return {@code true} if parameter is of type {@link com.ibm.mq.headers.pcf.MQCFGR} and parameter's parameter
+	 *         field value is {@code MQGACF_ACTIVITY_TRACE}, {@code false} - otherwise
 	 */
 	public static boolean isTraceParameter(PCFParameter param) {
 		return param.getParameter() == MQConstants.MQGACF_ACTIVITY_TRACE && param instanceof MQCFGR;
