@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.script.*;
@@ -63,6 +64,7 @@ public final class StreamsScriptingUtils {
 
 	private static final Pattern VALID_SCRIPT_EXP_PATTERN = Pattern.compile("(?s).*\\$(fieldValue\\b)(?s).*"); // NON-NLS
 	private static final Pattern FIELD_VALUE_PLACEHOLDER_PATTERN = Pattern.compile("(?s).*\\$\\w+(?s).*"); // NON-NLS
+	private static final Pattern FIELD_PLACEHOLDER_PATTERN = Pattern.compile("\\{\\w+\\}"); // NON-NLS
 
 	private static CompilerConfiguration DEFAULT_GROOVY_CONFIGURATION;
 	private static String DEFAULT_JS_CODE_IMPORTS;
@@ -338,6 +340,15 @@ public final class StreamsScriptingUtils {
 		if (FIELD_VALUE_PLACEHOLDER_PATTERN.matcher(expString).matches()) {
 			return VALID_SCRIPT_EXP_PATTERN.matcher(expString).matches();
 		} else {
+			Matcher m = FIELD_PLACEHOLDER_PATTERN.matcher(expString);
+			while (m.find()) {
+				int phSIdx = m.start();
+
+				if (phSIdx == 0 || expString.charAt(phSIdx - 1) != '$') {
+					return false;
+				}
+			}
+
 			return true;
 		}
 	}
