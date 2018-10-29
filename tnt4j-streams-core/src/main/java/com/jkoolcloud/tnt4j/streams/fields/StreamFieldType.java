@@ -167,7 +167,7 @@ public enum StreamFieldType {
 	/**
 	 * Age of activity event message.
 	 */
-	MsgAge(Long.class),
+	MessageAge(Long.class),
 
 	/**
 	 * Activity event category name.

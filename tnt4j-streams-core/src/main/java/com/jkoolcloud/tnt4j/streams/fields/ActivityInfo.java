@@ -380,7 +380,7 @@ public class ActivityInfo {
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
-			case MsgAge:
+			case MessageAge:
 				msgAge = substitute(msgAge, getNumberValue(fieldValue, Long.class));
 				break;
 			case ProcessId:
@@ -1839,7 +1839,7 @@ public class ActivityInfo {
 				return msgLength;
 			case MsgMimeType:
 				return msgMimeType;
-			case MsgAge:
+			case MessageAge:
 				return msgAge;
 			case ParentId:
 				return parentId;

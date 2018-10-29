@@ -295,6 +295,15 @@ public enum FieldNames {
 	MSG_CHAR_SET("MsgCharSet"),
 
 	/**
+	 *
+	 * Age (in microseconds) of activity entity message.
+	 *
+	 *
+	 */
+	@XmlEnumValue("MessageAge")
+	MESSAGE_AGE("MessageAge"),
+
+	/**
 	 * 
 	 * Activity entity category name.
 	 * 

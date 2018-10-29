@@ -370,6 +370,14 @@
                 </xs:annotation>
             </xs:enumeration>
 
+            <xs:enumeration value="MessageAge">
+                <xs:annotation>
+                    <xs:documentation>
+                        Age (in microseconds) of activity entity message.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+
             <xs:enumeration value="Category">
                 <xs:annotation>
                     <xs:documentation>
