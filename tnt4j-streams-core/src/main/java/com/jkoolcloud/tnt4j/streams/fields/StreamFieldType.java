@@ -165,6 +165,11 @@ public enum StreamFieldType {
 	MsgCharSet(String.class),
 
 	/**
+	 * Age of activity event message.
+	 */
+	MsgAge(Long.class),
+
+	/**
 	 * Activity event category name.
 	 */
 	Category(String.class),

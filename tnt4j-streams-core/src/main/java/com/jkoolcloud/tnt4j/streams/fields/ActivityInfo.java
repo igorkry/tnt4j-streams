@@ -84,6 +84,7 @@ public class ActivityInfo {
 	private String msgEncoding = null;
 	private Integer msgLength = null;
 	private String msgMimeType = null;
+	private long msgAge = -1L;
 
 	private Integer processId = null;
 	private Integer threadId = null;
@@ -378,6 +379,9 @@ public class ActivityInfo {
 				break;
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
+				break;
+			case MsgAge:
+				msgAge = substitute(msgAge, getNumberValue(fieldValue, Long.class));
 				break;
 			case ProcessId:
 				processId = substitute(processId, getNumberValue(fieldValue, Integer.class));
@@ -875,6 +879,9 @@ public class ActivityInfo {
 		if (StringUtils.isNotEmpty(msgCharSet)) {
 			event.setCharset(msgCharSet);
 		}
+		if (msgAge > 0L) {
+			event.setMessageAge(msgAge);
+		}
 
 		event.getOperation().setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		event.getOperation().setReasonCode(reasonCode);
@@ -971,6 +978,9 @@ public class ActivityInfo {
 		}
 		if (StringUtils.isNotEmpty(msgCharSet)) {
 			addActivityProperty(JSONFormatter.JSON_MSG_CHARSET_FIELD, msgCharSet);
+		}
+		if (msgAge > 0L) {
+			addActivityProperty(JSONFormatter.JSON_MSG_AGE_USEC_FIELD, msgAge);
 		}
 
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
@@ -1123,6 +1133,9 @@ public class ActivityInfo {
 		}
 		if (StringUtils.isNotEmpty(msgCharSet)) {
 			snapshot.add(JSONFormatter.JSON_MSG_CHARSET_FIELD, msgCharSet);
+		}
+		if (msgAge > 0L) {
+			snapshot.add(JSONFormatter.JSON_MSG_AGE_USEC_FIELD, msgAge);
 		}
 
 		snapshot.add(JSONFormatter.JSON_COMP_CODE_FIELD, compCode == null ? OpCompCode.SUCCESS : compCode);
@@ -1364,6 +1377,9 @@ public class ActivityInfo {
 		}
 		if (StringUtils.isEmpty(msgMimeType)) {
 			msgMimeType = otherAi.msgMimeType;
+		}
+		if (msgAge == -1L) {
+			msgAge = otherAi.msgAge;
 		}
 
 		if (processId == null) {
@@ -1640,6 +1656,15 @@ public class ActivityInfo {
 	}
 
 	/**
+	 * Gets message age.
+	 *
+	 * @return the message age
+	 */
+	public long getMsgAge() {
+		return msgAge;
+	}
+
+	/**
 	 * Gets process identifier.
 	 *
 	 * @return the process identifier
@@ -1754,6 +1779,7 @@ public class ActivityInfo {
 		sb.append(", msgEncoding=").append(Utils.sQuote(msgEncoding)); // NON-NLS
 		sb.append(", msgLength=").append(msgLength); // NON-NLS
 		sb.append(", msgMimeType=").append(Utils.sQuote(msgMimeType)); // NON-NLS
+		sb.append(", msgAge=").append(msgAge); // NON-NLS
 		sb.append(", processId=").append(processId); // NON-NLS
 		sb.append(", threadId=").append(threadId); // NON-NLS
 		sb.append(", category=").append(Utils.sQuote(category)); // NON-NLS
@@ -1813,6 +1839,8 @@ public class ActivityInfo {
 				return msgLength;
 			case MsgMimeType:
 				return msgMimeType;
+			case MsgAge:
+				return msgAge;
 			case ParentId:
 				return parentId;
 			case ProcessId:

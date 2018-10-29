@@ -190,6 +190,11 @@ sample:
     EventType(Enum.class),
 
     /**
+     * Status of activity - value must match values in {@link com.jkoolcloud.tnt4j.core.ActivityStatus} enumeration.
+     */
+    EventStatus(Enum.class),
+
+    /**
      * Time action associated with activity started.
      */
     StartTime(UsecTimestamp.class),
@@ -289,6 +294,11 @@ sample:
      * CharSet of activity event message data.
      */
     MsgCharSet(String.class),
+
+    /**
+     * Age of activity event message.
+     */
+    MsgAge(Long.class),
 
     /**
      * Activity event category name.
