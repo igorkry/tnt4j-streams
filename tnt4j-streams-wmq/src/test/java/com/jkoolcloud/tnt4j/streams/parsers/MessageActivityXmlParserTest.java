@@ -25,9 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
-import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
+import com.jkoolcloud.tnt4j.streams.fields.*;
 
 /**
  * @author akausinis
@@ -50,7 +48,7 @@ public class MessageActivityXmlParserTest {
 	}
 
 	@Test
-	public void testapplyFieldValue() throws Exception {
+	public void testApplyFieldValue() throws Exception {
 		MessageActivityXmlParser parser = new MessageActivityXmlParser();
 		ActivityInfo ai = mock(ActivityInfo.class);
 		ActivityField field = mock(ActivityField.class);
@@ -58,6 +56,25 @@ public class MessageActivityXmlParserTest {
 		when(field.getFieldType()).thenReturn(StreamFieldType.Correlator);
 		parser.applyFieldValue(ai, field, value);
 		verify(field).getFieldType();
+	}
+
+	@Test
+	public void testCalculateSignatureFromMsgId() throws Exception {
+		MessageActivityXmlParser parser = new MessageActivityXmlParser();
+
+		ActivityFieldLocator loc = new ActivityFieldLocator(null);
+		loc.setDataType(ActivityFieldDataType.Binary);
+		loc.setFormat("hexBinary", null);
+		loc.setRequired("false");
+
+		ActivityField field = new ActivityField("TrackingId");
+		field.setValueType("signature");
+		field.setRequired("false");
+		field.addLocator(loc);
+
+		Object locVal = loc.formatValue("414d51205639546573742020202020201fd7725b29317729");
+
+		parser.applyFieldValue(mock(ActivityInfo.class), field, locVal);
 	}
 
 }

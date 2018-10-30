@@ -5532,8 +5532,8 @@ This parser resolved data map may contain such entries:
 
 #### Activity Java object (POJO) parser
 
-* `SupportedClass` - defines class name of parser supported objects. Parser can have multiple property definitions. It is useful when just 
-some specific set of objects has to be handled by this parser instead of all passed objects. (Optional)
+* `SupportedClass` - defines class name of parser supported objects. Parser can have multiple definitions of this property. It is useful 
+when just some specific set of objects has to be handled by this parser instead of all passed objects. (Optional)
 
     sample:
 ```xml

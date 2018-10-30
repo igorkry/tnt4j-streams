@@ -89,10 +89,13 @@ public class ActivityFieldLocatorTest {
 	public void testFormatNumericValue() throws ParseException {
 		locator = new ActivityFieldLocator(1);
 		try {
+			locator.setDataType(ActivityFieldDataType.Generic);
 			locator.setFormat(null, Locale.ITALY.toString());
 			assertNull(locator.formatNumericValue(""));
 			assertEquals(1.0f, locator.formatNumericValue("1.0")); // NON-NLS
 			assertEquals(1000.01, locator.formatNumericValue("1.000,01")); // NON-NLS
+			assertEquals(15, locator.formatNumericValue("15")); // NON-NLS
+			assertEquals(2, locator.formatNumericValue("2 - Normal")); // NON-NLS
 		} catch (Exception e) {
 		}
 	}

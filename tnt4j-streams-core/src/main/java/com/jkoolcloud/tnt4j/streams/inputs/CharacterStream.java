@@ -22,7 +22,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.Feed;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed;
-import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 
 /**
  * Implements a character arrays based activity stream, where raw input source is {@link Reader} or {@link InputStream}
@@ -34,8 +33,8 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
  * 
  * @version $Revision: 1 $
  *
- * @see ReaderFeed
- * @see ActivityParser#isDataClassSupported(Object)
+ * @see com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed
+ * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class CharacterStream extends FeedInputStream<Reader, BufferedReader> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CharacterStream.class);

@@ -187,15 +187,14 @@ public class JMSStream extends AbstractBufferedStream<Message> {
 
 	@Override
 	protected boolean isInputEnded() {
-		boolean flag = true;
-
 		for (JMSDataReceiver jmsDataReceiver : jmsDataReceivers) {
 			if (!jmsDataReceiver.isInputEnded()) {
-				flag = false;
+				return false;
 			}
 		}
 
-		return flag;
+		offerDieMarker();
+		return true;
 	}
 
 	@Override

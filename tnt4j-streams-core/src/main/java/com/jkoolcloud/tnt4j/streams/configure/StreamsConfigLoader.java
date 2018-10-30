@@ -98,7 +98,7 @@ public class StreamsConfigLoader {
 			return new FileInputStream(path);
 		} catch (FileNotFoundException e) {
 		}
-		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+		return Utils.getResourceAsStream(path);
 	}
 
 	/**

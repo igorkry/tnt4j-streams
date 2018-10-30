@@ -18,8 +18,10 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -45,9 +47,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * This parser supports the following configuration properties (in addition to those supported by
  * {@link GenericActivityParser}):
  * <ul>
- * <li>SupportedClass - defines class name of parser supported objects. Parser can have multiple property definitions.
- * It is useful when just some specific set of objects has to be handled by this parser instead of all passed objects.
- * (Optional)</li>
+ * <li>SupportedClass - defines class name of parser supported objects. Parser can have multiple definitions of this
+ * property. It is useful when just some specific set of objects has to be handled by this parser instead of all passed
+ * objects. (Optional)</li>
  * </ul>
  * <p>
  * This activity parser supports those activity field locator types:
@@ -87,15 +89,22 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 				String value = prop.getValue();
 
 				if (ParserProperties.PROP_SUPPORTED_CLASS.equalsIgnoreCase(name)) {
-					try {
-						supportedClasses.add(Class.forName(value));
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.setting", name, value);
-					} catch (Throwable e) {
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityJavaObjectParser.resolve.class.failed", value, e.getLocalizedMessage());
+					if (StringUtils.isNotEmpty(value)) {
+						String[] sClasses = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+						for (String sClass : sClasses) {
+							try {
+								supportedClasses.add(Class.forName(sClass));
+								logger().log(OpLevel.DEBUG,
+										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+										"ActivityJavaObjectParser.adding.supported.class", sClass);
+							} catch (Throwable e) {
+								logger().log(OpLevel.DEBUG,
+										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+										"ActivityJavaObjectParser.resolve.class.failed", sClass,
+										e.getLocalizedMessage());
+							}
+						}
 					}
-
 				}
 			}
 		}
