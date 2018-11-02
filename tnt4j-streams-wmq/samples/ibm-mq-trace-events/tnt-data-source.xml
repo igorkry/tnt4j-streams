@@ -40,7 +40,7 @@
 
         <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
           entire content, remove this section.  To capture a portion of the message, use an
-          embedded parser as shown in the example below).  Messages are translated to a local character 
+          embedded parser as shown in the example below).  Messages are translated to a local character
           set and if a XQH/DLH exist, they are removed.
           -->
 
@@ -163,8 +163,8 @@
              The signature can be any unique value that will identify the message across systems and is used
              to identify producers and consumers of a given message.  It is similar to a correlator but uniquely
              identifies a single message rather than correlating it with other messages related to the flow.
-             This example uses the MQ message id plus the date and time the message was put.  For most applications, 
-                this will be sufficient to be unique unless they do not allow MQ to create unique message ids -->
+             This example uses the MQ message id plus the date and time the message was put. For most applications,
+             this will be sufficient to be unique unless they do not allow MQ to create unique message ids -->
 
         <field name="TrackingIdNorm" separator="#!#" value-type="signature" required="false" transparent="true">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
@@ -203,23 +203,23 @@
         <field name="TargetName" locator="ObjectName" locator-type="Activity" transparent="true"/>
 
         <!-- The following will use the TargetName as name for resource if it exists, unless
-                   The message is flowing over a transmission queue where the destination name will be used
-                   The messages is being published to a topic string 
+                   The messages is being published to a topic string
                    The target doesnt exist  -->
 
         <field name="DerivedName" value="" transparent="true">
             <field-transform lang="groovy" name="ResTransform"><![CDATA[
-                ${RemoteQName} != null
-                    ? ${RemoteQName}
-                    : (${ResolvedObjectString} != null ? ${ResolvedObjectString}
-                    : (${TargetName} != null ? ${TargetName} : ${QMgrName}))
+                StringUtils.isNotEmpty(${ResolvedObjectString})
+                    ? ${ResolvedObjectString}
+                    : StringUtils.isNotEmpty(${TargetName})
+                        ? ${TargetName}
+                        : ${QMgrName}
             ]]></field-transform>
         </field>
 
         <!-- ResourceName identifies the target for events and views such as topology.  -->
 
         <!-- to not include qmgr name as part of resource name, change the following line 
-              from  {0}={1}.{2} and comment MQCA_Q_MGR_NAME in the following section -->
+             from  {0}={1}.{2} and comment MQCA_Q_MGR_NAME in the following section -->
         <field name="ResourceName" formattingPattern="{0}={1}:{2}">
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label">
                 <field-map source="MQOT_Q" target="QUEUE"/>
@@ -273,20 +273,21 @@
             ]]></field-transform>
         </field>
 
-        <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
-               units="Microseconds" transparent="true"/>
+        <!-- record actual elapsed time as a number only, not time stamp -->
+        <field name="QMgrOpDuration" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+               units="Microseconds">
+            <field-transform name="ElapTransform" lang="groovy"><![CDATA[
+               $fieldValue == null ? 0 : $fieldValue
+            ]]></field-transform>
+        </field>
 
-        <!-- time calculations, use highrestime is available (not all calls have it) -->
+        <!-- time calculations, use highrestime if available (not all calls have it) -->
         <field name="HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
                units="Microseconds"/>
 
-        <field name="StartTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
-        </field>
-        <field name="EndTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        <field name="OperationTime" formattingPattern="{0} {1}" format="yyyy-MM-dd HH:mm:ss" datatype="DateTime" timezone="GMT">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label" required="false"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label" required="false"/>
         </field>
 
         <field name="PutTime" formattingPattern="{0} {1}" format="yyyyMMdd HHmmssSS" datatype="DateTime" timezone="GMT">
@@ -294,23 +295,31 @@
             <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label" required="false"/>
         </field>
 
-        <field name="ElapsedTime" value="0"/>
+        <!-- compute age of message based on time from put to time when delivered adjusting for difference in precision -->
+        <field name="MessageAge" value="" datatype="Number">
+            <field-transform name="MATransform" lang="groovy"><![CDATA[
+               (${PutTime} != null && ${EventType}.name().equals("RECEIVE"))
+                ? ${HighresTime} - ${PutTime} - 10000
+                : 0
+            ]]></field-transform>
+        </field>
 
-        <!-- record actual elapsed time as a number only, not time stamp -->
-        <field name="QMgrOpDuration" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds">
-            <field-transform name="ElapTransform" lang="groovy"><![CDATA[
-               ${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
+        <!-- If we have message age, use for Elapsed Time, otherwise use reported MQ time -->
+        <field name="ElapsedTime" value="0" datatype="Number">
+            <field-transform name="EtTransform" lang="groovy"><![CDATA[
+                ${MessageAge} > 0 ? ${MessageAge} : ${QMgrOpDuration}
             ]]></field-transform>
         </field>
         <!-- start time is only precise to seconds so use highrestime if available -->
-        <field name="StartTime" value="">
+        <field name="StartTime" value="" datatype="Timestamp">
             <field-transform lang="groovy" name="StartTimeTransform"><![CDATA[
-                ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
+                ${HighresTime} != null ? ${HighresTime} : ${OperationTime}
             ]]></field-transform>
         </field>
-        <field name="EndTime" value="">
+        <!-- if MessageAge is present, just use highrestime as end time otherwise if present, highrestime plus duration -->
+        <field name="EndTime" value="" datatype="Timestamp" units="Microseconds">
             <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
-                ${HighresTime} != null ? ${HighresTime} : ${EndTimeSec}
+                ${MessageAge} = 0 ? ${StartTime}.longValue() + ${ElapsedTime} : ${StartTime}
             ]]></field-transform>
         </field>
 
@@ -329,10 +338,6 @@
         <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label" datatype="Number"/>
         <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
         <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label" datatype="Number"/>
-        <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
-            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
-        </field>
         <field name="ObjType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
         <field name="ObjQMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
 
@@ -353,7 +358,6 @@
         </field>
 
         <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
-        <!-- translate Reason Code to something more meaningful -->
         <field name="RcText" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label"/>
         <field name="Exception" value="">
             <field-transform lang="groovy" name="RCTransform"><![CDATA[
