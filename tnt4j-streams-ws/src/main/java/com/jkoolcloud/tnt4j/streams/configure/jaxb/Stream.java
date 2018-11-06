@@ -22,6 +22,7 @@ import java.util.List;
 import javax.annotation.Generated;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -38,7 +39,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;complexType name="Stream">
  *           &lt;complexContent>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *               &lt;sequence>
+ *               &lt;choice maxOccurs="unbounded">
  *                 &lt;element name="property" type="{}StreamProperty" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
@@ -53,14 +54,14 @@ import javax.xml.bind.annotation.XmlType;
  *                     &lt;/complexContent>
  *                   &lt;/complexType>
  *                 &lt;/element>
- *               &lt;/sequence>
+ *               &lt;/choice>
  *               &lt;attGroup ref="{}EntityAttributeGroup"/>
  *             &lt;/restriction>
  *           &lt;/complexContent>
  *         &lt;/complexType>
  *       &lt;/redefine>
  *       &lt;sequence>
- *         &lt;element name="scenario" type="{}Scenario" maxOccurs="unbounded" minOccurs="1"/>
+ *         &lt;element name="scenario" type="{}Scenario" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -74,6 +75,7 @@ import javax.xml.bind.annotation.XmlType;
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 public class Stream extends OriginalStream {
 
+	@XmlElement(required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Scenario> scenario;
 
@@ -94,7 +96,7 @@ public class Stream extends OriginalStream {
 	 *
 	 *
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link String }
+	 * Objects of the following type(s) are allowed in the list {@link Scenario }
 	 *
 	 *
 	 */

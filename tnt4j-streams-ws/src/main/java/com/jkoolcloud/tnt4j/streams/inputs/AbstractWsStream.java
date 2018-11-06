@@ -16,20 +16,23 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
-import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.scenario.*;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -38,16 +41,20 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * Base class for scheduled service or system command request/call produced activity stream, where each call/request
  * response is assumed to represent a single activity or event which should be recorded.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link String} data to parse
+ * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
- * This activity stream supports configuration properties from {@link AbstractBufferedStream} (and higher hierarchy
- * streams).
+ * This activity stream supports configuration properties from
+ * {@link com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream} (and higher hierarchy streams).
  *
- * @version $Revision: 1 $
+ * @param <T>
+ *            type of handled response data
+ *
+ * @version $Revision: 2 $
  *
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
-public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
+public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsResponse<T>> {
 
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
@@ -68,11 +75,6 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	private static final ReentrantLock schedInitLock = new ReentrantLock();
 
 	// @Override
-	// public Object getProperty(String name) {
-	// return super.getProperty(name);
-	// }
-	//
-	// @Override
 	// public void setProperties(Collection<Map.Entry<String, String>> props) {
 	// super.setProperties(props);
 	//
@@ -83,6 +85,11 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	//
 	// }
 	// }
+	// }
+	//
+	// @Override
+	// public Object getProperty(String name) {
+	// return super.getProperty(name);
 	// }
 
 	@Override
@@ -155,11 +162,26 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 			scheduleBuilder = CronScheduleBuilder.cronSchedule(csd.getExpression());
 		} else {
 			SimpleSchedulerData ssd = (SimpleSchedulerData) step.getSchedulerData();
+			Integer repCount = ssd == null ? null : ssd.getRepeatCount();
+
+			if (repCount != null && repCount == 0) {
+				return;
+			}
+
+			if (repCount == null) {
+				repCount = 1;
+			}
+
+			TimeUnit timeUnit = ssd == null ? null : ssd.getUnits();
+			long interval = ssd == null ? 1 : ssd.getInterval();
+
+			if (timeUnit == null) {
+				timeUnit = TimeUnit.SECONDS;
+			}
 
 			scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-					.withIntervalInMilliseconds(ssd == null ? 1
-							: ssd.getUnits() == null ? ssd.getInterval() : ssd.getUnits().toMillis(ssd.getInterval()))
-					.withRepeatCount(ssd == null || ssd.getRepeatCount() == null ? 1 : ssd.getRepeatCount());
+					.withIntervalInMilliseconds(timeUnit.toMillis(interval))
+					.withRepeatCount(repCount > 0 ? repCount - 1 : repCount);
 		}
 
 		Trigger trigger = TriggerBuilder.newTrigger().withIdentity(job.getKey() + "Trigger").startNow() // NON-NLS
@@ -178,11 +200,6 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 	 * @return scheduler job detail object.
 	 */
 	protected abstract JobDetail buildJob(String jobId, JobDataMap jobAttrs);
-
-	@Override
-	protected long getActivityItemByteSize(String item) {
-		return item == null ? 0 : item.getBytes().length;
-	}
 
 	/**
 	 * Adds scenario to scenarios list.
@@ -229,46 +246,110 @@ public abstract class AbstractWsStream extends AbstractBufferedStream<String> {
 
 	@Override
 	protected boolean isInputEnded() {
-		boolean hasRunningSteps = true;
-
-		Set<TriggerKey> triggerKeys = null;
 		try {
-			triggerKeys = scheduler.getTriggerKeys(null);
+			List<JobExecutionContext> runningJobs = scheduler.getCurrentlyExecutingJobs();
+			if (CollectionUtils.isNotEmpty(runningJobs)) {
+				return false;
+			}
 		} catch (SchedulerException exc) {
 		}
 
-		if (CollectionUtils.isNotEmpty(triggerKeys)) {
-			for (TriggerKey tKey : triggerKeys) {
-				try {
-					Trigger t = scheduler.getTrigger(tKey);
-					if (t.mayFireAgain()) {
-						hasRunningSteps = false;
-						break;
+		try {
+			Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(null);
+			if (CollectionUtils.isNotEmpty(triggerKeys)) {
+				for (TriggerKey tKey : triggerKeys) {
+					try {
+						Trigger t = scheduler.getTrigger(tKey);
+						if (t.mayFireAgain()) {
+							return false;
+						}
+					} catch (SchedulerException exc) {
 					}
-				} catch (SchedulerException exc) {
+				}
+			}
+		} catch (SchedulerException exc) {
+		}
+
+		offerDieMarker();
+		return true;
+	}
+
+	@Override
+	protected String[] getDataTags(Object data) {
+		return data instanceof WsResponse<?> ? new String[] { ((WsResponse<?>) data).getTag() }
+				: super.getDataTags(data);
+	}
+
+	@Override
+	protected ActivityInfo applyParsers(Object data, String... tags) throws IllegalStateException, ParseException {
+		return super.applyParsers(data instanceof WsResponse<?> ? ((WsResponse<?>) data).getData() : data, tags);
+	}
+
+	/**
+	 * Fills in request/query/command string having variable expressions with parameters stored in
+	 * {@code streamProperties} map.
+	 *
+	 * @param reqDataStr
+	 *            request/query/command string
+	 * @param streamProperties
+	 *            stream properties map
+	 * @return variable values filled in request/query/command string
+	 */
+	protected String fillInRequestData(String reqDataStr, Map<String, String> streamProperties) {
+		if (StringUtils.isEmpty(reqDataStr) || streamProperties.isEmpty()) {
+			return reqDataStr;
+		}
+
+		List<String> vars = new ArrayList<>();
+		Utils.resolveExpressionVariables(vars, reqDataStr);
+		// Utils.resolveCfgVariables(vars, reqDataStr);
+
+		String reqData = reqDataStr;
+		if (CollectionUtils.isNotEmpty(vars)) {
+			String varVal;
+			for (String rdVar : vars) {
+				varVal = streamProperties.get(Utils.getVarName(rdVar));
+				if (varVal != null) {
+					reqData = reqData.replace(rdVar, varVal);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							"AbstractWsStream.filling.req.data.variable", rdVar, Utils.toString(varVal));
 				}
 			}
 		}
 
-		return hasRunningSteps;
+		return reqData;
 	}
 
 	/**
-	 * Request method types enumeration.
+	 * Fills in request/query/command string having variable expressions with parameters stored in streams cache
+	 * {@link com.jkoolcloud.tnt4j.streams.utils.StreamsCache}.
+	 *
+	 * @param reqDataStr
+	 *            request/query/command string
+	 * @return variable values filled in request/query/command string
 	 */
-	enum ReqMethod {
-		/**
-		 * Request method GET.
-		 */
-		GET,
-		/**
-		 * Request method POST.
-		 */
-		POST,
-		/**
-		 * Request method COMMAND.
-		 */
-		COMMAND
-	}
+	protected String fillInRequestCacheData(String reqDataStr) {
+		if (StringUtils.isEmpty(reqDataStr)) {
+			return reqDataStr;
+		}
 
+		List<String> vars = new ArrayList<>();
+		Utils.resolveExpressionVariables(vars, reqDataStr);
+		// Utils.resolveCfgVariables(vars, reqDataStr);
+
+		String reqData = reqDataStr;
+		if (CollectionUtils.isNotEmpty(vars)) {
+			String varVal;
+			for (String rdVar : vars) {
+				varVal = Utils.toString(StreamsCache.getValue(Utils.getVarName(rdVar)));
+				if (varVal != null) {
+					reqData = reqData.replace(rdVar, varVal);
+					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							"AbstractWsStream.filling.req.data.variable", rdVar, Utils.toString(varVal));
+				}
+			}
+		}
+
+		return reqData;
+	}
 }

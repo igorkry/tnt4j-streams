@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="Stream">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
+ *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="property" type="{}StreamProperty" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
@@ -52,7 +52,7 @@ import javax.xml.bind.annotation.*;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *       &lt;/sequence>
+ *       &lt;/choice>
  *       &lt;attGroup ref="{}EntityAttributeGroup"/>
  *     &lt;/restriction>
  *   &lt;/complexContent>

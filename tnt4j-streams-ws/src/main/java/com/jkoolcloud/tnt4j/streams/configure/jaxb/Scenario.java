@@ -102,6 +102,17 @@ public class Scenario {
 		getStep().add(new ScenarioStep(interval, units, repeatCount, request, name, url, method, username, password));
 	}
 
+	public void addStep(int interval, UnitsTypes units, Integer repeatCount, String request, String parserRef,
+			String name, String url, String method, String username, String password) {
+		getStep().add(new ScenarioStep(interval, units, repeatCount, request, parserRef, name, url, method, username,
+				password));
+	}
+
+	public void addStep(int interval, UnitsTypes units, Integer repeatCount, RequestType request, String name,
+			String url, String method, String username, String password) {
+		getStep().add(new ScenarioStep(interval, units, repeatCount, request, name, url, method, username, password));
+	}
+
 	/**
 	 * Gets the value of the name property.
 	 * 

@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @param <T>
  *            the type of handled RAW activity data
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see ArrayBlockingQueue
  */
@@ -59,6 +59,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	 * RAW activity data items buffer queue. Items in this queue are processed asynchronously by consumer thread(s).
 	 */
 	protected BlockingQueue<Object> inputBuffer;
+	private ThreadLocal<T> currentItem = new ThreadLocal<>();
 
 	/**
 	 * Constructs a new AbstractBufferedStream.
@@ -122,7 +123,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 
 	/**
 	 * Adds "DIE" marker object to input buffer to mark "logical" data flow has ended.
-	 * 
+	 *
 	 * @see #offerDieMarker(boolean)
 	 */
 	protected void offerDieMarker() {
@@ -147,11 +148,20 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	/**
 	 * Get the next activity data item to be processed. Method blocks and waits for activity input data available in
 	 * input buffer. Input buffer is filled by {@link InputProcessor} thread.
+	 * <p>
+	 * In case item is consumable by multiple iterations (like {@link java.sql.ResultSet}),
+	 * {@link #isItemConsumed(Object)} shall be overridden by stream implementing class to determine if item has been
+	 * got consumed (e.g. cursor has moved to last available position). {@link #initItemForParsing(Object)} shall be
+	 * overridden by stream implementing class if any procedure is required to initialize activity data before parsing
+	 * (e.g. move cursor position to initial value).
 	 *
 	 * @return next activity data item, or {@code null} if there is no next item
 	 *
 	 * @throws Exception
 	 *             if any errors occurred getting next item
+	 *
+	 * @see #isItemConsumed(Object)
+	 * @see #initItemForParsing(Object)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -161,23 +171,60 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 					"AbstractBufferedStream.changes.buffer.uninitialized"));
 		}
 
-		// Buffer is empty and producer input is ended. No more items going to
-		// be available.
-		if (inputBuffer.isEmpty() && isInputEnded()) {
-			return null;
+		while (true) {
+			// Buffer is empty and producer input is ended. No more items going to
+			// be available.
+			if (inputBuffer.isEmpty() && isInputEnded()) {
+				return null;
+			}
+
+			if (isItemConsumed(currentItem.get())) {
+				Object qe = inputBuffer.take();
+
+				// Producer input was slower than consumer, but was able to put "DIE"
+				// marker object to queue. No more items going to be available.
+				if (DIE_MARKER.equals(qe)) {
+					return null;
+				}
+
+				T item = (T) qe;
+				currentItem.set(item);
+				addStreamedBytesCount(getActivityItemByteSize(item));
+				boolean hasParsableData = initItemForParsing(item);
+
+				if (!hasParsableData) {
+					currentItem.set(null);
+					continue;
+				}
+			}
+
+			return currentItem.get();
 		}
+	}
 
-		Object qe = inputBuffer.take();
+	/**
+	 * Checks whether provided RAW activity data item is consumed, and stream should take next item from buffer.
+	 *
+	 * @param item
+	 *            activity data item to check
+	 *
+	 * @return {@code true} if activity data item is consumed, {@code false} - otherwise
+	 */
+	protected boolean isItemConsumed(T item) {
+		return true;
+	}
 
-		// Producer input was slower than consumer, but was able to put "DIE"
-		// marker object to queue. No more items going to be available.
-		if (DIE_MARKER.equals(qe)) {
-			return null;
-		}
-
-		T activityInput = (T) qe;
-		addStreamedBytesCount(getActivityItemByteSize(activityInput));
-		return activityInput;
+	/**
+	 * Performs activity data item initialization before parsing procedure and checks whether it has any parseable
+	 * payload.
+	 *
+	 * @param item
+	 *            activity data item to initialize before parsing
+	 *
+	 * @return {@code true} if activity item data has any parseable payload, {@code false} - otherwise
+	 */
+	protected boolean initItemForParsing(T item) {
+		return true;
 	}
 
 	/**
@@ -240,11 +287,9 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 	}
 
 	/**
-	 * Checks if stream data input is ended.
+	 * Checks if stream data input has ended.
 	 *
 	 * @return {@code true} if stream input ended, {@code false} - otherwise
-	 *
-	 * @see InputProcessor#isInputEnded()
 	 */
 	protected abstract boolean isInputEnded();
 
@@ -297,11 +342,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 			try {
 				closeInternals();
 			} finally {
-				// mark input end (in case producer thread is faster than consumer).
 				markInputEnd();
-				// add "DIE" marker to buffer (in case producer thread is slower
-				// than waiting consumer).
-				offerDieMarker();
 			}
 		}
 
@@ -338,7 +379,11 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 		 * Changes stream data input ended flag value to {@code true}
 		 */
 		protected void markInputEnd() {
+			// mark input end (in case producer thread is faster than consumer).
 			inputEnd = true;
+			// add "DIE" marker to buffer (in case producer thread is slower
+			// than waiting consumer).
+			offerDieMarker();
 		}
 
 		/**

@@ -13,6 +13,11 @@
                                     invocation schedule expression.
                                 </xs:documentation>
                             </xs:annotation>
+                            <!-- Make sure <request parser-ref=""> points to valid <parser> name -->
+                            <!--<xs:keyref name="ValidRequestParserRef" refer="tnt-data-source:UniqueParserName">-->
+                            <!--<xs:selector xpath="step/request"/>-->
+                            <!--<xs:field xpath="@parser-ref"/>-->
+                            <!--</xs:keyref>-->
                         </xs:element>
                     </xs:sequence>
                 </xs:extension>
@@ -93,7 +98,7 @@
                     </xs:annotation>
                 </xs:element>
             </xs:choice>
-            <xs:element name="request" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="request" type="RequestType" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
                         Request (or command) data.
@@ -137,6 +142,27 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+    </xs:complexType>
+
+    <!-- Element <request> definition-->
+    <xs:complexType name="RequestType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines scenario step request (or command) data.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="parser-ref" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            References parser used to parse request (or command) received response data.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
     </xs:complexType>
 
     <!-- Element <scenario> definition -->

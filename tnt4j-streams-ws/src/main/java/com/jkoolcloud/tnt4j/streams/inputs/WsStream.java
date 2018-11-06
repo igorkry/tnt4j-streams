@@ -23,7 +23,9 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.*;
@@ -46,6 +48,8 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
+import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -59,7 +63,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * Service call is performed by invoking {@link SOAPConnection#call(SOAPMessage, Object)}. Provided request XML data is
  * set as {@link SOAPMessage} body data.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link String} data to parse
+ * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractWsStream}):
@@ -80,7 +85,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see ActivityParser#isDataClassSupported(Object)
  * @see SOAPConnection#call(SOAPMessage, Object)
  */
-public class WsStream extends AbstractWsStream {
+public class WsStream extends AbstractWsStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsStream.class);
 
 	/**
@@ -111,6 +116,11 @@ public class WsStream extends AbstractWsStream {
 	}
 
 	@Override
+	protected long getActivityItemByteSize(WsResponse<String> item) {
+		return item == null || item.getData() == null ? 0 : item.getData().getBytes().length;
+	}
+
+	@Override
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
@@ -131,7 +141,7 @@ public class WsStream extends AbstractWsStream {
 
 		if (disableSSL) {
 			disableSslVerification();
-		}
+	}
 
 		if (synchronizeRequests) {
 			semaphore = new Semaphore(1);
@@ -166,7 +176,7 @@ public class WsStream extends AbstractWsStream {
 	 * @param soapRequestData
 	 *            JAX-WS service request data: headers and body XML string
 	 * @param stream
-	 *            stream instance to use
+	 *            stream instance to use for service call
 	 * @param scenario
 	 *            scenario of executed request
 	 * @return service response string
@@ -409,9 +419,7 @@ public class WsStream extends AbstractWsStream {
 	@Override
 	protected ActivityInfo applyParsers(Object data) throws IllegalStateException, ParseException {
 		try {
-			ActivityInfo activityInfo = super.applyParsers(data);
-
-			return activityInfo;
+			return super.applyParsers(data);
 		} finally {
 			if (semaphore != null) {
 				semaphore.release();
@@ -420,34 +428,15 @@ public class WsStream extends AbstractWsStream {
 	}
 
 	/**
-	 * Fills in WS request portion data string having variable expressions with parameters stored in
-	 * {@link #wsProperties} map.
+	 * Fills in WS request fragment string having variable expressions with parameters stored in {@link #wsProperties}
+	 * map.
 	 *
 	 * @param reqDataStr
-	 *            WS request portion data string
-	 * @return variable values filled in WS request data portion
+	 *            WS request fragment string
+	 * @return variable values filled in WS request fragment string
 	 */
 	protected String fillInRequestData(String reqDataStr) {
-		if (StringUtils.isEmpty(reqDataStr) || wsProperties.isEmpty()) {
-			return reqDataStr;
-		}
-
-		List<String> vars = new ArrayList<>();
-		Utils.resolveExpressionVariables(vars, reqDataStr);
-		// Utils.resolveCfgVariables(vars, reqDataStr);
-
-		String reqData = reqDataStr;
-		if (CollectionUtils.isNotEmpty(vars)) {
-			String varVal;
-			for (String rdVar : vars) {
-				varVal = wsProperties.get(Utils.getVarName(rdVar));
-				if (varVal != null) {
-					reqData = reqData.replace(rdVar, varVal);
-				}
-			}
-		}
-
-		return reqData;
+		return fillInRequestData(reqDataStr, wsProperties);
 	}
 
 	/**
@@ -463,8 +452,6 @@ public class WsStream extends AbstractWsStream {
 
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
-			String respStr = null;
-
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			WsStream stream = (WsStream) dataMap.get(JOB_PROP_STREAM_KEY);
@@ -473,7 +460,9 @@ public class WsStream extends AbstractWsStream {
 			Semaphore semaphore = (Semaphore) dataMap.get(JOB_PROP_SEMAPHORE);
 
 			if (!scenarioStep.isEmpty()) {
-				for (String request : scenarioStep.getRequests()) {
+				String respStr;
+				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					respStr = null;
 					try {
 						if (semaphore != null) {
 							while (semaphore.tryAcquire()) {
@@ -481,14 +470,14 @@ public class WsStream extends AbstractWsStream {
 							}
 						}
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
-								stream.fillInRequestData(request), stream, scenario);
+								stream.fillInRequestData(request.getData()), stream, scenario);
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"WsStream.execute.exception", exc);
 					} finally {
 						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(respStr);
+							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
 						} else {
 							if (semaphore != null && semaphore.availablePermits() < 1) {
 								semaphore.release();
@@ -526,12 +515,12 @@ public class WsStream extends AbstractWsStream {
 		}
 
 		/**
-		 * Resolves AX-WS request headers and body data from stream configuration defined request data string.
+		 * Resolves JAX-WS request headers and body data from stream configuration defined request data string.
 		 *
 		 * @param soapRequestData
 		 *            JAX-WS service request data: headers and body XML string
 		 * @param stream
-		 *            stream instance to use
+		 *            stream instance to use for service call
 		 * @return instance of this request data container
 		 * @throws IOException
 		 *             if an I/O error occurs reading request data

@@ -51,7 +51,8 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * second - issuing "search" (list) request providing offset and number of entries to return. Other metrics retrieval
  * scenarios are possible by providing different scenario steps/requests configuration.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link String} data to parse
+ * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link com.jkoolcloud.tnt4j.streams.inputs.WsStream}):
@@ -165,7 +166,7 @@ public class CastIronWsStream extends WsStream {
 	 */
 	@Override
 	protected void handleFault(SOAPFault fault, WsScenario scenario) {
-		if (fault.getFaultString().equals("Expired or invalid session ID")) { // TODO use code
+		if (fault.getFaultString().equals("Expired or invalid session ID")) { // NON-NLS // TODO use code
 			faultHandlingLock.lock();
 			try {
 				if (scenario.getLoginStep() == null || scenario.getLoginStep().isEmpty()) {
@@ -193,7 +194,7 @@ public class CastIronWsStream extends WsStream {
 
 		try {
 			RequestDataAndHeaders requestDataAndHeaders = new RequestDataAndHeaders()
-					.resolve(fillInRequestData(loginStep.getRequests().get(0)), this);
+					.resolve(fillInRequestData(loginStep.getRequests().get(0).getData()), this);
 			SOAPMessage soapRequest = createMessage(requestDataAndHeaders.getRequest(),
 					requestDataAndHeaders.getHeaders(), false, this);
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),

@@ -27,6 +27,7 @@ import org.xml.sax.SAXParseException;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
+import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
@@ -39,7 +40,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * handling.
  *
  * @version $Revision: 1 $
- *
+ * 
  * @see com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
@@ -64,6 +65,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
+	private String currParserRef;
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -230,6 +232,14 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					"ConfigParserHandler.malformed.configuration2", REQ_ELMT, STEP_ELMT), currParseLocation);
 		}
 
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (PARSER_REF_ELMT.equals(attName)) {
+				currParserRef = attValue;
+			}
+		}
+
 		elementData = new StringBuilder();
 	}
 
@@ -267,7 +277,20 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				currStep = null;
 			} else if (REQ_ELMT.equals(qName)) {
 				if (elementData != null) {
-					currStep.addRequest(getElementData());
+					currStep.addRequest(getElementData(), currParserRef);
+					if (StringUtils.isNotEmpty(currParserRef)) {
+						ActivityParser parser = getStreamsConfigData().getParser(currParserRef);
+						try {
+							currStream.addReference(parser);
+						} catch (IllegalStateException exc) {
+							throw new SAXParseException(
+									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+											"ConfigParserHandler.could.not.add.stream.parser", currStream.getName(),
+											parser.getName()),
+									currParseLocation, exc);
+						}
+					}
+					currParserRef = null;
 					elementData = null;
 				}
 			}

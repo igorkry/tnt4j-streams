@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.*;
  *           &lt;element name="schedule-cron" type="{}ScheduleCron"/>
  *           &lt;element name="schedule-simple" type="{}ScheduleSimple"/>
  *         &lt;/choice>
- *         &lt;element name="request" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="request" type="{}RequestType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="url" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -67,7 +67,7 @@ public class ScenarioStep {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected ScheduleSimple scheduleSimple;
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-08-10T10:06:43+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<String> request;
+	protected List<RequestType> request;
 	@XmlAttribute(name = "name", required = true)
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String name;
@@ -107,6 +107,28 @@ public class ScenarioStep {
 
 	public ScenarioStep(int interval, UnitsTypes units, Integer repeatCount, String request, String name, String url,
 			String method, String username, String password) {
+		this.scheduleSimple = new ScheduleSimple(interval, units, repeatCount);
+		addRequest(request);
+		this.name = name;
+		this.url = url;
+		this.method = method;
+		this.username = username;
+		this.password = password;
+	}
+
+	public ScenarioStep(int interval, UnitsTypes units, Integer repeatCount, String request, String parserRef,
+			String name, String url, String method, String username, String password) {
+		this.scheduleSimple = new ScheduleSimple(interval, units, repeatCount);
+		addRequest(request, parserRef);
+		this.name = name;
+		this.url = url;
+		this.method = method;
+		this.username = username;
+		this.password = password;
+	}
+
+	public ScenarioStep(int interval, UnitsTypes units, Integer repeatCount, RequestType request, String name,
+			String url, String method, String username, String password) {
 		this.scheduleSimple = new ScheduleSimple(interval, units, repeatCount);
 		addRequest(request);
 		this.name = name;
@@ -179,19 +201,27 @@ public class ScenarioStep {
 	 *
 	 *
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link String }
+	 * Objects of the following type(s) are allowed in the list {@link RequestType }
 	 *
 	 *
 	 */
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-08-10T10:06:43+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<String> getRequest() {
+	public List<RequestType> getRequest() {
 		if (request == null) {
-			request = new ArrayList<String>();
+			request = new ArrayList<RequestType>();
 		}
 		return this.request;
 	}
 
 	public void addRequest(String req) {
+		getRequest().add(new RequestType(req));
+	}
+
+	public void addRequest(String req, String parserRef) {
+		getRequest().add(new RequestType(req, parserRef));
+	}
+
+	public void addRequest(RequestType req) {
 		getRequest().add(req);
 	}
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
+
+    <parser name="SampleResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
+        <!--<property name="SQLJavaMapping" value="NUMBER=java.lang.Long"/>-->
+
+        <field name="EventType" value="EVENT"/>
+
+        <field name="DataId" locator="DATA_ID" locator-type="Label"/>
+        <field name="DataObject" locator="DATA_OBJECT" locator-type="Label" datatype="Binary"/>
+        <field name="PageIndex" locator="PAGE_INDEX" locator-type="Label" datatype="Number" format="integer"/>
+        <field name="DataType" locator="DATA_TYPE" locator-type="Label" datatype="Number" format="integer"/>
+        <field name="WorkFlowId" locator="WF_ID" locator-type="Label" datatype="Number" format="long"/>
+        <field name="RefTable" locator="REFERENCE_TABLE" locator-type="Label"/>
+        <field name="CreateTime" locator="CREATION_DATE" locator-type="Label"/>
+    </parser>
+
+    <cache>
+        <entry id="LastRecordCDate">
+            <key>LastRecordCDate</key>
+            <value>${CreateTime}</value>
+            <default>1970-01-01 00:00:00.000</default>
+        </entry>
+    </cache>
+
+    <stream name="Db2JDBCStream" class="com.jkoolcloud.tnt4j.streams.inputs.JDBCStream">
+        <property name="HaltIfNoParser" value="false"/>
+
+        <scenario name="Sample DB2-JDBC stream scenario">
+            <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
+                <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
+                <request parser-ref="SampleResultSetParser"><![CDATA[
+                    SELECT *
+                    FROM TRANS_DATA
+                    WHERE CREATION_DATE > TIMESTAMP ('${LastRecordCDate}')
+                    ORDER by CREATION_DATE DESC
+                    FETCH FIRST 100 ROWS ONLY
+                ]]></request>
+            </step>
+        </scenario>
+    </stream>
+</tnt-data-source>

@@ -29,7 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 public class WsScenarioStep {
 	private String name;
 	private String urlStr;
-	private List<String> requests;
+	private List<WsRequest<String>> requests;
 	private String method;
 	private String username;
 	private String password;
@@ -84,22 +84,36 @@ public class WsScenarioStep {
 	 *
 	 * @return request data
 	 */
-	public List<String> getRequests() {
+	public List<WsRequest<String>> getRequests() {
 		return requests;
 	}
 
 	/**
-	 * Sets request/command data.
+	 * Sets request/command data. Request tag is set to {@code null}.
 	 *
 	 * @param request
 	 *            request data
+	 *
+	 * @see #addRequest(String, String)
 	 */
 	public void addRequest(String request) {
-		if (this.requests == null) {
-			this.requests = new ArrayList<>();
+		addRequest(request, null);
+	}
+
+	/**
+	 * Sets request/command data and tag.
+	 *
+	 * @param request
+	 *            request data
+	 * @param tag
+	 *            request tag
+	 */
+	public void addRequest(String request, String tag) {
+		if (requests == null) {
+			requests = new ArrayList<>();
 		}
 
-		this.requests.add(request);
+		requests.add(new WsRequest<>(request, tag));
 	}
 
 	/**

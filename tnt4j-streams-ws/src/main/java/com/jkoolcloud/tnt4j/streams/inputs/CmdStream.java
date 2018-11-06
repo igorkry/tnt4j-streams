@@ -22,6 +22,8 @@ import org.quartz.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
+import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -33,16 +35,17 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * <p>
  * System command call is performed by invoking {@link Runtime#exec(String)}.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link String} data to parse
+ * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
  * This activity stream supports configuration properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see java.lang.Runtime#exec(String)
  */
-public class CmdStream extends AbstractWsStream {
+public class CmdStream extends AbstractWsStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CmdStream.class);
 
 	/**
@@ -55,6 +58,11 @@ public class CmdStream extends AbstractWsStream {
 	@Override
 	protected EventSink logger() {
 		return LOGGER;
+	}
+
+	@Override
+	protected long getActivityItemByteSize(WsResponse<String> item) {
+		return item == null || item.getData() == null ? 0 : item.getData().getBytes().length;
 	}
 
 	@Override
@@ -99,17 +107,17 @@ public class CmdStream extends AbstractWsStream {
 
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
-			String respStr = null;
-
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
-			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
+			CmdStream stream = (CmdStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 
 			if (!scenarioStep.isEmpty()) {
-				for (String request : scenarioStep.getRequests()) {
+				String respStr;
+				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					respStr = null;
 					try {
-						respStr = executeCommand(request);
+						respStr = executeCommand(request.getData());
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -117,7 +125,7 @@ public class CmdStream extends AbstractWsStream {
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {
-						stream.addInputToBuffer(respStr);
+						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
 					}
 				}
 			}

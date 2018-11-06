@@ -27,6 +27,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     * MS Excel document
     * Elastic Beats
     * FileSystem (JSR-203 compliant) provided files (accessing remote files over SCP/SSH, SFTP, etc.) 
+    * JDBC
 
 * Files (including provided by HDFS and JSR-203 FileSystem) can be streamed:
     * as "whole at once" - when a stream starts, it reads file contents line by line meaning a single file line holds data of a single 
@@ -3456,6 +3457,22 @@ containing field `TomcatActive`.
 
 **NOTE:** Stream stops only when critical runtime error/exception occurs or application gets terminated.
 
+#### JDBC
+
+This sample shows how to stream `JDBC` provided `ResultSet` rows as activity events.
+
+Sample files can be found in `samples/b2bi-jdbc-stream` directory (`tnt4j-streams-ws` module).
+
+**NOTE:** in `run.bat/run.sh` file set variable `JDBC_LIBPATH` value to reference JDBC implementation (`PostgreSQL`, `MySQL`, `DB2`, 
+`Oracle` and etc.) libraries used by your environment.
+
+See sample [data source configuration](./tnt4j-streams-ws/samples/b2bi-jdbc-stream/tnt-data-source.xml).
+
+Fill in these configuration value placeholders:
+ * `[HOST]` - define your host for B2Bi database. Optionally you can completely change JDBC URL yo match your JDBC driver, port and database.
+ * `[USER_NAME]` - define your database user name.
+ * `[USER_PASS]` - define your database user password.
+
 #### Redirecting TNT4J streams
 
 This sample shows how to redirect `tnt4j-stream-jmx` (may be from multiple running instances) produced trackables to [jKoolCloud](https://www.jkoolcloud.com/) 
@@ -4906,7 +4923,8 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         attributes `units` (time units - default value `MILLISECONDS`), `repeatCount` (integer numeric value - default
         value `1`, `-1` means endless).
         * `request` is XML tag to define string represented request data (e.g., system command with parameters). To
-        define XML contents it is recommended to use `<![CDATA[]]>`.
+        define XML contents it is recommended to use `<![CDATA[]]>`. It has optional attribute `parser-ref` to map received response data 
+        and parser to parse it.
 
     sample:
 ```xml
@@ -4991,6 +5009,15 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 ##### CmdStream parameters
 
 This stream does not have any additional configuration parameters.
+
+Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
+
+##### JDBCStream parameters
+
+ * List of `JDBC` driver supported properties used to invoke ['DriverManager.getConnection(String, Properties)'](https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html#getConnection-java.lang.String-java.util.Properties-). 
+ (Optional)
+ * when `UseExecutors` is set to `true` and `ExecutorThreadsQuantity` is greater than `1`, value for that property is reset to `1` since 
+ `java.sql.ResultSet` can't be accessed in multi-thread manner.
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 
@@ -5464,26 +5491,6 @@ alias) value is used, the comparison would be against decimal value `31`, not `3
 
 Also see [Generic parser parameters](#generic-parser-parameters).
 
-##### PCF parameter locators
-
-PCF message can have grouped parameters - all messages will have header `MQCFH` and set of PCF parameters. It also may have `MQCFGR` type 
-parameters and parameters containing binary data for MQI structures (named `MQBACF_XXXXX_STRUCT`, where `XXXXX` is MQI structure name). 
-See [PCF command messages](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.adm.doc/q020010_.html) as PCF message 
-reference. 
-* To access PCF message header fields use `MQCFH` expression with header field name delimited using `.` (e.g., `MQCFH.CompCode`). 
-See [MQCFH - PCF header](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.ref.adm.doc/q088600_.html) as field names 
-reference.
-* To access PCF message parameters use MQ constant name/value (e.g., `MQCACF_APPL_NAME` or `3024`).
-* To access inner `MQCFGR` (or inner inner and so on) parameters use group parameter MQ constant name/value with grouped parameter MQ 
-constant name/value delimited using `.` (e.g., `MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE`).
-* In case PCF parameter refers `MQI` structure, inner (or inner inner and so on) structure fields can be accessed by adding `.` delimited 
-MQI structure fields names to locator path after root MQI structure parameter identifier (e.g., 
-`MQGACF_ACTIVITY_TRACE.MQBACF_MQMD_STRUCT.MsgId` or `MQGACF_ACTIVITY_TRACE.MQBACF_MQCNO_STRUCT.clientConn.userIdentifier`). 
-See [Data types used in the MQI](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_9.0.0/com.ibm.mq.ref.dev.doc/q093560_.html) as field 
-names reference.
-* Additionally `PCFMessage` may contain `MQMD` data copied from transport `MQMessage`. To access transport message `MQMD` header values use 
-`MQMD` expression with field name (or relative PCF parameter constant) delimited using `.` (e.g., `MQMD.PutApplName`, `MQMD.MQCACF_APPL_NAME` or `MQMD.3024`).
-
 ##### MQ message signature calculation
 
 For MQ messages it is possible to calculate message signature from message fields. To initiate signature calculation as a field value, 
@@ -5507,6 +5514,19 @@ Sample of field definition for signature calculation:
         <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="String" format="bytes"/>
     </field>
 ```
+
+##### PCF parameter locators
+
+PCF message can have grouped parameters - all messages will have header `MQCFH` and may have `MQCFGR` type parameters. 
+* To access PCF message header fields use `MQCFH` expression with header field name delimited using `.` (e.g., `MQCFH.CompCode`).
+* To access PCF message parameters use MQ constant name/value (e.g., `MQCACF_APPL_NAME` or `3024`).
+* To access inner `MQCFGR` (or inner inner and so on) parameters use group parameter MQ constant name/value with grouped parameter MQ 
+constant name/value delimited using `.` (e.g., `MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE`).
+* In case PCF parameter refers `MQI` structure, inner (or inner inner and so on) structure fields can be accessed by adding `.` delimited 
+MQI structure fields names to locator path after root MQI structure parameter identifier (e.g., 
+`MQGACF_ACTIVITY_TRACE.MQBACF_MQMD_STRUCT.MsgId` or `MQGACF_ACTIVITY_TRACE.MQBACF_MQCNO_STRUCT.clientConn.userIdentifier`).
+* Additionally `PCFMessage` may contain `MQMD` data copied from transport `MQMessage`. To access `MQMD` values use `MQMD` expression with 
+field name (or relative PCF parameter constant) delimited using `.` (e.g., `MQMD.PutApplName`, `MQMD.MQCACF_APPL_NAME` or `MQMD.3024`).
 
 #### IBM MQ Error log entries parser
 
@@ -5570,6 +5590,15 @@ is not very comfortable when entered cell value is `integer`. Default value - `f
 ```xml
     <property name="UseFormattedCellValue" value="true"/>
 ```
+
+Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
+
+#### Activity JDBC ResultSet parser
+
+ * `SQLJavaMapping` - defines mapping from SQL type name (as `String`) to class (as `Class.forName(String)`) names in the Java programming 
+ language, e.g. `NUMBER=java.lang.String`. Parser can have multiple definitions og this property. It is useful when default JDBC driver 
+ mapping produces inaccurate result. **IMPORTANT:** if JDBC driver does not support `java.sql.ResultSet.getObject(int, Map)` or 
+ `java.sql.ResultSet.getObject(String, Map)` implementation, leave SQL-Java types map empty! (Optional)
 
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
 

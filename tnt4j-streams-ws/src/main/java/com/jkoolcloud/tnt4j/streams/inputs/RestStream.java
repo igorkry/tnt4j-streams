@@ -40,6 +40,8 @@ import org.quartz.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
+import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -52,16 +54,17 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * Service call is performed by invoking {@link org.apache.http.client.HttpClient#execute(HttpUriRequest)} with GET or
  * POST method request depending on scenario step configuration parameter 'method'. Default method is GET.
  * <p>
- * This activity stream requires parsers that can support {@link String} data.
+ * This activity stream requires parsers that can support {@link String} data to parse
+ * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
  * This activity stream supports configuration properties from {@link AbstractWsStream} (and higher hierarchy streams).
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  *
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  * @see org.apache.http.client.HttpClient#execute(HttpUriRequest)
  */
-public class RestStream extends AbstractWsStream {
+public class RestStream extends AbstractWsStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RestStream.class);
 
 	private static final int DEFAULT_AUTH_PORT = 80;
@@ -76,6 +79,11 @@ public class RestStream extends AbstractWsStream {
 	@Override
 	protected EventSink logger() {
 		return LOGGER;
+	}
+
+	@Override
+	protected long getActivityItemByteSize(WsResponse<String> item) {
+		return item == null || item.getData() == null ? 0 : item.getData().getBytes().length;
 	}
 
 	@Override
@@ -241,11 +249,9 @@ public class RestStream extends AbstractWsStream {
 
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
-			String respStr = null;
-
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
-			AbstractWsStream stream = (AbstractWsStream) dataMap.get(JOB_PROP_STREAM_KEY);
+			RestStream stream = (RestStream) dataMap.get(JOB_PROP_STREAM_KEY);
 			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 			String reqMethod = scenarioStep.getMethod();
 
@@ -255,10 +261,12 @@ public class RestStream extends AbstractWsStream {
 
 			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
 				if (!scenarioStep.isEmpty()) {
-					for (String request : scenarioStep.getRequests()) {
+					String respStr;
+					for (WsRequest<String> request : scenarioStep.getRequests()) {
+						respStr = null;
 						try {
-							respStr = executePOST(scenarioStep.getUrlStr(), request, scenarioStep.getUsername(),
-									scenarioStep.getPassword());
+							respStr = executePOST(scenarioStep.getUrlStr(), request.getData(),
+									scenarioStep.getUsername(), scenarioStep.getPassword());
 						} catch (Exception exc) {
 							Utils.logThrowable(LOGGER, OpLevel.WARNING,
 									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -266,11 +274,12 @@ public class RestStream extends AbstractWsStream {
 						}
 
 						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(respStr);
+							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
 						}
 					}
 				}
 			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
+				String respStr = null;
 				try {
 					respStr = executeGET(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
 							scenarioStep.getPassword());
@@ -281,10 +290,24 @@ public class RestStream extends AbstractWsStream {
 				}
 
 				if (StringUtils.isNotEmpty(respStr)) {
-					stream.addInputToBuffer(respStr);
+					stream.addInputToBuffer(new WsResponse<>(respStr));
 				}
 			}
 		}
+	}
+
+	/**
+	 * Request method types enumeration.
+	 */
+	enum ReqMethod {
+		/**
+		 * Request method GET.
+		 */
+		GET,
+		/**
+		 * Request method POST.
+		 */
+		POST,
 	}
 
 }

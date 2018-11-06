@@ -34,6 +34,10 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
+	private final static QName _OriginalStreamParserRef_QNAME = new QName("", "parser-ref");
+	private final static QName _OriginalStreamTnt4JProperties_QNAME = new QName("", "tnt4j-properties");
+	private final static QName _OriginalStreamProperty_QNAME = new QName("", "property");
+	private final static QName _OriginalStreamReference_QNAME = new QName("", "reference");
 	private final static QName _FieldLocatorFieldTransform_QNAME = new QName("", "field-transform");
 	private final static QName _FieldLocatorFieldMap_QNAME = new QName("", "field-map");
 	private final static QName _FieldLocatorFieldMapRef_QNAME = new QName("", "field-map-ref");
@@ -176,6 +180,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link CacheProperty }
+	 * 
+	 */
+	public CacheProperty createCacheProperty() {
+		return new CacheProperty();
+	}
+
+	/**
 	 * Create an instance of {@link FieldTransform }
 	 * 
 	 */
@@ -240,6 +252,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link RequestType }
+	 * 
+	 */
+	public RequestType createRequestType() {
+		return new RequestType();
+	}
+
+	/**
 	 * Create an instance of {@link StreamProperty }
 	 * 
 	 */
@@ -269,6 +289,45 @@ public class ObjectFactory {
 	 */
 	public OriginalStream.Tnt4JProperties createOriginalStreamTnt4JProperties() {
 		return new OriginalStream.Tnt4JProperties();
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Reference }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "parser-ref", scope = OriginalStream.class)
+	public JAXBElement<Reference> createOriginalStreamParserRef(Reference value) {
+		return new JAXBElement<Reference>(_OriginalStreamParserRef_QNAME, Reference.class, OriginalStream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link OriginalStream.Tnt4JProperties }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "tnt4j-properties", scope = OriginalStream.class)
+	public JAXBElement<OriginalStream.Tnt4JProperties> createOriginalStreamTnt4JProperties(
+			OriginalStream.Tnt4JProperties value) {
+		return new JAXBElement<OriginalStream.Tnt4JProperties>(_OriginalStreamTnt4JProperties_QNAME,
+				OriginalStream.Tnt4JProperties.class, OriginalStream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link StreamProperty }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "property", scope = OriginalStream.class)
+	public JAXBElement<StreamProperty> createOriginalStreamProperty(StreamProperty value) {
+		return new JAXBElement<StreamProperty>(_OriginalStreamProperty_QNAME, StreamProperty.class,
+				OriginalStream.class, value);
+	}
+
+	/**
+	 * Create an instance of {@link JAXBElement }{@code <}{@link Reference }{@code >}}
+	 * 
+	 */
+	@XmlElementDecl(namespace = "", name = "reference", scope = OriginalStream.class)
+	public JAXBElement<Reference> createOriginalStreamReference(Reference value) {
+		return new JAXBElement<Reference>(_OriginalStreamReference_QNAME, Reference.class, OriginalStream.class, value);
 	}
 
 	/**
