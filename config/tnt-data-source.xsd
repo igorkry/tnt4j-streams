@@ -393,6 +393,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+
+            <xs:enumeration value="Guid">
+                <xs:annotation>
+                    <xs:documentation>
+                        Identifier used to globally identify the data associated with this activity.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 

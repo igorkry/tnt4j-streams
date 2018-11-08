@@ -78,6 +78,7 @@ public class ActivityInfo {
 
 	private String trackingId = null;
 	private String parentId = null;
+	private String guid = null;
 	private Collection<String> tag = null;
 	private Object message = null;
 	private String msgCharSet = null;
@@ -394,6 +395,9 @@ public class ActivityInfo {
 				break;
 			case ParentId:
 				parentId = substitute(parentId, getStringValue(fieldValue, field));
+				break;
+			case Guid:
+				guid = substitute(guid, getStringValue(fieldValue, field));
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
@@ -850,6 +854,9 @@ public class ActivityInfo {
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
 		event.setParentId(parentId);
+		if (StringUtils.isNotEmpty(guid)) {
+			event.setGUID(guid);
+		}
 		// event.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) : correlator);
 		if (CollectionUtils.isNotEmpty(correlator)) {
 			event.setCorrelator(correlator);
@@ -948,6 +955,9 @@ public class ActivityInfo {
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
+		if (StringUtils.isNotEmpty(guid)) {
+			activity.setGUID(guid);
+		}
 		// activity.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) :
 		// correlator);
 		if (CollectionUtils.isNotEmpty(correlator)) {
@@ -1102,6 +1112,9 @@ public class ActivityInfo {
 				: (PropertySnapshot) tracker.newSnapshot(trackName);
 		snapshot.setTrackingId(trackId);
 		snapshot.setParentId(parentId);
+		if (StringUtils.isNotEmpty(guid)) {
+			snapshot.setGUID(guid);
+		}
 		snapshot.setSeverity(severity == null ? OpLevel.INFO : severity);
 		// snapshot.setCorrelator(CollectionUtils.isEmpty(correlator) ? Collections.singletonList(trackId) :
 		// correlator);
@@ -1356,6 +1369,9 @@ public class ActivityInfo {
 		if (StringUtils.isEmpty(trackingId)) {
 			trackingId = otherAi.trackingId;
 		}
+		if (StringUtils.isEmpty(guid)) {
+			guid = otherAi.guid;
+		}
 		if (otherAi.tag != null) {
 			if (tag == null) {
 				tag = new ArrayList<>();
@@ -1593,6 +1609,15 @@ public class ActivityInfo {
 	}
 
 	/**
+	 * Gets global identifier.
+	 *
+	 * @return the global identifier
+	 */
+	public String getGUID() {
+		return guid;
+	}
+
+	/**
 	 * Gets activity tag strings collection.
 	 *
 	 * @return the activity tag strings collection
@@ -1773,6 +1798,7 @@ public class ActivityInfo {
 		sb.append(", correlator=").append(correlator); // NON-NLS
 		sb.append(", trackingId=").append(Utils.sQuote(trackingId)); // NON-NLS
 		sb.append(", parentId=").append(Utils.sQuote(parentId)); // NON-NLS
+		sb.append(", guid=").append(Utils.sQuote(guid)); // NON-NLS
 		sb.append(", tag=").append(tag); // NON-NLS
 		sb.append(", message=").append(message); // NON-NLS
 		sb.append(", msgCharSet=").append(Utils.sQuote(msgCharSet)); // NON-NLS
@@ -1865,6 +1891,8 @@ public class ActivityInfo {
 				return trackingId;
 			case UserName:
 				return userName;
+			case Guid:
+				return guid;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 						StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.unrecognized.field", fieldName));

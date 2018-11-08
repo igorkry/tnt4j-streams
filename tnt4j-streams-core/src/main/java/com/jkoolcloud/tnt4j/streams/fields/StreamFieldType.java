@@ -177,7 +177,12 @@ public enum StreamFieldType {
 	/**
 	 * Identifier used to uniquely identify parent activity associated with this activity.
 	 */
-	ParentId(String.class);
+	ParentId(String.class),
+
+	/**
+	 * Identifier used to globally identify the data associated with this activity.
+	 */
+	Guid(String.class);
 
 	private final Class<?> dataType;
 

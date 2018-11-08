@@ -319,7 +319,16 @@ public enum FieldNames {
 	 * 
 	 */
 	@XmlEnumValue("ParentId")
-	PARENT_ID("ParentId");
+	PARENT_ID("ParentId"),
+
+	/**
+	 *
+	 * Identifier used to globally identify the data associated with this activity.
+	 *
+	 *
+	 */
+	@XmlEnumValue("Guid")
+	GUID("Guid");
 	private final String value;
 
 	FieldNames(String v) {

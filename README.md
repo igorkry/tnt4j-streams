@@ -309,7 +309,12 @@ sample:
     /**
      * Identifier used to uniquely identify parent activity associated with this activity.
      */
-    ParentId(String.class);
+    ParentId(String.class),
+
+    /**
+     * Identifier used to globally identify the data associated with this activity.
+     */
+    Guid(String.class);
 ```
 
 **NOTE:** `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 
