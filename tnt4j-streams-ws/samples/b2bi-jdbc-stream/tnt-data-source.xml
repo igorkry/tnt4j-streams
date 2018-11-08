@@ -18,6 +18,8 @@
     </parser>
 
     <cache>
+        <property name="Persisted" value="true"/>
+
         <entry id="LastRecordCDate">
             <key>LastRecordCDate</key>
             <value>${CreateTime}</value>

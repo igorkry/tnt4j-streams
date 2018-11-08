@@ -255,11 +255,11 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 							getLocationInfo()));
 				}
 
-				((AbstractWsStream) currStream).addScenario(currScenario);
+				((AbstractWsStream<?>) currStream).addScenario(currScenario);
 				currScenario = null;
 			} else if (STREAM_ELMT.equals(qName)) {
 				if (currStream instanceof AbstractWsStream) {
-					if (CollectionUtils.isEmpty(((AbstractWsStream) currStream).getScenarios())) {
+					if (CollectionUtils.isEmpty(((AbstractWsStream<?>) currStream).getScenarios())) {
 						throw new SAXException(StreamsResources.getStringFormatted(
 								StreamsResources.RESOURCE_BUNDLE_NAME, "WsConfigParserHandler.element.must.have.one",
 								STREAM_ELMT, SCENARIO_ELMT, getLocationInfo()));
