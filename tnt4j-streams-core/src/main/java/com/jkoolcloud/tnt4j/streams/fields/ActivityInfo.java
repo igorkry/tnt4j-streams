@@ -850,6 +850,12 @@ public class ActivityInfo {
 	 */
 	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId,
 			Collection<Trackable> chTrackables) {
+		if (StringUtils.isEmpty(trackName)) {
+			trackName = "_UNNAMED_EVENT_"; // NON-NLS
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.activity.has.no.name", TrackingEvent.class.getSimpleName(), trackName);
+		}
+
 		TrackingEvent event = tracker.newEvent(severity == null ? OpLevel.INFO : severity, trackName, (String) null,
 				(String) null, (Object[]) null);
 		event.setTrackingId(trackId);
@@ -952,6 +958,12 @@ public class ActivityInfo {
 	 */
 	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
 			Collection<Trackable> chTrackables) {
+		if (StringUtils.isEmpty(trackName)) {
+			trackName = "_UNNAMED_ACTIVITY_"; // NON-NLS
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.activity.has.no.name", TrackingActivity.class.getSimpleName(), trackName);
+		}
+
 		TrackingActivity activity = tracker.newActivity(severity == null ? OpLevel.INFO : severity, trackName);
 		activity.setTrackingId(trackId);
 		activity.setParentId(parentId);
@@ -1108,6 +1120,12 @@ public class ActivityInfo {
 	 * @return snapshot instance
 	 */
 	protected Snapshot buildSnapshot(Tracker tracker, String trackName, String trackId) {
+		if (StringUtils.isEmpty(trackName)) {
+			trackName = "_UNNAMED_SNAPSHOT_"; // NON-NLS
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityInfo.activity.has.no.name", PropertySnapshot.class.getSimpleName(), trackName);
+		}
+
 		PropertySnapshot snapshot = category != null ? (PropertySnapshot) tracker.newSnapshot(category, trackName)
 				: (PropertySnapshot) tracker.newSnapshot(trackName);
 		snapshot.setTrackingId(trackId);
