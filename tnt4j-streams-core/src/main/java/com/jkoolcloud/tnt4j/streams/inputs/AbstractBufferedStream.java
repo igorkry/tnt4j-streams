@@ -178,7 +178,8 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				return null;
 			}
 
-			if (isItemConsumed(currentItem.get())) {
+			T item = currentItem.get();
+			if (item == null || isItemConsumed(item)) {
 				Object qe = inputBuffer.take();
 
 				// Producer input was slower than consumer, but was able to put "DIE"
@@ -187,7 +188,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 					return null;
 				}
 
-				T item = (T) qe;
+				item = (T) qe;
 				currentItem.set(item);
 				addStreamedBytesCount(getActivityItemByteSize(item));
 				boolean hasParsableData = initItemForParsing(item);
@@ -198,7 +199,7 @@ public abstract class AbstractBufferedStream<T> extends TNTParseableInputStream<
 				}
 			}
 
-			return currentItem.get();
+			return item;
 		}
 	}
 

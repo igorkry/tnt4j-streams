@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -179,14 +180,16 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	 *            DB user password
 	 * @param query
 	 *            DB query
+	 * @param params
+	 *            DB query parameters map
 	 * @param stream
 	 *            stream instance to use for JDBC query execution
 	 * @return JDBC call returned result set {@link java.sql.ResultSet}
 	 * @throws SQLException
 	 *             if exception occurs while performing JDBC call
 	 */
-	protected static ResultSet executeJdbcCall(String url, String user, String pass, String query, JDBCStream stream)
-			throws SQLException {
+	protected static ResultSet executeJdbcCall(String url, String user, String pass, String query,
+			Map<String, WsRequest.Parameter> params, JDBCStream stream) throws SQLException {
 		if (StringUtils.isEmpty(url)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"JDBCStream.db.conn.not.defined", url);
@@ -200,8 +203,11 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 		}
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-				"RestStream.invoking.get.request", query);
+				"JDBCStream.invoking.query", url, query);
 
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.obtaining.db.connection", url);
+		long tc = System.currentTimeMillis();
 		Connection dbConn;
 		if (stream.jdbcProperties.isEmpty()) {
 			dbConn = DriverManager.getConnection(url, user, pass);
@@ -215,10 +221,185 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			}
 			dbConn = DriverManager.getConnection(url, connProps);
 		}
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.db.connection.obtained", url,
+				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tc));
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.preparing.query", query);
+
 		PreparedStatement statement = dbConn.prepareStatement(query);
+		addStatementParameters(statement, params, stream);
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.executing.query", url);
+		long tq = System.currentTimeMillis();
 		ResultSet rs = statement.executeQuery();
 
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.query.execution.completed", url,
+				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tq),
+				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tc));
+
 		return rs;
+	}
+
+	/**
+	 * Sets prepared SQL statement parameters provided by {@code params} map.
+	 *
+	 * @param statement
+	 *            prepared SQL statement parameters to set
+	 * @param params
+	 *            SQL query parameters map
+	 * @param stream
+	 *            stream instance to use for JDBC query execution
+	 * @throws SQLException
+	 *             if exception occurs while setting prepared statement parameter
+	 */
+	protected static void addStatementParameters(PreparedStatement statement, Map<String, WsRequest.Parameter> params,
+			JDBCStream stream) throws SQLException {
+		if (params != null) {
+			for (Map.Entry<String, WsRequest.Parameter> param : params.entrySet()) {
+				try {
+					int pIdx = Integer.parseInt(param.getValue().getId());
+					String type = param.getValue().getType();
+					String value = param.getValue().getValue();
+
+					if (type == null) {
+						type = "";
+					}
+
+					value = stream.fillInRequestData(value);
+
+					switch (type.toUpperCase()) {
+					case "INTEGER": // NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.INTEGER, type.toUpperCase());
+						} else {
+							int iValue = Integer.parseInt(value);
+							statement.setInt(pIdx, iValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "BIGINT":// NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.BIGINT, type.toUpperCase());
+						} else {
+							long lValue = Long.parseLong(value);
+							statement.setLong(pIdx, lValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "FLOAT":// NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.FLOAT, type.toUpperCase());
+						} else {
+							float fValue = Float.parseFloat(value);
+							statement.setFloat(pIdx, fValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "DOUBLE":// NON-NLS
+					case "REAL": // NON-NLS
+					case "DECIMAL": // NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.DOUBLE, "DOUBLE"); // NON-NLS
+						} else {
+							double dValue = Double.parseDouble(value);
+							statement.setDouble(pIdx, dValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, "DOUBLE"); // NON-NLS
+						}
+						break;
+					case "DATE":// NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.DATE, type.toUpperCase());
+						} else {
+							Date dtValue = Date.valueOf(value);
+							statement.setDate(pIdx, dtValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "TIME":// NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.TIME, type.toUpperCase());
+						} else {
+							Time tValue = Time.valueOf(value);
+							statement.setTime(pIdx, tValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "TIMESTAMP":// NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.TIMESTAMP, type.toUpperCase());
+						} else {
+							Timestamp tsValue = Timestamp.valueOf(value);
+							statement.setTimestamp(pIdx, tsValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "BOOLEAN": // NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.BOOLEAN, type.toUpperCase());
+						} else {
+							boolean bValue = Boolean.parseBoolean(value);
+							statement.setBoolean(pIdx, bValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "BINARY": // NON-NLS
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.BINARY, type.toUpperCase());
+						} else {
+							byte[] baValue = Utils.decodeHex(value);
+							statement.setBytes(pIdx, baValue);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
+						}
+						break;
+					case "VARCHAR": // NON-NLS
+					default:
+						if ("null".equalsIgnoreCase(value)) {
+							setNullParameter(statement, pIdx, Types.VARCHAR, "VARCHAR"); // NON-NLS
+						} else {
+							statement.setString(pIdx, value);
+							LOGGER.log(OpLevel.DEBUG,
+									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+									"JDBCStream.set.query.parameter", pIdx, value, "VARCHAR"); // NON-NLS
+						}
+						break;
+					}
+				} catch (SQLException exc) {
+					throw exc;
+				} catch (Throwable exc) {
+					throw new SQLException(StreamsResources.getStringFormatted(WsStreamConstants.RESOURCE_BUNDLE_NAME,
+							"JDBCStream.failed.to.set.query.parameter", param.getValue()), exc);
+				}
+			}
+		}
+	}
+
+	private static void setNullParameter(PreparedStatement statement, int pIdx, int type, String typeName)
+			throws SQLException {
+		statement.setNull(pIdx, type);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"JDBCStream.set.query.parameter.null", pIdx, typeName);
 	}
 
 	/**
@@ -265,7 +446,8 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 
 					try {
 						respRs = executeJdbcCall(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
-								scenarioStep.getPassword(), stream.fillInRequestData(request.getData()), stream);
+								scenarioStep.getPassword(), stream.fillInRequestData(request.getData()),
+								request.getParameters(), stream);
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),

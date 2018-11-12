@@ -89,31 +89,36 @@ public class WsScenarioStep {
 	}
 
 	/**
-	 * Sets request/command data. Request tag is set to {@code null}.
+	 * Adds request/command data for this step. Request tag is set to {@code null}.
 	 *
 	 * @param request
 	 *            request data
+	 * @return constructed request instance
 	 *
 	 * @see #addRequest(String, String)
 	 */
-	public void addRequest(String request) {
-		addRequest(request, null);
+	public WsRequest<String> addRequest(String request) {
+		return addRequest(request, null);
 	}
 
 	/**
-	 * Sets request/command data and tag.
+	 * Adds request/command data and tag for this step.
 	 *
 	 * @param request
 	 *            request data
 	 * @param tag
 	 *            request tag
+	 * @return constructed request instance
 	 */
-	public void addRequest(String request, String tag) {
+	public WsRequest<String> addRequest(String request, String tag) {
 		if (requests == null) {
 			requests = new ArrayList<>();
 		}
 
-		requests.add(new WsRequest<>(request, tag));
+		WsRequest<String> req = new WsRequest<>(request, tag);
+		requests.add(req);
+
+		return req;
 	}
 
 	/**

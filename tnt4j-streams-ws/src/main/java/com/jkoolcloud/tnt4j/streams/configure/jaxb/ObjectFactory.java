@@ -260,6 +260,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link ReqParameterType }
+	 *
+	 */
+	public ReqParameterType createReqParameterType() {
+		return new ReqParameterType();
+	}
+
+	/**
 	 * Create an instance of {@link StreamProperty }
 	 * 
 	 */

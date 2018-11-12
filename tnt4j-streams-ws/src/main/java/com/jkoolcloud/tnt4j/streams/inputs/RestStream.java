@@ -233,6 +233,9 @@ public class RestStream extends AbstractWsStream<String> {
 
 		String respStr = EntityUtils.toString(response.getEntity(), Utils.UTF8);
 
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"RestStream.received.response", req.getURI(), respStr);
+
 		return respStr;
 	}
 

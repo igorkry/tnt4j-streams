@@ -26,7 +26,7 @@ All you need is to define your data format mapping to TNT4J event mapping in TNT
     * System command
     * MS Excel document
     * Elastic Beats
-    * FileSystem (JSR-203 compliant) provided files (accessing remote files over SCP/SSH, SFTP, etc.) 
+    * FileSystem (JSR-203 compliant) provided files (accessing remote files over SCP/SSH, SFTP, etc.)
     * JDBC
 
 * Files (including provided by HDFS and JSR-203 FileSystem) can be streamed:
@@ -4466,7 +4466,7 @@ meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityCount`.
 
 * `MaxSize` - max. capacity of stream resolved values cache. Default value - `100`. (Optional)
 * `ExpireDuration` - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)
-* `Persisted` - flag indicating cache contents has to be persisted to file on close and loaded on initialization. Default value - `false. 
+* `Persisted` - flag indicating cache contents has to be persisted to file on close and loaded on initialization. Default value - `false`. 
 (Optional)
 
     sample:
@@ -4968,6 +4968,33 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         <step name="Step Windows">
             <request>typeperf "\Processor(_Total)\% Processor Time" -sc 1</request>
             <schedule-simple interval="25" units="Seconds" repeatCount="-1"/>
+        </step>
+    </scenario>
+    <!-- Sample of request and parser mapping -->
+    <scenario name="RabbitMQ Sampling scenario">
+        <step name="All RabbitMQ metrics">
+            <schedule-simple interval="30" units="Seconds" repeatCount="-1"/>
+
+            <request parser-ref="UsersRespParser">python rabbitmqadmin -f raw_json list users</request>
+            <request parser-ref="HostsRespParser">python rabbitmqadmin -f raw_json list vhosts</request>
+            <request parser-ref="OverviewRespParser">python rabbitmqadmin -f raw_json list overview</request>
+        </step>
+    </scenario>
+    <!-- Sample scenario for JDBC query invocation -->
+    <scenario name="Sample DB2-JDBC stream scenario">
+        <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
+            <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
+
+            <request parser-ref="SampleResultSetParser">
+                <![CDATA[
+                    SELECT *
+                    FROM TRANS_DATA
+                    WHERE CREATION_DATE > ?
+                    ORDER by CREATION_DATE DESC
+                    FETCH FIRST 100 ROWS ONLY
+                ]]>
+                <req-param id="1" value="${LastRecordCDate}" type="TIMESTAMP"/>
+            </request>
         </step>
     </scenario>
 ```

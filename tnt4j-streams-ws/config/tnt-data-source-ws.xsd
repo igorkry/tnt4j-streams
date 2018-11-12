@@ -101,9 +101,15 @@
             <xs:element name="request" type="RequestType" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
-                        Request (or command) data.
+                        Request (or command/query/etc.) data.
                     </xs:documentation>
                 </xs:annotation>
+
+                <!-- Make sure <req-param> identifiers are unique -->
+                <xs:unique name="UniqueReqParamId">
+                    <xs:selector xpath="req-param"/>
+                    <xs:field xpath="@id"/>
+                </xs:unique>
             </xs:element>
         </xs:sequence>
 
@@ -145,24 +151,73 @@
     </xs:complexType>
 
     <!-- Element <request> definition-->
-    <xs:complexType name="RequestType">
+    <xs:complexType name="RequestType" mixed="true">
         <xs:annotation>
             <xs:documentation>
-                Defines scenario step request (or command) data.
+                Defines scenario step request (or command/query/etc.) data.
             </xs:documentation>
         </xs:annotation>
 
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
-                <xs:attribute name="parser-ref" use="optional" type="xs:string">
-                    <xs:annotation>
-                        <xs:documentation>
-                            References parser used to parse request (or command) received response data.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
-            </xs:extension>
-        </xs:simpleContent>
+        <!--<xs:simpleContent>-->
+        <!--<xs:extension base="xs:string">-->
+        <!--<xs:attribute name="parser-ref" use="optional" type="xs:string">-->
+        <!--<xs:annotation>-->
+        <!--<xs:documentation>-->
+        <!--References parser used to parse request (or command/query/etc.) received response data.-->
+        <!--</xs:documentation>-->
+        <!--</xs:annotation>-->
+        <!--</xs:attribute>-->
+        <!--</xs:extension>-->
+        <!--</xs:simpleContent>-->
+
+        <xs:sequence>
+            <xs:element name="req-param" type="ReqParameterType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Request (or command/query/etc.) parameter.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute name="parser-ref" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    References parser used to parse request (or command/query/etc.) received response data.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- Element <req-param> definition-->
+    <xs:complexType name="ReqParameterType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines scenario step request (or command/query/etc.) parameter.
+            </xs:documentation>
+        </xs:annotation>
+
+        <xs:attribute name="id" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Parameter identifier.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="value" use="required" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Parameter value.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="type" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Parameter value type.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Element <scenario> definition -->
@@ -185,5 +240,4 @@
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>
-
 </xs:schema>

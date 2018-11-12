@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.sax;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,10 +30,7 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
-import com.jkoolcloud.tnt4j.streams.scenario.CronSchedulerData;
-import com.jkoolcloud.tnt4j.streams.scenario.SimpleSchedulerData;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.scenario.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
@@ -52,6 +51,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 	private static final String SCHED_CRON_ELMT = "schedule-cron"; // NON-NLS
 	private static final String SCHED_SIMPLE_ELMT = "schedule-simple"; // NON-NLS
 	private static final String REQ_ELMT = "request"; // NON-NLS
+	private static final String REQ_PARAM_ELMT = "req-param"; // NON-NLS
 
 	private static final String URL_ATTR = "url"; // NON-NLS
 	private static final String METHOD_ATTR = "method"; // NON-NLS
@@ -65,7 +65,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
-	private String currParserRef;
+	private RequestData currRequest;
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -87,6 +87,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			processSimpleScheduler(attributes);
 		} else if (REQ_ELMT.equals(qName)) {
 			processRequest(attributes);
+		} else if (REQ_PARAM_ELMT.equals(qName)) {
+			processReqParam(attributes);
 		} else {
 			super.startElement(uri, localName, qName, attributes);
 		}
@@ -232,15 +234,53 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					"ConfigParserHandler.malformed.configuration2", REQ_ELMT, STEP_ELMT), currParseLocation);
 		}
 
+		if (currRequest != null) {
+			throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"ConfigParserHandler.malformed.configuration", REQ_ELMT), currParseLocation);
+		}
+
+		currRequest = new RequestData();
+
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (PARSER_REF_ELMT.equals(attName)) {
-				currParserRef = attValue;
+				currRequest.parserRef = attValue;
 			}
 		}
 
 		elementData = new StringBuilder();
+	}
+
+	private void processReqParam(Attributes attrs) throws SAXException {
+		if (currRequest == null) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", REQ_PARAM_ELMT, REQ_ELMT),
+					currParseLocation);
+		}
+
+		String id = null;
+		String value = null;
+		String type = null;
+		for (int i = 0; i < attrs.getLength(); i++) {
+			String attName = attrs.getQName(i);
+			String attValue = attrs.getValue(i);
+			if (ID_ATTR.equals(attName)) {
+				id = attValue;
+			} else if (VALUE_ATTR.equals(attName)) {
+				value = attValue;
+			} else if (TYPE_ATTR.equals(attName)) {
+				type = attValue;
+			} else {
+				unknownAttribute(REQ_PARAM_ELMT, attName);
+			}
+		}
+
+		notEmpty(id, REQ_PARAM_ELMT, ID_ATTR);
+		notEmpty(value, REQ_PARAM_ELMT, VALUE_ATTR);
+
+		currRequest.addParameter(id, value, type);
 	}
 
 	@Override
@@ -277,9 +317,9 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				currStep = null;
 			} else if (REQ_ELMT.equals(qName)) {
 				if (elementData != null) {
-					currStep.addRequest(getElementData(), currParserRef);
-					if (StringUtils.isNotEmpty(currParserRef)) {
-						ActivityParser parser = getStreamsConfigData().getParser(currParserRef);
+					WsRequest<?> currReq = currStep.addRequest(getElementData(), currRequest.parserRef);
+					if (StringUtils.isNotEmpty(currRequest.parserRef)) {
+						ActivityParser parser = getStreamsConfigData().getParser(currRequest.parserRef);
 						try {
 							currStream.addReference(parser);
 						} catch (IllegalStateException exc) {
@@ -290,14 +330,28 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 									currParseLocation, exc);
 						}
 					}
-					currParserRef = null;
 					elementData = null;
+
+					for (WsRequest.Parameter param : currRequest.params) {
+						currReq.addParameter(param);
+					}
 				}
+
+				currRequest = null;
 			}
 		} catch (SAXException exc) {
 			throw exc;
 		} catch (Exception e) {
 			throw new SAXException(e.getLocalizedMessage() + getLocationInfo(), e);
+		}
+	}
+
+	private static class RequestData {
+		private String parserRef;
+		private List<WsRequest.Parameter> params = new ArrayList<>();
+
+		void addParameter(String id, String value, String type) {
+			params.add(new WsRequest.Parameter(id, value, type));
 		}
 	}
 

@@ -16,6 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.configure.jaxb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
@@ -33,6 +36,9 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="RequestType">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
+ *     	 &lt;sequence>
+ *         &lt;element name="req-param" type="{}ReqParameterType" minOccurs="0" maxOccurs="unbounded"/>
+ *       &lt;/sequence>
  *       &lt;attribute name="parser-ref" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
@@ -42,13 +48,16 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "RequestType", propOrder = { "value" })
+@XmlType(name = "RequestType", propOrder = { "value", "req-param" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
 public class RequestType {
 
 	@XmlValue
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String value;
+	@XmlElement(name = "req-param", required = true)
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	protected List<ReqParameterType> reqParam;
 	@XmlAttribute(name = "parser-ref")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String parserRef;
@@ -86,6 +95,47 @@ public class RequestType {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	/**
+	 * Gets the value of the req-param property.
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the req-param property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getReqParam().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link ReqParameterType }
+	 *
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	public List<ReqParameterType> getReqParam() {
+		if (reqParam == null) {
+			reqParam = new ArrayList<ReqParameterType>();
+		}
+		return this.reqParam;
+	}
+
+	public void addReqParam(ReqParameterType reqParam) {
+		getReqParam().add(reqParam);
+	}
+
+	public void addReqParam(String id, String value) {
+		getReqParam().add(new ReqParameterType(id, value));
+	}
+
+	public void addReqParam(String id, String value, String type) {
+		getReqParam().add(new ReqParameterType(id, value, type));
 	}
 
 	/**

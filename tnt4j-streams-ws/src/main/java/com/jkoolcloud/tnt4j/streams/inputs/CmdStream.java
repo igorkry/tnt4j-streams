@@ -90,8 +90,12 @@ public class CmdStream extends AbstractWsStream<String> {
 				"CmdStream.invoking.command", cmdData);
 
 		Process p = Runtime.getRuntime().exec(cmdData);
+		String respStr = Utils.readInput(p.getInputStream(), false);
 
-		return Utils.readInput(p.getInputStream(), false);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"CmdStream.received.response", respStr);
+
+		return respStr;
 	}
 
 	/**

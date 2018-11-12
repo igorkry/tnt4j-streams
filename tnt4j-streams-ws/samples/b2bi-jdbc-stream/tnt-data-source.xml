@@ -33,13 +33,16 @@
         <scenario name="Sample DB2-JDBC stream scenario">
             <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
                 <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
-                <request parser-ref="SampleResultSetParser"><![CDATA[
-                    SELECT *
-                    FROM TRANS_DATA
-                    WHERE CREATION_DATE > TIMESTAMP ('${LastRecordCDate}')
-                    ORDER by CREATION_DATE DESC
-                    FETCH FIRST 100 ROWS ONLY
-                ]]></request>
+                <request parser-ref="SampleResultSetParser">
+                    <![CDATA[
+                        SELECT *
+                        FROM TRANS_DATA
+                        WHERE CREATION_DATE > ?
+                        ORDER by CREATION_DATE DESC
+                        FETCH FIRST 100 ROWS ONLY
+                    ]]>
+                    <req-param id="1" value="${LastRecordCDate}" type="TIMESTAMP"/>
+                </request>
             </step>
         </scenario>
     </stream>

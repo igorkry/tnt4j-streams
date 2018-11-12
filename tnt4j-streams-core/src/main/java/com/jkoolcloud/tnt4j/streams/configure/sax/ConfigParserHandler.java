@@ -194,7 +194,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String VALUE_ATTR = "value"; // NON-NLS
+	protected static final String VALUE_ATTR = "value"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
@@ -258,7 +258,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String TYPE_ATTR = "type"; // NON-NLS
+	protected static final String TYPE_ATTR = "type"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
@@ -274,7 +274,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String ID_ATTR = "id"; // NON-NLS
+	protected static final String ID_ATTR = "id"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
