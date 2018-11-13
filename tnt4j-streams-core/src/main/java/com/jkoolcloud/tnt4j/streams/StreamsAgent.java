@@ -34,6 +34,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.configure.zookeeper.ZKConfigManager;
 import com.jkoolcloud.tnt4j.streams.inputs.*;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.Duration;
 import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -465,7 +466,7 @@ public final class StreamsAgent {
 				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"StreamsAgent.streams.stop.start", stl.size());
 				CountDownLatch streamsCompletionSignal = new CountDownLatch(stl.size());
-				long t1 = System.currentTimeMillis();
+				Duration sd = Duration.arm();
 
 				for (StreamThread st : stl) {
 					st.addCompletionLatch(streamsCompletionSignal);
@@ -481,7 +482,7 @@ public final class StreamsAgent {
 				// StreamsCache.cleanup();
 
 				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"StreamsAgent.streams.stop.complete", (System.currentTimeMillis() - t1));
+						"StreamsAgent.streams.stop.complete", sd.duration());
 			}
 		}
 

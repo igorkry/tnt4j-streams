@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -34,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.utils.Duration;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -207,7 +207,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.obtaining.db.connection", url);
-		long tc = System.currentTimeMillis();
+		Duration cod = Duration.arm();
 		Connection dbConn;
 		if (stream.jdbcProperties.isEmpty()) {
 			dbConn = DriverManager.getConnection(url, user, pass);
@@ -222,8 +222,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			dbConn = DriverManager.getConnection(url, connProps);
 		}
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-				"JDBCStream.db.connection.obtained", url,
-				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tc));
+				"JDBCStream.db.connection.obtained", url, cod.durationHMS());
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.preparing.query", query);
@@ -233,13 +232,11 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.executing.query", url);
-		long tq = System.currentTimeMillis();
+		Duration qed = Duration.arm();
 		ResultSet rs = statement.executeQuery();
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-				"JDBCStream.query.execution.completed", url,
-				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tq),
-				DurationFormatUtils.formatDurationHMS(System.currentTimeMillis() - tc));
+				"JDBCStream.query.execution.completed", url, qed.durationHMS(), cod.durationHMS());
 
 		return rs;
 	}

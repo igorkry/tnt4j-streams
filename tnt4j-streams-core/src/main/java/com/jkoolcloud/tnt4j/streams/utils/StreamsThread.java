@@ -187,12 +187,12 @@ public class StreamsThread extends Thread {
 	 * @see Thread#sleep(long)
 	 */
 	public static void sleep(long millis) {
-		long startTime = System.currentTimeMillis();
+		Duration sd = Duration.arm();
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"StreamsThread.sleep.interrupted", (System.currentTimeMillis() - startTime), millis);
+					"StreamsThread.sleep.interrupted", sd.duration(), millis);
 		}
 	}
 
@@ -207,23 +207,21 @@ public class StreamsThread extends Thread {
 	 * @see Thread#sleep(long)
 	 */
 	public void sleepFully(long millis) {
-		long startTime = 0L;
+		Duration st = Duration.arm();
 		long remainMillis = millis;
 		int interruptCount = 0;
 		while (remainMillis > 0L) {
 			try {
-				startTime = System.currentTimeMillis();
+				st.set();
 				Thread.sleep(remainMillis);
 				remainMillis = 0L; // not interrupted, stop sleeping
 			} catch (InterruptedException e) {
-				// if sleep interrupted because thread was signaled to
-				// terminate, then return
+				// if sleep interrupted because thread was signaled to terminate, then return
 				if (stopRunning) {
 					return;
 				}
-				// subtract from sleep time the amount of time we were actually
-				// asleep
-				long sleepMillis = System.currentTimeMillis() - startTime;
+				// subtract from sleep time the amount of time we were actually asleep
+				long sleepMillis = st.duration();
 				remainMillis -= sleepMillis;
 				interruptCount++;
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -245,12 +243,12 @@ public class StreamsThread extends Thread {
 	 * @see Thread#join()
 	 */
 	public void waitFor(long millis) {
-		long startTime = System.currentTimeMillis();
+		Duration wd = Duration.arm();
 		try {
 			join(millis);
 		} catch (InterruptedException e) {
 		}
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"StreamsThread.wait.for", (System.currentTimeMillis() - startTime));
+				"StreamsThread.wait.for", wd.duration());
 	}
 }

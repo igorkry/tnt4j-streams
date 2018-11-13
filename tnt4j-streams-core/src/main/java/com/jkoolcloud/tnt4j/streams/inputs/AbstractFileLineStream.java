@@ -33,6 +33,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.state.AbstractFileStreamStateHandler;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.Duration;
 import com.jkoolcloud.tnt4j.streams.utils.IntRange;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -472,7 +473,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 * @return time period in seconds to be logged
 		 */
 		protected Object getPeriodInSeconds(long timestamp) {
-			return timestamp < 0 ? "--" : TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timestamp); // NON-NLS
+			return timestamp < 0 ? "--" : Duration.duration(timestamp, TimeUnit.SECONDS); // NON-NLS
 		}
 	}
 
