@@ -277,7 +277,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 			}
 		}
 
-		notEmpty(id, REQ_PARAM_ELMT, ID_ATTR);
+		// notEmpty(id, REQ_PARAM_ELMT, ID_ATTR);
 		notEmpty(value, REQ_PARAM_ELMT, VALUE_ATTR);
 
 		currRequest.addParameter(id, value, type);

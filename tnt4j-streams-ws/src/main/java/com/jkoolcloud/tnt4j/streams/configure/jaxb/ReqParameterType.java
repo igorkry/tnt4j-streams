@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ReqParameterType">
  *   &lt;complexContent>
- *     &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *   &lt;/complexContent>
@@ -49,7 +49,7 @@ import javax.xml.bind.annotation.XmlType;
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
 public class ReqParameterType {
 
-	@XmlAttribute(name = "id", required = true)
+	@XmlAttribute(name = "id")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected String id;
 	@XmlAttribute(name = "value", required = true)

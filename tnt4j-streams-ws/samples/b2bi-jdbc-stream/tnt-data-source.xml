@@ -41,7 +41,8 @@
                         ORDER by CREATION_DATE DESC
                         FETCH FIRST 100 ROWS ONLY
                     ]]>
-                    <req-param id="1" value="${LastRecordCDate}" type="TIMESTAMP"/>
+                    <!-- parameter index is incremented automatically -->
+                    <req-param value="${LastRecordCDate}" type="TIMESTAMP"/>
                 </request>
             </step>
         </scenario>

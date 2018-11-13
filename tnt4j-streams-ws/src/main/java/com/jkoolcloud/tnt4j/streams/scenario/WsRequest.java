@@ -19,6 +19,8 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -96,6 +98,9 @@ public class WsRequest<T> {
 	 *            request parameter
 	 */
 	public void addParameter(Parameter parameter) {
+		if (StringUtils.isEmpty(parameter.id)) {
+			parameter.id = String.valueOf(parameters.size() + 1);
+		}
 		parameters.put(parameter.id, parameter);
 	}
 
@@ -108,7 +113,7 @@ public class WsRequest<T> {
 	 *            parameter value
 	 */
 	public void addParameter(String id, String value) {
-		parameters.put(id, new Parameter(id, value));
+		addParameter(new Parameter(id, value));
 	}
 
 	/**
@@ -122,7 +127,7 @@ public class WsRequest<T> {
 	 *            parameter type
 	 */
 	public void addParameter(String id, String value, String type) {
-		parameters.put(id, new Parameter(id, value, type));
+		addParameter(new Parameter(id, value, type));
 	}
 
 	/**
