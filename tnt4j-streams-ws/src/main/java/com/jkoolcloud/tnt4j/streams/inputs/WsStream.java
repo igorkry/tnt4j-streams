@@ -267,18 +267,6 @@ public class WsStream extends AbstractWsStream<String> {
 	}
 
 	/**
-	 * Performs pre-processing of SOAP request body data: it can bea expressions evaluation, filling in variable values
-	 * and so on.
-	 *
-	 * @param soapRequestData
-	 *            SOAP request body data
-	 * @return preprocessed SOAP request body data string
-	 */
-	protected String preProcess(String soapRequestData) {
-		return soapRequestData;
-	}
-
-	/**
 	 * Create a new {@link SOAPConnection} instance.
 	 *
 	 * @return SOAP connection instance

@@ -286,6 +286,18 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	}
 
 	/**
+	 * Performs pre-processing of request/command/query body data: it can bea expressions evaluation, filling in
+	 * variable values and so on.
+	 *
+	 * @param requestData
+	 *            request/command/query body data
+	 * @return preprocessed request/command/query body data string
+	 */
+	protected String preProcess(String requestData) {
+		return requestData;
+	}
+
+	/**
 	 * Fills in request/query/command string having variable expressions with parameters stored in
 	 * {@code streamProperties} map.
 	 *

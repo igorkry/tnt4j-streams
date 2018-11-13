@@ -268,7 +268,8 @@ public class RestStream extends AbstractWsStream<String> {
 					for (WsRequest<String> request : scenarioStep.getRequests()) {
 						respStr = null;
 						try {
-							respStr = executePOST(scenarioStep.getUrlStr(), request.getData(),
+							String processedRequest = stream.preProcess(request.getData());
+							respStr = executePOST(scenarioStep.getUrlStr(), processedRequest,
 									scenarioStep.getUsername(), scenarioStep.getPassword());
 						} catch (Exception exc) {
 							Utils.logThrowable(LOGGER, OpLevel.WARNING,

@@ -65,6 +65,7 @@ import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManag
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
+import com.jkoolcloud.tnt4j.streams.utils.Duration;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -99,12 +100,15 @@ public class MetricsReporter implements InterceptionsReporter {
 
 	private java.util.Timer metricsReportingTimer;
 
-	protected Tracker tracker;
+	private Tracker tracker;
 
 	private Map<String, TopicMetrics> topicsMetrics = new HashMap<>();
 
 	private boolean useObjectNameProperties = true;
 
+	/**
+	 * Base class defining generic metrics data for Kafka topic.
+	 */
 	protected abstract static class TopicMetrics {
 		/**
 		 * The topic name.
@@ -358,7 +362,7 @@ public class MetricsReporter implements InterceptionsReporter {
 		for (ConsumerRecord<?, ?> record : consumerRecords) {
 			ConsumerTopicMetrics topicMetrics = getConsumerTopicMetrics(record.topic(), record.partition(), clientId,
 					"consume"); // NON-NLS
-			long duration = System.currentTimeMillis() - record.timestamp();
+			long duration = Duration.duration(record.timestamp());
 			topicMetrics.latency.update(duration, TimeUnit.MILLISECONDS);
 			topicMetrics.keySize.update(record.serializedKeySize());
 			topicMetrics.valueSize.update(record.serializedValueSize());
@@ -391,6 +395,12 @@ public class MetricsReporter implements InterceptionsReporter {
 		Utils.close(tracker);
 	}
 
+	/**
+	 * Reports (logs over the tracker) Kafka topic metrics provided by metrics registry map.
+	 *
+	 * @param mRegistry
+	 *            metrics registry map
+	 */
 	protected void reportMetrics(Map<String, TopicMetrics> mRegistry) {
 		String metricsCorrelator = tracker.newUUID();
 
@@ -580,8 +590,20 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 	}
 
-	protected static PropertySnapshot processAttrValue(PropertySnapshot snapshot, PropertyNameBuilder propName,
-			Object value) {
+	/**
+	 * Adds JMX attribute to properties snapshot.
+	 * <p>
+	 * In case attribute value is {@link javax.management.openmbean.CompositeData}, it will be split into separate
+	 * properties by building property names individually for every composite data element.
+	 *
+	 * @param snapshot
+	 *            properties snapshot instance
+	 * @param propName
+	 *            property name builder
+	 * @param value
+	 *            property value
+	 */
+	protected static void processAttrValue(PropertySnapshot snapshot, PropertyNameBuilder propName, Object value) {
 		if (value instanceof CompositeData) {
 			CompositeData cdata = (CompositeData) value;
 			Set<String> keys = cdata.getCompositeType().keySet();
@@ -609,13 +631,21 @@ public class MetricsReporter implements InterceptionsReporter {
 		} else {
 			snapshot.add(propName.propString(), value);
 		}
-		return snapshot;
 	}
 
 	private static String padNumber(int idx) {
 		return idx < 10 ? "0" + idx : String.valueOf(idx);
 	}
 
+	/**
+	 * Retrieves snapshot property matching provided {@code key} cases insensitively.
+	 *
+	 * @param snap
+	 *            properties snapshot instance
+	 * @param key
+	 *            property key string
+	 * @return snapshot property matching defined key string case insensitive
+	 */
 	public static Property getSnapshotPropIgnoreCase(Snapshot snap, String key) {
 		if (snap != null) {
 			for (Property property : snap.getSnapshot()) {
@@ -628,6 +658,9 @@ public class MetricsReporter implements InterceptionsReporter {
 		return null;
 	}
 
+	/**
+	 * Defines metrics "jackson-databind" serializer.
+	 */
 	protected static class MetricsRegistrySerializer extends StdSerializer<TopicMetrics> {
 
 		/**
@@ -656,6 +689,9 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 	}
 
+	/**
+	 * Defines metrics "jackson-databind" serializer module.
+	 */
 	protected static class MetricsRegistryModule extends Module {
 		private static final Version VERSION = new Version(1, 2, 0, "", "com.jkoolcloud.tnt4j.streams", // NON-NLS
 				"tnt4j-streams-kafka"); // NON-NLS
@@ -679,13 +715,30 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 	}
 
-	private static class Offset {
+	/**
+	 * Defines producer topic offset data.
+	 */
+	protected static class Offset {
+		/**
+		 * Topic offset values map.
+		 */
 		final Map<String, Long> values = new HashMap<>(2);
 
+		/**
+		 * Constructs a new Offset.
+		 */
 		Offset() {
 			reset();
 		}
 
+		/**
+		 * Updates topic offset values.
+		 *
+		 * @param offset
+		 *            topic offset index
+		 * @param p_timestamp
+		 *            message production timestamp
+		 */
 		void update(long offset, long p_timestamp) {
 			synchronized (values) {
 				values.put("offset", offset); // NON-NLS
@@ -693,22 +746,46 @@ public class MetricsReporter implements InterceptionsReporter {
 			}
 		}
 
+		/**
+		 * Returns topic offset values map.
+		 * 
+		 * @return topic offset values map
+		 */
 		Map<?, ?> values() {
 			synchronized (values) {
 				return values;
 			}
 		}
 
+		/**
+		 * Resets topic offset values.
+		 */
 		void reset() {
 			update(-1L, -1L);
 		}
 	}
 
-	private static class COffset extends Offset {
+	/**
+	 * Defines consumer topic offset data.
+	 */
+	protected static class COffset extends Offset {
+		/**
+		 * Constructs a new COffset.
+		 */
 		COffset() {
 			reset();
 		}
 
+		/**
+		 * Updates topic offset values.
+		 *
+		 * @param offset
+		 *            topic offset index
+		 * @param p_timestamp
+		 *            message production timestamp
+		 * @param c_timestamp
+		 *            message consumption timestamp
+		 */
 		void update(long offset, long p_timestamp, long c_timestamp) {
 			synchronized (values) {
 				values.put("offset", offset); // NON-NLS
@@ -723,10 +800,13 @@ public class MetricsReporter implements InterceptionsReporter {
 		}
 	}
 
-	public static class PropertyNameBuilder {
+	/**
+	 * Metric property name builder.
+	 */
+	protected static class PropertyNameBuilder {
 		private StringBuilder sb;
 		private Deque<Integer> marks;
-		private String delimiter = "\\";
+		private String delimiter;
 
 		/**
 		 * Constructs a new PropertyNameBuilder. Default delimiter is {@code "\"}.
@@ -735,7 +815,7 @@ public class MetricsReporter implements InterceptionsReporter {
 		 *            initial property name string
 		 */
 		public PropertyNameBuilder(String initName) {
-			this(initName, "\\");
+			this(initName, "\\"); // NON-NLS
 		}
 
 		/**
