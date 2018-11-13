@@ -5590,7 +5590,7 @@ when just some specific set of objects has to be handled by this parser instead 
     sample:
 ```xml
     <property name="SupportedClass" value="org.apache.kafka.common.TopicPartition"/>
-    <property name="SupportedClass" value="com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.GeneralKafkaObject"/>
+    <property name="SupportedClass" value="com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.KafkaTraceEventData"/>
 ```
 
 Also see [Generic parser parameters](#generic-parser-parameters) regarding higher level parser configuration.
