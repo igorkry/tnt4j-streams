@@ -22,21 +22,24 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 
 /**
- * Implements Kafka intercepted messages trace reporter used stream. Stream itself does nothing, only initiates
- * streaming process. Reporter uses just stream output to send intercepted messages data to JKoolCloud.
+ * Implements Kafka intercepted messages trace reporter stream. Stream itself does nothing and used just to initiates
+ * streaming process. Reporter uses only stream output to send intercepted messages data to jKoolCloud.
+ *
+ * @param <T>
+ *            the type of handled RAW activity data
  *
  * @version $Revision: 1 $
  */
-class KafkaMsgTraceStream extends AbstractBufferedStream<ActivityInfo> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaMsgTraceStream.class);
+class KafkaObjTraceStream<T> extends AbstractBufferedStream<T> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaObjTraceStream.class);
 
 	private boolean ended = false;
 
 	/**
-	 * Constructs a new KafkaMsgTraceStream.
+	 * Constructs a new KafkaObjTraceStream.
 	 */
-	public KafkaMsgTraceStream() {
-		setName("KafkaMsgTraceStream"); // NON-NLS
+	public KafkaObjTraceStream() {
+		setName("KafkaObjTraceStream"); // NON-NLS
 	}
 
 	@Override
@@ -45,17 +48,21 @@ class KafkaMsgTraceStream extends AbstractBufferedStream<ActivityInfo> {
 	}
 
 	@Override
-	public boolean addInputToBuffer(ActivityInfo inputData) throws IllegalStateException {
+	public boolean addInputToBuffer(T inputData) throws IllegalStateException {
 		return super.addInputToBuffer(inputData);
 	}
 
 	@Override
-	protected ActivityInfo makeActivityInfo(ActivityInfo data) throws Exception {
-		return data;
+	protected ActivityInfo makeActivityInfo(T data) throws Exception {
+		if (data instanceof ActivityInfo) {
+			return (ActivityInfo) data;
+		} else {
+			return super.makeActivityInfo(data);
+		}
 	}
 
 	@Override
-	protected long getActivityItemByteSize(ActivityInfo activityItem) {
+	protected long getActivityItemByteSize(T activityItem) {
 		return 0; // TODO
 	}
 
@@ -68,7 +75,8 @@ class KafkaMsgTraceStream extends AbstractBufferedStream<ActivityInfo> {
 	 * Marks stream input end.
 	 */
 	public void markEnded() {
-		this.ended = true;
+		ended = true;
+		offerDieMarker();
 	}
 
 }
