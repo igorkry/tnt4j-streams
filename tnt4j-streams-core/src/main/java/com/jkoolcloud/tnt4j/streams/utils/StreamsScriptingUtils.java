@@ -142,14 +142,22 @@ public final class StreamsScriptingUtils {
 			DEFAULT_JS_CODE_IMPORTS = initDefaultJSScriptImports();
 		}
 
-		return DEFAULT_JS_CODE_IMPORTS + script;
+		StringBuilder sb = new StringBuilder();
+		sb.append("var ScriptImports = new JavaImporter(\n");// NON-NLS
+		sb.append(DEFAULT_JS_CODE_IMPORTS);
+		sb.append(");\n"); // NON-NLS
+		sb.append("with (ScriptImports) {\n"); // NON-NLS
+		sb.append(script);
+		sb.append("\n}"); // NON-NLS
+
+		return sb.toString();
 	}
 
 	private static String initDefaultJSScriptImports() {
 		StringBuilder sb = new StringBuilder();
 
 		for (String pckg : DEFAULT_IMPORT_PACKAGES) {
-			sb.append("importPackage(").append(pckg).append(");\n"); // NON-NLS
+			sb.append(sb.length() > 0 ? ", " : "  ").append(pckg).append("\n"); // NON-NLS
 		}
 
 		return sb.toString();
@@ -177,7 +185,7 @@ public final class StreamsScriptingUtils {
 		if (DEFAULT_JS_CODE_IMPORTS != null) {
 			StringBuilder sb = new StringBuilder(DEFAULT_JS_CODE_IMPORTS);
 
-			sb.append("importPackage(").append(pckg).append(");\n"); // NON-NLS
+			sb.append(sb.length() > 0 ? ", " : "  ").append(pckg).append("\n"); // NON-NLS
 
 			DEFAULT_JS_CODE_IMPORTS = sb.toString();
 		}
