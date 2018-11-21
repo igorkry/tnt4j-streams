@@ -17,10 +17,13 @@
 package com.jkoolcloud.tnt4j.streams.outputs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jkoolcloud.tnt4j.core.Activity;
 import com.jkoolcloud.tnt4j.core.Snapshot;
 import com.jkoolcloud.tnt4j.core.Trackable;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -37,7 +40,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
  * Implements TNT4J-Streams output logger for activities provided as {@link ActivityInfo} entities to be recorded to
- * JKoolCloud over TNT4J and JESL APIs.
+ * jKoolCloud over TNT4J and JESL APIs.
  * <p>
  * This output supports the following configuration properties (in addition to those supported by
  * {@link com.jkoolcloud.tnt4j.streams.outputs.AbstractJKCloudOutput}):
@@ -60,7 +63,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
-	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}";
+	private static final String DEFAULT_SOURCE_FQN = "APPL=${ApplName}#SERVER=${ServerName}#NETADDR=${ServerIp}#GEOADDR=${Location}"; // NON-NLS
 
 	private boolean resolveServer = false;
 	private boolean splitRelatives = false;
@@ -114,35 +117,56 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		Tracker tracker = getTracker();
-		ai.resolveServer(resolveServer);
-		String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
+			Tracker tracker = getTracker();
+			ai.resolveServer(resolveServer);
+			String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
-		if (splitRelatives && ai.hasChildren()) {
-			for (ActivityInfo cai : ai.getChildren()) {
-				cai.merge(ai);
-				Trackable t = cai.buildTrackable(tracker);
-				alterTrackableSource(tracker, t, cai, aiFQN);
+			if (splitRelatives && ai.hasChildren()) {
+				for (ActivityInfo cai : ai.getChildren()) {
+					cai.merge(ai);
+					Trackable t = cai.buildTrackable(tracker);
+					alterTrackableSource(tracker, t, cai, aiFQN);
+					recordActivity(tracker, CONN_RETRY_INTERVAL, t);
+				}
+			} else {
+				List<Trackable> chTrackables = new ArrayList<>();
+				Trackable t = ai.buildTrackable(tracker, chTrackables);
+				alterTrackableSource(tracker, t, ai, aiFQN);
 				recordActivity(tracker, CONN_RETRY_INTERVAL, t);
-			}
-		} else {
-			List<Trackable> chTrackables = new ArrayList<>();
-			Trackable t = ai.buildTrackable(tracker, chTrackables);
-			alterTrackableSource(tracker, t, ai, aiFQN);
-			recordActivity(tracker, CONN_RETRY_INTERVAL, t);
 
-			for (int i = 0; i < chTrackables.size(); i++) {
-				Trackable chT = chTrackables.get(i);
-				ActivityInfo cai = ai.getChildren().get(i);
-				alterTrackableSource(tracker, chT, cai, aiFQN);
-				recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
+				for (int i = 0; i < chTrackables.size(); i++) {
+					Trackable chT = chTrackables.get(i);
+					ActivityInfo cai = ai.getChildren().get(i);
+					alterTrackableSource(tracker, chT, cai, aiFQN);
+					recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
+				}
 			}
 		}
-	}
 
 	private static void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
 		if (StringUtils.isNotEmpty(fqn)) {
-			t.setSource(buildSource(tracker, ai.getSourceFQN(fqn)));
+			Source tSrc = buildSource(tracker, ai.getSourceFQN(fqn));
+			t.setSource(tSrc);
+
+			Collection<Snapshot> snapshots = null;
+			if (t instanceof Activity) {
+				snapshots = ((Activity) t).getSnapshots();
+			} else if (t instanceof TrackingEvent) {
+				snapshots = ((TrackingEvent) t).getOperation().getSnapshots();
+			}
+
+			if (CollectionUtils.isNotEmpty(snapshots)) {
+				List<ActivityInfo> cais = ai.getChildren();
+				int i = 0;
+				for (Snapshot s : snapshots) {
+					ActivityInfo cai = (cais == null || i >= cais.size()) ? null : cais.get(i++);
+					if (cai == null) {
+						s.setSource(tSrc);
+					} else {
+						s.setSource(buildSource(tracker, cais.get(i++).getSourceFQN(fqn)));
+					}
+				}
+			}
 		}
 	}
 
