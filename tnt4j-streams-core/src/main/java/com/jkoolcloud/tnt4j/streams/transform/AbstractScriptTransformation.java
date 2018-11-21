@@ -198,6 +198,15 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	}
 
 	/**
+	 * Returns set of expressions variable placeholders - usually names of referenced activity entity fields.
+	 *
+	 * @return set of expressions variable placeholders
+	 */
+	public Set<String> getExpressionVariables() {
+		return exprVars;
+	}
+
+	/**
 	 * Resolved activity entity field value for a expression variable defined field name.
 	 *
 	 * @param eVar

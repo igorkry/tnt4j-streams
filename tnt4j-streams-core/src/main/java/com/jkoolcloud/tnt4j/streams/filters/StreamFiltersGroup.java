@@ -80,6 +80,15 @@ public class StreamFiltersGroup<T> implements StreamEntityFilter<T> {
 		activityFilters.remove(filter);
 	}
 
+	/**
+	 * Returns group filters list.
+	 *
+	 * @return group filters list
+	 */
+	public List<AbstractEntityFilter<T>> getFilters() {
+		return activityFilters;
+	}
+
 	@Override
 	public boolean doFilter(T value, ActivityInfo ai) throws FilterException {
 		if (CollectionUtils.isNotEmpty(activityFilters)) {

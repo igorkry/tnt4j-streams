@@ -146,6 +146,15 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 		ppExpression = expString;
 	}
 
+	/**
+	 * Returns set of expressions variable placeholders - usually names of referenced activity entity fields.
+	 *
+	 * @return set of expressions variable placeholders
+	 */
+	public Set<String> getExpressionVariables() {
+		return exprVars;
+	}
+
 	@Override
 	public StreamFilterType getFilterType() {
 		return StreamFilterType.EXPRESSION;

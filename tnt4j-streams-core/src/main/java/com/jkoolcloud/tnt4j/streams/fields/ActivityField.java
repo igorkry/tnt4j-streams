@@ -25,7 +25,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.filters.AbstractEntityFilter;
+import com.jkoolcloud.tnt4j.streams.filters.AbstractExpressionFilter;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -749,6 +752,67 @@ public class ActivityField extends AbstractFieldEntity {
 	@Override
 	protected ValueTransformation.Phase getDefaultTransformationPhase() {
 		return ValueTransformation.Phase.AGGREGATED;
+	}
+
+	/**
+	 * Collects all references for this field from bound transformation and filter expressions. If locator type is
+	 * {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}, locator referenced field is added
+	 * to references set too.
+	 *
+	 * @return set of field references
+	 */
+	public Set<String> getReferredFields() {
+		Set<String> rFields = new HashSet<>();
+
+		addTransformationAndFilterReferences(this, rFields);
+
+		for (ActivityFieldLocator loc : locators) {
+			if (loc.getBuiltInType() == ActivityFieldLocatorType.Activity) {
+				rFields.add(loc.getLocator());
+			}
+
+			addTransformationAndFilterReferences(loc, rFields);
+		}
+
+		return rFields;
+	}
+
+	/**
+	 * Collects field entity references form bound transformation and filter expressions.
+	 *
+	 * @param fe
+	 *            field entity to collect references
+	 * @param rFields
+	 *            references set to append found references
+	 */
+	protected static void addTransformationAndFilterReferences(AbstractFieldEntity fe, Set<String> rFields) {
+		if (CollectionUtils.isNotEmpty(fe.transformations)) {
+			for (ValueTransformation<?, ?> vt : fe.transformations) {
+				if (vt instanceof AbstractScriptTransformation) {
+					AbstractScriptTransformation<?> st = (AbstractScriptTransformation<?>) vt;
+					Set<String> exVars = st.getExpressionVariables();
+					if (CollectionUtils.isNotEmpty(exVars)) {
+						for (String expVar : exVars) {
+							rFields.add(Utils.getVarName(expVar));
+						}
+					}
+				}
+			}
+		}
+
+		if (fe.filter != null && CollectionUtils.isNotEmpty(fe.filter.getFilters())) {
+			for (AbstractEntityFilter<?> f : fe.filter.getFilters()) {
+				if (f instanceof AbstractExpressionFilter) {
+					AbstractExpressionFilter<?> ef = (AbstractExpressionFilter<?>) f;
+					Set<String> exVars = ef.getExpressionVariables();
+					if (CollectionUtils.isNotEmpty(exVars)) {
+						for (String expVar : exVars) {
+							rFields.add(Utils.getVarName(expVar));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

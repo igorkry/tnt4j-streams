@@ -17,24 +17,13 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -324,7 +313,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		public void setProperties(Collection<Map.Entry<String, String>> props) {
+		public void setProperty(String name, String value) {
 		}
 
 		@Override
@@ -334,6 +323,10 @@ public class TNTInputStreamTest {
 
 		@Override
 		public void addField(ActivityField field) {
+		}
+
+		@Override
+		public void organizeFields() {
 		}
 
 		@Override

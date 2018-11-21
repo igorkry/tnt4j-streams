@@ -34,10 +34,7 @@ import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.preparsers.ActivityDataPreParser;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Generic class for common activity parsers. It provides some generic functionality witch is common to most activity
@@ -53,6 +50,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * line, or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
  * <li>RequireDefault - indicates that all parser fields/locators by default requires to resolve non-null value. Default
  * value - {@code false}. (Optional)</li>
+ * <li>AutoArrangeFields - flag indicating parser fields shall be automatically ordered by parser to ensure references
+ * sequence. When {@code false}, fields shall maintain user parser configuration defined order. NOTE: it is alias for
+ * parser configuration attribute {@code "manualFieldsOrder"}. Default value - {@code true}. (Optional)</li>
  * </ul>
  *
  * @param <T>
@@ -103,41 +103,40 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected final Lock filterLock = new ReentrantLock();
 	protected final Lock preParserLock = new ReentrantLock();
 
-	private boolean autoSort = true;
+	private boolean autoArrangeFields = true;
 	private ActivityField parentIdField;
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
+	public void setProperty(String name, String value) {
+		if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
+			useActivityAsMessage = Utils.toBoolean(value);
 
-				if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {
-					useActivityAsMessage = Utils.toBoolean(value);
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.setting", name, value);
+		} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				activityDelim = value;
 
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.setting", name, value);
-				} else if (ParserProperties.PROP_ACTIVITY_DELIM.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						activityDelim = value;
-
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.setting", name, value);
-					}
-				} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						requireAll = Utils.toBoolean(value);
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.setting", name, value);
-					}
-				} else if (ParserProperties.PROP_COMPOSITE_DELIM.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						compositeDelim = value;
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"ActivityParser.setting", name, value);
-					}
-				}
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.setting", name, value);
+			}
+		} else if (ParserProperties.PROP_REQUIRE_ALL.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				requireAll = Utils.toBoolean(value);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.setting", name, value);
+			}
+		} else if (ParserProperties.PROP_COMPOSITE_DELIM.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				compositeDelim = value;
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.setting", name, value);
+			}
+		} else if (ParserProperties.PROP_AUTO_ARRANGE_FIELDS.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				autoArrangeFields = Utils.toBoolean(value);
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityParser.setting", name, value);
 			}
 		}
 	}
@@ -155,6 +154,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 		if (ParserProperties.PROP_COMPOSITE_DELIM.equalsIgnoreCase(name)) {
 			return compositeDelim;
+		}
+		if (ParserProperties.PROP_AUTO_ARRANGE_FIELDS.equalsIgnoreCase(name)) {
+			return autoArrangeFields;
 		}
 
 		return null;
@@ -227,10 +229,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return Utils.toStringDump(data);
 	}
 
-	public void setAutoSort(boolean autoSort) {
-		this.autoSort = autoSort;
-	}
-
 	@Override
 	public void addField(ActivityField field) {
 		if (field == null) {
@@ -243,11 +241,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		validateSupportedLocatorTypes(field);
 		validateDuplicateFields(field);
 
-		if (autoSort) {
-			addFieldAndSort(field);
-		} else {
-			fieldList.add(field);
-		}
+		fieldList.add(field);
 		field.referParser(this);
 	}
 
@@ -292,49 +286,126 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return null;
 	}
 
+	@Override
+	public void organizeFields() {
+		List<ActivityField> sortedRefs = organizeFieldsReferences(fieldList);
+
+		if (autoArrangeFields) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.fields.user.order", fieldList.toString());
+			if (sortedRefs != null) {
+				fieldList.clear();
+				fieldList.addAll(sortedRefs);
+			}
+			arrangeFieldsByType(fieldList);
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.fields.auto.order", fieldList.toString());
+		}
+	}
+
 	/**
-	 * Adds activity field definition to the set of fields supported by this parser and makes fields sorting according
-	 * to value resolution order: activity RAW data value locating fields first, then activity entity field value
-	 * locating fields, and then cache stored values locating fields.
+	 * Organizes fields by references for {@code fields} list provided parser fields. Organizing is performed in two
+	 * steps:
+	 * <ul>
+	 * <li>validates fields references for unknown fields and cyclic references.</li>
+	 * <li>arranges fields by soring them topologically (using references) to maintain correct value resolution
+	 * sequence</li>
+	 * </ul>
 	 *
-	 * @param field
-	 *            activity field to add
+	 * @param fields
+	 *            fields list to organize
+	 * @return topologically sorted fields list
 	 */
-	protected void addFieldAndSort(ActivityField field) {
-		int rIdx = -1;
-		int aIdx = -1;
-		int cIdx = -1;
-		for (int i = 0; i < fieldList.size(); i++) {
-			ActivityField af = fieldList.get(i);
-
-			boolean fNoValueLocators = af.isResolvingValueOverTransformation();
-			boolean fActivity = af.hasActivityLocators() || (af.hasActivityTransformations() && !fNoValueLocators);
-			boolean fCache = af.hasCacheLocators() || fNoValueLocators;
-			boolean fRAW = !fActivity && !fCache;
-
-			if (fRAW) {
-				rIdx = Math.max(rIdx, i);
-			}
-			if (fActivity) {
-				aIdx = Math.max(aIdx, i);
-			}
-			if (fCache) {
-				cIdx = Math.max(cIdx, i);
-			}
+	protected static List<ActivityField> organizeFieldsReferences(List<ActivityField> fields) {
+		// make fields map to simplify fields access by name
+		Map<String, ActivityField> fieldsMap = new LinkedHashMap<>(fields.size());
+		for (ActivityField f : fields) {
+			fieldsMap.put(f.getFieldTypeName(), f);
 		}
 
-		int idx = rIdx + 1;
-		aIdx = aIdx < 0 ? rIdx : aIdx;
-		cIdx = cIdx < 0 ? aIdx : cIdx;
+		// make fields references matrix and verify missing references
+		Map<ActivityField, Set<ActivityField>> refsMap = new LinkedHashMap<>(fields.size());
+		for (ActivityField af : fields) {
+			Set<String> refs = af.getReferredFields();
+			Set<ActivityField> rFields = new LinkedHashSet<>(refs.size());
 
-		if (field.hasActivityLocators() || field.hasActivityTransformations()) {
-			idx = aIdx + 1;
-		}
-		if (field.hasCacheLocators() || field.isResolvingValueOverTransformation()) {
-			idx = cIdx + 1;
+			if (CollectionUtils.isNotEmpty(refs)) {
+				for (String ref : refs) {
+					ActivityField rf = fieldsMap.get(ref);
+
+					if (rf == null) {
+						throw new IllegalArgumentException(
+								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+										"ActivityParser.unknown.field.reference", af.getFieldTypeName(), ref));
+					}
+
+					rFields.add(rf);
+				}
+			}
+			refsMap.put(af, rFields);
 		}
 
-		fieldList.add(idx, field);
+		// build fields references graph
+		DirectedGraph<ActivityField> frg = new DirectedGraph<>();
+		for (Map.Entry<ActivityField, Set<ActivityField>> re : refsMap.entrySet()) {
+			frg.addNode(re.getKey());
+		}
+
+		for (Map.Entry<ActivityField, Set<ActivityField>> re : refsMap.entrySet()) {
+			Set<ActivityField> refs = re.getValue();
+
+			if (CollectionUtils.isNotEmpty(refs)) {
+				for (ActivityField ref : refs) {
+					frg.addEdge(ref, re.getKey());
+				}
+			}
+		}
+		// and detect cyclic dependencies
+		try {
+			return TopologicalSort.sort(frg);
+		} catch (TopologicalSort.CyclicDependencyException exc) {
+			throw new IllegalArgumentException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityParser.cyclic.field.dependency", exc.getCycleNode()));
+		}
+	}
+
+	/**
+	 * Arranges parser fields list by field locator type: RAW, ACTIVITY, CACHE
+	 *
+	 * @param fields
+	 *            fields list to arrange
+	 */
+	protected static void arrangeFieldsByType(List<ActivityField> fields) {
+		Collections.sort(fields, new Comparator<ActivityField>() {
+			@Override
+			public int compare(ActivityField f1, ActivityField f2) {
+				int fi1 = fieldTypeIndex(f1);
+				int fi2 = fieldTypeIndex(f2);
+
+				return fi2 - fi1;
+			}
+
+			private int fieldTypeIndex(ActivityField field) {
+				boolean af = field.hasActivityLocators();
+				boolean cf = field.hasCacheLocators();
+				boolean rf = !af && !cf;
+
+				int ftIdx = 0;
+				if (af) {
+					ftIdx |= 1 << 1;
+				}
+				if (cf) {
+					ftIdx |= 1 << 0;
+				}
+				if (rf) {
+					ftIdx |= 1 << 2;
+				}
+
+				return ftIdx;
+			}
+		});
 	}
 
 	/**

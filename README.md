@@ -5150,12 +5150,16 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  * `RequireDefault` - indicates that all parser fields/locators by default are required to resolve to non-null values. Default value - 
  `false`. (Optional). The `field` attribute `required="true"` (or `false`) may be used to take precedence over the `RequireDefault` 
  property. See `required` attribute definition in ['TNT4J Events field mappings'](#tnt4j-events-field-mappings).
+ * `AutoArrangeFields` - flag indicating parser fields shall be automatically ordered by parser to ensure references sequence. When `false`, 
+ fields shall maintain user parser configuration defined order. **NOTE:** it is alias for parser configuration attribute 
+ `manualFieldsOrder`. Default value - `true`. (Optional)
 
     sample:
 ```xml
     <property name="UseActivityDataAsMessageForUnset" value="true"/>
     <property name="ActivityDelim" value="EOF"/>
     <property name="RequireDefault" value="true"/>
+    <property name="AutoArrangeFields" value="false"/>
 ```
 
 #### Activity Name-Value parser

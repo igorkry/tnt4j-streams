@@ -115,6 +115,11 @@ public abstract class ActivityParser implements NamedObject {
 	public abstract void addField(ActivityField field);
 
 	/**
+	 * Verifies field references and arranges parser fields to ensure right values resolution order.
+	 */
+	public abstract void organizeFields();
+
+	/**
 	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
 	 * to jKoolCloud.
 	 *
