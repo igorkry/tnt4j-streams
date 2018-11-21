@@ -43,6 +43,7 @@ import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
+import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
 
 /**
  * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKoolCloud.
@@ -800,10 +801,7 @@ public class ActivityInfo {
 
 		determineTimes();
 		resolveServer(false);
-
-		if (StringUtils.isEmpty(trackingId)) {
-			trackingId = tracker.newUUID();
-		}
+		determineTrackingId();
 
 		if (eventType == OpType.ACTIVITY) {
 			return buildActivity(tracker, eventName, trackingId, chTrackables);
@@ -812,6 +810,18 @@ public class ActivityInfo {
 		} else {
 			return buildEvent(tracker, eventName, trackingId, chTrackables);
 		}
+	}
+
+	/**
+	 * Assigns new activity entity tracking identifier value if not yet defined.
+	 *
+	 * @retrun the tracking identifier
+	 */
+	public String determineTrackingId() {
+		if (StringUtils.isEmpty(trackingId)) {
+			trackingId = DefaultUUIDFactory.getInstance().newUUID();
+		}
+		return trackingId;
 	}
 
 	/**
@@ -1168,19 +1178,33 @@ public class ActivityInfo {
 		if (msgAge > 0L) {
 			snapshot.add(JSONFormatter.JSON_MSG_AGE_USEC_FIELD, msgAge);
 		}
-
-		snapshot.add(JSONFormatter.JSON_COMP_CODE_FIELD, compCode == null ? OpCompCode.SUCCESS : compCode);
-		snapshot.add(JSONFormatter.JSON_REASON_CODE_FIELD, reasonCode);
-		snapshot.add(JSONFormatter.JSON_TYPE_FIELD, eventType);
-		snapshot.add(JSONFormatter.JSON_EXCEPTION_FIELD, exception);
+		if (compCode != null) {
+			snapshot.add(JSONFormatter.JSON_COMP_CODE_FIELD, compCode);
+		}
+		if (reasonCode > 0) {
+			snapshot.add(JSONFormatter.JSON_REASON_CODE_FIELD, reasonCode);
+		}
+		if (eventType != null) {
+			snapshot.add(JSONFormatter.JSON_TYPE_FIELD, eventType);
+		}
+		if (StringUtils.isNotEmpty(exception)) {
+			snapshot.add(JSONFormatter.JSON_EXCEPTION_FIELD, exception);
+		}
 		if (StringUtils.isNotEmpty(location)) {
 			snapshot.add(JSONFormatter.JSON_LOCATION_FIELD, location);
 		}
-		snapshot.add(JSONFormatter.JSON_RESOURCE_FIELD, resourceName);
-		snapshot.add(JSONFormatter.JSON_USER_FIELD,
-				StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
-		snapshot.add(JSONFormatter.JSON_TID_FIELD, threadId == null ? Thread.currentThread().getId() : threadId);
-		snapshot.add(JSONFormatter.JSON_PID_FIELD, processId == null ? Utils.getVMPID() : processId);
+		if (StringUtils.isNotEmpty(resourceName)) {
+			snapshot.add(JSONFormatter.JSON_RESOURCE_FIELD, resourceName);
+		}
+		if (StringUtils.isNotEmpty(userName)) {
+			snapshot.add(JSONFormatter.JSON_USER_FIELD, userName);
+		}
+		if (threadId != null) {
+			snapshot.add(JSONFormatter.JSON_TID_FIELD, threadId);
+		}
+		if (processId != null) {
+			snapshot.add(JSONFormatter.JSON_PID_FIELD, processId);
+		}
 		snapshot.setTimeStamp(startTime == null ? (endTime == null ? UsecTimestamp.now() : endTime) : startTime);
 		if (eventStatus != null) {
 			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
@@ -1906,7 +1930,7 @@ public class ActivityInfo {
 			case ThreadId:
 				return threadId;
 			case TrackingId:
-				return trackingId;
+				return determineTrackingId();
 			case UserName:
 				return userName;
 			case Guid:
