@@ -18,14 +18,12 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.sql.*;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,31 +83,22 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-
-				if (WsParserProperties.PROP_SQL_JAVA_MAPPING.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						String[] sqlJavaMappings = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
-						for (String sqlJavaMapping : sqlJavaMappings) {
-							String[] nsFields = sqlJavaMapping.split("="); // NON-NLS
-							try {
-								typesMap.put(nsFields[0], Class.forName(nsFields[1]));
-								logger().log(OpLevel.DEBUG,
-										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-										"ActivityJDBCResultSetParser.adding.mapping", name, sqlJavaMapping);
-							} catch (Throwable exc) {
-								logger().log(OpLevel.DEBUG,
-										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-										"ActivityJDBCResultSetParser.resolve.class.failed", nsFields[1],
-										exc.getLocalizedMessage());
-							}
-						}
+		if (WsParserProperties.PROP_SQL_JAVA_MAPPING.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				String[] sqlJavaMappings = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+				for (String sqlJavaMapping : sqlJavaMappings) {
+					String[] nsFields = sqlJavaMapping.split("="); // NON-NLS
+					try {
+						typesMap.put(nsFields[0], Class.forName(nsFields[1]));
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityJDBCResultSetParser.adding.mapping", name, sqlJavaMapping);
+					} catch (Throwable exc) {
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityJDBCResultSetParser.resolve.class.failed", nsFields[1],
+								exc.getLocalizedMessage());
 					}
 				}
 			}

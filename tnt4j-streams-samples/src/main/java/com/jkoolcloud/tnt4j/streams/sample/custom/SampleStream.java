@@ -19,10 +19,6 @@ package com.jkoolcloud.tnt4j.streams.sample.custom;
 import java.io.File;
 import java.io.FileReader;
 import java.io.LineNumberReader;
-import java.util.Collection;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -70,23 +66,19 @@ public class SampleStream extends TNTParseableInputStream<String> {
 	}
 
 	/**
-	 * Set properties for activity stream.
+	 * Set property for this activity stream.
 	 *
-	 * @param props
-	 *            properties to set
+	 * @param name
+	 *            property name
+	 * @param value
+	 *            property value
 	 */
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-					fileName = value;
-				}
-			}
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			fileName = value;
 		}
 	}
 

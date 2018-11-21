@@ -17,10 +17,8 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.logstash.beats.IMessageListener;
 import org.logstash.beats.Message;
 import org.logstash.beats.Server;
@@ -90,29 +88,23 @@ public class ElasticBeatsStream extends AbstractBufferedStream<Map<?, ?>> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
-					host = value;
-				} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-					port = Integer.valueOf(value);
-				} else if (ElasticBeatsStreamProperties.PROP_SSL_CERTIFICATE_FILE_PATH.equalsIgnoreCase(name)) {
-					sslCertificateFilePath = value;
-				} else if (ElasticBeatsStreamProperties.PROP_SSL_KEY_FILE_PATH.equalsIgnoreCase(name)) {
-					sslKeyFilePath = value;
-				} else if (ElasticBeatsStreamProperties.PROP_PASSPHRASE.equalsIgnoreCase(name)) {
-					passPhrase = value;
-				} else if (ElasticBeatsStreamProperties.PROP_TIMEOUT.equalsIgnoreCase(name)) {
-					timeout = Integer.valueOf(value);
-				} else if (ElasticBeatsStreamProperties.PROP_THREAD_COUNT.equalsIgnoreCase(name)) {
-					threadCount = Integer.valueOf(value);
-				}
-			}
+		if (StreamProperties.PROP_HOST.equalsIgnoreCase(name)) {
+			host = value;
+		} else if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+			port = Integer.valueOf(value);
+		} else if (ElasticBeatsStreamProperties.PROP_SSL_CERTIFICATE_FILE_PATH.equalsIgnoreCase(name)) {
+			sslCertificateFilePath = value;
+		} else if (ElasticBeatsStreamProperties.PROP_SSL_KEY_FILE_PATH.equalsIgnoreCase(name)) {
+			sslKeyFilePath = value;
+		} else if (ElasticBeatsStreamProperties.PROP_PASSPHRASE.equalsIgnoreCase(name)) {
+			passPhrase = value;
+		} else if (ElasticBeatsStreamProperties.PROP_TIMEOUT.equalsIgnoreCase(name)) {
+			timeout = Integer.valueOf(value);
+		} else if (ElasticBeatsStreamProperties.PROP_THREAD_COUNT.equalsIgnoreCase(name)) {
+			threadCount = Integer.valueOf(value);
 		}
 	}
 

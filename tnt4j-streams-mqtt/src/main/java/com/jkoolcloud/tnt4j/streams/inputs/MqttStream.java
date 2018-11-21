@@ -26,7 +26,6 @@ import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.*;
@@ -135,32 +134,31 @@ public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
-					serverURI = value;
-				} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
-					userName = value;
-				} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
-					password = value;
-				} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
-					topic = value;
-				} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-					useSSL = Utils.toBoolean(value);
-				} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
-					keystore = value;
-				} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
-					keystorePass = value;
-				}
-			}
-		}
-
 		if (StringUtils.isNotEmpty(topic)) {
 			// remove leading and trailing slashes to comply MQTT topic
 			// naming.
 			topic = topic.replaceAll("^/+", "").replaceAll("/+$", ""); // NON-NLS
+		}
+	}
+
+	@Override
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
+
+		if (StreamProperties.PROP_SERVER_URI.equalsIgnoreCase(name)) {
+			serverURI = value;
+		} else if (StreamProperties.PROP_USERNAME.equalsIgnoreCase(name)) {
+			userName = value;
+		} else if (StreamProperties.PROP_PASSWORD.equalsIgnoreCase(name)) {
+			password = value;
+		} else if (StreamProperties.PROP_TOPIC_STRING.equalsIgnoreCase(name)) {
+			topic = value;
+		} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
+			useSSL = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+			keystore = value;
+		} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+			keystorePass = value;
 		}
 	}
 

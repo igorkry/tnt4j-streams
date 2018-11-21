@@ -22,7 +22,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -137,7 +136,7 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 
 	private Iterator<MessageAndMetadata<byte[], byte[]>> messageBuffer;
 
-	private Map<String, Properties> userKafkaProps;
+	private Map<String, Properties> userKafkaProps = new HashMap<>(3);
 
 	/**
 	 * Constructs a new KafkaStream.
@@ -152,40 +151,32 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		userKafkaProps = new HashMap<>(3);
+		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+			topicName = value;
+		} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
+			startServer = Utils.toBoolean(value);
+		} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
+			startZooKeeper = Utils.toBoolean(value);
+		} else {
+			Field[] propFields = StreamProperties.class.getDeclaredFields();
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-					topicName = value;
-				} else if (StreamProperties.PROP_START_SERVER.equalsIgnoreCase(name)) {
-					startServer = Utils.toBoolean(value);
-				} else if (KafkaStreamProperties.PROP_START_ZOOKEEPER.equalsIgnoreCase(name)) {
-					startZooKeeper = Utils.toBoolean(value);
-				} else {
-					Field[] propFields = StreamProperties.class.getDeclaredFields();
-
-					boolean streamsProperty = false;
-					for (Field pf : propFields) {
-						try {
-							pf.setAccessible(true);
-							if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-								streamsProperty = true;
-								break;
-							}
-						} catch (Exception exc) {
-						}
+			boolean streamsProperty = false;
+			for (Field pf : propFields) {
+				try {
+					pf.setAccessible(true);
+					if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+						streamsProperty = true;
+						break;
 					}
-
-					if (!streamsProperty) {
-						addUserKafkaProperty(name, value);
-					}
+				} catch (Exception exc) {
 				}
+			}
+
+			if (!streamsProperty) {
+				addUserKafkaProperty(name, value);
 			}
 		}
 	}
@@ -508,6 +499,8 @@ public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
 		if (consumer != null) {
 			consumer.shutdown();
 		}
+
+		userKafkaProps.clear();
 
 		super.cleanup();
 	}

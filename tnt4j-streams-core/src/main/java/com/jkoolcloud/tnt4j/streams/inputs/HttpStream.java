@@ -19,14 +19,12 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.*;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -112,25 +110,19 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
-					serverPort = Integer.valueOf(value);
-				} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
-					useSSL = Utils.toBoolean(value);
-				} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
-					keystore = value;
-				} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
-					keystorePass = value;
-				} else if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
-					keyPass = value;
-				}
-			}
+		if (StreamProperties.PROP_PORT.equalsIgnoreCase(name)) {
+			serverPort = Integer.valueOf(value);
+		} else if (StreamProperties.PROP_USE_SSL.equalsIgnoreCase(name)) {
+			useSSL = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_KEYSTORE.equalsIgnoreCase(name)) {
+			keystore = value;
+		} else if (StreamProperties.PROP_KEYSTORE_PASS.equalsIgnoreCase(name)) {
+			keystorePass = value;
+		} else if (StreamProperties.PROP_KEY_PASS.equalsIgnoreCase(name)) {
+			keyPass = value;
 		}
 	}
 

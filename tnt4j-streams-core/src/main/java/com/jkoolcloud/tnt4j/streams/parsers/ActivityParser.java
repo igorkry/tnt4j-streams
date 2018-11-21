@@ -73,7 +73,25 @@ public abstract class ActivityParser implements NamedObject {
 	 * @param props
 	 *            configuration properties to set
 	 */
-	public abstract void setProperties(Collection<Map.Entry<String, String>> props);
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				setProperty(prop.getKey(), prop.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Sets configuration property for this activity parser.
+	 *
+	 * @param name
+	 *            property name
+	 * @param value
+	 *            property value
+	 *
+	 * @see #setProperties(java.util.Collection)
+	 */
+	public abstract void setProperty(String name, String value);
 
 	/**
 	 * Get value of specified property. If subclasses override {@link #setProperties(java.util.Collection)}, they should

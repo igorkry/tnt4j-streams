@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -77,7 +76,7 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 	private String topicName;
 	private String cfgFileName;
 
-	private Map<String, Properties> userKafkaProps;
+	private Map<String, Properties> userKafkaProps = new HashMap<>(3);
 
 	private KafkaDataReceiver kafkaDataReceiver;
 
@@ -97,38 +96,6 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 	public void setProperties(Collection<Map.Entry<String, String>> props) {
 		super.setProperties(props);
 
-		userKafkaProps = new HashMap<>(3);
-
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
-					topicName = value;
-				} else if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
-					cfgFileName = value;
-				} else {
-					Field[] propFields = StreamProperties.class.getDeclaredFields();
-
-					boolean streamsProperty = false;
-					for (Field pf : propFields) {
-						try {
-							pf.setAccessible(true);
-							if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
-								streamsProperty = true;
-								break;
-							}
-						} catch (Exception exc) {
-						}
-					}
-
-					if (!streamsProperty) {
-						addUserKafkaProperty(name, value);
-					}
-				}
-			}
-		}
-
 		if (StringUtils.isNotEmpty(cfgFileName)) {
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 					"KafkaConsumerStream.consumer.cfgFile.load", cfgFileName);
@@ -139,6 +106,35 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 				Utils.logThrowable(logger(), OpLevel.WARNING,
 						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"KafkaConsumerStream.consumer.cfgFile.load.failed", exc);
+			}
+		}
+	}
+
+	@Override
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
+
+		if (StreamProperties.PROP_TOPIC_NAME.equalsIgnoreCase(name)) {
+			topicName = value;
+		} else if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			cfgFileName = value;
+		} else {
+			Field[] propFields = StreamProperties.class.getDeclaredFields();
+
+			boolean streamsProperty = false;
+			for (Field pf : propFields) {
+				try {
+					pf.setAccessible(true);
+					if (pf.get(StreamProperties.class).toString().equalsIgnoreCase(name)) {
+						streamsProperty = true;
+						break;
+					}
+				} catch (Exception exc) {
+				}
+			}
+
+			if (!streamsProperty) {
+				addUserKafkaProperty(name, value);
 			}
 		}
 	}
@@ -308,6 +304,8 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 		if (kafkaDataReceiver != null) {
 			kafkaDataReceiver.shutdown();
 		}
+
+		userKafkaProps.clear();
 
 		super.cleanup();
 	}

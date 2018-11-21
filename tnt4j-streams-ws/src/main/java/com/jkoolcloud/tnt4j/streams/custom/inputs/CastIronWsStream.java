@@ -19,15 +19,11 @@ package com.jkoolcloud.tnt4j.streams.custom.inputs;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.soap.*;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
@@ -79,20 +75,13 @@ public class CastIronWsStream extends WsStream {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-
-				if (WsStreamProperties.PROP_SECURITY_CACHED_TOKEN_KEY.equalsIgnoreCase(name)) {
-					tokenCacheKey = value;
-				} else if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER_TAG.equalsIgnoreCase(name)) {
-					securityResponseParserTag = value;
-				}
-			}
+		if (WsStreamProperties.PROP_SECURITY_CACHED_TOKEN_KEY.equalsIgnoreCase(name)) {
+			tokenCacheKey = value;
+		} else if (WsStreamProperties.PROP_SECURITY_RESPONSE_PARSER_TAG.equalsIgnoreCase(name)) {
+			securityResponseParserTag = value;
 		}
 	}
 

@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -78,21 +76,14 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 
 	@Override
 	@SuppressWarnings("deprecation")
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
+		if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
+			activityDelim = Utils.toBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
 
-				if (ParserProperties.PROP_READ_LINES.equalsIgnoreCase(name)) {
-					activityDelim = Utils.toBoolean(value) ? ActivityDelim.EOL.name() : ActivityDelim.EOF.name();
-
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.setting", name, value);
-				}
-			}
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.setting", name, value);
 		}
 	}
 

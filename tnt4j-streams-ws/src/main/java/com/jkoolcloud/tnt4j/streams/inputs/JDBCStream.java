@@ -17,12 +17,10 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.sql.*;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
@@ -84,17 +82,10 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-
-				jdbcProperties.put(name, value);
-			}
-		}
+		jdbcProperties.put(name, value);
 	}
 
 	@Override

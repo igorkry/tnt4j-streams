@@ -41,6 +41,7 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
+import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
 import com.jkoolcloud.tnt4j.streams.configure.jaxb.ResourceReferenceType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -599,7 +600,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		String name = null;
 		String className = null;
 		String tags = null;
-		boolean autoSort = true;
+		boolean autoArrange = true;
 		ActivityFieldDataType defaultDataType = null;
 		boolean defaultEmptyAsNull = true;
 		for (int i = 0; i < attrs.getLength(); i++) {
@@ -612,7 +613,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (TAGS_ATTR.equals(attName)) {
 				tags = attValue;
 			} else if (AUTO_SORT_ATTR.equals(attName)) {
-				autoSort = !Utils.toBoolean(attValue);
+				autoArrange = !Utils.toBoolean(attValue);
 			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
 				defaultDataType = ActivityFieldDataType.valueOf(attValue);
 			} else if (DEFAULT_EMPTY_AS_NULL.equals(attName)) {
@@ -643,7 +644,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currParser != null) {
 			currParser.setName(name);
 			currParser.setTags(tags);
-			((GenericActivityParser<?>) currParser).setAutoSort(autoSort);
+			currParser.setProperty(ParserProperties.PROP_AUTO_ARRANGE_FIELDS, String.valueOf(autoArrange));
 			currParser.setDefaultDataType(defaultDataType);
 			currParser.setDefaultEmptyAsNull(defaultEmptyAsNull);
 			streamsConfigData.addParser(currParser);

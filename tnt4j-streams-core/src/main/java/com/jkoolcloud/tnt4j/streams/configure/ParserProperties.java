@@ -104,4 +104,9 @@ public interface ParserProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_COMPOSITE_DELIM = "CompositeStructDelim"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_AUTO_ARRANGE_FIELDS = "AutoArrangeFields"; // NON-NLS
 }

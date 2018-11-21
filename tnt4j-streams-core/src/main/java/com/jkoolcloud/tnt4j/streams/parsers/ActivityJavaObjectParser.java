@@ -16,7 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -80,30 +82,20 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-
-				if (ParserProperties.PROP_SUPPORTED_CLASS.equalsIgnoreCase(name)) {
-					if (StringUtils.isNotEmpty(value)) {
-						String[] sClasses = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
-						for (String sClass : sClasses) {
-							try {
-								supportedClasses.add(Class.forName(sClass));
-								logger().log(OpLevel.DEBUG,
-										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-										"ActivityJavaObjectParser.adding.supported.class", sClass);
-							} catch (Throwable e) {
-								logger().log(OpLevel.DEBUG,
-										StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-										"ActivityJavaObjectParser.resolve.class.failed", sClass,
-										e.getLocalizedMessage());
-							}
-						}
+		if (ParserProperties.PROP_SUPPORTED_CLASS.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				String[] sClasses = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+				for (String sClass : sClasses) {
+					try {
+						supportedClasses.add(Class.forName(sClass));
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityJavaObjectParser.adding.supported.class", sClass);
+					} catch (Throwable e) {
+						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"ActivityJavaObjectParser.resolve.class.failed", sClass, e.getLocalizedMessage());
 					}
 				}
 			}

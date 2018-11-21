@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.custom.parsers;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,21 +87,14 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		// if (CollectionUtils.isNotEmpty(props)) {
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
 		// // no any additional properties are required yet.
 		// if (false) {
 		// logger().log(OpLevel.DEBUG,
 		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 		// name, value);
-		// }
-		// }
 		// }
 	}
 

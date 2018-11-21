@@ -16,12 +16,9 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -57,22 +54,15 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	protected final Lock evaluationLock = new ReentrantLock();
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
+		if (MsOfficeParserProperties.PROP_USE_FORMATTED_VALUE.equalsIgnoreCase(name)) {
+			useFormattedCellValue = Utils.toBoolean(value);
 
-				if (MsOfficeParserProperties.PROP_USE_FORMATTED_VALUE.equalsIgnoreCase(name)) {
-					useFormattedCellValue = Utils.toBoolean(value);
-
-					logger().log(OpLevel.DEBUG,
-							StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
-							name, value);
-				}
-			}
+			logger().log(OpLevel.DEBUG,
+					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"), name,
+					value);
 		}
 	}
 

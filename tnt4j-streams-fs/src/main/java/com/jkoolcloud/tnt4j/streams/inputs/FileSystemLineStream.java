@@ -16,9 +16,6 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
@@ -60,10 +57,10 @@ public class FileSystemLineStream extends FileLineStream {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		fsAdapter.setProperties(props);
+		fsAdapter.setProperty(name, value);
 	}
 
 	@Override

@@ -17,9 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
@@ -92,21 +90,14 @@ public class ActivityStringParser extends GenericActivityParser<String> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		// if (CollectionUtils.isNotEmpty(props)) {
-		// for (Map.Entry<String, String> prop : props) {
-		// String name = prop.getKey();
-		// String value = prop.getValue();
-		//
 		// // no any additional properties are required yet.
 		// if (false) {
 		// logger().log(OpLevel.DEBUG,
 		// StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.setting"),
 		// name, value);
-		// }
-		// }
 		// }
 	}
 

@@ -16,11 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -72,17 +69,11 @@ public class ExcelRowStream extends AbstractExcelStream<Row> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-				if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
-					rangeValue = value;
-				}
-			}
+		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			rangeValue = value;
 		}
 	}
 

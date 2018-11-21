@@ -17,10 +17,12 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -131,21 +133,14 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
+		if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
+			nodePathDelim = value;
 
-				if (ParserProperties.PROP_LOC_PATH_DELIM.equalsIgnoreCase(name)) {
-					nodePathDelim = value;
-
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.setting", name, value);
-				}
-			}
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityParser.setting", name, value);
 		}
 	}
 
