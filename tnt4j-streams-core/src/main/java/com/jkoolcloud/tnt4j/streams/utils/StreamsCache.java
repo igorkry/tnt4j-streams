@@ -56,6 +56,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  * (Optional)</li>
  * <li>Persisted - flag indicating cache contents has to be persisted to file on close and loaded on initialization.
  * Default value - {@code false}. (Optional)</li>
+ * <li>FileName - defines file name to persist cache entries as XML. Default value - {@code "./persistedCache.xml"}.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 3 $
@@ -75,8 +77,8 @@ public final class StreamsCache {
 
 	private static long maxSize = DEFAULT_CACHE_MAX_SIZE;
 	private static long expireDuration = DEFAULT_CACHE_EXPIRE_IN_MINUTES;
-	private static boolean persistenceOn = false; // TODO: file naming, because there may be running multiple concurrent
-													// streams configurations (JVMs)
+	private static boolean persistenceOn = false;
+	private static String fileName = DEFAULT_FILE_NAME;
 
 	private static Cache<String, CacheValue> buildCache(long cSize, long duration) {
 		return CacheBuilder.newBuilder().maximumSize(cSize).expireAfterAccess(duration, TimeUnit.MINUTES).build();
@@ -101,6 +103,8 @@ public final class StreamsCache {
 					expireDuration = Long.parseLong(value);
 				} else if (CacheProperties.PROP_PERSISTED.equalsIgnoreCase(name)) {
 					persistenceOn = Utils.toBoolean(value);
+				} else if (CacheProperties.PROP_PERSISTED_FILE_NAME.equalsIgnoreCase(name)) {
+					fileName = value;
 				}
 			}
 		}
@@ -254,11 +258,31 @@ public final class StreamsCache {
 	}
 
 	/**
-	 * Cleans cache stored values.
+	 * Cleans all cache stored values.
 	 */
 	public static void clearValues() {
 		if (valuesCache != null) {
 			valuesCache.invalidateAll();
+		}
+	}
+
+	/**
+	 * Cleans cache stored values for entries having key fragment defined by {@code entryKey}.
+	 * 
+	 * @param entryKey
+	 *            cache entry key fragment
+	 */
+	public static void clearValues(String entryKey) {
+		if (valuesCache != null) {
+			Map<String, CacheValue> cEntries = valuesCache.asMap();
+			List<String> keyList = new ArrayList<>();
+			for (Map.Entry<String, CacheValue> ce : cEntries.entrySet()) {
+				if (ce.getKey().startsWith(entryKey)) {
+					keyList.add(ce.getKey());
+				}
+			}
+
+			valuesCache.invalidateAll(keyList);
 		}
 	}
 
@@ -324,7 +348,7 @@ public final class StreamsCache {
 		try {
 			JAXBContext jc = JAXBContext.newInstance(CacheRoot.class);
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
-			File persistedFile = new File(DEFAULT_FILE_NAME);
+			File persistedFile = new File(fileName);
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.loading.file", persistedFile.getAbsolutePath());
 			if (!persistedFile.exists()) {
@@ -357,7 +381,7 @@ public final class StreamsCache {
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			CacheRoot root = new CacheRoot();
 			root.setEntriesMap(cacheEntries);
-			File persistedFile = new File(DEFAULT_FILE_NAME);
+			File persistedFile = new File(fileName);
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.persisting.file", persistedFile.getAbsolutePath());
 			marshaller.marshal(root, persistedFile);

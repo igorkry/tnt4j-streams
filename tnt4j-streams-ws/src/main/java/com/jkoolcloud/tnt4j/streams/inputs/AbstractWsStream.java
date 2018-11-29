@@ -63,10 +63,6 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.
 	 */
-	protected static final String JOB_PROP_SCENARIO_KEY = "scenarioObj"; // NON-NLS
-	/**
-	 * Constant for name of built-in scheduler job property {@value}.
-	 */
 	protected static final String JOB_PROP_SCENARIO_STEP_KEY = "scenarioStepObj"; // NON-NLS
 
 	private List<WsScenario> scenarioList;
@@ -124,7 +120,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 			for (WsScenario scenario : scenarioList) {
 				if (!scenario.isEmpty()) {
 					for (WsScenarioStep step : scenario.getStepsList()) {
-						scheduleScenarioStep(scenario, step);
+						scheduleScenarioStep(step);
 					}
 					scenariosCount++;
 				}
@@ -140,7 +136,15 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 		}
 	}
 
-	private void scheduleScenarioStep(WsScenario scenario, WsScenarioStep step) throws SchedulerException {
+	/**
+	 * Schedules scenario step to be executed by step defined scheduler configuration data.
+	 *
+	 * @param step
+	 *            scenario step instance to schedule
+	 * @throws SchedulerException
+	 *             if scheduler fails to schedule job for defined step
+	 */
+	protected void scheduleScenarioStep(WsScenarioStep step) throws SchedulerException {
 		if (scheduler == null) {
 			throw new SchedulerException(StreamsResources.getStringFormatted(WsStreamConstants.RESOURCE_BUNDLE_NAME,
 					"AbstractWsStream.null.scheduler", getName()));
@@ -148,10 +152,9 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 
 		JobDataMap jobAttrs = new JobDataMap();
 		jobAttrs.put(JOB_PROP_STREAM_KEY, this);
-		jobAttrs.put(JOB_PROP_SCENARIO_KEY, scenario);
 		jobAttrs.put(JOB_PROP_SCENARIO_STEP_KEY, step);
 
-		String jobId = scenario.getName() + ':' + step.getName();
+		String jobId = step.getScenario().getName() + ':' + step.getName();
 
 		JobDetail job = buildJob(jobId, jobAttrs);
 

@@ -163,7 +163,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 					if (cai == null) {
 						s.setSource(tSrc);
 					} else {
-						s.setSource(buildSource(tracker, cais.get(i++).getSourceFQN(fqn)));
+						s.setSource(buildSource(tracker, cai.getSourceFQN(fqn)));
 					}
 				}
 			}

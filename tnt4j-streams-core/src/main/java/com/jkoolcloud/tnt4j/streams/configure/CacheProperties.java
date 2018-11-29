@@ -34,4 +34,8 @@ public interface CacheProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_PERSISTED = "Persisted"; // NON-NLS
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_PERSISTED_FILE_NAME = "FileName"; // NON-NLS
 }

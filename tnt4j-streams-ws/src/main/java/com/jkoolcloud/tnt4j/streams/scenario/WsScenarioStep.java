@@ -35,6 +35,8 @@ public class WsScenarioStep {
 	private String password;
 	private SchedulerData schedulerData;
 
+	private WsScenario scenario;
+
 	/**
 	 * Constructs a new WsScenarioStep. Defines scenario step name.
 	 *
@@ -207,5 +209,24 @@ public class WsScenarioStep {
 	 */
 	public String getPassword() {
 		return password;
+	}
+
+	/**
+	 * Sets scenario instance this step belongs to.
+	 *
+	 * @param scenario
+	 *            scenario instance this step belongs to
+	 */
+	void setScenario(WsScenario scenario) {
+		this.scenario = scenario;
+	}
+
+	/**
+	 * Returns scenario instance this step belongs to.
+	 * 
+	 * @return scenario instance this step belongs to
+	 */
+	public WsScenario getScenario() {
+		return scenario;
 	}
 }

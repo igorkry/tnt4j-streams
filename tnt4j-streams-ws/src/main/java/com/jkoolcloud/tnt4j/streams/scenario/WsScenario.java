@@ -61,6 +61,7 @@ public class WsScenario {
 			stepsList = new ArrayList<>();
 		}
 
+		scenarioStep.setScenario(this);
 		if ("login".equalsIgnoreCase(scenarioStep.getName())) { // NON-NLS
 			loginStep = scenarioStep;
 		} else {

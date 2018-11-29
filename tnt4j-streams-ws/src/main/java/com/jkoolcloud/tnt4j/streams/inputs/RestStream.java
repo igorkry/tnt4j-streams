@@ -18,20 +18,18 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.IOException;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -66,8 +64,6 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  */
 public class RestStream extends AbstractWsStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RestStream.class);
-
-	private static final int DEFAULT_AUTH_PORT = 80;
 
 	/**
 	 * Constructs an empty RestStream. Requires configuration settings to set input stream source.
@@ -212,16 +208,28 @@ public class RestStream extends AbstractWsStream<String> {
 		HttpResponse response;
 
 		if (StringUtils.isNotEmpty(username)) {
-			CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-			credentialsProvider.setCredentials(new AuthScope(req.getURI().getAuthority(), DEFAULT_AUTH_PORT),
-					new UsernamePasswordCredentials(username, password));
-
-			HttpClientContext context = HttpClientContext.create();
-			context.setCredentialsProvider(credentialsProvider);
-			// context.setAuthSchemeRegistry(authRegistry);
+			// CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+			// UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+			// credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+			//
+			// // HttpClient client =
+			// // HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
+			//
+			// URI reqURI = req.getURI();
+			// HttpHost targetHost = new HttpHost(reqURI.getHost(), reqURI.getPort(), reqURI.getScheme());
+			// AuthCache authCache = new BasicAuthCache();
+			// authCache.put(targetHost, new BasicScheme());
+			//
+			// HttpClientContext context = HttpClientContext.create();
+			// context.setCredentialsProvider(credentialsProvider);
 			// context.setAuthCache(authCache);
+			//
+			// response = client.execute(req, context);
 
-			response = client.execute(req, context);
+			String credentialsStr = username + ":" + password; // NON-NLS
+			String encoding = DatatypeConverter.printBase64Binary(credentialsStr.getBytes());
+			req.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding); // NON-NLS
+			response = client.execute(req);
 		} else {
 			response = client.execute(req);
 		}
@@ -303,7 +311,7 @@ public class RestStream extends AbstractWsStream<String> {
 	/**
 	 * Request method types enumeration.
 	 */
-	enum ReqMethod {
+	protected enum ReqMethod {
 		/**
 		 * Request method GET.
 		 */

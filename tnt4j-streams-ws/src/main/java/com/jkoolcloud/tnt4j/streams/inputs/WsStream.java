@@ -141,7 +141,7 @@ public class WsStream extends AbstractWsStream<String> {
 
 		if (disableSSL) {
 			disableSslVerification();
-	}
+		}
 
 		if (synchronizeRequests) {
 			semaphore = new Semaphore(1);
@@ -443,7 +443,6 @@ public class WsStream extends AbstractWsStream<String> {
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			WsStream stream = (WsStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			WsScenario scenario = (WsScenario) dataMap.get(JOB_PROP_SCENARIO_KEY);
 			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 			Semaphore semaphore = (Semaphore) dataMap.get(JOB_PROP_SEMAPHORE);
 
@@ -458,7 +457,7 @@ public class WsStream extends AbstractWsStream<String> {
 							}
 						}
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
-								stream.fillInRequestData(request.getData()), stream, scenario);
+								stream.fillInRequestData(request.getData()), stream, scenarioStep.getScenario());
 					} catch (Exception exc) {
 						Utils.logThrowable(LOGGER, OpLevel.WARNING,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),

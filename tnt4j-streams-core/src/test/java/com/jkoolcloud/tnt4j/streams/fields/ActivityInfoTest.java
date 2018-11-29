@@ -436,4 +436,20 @@ public class ActivityInfoTest {
 		fVal = ai.getFieldValue("TestField");
 		assertEquals("Unexpected field value", ",,", fVal);
 	}
+
+	@Test
+	public void testTimestampAsHex() throws ParseException {
+		Integer TEST_VALUE = 0x5bc584a2;
+		System.out.printf("The decimal: %d \n", TEST_VALUE);
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("startTime");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		testLocator.setDataType(ActivityFieldDataType.Timestamp);
+		testLocator.setUnits("Seconds");
+		af.addLocator(testLocator);
+
+		ai.applyField(af, TEST_VALUE);
+		Object startTime = ai.getFieldValue("startTime");
+		System.out.printf("The result: %s \n", startTime);
+	}
 }

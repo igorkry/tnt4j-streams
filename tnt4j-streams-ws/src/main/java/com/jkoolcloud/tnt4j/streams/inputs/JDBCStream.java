@@ -424,7 +424,6 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
 			JDBCStream stream = (JDBCStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			// WsScenario scenario = (WsScenario) dataMap.get(JOB_PROP_SCENARIO_KEY);
 			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 
 			if (!scenarioStep.isEmpty()) {
