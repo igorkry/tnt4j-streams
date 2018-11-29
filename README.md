@@ -441,6 +441,33 @@ named `AccessLogParserCommon`.
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
 
+**NOTE:** when using stacked parser, `Activity` type locator prefix `^.` can be used to access parent parser (one stacked parser was invoked 
+from) produced activity entity field value. E.g.:
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="tnt-data-source.xsd">
+
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
+        <.../>
+        <field name="ValueFromParent" locator="^.StaticValue" locator-type="Activity"/>
+    </parser>
+
+    <parser name="SampleJMSParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJMSMessageParser">
+        <.../>
+        <field name="StaticValue" value="SampleJMSParser_Value" transparent="true"/>
+        <.../>
+        <embedded-activity name="InternalActivity" locator="OtherActivityData" locator-type="Label">
+            <parser-ref name="AccessLogParserCommon" aggregation="Relate"/>
+        </embedded-activity>
+        <.../>
+    </parser>
+    ...
+</tnt-data-source>
+```
+`AccessLogParserCommon` uses field `ValueFromParent` locator `^.StaticValue` to fill in value defined in `SampleJMSParser` parser field 
+`StaticValue`. After parsing, field `ValueFromParent` will have value `SampleJMSParser_Value`.
+
 #### Stacked parser matching data or parsing context
 
 It is possible to define context or data match criteria for a stacked parser reference. It allows to apply stacked parser on provided data 
@@ -4468,12 +4495,14 @@ meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityCount`.
 * `ExpireDuration` - stream resolved values cache entries expiration duration in minutes. Default value - `10`. (Optional)
 * `Persisted` - flag indicating cache contents has to be persisted to file on close and loaded on initialization. Default value - `false`. 
 (Optional)
+* `FileName` - defines file name to persist cache entries as XML. Default value - `./persistedCache.xml`. (Optional)
 
     sample:
 ```xml
     <property name="MaxSize" value="500"/>
     <property name="ExpireDuration" value="30"/>
     <property name="Persisted" value="true"/>
+    <property name="FileName" value="./storage/MyStreamCache.xml"/>
 ```
 
 ##### Parseable streams parameters
