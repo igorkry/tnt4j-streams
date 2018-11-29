@@ -515,7 +515,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
+	protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+			throws IllegalStateException, ParseException {
 		if (data == null) {
 			return null;
 		}
@@ -529,6 +530,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				"ActivityParser.preparsed.data", getLogString(data));
 
 		ActivityContext cData = prepareItem(stream, data);
+		if (pai != null) {
+			cData.setParentActivity(pai);
+		}
 
 		if (cData == null || !cData.isValid()) {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -980,7 +984,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Cache) {
 					val = Utils.simplifyValue(StreamsCache.getValue(cData.getActivity(), locStr, getName()));
 				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Activity) {
-					val = cData.getActivity().getFieldValue(locator.getLocator());
+					val = resolveActivityValue(locator, cData);
 				} else {
 					val = resolveLocatorValue(locator, cData, formattingNeeded);
 				}
@@ -1045,6 +1049,31 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return val;
+	}
+
+	/**
+	 * Gets activity entity data value resolved by locator.
+	 *
+	 * @param locator
+	 *            activity field locator
+	 * @param cData
+	 *            activity object context data package
+	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 */
+	protected Object resolveActivityValue(ActivityFieldLocator locator, ActivityContext cData) {
+		Object value = null;
+		String locStr = locator.getLocator();
+		if (StringUtils.isNotEmpty(locStr)) {
+			if (locStr.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
+				ActivityInfo pai = cData.getParentActivity();
+				value = pai == null ? null
+						: pai.getFieldValue(locStr.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()));
+			} else {
+				value = cData.getActivity().getFieldValue(locStr);
+			}
+		}
+
+		return value;
 	}
 
 	/**
@@ -1174,6 +1203,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 		private static final String STREAM_KEY = "STREAM_DATA"; // NON-NLS
 		private static final String RAW_DATA_KEY = "RAW_ACTIVITY_DATA"; // NON-NLS
+		private static final String PARENT_ACTIVITY_KEY = "PARENT_ACTIVITY_DATA"; // NON-NLS
 
 		private static final String PREPARED_DATA_KEY = "PREPARED_ACTIVITY_DATA"; // NON-NLS
 		private static final String ACTIVITY_DATA_KEY = "ACTIVITY_DATA"; // NON-NLS
@@ -1283,6 +1313,25 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		 */
 		public ActivityInfo getActivity() {
 			return (ActivityInfo) get(ACTIVITY_DATA_KEY);
+		}
+
+		/**
+		 * Sets parent activity entity data.
+		 *
+		 * @param pai
+		 *            parent activity entity data
+		 */
+		public void setParentActivity(ActivityInfo pai) {
+			put(PARENT_ACTIVITY_KEY, pai);
+		}
+
+		/**
+		 * Returns parent activity entity data.
+		 *
+		 * @return parent activity entity data
+		 */
+		public ActivityInfo getParentActivity() {
+			return (ActivityInfo) get(PARENT_ACTIVITY_KEY);
 		}
 
 		/**

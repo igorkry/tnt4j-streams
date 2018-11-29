@@ -135,7 +135,29 @@ public abstract class ActivityParser implements NamedObject {
 	 * @see #isDataClassSupported(Object)
 	 * @see GenericActivityParser#parsePreparedItem(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	public abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data)
+	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
+		return parse(stream, data, null);
+	}
+
+	/**
+	 * Parse the specified raw activity data, converting each field in raw data to its corresponding value for passing
+	 * to jKoolCloud.
+	 *
+	 * @param stream
+	 *            parent stream
+	 * @param data
+	 *            raw activity data to parse
+	 * @param pai
+	 *            parent activity info instance, or {@code null} if applied on root parser
+	 * @return converted activity info, or {@code null} if raw activity data does not match format for this parser
+	 * @throws IllegalStateException
+	 *             if parser has not been properly initialized
+	 * @throws ParseException
+	 *             if an error parsing raw data string
+	 * @see #isDataClassSupported(Object)
+	 * @see GenericActivityParser#parsePreparedItem(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
+	 */
+	protected abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
 			throws IllegalStateException, ParseException;
 
 	/**
@@ -248,7 +270,7 @@ public abstract class ActivityParser implements NamedObject {
 				"ActivityParser.stacked.parser.match", parserRef, dataMatch, dataMatch ? expMatch : "----"); // NON-NLS
 
 		if (dataMatch && expMatch) {
-			ActivityInfo sai = parserRef.getParser().parse(stream, value);
+			ActivityInfo sai = parserRef.getParser().parse(stream, value, ai);
 
 			if (sai != null) {
 				if (parserRef.getAggregationType() == AggregationType.Join

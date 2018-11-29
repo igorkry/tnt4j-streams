@@ -73,6 +73,12 @@ public final class StreamsConstants {
 	 */
 	public static final String STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY = ".GroupingActivityId"; // NON-NLS
 
+	/**
+	 * The constant defining {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity} type locator
+	 * prefix to resolve field value of parent activity entity.
+	 */
+	public static final String PARENT_REFERENCE_PREFIX = "^.";// NON-NLS
+
 	private StreamsConstants() {
 	}
 }

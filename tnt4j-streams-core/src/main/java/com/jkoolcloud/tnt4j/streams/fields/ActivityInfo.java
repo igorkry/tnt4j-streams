@@ -35,10 +35,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
@@ -99,6 +96,7 @@ public class ActivityInfo {
 
 	private Map<String, Property> activityProperties;
 	private List<ActivityInfo> children;
+	private ActivityInfo parent;
 
 	/**
 	 * Constructs a new ActivityInfo object.
@@ -1484,6 +1482,7 @@ public class ActivityInfo {
 			}
 
 			children.addAll(otherAi.children);
+			parent = otherAi.parent;
 		}
 	}
 
@@ -1797,6 +1796,7 @@ public class ActivityInfo {
 			children = new ArrayList<>();
 		}
 
+		ai.setParent(this);
 		children.add(ai);
 	}
 
@@ -1816,6 +1816,16 @@ public class ActivityInfo {
 	 */
 	public boolean hasChildren() {
 		return CollectionUtils.isNotEmpty(children);
+	}
+
+	/**
+	 * Sets parent activity entity instance.
+	 *
+	 * @param parent
+	 *            parent activity entity instance
+	 */
+	protected void setParent(ActivityInfo parent) {
+		this.parent = parent;
 	}
 
 	@Override
@@ -1854,6 +1864,7 @@ public class ActivityInfo {
 		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
 		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
 		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
+		sb.append(", parent=").append(parent == null ? "NONE" : parent); // NON-NLS
 		sb.append('}'); // NON-NLS
 		return sb.toString();
 	}
@@ -1869,6 +1880,11 @@ public class ActivityInfo {
 	 */
 	public Object getFieldValue(String fieldName) {
 		try {
+			if (fieldName.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
+				return parent == null ? null
+						: parent.getFieldValue(fieldName.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()));
+			}
+
 			if (fieldName.startsWith(Utils.VAR_EXP_START_TOKEN)) {
 				fieldName = Utils.getVarName(fieldName);
 			}

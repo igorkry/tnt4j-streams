@@ -158,7 +158,8 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
+	protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+			throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityNameValueParser.no.field.delimiter"));
@@ -168,7 +169,7 @@ public class ActivityNameValueParser extends GenericActivityParser<Map<String, S
 					"ActivityNameValueParser.no.value.delimiter"));
 		}
 
-		return super.parse(stream, data);
+		return super.parse(stream, data, pai);
 	}
 
 	@Override

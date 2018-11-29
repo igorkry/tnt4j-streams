@@ -133,13 +133,14 @@ public class ActivityRegExParser extends GenericActivityParser<Matcher> {
 	}
 
 	@Override
-	public ActivityInfo parse(TNTInputStream<?, ?> stream, Object data) throws IllegalStateException, ParseException {
+	protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+			throws IllegalStateException, ParseException {
 		if (pattern == null || StringUtils.isEmpty(pattern.pattern())) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"ActivityRegExParser.no.regex.pattern"));
 		}
 
-		return super.parse(stream, data);
+		return super.parse(stream, data, pai);
 	}
 
 	@Override
