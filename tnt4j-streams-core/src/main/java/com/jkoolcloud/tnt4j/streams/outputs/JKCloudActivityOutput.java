@@ -99,8 +99,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 
 		if (OutputProperties.PROP_RESOLVE_SERVER.equalsIgnoreCase(name)) {
 			resolveServer = Utils.toBoolean((String) value);
-		} else if (OutputProperties.PROP_SPLIT_RELATIVES.equalsIgnoreCase(name)
-				|| OutputProperties.PROP_TURN_OUT_CHILDREN.equalsIgnoreCase(name)) {
+		} else if (StringUtils.equalsAnyIgnoreCase(name, OutputProperties.PROP_SPLIT_RELATIVES,
+				OutputProperties.PROP_TURN_OUT_CHILDREN)) {
 			splitRelatives = Utils.toBoolean((String) value);
 		} else if (OutputProperties.PROP_BUILD_FQN_FROM_DATA.equalsIgnoreCase(name)) {
 			buildFQNFromData = Utils.toBoolean((String) value);

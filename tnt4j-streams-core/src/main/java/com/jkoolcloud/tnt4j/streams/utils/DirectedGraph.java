@@ -92,7 +92,7 @@ public class DirectedGraph<T> implements Iterable<T> {
 
 	/**
 	 * Given two nodes in the graph, returns whether there is an edge from the first node to the second node. If either
-	 * node does not exist in the graph, throws a {@link NoSuchElementException).
+	 * node does not exist in the graph, throws a {@link NoSuchElementException}.
 	 *
 	 * @param start
 	 *            the start node

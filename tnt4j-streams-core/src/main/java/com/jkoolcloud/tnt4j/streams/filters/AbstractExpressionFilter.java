@@ -185,8 +185,7 @@ public abstract class AbstractExpressionFilter<T> extends AbstractEntityFilter<T
 
 		if (StreamsScriptingUtils.GROOVY_LANG.equalsIgnoreCase(lang)) {
 			return new GroovyExpressionFilter(handleType, expression);
-		} else if (StreamsScriptingUtils.JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
-				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
+		} else if (StringUtils.equalsAnyIgnoreCase(lang, StreamsScriptingUtils.JAVA_SCRIPT_LANG, "js", "jscript")) // NON-NLS
 		{
 			return new JavaScriptExpressionFilter(handleType, expression);
 		} else if (StreamsScriptingUtils.XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {

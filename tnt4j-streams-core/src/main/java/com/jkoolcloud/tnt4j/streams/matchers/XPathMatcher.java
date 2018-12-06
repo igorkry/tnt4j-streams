@@ -96,7 +96,7 @@ public class XPathMatcher implements Matcher {
 		try {
 			String expressionResult = xPath.evaluate(expression, xmlDoc);
 
-			if ("true".equalsIgnoreCase(expressionResult) || "false".equalsIgnoreCase(expressionResult)) { // NON-NLS
+			if (StringUtils.equalsAnyIgnoreCase(expression, "true", "false")) { // NON-NLS
 				return Boolean.parseBoolean(expressionResult);
 			}
 

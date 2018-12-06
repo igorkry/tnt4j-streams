@@ -163,8 +163,7 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 
 		if (StreamsScriptingUtils.GROOVY_LANG.equalsIgnoreCase(lang)) {
 			return new GroovyTransformation(name, code, phase);
-		} else if (StreamsScriptingUtils.JAVA_SCRIPT_LANG.equalsIgnoreCase(lang) || "js".equalsIgnoreCase(lang)
-				|| "jscript".equalsIgnoreCase(lang)) // NON-NLS
+		} else if (StringUtils.equalsAnyIgnoreCase(lang, StreamsScriptingUtils.JAVA_SCRIPT_LANG, "js", "jscript")) // NON-NLS
 		{
 			return new JavaScriptTransformation(name, code, phase);
 		} else if (StreamsScriptingUtils.XPATH_SCRIPT_LANG.equalsIgnoreCase(lang)) {
