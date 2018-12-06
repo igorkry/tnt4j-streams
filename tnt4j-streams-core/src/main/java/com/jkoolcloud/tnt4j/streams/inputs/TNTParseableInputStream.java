@@ -132,6 +132,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			return;
 		}
 
+		parser.organizeFields();
 		addTaggedParser(parser.getName(), parser);
 
 		String[] tags = parser.getTags();
