@@ -16,8 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.scenario;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -30,6 +29,7 @@ public class WsScenarioStep {
 	private String name;
 	private String urlStr;
 	private List<WsRequest<String>> requests;
+	private Map<String, String> properties;
 	private String method;
 	private String username;
 	private String password;
@@ -229,4 +229,51 @@ public class WsScenarioStep {
 	public WsScenario getScenario() {
 		return scenario;
 	}
+
+	/**
+	 * Searches step properties map for property having defined name and returns that property value. If step has no
+	 * property with defined name - {@code null} is returned.
+	 *
+	 * @param propName
+	 *            the property name
+	 * @return the value of step property having defined name, or {@code null} is step has no property with defined name
+	 */
+	public String getProperty(String propName) {
+		return properties == null ? null : properties.get(propName);
+	}
+
+	/**
+	 * Sets property for this step.
+	 * 
+	 * @param name
+	 *            property name
+	 * @param value
+	 *            property value
+	 */
+	public void setProperty(String name, String value) {
+		if (properties == null) {
+			properties = new HashMap<>();
+		}
+
+		properties.put(name, value);
+	}
+
+	/**
+	 * Sets properties values map for this step.
+	 *
+	 * @param props
+	 *            collection of properties to set for this step
+	 */
+	public void setProperties(Collection<Map.Entry<String, String>> props) {
+		if (properties == null) {
+			properties = new HashMap<>();
+		}
+
+		if (CollectionUtils.isNotEmpty(props)) {
+			for (Map.Entry<String, String> prop : props) {
+				properties.put(prop.getKey(), prop.getValue());
+			}
+		}
+	}
+
 }

@@ -86,7 +86,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String PARSER_ELMT = "parser"; // NON-NLS
+	protected static final String PARSER_ELMT = "parser"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -94,7 +94,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String PROPERTY_ELMT = "property"; // NON-NLS
+	protected static final String PROPERTY_ELMT = "property"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -150,7 +150,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String JAVA_OBJ_ELMT = "java-object"; // NON-NLS
+	protected static final String JAVA_OBJ_ELMT = "java-object"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -162,7 +162,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
-	private static final String CACHE_ELMT = "cache"; // NON-NLS
+	protected static final String CACHE_ELMT = "cache"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag {@value}.
 	 */
@@ -341,7 +341,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 * Currently configured TNT input stream.
 	 */
 	protected TNTInputStream<?, ?> currStream = null;
-	private Map<String, String> currProperties = null;
+	protected Map<String, Map<String, String>> currProperties = null;
 	private ActivityParser currParser = null;
 	private ActivityFieldData currField = null;
 	@SuppressWarnings("rawtypes")
@@ -359,7 +359,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private boolean processingTNT4JProperties = false;
 	private JavaObjectData javaObjectData = null;
-	private Property currProperty = null;
+	protected Property currProperty = null;
 	private FieldLocatorData currLocatorData = null;
 	private FieldTransformData currTransform = null;
 	private FilterValueData currFilterValue = null;
@@ -374,6 +374,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	protected StringBuilder elementData;
 
 	private boolean include = false;
+	private Stack<String> path;
 
 	/**
 	 * Constructs a new ConfigurationParserHandler.
@@ -402,7 +403,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		currStream = null;
-		currProperties = null;
+		currProperties = new HashMap<>();
 		currParser = null;
 		currField = null;
 		currFilter = null;
@@ -411,6 +412,8 @@ public class ConfigParserHandler extends DefaultHandler {
 		streamsConfigData = new StreamsConfigData();
 		javaObjectsMap = new HashMap<>();
 		processingCache = false;
+
+		path = new Stack<>();
 	}
 
 	@Override
@@ -427,6 +430,21 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		path.push(qName);
+		startCfgElement(qName, attributes);
+	}
+
+	/**
+	 * Receives notification of the start of an stream configuration element.
+	 * 
+	 * @param qName
+	 *            the qualified element name
+	 * @param attributes
+	 *            the element attributes list
+	 * @throws SAXException
+	 *             if malformed configuration found
+	 */
+	protected void startCfgElement(String qName, Attributes attributes) throws SAXException {
 		if (CONFIG_ROOT_ELMT.equals(qName) || CONFIG_ROOT_ELMT_OLD.equals(qName)) {
 			if (streamsConfigData.isStreamsAvailable()) {
 				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -1410,13 +1428,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	 *             if error occurs parsing element
 	 */
 	private void processProperty(Attributes attrs) throws SAXException {
-		if (currStream == null && currParser == null && javaObjectData == null && !processingCache) {
-			throw new SAXParseException(
-					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ConfigParserHandler.malformed.configuration2", PROPERTY_ELMT,
-							Utils.arrayToString(STREAM_ELMT, PARSER_ELMT, JAVA_OBJ_ELMT, CACHE_ELMT)),
-					currParseLocation);
-		}
+		checkPropertyState();
 
 		currProperty = new Property();
 
@@ -1435,6 +1447,22 @@ public class ConfigParserHandler extends DefaultHandler {
 		notEmpty(currProperty.name, PROPERTY_ELMT, NAME_ATTR);
 
 		elementData = new StringBuilder();
+	}
+
+	/**
+	 * Checks whether required parent configuration definition elements for {@code <property>} element are initialized.
+	 *
+	 * @throws SAXException
+	 *             if no required parent elements found in configuration
+	 */
+	protected void checkPropertyState() throws SAXException {
+		if (currStream == null && currParser == null && javaObjectData == null && !processingCache) {
+			throw new SAXParseException(
+					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ConfigParserHandler.malformed.configuration2", PROPERTY_ELMT,
+							Utils.arrayToString(STREAM_ELMT, PARSER_ELMT, JAVA_OBJ_ELMT, CACHE_ELMT)),
+					currParseLocation);
+		}
 	}
 
 	/**
@@ -1928,13 +1956,27 @@ public class ConfigParserHandler extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
+			endCfgElement(qName);
+		} finally {
+			path.pop();
+		}
+	}
+
+	/**
+	 * Receives notification of the end of an stream configuration element.
+	 * 
+	 * @param qName
+	 *            the qualified element name
+	 * @throws SAXException
+	 *             if malformed configuration found
+	 */
+	protected void endCfgElement(String qName) throws SAXException {
+		try {
 			if (STREAM_ELMT.equals(qName)) {
-				currStream.setProperties(applyVariableProperties(currProperties));
-				currProperties = null;
+				currStream.setProperties(applyVariableProperties(currProperties.remove(qName)));
 				currStream = null;
 			} else if (PARSER_ELMT.equals(qName)) {
-				currParser.setProperties(applyVariableProperties(currProperties));
-				currProperties = null;
+				currParser.setProperties(applyVariableProperties(currProperties.remove(qName)));
 				currParser = null;
 			} else if (FIELD_ELMT.equals(qName) || EMBEDDED_ACTIVITY_ELMT.equals(qName)) {
 				if (currField != null) {
@@ -1954,7 +1996,6 @@ public class ConfigParserHandler extends DefaultHandler {
 			} else if (JAVA_OBJ_ELMT.equals(qName)) {
 				if (javaObjectData != null) {
 					handleJavaObject(javaObjectData);
-					currProperties = null;
 					javaObjectData = null;
 				}
 			} else if (PROPERTY_ELMT.equals(qName)) {
@@ -1996,8 +2037,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					elementData = null;
 				}
 			} else if (CACHE_ELMT.equals(qName)) {
-				StreamsCache.setProperties(applyVariableProperties(currProperties));
-				currProperties = null;
+				StreamsCache.setProperties(applyVariableProperties(currProperties.remove(qName)));
 				processingCache = false;
 			} else if (CACHE_ENTRY_ELMT.equals(qName)) {
 				if (currCacheEntry != null) {
@@ -2154,25 +2194,27 @@ public class ConfigParserHandler extends DefaultHandler {
 			((NamedObject) obj).setName(javaObjectData.name);
 		}
 
+		Map<String, String> objProps = currProperties.remove(JAVA_OBJ_ELMT);
+
 		if (obj instanceof TNTStreamOutput) {
 			TNTStreamOutput<?> out = (TNTStreamOutput<?>) obj;
 
-			if (MapUtils.isNotEmpty(currProperties)) {
-				out.setProperties(applyVariableProperties(currProperties));
+			if (MapUtils.isNotEmpty(objProps)) {
+				out.setProperties(applyVariableProperties(objProps));
 			}
 		} else if (obj instanceof Configurable) {
 			Configurable cfgObj = (Configurable) obj;
 
-			if (MapUtils.isNotEmpty(currProperties)) {
-				String beanRefObj = currProperties.get(BEAN_REF_ATTR);
+			if (MapUtils.isNotEmpty(objProps)) {
+				String beanRefObj = objProps.get(BEAN_REF_ATTR);
 				if (StringUtils.isNotEmpty(beanRefObj)) {
-					Map<String, Object> props = new HashMap<>(currProperties.size());
-					props.putAll(currProperties);
-					Object beanObj = resolveTransformationBean(String.valueOf(beanRefObj));
+					Map<String, Object> props = new HashMap<>(objProps.size());
+					props.putAll(objProps);
+					Object beanObj = resolveTransformationBean(beanRefObj);
 					props.put(BEAN_REF_ATTR, beanObj);
 					cfgObj.setConfiguration(props);
 				} else {
-					cfgObj.setConfiguration(currProperties);
+					cfgObj.setConfiguration(objProps);
 				}
 			}
 		}
@@ -2195,14 +2237,21 @@ public class ConfigParserHandler extends DefaultHandler {
 			Map.Entry<String, String> p = new AbstractMap.SimpleEntry<>(currProperty.name, currProperty.value);
 			currStream.output().setProperty(OutputProperties.PROP_TNT4J_PROPERTY, p);
 		} else {
-			if (currProperties == null) {
-				currProperties = new HashMap<>();
+			if (path.size() < 2) {
+				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.malformed.configuration3", PROPERTY_ELMT), currParseLocation);
 			}
-			String cpv = currProperties.get(currProperty.name);
+			String pParent = path.get(path.size() - 2);
+			Map<String, String> eProps = currProperties.get(pParent);
+			if (eProps == null) {
+				eProps = new HashMap<>();
+				currProperties.put(pParent, eProps);
+			}
+			String cpv = eProps.get(currProperty.name);
 			if (cpv != null && !isPropValueAlreadyAdded(cpv, currProperty.value)) {
 				currProperty.value = cpv + StreamsConstants.MULTI_PROPS_DELIMITER + currProperty.value;
 			}
-			currProperties.put(currProperty.name, currProperty.value);
+			eProps.put(currProperty.name, currProperty.value);
 		}
 	}
 

@@ -82,7 +82,14 @@
         </xs:annotation>
 
         <xs:sequence>
-            <xs:choice maxOccurs="1">
+            <xs:element name="property" type="Property" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies step configuration property.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:choice minOccurs="0" maxOccurs="1">
                 <xs:element name="schedule-cron" type="ScheduleCron" maxOccurs="1">
                     <xs:annotation>
                         <xs:documentation>

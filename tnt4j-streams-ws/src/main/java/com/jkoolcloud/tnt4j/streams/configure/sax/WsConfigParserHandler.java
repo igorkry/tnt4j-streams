@@ -32,6 +32,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.scenario.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
 
 /**
@@ -76,7 +77,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	protected void startCfgElement(String qName, Attributes attributes) throws SAXException {
 		if (SCENARIO_ELMT.equals(qName)) {
 			processScenario(attributes);
 		} else if (STEP_ELMT.equals(qName)) {
@@ -90,7 +91,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		} else if (REQ_PARAM_ELMT.equals(qName)) {
 			processReqParam(attributes);
 		} else {
-			super.startElement(uri, localName, qName, attributes);
+			super.startCfgElement(qName, attributes);
 		}
 	}
 
@@ -284,8 +285,23 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 	}
 
 	@Override
-	public void endElement(String uri, String localName, String qName) throws SAXException {
-		super.endElement(uri, localName, qName);
+	protected void checkPropertyState() throws SAXException {
+		try {
+			super.checkPropertyState();
+		} catch (SAXException exc) {
+			if (currStep == null) {
+				throw new SAXParseException(
+						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+								"ConfigParserHandler.malformed.configuration2", PROPERTY_ELMT,
+								Utils.arrayToString(STREAM_ELMT, PARSER_ELMT, JAVA_OBJ_ELMT, CACHE_ELMT, STEP_ELMT)),
+						currParseLocation);
+			}
+		}
+	}
+
+	@Override
+	public void endCfgElement(String qName) throws SAXException {
+		super.endCfgElement(qName);
 
 		try {
 			if (SCENARIO_ELMT.equals(qName)) {
@@ -312,6 +328,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 									"ConfigParserHandler.must.contain", STEP_ELMT, URL_ATTR, REQ_ELMT),
 							currParseLocation);
 				}
+
+				currStep.setProperties(applyVariableProperties(currProperties.remove(qName)));
 
 				currScenario.addStep(currStep);
 				currStep = null;

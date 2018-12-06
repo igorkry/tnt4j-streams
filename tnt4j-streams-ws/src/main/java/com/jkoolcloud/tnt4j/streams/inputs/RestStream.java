@@ -167,8 +167,7 @@ public class RestStream extends AbstractWsStream<String> {
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
 	 */
-	protected static String executePOST(String uriStr, String reqData, String username, String password)
-			throws Exception {
+	public static String executePOST(String uriStr, String reqData, String username, String password) throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"RestStream.cant.execute.post.request", uriStr);
