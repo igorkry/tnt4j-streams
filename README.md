@@ -106,7 +106,9 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
         * `hexBinary` 
         * `string`
         * any decimal or time format pattern, i.e. `#####0.000`
-        * one of number type enumerators: `integer`, `long`, `double`, `float`, `short` and `byte` 
+        * one of number type enumerators: `integer`/`int`, `long`, `double`, `float`, `short`, `byte`, `biginteger`/`bigint`, `bigdecimal`/
+        `bigdec` and `any`. `any` will resolve any possible numeric value out of provided string, e.g. string `"30hj00"` will result value 
+        `30`.
     * `value` - defines predefined (hardcoded) value of field
     * `datatype` - defines how to interpret field resolved value. Set of supported values:
         * `String` 

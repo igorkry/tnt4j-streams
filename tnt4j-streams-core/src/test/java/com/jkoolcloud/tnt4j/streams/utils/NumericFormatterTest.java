@@ -19,6 +19,8 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -33,17 +35,17 @@ public class NumericFormatterTest {
 	@Test
 	public void testParseObject() throws ParseException {
 		// Test Integers
-		assertEquals(2, NumericFormatter.parse(null, 1, 2));
-		assertEquals(1, NumericFormatter.parse(null, 1, null));
-		assertNull(NumericFormatter.parse(null, null, null));
+		assertEquals(2, NumericFormatter.parse(1, null, 2));
+		assertEquals(1, NumericFormatter.parse(1, (String) null));
+		assertNull(NumericFormatter.parse(null, (String) null));
 
 	}
 
 	@Test
 	public void testParseStaticHex() throws ParseException {
-		assertEquals(342, NumericFormatter.parse(null, "0xAB", 2)); // NON-NLS
-		assertEquals(171, NumericFormatter.parse(null, 0XAB, null));
-		assertNull(NumericFormatter.parse(null, null, null));
+		assertEquals(342, NumericFormatter.parse("0xAB", null, 2)); // NON-NLS
+		assertEquals(171, NumericFormatter.parse(0XAB, (String) null));
+		assertNull(NumericFormatter.parse(null, (String) null));
 	}
 
 	@Test
@@ -51,12 +53,12 @@ public class NumericFormatterTest {
 		NumericFormatter formatter = new NumericFormatter();
 		assertEquals(342, formatter.parse("0xAB", 2)); // NON-NLS
 		assertEquals(171, formatter.parse(0XAB));
-		assertNull(formatter.parse(null, null));
+		assertNull(formatter.parse(null));
 	}
 
 	@Test
 	public void testParseStringObjectNumber() throws ParseException {
-		NumericFormatter.parse(null, 10, 1);
+		NumericFormatter.parse(10, null, 1);
 	}
 
 	@Test
@@ -77,12 +79,16 @@ public class NumericFormatterTest {
 	@Test
 	public void testGeneric() throws Exception {
 		NumericFormatter formatter = new NumericFormatter();
-		formatter.setPattern(null, Locale.US.toString());
+		formatter.setPattern("any", Locale.US.toString());
 		assertEquals(123456.789, formatter.parse("123,456.789")); // NON-NLS
 
 		formatter = new NumericFormatter();
-		formatter.setPattern(null, "lt-LT"); // NON-NLS
+		formatter.setPattern("any", "lt-LT"); // NON-NLS
 		assertEquals(-5896456.7898658, formatter.parse("-5896456,7898658")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		formatter.setPattern("any", Locale.US.toString()); // NON-NLS
+		assertEquals(30L, formatter.parse("30hj00")); // NON-NLS
 
 		formatter = new NumericFormatter();
 		assertEquals(25, formatter.parse("25")); // NON-NLS
@@ -95,5 +101,29 @@ public class NumericFormatterTest {
 
 		formatter = new NumericFormatter();
 		assertEquals(1.0f, formatter.parse("1.0")); // NON-NLS
+
+		formatter = new NumericFormatter();
+		formatter.setPattern("long", null);
+		assertEquals(90000L, formatter.parse("0x15f90"));
+	}
+
+	@Test(expected = ParseException.class)
+	public void testGenericFail() throws Exception {
+		NumericFormatter formatter = new NumericFormatter();
+		formatter.setPattern(null, "lt-LT"); // NON-NLS
+		assertEquals(30, formatter.parse("30hj00")); // NON-NLS
+	}
+
+	@Test
+	public void testCast() {
+		assertEquals((Long) 20L, NumericFormatter.castNumber(20L, Long.class));
+		assertEquals(20L, NumericFormatter.castNumber(20L, Number.class));
+		assertEquals((Long) 20L, NumericFormatter.castNumber(20.0, Long.class));
+		assertEquals((Long) 20L, NumericFormatter.castNumber(20, Long.class));
+		assertEquals(20.0, NumericFormatter.castNumber(20L, Double.class), 0.0001);
+		assertEquals(20.0, NumericFormatter.castNumber(20.0, Double.class), 0.0001);
+		assertEquals(BigDecimal.valueOf(20.0), NumericFormatter.castNumber(20L, BigDecimal.class));
+		assertEquals(0, new BigDecimal("15445512248522412556325202").compareTo(
+				NumericFormatter.castNumber(new BigInteger("15445512248522412556325202"), BigDecimal.class)));
 	}
 }

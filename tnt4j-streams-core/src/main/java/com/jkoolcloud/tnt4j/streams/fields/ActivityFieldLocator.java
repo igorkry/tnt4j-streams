@@ -58,7 +58,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 
 	private ActivityFieldLocatorType builtInType = null;
 	private ActivityFieldFormatType builtInFormat = null;
-	private TimeUnit builtInUnits = null;
+	private TimeUnit builtInUnits = TimeUnit.MILLISECONDS;
 	private Map<Object, Object> valueMap = null;
 	private Object mapCatchAll = null;
 
@@ -299,11 +299,14 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
-	 * Gets the enumeration value for this locator's units if it implements one of the built-in units types.
+	 * Gets the built-in time units enumerator matching defined locator units.
+	 * <p>
+	 * If locator defined units can't be mapped to built-in time units,
+	 * {@link java.util.concurrent.TimeUnit#MICROSECONDS} is set.
 	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
-	 * @return the builtInUnits built-in format type, or {@code null} if this units specification is a custom one.
+	 * @return the built-in time units enumerator
 	 */
 	public TimeUnit getBuiltInUnits() {
 		return builtInUnits;
@@ -313,6 +316,9 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * Sets the units represented by the raw data field value. This value can be one of the predefined units, or it can
 	 * be a custom unit type.
 	 * <p>
+	 * If locator defined units can't be mapped to built-in time units,
+	 * {@link java.util.concurrent.TimeUnit#MICROSECONDS} is set.
+	 * <p>
 	 * Note: This is not applicable for all fields and will be ignored by those fields to which it does not apply.
 	 *
 	 * @param units
@@ -320,9 +326,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 */
 	public void setUnits(String units) {
 		this.units = units;
-		builtInUnits = null;
+
+		this.builtInUnits = TimeUnit.MICROSECONDS;
 		try {
-			if (units != null) {
+			if (StringUtils.isNotEmpty(units)) {
 				builtInUnits = TimeUnit.valueOf(units.toUpperCase());
 			}
 		} catch (Exception e) {
@@ -379,11 +386,14 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	public void setFormat(String format, String locale) {
 		this.format = format;
 		this.locale = locale;
-		builtInFormat = null;
+
+		this.builtInFormat = null;
 		try {
 			builtInFormat = ActivityFieldFormatType.valueOf(this.format);
 		} catch (Exception e) {
 		}
+		this.numberParser = null;
+		this.timeParser = null;
 	}
 
 	/**
@@ -571,11 +581,16 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		}
 
 		// is it a number
+		String prevPattern = format;
 		try {
+			if (StringUtils.isEmpty(format)) {
+				setFormat(NumericFormatter.FormatterContext.ANY, locale);
+			}
 			Object pValue = getMappedValue(formatNumericValue(value));
 			dataType = ActivityFieldDataType.Number;
 			return pValue;
 		} catch (ParseException exc) {
+			setFormat(prevPattern, locale);
 		}
 
 		// is it a datetime/timestamp
@@ -717,15 +732,8 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			return timestamp;
 		}
 		if (timeParser == null) {
-			TimeUnit fUnits = TimeUnit.MILLISECONDS;
-			if (units != null) {
-				try {
-					fUnits = TimeUnit.valueOf(units.toUpperCase());
-				} catch (Exception e) {
-				}
-			}
 			timeParser = dataType == ActivityFieldDataType.Timestamp || dataType == ActivityFieldDataType.Number
-					? new TimestampFormatter(fUnits) : new TimestampFormatter(format, timeZone, locale);
+					? new TimestampFormatter(builtInUnits) : new TimestampFormatter(format, timeZone, locale);
 		}
 		return timeParser.parse(value);
 	}

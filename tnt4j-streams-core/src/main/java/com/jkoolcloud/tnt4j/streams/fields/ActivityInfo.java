@@ -257,12 +257,10 @@ public class ActivityInfo {
 			case ElapsedTime:
 				try {
 					// Elapsed time needs to be converted to usec
-					String lUnits = locator == null ? null : locator.getUnits();
-					TimeUnit units = StringUtils.isEmpty(lUnits) ? TimeUnit.MICROSECONDS
-							: TimeUnit.valueOf(lUnits.toUpperCase());
 					if (!(value instanceof Number)) {
 						value = Long.valueOf(Utils.toString(value));
 					}
+					TimeUnit units = locator == null ? TimeUnit.MICROSECONDS : locator.getBuiltInUnits();
 					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
 				} catch (Exception e) {
 				}
@@ -324,7 +322,7 @@ public class ActivityInfo {
 				// addCorrelator(Utils.getTags(formatTagsObject(fieldValue, field)));
 				break;
 			case ElapsedTime:
-				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class));
+				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class, field));
 				break;
 			case EndTime:
 				endTime = substitute(endTime, getTimestampValue(fieldValue, field));
@@ -336,7 +334,7 @@ public class ActivityInfo {
 				location = substitute(location, getStringValue(fieldValue, field));
 				break;
 			case ReasonCode:
-				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class));
+				reasonCode = substitute(reasonCode, getNumberValue(fieldValue, Integer.class, field));
 				break;
 			case ResourceName:
 				resourceName = substitute(resourceName, getStringValue(fieldValue, field));
@@ -375,19 +373,19 @@ public class ActivityInfo {
 				msgEncoding = substitute(msgEncoding, getStringValue(fieldValue, field));
 				break;
 			case MsgLength:
-				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class));
+				msgLength = substitute(msgLength, getNumberValue(fieldValue, Integer.class, field));
 				break;
 			case MsgMimeType:
 				msgMimeType = substitute(msgMimeType, getStringValue(fieldValue, field));
 				break;
 			case MessageAge:
-				msgAge = substitute(msgAge, getNumberValue(fieldValue, Long.class));
+				msgAge = substitute(msgAge, getNumberValue(fieldValue, Long.class, field));
 				break;
 			case ProcessId:
-				processId = substitute(processId, getNumberValue(fieldValue, Integer.class));
+				processId = substitute(processId, getNumberValue(fieldValue, Integer.class, field));
 				break;
 			case ThreadId:
-				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class));
+				threadId = substitute(threadId, getNumberValue(fieldValue, Integer.class, field));
 				break;
 			case Category:
 				category = substitute(category, getStringValue(fieldValue, field));
@@ -439,7 +437,7 @@ public class ActivityInfo {
 		if (fmLocator != null) {
 			switch (fmLocator.getDataType()) {
 			case Number:
-				return getNumberValue(fieldValue);
+				return getNumberValue(fieldValue, field);
 			case DateTime:
 			case Timestamp:
 				return getTimestampValue(fieldValue, field);
@@ -460,8 +458,8 @@ public class ActivityInfo {
 	private static Object getPredictedValue(Object fieldValue, ActivityField field) {
 		// is it a number
 		try {
-			return getNumberValue(fieldValue);
-		} catch (NumberFormatException e) {
+			return getNumberValue(fieldValue, field);
+		} catch (Exception e) {
 		}
 
 		// is it a boolean
@@ -484,14 +482,15 @@ public class ActivityInfo {
 	}
 
 	private static UsecTimestamp getTimestampValue(Object fieldValue, ActivityField field) throws ParseException {
-		ActivityFieldLocator fmLocator = field.getMasterLocator();
 		UsecTimestamp timestamp = TimestampFormatter.getTimestamp(fieldValue);
 		if (timestamp != null) {
 			return timestamp;
 		}
 
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
 		if (fieldValue instanceof Number) {
-			return new UsecTimestamp((Number) fieldValue);
+			TimeUnit units = fmLocator == null ? TimeUnit.MICROSECONDS : fmLocator.getBuiltInUnits();
+			return new UsecTimestamp(units.toMicros(((Number) fieldValue).longValue()));
 		} else {
 			return TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
 					getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
@@ -813,7 +812,7 @@ public class ActivityInfo {
 	/**
 	 * Assigns new activity entity tracking identifier value if not yet defined.
 	 *
-	 * @retrun the tracking identifier
+	 * @return the tracking identifier
 	 */
 	public String determineTrackingId() {
 		if (StringUtils.isEmpty(trackingId)) {
@@ -1311,15 +1310,7 @@ public class ActivityInfo {
 		}
 	}
 
-	// private static Integer getIntValue(Object value) {
-	// return value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(Utils.toString(value));
-	// }
-	//
-	// private static Long getLongValue(Object value) {
-	// return value instanceof Number ? ((Number) value).longValue() : Long.parseLong(Utils.toString(value));
-	// }
-
-	private static Number getNumberValue(Object value) {
+	private static Number getNumberValue(Object value, ActivityField field) throws ParseException {
 		if (value instanceof Number) {
 			return (Number) value;
 		}
@@ -1327,13 +1318,16 @@ public class ActivityInfo {
 		String valStr = Utils.toString(value);
 		valStr = StringUtils.trim(valStr);
 
-		return NumericFormatter.strToNumber(valStr);
+		ActivityFieldLocator fmLocator = field.getMasterLocator();
+
+		return fmLocator == null ? NumericFormatter.strToNumber(valStr) : fmLocator.formatNumericValue(value);
 	}
 
-	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz) {
-		Number num = getNumberValue(value);
+	private static <T extends Number> T getNumberValue(Object value, Class<T> clazz, ActivityField field)
+			throws ParseException {
+		Number num = getNumberValue(value, field);
 
-		return Utils.castNumber(num, clazz);
+		return NumericFormatter.castNumber(num, clazz);
 	}
 
 	private static Boolean getBooleanValue(Object value) {

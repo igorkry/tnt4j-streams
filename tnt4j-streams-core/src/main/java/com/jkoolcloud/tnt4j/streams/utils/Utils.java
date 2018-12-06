@@ -186,15 +186,13 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		try {
 			return OpType.valueOf(opType.toUpperCase());
 		} catch (IllegalArgumentException exc) {
-			if (opType.equalsIgnoreCase("END") || opType.equalsIgnoreCase("FINISH") // NON-NLS
-					|| opType.equalsIgnoreCase("DISCONNECT") || opType.equalsIgnoreCase("COMMIT") // NON-NLS
-					|| opType.equalsIgnoreCase("BACK")) { // NON-NLS
+			if (StringUtils.equalsAnyIgnoreCase(opType, "END", "FINISH", "DISCONNECT", "COMMIT", "BACK")) { // NON-NLS
 				return OpType.STOP;
 			}
-			if (opType.equalsIgnoreCase("CONNECT") || opType.equalsIgnoreCase("BEGIN")) { // NON-NLS
+			if (StringUtils.equalsAnyIgnoreCase(opType, "CONNECT", "BEGIN")) { // NON-NLS
 				return OpType.START;
 			}
-			if (opType.equalsIgnoreCase("CALLBACK") || opType.equalsIgnoreCase("GET")) { // NON-NLS
+			if (StringUtils.equalsAnyIgnoreCase(opType, "CALLBACK", "GET")) { // NON-NLS
 				return OpType.RECEIVE;
 			}
 			if (opType.equalsIgnoreCase("PUT")) { // NON-NLS
@@ -1475,38 +1473,6 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return oList;
-	}
-
-	/**
-	 * Casts provided number value to desired number type.
-	 *
-	 * @param num
-	 *            number value to cast
-	 * @param clazz
-	 *            number class to cast number to
-	 * @param <T>
-	 *            desired number type
-	 * @return number value cast to desired numeric type
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends Number> T castNumber(Number num, Class<T> clazz) {
-		Number cNum = 0;
-
-		if (clazz.isAssignableFrom(Long.class)) {
-			cNum = num.longValue();
-		} else if (clazz.isAssignableFrom(Integer.class)) {
-			cNum = num.intValue();
-		} else if (clazz.isAssignableFrom(Byte.class)) {
-			cNum = num.byteValue();
-		} else if (clazz.isAssignableFrom(Float.class)) {
-			cNum = num.floatValue();
-		} else if (clazz.isAssignableFrom(Double.class)) {
-			cNum = num.doubleValue();
-		} else if (clazz.isAssignableFrom(Short.class)) {
-			cNum = num.shortValue();
-		}
-
-		return (T) cNum;
 	}
 
 	/**

@@ -76,7 +76,7 @@ public class ActivityFieldLocatorTest {
 	public void testUnits() {
 		locator = new ActivityFieldLocator(1);
 		locator.setUnits("TEST"); // NON-NLS
-		assertNull(locator.getBuiltInUnits());
+		assertEquals(TimeUnit.MICROSECONDS, locator.getBuiltInUnits());
 		for (TimeUnit unit : TimeUnit.values()) {
 			locator.setFormat(unit.name(), null); // TODO
 			locator.setUnits(unit.name());
@@ -88,16 +88,14 @@ public class ActivityFieldLocatorTest {
 	@Test
 	public void testFormatNumericValue() throws ParseException {
 		locator = new ActivityFieldLocator(1);
-		try {
-			locator.setDataType(ActivityFieldDataType.Generic);
-			locator.setFormat(null, Locale.ITALY.toString());
-			assertNull(locator.formatNumericValue(""));
-			assertEquals(1.0f, locator.formatNumericValue("1.0")); // NON-NLS
-			assertEquals(1000.01, locator.formatNumericValue("1.000,01")); // NON-NLS
-			assertEquals(15, locator.formatNumericValue("15")); // NON-NLS
-			assertEquals(2, locator.formatNumericValue("2 - Normal")); // NON-NLS
-		} catch (Exception e) {
-		}
+		locator.setDataType(ActivityFieldDataType.Generic);
+		locator.setFormat(null, Locale.ITALY.toString());
+		assertNull(locator.formatNumericValue(""));
+		assertEquals(1.0f, locator.formatNumericValue("1.0")); // NON-NLS
+		assertEquals(15, locator.formatNumericValue("15")); // NON-NLS
+		locator.setFormat("any", Locale.ITALY.toString());
+		assertEquals(1000.01, locator.formatNumericValue("1.000,01")); // NON-NLS
+		assertEquals(2L, locator.formatNumericValue("2 - Normal")); // NON-NLS
 	}
 
 	@Test
