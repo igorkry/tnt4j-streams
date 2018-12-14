@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This sample is useful for tracing MQ activity using activity events and requires little or no alteration
+     1) Verify Message, Payload and Correlator examples for desired settings
+     2) Set the queue manager(s) to process in the stream section at the end of this file
+     3) Review other fields as needed
+     -->
+
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+
+    <resource-ref id="TraceParsers" type="Parser" uri="trace_parser_dev.xml"/>
+
+    <!-- this section specifies the connection to the queue manager. It can be repeated for multiple queue managers. -->
+
+    <!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
+
+    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations -->
+    <stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+        <property name="StripHeaders" value="false"/>
+        <property name="RetryStateCheck" value="true"/>
+
+        <!-- Queue Manager name to which to connect -->
+        <property name="QueueManager" value="MyQmgr2"/>
+        <!--<property name="Channel" value="CLOUD.APP.SVRCONN"/>-->
+        <property name="Channel" value="CLOUD.ADMIN.SVRCONN"/>
+        <!-- using an application topic, could be channel or connection, change as needed -->
+        <property name="TopicString" value="$SYS/MQ/INFO/QMGR/QM_B/ActivityTrace/ApplName/amqsput*"/>
+        <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
+
+        <!-- these 2 are required if connecting remote or removed for local connection -->
+        <property name="Host" value="myqmgr2-eaaa.qm.beta.mqcloud.ibm.com"/>
+        <property name="Port" value="32405"/>
+
+        <!-- user and password as required by the MQ Queue Manager -->
+        <property name="UserName" value="admin"/>
+        <property name="Password" value="jolWa7UzjpG7iBHrK2011udi3YhT6c5P-7KaqHyJerjg"/>
+        <property name="CMQC.USE_MQCSP_AUTHENTICATION_PROPERTY" value="true"/>
+
+        <parser-ref name="TraceEventsParser"/>
+    </stream>
+</tnt-data-source>

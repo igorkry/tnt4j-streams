@@ -1,0 +1,2876 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This sample is useful for tracing MQ activity using activity events and requires little or no alteration
+	1) Verify Message, Payload and Correlator examples for desired settings
+	2) Set the queue manager(s) to process in the stream section at the end of this file
+	3) Review other fields as needed
+-->
+
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-wmq/config/tnt-data-source-wmq_pcf.xsd">
+
+    <!-- This is a sample imbedded parser to extract a field from the messages based on XML tag
+         For this example, you want to extract the item and price from the message:
+                <?xml version="1.0" encoding="utf-8"?>
+                    <Sample>
+                      <Order>
+                        <orderid>A12T67903Z</orderid>
+                        <item>Deck of Cards</item>
+                        <price>2.50</price>
+                        <quantity>3</quantity>
+                       </Order>
+                    </Sample>
+    -->
+    <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- Extract the Order Id, Item Id and Price and include with the data -->
+        <field name="OrderID" locator="/Sample/Order/orderid" locator-type="Label"/>
+        <field name="ItemID" locator="/Sample/Order/item" locator-type="Label"/>
+        <field name="Price" locator="/Sample/Order/price" locator-type="Label" datatype="Number"/>
+        <field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number"/>
+
+    </parser>
+
+    <!-- Filename:
+	     09/01/17 hbc_rgn_tnt-data-source-mq-traces_v2.xml
+	     10/10/17 hbc_rgn_tnt-data-source-mq-traces_v3.xml 
+	================================================================================================ -->
+    <!-- 09/07/17 HBC   Fix made to GitHub by Andrius Kausinis:
+                        Since configuration is defined using XML, now "\n" and "\r" are mapped
+                        to Java as a two symbol string, not as a char. The correct mapping to
+                        NL and CR XML values is:
+                            <property name="FieldDelim" value="&#10;"/> in JAVA will map to: \n
+                            <property name="FieldDelim" value="&#13;"/> in JAVA will map to: \r
+
+         09/11/17  HBC  Fix made to GitHub by Andrius Kausinis in streams-master, issue #35:
+                        - Add new XML parser property NamespaceAware to ignore namespace lines;
+                          11 changed files in streams-master. Worked.
+
+                        See README samples SampleFlumeStream, SampleLogstashStream, SampleHttpStream, CollectdStream
+                        that show use of a parser within a parser i.e. stacked parsers
+        09/12/17  HBC   Test case 6, try stacked parsers, failed; open issue #36
+                        Start test case 7, Extract fields from combined NV’s, offset/lengths and specific lines
+        09/13/17        Test case 6 working with Andrius #36 suggested parser changes
+        09/18/17		TEST CASE 7 moved to separate parser for now. Delete all related lines from this file to avoid confusion.
+                        Add "HaltIfNoParser" to allow multiple msg parsers to be tried for matching
+        09/19/17        Add back Test_7_Mixed_NV_Offsets_Lines_Parser after rebuild/fix from Andrius; works if case 6 parser nop'data
+                        Move case 7 parser before case 4 parser
+        09/20/17		Nop current parser-ref stanzas for cases 4,6,7; insert MessageFormats suggested by Andrius.
+        09/25/17   		Test Andrius fix for parser order after download tnt4j-streams and rebuild.
+        09/27/17		Use MQ 8 qmgr Howardo vs MQ 7 HBC_QM2.
+                        Add Test_16_Random_Format_Parser.
+        09/28/17		Use Andrius's fix Test16_FreeFormTextParser after parsers fix and build
+        09/29/17		Add Test_9_XML_RFH2_Parser
+        10/02/17 		Add Test_11_NonStd_XML_Parser
+        10/03/17		Revisit Test_9_XML_RFH2_Parser; add TransValue.
+        10/04/17 		Revisit SOCGEN_Msg_Data_parser
+        10/10/17        Build latest Andrius tnt4j-streams fixes:
+                        Re-test Test_9_XML_RFH2_Parser, put,get,put,get: ok
+                        Re-test SWIFT_1_TransId_Parser: ok
+                        Re-test Test16_FreeFormTextParser, 4 subcases: ok
+                        Test Test16_FreeFormTextParser_2 from Andrius: ok
+                        Add Test_12, Extract trans ID from different fields based on trans type,
+                         "Test_12_XML_TID_BasedOn_TransType_Parser" : OK
+        10/11/17		Chg "locator_type" to "locator-type" in SWIFT_2_RegEx_Parser.
+                        Chg name SWIFT_2_Parser to SWIFT_2_RegEx_Parser.
+                        Create variant SWIFT_2_RegEx_Parser_2 and test: OK
+                        Expand TEST_3_SOCGEN_Msg_Data_RegEx_Parser and test: OK
+        10/16/17        Add TEST_3A_SOCGEN_Msg_Data_Parser which requires match on q CCC.LQ; see also CachedResolvedQName.
+                        Fix ResourceName: Field to ck is MQIACF_OBJECT_TYPE vs MQIACF_RESOLVED_TYPE. The latter
+                        yields GENERIC=null in the jKool GUI.
+                        Enable MQOPEN event to be sent for testing OBJECT_TYPE.
+                        Cache the Resource name at MQOPEN time to be sent at MQPUT time; see ResourceNameOpen: OK
+        10/17/17		Fix a few ">>" typos in SWIFT parsers that cause parser startup err msg "Configuration XML-XSD
+                        validation failure: etc"
+                        file_name_V4.xml: Replace TraceEventsParser w/latest modifiied by RGN
+        10/18/17		Added ref's to cached data in TEST_3_SOCGEN_Msg_Data_RegEx_Parser: ok
+                        Add TEST_17_XML_Incomplete_Msg_Parser
+        10/19/17		Add TEST_17.1_XML_Complete_Msg_Partial_Xpath_Parser
+                        Add TEST_18_XML_Msg_NV_Parser
+        10/20/17 		Add Test_14_XML_RFH2_JMS_Text_Msg_Parser
+        10/23/17		Add Test_15_XML_RFH2_JMS_Bytes_Msg_Parser
+        10/27/17		TEST_15_NV_Payload_Parser tested OK
+                        Re-test TEST_3A_SOCGEN_Msg_Data_Parser w/new feature <matchExp>: nogo
+        10/30/17		matchExp worked after Andrius fix.
+        10/31/17		Add TEST_3B_SOCGEN_Msg_Data_Parser
+        11/06/17		Test fix to TEST_13A parser
+        11/07/17		Test Andrius fix for TEST_13A, inclduing groovy script
+        11/08/17        Improved TEST_13A groovy script to extract alphanumeric sub-srings vs numeric.
+        11/13/17		Add matchExpo in parser-ref's:
+                        - test parsers 1,2,2A,3A,3B,15,4: ok
+        11/14/17		- test cases 18,4,12,9,16,13,13A,11: ok
+        11/16/17		- test cases 6,7,4
+        11/22/17        Add TEST_19_JSON_Parser
+                        Add new CSFB_2_Msg_Data_XML_parser and rename prev one to CSFB_2A_Msg_Data_XML_parser to avoid conflict w/test msgs
+        11/27/17		Fm Andrius 11/16/17:
+                          1."REGroupNum" is deprecated for configuration use (should be changed to
+                            "Index" locator type), but is supported by code.
+                          2. RegExParser will now allow Index value 0. Previously it was skipped for
+                             parsing use by default.
+                          3. To ease parsing for SOCGEN_3B case. I've introduced ActivityStringParser to
+                             map sub-string ranges of the input string to activity event fields.
+                             See 'core' module sample 'string-ranges' and README > 'String ranges streaming'
+                        Add TEST_3D_SOCGEN_Msg_Data_Parser to test ActivityStringParser: ??
+
+    -->
+
+    <!-- TEST CASE 1 w/RFH2 added, CASE 2 w/o RFH2 added -->
+    <!-- 08/24/17 HC Define XML msg data (aka payload) parser [lifted from sample.xml]  -->
+    <!-- Rules for parsing CSFB XML msg -->
+    <!-- Test msg: TEST3_CSFBMSG.txt, TEST4_CSFBMSG.txt -->
+    <!-- Working -->
+    <!-- 11/01/17 Run test case 2A: no match and next parser not called.
+         Try adding RequireDefault false: same result-->
+    <!-- 11/22/17 Call pre-parser XMLFromRFH2PreParser to make full xpath searchable, due to RFH2 header:
+         nogo; cannot use forward reference:
+            ActivityXmlParser] - Parser 'CSFB_1_Msg_Data_XML_parser' will not reference unsupported object: null
+         Try local copy of it w/diff name XMLFromRFH2PreParser_1
+    -->
+
+    <java-object name="XMLFromRFH2PreParser_1" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+    </java-object>
+
+    <parser name="CSFB_1_Msg_Data_XML_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <!-- Convert possible RFH2 msg to full parseable XML msg with /root as its main element -->
+        <reference name="XMLFromRFH2PreParser_1"/>
+
+        <field name="ParserName" value="CSFB_1_Msg_Data_XML_parser"/>
+        <field name="TransID" locator="/root/CDA_CASH_SECURITY/CDA_TRANS_HDR/FO_INTRL_ID" locator-type="Label"/>
+        <field name="TransType" locator="/root/CDA_CASH_SECURITY/CDA_TRANS_HDR/TRN_TYP_C" locator-type="Label"/>
+        <field name="TransValue" locator="/root/CDA_CASH_SECURITY/CDA_TRANS_CASH_DTL/TRN_NET_CNSID_M" locator-type="Label"/>
+        <field name="UserData" locator="/root/CDA_CASH_SECURITY/CDA_TRANS_COMMON_DTL/TRN_TRADE_DZ" locator-type="Label"/>
+    </parser>
+
+    <!-- 11/22/17 -->
+    <!-- TEST CASE 2 -->
+    <!-- Copy of case 1, needed for parser-ref w/this name -->
+    <!-- Test msg: TEST4_CSFBMSG.txt w/o RFH2 header, so no XML pre-parse and no /root in locators -->
+    <parser name="CSFB_2_Msg_Data_XML_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="RequireDefault" value="false"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="CSFB_2_Msg_Data_XML_parser"/>
+        <field name="TransID" locator="/CDA_CASH_SECURITY/CDA_TRANS_HDR/FO_INTRL_ID" locator-type="Label"/>
+        <field name="TransType" locator="/CDA_CASH_SECURITY/CDA_TRANS_HDR/TRN_TYP_C" locator-type="Label"/>
+        <field name="TransValue" locator="/CDA_CASH_SECURITY/CDA_TRANS_CASH_DTL/TRN_NET_CNSID_M" locator-type="Label"/>
+        <field name="UserData" locator="/CDA_CASH_SECURITY/CDA_TRANS_COMMON_DTL/TRN_TRADE_DZ" locator-type="Label"/>
+    </parser>
+
+    <!-- TEST CASE 2A -->
+    <!-- Rules for parsing another CSFB XML msg, test 5 in test.sh" -->
+    <!-- Test msg: TEST5_CSFB_mod438475_reformatted.txt -->
+    <!-- Using XML element names w/o full xpath: fields are not found  -->
+    <!-- Using full xpath: works -->
+    <parser name="CSFB_2A_Msg_Data_XML_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="ParserName" value="CSFB_2A_Msg_Data_XML_parser"/>
+        <field name="TransID" locator="/ExceptionTrans/transRefId" locator-type="Label"/>
+        <field name="TransType" locator="/ExceptionTrans/transType" locator-type="Label"/>
+        <field name="TransValue" locator="/ExceptionTrans/ExceptionTransData/dataItemValue[@fieldName='ValueDate']" locator-type="Label"/>
+        <field name="UserData" locator="/ExceptionTrans/Exception/reasonCode" locator-type="Label"/>
+    </parser>
+
+    <!-- TEST CASE 3:  Extract fields from a clear text message using offsets and lengths -->
+    <!-- Rules for parsing Societe General (SOCGEN) message, Test 3 in "tacon test cases" -->
+    <!-- Test msg: TEST6_SOCGEN.txt -->
+    <!-- Called for operations: MQPUT, MQPUT1, MQGET -->
+    <!-- 09/??/17 -->
+    <!-- Try property name="Pattern"    value="(.*)\n(.*)\n(.*)\n(.*)\n(.*)\n"/>  nogo, works in test_7 -->
+    <!-- exact pattern, ok in online tester -->
+    <!-- Try property name="Pattern"    value="(.*\n)(.*\n)(.*\n)(.*\n)(.*\n)"/  : nogo
+             java.text.ParseException: Failed parsing RegEx Group data for field TransID
+             Caused by: java.lang.IllegalArgumentException: No group with name <1>  -->
+    <!-- Try pattern ".*" : no match -->
+    <!-- Try pattern 1 again w/MATCH and w/CDATA: nogo -->
+    <!-- 10/04/17  The regex pattern is every line followed by a NL. Get that value and take a substring.
+                Data a-c comes from the first line. User Data d is on line 2, but we assume we know that.
+                a. Transaction ID:  Offset 0, length 16
+                   Expected value:  TEST6_30CLD00009
+                b. Transaction type: Offset 19, length 9
+                   Expected value:  TEST6_DDA
+                c. Transaction money value:  Offset 59, length 15
+                   Expected value:  TEST6_USD265,82
+                d. User data:  Offset 87, length 19 (from start of msg, line 1) or
+                               offset  0, length 19 (on line 2, after the NL)
+                   Expected value:  SGFC~~~~~~~~/159379
+         10/11/17 Re-test: ok, got TID.
+                  Expand to include the other fields:
+
+                  NOTE: Groovy method:
+                  String substring(int beginIndex, int endIndex)
+                  Parameters
+                    beginIndex − the begin index, inclusive.
+                    endIndex   − the end index, exclusive.
+                  Return Value − The specified substring.
+         10/17/17 Try getting cached q name: nogo
+                  Try a diff field expression, get first 3 chars of q name: nogo
+                  Try just getting the cached field: ok, for MQGET calls; missing for MQPUT. Trace msg:
+                    ActivityInfo] - Set property 'QName' value to 'AAA.LQ' (type 'none')
+                  Specifiy datatype="String" to get rid of confusing "(type 'none')": no, same msg
+                  Add format="string" : no, same msg.
+        10/18/17  Cache definition:
+                    TNT4J-Streams provides temporary storage (i.e. cache) for a resolved activity fields values.
+                    It is useful when there are some related activities streamed and particular jKool prepared
+                    activity entity requires data values from previously streamed activities.
+                  Maybe the cached data, created during the MQPUT activity, is not available until a later activity,
+                  such as MQCLOSE, MQDISC or the laster MQGET: true
+                  Enable MQOPEN since ObjectName is avail and will be cached there. Then CachedObjName can be accessed at MQPUT time: ok
+                  Trace lines now w/AAA.LQ: OK
+                    ActivityField] - Field 'QName' value before transformations: AAA.LQ
+                    ActivityField] - Field 'QName' value after applying transformation 'QNameCheck@AGGREGATED': XYZ
+                     ActivityInfo] - Set property 'QName' value to 'XYZ' (type 'none')
+                  w/CCC.LQ: OK
+                     ActivityInfo] - Set property 'QName' value to 'CCC.LQ' (type 'none')
+        10/30/17  Replaced by TEST_3A_SOCGEN_Msg_Data_Parser
+      -->
+    <parser name="TEST_3_SOCGEN_Msg_Data_RegEx_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[(.*)\n(.*)\n(.*)\n(.*)\n(.*)\n]]></property>
+        <property name="MatchStrategy" value="MATCH"/> <!-- match entire input -->
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="TEST_3_SOCGEN_Msg_Data_RegEx_Parser"/>
+
+        <!-- 10/18/17 Try to create a new field using locator type StreamProp (stream property):
+             "Indicates that raw data value is the value of a named property of the current stream.
+                StreamProp(String.class)"
+             Testing shows that the locator being accessed must indeed be a property defined between <stream> and </stream>,
+             not a field within another stacked parser. Thus, so far, we must use the caching method to
+             get access to the queue name that was opened. -->
+        <field name="QNameStream1" locator="ObjectName" locator-type="StreamProp"/>  <!-- none; locator is a field name -->
+        <field name="QNameStream2" locator="Queue" locator-type="StreamProp"/>  <!-- works; locator is a propperty -->
+
+        <!-- Caching method: -->
+        <!-- Check resolved q name saved in the cache by the MQOPEN trace events parser.-->
+        <!-- field name="QNamePut" locator="CachedObjName" locator-type="Cache"/  This works ok-->
+        <field name="QNamePut" locator="CachedObjName" locator-type="Cache" transparent="false">
+            <field-transform name="QNameCheck" lang="groovy">
+                $fieldValue == "CCC.LQ" ? $fieldValue : "XYZ"
+            </field-transform>
+        </field>
+
+        <field name="TransID">  <!-- length=16, ck line length >= extract length -->
+            <field-locator locator="1" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 16) ? $fieldValue : $fieldValue.substring(0,16)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransType">  <!-- length=9, ck line length > starting offset  -->
+            <field-locator locator="1" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 20) ? null :
+					   $fieldValue.substring(19,28) 
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransValue">  <!-- field length=15, ck line length > starting offset -->
+            <field-locator locator="1" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 60) ? null :
+					   $fieldValue.substring(59,74)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="UserData">  <!-- length=19, ck line length > extract length -->
+            <field-locator locator="2" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 19) ? $fieldValue :
+					   $fieldValue.substring(0,19)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+    </parser>
+
+    <!--10/16/17 -->
+    <!-- TEST CASE 3A: same as TEST CASE 3 below, w/added rerquirement that queue name must match AAA.LQ -->
+    <!-- Input: full msg content from TraceEventsParser -->
+    <!-- 10/16/17 Initial creation w/cache reference
+                  Nogo; not called.
+         10/17/17 Remove cache reference. Try to access trace event data directly locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME":
+                  nogo.
+                  Try cache again: nogo; one trace line: Parser 'TraceEventsParser' is applying stacked parser 'TEST_3A_SOCGEN_Msg_Data_Parser:Merge' for field 'MessageFormats'
+                  Bypass cache logic to see if TEST_3 parser is called: nogo, same result. Problem must be the parsert type.
+                  Try ActivityRegExParser vs ActivityMapParser: nogo, "Regular expression pattern not specified or empty"
+        10/18/17  Add pattern: CDATA[(.*\n{1,}]]: partial ok; got ParserName, QName; parser-ref returned nothing.
+                    ActivityRegExParser] - None of parser 'TEST_3A_SOCGEN_Msg_Data_Parser' field 'TEST_3A_QNAME'
+                    stacked parsers was applied
+                    'RAW activity data' was empty.
+        10/30/17  Try matchExp from this level: nogo
+                  SAXParseException; lineNumber: 273; columnNumber: 13; Malformed configuration: 'matchExp' expected
+                  to have 'parser-ref' as parent
+                  Moved to top level, with parser-ref parent. Works there.
+                  Working ok w/pattern (.*\n){1,}
+                  Try simpler pattern: (.*\n) : nogo;
+                            ActivityRegExParser] - Input does not match pattern '(.*\n)' defined in parser 'TEST_3A_SOCGEN_Msg_Data_Parser
+                  Try simpler pattern (.*) works in regx101: same trace msg
+                  Try simpler pattern  .* works in regx101:: same trace msg
+                  Try .*\n : same trace msg
+                  Try to get last word of last line, REVOLVER. at offset 191, length 8:
+        -->
+    <parser name="TEST_3A_SOCGEN_Msg_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="Pattern"><![CDATA[(.*\n){1,}]]></property>
+
+        <field name="ParserName" value="TEST_3A_SOCGEN_Msg_Data_Parser"/>
+
+        <!-- Check resolved q name saved in the cache by the MQ trace events parser.-->
+        <field name="QName" locator="CachedObjName" locator-type="Cache" transparent="false">
+        </field>
+
+        <field name="TransID">  <!-- offsets 0-15 inclusive, length=16, ck line length >= extract length; 
+									 expected value: TEST6_30CLD00009 -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 16) ? $fieldValue : 
+					   $fieldValue.substring(0,16) 
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransType">  <!-- offsets 19-27 inclusive, length=9, ck line length > starting offset
+									   expected value: TEST6_DDA -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TransTypeSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 20) ? null :
+					   $fieldValue.substring(19,28) 
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransValue">  <!-- offsets 59-73 inclusive, field length=15, ck line length > starting offset
+										expected value: TEST6_USD265,82 -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TransValueSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 60) ? null :
+					   $fieldValue.substring(59,74)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="UserData">  <!-- offsets 87-105 inclusive, length=19, ck line length > starting offset
+									  expected value: SGFC~~~~~~~~/159379 -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="UserDataSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 88) ? null :
+					   $fieldValue.substring(87,106)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <!-- Get last word of last line -->
+        <field name="LastWord">  <!-- offsets 187-194 inclusive, length=8, ck line length > starting offset
+									  expected value: REVOLVER -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="LastWordSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 192) ? null :
+					   $fieldValue.substring(187,195)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+    </parser>
+
+    <!-- ==========================================================================================================  -->
+    <!--10/31/17 -->
+    <!-- TEST CASE 3B: Similar to TEST CASE 3A, w/requirement that queue name must match BBB.LQ -->
+    <!-- Input: full msg content from TraceEventsParser -->
+    <!-- locators are regex group numbers -->
+    <!-- Test REMatchId in place of REGroupNum: NOGO, all fields null  -->
+    <!-- Test again with added property MatchStrategy/value="FIND":  NOGO, same result   -->
+    <parser name="TEST_3B_SOCGEN_Msg_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="Pattern"><![CDATA[(.*\n){1,}]]></property>
+
+        <field name="ParserName" value="TEST_3B_SOCGEN_Msg_Data_Parser"/>
+
+        <!-- Check resolved q name saved in the cache by the MQ trace events parser.-->
+        <field name="QName" locator="CachedObjName" locator-type="Cache" transparent="false">
+        </field>
+
+        <field name="TransID">  <!-- offsets 0-13 inclusive, length=14, ck line length >= extract length; 
+									 expected value: TID_TEST3B_456   ok -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TIDSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 14) ? $fieldValue : 
+					   $fieldValue.substring(0,14) 
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransType">  <!-- offsets 20-35 inclusive, length=16, ck line length > starting offset
+									   expected value: TYPE_TEST3B_SALE   ok -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TransTypeSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 20) ? null :
+					   $fieldValue.substring(20,36) 
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="TransValue">  <!-- offsets 70-89 inclusive, field length=15, ck line length > starting offset
+										expected value: AMT_TEST3B_USD123.45   ok -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="TransValueSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 70) ? null :
+					   $fieldValue.substring(70,90)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+        <field name="UserData">  <!-- offsets 123-145 inclusive, length=23, ck line length > starting offset
+									  expected value: TEST3B_Model iSeries123   ok -->
+            <field-locator locator="0" locator-type="Index">
+                <field-transform lang="groovy" name="UserDataSubstring">
+                    <![CDATA[
+                       ($fieldValue == null || $fieldValue.length() <= 125) ? null :
+					   $fieldValue.substring(123,146)
+                       ]]>
+                </field-transform>
+            </field-locator>
+        </field>
+
+    </parser>
+
+    <!-- ==========================================================================================================  -->
+    <!--11/27/17 -->
+    <!-- TEST CASE 3D: Similar to TEST CASE 3B, w/requirement that queue name must match TEST3D.LQ
+         and uses string ranges parser -->
+    <!-- MSG: TEST3D_SOCGEN.txt        -->
+    <!-- Input: full msg content from TraceEventsParser -->
+    <!-- Test:  ?? -->
+    <parser name="TEST_3D_SOCGEN_Msg_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityStringParser">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="TEST_3D_SOCGEN_Msg_Data_Parser"/>
+        <field name="TransID">  <!-- offsets 0-13 inclusive, length=14; expected value: TID_TEST3D_456 ? -->
+            <field-locator locator="0:14" locator-type="Range"/>
+        </field>
+
+        <field name="TransType">  <!-- offsets 20-35 inclusive, length=16, expected value: TYPE_TEST3B_SALE ? -->
+            <field-locator locator="20:36" locator-type="Range"/>
+        </field>
+
+        <field name="TransValue">  <!-- offsets 70-89 inclusive,field length=20,expected value: AMT_TEST3B_USD123.45 ? -->
+            <field-locator locator="70:90" locator-type="Range"/>
+        </field>
+
+        <field name="UserData">  <!-- offsets 123-145 inclusive, length=23, expected value: TEST3B_Model iSeries123 ?? -->
+            <field-locator locator="123:146" locator-type="Range"/>
+        </field>
+    </parser>
+
+    <!-- ==========================================================================================================  -->
+
+    <!-- Activity map parser for a SWIFT type msg, Test 4 in "tacon test cases", test 11 in test.sh -->
+    <!-- Test msg: TEST11_NV_TEST1.txt -->
+    <!-- This does not work
+    <parser name="SWIFT_Msg_Data_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser">
+        <field name="TransID"    locator=":33A:" locator-type="Label"/>
+        <field name="TransType"  locator=":24B:" locator-type="Label"/>
+        <field name="TransValue" locator=":35J:" locator-type="Label"/>
+        <field name="UserData" separator=":">
+            <field-locator locator=":57J:" locator-type="Label"/>
+            <field-locator locator=":36:"  locator-type="Label"/>
+        </field>
+    </parser>
+    -->
+
+    <!-- TEST CASE 4 -->
+    <!-- Name-Value parser for a SWIFT type msg, Test 4 in "tacon test cases", test 11 in test.sh -->
+    <!-- Test msg: TEST11_NV_TEST1.txt -->
+    <!-- a. NOGO -->
+    <!-- b. NOGO: Break into 4 NV parsers, with FieldDelim = :33A:, :24B:, :35J" and ValueDelim \s  -->
+    <!-- c. Worked: Use diff test msg TEST11_NV_TEST1_space_delim.txt with FieldDelim=";" ValueDelim=" "
+            no ':' around item numbers, ";' at end of line.
+              Extracted the 4 fields ok in to JSON msg to jKool
+              First 3 fields ok, but UserData sgements were cut at the spaces:
+               "name": "UserData","type": "string","value": "\/ABIC\/TEST11_LOYDGB22\/NAME\/Lloyds:TEST11_SENDING"} -->
+    <!-- d. Saw a JSON output w/original msg and all fields extracted, incl spaces. Try to recreate:
+            Set FieldDelim as " " and ValueDelim=";"      NOGO
+            Set FieldDelim as "\n" and ValueDelim=""      NOGO split into 1 field
+            Set FieldDelim as "\n" and ValueDelim="(null) NOGO split into 1 field "
+            Set FieldDelim as "(\n)" and ValueDelim="(null)	 NOGO  Split into 1 field
+            Set FieldDelim as "(\s)" and ValueDelim="(null) NOGO, \s means any whitespace char, incl space,tab,CR,LF
+                                                                  It split into 3 fields, after space and after 's' in 'Treasury'
+            Set FieldDelim as "(\S+)" and ValueDelim="(null) NOGO  \S+ means one or more non-whitepace chars
+                                                                   Split into 8 fields at wrong places
+            FieldDelim=[\r\n] either CR or NL, ValueDelim=(null)   NOGO Split into 3 fields at wrong places
+                                                                   raw msg has \r\n chars, but nsput drops the \r chars.
+            FieldDelim=[\r\n], ValueDelim=":"                      NOGO Split into 3 fields at wrong places
+            FieldDelim="[ \n]", ValueDelim=":"      			   NOGO  "
+            FieldDelim="[\r\n]", ValueDelim="(\n)"                 w/TEST11_NV_TEST1_24B_OnNewLine.txt
+                                                                   NOGO Split into 3 fields at wrong places
+            FieldDelim="\n", ValueDelim=""                         w/TEST11_NV_TEST1_24B_OnNewLine.txt, NOGO split into 1 field
+            Restore back to the modified msg TEST11_NV_TEST1_space_delim.txt with ";" Field Delim at end of line and " " ValueDelim
+            Msg has "_" in place of spaces and :24B: is on a new line:  OK, perfect extract
+            Now remove the space after each numbered tag;use
+                FieldDelim=";" and ValueDelim=":" and each tag is ":nn" w/o the trailing ':'
+                                                                    NOGO; Split into 6 name/value fields, but each name has merged name ":nn:string" and value is null
+            Restore space ValueDelim but use \n as FieldDelim even though ";" is at end of line also.
+                                                                    NOGO; Split input into 1 fields
+            Use FieldDelim="(\n)" instead							NOGO:  "
+            Use FieldDelim="$" meaning at end of line				NOGO: split at the $ in the money field
+            Use FieldDelim="($)"									NOGO: "
+            Use FieldDelim="(\$)"									NOGO: "
+            Use FieldDelim="\n"										NOGO: spit into 1 field
+            Try "[\r\n]+"  											NOGO: Split input into 3 fields
+                                                                    Split on the 2 r's in 'Lloyd's_Treasury' to give
+                                                                    name ':33A:' followed by value .../Lloyds_T" and
+                                                                    name 'eaus' followed by value null and
+                                                                    name 'y' followed by value '/GBSC/301557;:36: TEST11_SENDING_PARTY;'
+                                                                    No lower case 'n' in the text so no split on that.
+                                                                    Regex expression for one or more CR or LF's is not handled
+            Back to ";"
+            Try new FieldDelim="&#10;"   							Java symbol for NL includes the ';'
+                                                                    NOGO: From trace:
+                                                                    Split input into 1 fields
+                                                                    ActivityNameValueParser] - Found Name/Value: :33A: TEST11_TID1234;:24B:
+                                                                      TEST11_TRANTYPE;:35J: TEST11_$123.45;:57J:/ABIC/TEST11_LOYDGB22/NAME/Lloyds_Treasury/GBSC/301557;:36: TEST11_SENDING_PARTY
+                                                                    ActivityNameValueParser]Parsing:[:33A:=TEST11_TID1234;:24B:]
+                                                                    Applying field 'TransID', value = TEST11_TID1234;:24B:
+            Try new [&#10;&#13;]								    Either CR or LF, NOGO: same result as above.
+            Leave FieldDelim for now with ";"
+            9/7/16 Use format from Andrius with CDATA[ ]			Working
+    -->
+
+    <parser name="SWIFT_NV_Msg_Data_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+        <property name="EntryPattern"><![CDATA[:(?<key>.*?):(?<value>.[^:]+)]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="Swift Transaction"/>
+        <field name="TransID" locator="33A" locator-type="Label"/>
+        <field name="TransType" locator="24B" locator-type="Label"/>
+        <field name="TransValue" locator="35J" locator-type="Label"/>
+        <field name="UserData" separator=":">
+            <field-locator locator="57J" locator-type="Label"/>
+            <field-locator locator="36" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <!--
+        <parser name="SWIFT_NV_Msg_Data_parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+            <property name="FieldDelim" value=";"/>
+    -->
+    <!-- Default value is comma ',' so must specifiy the trailing colon ':' as
+       end of the field and each field locator specify without the trailing ':'
+       a. ":" nogo, causes 11 name/value fields: null, 33A, TEST11_TID1234, etc
+       where each is a name with a null value
+       b. "" null fails:
+           Java.lang.IllegalStateException: Field delimiter not specified
+       c. Try msg with space " " field delimiters: nogo, breaks into fileds 33A,
+          then TEST11_TID1234;24B
+       d. Set FieldDelim to ";" and Value Delim "space":
+    -->
+    <!--
+            <property name="ValueDelim" value=" "/>
+    -->
+    <!-- Each value is terminated by optional whitespace then start of optional next field
+       Value delimiter. Default value is dot '.' (Optional)
+       "\s"  does not work
+       ";"   try this; add semi-colon to end of each value in the test msg:
+    -->
+    <!--
+            <property name="Pattern" value="(.*)"/>
+    -->
+
+    <!-- Value pattern; (\S+) means one or more non-whitespace chars. Fails:
+       Input does not match pattern '(\S+)' defined in parser 'SWIFT_NV_Msg_Data_parser'
+     Pattern used to determine which types of activity data string this parser supports.
+     When null, all strings are assumed to match the format supported by this parser.
+     Default value - null. (Optional) -->
+    <!--
+            <property name="StripQuotes" value="false"/>
+    -->
+    <!-- No embedded quotes in the msg, but leave them if present. Default=true -->
+
+    <!--
+            <property name="UseActivityDataAsMessageForUnset" value="false"/>
+    -->
+    <!-- Flag indicating weather RAW activity data shall be put into field Message
+         if there is no mapping defined for that field in stream parser configuration or
+         value was not resolved by parser from RAW activity data. NOTE: It is recommended
+         to use it for DEBUGGING purposes only. For a production version of your software,
+         remove this property from stream parser configuration. Default value - false. (Optional)
+         -->
+    <!--
+            <field name="TransID"    locator=":33A:" locator-type="Label"/>
+            <field name="TransType"  locator=":24B:" locator-type="Label"/>
+            <field name="TransValue" locator=":35J:" locator-type="Label"/>
+            <field name="UserData" separator=":">
+                <field-locator locator=":57J:" locator-type="Label"/>
+                <field-locator locator=":36:"  locator-type="Label"/>
+            </field>
+        </parser>
+    -->
+    <!-- ============================================================================================ -->
+    <!-- TEST CASE 4 -->
+    <!-- MSG:  ..\test_msgs\TEST11_NV_TEST1.txt (:33A: and :24B: are both on the first line) -->
+
+    <!--  Try using regex parser -->
+    <!-- 10/09/17 Test call direct, as is: nogo, ActivityRegExParser] - Input does not match pattern '(:33A:)(.*)(:24B:)(.*)'
+                  Add <property name="MatchStrategy" value="FIND"/>: nogo:
+                    ParseException: Failed parsing RegEx Group data for field TransId
+                    Caused by: java.lang.IllegalArgumentException: No group with name <2>
+                Try MATCH: same result
+                Try this pattern: (:33A:)(.*\n) w/FIND and value in group number 2: nogo;
+                   Caused by: java.lang.IllegalArgumentException: No group with name <2>
+                Try "Pattern" value="(:33A:)(.*)"/> which used to work: nogo;
+                   IllegalArgumentException: No group with name <2>
+                   regex101 works, shows this:
+                   Match 1
+                    Full match	0-20	`:33A:TEST11_TID1234 `
+                    Group 1.	0-5	    `:33A:`
+                    Group 2.	5-20	`TEST11_TID1234 `
+        10/10/17  Test again after rebuild with Andrius fix: worked as is w/REGroupNum
+                  Test with Andrius suggestion: use Index vs REGroupNum: worked also.
+
+    -->
+    <parser name="SWIFT_1_TransId_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- \s is whitespace char, including space, \t (tab), \r (CR), \n (NL), \f (form feed)-->
+        <!-- :33A:xxxx :24B:xxxxx...xxx\r\n -->
+        <!-- property name="Pattern" value="(:33A:)(.*)(:24B:)"         nogo -->
+        <!-- property name="Pattern" value="(:33A:)(.*)"                worked in past, but extracts entire :33A: line -->
+        <property name="Pattern" value="(:33A:)(.*)(:24B:)(.*)"/>  <!-- worked in past, full msg format -->
+        <property name="MatchStrategy" value="FIND"/>
+        <field name="TransId" locator="2" locator-type="Index"/>
+    </parser>
+
+    <parser name="SWIFT_1_TransType_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- <property name="Pattern" value="(.*)(:24B:)(.*)(\r\n|\r|\n)"/>   nogo -->
+        <!-- <property name="Pattern" value="(.*)(:24B:)(.*)"/>  This extracts 24B value to end of the msg  -->
+        <!-- <property name="Pattern" value="(.*)(:24B:)(.*)(\n)"/>  Should extract 24B value up to the \n; NOGO -->
+        <!-- <property name="Pattern" value="(.*)(:24B:)(.*)(:35J:)"/>      nogo -->
+        <property name="Pattern" value="(.*)(:24B:)(.*)(:35J:)(.*)"/>  <!-- works; needs the full msg format -->
+        <!-- <property name="Pattern" value="(:24B:)(.*)(:35J:)(.*)"/>      nogo -->
+        <field name="TransType" locator="3" locator-type="Index"/>
+    </parser>
+
+    <parser name="SWIFT_1_TransValue_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- <property name="Pattern" value="(.*)(:35J:)(.*)(\r\n|\r|\n)"/>      nogo -->
+        <!-- <property name="Pattern" value="(.*)(:35J:)(.*)(\r\n|\r|\n)(.*)"/>  nogo, full msg format -->
+        <!-- <property name="Pattern" value="(.*)(:35J:)(.*)(\n)(.*)"/>          nogo -->
+        <property name="Pattern" value="(.*)(:35J:)(.*)(:57J:)(.*)"/>            <!-- works, full msg format, no \n chars -->
+        <!-- <property name="Pattern" value="(.*)(:35J:)(.*)(\s)(.*)"/>          nogo, try with white space chars \s spec -->
+        <field name="TransValue" locator="3" locator-type="Index"/>
+    </parser>
+
+    <!-- The pattern assumes that 35J comes immediately before 57J and :36: is last -->
+    <!-- Whitespace chars after 35J value will be CR LF or just LF  -->
+    <parser name="SWIFT_1_UserData_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- <property name="Pattern" value="(.*)(:35J:)(.*)(\r\n|\r|\n)(:57J:)(.*)(\r\n|\r|\n)(:36:)(.*)"/>  nogo -->
+        <property name="Pattern" value="(.*)(:57J:)(.*)(:36:)(.*)"/>        <!-- works, full msg format  -->
+        <field name="UserData" separator=":">
+            <field-locator locator="3" locator-type="Index"/>
+            <field-locator locator="5" locator-type="Index"/>
+        </field>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 6 -->
+
+    <!--  09/06/17 1. NOGO: Try using partial Xpaths containing only 'element nodes': userRef, type, amount, currency
+                   1A.NOGO: More partial Xpath: "Locator 'genericTransFields/userRef' resolved value: null"
+          09/07/16 2. NOGO: Use full xpath with /OFACRequest/: still getting resolved value: null
+          09/08/17 3. NOGO: Try 1 again.
+                   4. OK:   Try 2 again with shorter TEST30_bnym4_mod_simple.txt
+                   5. NOGO: Try full xpath w/original msg TEST30_bnym4_mod.txt again
+                   6. OK:   Try 5 again with xmnls 'namespace attribute' removed from OFACRequest root element:
+                         <OFACRequest xmlns="http://www.bnymellon.com/EPH/OSARequest" >
+                   7. NOGO: Try 5 again but with just the ending space removed from xmnls line
+                   8. OK:   Try with ns prefix "xmlns:bnym=..." inserted in the xmlns attribute
+                            NOTE: When using prefixes in XML, a namespace for the prefix must be defined.
+                            Ref: https://www.w3schools.com/xml/xml_namespaces.asp
+                            But the original msg is valid, because ...
+                            "Defining a default namespace for an element saves us from using prefixes in all the child elements. It has the following syntax:
+                                xmlns="namespaceURI"
+                            Ref: https://www.w3schools.com/xml/xml_namespaces.asp
+                            To do: Notify GitHub/Andrius
+                   9. OK    Try 4 again with xmlns attribute w/ns prefix added
+                  10. NOGO  Try 4 again with xmlns attribute but wo/ns prefix
+                  11. OK    Try 2 again, full xpath, original msg w/ns prefix added
+                  12. OK    Add UserData; works ok with very specific regex parser called outside of xml parser
+                  13. NOGO  Try generic regex Pattern specifying \n as value string terminator:
+                                Input does not match pattern '(.*)(:20:)(.*)(\n)(:52A:)(.*)(\n)(.*)'
+                                defined in parser 'BNYM_RegEx_UserData_Parser
+    -->
+
+    <!-- 9/8/17 works ok, but knowing specific order -->
+    <!-- BYPASS TO TEST NameValueParser below
+        <parser name="BNYM_UserData_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+    -->
+    <!-- Next lines, usng regex groups, requires knowing that :20: always comes before :52A: -->
+    <!-- OK:
+               <property name="Pattern" value="(.*)(:20:)(.*)(:21:)(.*)(:52A:)(.*)(:53B:)(.*)"/> -->
+    <!-- NOGO: "ActivityRegExParser] - Input does not match pattern '(.*)(:20:)(.*)(\s)(:52A:)(.*)(\s)(.*)'
+                  defined in parser 'BNYM_UserData_Parser"
+               Fails in online regex tester also				   -->
+    <!--      <property name="Pattern" value="(.*)(:20:)(.*)(\s)(:52A:)(.*)(\s)(.*)"/>   -->
+    <!-- NOGO: same error
+              <property name="Pattern" value="(.*)(:20:)(.*)(\s)(:52A:)(.*)((\s)(.*))+"/>
+               regex tester no match also -->
+    <!-- NOGO: same error
+               Chg repeating group after LF following 52A to one or more groups of {any char followed by LF}
+              <property name="Pattern" value="(.*)(:20:)(.*)(\s)(:52A:)(.*)\s(.*\s)+"/>
+              regex tester no match also -->
+    <!-- NOGO: same error
+               <property name="Pattern" value="(.*)(:20:)(.*)(\s)(.*\s)+(:52A:)(.*)"/>
+               regex tester no match also -->
+    <!-- Next line is valid in online regex checker: https://regex101.com/
+               a. nogo w/o leading (.*), same error "Input does not..."
+               b. nogo w/leading (.*), same error
+               c. I don't think the \s works; try (.*\s)+  w/o it: nogo, also does NOT work in regex tester
+               d. Try \n instead of \s, which works in regex tester: nogo, same "input does not match pattern"
+               e. Append (:53B:)(.*): same error: (.*)(:20:)(.*)(.*\n)+(:52A:)(.*)(:53B:)(.*) invalid in regex tester
+               f. Try OK pattern above again: OK, also in regex tester
+               g. Try modified e: (.*)(:20:)(.*)(:52A:)(.*)(:53B:)(.*)
+                      OK, UserData="QT06171612-1:21:QAVOLUME:32A:150617EUR0,01:IRVTBEBB" same as
+                      group 3 in regex tester
+               h. Try this:  (.*)(:20:)(.*\n)(.*\n)*(:52A:)(.*\n)  works in regex tester; nogo,same error
+               i. Add global bracketing: /xxx/g : same error
+               j. Remove global, add CDATA bracketing: same error
+               k. Delete CDATA, delete NL chars, since they not visible in the tnt4j-streams.log line
+                  "Activity data after pre-parsing:"
+               l. Try pattern style that worked w/above SWIFT regex parser: (.*)(:20:)(.*)(:52A:)(.*)
+                  w/locator 3 and 5, but does not work w/regex tester:
+                  Works, but pulled too much data:
+                  :20: pulled all data up to :52A: except for NL chars; :52A: pulled all data from there
+                  to end of the msg, except NL chars:
+                     Set property 'UserData' value to 'QT06171612-1:21:QAVOLUME:32A:150617EUR0,01:IRVTBEBB:53B:/0049609710:57A:DEUTDEFF:58A:/11548432050460DEUTDEFF:72:/BNF/GFC-BRELTEST-}</sourceMessage></OFACRequest>'
+               m. Try pattern  (.*)(:20:)(.*)(.*\n)+(:52A:)(.*), similar to e and h above.
+                  Nogo: same failure as above cases:
+                  ActivityRegExParser] - Input does not match pattern '(.*)(:20:)(.*)(.*\n)+(:52A:)(.*)' defined in parser 'BNYM_UserData_Parser
+               n. Try NameValue parser as done above for SWIFT with CDATA: NOGOP, see belowBNYM_UserData_Parser.
+
+               -->
+    <!-- BYPASS TO TEST NameValueParser below
+            <property name="Pattern" value="(.*)(:20:)(.*)(.*\n)+(:52A:)(.*)"/>
+            <field name="UserData" separator=":">
+               <field-locator locator="3" locator-type="Index"/>
+               <field-locator locator="5" locator-type="Index"/>
+            </field>
+        </parser>
+    -->
+    <!-- 9/12/17 Partial NOGO; earlier data in the msg contains some colons ':' so wrong set of name/values are extracted
+                 e.g. Name/Value: QT06171612-1}}{4=:20 and QT06171612-1=21
+    -->
+    <parser name="BNYM_UserData_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+        <!-- The regex pattern for key uses a lazy dot, so that the min chars are picked before finding a colon.
+             The value uses a bracketed negated colon, followed by a greedy plus, meaning find the most
+             chars, but excluding a colon, which stops at the start of the next SWIFT tag.
+             When using the negated character class, no backtracking occurs, which saves parsing time.
+
+             NOTE:  This pattern  \n:(?<key>.*?):(?<value>.[^:\n]+) gets all SWIFT tags and values as a
+             sequence of 8 regex groups from msg ..\test_msgs\TEST30_bnym4.txt, in regex tester.
+             This also works: (:\d.*:)(.*?\n)  It starts picking up from :20:, includes :32A: :53B: etc
+             -->
+        <property name="EntryPattern"><![CDATA[:(?<key>.*?):(?<value>.[^:]+)]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="UserData" separator=":">
+            <!-- locators are the keys i.e. <colon><string of min length exlc LF before hitting colon><colon>
+                  value string follows  <greedy plus, max chars excluding the colon that starts the next SWIFT tag> -->
+            <field-locator locator="20" locator-type="Label"/>
+            <field-locator locator="52A" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <!-- 09/13/17 This extra sub-parser added by Andrius: Working
+         Input: Msg data string starting at /OFACRequest/sourceMessage
+         Parse the SWIFT data, starting after chars "{4:",  with a Name-Value parser and merge.
+         The EntryPattern allows for detecting the string
+         ... </messageDetails><sourceMessage>{1:F01I...06952}{2:O2020902...0902N}{3:{108:QT06171612-1}}{4:
+         :20:QT06171612-1
+         :21:etc
+         :72:/BNF/GFC-BRELTEST
+         }
+    -->
+    <parser name="BNYM_SourceMessage_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+        <property name="EntryPattern"><![CDATA[\{(?<key>.*?):(?<value>(?s).[^{]*)\}]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="SWIFTContent" locator="4" locator-type="label" transparent="true">
+            <parser-ref name="BNYM_UserData_Parser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <!-- TEST CASE 6 -->
+    <!-- Msg: TEST30_bnym4.txt -->
+    <parser name="BNYM_XML_Msg_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <!-- 09/11/17 Add new property NamespaceAware defined by Andrius to ignore namespace lines. Worked. -->
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <field name="ParserName" value="BNYM_XML_Msg_Data_Parser"/>
+        <field name="TransID">
+            <!-- If TID not found, force error so that this parser does not continue -->
+            <field-locator locator="/OFACRequest/genericTransFields/userRef" locator-type="Label">
+                <!--
+                    <field-transform name="TransIDCheck" lang="groovy">
+                        $fieldValue != null ? $fieldValue : new ForceError($fieldValue)
+                    </field-transform>
+                -->
+            </field-locator>
+        </field>
+        <field name="TransType" locator="/OFACRequest/genericTransFields/type" locator-type="Label"/>
+        <field name="TransValue" separator=":">
+            <field-locator locator="/OFACRequest/header/amount" locator-type="Label"/>
+            <field-locator locator="/OFACRequest/header/currency" locator-type="Label"/>
+        </field>
+        <!--  Having BNYM_XML_MessageDataText here does not find the UserData; move it outside BNYM_XML_Msg_Data_Parser, following MessageDataText10: Works 9/8/17 -->
+        <!-- 09/12/17 Try again to call other parser here (as in stacked parser usage in SampleJMStream)
+                      Data passed to 2nd parser should be that following the chars "{4:" in the msg TEST30_bnym4.txt
+                      NOGO: WmqTraceStream] - Failed to record activity at position 0: Failed to process activity data at position 0
+                            java.text.ParseException: Failed to process activity data at position 0
+                            java.text.ParseException: Failed parsing data for field 'MessageDataText10'
+                            ParseException: Failed parsing data for field 'BNYM_XML_MessageDataText'
+                            Exception occurred while processing XPath expression.
+                            TransformerException: A node test that matches either NCName:* or QName was expected.
+                      Try aggregation Relate vs Merge: same error
+                      Try w/o datatype="String" format="string": same error
+                      Opened GitHub issue #36
+            09/13/17  As per Andrius, use /Request/sourceMessage vs non-xpath "{4:}"
+                      -->
+        <field name="BNYM_XML_MessageDataText" locator="/OFACRequest/sourceMessage" locator-type="Label" transparent="true"
+               datatype="String" format="string">
+            <parser-ref name="BNYM_SourceMessage_Parser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- 10/18/17 -->
+    <!-- Test msg: TEST17_IncompleteXML.xml -->
+    <!-- nogo;  ParseException: Can not build XML DOM document from input -->
+    <!-- add pre-processing: -->
+
+    <java-object
+            name="XMLIncompletePreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+    </java-object>
+
+    <parser name="TEST_17_XML_Incomplete_Msg_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- Convert possibly incomplete msg to full parseable XML msg with /root as its main element -->
+        <reference name="XMLIncompletePreParser"/>
+
+        <field name="ParserName" value="TEST_17_XML_Incomplete_Msg_Parser"/>
+        <field name="TransID" locator="/CDB_CASH_SECURITY/CDB_TRANS_HDR/FO_INTRL_ID" locator-type="Label"/>
+        <field name="TransType" locator="/CDB_CASH_SECURITY/CDB_TRANS_HDR/TRN_TYP_C" locator-type="Label"/>
+        <field name="TransValue" locator="/CDB_CASH_SECURITY/CDB_TRANS_CASH_DTL/TRN_NET_CNSID_M" locator-type="Label"/>
+        <field name="UserData" locator="/CDB_CASH_SECURITY/CDB_TRANS_COMMON_DTL/TRN_TRADE_DZ" locator-type="Label"/>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- 10/19/17 -->
+    <!-- Test msg: TEST17_CompleteXML.xml with elelement CDD_CASH_SECURITY: no match  -->
+    <!-- 11/13/17  Chg locators like this, FO_INTRL_ID to //FO_INTRL_ID/text() to locate the element value anywhere in the msg: ok -->
+
+    <java-object
+            name="TEST_17.1_XMLCompletePreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+    </java-object>
+
+    <parser name="TEST_17.1_XML_Complete_Msg_Partial_Xpath_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- Convert possibly incomplete msg to full parseable XML msg with /root as its main element -->
+        <reference name="TEST_17.1_XMLCompletePreParser"/>
+
+        <field name="ParserName" value="TEST_17.1_XML_Complete_Msg_Partial_Xpath_Parser"/>
+        <field name="TransID" locator="//FO_INTRL_ID/text()" locator-type="Label"/>
+        <field name="TransType" locator="//TRN_TYP_C/text()" locator-type="Label"/>
+        <field name="TransValue" locator="//TRN_NET_CNSID_M/text()" locator-type="Label"/>
+        <field name="UserData" locator="//TRN_TRADE_DZ/text()" locator-type="Label"/>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- 10/19/17  OK-->
+    <!-- Test msg: TEST18_CompleteXML.xml with elelement CDD_CASH_SECURITY -->
+    <!-- 11/03/17 If it processes TEST 16 msg test16.txt, it finds null and returns success, so that next parser is not called.
+         Commenting out ParserName field makes no difference.  -->
+
+    <parser name="TEST_18_XML_Msg_NV_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+        <!-- The regex pattern for key uses a lazy dot, so that the min chars are picked before finding a '>'.
+             The value says find a string of 1 or more of any char, terminated by a '<'.
+
+             NOTE:  This pattern  <(?<key>.*?)>(?<value>.+)< gets all XML tags and values.
+             regex101 had 87 matches, with first two:
+                key TRN_TYP_C      value TEST4_CASH
+                key TRN_SUBTYP1_C  value STAND<
+             -->
+        <property name="EntryPattern"><![CDATA[<(?<key>.*?)>(?<value>.+)<]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="TEST_18_XML_Msg_NV_Parser"/>
+        <field name="TransID" locator="FO_INTRL_ID" locator-type="Label"/>
+        <field name="TransType" locator="TRN_TYP_C" locator-type="Label"/>
+        <field name="TransValue" locator="TRN_NET_CNSID_M" locator-type="Label"/>
+        <field name="UserData" locator="TRN_TRADE_DZ" locator-type="Label"/>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 4 -->
+    <!-- UNUSED -->
+    <!-- Use 4 different sub-parsers to extract the 4 fields -->
+    <!-- Input: MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA    -->
+    <!-- 09/18/17 Making this as a separate pasrer does not work. Causes error:
+                  java.lang.IllegalStateException: Regular expression pattern not specified or empty
+                  Try w/o specifying the class: nogo, it's required
+                  Try specifying Patern null: nogo, fails: Regular expression pattern not specified or empty
+                  Try .* pattern:
+                    nogo; Failed parsing RegEx Group data for field MessageDataText5,
+                    No group with name MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA
+    -->
+    <parser name="SWIFT_1_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern" value=".*"/>
+
+        <field name="ParserName" value="SWIFT_1_Parser"/>
+        <field name="SWIFT_MessageDataText" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" transparent="true">
+            <parser-ref name="SWIFT_1_TransId_Parser" aggregation="Merge"/>
+
+            <parser-ref name="SWIFT_1_TransType_Parser" aggregation="Merge"/>
+
+            <parser-ref name="SWIFT_1_TransValue_Parser" aggregation="Merge"/>
+
+            <parser-ref name="SWIFT_1_UserData_Parser" aggregation="Merge"/>
+        </field>
+    </parser>
+
+    <!-- TEST CASE 4 -->
+    <!-- UNUSED      -->
+    <!-- MSG: TEST11_NV_TEST1_24B_OnNewLine.txt with "Pattern" value=":(.*?):(.*)" : Input does not match pattern -->
+    <!-- Try Pattern with group names <![CDATA[:(?<key>.*):(?<value>.[^:]*)]]>
+         Next try full pattern for entire msg of 7 lines:
+           (:(.*?):(.*\n)){7}
+        10/09/17 Pattern [CDATA[:(?<key>.*):(?<value>.[^:]*)]]  :nogo, works w/online regex, find 5 groups:
+                    java.text.ParseException: Failed parsing RegEx Group data for field UserData
+                    Caused by: java.lang.IllegalArgumentException: No group with name <1>
+        10/11/17 Retest w/msg TEST11_NV_TEST1_24B_OnNewLine: nogo, trace:
+                    ActivityRegExParser] - Input does not match pattern ':(?<key>.*):(?<value>.[^:]*)' defined in parser 'SWIFT_2_RegEx_Parser
+                 Retry with "MATCH" added and \n added after last "*)" (in regex101 it excludes the NL from the value): Input does not match pattern ':(?<key>.*):(?<value>.[^:]*)\n'
+                 Retry w/FIND since regex101 finds the groups in multiple matches: nogo:
+                     found TID locator 2, others null.
+    -->
+    <parser name="SWIFT_2_RegEx_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[:(?<key>.*):(?<value>.[^:]*)\n]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+
+        <field name="ParserName" value="SWIFT_2_RegEx_Parser"/>
+        <field name="TransId" locator="2" locator-type="Index"/>
+        <field name="TransType" locator="4" locator-type="Index"/>
+        <field name="TransValue" locator="6" locator-type="Index"/>
+        <field name="UserData" separator=":">
+            <field-locator locator="8" locator-type="Index"/>
+            <field-locator locator="10" locator-type="Index"/>
+        </field>
+    </parser>
+
+    <!-- 10/11/17 Try different regex pattern, that worked well for Test16_FreeFormTextParser_2,
+                  that does not asssume known order of the SWIFT tags. Pattern
+                  is a logical 'or' of all tags to find, with a key assigned to
+                  the found tag. The regex group numbers (the locators) are assigned to the values
+                  found in the order in which they appear in the pattern:
+                        1(tid):full "tag:value", 2(type):tag, 3:value;
+                  similar for 4(type),5,6; 7(amount),8,9; etc. Tested in regex101: OK
+                  Trace lines for TID capture:
+                      Applying RegEx Match mappings, count=4
+                      Adding RegEx match map entry: 1=:33A:TEST11_TID1234
+                      Adding RegEx match map entry: tid=:33A:TEST11_TID1234
+                      Adding RegEx match map entry: 2=:33A:
+                      Adding RegEx match map entry: 3=TEST11_TID1234
+                      ...
+                      Locator '3' resolved value: TEST11_TID1234
+                      Resolved RegEx locator value for field: TransId=TEST11_TID1234
+                      ...
+                      Locator '12' resolved value: /ABIC/TEST11_LOYDGB22
+                      /NAME/Lloyds Treasury
+                      /GBSC/301557
+                Test with msg TEST11_NV_TEST1.txt, where :33A: and :24B: are on first line: nogo,
+                  only tid locator 2 and value are found. Match was by SWIFT_1_TransId_Parser, due to
+                  its pattern which matched the first line of the msg.
+                Retest w/SWIFT_2_RegEx_Parser_2 call before SWIFT_1_TransId_Parser call: OK, got 4 fields.
+    -->
+    <parser name="SWIFT_2_RegEx_Parser_2" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[(?<tid>(:33A:)(.[^\s:,%@]*))|(?<type>(:24B:)(.[^\s:,%@]*))|(?<amount>(:35J:)(.[^\s:,%@]*))|
+(?<nameadrs>(:57J:)(.[^:,%@]*))|(?<sender>(:36:)(.[^:,%@]*)) ]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="SWIFT_2_RegEx_Parser_2"/>
+        <field name="TransId" locator="3" locator-type="REMatchId"/>
+        <field name="TransType" locator="6" locator-type="REMatchId"/>
+        <field name="TransValue" locator="9" locator-type="REMatchId"/>
+        <field name="UserData" separator=":">
+            <field-locator locator="12" locator-type="REMatchId"/>
+            <field-locator locator="15" locator-type="REMatchId"/>
+        </field>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 7 -->
+    <!-- 09/25/17  Use the same msg data to get the user data
+        Extract as field "UserData=line1_10chars:line7_full"
+        Match each line with regex of "any chars, any numer of times "
+        First line will be limited to 10 chars
+        Need locator by capture group number since we don't know the field names that can appear on line 1 or line 7
+        Maybe try pattern:
+          <property name="Pattern"><![CDATA[(?<Line1>.*)\n(?<Line2>.*)\n(?<Line3>.*)\n(?<Line4>.*)\n(?<Line5>.*)\n(?<Line6>.*)\n(?<Line7>.*)\n]]></property>
+     -->
+
+    <!-- When called directly from main stream, it works: tnt4j-streams.log trace shows:
+            ActivityRegExParser] - Locator '1' resolved value: TID:TID_TEST51
+            ActivityRegExParser] - Locator '7' resolved value: NAME:Lloyds-Bank
+            ActivityInfo] - Applying field 'UserData' from: [TID:TID_TEST51, NAME:Lloyds-Bank]
+        and tnt4j-streams-activities.log:
+            "UserData","type": "string","value": "TID:TID_TEST51:NAME:Lloyds-Bank"
+        When transform is added, trace shows correct extract of first 10 chars of line 1:
+            ActivityInfo] - Applying field 'UserData' from: [TID:TID_TE, NAME:Lloyds-Bank]
+        09/26/17
+        When called as a subparser, did not figure out yet how to pass the full msg.
+        Test with msg with an 8th NV line and reduced pattern, see Test_7_UserData_Parser_2.
+        10/09/17: Retest, called direct from stream stanza: nogo: No group with name <1>
+                  Add <property name="MatchStrategy" value="MATCH"/>: same result
+    -->
+    <parser name="Test_7_UserData_Parser_1" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+
+        <!-- Define pattern as 7 lines of any length ending with NL -->
+        <!-- Tested pattern with online regex tester -->
+
+        <property name="Pattern" value="(.*)\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)\n(.*)\n"/>
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="MatchStrategy" value="MATCH"/>
+
+        <field name="ParserName" value="Test_7_UserData_Parser_1"/>
+        <field name="UserData" separator=":">
+
+            <!-- locators are regex group numbers, where each group is one msg line, excluding the NL char -->
+            <!-- $fieldValue.toLowerCase  works
+                 $fieldValue[0..9]        works -->
+
+            <field-locator locator="1" locator-type="Index">
+                <field-transform name="line1" lang="groovy">
+                    $fieldValue[0..9]
+                </field-transform>
+            </field-locator>
+            <field-locator locator="7" locator-type="Index"/>
+        </field>
+    </parser>
+
+    <parser name="Test_7_UserData_Parser_2" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!--Define pattern as 7 lines of any length, each ending with NL -->
+        <!-- 09/26/17 Test with 8 or more lines msg and named capture groups. Desired lines are in named groups Line1 and Line 7.
+                      Pattern contains '<' so must use CDATA form: OK
+                        ActivityInfo] - Set property 'UserData' value to 'TID:TID_TE:NAME:Lloyds-Bank'
+                      The last 2 terms "(.*\n){0,}" were needed else regex parser said match not found. The extra terms
+                      are required for matching of the full msg, not just through line 7.
+                      Regex parser requires match on the full msg at this time.
+             10/09/17 Still working if called directly
+                  Try UserData field-locator REGroupNum instead of Name: nogo,
+                    java.text.ParseException: Failed parsing RegEx Group data for field UserData
+                    Caused by: java.lang.IllegalArgumentException: No group with name <1>
+                  Restore original lines, but change locator name Line1 to invalid Line11 to see the error msg:
+                    java.text.ParseException: Failed parsing RegEx Group data for field UserData
+                    Caused by: java.lang.IllegalArgumentException: No group with name <Line11>.
+                  Same as for group number; maybe code err??
+        -->
+
+        <property name="Pattern"><![CDATA[(?<Line1>.*)\n(.*\n){5}(?<Line7>.*)(.*\n){0,}]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="Test_7_UserData_Parser_2"/>
+        <field name="UserData" separator=":">
+            <!-- locators are regex group names, where each group is one msg line, excluding the NL char -->
+            <field-locator locator="Line1" locator-type="REGroupName">
+                <!--field-locator locator="1" locator-type="REGroupNum"-->
+                <field-transform name="line1" lang="groovy">
+                    $fieldValue[0..9]
+                </field-transform>
+            </field-locator>
+            <field-locator locator="Line7" locator-type="REGroupName"/>
+        </field>
+    </parser>
+
+    <!-- 10/09/17 Modify Parser_2 to use group nums w/pattern that yielded 2 groups in online regex101
+                  nogo: No group with name <1>
+         11/02/17 Test w/msg TEST51_flag_NL_mod2.txt: OK; locator 1, group nbr 1 is entire msg
+                    ActivityFieldLocator] - Field entity 'REGroupNum::1' value after applying transformation 'line1': TID:TID_TE
+                    ActivityRegExParser] -  Locator '2' resolved value: NAME:Lloyds-Bank
+                  Working; output is UserData="TID:TID_TE:NAME:Lloyds-Bank\n"
+                  *** Pattern used is not complete, so don't use this parser. ***
+    -->
+    <parser name="Test_7_UserData_Parser_3" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[((.*\n){7})]]></property>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="Test_7_UserData_Parser_3"/>
+        <field name="UserData" separator=":">
+            <field-locator locator="1" locator-type="Index">
+                <field-transform name="line1" lang="groovy">
+                    $fieldValue[0..9]
+                </field-transform>
+            </field-locator>
+            <field-locator locator="2" locator-type="Index"/>
+        </field>
+    </parser>
+
+    <!-- TEST CASE 7 -->
+    <!-- MSG: TEST51_flag_NL_mod2.txt -->
+    <!-- Correctly parses case 7 msg TEST51_flag_NL_mod2.txt and TEST51_flag_NL_mod2a.txt -->
+    <!-- Incorrectly parses case 7 msg TEST51_flag_NL.txt and got no expected output      -->
+    <parser name="Test_7_Mixed_NV_Offsets_Lines_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityNameValueParser">
+        <property name="FieldDelim" value="&#10;"/>
+        <property name="ValueDelim" value=":"/>
+        <!-- <property  name="EntryPattern"><![CDATA[(?<key>.+?):(?<value>.*)]]></property>  -->
+        <!-- <property  name="EntryPattern"><![CDATA[(?<key>.+?):(?<value>[^\r\n]*(?:[\r\n]+(?!.+:).*)*)]]></property> -->
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="Test_7_Mixed_NV_Offsets_Lines_Parser"/>
+        <field name="TransID" locator="TRADE" locator-type="Label"/>
+        <field name="TransType" locator="TYPE" locator-type="Label"/>
+        <field name="TransValue" locator="AMOUNT" locator-type="Label"/>
+
+        <!-- User data:  Value at offset 0,length 10 and value on line 7, joined by a colon.
+             Expected value:  TID:TID_TE:NAME:Lloyds-Bank 
+             Using locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" : nogo
+             Using locator="TID", assuming we know that msg starts with that pattern: nogo;
+             only the "TID" value string "TID_TEST51" instead of the entire msg was passed to the UserData parser.
+        -->
+        <!--Bypass use of an additional parser since I can't figure out how to set the locator to the start of msg -->
+        <!--Try Parser_1 with locator 1, index, meaning offset to byte 1, the first byte of the msg: nogo
+                ActivityNameValueParser] - Locator '1' resolved value: null
+            Try Parser_2 with locator 1, index: nogo, same result.
+        -->
+        <!--
+        <field name="UserData"   locator="1"   locator-type="Index" 
+              datatype="String" format="string"  transparent="true">
+            <parser-ref name="Test_7_UserData_Parser_2" aggregation="Merge"/>
+        </field>
+        -->
+
+        <!-- Define UserData inline, assuming we know the tag names on lines 1 and 7: OK
+                ActivityInfo] - Set property 'UserData' value to 'TID:TID_TE:NAME:Lloyds-Bank'
+             09/26/17 Works also for the msg with an extra 8th NV line.
+        -->
+        <field name="UserData" separator=":">
+            <field-locator locator="TID" locator-type="Label">
+                <field-transform name="Line1" lang="groovy">
+                    "TID:" + $fieldValue[0..5]
+                </field-transform>
+            </field-locator>
+
+            <field-locator locator="NAME" locator-type="Label">
+                <field-transform name="Line7" lang="groovy">
+                    "NAME:" + $fieldValue
+                </field-transform>
+            </field-locator>
+        </field>
+
+    </parser>
+
+    <!-- TEST CASE 7 (?? or 7A) -->
+    <!-- MSG: TEST51_flag_NL_mod2.txt -->
+    <!-- 09/20/17  Suggested fix from Andrius for stacked parsers: -->
+    <!--           Test w/TEST51_flag_NL_mod2.txt: BNYM no trace, SWIFT 2 no trace, Test 7 NV parse trace
+                   Order was 6,4,7. Move 7 before 4.
+                   Order now 6,7,4 retest:
+                   1st trace is case 4, not case 6:
+                      2017-09-20 13:16:50,979 DEBUG
+                      [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityRegExParser] - Input does not match pattern ':(?<key>.*):(?<value>.[^:]*)' defined in parser 'SWIFT_2_RegEx_Parser'
+                   2nd trace is case 6:
+                   2017-09-20 13:16:50,988 DEBUG [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityXmlParser] - Activity data after pre-parsing: TID:TID_TEST51:etc
+                   Caused by: java.text.ParseException: Can not build XML DOM document from input:
+                   Caused by: org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.
+                   3rd trace: 2017-09-20 13:16:51,030 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!WmqTraceStream] - Trace message consumption check: found PCF message activity trace marker value: 1/1
+                   *** No Test 7 NV parser trace. Case 6 failure blocked execution of parser 7.
+                   Order is 6,7,4:
+                   Repeated last test at 13:31 w/new trace files, same results. Appears that the last parser in list is called first. Why did parser case 6 execute after case 4? Why not parser case 7?
+                   Test case 6 w/msg TEST30_bnym4.txt:
+                      Trace shows case 4 first, no input match; then case 6,
+                      which parsed ok. Case 7 was skipped again
+                   Add extra case 7, order 6,7,7,4:
+                        No case 4 trace, first and only trace ActivityNameValueParser case 7, no case 6 trace:
+                        ActivityNameValueParser] - Split input into 71 fields *** obvious error ***
+                        such as "Name/Value: <amount>EUR 0.01</amount>"
+                        Each msg line was shown as a name/value pair. Msg has 70 text lines + 2 blank end lines
+                    Now swap 6 and 7 first instance and see if second test, case 7, is skipped and case 6 executed instead: same result, with 71 field split. case 4 parser not called. case 6 regex parser not called.
+        09/25/17   Test Andrius fix for parser order and added tracing:
+                   1.Restore original order 6,4,7, test case 7 first TEST51_flag_NL_mod2.txt: OK
+
+                       Parser 'TraceEventsParser' is applying stacked parser 'BNYM_XML_Msg_Data_Parser:Merge' for field 'MessageFormats
+                       ActivityXmlParser] - RAW activity data: TID:TID_TEST51:etc
+                       ActivityXmlParser] - Activity data after pre-parsing: TID:etc
+                       ActivityPCFParser] - Parser 'TraceEventsParser' failed to apply stacked parser 'BNYM_XML_Msg_Data_Parser:Merge' for field 'MessageFormats'
+                       ParseException: Can not build XML DOM document from input:
+                       Caused by: org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog
+
+                       Parser 'TraceEventsParser' is applying stacked parser 'SWIFT_2_RegEx_Parser:Merge' for field 'MessageFormats'
+                       ActivityRegExParser] - RAW activity data: TID:TI
+                       ActivityRegExParser] - Activity data after pre-parsing: TID:etc
+                       ActivityRegExParser] - Input does not match pattern ':(?<key>.*):(?<value>.[^:]*)' defined in parser 'SWIFT_2_RegEx_Parser'
+                       ActivityRegExParser] - Got nothing to parse from RAW activity data
+
+                       ActivityPCFParser] - Parser 'TraceEventsParser' is applying stacked parser 'Test_7_Mixed_NV_Offsets_Lines_Parser:Merge' for field 'MessageFormats'
+                       ActivityNameValueParser] - RAW activity data: TID:TID_TEST51 etc
+                       ActivityNameValueParser] - Activity data after pre-parsing: TID:T etc
+                       ActivityNameValueParser] - Input string to split: TID:etc
+                       ActivityNameValueParser] - Split input into 8 fields
+                       Found Name/Value: TID:TID_TEST51 [etc , 7 more similar lines]
+                       ActivityNameValueParser] - Parsing: [=, TRADE=IBM-TEST51, ACTION=START-TEST51, AMOUNT=$124, TYPE=SELL, PAYOR=HBCTESTER, TID=TID_TEST51, NAME=Lloyds-Bank]
+                       Parser 'TraceEventsParser' successfully applied stacked parser 'Test_7_Mixed_NV_Offsets_Lines_Parser:Merge
+        09/27/17 	Test_7 parser, if listed before Test_16 parser, gets called and processes the msg.
+                    Switch order:
+        10/27/17	Try matchExp for TEST_3A: seemed to continue for AAA.LQ
+                    Try w/o CDATA since this not XML anyway
+        10/30/17	TEST_3A working w/matchExp.
+    -->
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 16 -->
+    <!-- 09/27/17 NOGO: ActivityRegExParser] - Input does not match pattern '(.*\n){0,}(USER_DATA=)(.*?[\s:,%])(.*\n){0,}' defined in
+                  parser 'Test_16_Random_Format_Parser'
+                  Try: (.*\n){0,}(USER_DATA)=(.*[\s:,%])(.*\n){0,} :nogo, same error
+                  Try: (USER_DATA)=(.*[\s:,%]) :nogo, same error
+                  Try: (USER_DATA)=(.*[\s:,%])(.*) :nogo, same error
+                  Try: (.*\n)(.*)(TID)=(.*[\s:,%])(.*)(USER_DATA)=(.*[\s:,%])(.*)  w/answer in group 7 of 8 groups; this parses the
+                        entire msg in rexex101: nogo, same error
+                        regex101 parsing:
+                            Group 1.	0-26	`Mesage with random format
+                            `
+                            Group 2.	26-38	`My_msg_hdr::`
+                            Group 3.	38-41	`TID`
+                            Group 4.	42-66	`TEST16_TID JUNK=MY_JUNK
+                            `
+                            Group 5.	66-82	`TYPE=TEST16_BUY@`
+                            Group 6.	82-91	`USER_DATA`
+                            Group 7.	92-108	`TEST16_UserData
+                            `
+                            Group 8.	108-126	`AMOUNT=TEST16_$123`
+
+    -->
+
+    <!-- UNUSED -->
+    <!-- 09/28/17: working -->
+    <!-- 10/10/17: working -->
+    <!-- Input:  All data from input msg to the left or right of "USER_DATA=value"
+         Output: If TID name and value are found, send TransID value in JSON format.
+    -->
+    <parser name="Test16_FreeFormTextParser_TID" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- This pattern works in regex01 on string part1 passed to it for test case 16 -->
+        <property name="Pattern"><![CDATA[(?<part1>(?s).*)(TID=)(?<tid>(.[^\s:,%@]*))(?<part2>(?s).*)]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="TransID" locator="tid" locator-type="REGroupName"/>
+    </parser>
+
+    <!-- UNUSED -->
+    <parser name="Test16_FreeFormTextParser_TYPE" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[(?<part1>(?s).*)(TYPE=)(?<type>(.[^\s:,%@]*))(?<part2>(?s).*)]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="TransType" locator="type" locator-type="REGroupName"/>
+    </parser>
+
+    <!-- UNUSED -->
+    <parser name="Test16_FreeFormTextParser_AMOUNT" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern"><![CDATA[(?<part1>(?s).*)(AMOUNT=)(?<amount>(.[^\s:,%@]*))(?<part2>(?s).*)]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="TransValue" locator="amount" locator-type="REGroupName"/>
+    </parser>
+
+    <!-- UNUSED -->
+    <!-- 09/28/17 Andrius's solution after a parser fix to add MatchStrategy of
+         FIND substring or MATCH entire input.
+         Our pattern:
+          <property name="Pattern"><![CDATA[(?<tid>(TID)=(.[^\s:,%]*))((?s).*)(?<userData>(USER_DATA)=(.[^\s:,%]*))]]
+         Find 'TID' followed by '='. Value is 0 or more chars excluding whitespace ':' ',' and '%', any of which
+         thus terminates the string. Then ((?s).*) find string of all chars incl \r\n (called DOTALL),
+         but stopping when 'USER_DATA' is found. It's value is 0 or more of any chars with same chars exclusion
+         as before, any of which terminates the string.
+
+         This is not the earlier requirement as stated in Note 2 below, to get 10 chars from line 1 and all data from line 7 w/o knowing the tag/labels. It gets 10 chars from the combined TID name/value and all the chars from the combined USER_DATA name/value.
+         The TID does not need to be at start of msg.
+         OK: Formed UserData property: TID=TEST16:USER_DATA=TEST16_UserData
+         Modify fields to get just the USER_DATA value. The above pattern knows that TID comes before USER_DATA,
+           ((?s).*)(USER_DATA=)(?<userData>(.[^\s:,%]*))
+         OK: Trace msg: ...ActivityRegExParser] - Locator 'userData' resolved value: TEST16_UserData.
+         Try same pattern w/o the leading ((?s).*), i.e. (USER_DATA=)(?<userData>(.[^\s:,%]*)) : OK
+         Try alternation pattern: (USER_DATA=)(?<user_data>(.[^\s:,%]*))|(TID=)(?<tid>(.[^\s:,%]*)) : OK partially
+         TID appears earlier in the msg, so it was found first and satisfies the regex. Trace output:
+            Locator 'userData' resolved value: null
+            Locator 'tid' resolved value: TEST16_TID
+         How to match on both??
+         Maybe parse here for USER_DATA, with locatorw for strings before and after USER_DATA.
+         Then call parser for TID twice, once with locator1 and once with locator2; one of them should match.
+         Then call parser for money value twice w/both locators. etc for other strings to be found.
+    -->
+    <parser name="Test16_FreeFormTextParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- property name="Pattern"><![CDATA[(?<tid>(TID)=(.[^\s:,%]*))((?s).*)(?<userData>(USER_DATA)=(.[^\s:,%]*))]]></property-->
+        <!--property name="Pattern"><![CDATA[(USER_DATA=)(?<userData>(.[^\s:,%]*))]]></property-->
+        <property name="Pattern"><![CDATA[(?<part1>(?s).*)(USER_DATA=)(?<userData>(.[^\s:,%]*))(?<part2>(?s).*)]]></property>
+
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <!-- Get "TID=xxx.." chars 1 to 10 -->
+        <!-- Bypass to extract just USER_DATA value
+       <field name="UserData" separator=":">
+           <field-locator locator="tid" locator-type="REGroupName">
+               <field-transform lang="groovy" name="TIDSubstring">
+                   <![CDATA[
+                     ($fieldValue == null || $fieldValue.length() <= 10) ? $fieldValue :$fieldValue.substring(0,10)
+                     ]]>
+               </field-transform>
+           </field-locator>
+           <field-locator locator="userData" locator-type="REGroupName"/>
+       </field>
+       -->
+
+        <field name="ParserName" value="Test16_FreeFormTextParser"/>
+        <field name="UserData" locator="userData" locator-type="REGroupName"/>
+        <!-- Some transform code like above to test if UserData was found before calling TID parser,
+             Should look for TID first, then if found call UserData and other sub-parsers. -->
+
+        <!-- TID order is part1 then part2.
+             Problem??
+             Looks like part2 was called but not part1. So, reverse order and retest:
+             now part1 called and part2 not called,
+             TID found: "TEST16_TID", UserData found: TEST16_UserData.
+             Maybe because same parser being used, only the 2nd call is made?
+             Test w/diff parser name for part 2: same result; only second parser part1 was called.
+             Maybe caused because both field shave same 'name'
+             Try w/diff field names but same subparser: OK
+                ActivityInfo] - Set property 'TransID' value to 'TEST16_TID' as 'none' replacing map entry: 'null'
+                ActivityRegExParser] - Parser 'Test16_FreeFormTextParser' successfully applied stacked parser 'Test16_FreeFormTextParser_TID:Merge' for field 'TID_part1'
+
+                ActivityRegExParser] - Locator 'part2' resolved value: AMOUNT=TEST16_$123
+                ActivityInfo] - Applying field 'TID_part2' from: AMOUNT=TEST16_$123
+                Parser 'Test16_FreeFormTextParser' is applying stacked parser 'Test16_FreeFormTextParser_TID:Merge' for field 'TID_part2'
+                ActivityRegExParser] - Activity data after pre-parsing: AMOUNT=TEST16_$123
+                ActivityRegExParser] - Input does not match pattern '(?<part1>(?s).*)(TID=)(?<tid>(.[^\s:,%]*))(?<part2>(?s).*)' defined in parser 'Test16_FreeFormTextParser_TID'
+                ActivityInfo] - Applying field 'TransID' from: TEST16_TID
+                "name": "TransID","type": "string","value": "TEST16_TID"
+
+             Test w/test16_1.txt, has TID after USER_DATA instead of before it: OK
+               Now part2 has the TID data:
+               Locator 'part2' resolved value: AMOUNT=TEST16_$123::TID=TEST16_TID
+               ActivityRegExParser] - Parser 'Test16_FreeFormTextParser' successfully applied stacked parser 'Test16_FreeFormTextParser_TID:Merge' for field 'TID_part2'
+               "name": "TransID","type": "string","value": "TEST16_TID"
+
+           Add TYPE parsing: type in part1, left part before USER_DATA: ok:
+               ActivityRegExParser] - Parsing: Mesage with random format My_msg_hdr::JUNK=MY_JUNK::TID=TEST16_TID
+               ActivityRegExParser] - Locator 'type' resolved value: TEST16_BUY@
+           Have to eliminate the '@'; should be one of the delimiters [in list of chars to exclude from pattern]:OK
+              ActivityRegExParser] - Locator 'type' resolved value: TEST16_BUY | TRACE
+           Test type in part2 after USER_DATA, msg test16_2.txt: OK
+                 ActivityRegExParser] - Parsing: TYPE=TEST16_BUY@AMOUNT=TEST16_$123
+                Locator 'type' resolved value: TEST16_BUY
+                ActivityRegExParser] - Parser 'Test16_FreeFormTextParser' successfully applied stacked parser 'Test16_FreeFormTextParser_TYPE:Merge' for field 'TYPE_part2'
+           9/29/17:
+           Add AMOUNT parsing, finds AMOUNT in part 1 or part 2 msg test16_3.txt
+               ActivityRegExParser] - Locator 'part2' resolved value: AMOUNT=TEST16_$123
+               ActivityRegExParser] - Parser 'Test16_FreeFormTextParser' successfully applied stacked parser 'Test16_FreeFormTextParser_AMOUNT:Merge' for field 'AMOUNT_part2'
+                    or
+               ActivityInfo] - Applying field 'TransValue', value=TEST16_$123
+               ActivityRegExParser] - Parser 'Test16_FreeFormTextParser' successfully applied stacked parser 'Test16_FreeFormTextParser_AMOUNT:Merge' for field 'AMOUNT_part1'
+               Try insert of parser-ref TID_Part2 under field-transform: nogo, loaded okay but execution time groovy failure
+        -->
+
+        <field name="TID_part2" locator="part2" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_TID" aggregation="Merge"/>
+        </field>
+
+        <field name="TID_part1" locator="part1" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_TID" aggregation="Merge"/>
+        </field>
+
+        <!-- Similarly, find and extract TYPE -->
+        <field name="TYPE_part1" locator="part1" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_TYPE" aggregation="Merge"/>
+        </field>
+
+        <field name="TYPE_part2" locator="part2" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_TYPE" aggregation="Merge"/>
+        </field>
+
+        <!-- Similarly, find and extract AMOUNT -->
+        <field name="AMOUNT_part1" locator="part1" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_AMOUNT" aggregation="Merge"/>
+        </field>
+
+        <field name="AMOUNT_part2" locator="part2" locator-type="REGroupName" transparent="true">
+            <parser-ref name="Test16_FreeFormTextParser_AMOUNT" aggregation="Merge"/>
+        </field>
+
+    </parser>
+
+    <!-- Andrius notes:
+    NOTE1: I used RegEx group names "?<tid>" and "?<userData>", so I do not
+    need to count which group index i to map in the parser. Regex101 does
+    not like group names, but Java allows this.
+
+    NOTE2: Taking your previous mail into account, I've made "UserData" field
+       to have value like you have described:
+       "The requirement is "Get line 1, first 10 chars starting from offset 0,
+       and get complete line 7, and join the two strings with a colon to form
+       the UserData property". So, yes, the labels/tags are included."
+    -->
+
+    <!-- 10/10/17 Parser suggested by Andrius to find "xxx=value" anywhere in a message:
+                    REMatchId:
+                    Indicates that raw data value is the value of a specific regular expression match, for parsers that interpret the
+                    raw activity data using a regular expression pattern defined as a sequence of repeating match patterns. Match
+                    identifier can be group sequence number or name.
+                  Test result: TID=TEST16_TID, TYPE=TEST16_BUY@USER_DATA=TEST16_UserData
+                  - Add @ as excluded value char so that @ is a value delimiter
+                  - How to drop the 'name=' (e.g. 'TID=' or 'TYPE=') from all the fields?
+                    Try moving (TID)= before the key ?<tid> : nogo; subexpression ignored completely
+                    Ran regex101, compare to trace: regex group nbrs are 1:TID=TEST16_TID, 2:TID, 3:TEST16_TID,
+                       4:AMOUNT=TEST16_$123, 5:AMOUNT, 6:TEST16_$123, etc n:full string name=value, n+1:name, n+2:value
+                       Group locator "tid" is same as group nbr 1; "amount" is same as group nbr 4.
+                    Try using Index values 3,6,9,12 to get just the values: nogo, no JSON output;
+                      java.text.ParseException: Failed parsing activity data using RegEx for field 'UserData2'
+                      ...
+                      Caused by: java.lang.IllegalStateException: No match found
+                    Try again using same locator group nbrs but with REMatchId: OK; traces saved.
+        11/14/17  Swap field names so that the std fields uisng locator group numbers get the plain values.
+    -->
+    <parser name="Test16_FreeFormTextParser_2" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="Pattern">
+            <![CDATA[(?<tid>(TID)=(.[^\s:,%@]*))|(?<amount>(AMOUNT)=(.[^\s:,%@]*))|(?<type>(TYPE)=(.[^\s:,%@]*))|(?<userData>(USER_DATA)=(.[^\s:,%@]*))]]></property>
+
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="Test16_FreeFormTextParser_2"/>
+        <field name="TransID2" locator="tid" locator-type="REMatchId"/> <!-- ok -->
+        <field name="TransValue2" locator="amount" locator-type="REMatchId"/> <!-- ok -->
+        <field name="TransType2" locator="type" locator-type="REMatchId"/> <!-- ok -->
+        <field name="UserData2" locator="userData" locator-type="REMatchId"/> <!-- ok -->
+
+        <field name="TransID" locator="3" locator-type="REMatchId"/> <!-- ok -->
+        <field name="TransValue" locator="6" locator-type="REMatchId"/> <!-- ok -->
+        <field name="TransType" locator="9" locator-type="REMatchId"/> <!-- ok -->
+        <field name="UserData" locator="12" locator-type="REMatchId"/> <!-- ok -->
+    </parser>
+
+    <!-- ============================================================================================ -->
+    <!-- TEST CASE 9 -->
+    <!-- Msg: TEST70_Danone_RFH2_USER_DOCX_FILENAMX_BLOB.dat -->
+    <!-- Pre-parsing trace lines:
+         2017-09-29 12:26:18 ...ActivityXmlParser] - Activity data after pre-parsing step: [#document: null] |
+         2017-09-29 12:26:18... ActivityXmlParser] - Activity data after pre-parsing: [#document: null]
+         2017-09-29 12:26:18... ActivityXmlParser] - Parsing:
+            <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            <root>
+            <mcd>
+            <Msd>mrm</Msd>
+            <Set>ia9f_BLOB</Set>
+            <Type>BLOB_BO</Type>
+            <Fmt>CwXML</Fmt>
+            </mcd>
+            <usr>
+            <ROUTE>BB_GB8_YYYY_SAP_MANBAR_FLOW_Delivery_OTC</ROUTE>
+            <QUEUE_OUT>UEB301S.QR.WFRSTO68Q.QL.EAI_FRxZZZJTEXT</QUEUE_OUT>
+            etc
+            534f4446494c2073697a653d2231223e3c4e533</BLOB_BO:BLOB>
+            </root>
+            -->
+    <!-- Trace looks OK:
+         ActivityXmlParser] - Locator '/root/usr/DOX_NUMBER' resolved value: 0000000129279872
+         ActivityInfo] - Applying field 'TransID', value=0000000129279872
+         ActivityXmlParser] - Locator '/root//usr/MESSAGE_TYPE' resolved value: ZCORDELVRY05_OTC
+         ActivityInfo] - Applying field 'TransType', value=ZCORDELVRY05_OTC
+         ActivityXmlParser] - Locator '/root/usr/FILENAMX' resolved value: D:\MQTools\test_nastel\file\
+         ActivityInfo] - Set property 'UserData' value to 'D:\MQTools\test_nastel\file\
+         ActivityPCFParser] - Parser 'TraceEventsParser' successfully applied stacked parser 'Test_9_XML_RFH2_Parser:Merge' for field 'MessageFormats'
+
+         Worked once then failed twice:
+           ActivityXmlParser] - Activity data pre-parsing failed: | ERROR
+           org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted.
+        10/03/17  Test again after rebuild of fix from Andrius: nogo; same problem. PUT 1 ok, GET 1 nok.
+                  Restart: Put 1,   Restart: Get
+        10/10/17: Test latest fix from Andrius: put, get, put, get working.
+    -->
+
+    <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+        <!--IF RAW ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. -->
+        <!--<param name="format" value="base64Binary" 
+					type="com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType"/>-->
+        <!--<param name="format" value="base64Binary" type="java.lang.String"/>-->
+    </java-object>
+
+    <parser name="Test_9_XML_RFH2_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+        <!--
+            <property  name="Namespace" value="BLOB_BO=http://www.ibm.com/websphere/crossworlds/2002/BOSchema/BLOB_BO"/>
+            <property  name="Namespace" value="JText_META_DATA=http://www.ibm.com/websphere/crossworlds/2002/BOSchema/JText_META_DATA"/>
+            <property  name="Namespace" value="xsd=http://www.w3.org/2001/XMLSchema"/>
+        -->
+        <!--
+            <property  name="Namespace" value="xsi=http://www.w3.org/2001/XMLSchema-instance">
+        -->
+
+        <!-- Convert RFH2 msg to full parseable XML msg with /root as its main element -->
+        <reference name="XMLFromRFH2PreParser"/>
+
+        <field name="ParserName" value="Test_9_XML_RFH2_Parser"/>
+        <field name="TransID" locator="/root/usr/DOX_NUMBER" locator-type="Label"/>
+        <field name="TransType" locator="/root/usr/MESSAGE_TYPE" locator-type="Label"/>
+        <!-- field name="TransValue" locator="/root/META_DATA/JText_META_DATA/OutFileName"  locator-type="Label"  nogo -->
+        <!-- Msg is appx 12000 bytes; I edited mqat.ini to allow max of 20000 bytes vs 10000 -->
+        <!-- Try this w/NamespaceAware=false, works in online xpath tester"
+               locator="/root/BLOB_BO:BLOB_BO/BLOB_BO:MetaData/JText_META_DATA:JText_META_DATA/JText_META_DATA:FileWriteMode"
+             nogo, null -->
+        <!-- Try it w/NamespaceAware=true, works in online xpath tester:
+               Element='<JText_META_DATA:FileWriteMode xmlns:JText_META_DATA="http://www.ibm.com/websphere/crossworlds/2002/BOSchema/JText_META_DATA">o</JText_META_DATA:FileWriteMode>'
+               If I remove "JText_META_DATA:" prefix before the FileWriteMode, then xpath testaer says No Match.
+               nogo: null, but other fields were found as before.
+              Try same locator with Namespace properties added; note leading "xmlns:" and leading quote are dropped.
+              Try same locator w/o the NS prefixes: ok, found the "o" value
+              Change filed to OutFileName: OK, found value=D:\MQTools\test_nastel\file\SAP_ZCORDELVRY05_OTC_XXX_YYYY_20160317_134839222.txt
+              Try w/o the NS property lines above: OK
+              Now try w/NamespaceAware=false: OK
+        -->
+        <field name="TransValue" locator="/root/BLOB_BO/MetaData/JText_META_DATA/OutFileName"
+               locator-type="Label"/>
+        <field name="UserData" locator="/root/usr/FILENAMX" locator-type="Label"/>
+    </parser>
+    <!-- ============================================================================================ -->
+
+    <parser name="Test_11_NonStd_XML_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- ?? 10/02/17 Either forced null TransValue or ParserName might cause the parser to return success
+                while other fields are null: nogo
+                Try nop of UserData: nogo. Still get these 2 back-to-back trace msgs and next stacked
+                parser is not called:
+                    ActivityPCFParser] - Parser 'TraceEventsParser' successfully applied stacked parser 'Test_11_NonStd_XML_Parser:Merge' for field 'MessageFormats'
+                    ActivityPCFParser] - None of parser 'TraceEventsParser' field 'MessageFormats' stacked parsers was applied
+                Temp solution: Move Test_11 parser lower in order after Test_13.
+        -->
+        <field name="ParserName" value="Test_11_NonStd_XML_Parser"/>
+        <field name="TransID" locator="/tXML/Message/PIX/PIXFields/Reference1" locator-type="Label"/>
+        <field name="TransType" locator="/tXML/Message/PIX/TransactionType" locator-type="Label"/>
+        <field name="TransValue" value=""/>
+        <field name="UserData" separator=":">
+            <field-locator locator="/tXML/Header/Reference_ID" locator-type="Label"/>
+            <field-locator locator="/tXML/Message/PIX/PIXFields/ReferenceCode3" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <!-- ============================================================================================ -->
+    <!-- 10/10/17 Initial creation -->
+    <!-- OK partial: TransID varies with SELL or BUY TransType, but fields TransID1 and TransID2 are also sent.
+         10/11/17    Use transparent="true" to block sending of field: OK -->
+    <parser name="Test_12_XML_TID_BasedOn_TransType_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <field name="ParserName" value="Test_12_XML_TID_BasedOn_TransType_Parser"/>
+        <field name="TransID1" locator="/STOCKS/TID" locator-type="Label" transparent="true"/>
+        <field name="TransID2" locator="/STOCKS/ACTION" locator-type="Label" transparent="true"/>
+        <field name="TransType" locator="/STOCKS/TRADE/TYPE" locator-type="Label"/>
+        <field name="TransID" value="">
+            <field-transform name="TransTypeCheck" lang="groovy">
+                ${TransType} == "SELL" ? ${TransID1} : ${TransID2}
+            </field-transform>
+        </field>
+        <field name="TransValue" locator="/STOCKS/TRADE/AMOUNT" locator-type="Label"/>
+        <field name="UserData" locator="/STOCKS/TRADE/NAME" locator-type="Label"/>
+
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 13 -->
+    <!-- 10/02/17 All xpaths test ok using online xpath checker  https://www.freeformatter.com/xpath-tester.html#ad-output
+          PROBLEM: All fields found null value, yet trace says
+                ActivityPCFParser] - Parser 'TraceEventsParser' successfully applied stacked parser 'Test_13_XML_Second_Instances_Parser:Merge'
+          and next parser is not called.
+          Namespace prefix used throughout the msg, so NamespaceAware should be true.
+          Set and test: nogo; still get null values
+          Try without the instance number Debit_Credit_Party[2]: nogo, null values "
+          Try w/o "tns:" in each part of xpath for TransID: nogo, still get null
+          Try NamespaceAware false and w/o "tns:": Found 2 instances of TID tags but returned null values:
+            2017-10-02 23:07:41,033 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityXmlParser] - Locator '/AAL_Request_NEW/OPF_Information/Debit_Credit_Party/Debit_Credit_Party_Account' resolved value: [[tns:Debit_Credit_Party_Account: null], [tns:Debit_Credit_Party_Account: null]]
+            2017-10-02 23:07:41,034 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Applying field 'TransID' from: [[tns:Debit_Credit_Party_Account: null], [tns:Debit_Credit_Party_Account: null]]
+          Try NamespaceAware=true and w/o "tns:" for TID: nogo, same results
+          THUS, REQUIRED: NamespaceAware=false
+          Remove all "tns:" from xpaths: Found 2 instances of each tag, but w/null values.
+          Try instance [1] w/NamespaceAware=false and no "tns:" prefixes: OK, got all 4 fields, instance 1
+          Try instance [2]: OK, got all 4 fields, instance 2
+             Sample trace:
+2017-10-02 23:43:37,705 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityXmlParser] - Locator '/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Party_Account' resolved value: 3583209700
+2017-10-02 23:43:37,705 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Applying field 'TransID' from: 3583209700
+2017-10-02 23:43:37,705 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Applying field 'TransID', value=3583209700
+2017-10-02 23:43:37,705 TRACE [12:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Set property 'TransID' value to '3583209700' as 'none' replacing map entry: 'null'
+
+          PROBLEM: Why did it work w/NamespaceAware=false??
+          ANSWER: See C:\TNT4J\BuildTnt4jStreams\tnt4j-streams-master\run\trace-events\logs\samples\swift\tnt-data-source_xml.xml
+          It shows a parser with and without Property Namespace definition. Without it and with NamespaceAware false, you cannot use
+          namespace prefixes in the xpaths.
+          Test w/NamespaceAware=true: still OK
+    -->
+    <parser name="Test_13_XML_Second_Instances_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <field name="ParserName" value="Test_13_XML_Second_Instances_Parser"/>
+        <field name="TransID" locator="/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Party_Account"
+               locator-type="Label"/>
+        <field name="TransType" locator="/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Type"
+               locator-type="Label"/>
+        <field name="TransValue" locator="/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Amount"
+               locator-type="Label"/>
+        <field name="UserData"
+               locator="/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Party_Name_Line1"
+               locator-type="Label"/>
+    </parser>
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 13A -->
+    <!-- 10/31/17 Created
+        TEST MSG: TEST13A_STUB.OPF.T.AAL.REQUESTS.QUAL.CR.xml (msg name changed fm TEST98_... 11/20/17)
+        Online xpath tester for TransID with this xpath, without any instance brackets,
+          /tns:AAL_Request_NEW/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Party_Account
+        yielded 2 elements:
+            <tns:Debit_Credit_Party_Account xmlns:tns="http://www.bnymellon.com/AAL_Request_NEW">0049609710</tns:Debit_Credit_Party_Account>
+            <tns:Debit_Credit_Party_Account xmlns:tns="http://www.bnymellon.com/AAL_Request_NEW">3583209700</tns:Debit_Credit_Party_Account>
+        Test w/NamespaceAware=false : NOGO; Same as for TEST 13 above, 2 full xpath elements returned with null values, for each field. e.g.
+           ActivityXmlParser] - Applying parser 'Test_13A_XML_All_Instances_Parser' resolved field value: UserData=[[tns:Debit_Credit_Party_Name_Line1: null], [tns:Debit_Credit_Party_Name_Line1: null]]
+        Test w/NamespaceAware=true: null values w/o the element names
+        Test with tns: added: same null values, e.g.
+           ActivityXmlParser] - Locator '/tns:AAL_Request_NEW/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Type' resolved value:null
+        Try format to get all instances of an element, e.g. //tns:Debit_Credit_Party_Name_Line1: nogo; resolved values null
+        Try w/o the 'tns:' namespace prefix: nogo, same resolved values null
+        Try again w/tns: prefix: nogo
+        Try with text() modifier as in online tool example //actor/text() to get textual value: nogo; all nulls, e.g.
+            ActivityXmlParser] - Locator '//tns:Debit_Credit_Party_Account/text()' resolved value: null
+            Online tester xpath
+                //tns:Debit_Credit_Party_Account/text() or   /tns:AAL_Request_NEW/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Party_Account/text()
+            both yield the 2 values:
+               0049609710
+               3583209700
+
+        Try TransID long locator with [1] and text(): nogo;
+           ActivityXmlParser] - Locator '/tns:AAL_Request_NEW/tns:OPF_Information/tns:Debit_Credit_Party[1]/tns:Debit_Credit_Party_Account/text()' resolved value: null
+        Remove text(): nogo
+        Remove tns: prefixes: nogo
+        Test instance [1] again with NamespaceAware false: ok
+           ActivityXmlParser] - Locator '/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[1]/Debit_Credit_Party_Account' resolved value: 0049609710
+        11/06/17 Try to access all instances using Andrius answer, to add Namespace property, same as defined in the TEST_98 msg, w/text() : nogo, all null values
+        Retry w/o text() as in my email to Andrius and in his reply: nogo, all null values
+        Retry w/NamespaceAware true: better but nogo, got names w/empty values, e.g.
+           ActivityXmlParser] - Applying parser 'Test_13A_XML_All_Instances_Parser' resolved field value: TransID=[[tns:Debit_Credit_Party_Account: null], [tns:Debit_Credit_Party_Account: null]]
+        Retry w/text() appended to locators: OK, eg.
+           ActivityXmlParser] - Applying parser 'Test_13A_XML_All_Instances_Parser' resolved field value: TransID=[[#text: 0049609710], [#text: 3583209700]] | TRACE
+        If this is not a good format to send the values to jKool, how to check how many instances returned
+        and then transform into individual outouts, such as TransID1, TransID2, etc?
+        Try groovy regex transform eachMatch:
+
+        11/07/17 New download, build and test: OK, modify the Groovy script transform due to chgd output:
+        ActivityXmlParser] - Applying parser 'Test_13A_XML_All_Instances_Parser' resolved field value: TransID=[0049609710, 3583209700]
+
+        Test Andrius fix w/o Namespace property: ok, Andrius changed code to check for namespace definition in the message, but
+        must setNamespaceAware true.
+        Test w/o /text() on locators: ok
+
+    -->
+    <parser name="Test_13A_XML_All_Instances_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="true"/>
+        <property name="RequireDefault" value="false"/>
+        <!-- <property  name="Namespace"       value="tns=http://www.bnymellon.com/AAL_Request_NEW"/> -->
+
+        <field name="ParserName" value="Test_13A_XML_All_Instances_Parser"/>
+        <!--
+              <field name="TransID"    locator="/tns:AAL_Request_TEST13A/OPF_Information/Debit_Credit_Party/Debit_Credit_Party_Account"
+                                       locator-type="Label"/>
+              <field name="TransType"  locator="/tns:AAL_Request_TEST13A/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Type"
+                                       locator-type="Label"/>
+              <field name="TransValue" locator="/tns:AAL_Request_TEST13A/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Amount"
+                                       locator-type="Label"/>
+              <field name="UserData" locator="/tns:AAL_Request_TEST13A/tns:OPF_Information/tns:Debit_Credit_Party/tns:Debit_Credit_Party_Name_Line1"
+                                       locator-type="Label"/>
+        -->
+        <!-- eachMatch with the regex I used generates two groups per instance:
+          [#text: 0049609710], 0049609710]
+          0049609710
+          [#text: 3583209700], 3583209700]
+          3583209700
+
+        So we write mini-Groovy script to parse and output the non-"#text" lines.
+        Output should be: value1:value2:...  [ extra colon at end of string for now]
+        Note: cannot have any XML style comments in middle of the Groovy script
+        sFound is a Groovy "closure", see http://groovy-lang.org/closures.html
+  -->
+        <field name="TransID" locator="//tns:Debit_Credit_Party_Account"
+               locator-type="Label"
+               datatype="String" format="string">
+
+            <field-transform lang="groovy" name="TransIDTransform">
+
+                <!-- 11/06/17 This groovy script w/eachMatch was valid:
+          2017-11-06 20:37:28,397 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value before phase 'AGGREGATED' transformations: [[#text: 0049609710], [#text: 3583209700]]
+          2017-11-06 20:37:28,481 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value after applying transformation 'TransIDTransform': HelloWorld
+          2017-11-06 20:37:28,481 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Setting property 'TransID' value to 'HelloWorld' (type 'none')
+
+          Fail #2:
+          Caused by: org.codehaus.groovy.control.MultipleCompilationErrorsException: startup failed:
+          TransIDTransform: 7: expecting EOF, found '->' @ line 7, column 13.
+                      ch -> println ch;
+                         ^
+          Add missing right curly brace: fail #3
+              Caused by: java.util.regex.PatternSyntaxException: Unknown inline modifier near index 9
+              #text: (?value.*?)]
+                      ^
+          Remove ?<value> : runs ok, but returns Hello World
+                -->
+
+                <!--
+                      <![CDATA[
+                      /* String s = "Hello World"; */
+                      String   s ="[#text: 0049609799], [#text: 3583209799]"
+                      String[] str="";
+                      String   strOut="";
+
+                      /* s.eachMatch("#.") {                     ok, produces "Hello World" */
+                         /* output format: [#text: 0049609799], 0049609799] */
+                         s.eachMatch("#text: (.*?)]") {
+                         ch -> /* println ch; */
+
+                        str = ch;
+                        for( String value1:str ) {
+                          if (!value1.matches("#text: (.*)"))
+                            strOut = strOut + value1 + ":";
+                          println strOut;						/* shows original value of s string */
+                        }
+                      }
+                    ]]>
+                -->
+
+                <!--  11/06/17 This groovy script w/eachMatch failed:
+                    Looks like 3 args being passed vs expected 1 and optional closure:
+                    Caused by: groovy.lang.MissingMethodException: No signature of method: [Ljava.lang.Object;.eachMatch() is applicable for argument types: (java.lang.String, java.lang.String, TransIDTransform$_run_closure1) values: [#text: (?<value>.*?)], , TransIDTransform$_run_closure1@3f42f5f]
+
+                    Add clos arg: nogo; still looks like 3 args:
+                    Caused by: groovy.lang.MissingMethodException: No signature of method: [Ljava.lang.Object;.eachMatch() is applicable for argument types: (java.lang.String, TransIDTransform$_run_closure1, TransIDTransform$_run_closure2) values: [., TransIDTransform$_run_closure1@83e6b47, TransIDTransform$_run_closure2@7e8fe7b2]
+
+                    Try it w/o 'value' named group, just simple ".": same error
+                -->
+
+                <!--
+                    <![CDATA[
+
+                      String[] str="";     /* array of strings */
+                      String   strOut="";  /* string variable  */
+                      def clos = { param -> println "${param}" };
+
+                      /* call eachMatch w/o a closure */
+                      /* $fieldValue.eachMatch("#text: (?<value>.*?)b") { place right bracket in place of b */
+                      $fieldValue.eachMatch(".", clos) {
+                      sFound ->
+                        /* println sFound; */
+                        str = sFound;
+                        for( String value:str ) {
+                          if (!value.matches("#text: (.*)"))
+                            strOut = strOut + value + ":";
+                        }
+                      }
+                      $fieldValue=strOut;  /* or println strOut will also assign the field value, as in the println above  */
+                    ]]>
+                -->
+
+                <!-- Inserted writer stmts to get output to file and its correct
+                    C:\Users\howard>cat  C:\Example.txt
+                    Hello World
+                    sFound=[#text: 0049609799], 0049609799]
+                    Value is=|0049609799|
+                    strOut=|0049609799:|
+                    sFound=[#text: 3583209799], 3583209799]
+                    Value is=|3583209799|
+                    strOut=|0049609799:3583209799:|
+
+                Add line to assign strOut to $fileValue: OK, got good treace:
+
+                2017-11-07 15:06:04,660 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value before phase 'AGGREGATED' transformations: [[#text: 0049609710], [#text: 3583209700]]
+                2017-11-07 15:06:04,751 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value after applying transformation 'TransIDTransform': 0049609799:3583209799:
+
+                Re-run with 's.eachMatch' string replaced by $fieldValue: fails:
+                    ActivityInfo] - Failed to transform field 'TransID' value: '[[#text: 0049609710], [#text: 3583209700]]' | WARNING
+                    TransformationException: Failed to apply transformation 'TransIDTransform' on phase 'AGGREGATED'
+                    ...
+                    AA: Caused by: groovy.lang.MissingMethodException: No signature of method: [Ljava.lang.Object;.eachMatch() is applicable for argument types: (java.lang.String, TransIDTransform$_run_closure1$_closure2) values: [#text: (.*?)], TransIDTransform$_run_closure1$_closure2@7105341d]
+                Re-try with s=$fieldValue and s.eachMatch: debug file contains only "Hello World" and final output is blank
+                Revert to fixed string: ok
+                Append ':' only if 2nd value or later being added: ok
+                  2017-11-07 15:53:59,381 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value before phase 'AGGREGATED' transformations: [[#text: 0049609710], [#text: 3583209700]]
+                  2017-11-07 15:53:59,495 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value after applying transformation 'TransIDTransform': 0049609799:3583209799
+                  2017-11-07 15:53:59,495 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Setting property 'TransID' value to '0049609799:3583209799' (type 'none')
+                Try again with added field properties datatype="String" format="string" and s=$fieldValue and unassigned s string: as before, blank output and debug file.
+                Print s after assignment and $fieldValue:
+                   Initial string s=[Ljava.lang.Object;@67f88269
+                   fieldvalue=[[#text: 0049609710], [#text: 3583209700]]
+                Try string append 'plus' function to get 's' correctly:  same debug print
+                Try ${TransID} v s$fieldValue: nogo, blank TransID, because "You can also use parser defined field names as script/expression variables having format ${FIELD_NAME} to access resolved activity entity fields like ${EventType} or ${Trace.HighResTime}." Key word is resolved already. At this point, TransID is not resolved.
+                Try "String s = new String($fieldValue)" or "def s = ..." :
+                    Caused by: groovy.lang.GroovyRuntimeException: Could not find matching constructor for: java.lang.String([Ljava.lang.Object;)
+                Rertry use $fieldValue in place of s : same error as AA above. Why?????
+                **** How to pass to Groovy the found field value? ****
+                11/07/16 latest:
+                    Using predefined 's' string: applying transformation 'TransIDTransform': 0049609799:3583209799
+                    C:\Users\howard>cat  C:\GroovyDebug.txt
+            Hello World
+            Initial string s=[[#text: 0049609799], [#text: 3583209799]]
+            fieldValue=[[#text: 0049609710], [#text: 3583209700]]
+            sFound=[#text: 0049609799], 0049609799]
+            lLoopCount before check:0
+            lLoopCount after check:1
+            Value is=|0049609799|
+            strOut=|0049609799|
+            sFound=[#text: 3583209799], 3583209799]
+            lLoopCount before check:1
+            lLoopCount after check:2
+            Value is=|3583209799|
+            strOut=|0049609799:3583209799|
+
+            -->
+
+                <!-- 11/07/17  Need the transform modified slightly after the new build, due to improved output format:
+                               Single surround brackets vs double and "#text:" is not present.
+                               Now it's good, but stll using fixed string 's' :
+                    2017-11-07 20:50:13,026 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value before phase 'AGGREGATED' transformations: [0049609710, 3583209700]
+                    2017-11-07 20:50:13,135 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityField] - Field entity 'TransID' value after applying transformation 'TransIDTransform': 0049609710:3583209700
+                    11/08/17   Leave eachMatch pattern as-is, to find mumerical sequences, since I cannnot get alpha-numeric sequence extracts to work
+                               Test with 3 TID's in string s: ok
+                               !ActivityField] - Field entity 'TransID' value after applying transformation 'TransIDTransform': 004969710:358329700:123456789 | TRACE |
+                               2017-11-08 17:55:26,301 TRACE [13:WmqTraceStream:WmqActivityTraceStreamQM_A!ActivityInfo] - Setting
+                               property 'TransID' value to '004969710:358329700:123456789'  [NOTE 2]
+                    11/14/17   Try eachMatch with $fieldValue. instaed of 's.' : transform failure:
+                                 Caused by: groovy.lang.MissingMethodException: No signature of method: [Ljava.lang.Object;.eachMatch() is applicable for argument types: (java.lang.String, TransIDTransform$_run_closure1$_closure2) values: [[0-9a-zA-Z][^,\]]*, TransIDTransform$_run_closure1$_closure2@1f24449a]
+                -->
+                <![CDATA[
+	
+	/* String   s="[[#text: 0049609799], [#text: 3583209799]]";  old output */
+	String   s="[0A4969710, 3B8329700, 1C3456789]" ;   /* TransID after 11/07/17 rebuild */
+	String   str;
+	String   strOut="";
+	long     lLoopCount = 0;
+	new File("C:\\GroovyDebug.txt").withWriter('utf-8') { 
+         writer -> writer.writeLine 'Hello World' 
+		
+	  /* s=$fieldValue    cannot do; yields invalid 's'=[Ljava.lang.Object;@67f88269 
+						  then missing applicable signature for substring used below */
+	   
+	  /* s=s.plus(${TransID});  nogo */
+	  /* def s = new String($fieldValue); */	  
+	  /* writer.writeLine "TransID=" + ${TransID}; */
+	  
+	  writer.writeLine "Initial string s=" + s;
+	  writer.writeLine "fieldValue=" + $fieldValue ;
+	  /* writer.writeLine "fieldValue.substring(0,16)=" + 
+	     $fieldValue.substring(0,16)  causes msg sig error */
+	
+	  
+	  /* s.eachMatch("#text: (.*?)]")  */
+	  /* s.eachMatch("\\d+")                  OK:  match substrings of digits in "[n1, n2, n3, ...,nn]"  */
+	  /* s.eachMatch("[\\[ ](.+?)[,\\]]")     NOK; match all substrings in "[s1, s2, s3, ..., sn]"   */
+	  /* s.eachMatch("[[:alnum:]]+")  		  NOK: works in reg101, but not in groovy tester nor here, sFound blank */
+	  /* s.eachMatch("([[:alnum:]]+)")        NOK: try w/extra parens to get group numbers in regex101: sFound blank */
+	  /* s.eachMatch("[0-9a-zA-Z][^,\\]]*") */    /* OK:  works in regex101 and groovy test and here as in [NOTE 2] above,
+												   using fixed string 's'.
+	                                               Exclude of comma and right bracket serves as end delimiter for 
+												   the alhpanumeric extracted strings. */
+	  
+	  $fieldValue.eachMatch("[0-9a-zA-Z][^,\\]]*") {
+	  
+		/* ch -> println ch; */
+		/* sFound is a closure param (the output from eachMatch), */
+		/* followed by closure statements that use that param  */
+		sFound ->
+			/* println "sFound=" + sFound; */
+			writer.writeLine "sFound=" + sFound;
+			str = sFound;
+			/* for( String value:str )  */
+			/* println "value="+value  */
+				/* if (!value.matches("#text: (.*)")) */
+				    /* If past first value to save, then first append a ':' */
+					writer.writeLine "lLoopCount before check:" + lLoopCount
+					lLoopCount+=1;
+					if (lLoopCount > 1) {
+				       strOut = strOut + ":";					   
+					}					
+					writer.writeLine "lLoopCount after check:" + lLoopCount
+					/* println("Value is=|" + value + "|");          */
+					/* writer.writeLine "Value is=|" + value + "|";  */
+					strOut = strOut + str;
+					println "strOut=|" + strOut + "|";
+					writer.writeLine "strOut=|" + strOut + "|" ;
+				
+			   /* end for */
+	  } /* end eachMatch */
+	  
+	  $fieldValue = strOut; /* return output */
+    } /* end new File */
+	
+    ]]>
+
+                <!-- With valid s.eachMatch, GroovyDebug,txt:
+                      fieldValue=[[#text: 0049609710], [#text: 3583209700]]
+                      regex group ch=[#text: 0049609799], 0049609799]
+                      regex group ch=[#text: 3583209799], 3583209799]
+                    With $fieldValue.eachMatch, trace lines:
+                    Failed to apply transform...
+                    Caused by: groovy.lang.MissingMethodException: No signature of method: [Ljava.lang.Object;.eachMatch() is applicable for argument types: (java.lang.String, TransIDTransform$_run_closure1$_closure2) values: [#text: (.*?)], TransIDTransform$_run_closure1$_closure2@15d2780a]
+                -->
+
+                <!--
+                        String  s="[#text: 0049609799], [#text: 3583209799]";
+                        new File("C:\\GroovyDebug.txt").withWriter('utf-8') {
+                            writer -> writer.writeLine "fieldValue=" + $fieldValue /* ok, output:
+                                            fieldValue=[[#text: 0049609710], [#text: 3583209700]]   */
+
+                            /* $fieldValue="1234:5678";   ok */
+
+                            /* s.eachMatch("#text: (.*?)]") ok w/s. but nok with $fieldValue. */
+                            $fieldValue.eachMatch("#text: (.*?)]") {
+                              ch -> println "field=" + ch;
+                              writer.writeLine "regex group ch=" + ch;
+                            }
+                        }
+                -->
+            </field-transform>
+        </field>
+
+        <field name="TransType" locator="//tns:Debit_Credit_Type"
+               locator-type="Label"/>
+        <field name="TransValue" locator="//tns:Debit_Credit_Amount"
+               locator-type="Label"/>
+        <field name="UserData" locator="//tns:Debit_Credit_Party_Name_Line1"
+               locator-type="Label"/>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 14 -->
+    <!-- 10/20/17 -->
+    <!-- Test msg: TEST103_WAVES_PPR_RFH_NO_MD_DataVerNoSpace.dat -->
+    <!-- Not a true xml msg; has xml-like elements -->
+    <!-- No pre-parsing, locators /usr/etc : nogo
+                SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.-->
+    <!-- Add pre-parsing: nogo, pre-parsing dropped part of the msg, locators cannot be found-->
+    <!-- Add /root to locators: don't bother w/test, pre-parsing had incorrect output -->
+    <!-- Use another parser: ActivityJMSMessageParser w/o /usr prefixes: msg is not part of a JMS stream-->
+    <!-- 10/23/17 Revisit XML w/pre-parsing (maybe little endian encoding is the problem): nogo -->
+    <!-- Try msg with big endian encoding (manually edited binary lengths): no difference -->
+    <!-- Compare traces of msg TEST103 and TEST70 runs: the space in the XML tags "Data Ver" caused pre-parsing error;
+         change space to underscore in the msg and the TransValue locator and place call to TEST_14 parser before TEST_9: OK -->
+
+    <java-object
+            name="TEST_14_XML_PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+    </java-object>
+
+    <parser name="Test_14_XML_RFH2_JMS_Text_Msg_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+
+        <!-- Convert RFH2 msg to full parseable XML msg with /root as its main element -->
+        <reference name="TEST_14_XML_PreParser"/>
+
+        <field name="ParserName" value="Test_14_XML_RFH2_JMS_Text_Msg_Parser"/>
+        <field name="TransID" locator="/root/usr/ADPMsgCorrelationID" locator-type="Label"/>
+        <field name="TransType" locator="/root/usr/Verb" locator-type="Label"/>
+        <field name="TransValue" separator=":">
+            <field-locator locator="/root/usr/PldFmt" locator-type="Label"/>
+            <field-locator locator="/root/usr/Data_Ver" locator-type="Label"/>
+        </field>
+        <field name="UserData" separator=":">
+            <field-locator locator="/root/usr/ServReg" locator-type="Label"/>
+            <field-locator locator="/root/usr/CustID" locator-type="Label"/>
+            <field-locator locator="/root/usr/SrcSysID" locator-type="Label"/>
+            <field-locator locator="/root/usr/PldEffTime" locator-type="Label"/>
+        </field>
+
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- TEST CASE 15 -->
+    <!-- 10/23/17
+    TEST MSG: bnym_jmsbyte_crash.bin
+    XML parser w/pre-parsing and ConvertToString: nogo due to binary bytes before each name and value in payload.
+    Use a TID locator that's in the usr folder, _wb_PaymentInterchange, w/value 250398550: TID found, but not data in payload.
+    Need to call somehow parseBytesMessage((BytesMessage) message, dataMap) ??
+    Try using use an NV subparser: nogo; char 't' alone does not serve as sufficient delimiter between name and value or between name/value pairs, and the 2 byte binary length has to be accounted for.
+    10/25/17
+    Use regex with logical OR to find specific fields with "t.." for t followed by 2 binary length chars: OK
+    Works with locator-type REMatchId, but not REGroupNum.
+    Tests OK in regex101 tool.
+    "PaymentInstruction" appears twice, as begin tag and end tag. First tag causes locator 11 to be found with value, locator 12. But then the end tag comes along which satisfies locator 11 and causes the locator 12 value to beocome null. So, must make the pattern more specific to find only the begin tag.
+    PROBLEM: The 'TransValue' error caused the values found thus far to be discarded and the next stacked parser to be called:
+      java.text.ParseException: Failed parsing activity data using RegEx for field 'TransValue'
+      ...
+      Caused by: java.lang.IllegalStateException: No match found
+      ...
+      ActivityPCFParser] - Parser 'TraceEventsParser' is applying stacked parser 'Test_14_XML_RFH2_JMS_Text_Msg_Parser:Merge' for field 'MessageFormats'
+   Still get same error after pattern correction and the name and value were the first ones found:
+      ActivityRegExParser] - Adding RegEx match map entry: 11=<_wb_PaymentInstruction
+      ActivityRegExParser] - Adding RegEx match map entry: 12=252025749
+      ActivityRegExParser] - Adding RegEx match map entry: value6=252025749
+      ActivityRegExParser] - Adding RegEx match map entry: 7=InstType
+      ActivityRegExParser] - Adding RegEx match map entry: 8=SWIFT-MT202
+      ActivityRegExParser] - Adding RegEx match map entry: value4=SWIFT-MT202
+      ...
+      ActivityInfo] - Set property 'Trans12' value to '252025749'
+   Move TransValue line from last to first field position: same error
+   Comment out TransValue field: now get the error for UserData.
+   Maybe multiple references to same value is causing the error. Comment out equivalent Trans10 line: same error
+   Restore Trans10
+   Maybe REGroupName no longer working: no refernces to it or REGroupNum in README; seems REMatchId has taken over.
+   Try REMatchId: UserData, TransType, TransID, TransValue - all ok now.
+   WORKING
+-->
+
+    <parser name="TEST_15_NV_Payload_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <property name="MatchStrategy" value="FIND"/>   <!-- find any match -->
+        <property name="Pattern">
+            <![CDATA[(\/ALS\/Hdr\/Brch\/Brch\(n\))t..(?<value1>.*?)t..|(\/ALS\/Hdr\/DDASys)t..(?<value2>.*?)t..|(EntityDisplayId)t..(?<value3>.*?)t..|(InstType)t..(?<value4>.*?)t..|(/ALS/Hdr/SrceRef)t..(?<value5>.*?)t..|(<_wb_PaymentInstruction)>(?<value6>.*?)<]]></property>
+
+        <field name="ParserName" value="TEST_15_NV_Payload_Parser"/>
+        <field name="Trans1" locator="1" locator-type="REMatchId"/>  <!-- expect: /ALS/Hdr/Brch/Brch(n) ok -->
+        <field name="Trans2" locator="2" locator-type="REMatchId"/>  <!-- expect: 04  ok -->
+        <field name="Trans3" locator="3" locator-type="REMatchId"/>  <!-- expect: /ALS/Hdr/DDASys ok -->
+        <field name="Trans4" locator="4" locator-type="REMatchId"/>  <!-- expect: MMD ok -->
+        <field name="Trans5" locator="5" locator-type="REMatchId"/>  <!-- expect: EntityDisplayId ok -->
+        <field name="Trans6" locator="6" locator-type="REMatchId"/>  <!-- expect: EPH1510290001128 ok -->
+        <field name="Trans7" locator="7" locator-type="REMatchId"/>  <!-- expect: InstType  ok -->
+        <field name="Trans8" locator="8" locator-type="REMatchId"/>  <!-- expect: SWIFT-MT202  ok -->
+        <field name="Trans9" locator="9" locator-type="REMatchId"/>  <!-- expect: /ALS/Hdr/SrceRef  ok-->
+        <field name="Trans10" locator="10" locator-type="REMatchId"/>  <!-- expect: EPH1510290001127 ok -->
+        <field name="Trans11" locator="11" locator-type="REMatchId"/>  <!-- expect: PaymentInstruction  ok -->
+        <field name="Trans12" locator="12" locator-type="REMatchId"/>  <!-- expect: 252025749  ok -->
+        <field name="TransID" locator="value3" locator-type="REMatchId"/> <!-- expect: EPH1510290001128  ok -->
+        <field name="TransType" locator="value4" locator-type="REMatchId"/> <!-- expect: SWIFT-MT202  ok -->
+        <field name="UserData" locator="value5" locator-type="REMatchId"/> <!-- expect: EPH1510290001127 ok -->
+        <field name="TransValue" locator="value6" locator-type="REMatchId"/> <!-- expect: 252025749 ok-->
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <java-object
+            name="TEST_15_XML_PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
+    </java-object>
+
+    <!-- Input: MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA
+         _wb_fileName is last element before end tag </usr>
+         11/03/17 TrasID found but TEST_15_NV_Payload_Parser doesn't have correct input
+         Try Payload locator, the full MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA: nogo; locator must be something the XmlParser found.
+         NOT WORKING
+         11/09/17 Try again locating _wb_fileName and passing that to the parser-ref: wb_filename not found
+          Try using same locator _wb_PaymentInterchange used for TransID: nogo; only the value of that field is passed to the PayloadParser:
+             ActivityRegExParser] - RAW activity data: 250398550
+             ActivityRegExParser] - Activity data after pre-parsing: 250398550 | DEBUG
+             ActivityRegExParser] - Input does not match pattern '(\/ALS\/Hdr\/Brch\/Brch\(n\))t..(?<value1>.*?)t..|(\/ALS\/Hdr\/DDASys)t..(?<value2>.*?)t..|(EntityDisplayId)t..(?<value3>.*?)t..|(InstType)t..(?<value4>.*?)t..|(/ALS/Hdr/SrceRef)t..(?<value5>.*?)t..|(<_wb_PaymentInstruction)>(?<value6>.*?)<' defined in parser 'TEST_15_NV_Payload_Parser' |
+
+          How to locate start of the JMS B ytes data and pass to PayloadParser?
+
+          The results of the PreParser, after </usr> is a mess due to the JMS Bytes.
+          </usr>   ??&#0;&#5;sr&#0;&#17;java.util.HashMap&#5;&#7;???&#22;`?&#3;&#0;&#2;F&#0;
+loadFactorI&#0;	thresholdxp?@&#0;&#0;&#0;&#0;&#0;&#24;w&#8;&#0;&#0;&#0; &#0;&#0;&#0;&#24;t&#0;&#8;InstTypet&#0;&#11;SWIFT-MT202t&#0;&#21;/ALS/Hdr/Brch/Brch(n)t&#0;&#2;04t&#0;&#16;/ALS/Hdr/SrceReft&#0;&#16;EPH1510290001127t&#0;&#23;/ALS/Hdr/ReqValue/Aliast&#0;
+0051269710t&#0;&#22;/ALS/Hdr/DrCrIndicatort&#0;&#1;Dt&#0;&#13;ResumeOutcomet&#0;&#8;Continuet&#0;&#12;ResumeCreditt&#0;	ALSCreditt&#0;&#16;/ALS/Hdr/ReqTypet&#0;&#6;ALIASRt&#0;&#12;/ALS/Hdr/Ccyt&#0;&#3;EURt&#0;&#19;/ALS/Hdr/AliasSTypept&#0;&#13;retryAttemptst&#0;&#1;3t&#0;&#8;Outboundt&#0;&#4;truet&#0;&#19;/ALS/Hdr/SendingBict&#0;&#11;IRVTUS3NXXXt&#0;&#17;/ALS/Hdr/SrceMnemt&#0;&#3;EPHt&#0;&#15;EntityDisplayIdt&#0;&#16;EPH1510290001128t&#0;&#15;/ALS/Hdr/DDASyst&#0;&#3;MMDt&#0;&#18;/ALS/Hdr/AliasTypept&#0;
+retryDelayt&#0;&#1;5t&#0;&#19;FlowProcessTemplatet&#0;&#19;E25OutboundTransfert&#0;&#15;FlowContextTypept&#0;	EntityKeyt&#0;	252025749t&#0;&#18;/ALS/Hdr/NbrRecReqt&#0;&#2;00t&#0;
+EntityTypet&#0;6com.clear2pay.bph.opfpayment.domain.PaymentInstructiont&#0;&#11;ResumeDebitt&#0;&#8;ALSDebitx</root>
+    -->
+
+    <parser name="Test_15_XML_RFH2_JMS_Bytes_Msg_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <property name="NamespaceAware" value="false"/>
+        <property name="RequireDefault" value="false"/>
+        <property name="ConvertToString"
+                  value="true"/> <!-- convert BytesMessage payload to strings; property may only apply to JMS parser -->
+
+        <!-- Convert RFH2 msg to full parseable XML msg with /root as its main element -->
+        <reference name="TEST_15_XML_PreParser"/>
+
+        <field name="ParserName" value="Test_15_XML_RFH2_JMS_Bytes_Msg_Parser"/>
+        <!-- field name="TransID" locator="/root/usr/EntityDisplayId"         locator-type="Label"/> -->
+        <field name="TransID" locator="/root/usr/_wb_PaymentInterchange" locator-type="Label"/> <!-- expect 250398550, ok -->
+        <field name="Payload" locator="/root/usr/_wb_PaymentInterchange" locator-type="Label" transparent="true">
+            <parser-ref name="TEST_15_NV_Payload_Parser" aggregation="Merge"/>
+        </field>
+
+    </parser>
+
+    <!-- ============================================================================================ -->
+    <parser name="TEST_19_JSON_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJsonParser">
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="ParserName" value="TEST_19_JSON_Parser"/>
+        <field name="TransID" locator="$.trans_id" locator-type="Label"/> <!-- expect TEST19_TID -->
+        <field name="TransType" locator="$.adrs_misc.trans_type" locator-type="Label"/> <!-- expect TEST19_JSON_TYPE -->
+        <field name="TransValue" locator="$.adrs_misc.trans_value" locator-type="Label"/> <!-- expect TEST19_$123.34 -->
+        <field name="UserData" separator=":"> <!-- expect TEST19-UD1_123:TEST19-UD2_456 -->
+            <field-locator locator="$.phoneNumbers[0].number" locator-type="Label"/>
+            <field-locator locator="$.phoneNumbers[1].number" locator-type="Label"/>
+        </field>
+    </parser>
+
+    <!-- ============================================================================================ -->
+
+    <!-- Parse an MQ activity trace PCF msg, which contains multiple MQ API operations for multiple appls -->
+    <parser name="TraceEventsParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityPCFParser">
+
+        <!--  Include the entire message data as a UTF-8 String.  If you do not want to not capture the
+			  entire content, remove this section.  To capture a portion of the message, use an
+			  imbedded parser as shown in the example below).
+			  -->
+        <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
+            <field-transform name="BytesToString" lang="groovy"><![CDATA[
+               $fieldValue == null ? null : new String ($fieldValue, "UTF-8")
+            ]]></field-transform>
+        </field>
+
+        <!--  Uncomment the following to pass a binary copy of the message data with the event   -->
+        <!--field name="BinaryMessage" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary"-->
+
+        <!--  Uncomment the following to parse specfic fields out of an XML message, see sample XML above  -->
+
+        <!--field name="MessageFormats"
+                locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label"
+                datatype="String"  format="string" transparent="true">
+                        <parser-ref name="XML_Data_Parser" aggregation="Merge"/>
+        </field-->
+
+        <!-- One or more correlators are used to stitch sets of messages together based on common criteria.
+            The examples of setting the correlator
+            1) Using message id and correlator for applications which use this common MQ pattern
+            2) Using the Connection id to correlate all data from a single MQ connection
+            3) Using message content such as an order or trade ID
+            -->
+
+        <!-- (1) Extract MQ correlation id and message id as correlators, except when hex "0" in CORREL_ID  -->
+        <field name="Correlator">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" required="false">
+                <filter name="CorrelValueFilter">
+                    <value handle="exclude">000000000000000000000000000000000000000000000000</value>
+                </filter>
+            </field-locator>
+            <!-- * always collect msgid for correlator  -->
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+
+            <!-- (2) uncomment this if you want stitching across the entire application connection.
+                 Note, this correlates across commit boundaries so should not be used for long running applications -->
+            <field-locator locator="MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+
+            <!-- (3) Content based correlator - use fields from the payload extracted by imbedded parser above -->
+            <!--field-locator locator="OrderID" locator-type="Activity"/-->
+        </field>
+
+        <!-- The following fields should be reviewed but default selection should be sufficient in most cases -->
+        <!-- ================================================================================================ -->
+
+        <!-- map MQ API name to a friendly operation name -->
+        <field name="EventName" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label">
+            <field-map source="MQXF_PUT1" target="MQPUT1"/>
+            <field-map source="MQXF_PUT" target="MQPUT"/>
+            <field-map source="MQXF_GET" target="MQGET"/>
+            <field-map source="MQXF_CALLBACK" target="MQCALLBACK"/>
+            <field-map source="MQXF_CONN" target="MQCONN"/>
+            <field-map source="MQXF_CONNX" target="MQCONNX"/>
+            <field-map source="MQXF_DISC" target="MQDISC"/>
+            <field-map source="MQXF_OPEN" target="MQOPEN"/>
+            <field-map source="MQXF_CLOSE" target="MQCLOSE"/>
+            <field-map source="MQXF_BEGIN" target="MQBEGIN"/>
+            <field-map source="MQXF_CMIT" target="MQCOMMIT"/>
+            <field-map source="MQXF_BACK" target="MQBACK"/>
+            <field-map source="MQXF_INQ" target="MQINQ"/>
+            <field-map source="MQXF_CB" target="MQCB"/>
+            <field-map source="" target="OTHER"/>
+        </field>
+
+        <!-- map MQ API name to an operation type -->
+        <field name="EventType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPERATION_ID" locator-type="Label">
+            <field-map source="MQXF_PUT1" target="SEND"/>
+            <field-map source="MQXF_PUT" target="SEND"/>
+            <field-map source="MQXF_GET" target="RECEIVE"/>
+            <field-map source="MQXF_CALLBACK" target="RECEIVE"/>
+            <field-map source="MQXF_CB" target="RECEIVE"/>
+            <field-map source="MQXF_CONN" target="START"/>
+            <field-map source="MQXF_CONNX" target="START"/>
+            <field-map source="MQXF_DISC" target="END"/>
+            <field-map source="MQXF_OPEN" target="OPEN"/>
+            <field-map source="MQXF_CLOSE" target="CLOSE"/>
+            <field-map source="MQXF_BEGIN" target="START"/>
+            <field-map source="MQXF_CMIT" target="STOP"/>
+            <field-map source="MQXF_BACK" target="STOP"/>
+            <field-map source="MQXF_INQ" target="INQUIRE "/>
+            <field-map source="" target="OTHER"/>
+        </field>
+
+        <!-- *** Use following signature definition for MQ messages ***
+             The signature can be any unique value that will identify the message across systems and is used
+             to identify producers and consumers of a given message.  It is similar to a correlator but uniquely
+             identifies a single message rather than correlating it with other messages related to the flow.
+             This example uses the message type, format and message id plus the date and time the message was put.
+             For most applications, this will be sufficient to be unique -->
+
+        <field name="MsgId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+        <field name="CorrelId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CORREL_ID" locator-type="Label" datatype="Binary"/>
+
+        <!-- 08/23/17 HBC/RGN   MQMD.ApplName is needed in the signature, but missing because it's not exposed in the IBM activity trace msg; only the put-ing or get-ing appl name is shown.  -->
+
+        <field name="TrackingId" separator="#!#" value-type="signature" required="false">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label" datatype="Number"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQBACF_MSG_ID" locator-type="Label" datatype="Binary"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
+        </field>
+        <field name="QMgrName" locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+        <!-- moved below after cache logic -->
+        <!-- field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/ -->
+        <field name="ResolvedQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_Q_NAME" locator-type="Label"/>
+
+        <field name="DerivedName" value="" transparent="true">
+            <field-transform lang="groovy" name="ResTransform"><![CDATA[
+                ${ResolvedQName} != null
+                    ? ${ResolvedQName}
+                    : (${ObjectName} != null ? ${ObjectName} : ${QMgrName})
+            ]]></field-transform>
+        </field>
+
+        <!-- Formating pattern is field {locator 0 "OBJECT_TYPE_value"}={field locator 1 "OBJECT_NAME_value"}
+         e.g. "GENERIC=null" for MQPUT or "QUEUE=AAA.LQ" for MQOPEN.  -->
+        <field name="ResourceName" formattingPattern="{0}={1}">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label">
+                <field-map source="MQOT_Q" target="QUEUE"/>
+                <field-map source="MQOT_NAMELIST" target="NAMELIST"/>
+                <field-map source="MQOT_PROCESS" target="PROCESS"/>
+                <field-map source="MQOT_STORAGE_CLASS" target="STORAGE_CLASS"/>
+                <field-map source="MQOT_Q_MGR" target="QMGR"/>
+                <field-map source="" target="QMGR"/>
+            </field-locator>
+            <!-- ResourceName identifies the target for events and views such as topology.
+            Using DerivedName will use the resolved queue name when it is available, the application supplied object for other calls and the
+            queue manager when neither is available. Using MQCACF_OBJECT_NAME will use the alias, dynamic or remote queue used by the application. -->
+            <field-locator locator="DerivedName" locator-type="Activity"/>
+            <!--field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/-->
+        </field>
+
+        <!-- general message fields -->
+
+        <field name="HostName" locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        <!-- Also use queue manager and host as 'server'  -->
+        <field name="ServerName" separator=":">
+            <field-locator locator="MQCA_Q_MGR_NAME" locator-type="Label"/>
+            <field-locator locator="MQCACF_HOST_NAME" locator-type="Label"/>
+        </field>
+
+        <!-- provide application name without path for tracking -->
+        <field name="ApplName" locator="MQCACF_APPL_NAME" locator-type="Label">
+            <field-transform name="fileName" lang="groovy">
+                Utils.getFileName($fieldValue)
+            </field-transform>
+        </field>
+
+        <field name="ElapsedTimeSec" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_QMGR_OP_DURATION" locator-type="Label" datatype="Number"
+               units="Microseconds" transparent="true"/>
+
+        <!-- time calculations, use highrestime is available (not all calls have it) -->
+        <field name="HighresTime" locator="MQGACF_ACTIVITY_TRACE.MQIAMO64_HIGHRES_TIME" locator-type="Label" datatype="Timestamp"
+               units="Microseconds"/>
+
+        <field name="StartTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+        <field name="EndTimeSec" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss" transparent="true">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+
+        <!-- some events may not have elapsed time, default to 0 -->
+        <field name="ElapsedTime" value="">
+            <field-transform name="ElapTransform" lang="groovy"><![CDATA[
+               	${ElapsedTimeSec} == null ? 0 : ${ElapsedTimeSec}
+            ]]></field-transform>
+        </field>
+        <!-- also record elapsed time independently as a number only, not time stamp -->
+        <field name="ElapsedTime_us" locator="ElapsedTime" locator-type="Activity" datatype="Number" units="Microseconds"/>
+
+        <!-- start time and end times are only precise to seconds so use highrestime if available -->
+        <field name="StartTime" value="">
+            <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
+                ${HighresTime} != null ? ${HighresTime} : ${StartTimeSec}
+            ]]></field-transform>
+        </field>
+        <field name="EndTime" value="">
+            <field-transform lang="groovy" name="EndTimeTransform"><![CDATA[
+                ${HighresTime} != null && ${ElapsedTime} != null
+                    ? ${HighresTime} + ${ElapsedTime}
+                    : (${ElapsedTime} != null
+                        ? ${EndTimeSec} + ${ElapsedTime}
+                        : ${EndTimeSec})
+            ]]></field-transform>
+        </field>
+
+        <!-- activity trace fields -->
+        <field name="CommandLevel" locator="MQIA_COMMAND_LEVEL" locator-type="Label"/>
+        <field name="SequenceNumber" locator="MQIACF_SEQUENCE_NUMBER" locator-type="Label" datatype="Number"/>
+        <field name="ApplType" locator="MQIA_APPL_TYPE" locator-type="Label"/>
+        <field name="ProcessId" locator="MQIACF_PROCESS_ID" locator-type="Label" datatype="Number"/>
+        <field name="UserName" locator="MQCACF_USER_IDENTIFIER" locator-type="Label"/>
+        <field name="ApiCallerType" locator="MQIACF_API_CALLER_TYPE" locator-type="Label"/>
+        <field name="ApiEnvironment" locator="MQIACF_API_ENVIRONMENT" locator-type="Label"/>
+        <field name="ApplFunction" locator="MQCACF_APPL_FUNCTION" locator-type="Label"/>
+        <field name="ApplFunctionType" locator="MQIACF_APPL_FUNCTION_TYPE" locator-type="Label"/>
+        <field name="TraceDetail" locator="MQIACF_TRACE_DETAIL" locator-type="Label"/>
+        <field name="TraceDataLength" locator="MQIACF_TRACE_DATA_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="PointerSize" locator="MQIACF_POINTER_SIZE" locator-type="Label" datatype="Number"/>
+        <field name="Platform" locator="MQIA_PLATFORM" locator-type="Label"/>
+        <field name="ThreadId" locator="MQGACF_ACTIVITY_TRACE.MQIACF_THREAD_ID" locator-type="Label" datatype="Number"/>
+        <field name="OperationTime" separator=" " datatype="DateTime" format="yyyy-MM-dd HH:mm:ss">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_OPERATION_TIME" locator-type="Label"/>
+        </field>
+        <field name="ObjType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OBJECT_TYPE" locator-type="Label"/>
+        <field name="ObjQMgrName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_Q_MGR_NAME" locator-type="Label"/>
+
+        <field name="ObjHandle" locator="MQGACF_ACTIVITY_TRACE.MQIACF_HOBJ" locator-type="Label"/>
+        <field name="CompCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_COMP_CODE" locator-type="Label">
+            <field-map source="0" target="SUCCESS"/>
+            <field-map source="1" target="WARNING"/>
+            <field-map source="MQCC_OK" target="SUCCESS"/>
+            <field-map source="MQCC_WARNING" target="WARNING"/>
+            <field-map source="" target="ERROR"/>
+        </field>
+        <field name="ReasonCode" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REASON_CODE" locator-type="Label" datatype="Number"/>
+        <field name="ConnectOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CONNECT_OPTIONS" locator-type="Label"/>
+        <field name="OpenOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_OPEN_OPTIONS" locator-type="Label"/>
+        <field name="GetOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_GET_OPTIONS" locator-type="Label"/>
+        <field name="PutOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PUT_OPTIONS" locator-type="Label"/>
+        <field name="CloseOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CLOSE_OPTIONS" locator-type="Label"/>
+        <field name="ResolvedLocalQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_RESOLVED_LOCAL_Q_MGR" locator-type="Label"/>
+        <field name="ResolvedType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RESOLVED_TYPE" locator-type="Label"/>
+        <field name="DynamicQName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_DYNAMIC_Q_NAME" locator-type="Label"/>
+        <field name="MsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="BufferLength" locator="MQGACF_ACTIVITY_TRACE.MQIACF_BUFFER_LENGTH" locator-type="Label" datatype="Number"/>
+        <field name="Report" locator="MQGACF_ACTIVITY_TRACE.MQIACF_REPORT" locator-type="Label"/>
+        <field name="MsgType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MSG_TYPE" locator-type="Label"/>
+        <field name="Expiry" locator="MQGACF_ACTIVITY_TRACE.MQIACF_EXPIRY" locator-type="Label" datatype="Number"/>
+        <field name="FormatName" locator="MQGACF_ACTIVITY_TRACE.MQCACH_FORMAT_NAME" locator-type="Label"/>
+        <field name="Priority" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PRIORITY" locator-type="Label" datatype="Number"/>
+        <field name="Persistence" locator="MQGACF_ACTIVITY_TRACE.MQIACF_PERSISTENCE" locator-type="Label"/>
+        <field name="ReplyToQ" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q" locator-type="Label"/>
+        <field name="ReplyToQMgr" locator="MQGACF_ACTIVITY_TRACE.MQCACF_REPLY_TO_Q_MGR" locator-type="Label"/>
+        <field name="CodedCharSetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label"/>
+        <field name="Encoding" locator="MQGACF_ACTIVITY_TRACE.MQIACF_ENCODING" locator-type="Label"/>
+        <field name="PutTime" separator=" " datatype="DateTime" format="yyyyMMdd HHmmss">
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_DATE" locator-type="Label"/>
+            <field-locator locator="MQGACF_ACTIVITY_TRACE.MQCACF_PUT_TIME" locator-type="Label"/>
+        </field>
+        <field name="SelectorCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTOR_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="Selectors" locator="MQGACF_ACTIVITY_TRACE.MQIACF_SELECTORS" locator-type="Label"/>
+        <field name="ConnectionId" locator="MQGACF_ACTIVITY_TRACE.MQBACF_CONNECTION_ID" locator-type="Label" datatype="Binary"/>
+        <field name="RecsPresent" locator="MQGACF_ACTIVITY_TRACE.MQIACF_RECS_PRESENT" locator-type="Label"/>
+        <field name="CallType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CALL_TYPE" locator-type="Label"/>
+        <field name="CtlOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_CTL_OPERATION" locator-type="Label"/>
+        <field name="MQCallbackType" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_TYPE" locator-type="Label"/>
+        <field name="MQCallbackName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_MQCB_NAME" locator-type="Label"/>
+        <field name="MQCallbackFunction" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MQCB_FUNCTION" locator-type="Label" datatype="Binary"/>
+        <field name="MQCallbackOptions" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPTIONS" locator-type="Label"/>
+        <field name="MQCallbackOperation" locator="MQGACF_ACTIVITY_TRACE.MQIACF_MQCB_OPERATION" locator-type="Label"/>
+        <field name="InvalidDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_INVALID_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="UnknownDestCount" locator="MQGACF_ACTIVITY_TRACE.MQIACF_UNKNOWN_DEST_COUNT" locator-type="Label" datatype="Number"/>
+        <field name="MaxMsgLength" locator="MQGACF_ACTIVITY_TRACE.MQIACH_MAX_MSG_LENGTH" locator-type="Label" datatype="Number"/>
+
+        <!-- Save obj name from MQOPEN (or MQPUT/MQGET ?) for use by
+             parsers that want to check the q name -->
+        <!-- Try using ResolvedQName vs ObjectName: works also, but that's not the answer. See next comments. -->
+        <!-- See if MQPUT activity gets it: no; it appears in MQGET activity, if MQGET is done in the same session.
+             If MQGET is done in another session, the first MQGET saves the cache value, a second MQGET can read it,
+             and the following MQCLOSE can read it also. -->
+
+        <!-- datatype="String" does not eliminate "(type=none)" in the trace. -->
+        <field name="ObjectName" locator="MQGACF_ACTIVITY_TRACE.MQCACF_OBJECT_NAME" locator-type="Label"/>
+
+        <!-- 10/18/17 Theory: Cached data is not available until a later activity, that follows the activity
+        that created the cached data. Test if activity MQCLOSE, which follows MQPUT or MQGET, gets the saved
+        CachedObjName: YES
+        Question: If ObjectName is available at MQOPEN time, then shouldn't it be cached then and accessible
+        at MQPUT time? Answer: Yes. If I enable send of OPEN and CLOSE activities and parser is running and I do
+        PUT A, PUT B, GET A, traces show:
+            OPEN  A w/o QNameClose     (retrieves no value for A and caches new A)
+            PUT   A w/  QNameClose=A   (retrieves A and caches new A)
+            CLOSE A w/  QNameClose=A   (retrieves A and caches new A)
+
+            OPEN  B w/  QNameClose=A   (retrieves A and caches new B)
+            PUT   B w/  QNameClose=B   (retrieves B and caches new B)
+            CLOSE B w/  QNameClose=B   (retrieves B and caches new B)
+
+            OPEN  A w/  QNameClose=B   (retrieves B and caches new A)
+            GET   A w/  QNameClose=A   (retrieves A and caches new A)
+            CLOSE A w/  QNameClose=A   (retrieves A and caches new A)
+        If OPEN is not enabled, results are similar: the cached value in activity/operation i is available in the next activity/operation i+1:
+            PUT   A w/o QNameClose
+            CLOSE A w/  QNameClose=A   (retrieves A and caches new A)
+
+            PUT   B w/  QNameClose=A   (retrieves A and caches new B)
+            CLOSE B w/  QNameClose=B   (retrieves B and caches new B)
+
+            GET   A w/  QNameClose=B   (retrieves B and caches new A)
+            CLOSE A w/  QNameClose=A   (retrieves A and caches new A)
+
+        -->
+        <field name="QNameClose" locator="CachedObjName" locator-type="Cache"/>
+
+        <!-- =====================================================================================  -->
+        <!-- 08/24/17 HC Define additional msg data (aka payload) parsers [lifted from sample.xml]  -->
+        <!-- =====================================================================================  -->
+
+        <!-- ======================================================================================================= -->
+
+        <field name="MessageFormats"
+               locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label"
+               datatype="String" format="string" transparent="true">
+
+            <!--  11/22/17 -->
+            <parser-ref name="TEST_19_JSON_Parser" aggregation="Merge">
+                <!-- Test format is JSON before calling this parser -->
+                <matchExp>jpath:$.[?(@.format == 'JSON')]</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 1 (msg w/RFH2) and CASE 2 (msg w/o RFH2) -->
+            <!-- Msg has RFH2 header, so matchExp xpath will fail; finding an invalid xml msg due to the RFH2  -->
+            <!-- If the msg data has CSFB fields for either of two msg formats, merge the fields into the output stream. -->
+            <!-- Working -->
+            <!-- 11/13/17 Add xpath matchExp: test ok -->
+            <!-- 11/21/17 Test 1 no match due to RFH2 header; use regex to search for tag and value anywhere in msg vs xpath: ok  -->
+            <parser-ref name="CSFB_1_Msg_Data_XML_parser" aggregation="Merge">
+                <!-- Test TransType is present before calling this parser -->
+                <!-- matchExp>xpath:boolean(/CDA_CASH_SECURITY/CDA_TRANS_HDR/FO_INTRL_ID)</matchExp> -->
+                <matchExp>regex:<![CDATA[<TRN_TYP_C>TEST3_CASH<]]></matchExp>
+            </parser-ref>
+
+            <!--  Diff test msg w/altered conent requires a diff parser-ref w/diff match exp -->
+            <parser-ref name="CSFB_2_Msg_Data_XML_parser" aggregation="Merge">
+                <!-- Test TransType is present before calling this parser -->
+                <!-- Using regex but could have used full boolean xpath -->
+                <matchExp>regex:<![CDATA[<TRN_TYP_C>TEST4_CASH<]]></matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 2A -->
+            <!-- 09/06/17 Working -->
+            <!-- 11/13/17 Add matchExp, test w/case 1 inplace above: ok -->
+            <parser-ref name="CSFB_2A_Msg_Data_XML_parser" aggregation="Merge">
+                <!-- Test TID is present before calling this parser -->
+                <matchExp>xpath:boolean(/ExceptionTrans/transRefId)</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 3 -->
+            <!-- MSG: TEST6_SOCGEN.txt -->
+            <!-- Extract fields from a clear text message using offsets and lengths -->
+            <!-- 10/17/17: working, w/preceding parsers present SWIFT 2, SWIFT 1, Test_12, Test_9, Test_16, Test_7-->
+            <!-- 10/30/17: Replaced by TEST_3A_SOCGEN_Msg_Data_Parser -->
+            <!-- parser-ref name="TEST_3_SOCGEN_Msg_Data_RegEx_Parser" aggregation="Merge"/> -->
+
+            <!-- 10/16/17   -->
+            <!-- 10/27/17 Add matchExp qname check: OK -->
+            <!-- 11/13/17 Test matchExp w/cases 1,2A in place above: ok -->
+            <parser-ref name="TEST_3A_SOCGEN_Msg_Data_Parser" aggregation="Merge">
+                <!-- If QName is not AAA.LQ, do not call the parser ref. -->
+                <matchExp>
+                    groovy:${ObjectName} == "AAA.LQ"
+                </matchExp>
+            </parser-ref>
+
+            <!-- 10/31/17 -->
+            <!-- MSG: TEST3B_SOCGEN.txt -->
+            <!-- Working -->
+            <!-- 11/13/17 Test w/cases 1,2A,3 in place above: ok -->
+            <parser-ref name="TEST_3B_SOCGEN_Msg_Data_Parser" aggregation="Merge">
+                <!-- If QName is not BBB.LQ, do not call the parser ref. -->
+                <matchExp>
+                    groovy:${ObjectName} == "BBB.LQ"
+                </matchExp>
+            </parser-ref>
+
+            <!-- 11/27/17 -->
+            <!-- MSG: TEST3D_SOCGEN.txt -->
+            <!-- 11/27/17 Test w/cases 1,2A,3,3A,3B in place above: ?? -->
+            <parser-ref name="TEST_3D_SOCGEN_Msg_Data_Parser" aggregation="Merge">
+                <!-- If QName is not TEST3D.LQ, do not call the parser ref. -->
+                <matchExp>
+                    groovy:${ObjectName} == "TEST3D.LQ"
+                </matchExp>
+            </parser-ref>
+
+            <!-- 10/25/17  try this -->
+            <!-- 10/27/17  working -->
+            <!-- 11/13/17 Add/test matchExp w/cases 1,2A,3,3B in place above: ok -->
+            <parser-ref name="TEST_15_NV_Payload_Parser" aggregation="Merge">
+                <!-- Test TID is present before calling this parser -->
+                <!-- Parens not required; they form a numbered group. -->
+                <matchExp>regex:(EntityDisplayId)t</matchExp>
+            </parser-ref>
+
+            <!-- 10/23/17 added -->
+            <!-- 11/03/17 not working, leave it out  -->
+            <!-- parser-ref name="Test_15_XML_RFH2_JMS_Bytes_Msg_Parser" aggregation="Merge"/> -->
+
+            <!-- 10/18/17 added -->
+            <!-- 11/13/17 Add/test matchExp w/cases 1,2A,3,3B,15_NV in place above:  NOGO
+                   ..stacked parser 'TEST_17_XML_Incomplete_Msg_Parser' match expression 'xpath:boolean(//FO_INTRL_ID)' evaluation failed:
+                   ..sax.SAXParseException; lineNumber: 131; columnNumber: 1; XML document structures must start and end within the same entity.
+                 Match fails because msg is incomplete XML and we did not get to first call XMLIncompletePreParser-->
+            <!-- 11/21/17 Use regex matching -->
+            <parser-ref name="TEST_17_XML_Incomplete_Msg_Parser" aggregation="Merge">
+                <!-- Test TID element is present anywhere in the msg before calling this parser -->
+                <!-- Msg must also contains xpath CDC vs CDA,CDB used in cases 1, 18 -->
+                <!--
+                  <matchExp>xpath:boolean(//FO_INTRL_ID)</matchExp>
+                  <matchExp>xpath:boolean(//CDB_CASH_SECURITY)</matchExp>
+                -->
+                <matchExp>regex:FO_INTRL_ID</matchExp>
+                <matchExp>regex:CDB_CASH_SECURITY</matchExp>
+            </parser-ref>
+
+            <!-- 10/19/17 -->
+            <!-- 11/13/17 Add/test matchExp w/cases 1,2A,3,3B,15_NV,17 in place above:  ok -->
+            <parser-ref name="TEST_17.1_XML_Complete_Msg_Partial_Xpath_Parser" aggregation="Merge">
+                <!-- Test TID element is present anywhere in the msg before calling this parser -->
+                <!-- Msg must also conatain xpath CDC vs CDA,CDB used in cases 1, 18 -->
+                <matchExp>xpath:boolean(//FO_INTRL_ID)</matchExp>
+                <matchExp>xpath:boolean(//CDC_CASH_SECURITY)</matchExp>
+            </parser-ref>
+
+            <!-- 10/19/18 added -->
+            <!-- MSG: TEST18_CompleteXML.xml -->
+            <!-- 11/14/17 Add/test matchExp w/cases 1,2A,3,3B,15_NV in place above: ok  -->
+            <parser-ref name="TEST_18_XML_Msg_NV_Parser" aggregation="Merge">
+                <!-- Test TID element is present anywhere in the msg before calling this parser -->
+                <!-- Msg must also conatain xpath CDD vs CDA or CDB used above -->
+                <matchExp>xpath:boolean(//FO_INTRL_ID)</matchExp>
+                <matchExp>xpath:boolean(//CDD_CASH_SECURITY)</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 4-->
+            <!-- MSG: TEST11_NV_TEST1.txt, TEST11_NV_TEST1_24B_OnNewLine.txt -->
+            <!-- 10/11/17 Move before Test_7_UserData_Parser_2 which matches the case 4 msg.
+                          Test variant SWIFT_2_RegEx_Parser_2 in place of SWIFT_2_RegEx_Parser: OK
+                          Move it before SWIFT_1_TransId_Parser, because a SWIFT_2 test msg was
+                          matched by SWIFT_1.
+                11/14/17  Add/test matchExp w/other parsers in place above: ok
+                          Parses both messages: ok -->
+            <parser-ref name="SWIFT_2_RegEx_Parser_2" aggregation="Merge">
+                <!-- Test TID is present before calling this parser -->
+                <!-- Pattern is taken directly from the parser Pattern line but w/o the key name -->
+                <matchExp>regex:((:33A:)(.[^\s:,%@]*))</matchExp>
+            </parser-ref>
+
+            <!-- 10/09/17 Try TEST CASE 4 SWIFT_1_Parser regex reg num directly -->
+            <!-- 10/10/17 Retest w/test SWIFT_1 first: ok -->
+            <!-- 11/14/17 Bypass; was a temp test.        -->
+            <!--
+            <parser-ref name="SWIFT_1_TransId_Parser" aggregation="Merge">
+                <matchExp>regex:((:33A:)(.[^\s:,%@]*))</matchExp>
+            </parser-ref>
+            -->
+
+            <!-- TEST CASE 12 -->
+            <!-- 12: MSG: TEST52_flag_XML.txt, no RFH -->
+            <!-- 12.1     TEST53_flag_XML.txt, "  "   -->
+            <!-- 10/10/17: Must be before Test_9 which parses this test msg, though has no output fields -->
+            <!-- 11/14/17 Add/test matchExp: OK -->
+            <parser-ref name="Test_12_XML_TID_BasedOn_TransType_Parser" aggregation="Merge">
+                <!-- Test either TID part is present before calling this parser -->
+                <!-- XPaths are taken directly from the parser TransID1,2 lines -->
+                <!-- Though the xpath pipe sign '|' means AND, the expression returns true if either or both element is present;
+                     tested in online XPath tester:  ok
+                        ActivityPCFParser] - Parser 'TraceEventsParser' field 'MessageFormats' stacked parser 'Test_12_XML_TID_BasedOn_TransType_Parser' match expression 'xpath:boolean(/STOCKS/TID|/STOCKS/ACTION)' evaluated as: true
+                     -->
+                <matchExp>xpath:boolean(/STOCKS/TID|/STOCKS/ACTION)</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 9 -->
+            <!-- MSG: TEST70_Danone_RFH2_USER_DOCX_FILENAMX_BLOB.dat -->
+            <!-- Test case 7 erroneously parses msg meant for test 9; move 9 before 7 for now. -->
+            <!-- 10/10/17 Retest w/test 9 first: ok -->
+            <!-- 11/14/17 Add/test matchExp: ok -->
+            <parser-ref name="Test_9_XML_RFH2_Parser" aggregation="Merge">
+                <!-- Test TID xml element is anywhere in the msg using regex. Don't use xpath because
+                     the msg may not be well formed and the pre-parser will not have been executed yet,
+                     until the parser-ref is actually called.
+                     Insure we find exact element by adding the tag angle brackets < >. If so,
+                     XML compiler will choke, so bracket the exp with CDATA.
+                        ActivityPCFParser] - Parser 'TraceEventsParser' field 'MessageFormats' stacked parser 'Test_9_XML_RFH2_Parser'
+                        match expression 'regex:<DOX_NUMBER>' evaluated as: true -->
+                <matchExp>regex:<![CDATA[<DOX_NUMBER>]]></matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 16 -->
+            <!-- MSG:  test16.txt -->
+            <!-- 09/27/17 Test 7 parser, if listed before test 16 parser, gets called and processes the msg -->
+            <!-- 10/09/17 Retest: ok -->
+            <!-- 10/10/17 Retest: w/tests cases 4 and 9 preceding: ok -->
+            <!-- parser-ref name="Test16_FreeFormTextParser" aggregation="Merge"/ -->
+            <!-- 10/10/17 Test simpler parser Test16_FreeFormTextParser_2 from Andrius: ok -->
+            <!-- 11/14/17 Add/test matchExp, looking for TID=xxx, use CDATA bracketing <![CDATA[(TID)=(.[^\s:,%@]*)]]>   :ok
+                             ActivityPCFParser] - Parser 'TraceEventsParser' field 'MessageFormats' stacked parser 'Test16_FreeFormTextParser_2' match expression 'regex:(TID)=(.[^\s:,%@]*)' evaluated as: true
+                          Re-test w/o CDATA: ok
+                             ActivityPCFParser] - Parser 'TraceEventsParser' field 'MessageFormats' stacked parser 'Test16_FreeFormTextParser_2' match expression 'regex:(TID)=(.[^\s:,%@]*)' evaluated as: true -->
+            <parser-ref name="Test16_FreeFormTextParser_2" aggregation="Merge">
+                <matchExp>regex:(TID)=(.[^\s:,%@]*)</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 13 -->
+            <!-- MSG: TEST98_STUB.OPF.T.AAL.REQUESTS.QUAL.CR.xml -->
+            <!-- Extract the 2nd instance of elements from an XML message -->
+            <!-- 11/14/17 Add/test matchExp, looking for TID, w/tns namespace prefixes: nogo
+                        ActivityPCFParser] - Parser 'TraceEventsParser' field 'MessageFormats' stacked parser 'Test_13_XML_Second_Instances_Parser' match expression 'xpath:boolean(/tns:AAL_Request_NEW/tns:OPF_Information/tns:Debit_Credit_Party[2]/tns:Debit_Credit_Party_Account)' evaluated as: false
+                        Try w/o boolean( ): false (but works in online xpath tester)
+                        Try w/o array index [2] in Debit_Credit_Party[2] : false
+                        Try w/o tns: namespace prefix: ok; matchExp must have been "namespace aware" by checking the msg
+                        Try now with [2] restored:
+            -->
+
+            <parser-ref name="Test_13_XML_Second_Instances_Parser" aggregation="Merge">
+                <matchExp>xpath:/AAL_Request_NEW/OPF_Information/Debit_Credit_Party[2]/Debit_Credit_Party_Account</matchExp>
+            </parser-ref>
+
+            <!-- 10/31/17 -->
+            <!-- TEST CASE 13A -->
+            <!-- MSG: TEST13A_STUB.OPF.T.AAL.REQUESTS.QUAL.CR.xml -->
+            <!-- Extract all instances of elements from an XML message -->
+            <!-- Place TEST 13A before TEST_14 else TEST_14 XML case intercepts 13A test msg  -->
+            <!-- 11/14/17 Add/test matchExp, looking for TID: ok
+                          Before the test, must comment out Test_13 which will match on the same msg being used here
+                 11/20/17 Use diff msg TEST13A_STUB.OPF.T.AAL.REQUESTS.QUAL.CR.xml with diff xpaths to avoid conflict -->
+            <parser-ref name="Test_13A_XML_All_Instances_Parser" aggregation="Merge">
+                <matchExp>xpath:/AAL_Request_TEST13A/OPF_Information/Debit_Credit_Party/Debit_Credit_Party_Account</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 11 -->
+            <!-- MSG: TEST76_Nike_DS1_nonstd.xml -->
+            <!-- Move before case 6, which attempts parse of any XML msg, assumes success and
+                 other stacked parsers are not called.
+                 Move after Test_13 else Test_13 does not get called.
+                 11/14/17 Add/test matchExp, looking for TID, look anywhere in the msg for this partial path: ok
+            -->
+            <parser-ref name="Test_11_NonStd_XML_Parser" aggregation="Merge">
+                <matchExp>xpath://PIXFields/Reference1</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 14 -->
+            <!-- MSG: TEST103_WAVES_PPR_RFH_NO_MD_DataVerNoSpace.dat  with RFH2 -->
+            <!-- 10/19/17 -->
+            <!-- 11/14/17 Add/test matchExp, looking for TID, an XML element anywhere in the msg, w/CDATA due to angle brackets: ok -->
+            <parser-ref name="Test_14_XML_RFH2_JMS_Text_Msg_Parser" aggregation="Merge">
+                <matchExp>regex:<![CDATA[<ADPMsgCorrelationID>]]></matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 6 -->
+            <!-- MSG: TEST30_bnym4.txt -->
+            <!-- BYPASS during test case 7 testing else get XML error when this parser intercepts
+                 case 7 msg TEST51_flag_NL_mod1.txt -->
+            <!-- 11/15/17 Add/test matchExp, xpath, looking for TID, an XML element given absolute path: ok -->
+            <parser-ref name="BNYM_XML_Msg_Data_Parser" aggregation="Merge">
+                <matchExp>xpath:/OFACRequest/genericTransFields/userRef</matchExp>
+            </parser-ref>
+
+            <!-- 09/26/17 Test_7_UserData_Parser_2 works if called directly. -->
+            <!-- 10/09/17 Still working if called directly -->
+            <!--          Try Test_7_UserData_Parser_3 with regex group numbers  -->
+            <!-- 11/02/17 Working, but only provides UserData, so bypass it. -->
+            <!-- parser-ref name="Test_7_UserData_Parser_3" aggregation="Merge"/> -->
+
+            <!-- TEST CASE 7 -->
+            <!-- MSG: TEST51_flag_NL_mod2.txt -->
+            <!-- 09/26/17 Test_7_UserData_Parser_2 works if called directly.    -->
+            <!--parser-ref name="Test_7_UserData_Parser_2" aggregation="Merge"/ -->
+            <!-- 11/15/17 Add/test matchExp, looking for TID name "TRADE:"anywhere in the msg:  ok
+                          Adding quotes in the expr like this "TRADE:" causes no match -->
+            <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
+                <matchExp>regex:TRADE:</matchExp>
+            </parser-ref>
+
+            <!-- TEST CASE 4 -->
+            <!-- UNUSED; replaced by SWIFT_2_RegEx_Parser_2 -->
+            <!-- MSG: TEST11_NV_TEST1.txt -->
+            <!-- 08/28/17 Add SWIFT regex parsers to get 4 fields from a msg: working -->
+            <!-- 09/18/17 Move all SWIFT sub-parsers into SWIFT_1_Parser -->
+            <!-- 09/07/16 Working; uses Andrius CDATA method; more efficient than having 4 separate parsers -->
+            <!-- 11/15/17 Add/test matchExp, looking for TID name ":33A:"anywhere in the msg: nogo;
+                          Msg was matched by SWIFT_2_RegEx_Parser_2.
+                          Try 33A: as expr: -->
+            <!--
+            <parser-ref name="SWIFT_NV_Msg_Data_parser" aggregation="Merge">
+                <matchExp>regex:33A:</matchExp>
+            </parser-ref>
+            -->
+
+        </field>
+
+    </parser>  <!-- end of TraceEventsParser -->
+
+    <cache>
+        <entry id="CachedObjName">
+            <!-- key>ObjectName</key -->
+            <!-- value>${ObjectName}</value -->
+            <key>ResolvedQName</key>
+            <value>${ResolvedQName}</value>
+        </entry>
+    </cache>
+
+    <!-- ============================================================================================== -->
+
+    <!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
+    <!-- Add a new stream section with a different name for each additional qmgr to be monitored -->
+    <!-- Bypass to test with CharacterStream or FileLineStream reading -->
+    <stream name="WmqActivityTraceStreamQM_A" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+
+        <!--property name="Host" value="localhost"/-->
+        <!--property name="Port" value="1414"/-->
+        <!-- HBC 8/22/17: deleted SourceFQN line  -->
+
+        <property name="StripHeaders" value="false"/>
+        <property name="RetryStateCheck" value="true"/>
+
+        <!-- Queue Manager name to which to connect -->
+        <property name="QueueManager" value="Howardo"/> <!-- MQ8; was MQ 7 HBC_QM2 -->
+
+        <!-- using default queue or could be alternate queue -->
+        <property name="Queue" value="SYSTEM.ADMIN.TRACE.ACTIVITY.QUEUE"/>
+
+        <!--<property name="UserName" value="[USER_NAME]"/>-->
+        <!--<property name="Password" value="[USER_PASS]"/>-->
+
+        <!-- these return codes are not typically needed when tracing and excluded -->
+        <property name="ExcludedRC" value="2033|2080|30737"/>
+
+        <!-- 09/18/17 Add HaltIfNoParser: false states that stream should skip unparseable entries
+                      and don't stop if such situation occurs. All added msgs parsers at end of TraceEventsParser
+                      should fail except for one, assuming no identical parsed fields.
+                      Try = true: I saw MessageFormat3 no match, then MessageFormat2 was tried and it failed due to msg not in XML format:
+                          ParseException: Can not build XML DOM document from input
+                          SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog
+                      Then MessageFormat4 was NOT tried. So restore value top false and rerun test 7A:
+                      Made no difference; case 7 parser not called unless case 6 parser nop'd. -->
+
+        <property name="HaltIfNoParser" value="false"/>
+
+        <!-- Use the following to control which operations are being analyzed.
+            As defined, only operations which process messages are passed. Browse
+            operations are excluded.   -->
+        <property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK|OPEN|CLOSE)"/>
+        <property name="SuppressBrowseGets" value="true"/>
+
+        <!-- Parser to be used, defined above -->
+        <parser-ref name="TraceEventsParser"/>
+
+    </stream>
+    <!-- deleted 2 qmgrs here HBC -->
+
+    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations  -->
+    <!--
+    <stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
+        <property name="StripHeaders" value="false"/>
+        <property name="RetryStateCheck" value="true"/>
+    -->
+    <!-- Queue Manager name to which to connect -->
+    <!--
+    <property name="QueueManager" value="[QMGR]"/>
+    -->
+
+    <!-- using an application topic, could be channel or connection, change as needed -->
+    <!--
+    <property name="TopicString" value="$SYS/MQ/INFO/QMGR/[QMGR]/ActivityTrace/ApplName/amqs*"/>
+    <property name="OpenOptions" value="MQSO_WILDCARD_CHAR"/>
+    -->
+
+    <!-- These 2 are required if connecting remote or removed for local connection -->
+    <!--
+    <property name="Host" value="localhost"/>
+    <property name="Port" value="1414"/>
+    -->
+
+    <!-- user and password as required by the MQ Queue Manager -->
+    <!--<property name="UserName" value="[USER_NAME]"/>-->
+    <!--<property name="Password" value="[USER_PASS]"/>-->
+
+    <!--
+    <parser-ref name="TraceEventsParser"/>
+</stream>
+    -->
+
+    <!-- Test case order: 7, 6 , 4 -->
+    <!-- 2nd and 3rd parsers cannot be loaded using CharacterStream -->
+    <!-- Try FileLineStream: each line in file is considered an activity
+         case 7 parser called, matches on 2 lines: 1 for TransId , 1 for TransType.
+         Order cases 6,4,7: XML DOM invalid error occurs for each line in the file. Case 7 parser not called.
+         Order cases 4,7,6: A line is read, then parser 4 called 'does not match', then parser 7 called, match or no match. I didn't see Parser 6 being called. Cycle repeats.
+         Restore to CharacterStream: Error "could not add stream 'FileStream' parser 'Test_7_ etc" and
+         and config stops loading. This means can only hvae 1 parser.
+         Order cases 7,4,6: Immediate error "could not add SWIFT_2_RegEx_Parser" for case 4; only first parser, case 7, loads.
+         Abandon effort to use CharacterStream or FileLineStream.
+    -->
+    <!--
+        <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+            <property name="FileName" value="./TEST51_flag_NL_mod2.txt"/>
+            <property name="HaltIfNoParser" value="false"/>
+    -->
+    <!-- First parser that matches, then no other parser is called.
+         This rule only works for FileLineStream. -->
+    <!--
+            <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge"/>	case 7
+            <parser-ref name="SWIFT_2_RegEx_Parser" aggregation="Merge"/>			    	case 4
+            <parser-ref name="BNYM_XML_Msg_Data_Parser" aggregation="Merge"/>				case 6
+        </stream>
+    -->
+
+</tnt-data-source>

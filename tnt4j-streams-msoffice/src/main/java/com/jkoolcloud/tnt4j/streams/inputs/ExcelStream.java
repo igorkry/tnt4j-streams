@@ -1,0 +1,386 @@
+/*
+ * Copyright 2014-2018 JKOOL, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.jkoolcloud.tnt4j.streams.inputs;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.*;
+
+import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
+import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
+import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
+
+/**
+ * Base class for MS Excel workbook stored activity stream, where each workbook sheet or row is assumed to represent a
+ * single activity or event which should be recorded.
+ * <p>
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link TNTParseableInputStream}):
+ * <ul>
+ * <li>FileName - the system-dependent file name of MS Excel document. (Required)</li>
+ * <li>SheetsToProcess - defines workbook sheets name filter mask (wildcard or RegEx) to process only sheets which names
+ * matches this mask. (Optional)</li>
+ * <li>WorkbookPassword - excel workbook password. (Optional)</li>
+ * </ul>
+ *
+ * @version $Revision: 1 $
+ */
+public class ExcelStream extends TNTParseableInputStream<Iterable<?>> {
+	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelStream.class);
+
+	/**
+	 * Stream attribute defining file name.
+	 */
+	private String fileName = null;
+	private ActivityScope activityScope = ActivityScope.ROW;
+
+	private String sheetName = null;
+	private Pattern sheetNameMatcher = null;
+	private String rangeValue = "1:"; // NON-NLS
+	private IntRange rowRange = null;
+
+	private String wbPass = null;
+
+	private Workbook workbook;
+	private Iterator<Sheet> sheets;
+
+	private ExcelActivityFeeder<?> feeder;
+
+	/**
+	 * Attribute storing sheet/row position marker of streamed file.
+	 */
+	protected int activityPosition = -1;
+
+	/**
+	 * Constructs a new ExcelStream. Requires configuration settings to set input stream source.
+	 */
+	public ExcelStream() {
+		super();
+	}
+
+	protected ExcelStream(ActivityScope aScope) {
+		this.activityScope = aScope;
+	}
+
+	@Override
+	protected EventSink logger() {
+		return LOGGER;
+	}
+
+	@Override
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
+
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			fileName = value;
+		} else if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
+			sheetName = value;
+
+			if (StringUtils.isNotEmpty(sheetName)) {
+				sheetNameMatcher = Pattern.compile(Utils.wildcardToRegex2(sheetName));
+			}
+		} else if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			rangeValue = value;
+		} else if (MsOfficeStreamProperties.PROP_WORKBOOK_PASS.equalsIgnoreCase(name)) {
+			if (StringUtils.isNotEmpty(value)) {
+				wbPass = value;
+			}
+		}
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (StreamProperties.PROP_FILENAME.equalsIgnoreCase(name)) {
+			return fileName;
+		}
+		if (MsOfficeStreamProperties.PROP_SHEETS.equalsIgnoreCase(name)) {
+			return sheetName;
+		}
+		if (StreamProperties.PROP_RANGE_TO_STREAM.equalsIgnoreCase(name)) {
+			return rangeValue;
+		}
+		if (MsOfficeStreamProperties.PROP_WORKBOOK_PASS.equalsIgnoreCase(name)) {
+			return wbPass;
+		}
+
+		// if ("PROP_STREAMED_WORKBOOK".equalsIgnoreCase(name)) {
+		// return workbook;
+		// }
+
+		return super.getProperty(name);
+	}
+
+	@Override
+	public int getTotalActivities() {
+		return feeder == null ? super.getTotalActivities() : feeder.getTotalActivitiesCount();
+	}
+
+	@Override
+	public int getActivityPosition() {
+		return activityPosition;
+	}
+
+	@Override
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
+
+		if (StringUtils.isEmpty(fileName)) {
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
+		}
+
+		rowRange = IntRange.getRange(rangeValue);
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
+
+		File wbFile = new File(fileName);
+		if (!wbFile.exists()) {
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME, "AbstractExcelStream.file.not.exist", fileName));
+		}
+
+		workbook = WorkbookFactory.create(wbFile, wbPass, true);
+		sheets = workbook.sheetIterator();
+
+		switch (activityScope) {
+		case WORKBOOK:
+			feeder = new WorkbookActivityFeeder();
+			break;
+		case SHEET:
+			feeder = new SheetActivityFeeder();
+			break;
+		default:
+			feeder = new RowActivityFeeder();
+		}
+	}
+
+	// @Override
+	// public long getTotalBytes() {
+	// return super.getTotalBytes();
+	// }
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method returns a excel workbook {@link Sheet} containing the contents of the next raw activity data item.
+	 */
+	@Override
+	public Iterable<?> getNextItem() throws Exception {
+		return feeder.nextActivityItem();
+	}
+
+	@Override
+	protected void cleanup() {
+		Utils.close(workbook);
+
+		super.cleanup();
+	}
+
+	/**
+	 * Returns {@link Workbook} next {@link Sheet} which name matches configuration defined (property
+	 * {@value com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties#PROP_SHEETS}) sheets name filtering mask.
+	 * If no more sheets matching name filter mask is available in workbook, then {@code null} is returned.
+	 *
+	 * @param countSkips
+	 *            flag indicating whether unmatched sheets has to be added to stream skipped activities count
+	 *
+	 * @return next workbook sheet matching name filter mask, or {@code null} if no more sheets matching name mask
+	 *         available in this workbook.
+	 */
+	protected Sheet getNextNameMatchingSheet(boolean countSkips) {
+		while (true) {
+			if (sheets == null || !sheets.hasNext()) {
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+						"AbstractExcelStream.no.more.sheets");
+
+				return null;
+			}
+
+			Sheet sheet = sheets.next();
+			boolean match = sheetNameMatcher == null || sheetNameMatcher.matcher(sheet.getSheetName()).matches();
+
+			if (!match) {
+				if (countSkips) {
+					skipFilteredActivities();
+				}
+				continue;
+			}
+
+			activityPosition = workbook.getSheetIndex(sheet);
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(MsOfficeStreamConstants.RESOURCE_BUNDLE_NAME),
+					"AbstractExcelStream.sheet.to.process", sheet.getSheetName());
+
+			return sheet;
+		}
+	}
+
+	/**
+	 * Calculates {@link Row} contained data bytes count.
+	 *
+	 * @param row
+	 *            the row
+	 *
+	 * @return the row data bytes count
+	 */
+	static int getRowBytesCount(Row row) {
+		int bCount = 0;
+
+		if (row != null) {
+			Iterator<Cell> cells = row.cellIterator();
+			while (cells.hasNext()) {
+				Cell c = cells.next();
+				if (c != null) {
+					String cv = c.toString();
+					bCount += cv.getBytes().length;
+				}
+			}
+		}
+
+		return bCount;
+	}
+
+	/**
+	 * Gets {@link Sheet} contained data bytes count.
+	 *
+	 * @param sheet
+	 *            the sheet
+	 *
+	 * @return the sheet data bytes count
+	 */
+	static int getSheetBytesCount(Sheet sheet) {
+		int bCount = 0;
+
+		if (sheet != null) {
+			Iterator<Row> rows = sheet.rowIterator();
+			while (rows.hasNext()) {
+				Row r = rows.next();
+				bCount += getRowBytesCount(r);
+			}
+		}
+
+		return bCount;
+	}
+
+	public enum ActivityScope {
+		WORKBOOK, SHEET, ROW
+	}
+
+	private interface ExcelActivityFeeder<T extends Iterable<?>> {
+		T nextActivityItem();
+
+		int getTotalActivitiesCount();
+	}
+
+	private class WorkbookActivityFeeder implements ExcelActivityFeeder<Workbook> {
+		private boolean consumed = false;
+
+		@Override
+		public Workbook nextActivityItem() {
+			if (consumed) {
+				return null;
+			} else {
+				consumed = true;
+				return workbook;
+			}
+		}
+
+		@Override
+		public int getTotalActivitiesCount() {
+			return 1;
+		}
+	}
+
+	private class SheetActivityFeeder implements ExcelActivityFeeder<Sheet> {
+		@Override
+		public Sheet nextActivityItem() {
+			Sheet sheet = getNextNameMatchingSheet(true);
+
+			if (sheet != null) {
+				addStreamedBytesCount(getSheetBytesCount(sheet));
+			}
+
+			return sheet;
+		}
+
+		@Override
+		public int getTotalActivitiesCount() {
+			return workbook.getNumberOfSheets();
+		}
+	}
+
+	private class RowActivityFeeder implements ExcelActivityFeeder<Row> {
+		private Iterator<Row> rows;
+
+		private int totalRows = 0;
+
+		@Override
+		public Row nextActivityItem() {
+			while (true) {
+				if (rows == null || !rows.hasNext()) {
+					activityPosition = 0;
+					Sheet sheet = getNextNameMatchingSheet(false);
+
+					if (sheet == null) {
+						return null;
+					} else {
+						rows = sheet.rowIterator();
+						totalRows += sheet.getPhysicalNumberOfRows();
+					}
+				}
+
+				if (!rows.hasNext()) {
+					continue;
+				}
+
+				activityPosition++;
+				if (!IntRange.inRange(rowRange, activityPosition)) {
+					// skip row if it is not in range
+					skipFilteredActivities();
+					rows.next();
+
+					continue;
+				}
+
+				Row row = rows.next();
+
+				if (row != null) {
+					addStreamedBytesCount(getRowBytesCount(row));
+				}
+
+				return row;
+			}
+		}
+
+		@Override
+		public int getTotalActivitiesCount() {
+			return totalRows;
+		}
+	}
+}

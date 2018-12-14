@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <!-- 01  08-Aug-18 HBC  Initial creation -->
+
+    <!--
+        Health Care Claim Status Request Transaction Set (276):
+
+        The EDI 276 transaction set is a Health Care Claim Status Inquiry. It is used by healthcare providers to verify the status of a claim submitted previously to a payer, such as an insurance company, HMO, government agency like Medicare or Medicaid, etc
+
+        Submitting a 276 status request to a payer is the first step in the claim status request/response process. The payer provides the requested information in response to the 276 request using a 277 Claim Status Response transaction. Inbound 276 transactions may also result in an immediate 999 Receipt Acknowledgement, followed by the 277 response with the requested status information.
+
+        Ref: MedNY samples  https://www.emedny.org/HIPAA/5010/5010_sample_files/index.aspx
+        Sampe EDI 277 msg:
+        Ref: https://www.emedny.org/HIPAA/5010/5010_sample_files/277Sample(276Resp-ClaimInfo).txt
+
+        ISA*00*          *00*          *ZZ*EMEDNYBAT      *ZZ*ETIN           *110101*0100*^*00501*000000001*0*T*:~
+        GS*HN*EMEDNYBAT*ETIN*20110101*010000*1*X*005010X212~
+        ST*277*000000001*005010X212~
+        BHT*0010*08*701620002 162000002*20110101*010000*DG~
+        HL*1**20*1~NM1*PR*2*NYSDOH*****PI*141797357~HL*2*1*21*1~
+        NM1*41*2*SUBMITTER*****46*ETIN~
+        HL*3*2*19*1~
+        NM1*1P*2*BUSY PROVIDER*****XX*1234567891~
+        HL*4*3*22*0~
+        NM1*IL*1*Patient Last Name*Patient First Name****MI*XX99999X~	TRN*2*10060216012300233HSP1156IC002-~	STC*F1:3::RX*20101214**524.49*389.73~
+        REF*1K*1026000000099999~
+        REF*EJ*PT12345~
+        REF*D9*20041513010001~
+        REF*XZ*0898779~	DTP*472*RD8*20100729-20100729~
+        SVC*N4:10337080301*524.49*389.73****100.00~
+        STC*F1:3*20101214~
+        DTP*472*RD8*20100729-20100729~
+        SE*21*000000001~
+        GE*1*1~IEA*1*000000001~
+
+        Bluecross EDI 276 and 277 data element tables and sample 276 request msg:	https://www.bluecrossnc.com/sites/default/files/document/attachment/providers/public/pdfs/276-277_Claims%20Status_5010_Companion_Guide_v1.5.pdf
+
+        Segment Type:       BHT
+        Segment Designator: Beginning of Hierarchical Transaction
+
+        Element Data Element Name		    BlueCross Business Rules
+        ID
+        03 		Reference Identification
+                                            Number assigned by the originator to identify
+                                            the transaction within the originator’s
+                                            business application system. Will be
+                                            returned on the 277. Required.
+                                            e.g. 0010 in msg below
+        04 		Date
+                                            All dates must be expressed in the
+                                            ccyymmdd format. Future or invalid dates
+                                            are not accepted. See the "Business Edits"
+                                            in the Introduction of the 276/7 Chapter for
+                                            Error Messages
+        05 		Time
+                                            Time in Eastern time. Required. Can be
+                                            received in HHMM or HHMMSS or
+                                            HHMMSSD or HHMMSSDD format.
+                                            Required.
+
+        ST*276*0123*005010X212~
+        BHT*0010*13*ABC276XXX*20021031*1425~
+        HL*1**20*1~
+        NM1*PR*2*Blue Cross and Blue Shield of NC*****PI*560894904~
+        HL*2*1*21*1~
+        NM1*41*2*BONE AND JOINT CLINIC*****46*1234567893~
+        HL*3*2*19*1~
+        NM1*1P*1*HELBY*MARCUS***MD*XX*1234567893~
+        HL*4*3*22*1~
+        NM1*IL*1*RUBBLE*BARNARD****MI*111223301~
+        HL*5*4*23~
+        DMG*D8*19881014*M~
+        NM1*QC*1*RUBBLE*BAMBAM~
+        TRN*1*XXX123~
+        REF*1K*MMDDYY123456~
+        REF*BLT*111~
+        AMT*T3*2500~
+        DTP*472*D8*20021021~
+        SE*19*0123~
+    -->
+
+    <parser name="EDI_277_ST_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!--  Group 1 or st: 277, Group 2 or value1: 0123, Group 3 or value 2: 005010X212 -->
+        <property name="Pattern"><![CDATA[(?<st>\d+)\*(?<value1>.+)\*(?<value2>.[^~]+) ]]></property>
+        <property name="MatchStrategy" value="MATCH"/>  <!-- match all specified capture groups -->
+        <property name="ActivityDelim" value="EOF"/>
+
+        <field name="SegmentType" locator="st" locator-type="REMatchId"/>
+        <field name="Code1_277" locator="value1" locator-type="REMatchId"/>
+        <field name="Code2_277" locator="value2" locator-type="REMatchId"/>
+    </parser>
+
+    <!-- Input: ST value string e.g. '276*0123*005010X212` -->
+    <parser name="EDI_276_ST_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- These named capture groups work -->
+        <!--  Group 1 or named capture group:   276
+              Group 2 or named capture elem1:  0123
+              Group 3 or named capture elem2:  005010X212 -->
+        <!-- Pattern should MATCH complete input data string -->
+        <property name="Pattern"><![CDATA[(?<st>\d+)\*(?<elem1>.+)\*(?<elem2>.[^~]+)]]></property>
+        <property name="MatchStrategy" value="MATCH"/>
+        <property name="ActivityDelim" value="EOF"/>
+
+        <!-- try Index locator instead of REMatchId		-->
+        <field name="SegmentType" locator="st" locator-type="REMatchId"/>
+        <field name="Code1_276" locator="elem1" locator-type="Label"/>
+        <!--<field name="Code2_276" locator="elem2" locator-type="REMatchId"/>-->
+        <field name="Code2_276" locator="3" locator-type="Index"/>
+
+        <!-- 08/20/18 Index locators work
+        <field name="SegmentType" locator="1"  locator-type="Index"/>
+        <field name="Code1_276"   locator="2"  locator-type="Index"/>
+        <field name="Code2_276"   locator="3"  locator-type="Index"/>
+-->
+
+        <field name="time2" locator="DateTime" locator-type="StreamProp" datatype="Timestamp"/>
+    </parser>
+
+    <!-- Parsing of fields ok but overall parser fails when using "REMatchId" :
+    2018-08-20 13:14:25,165 ERROR [10:CharacterStream:FileStream!CharacterStream] - Failed to record activity at position 0: java.text.ParseException: Failed to process activity data at position 0
+    at com.jkoolcloud.tnt4j.streams.inputs.TNTParseableInputStream.makeActivityInfo(TNTParseableInputStream.java:310)
+    ...
+    Caused by: java.text.ParseException: Failed parsing data for field 'ST_segment'
+    ...
+    Caused by: java.lang.IllegalStateException: No match found
+    	at java.util.regex.Matcher.group(Unknown Source)
+    	...
+    Try transparent=false: still fails same way
+    Try no parser-ref: still fails same way
+    Try locator Index vs REMatchId: no failure, parses ok
+    Try REMatchId with MATCH here and above vs FIND: no match:
+    	2018-08-20 15:54:30,280 DEBUG [10:CharacterStream:FileStream!ActivityRegExParser] - Input does not match pattern 'ST\*(?<STvalue>.[^~]*)' defined in parser 'EDI_Health_Msg_Regex_Parser' | RUNTIME=27340@Howard2-PC#SERVER=Howard2-PC#NETADDR=11.0.0.24#DATACENTER=UNKNOWN#GEOADDR=0,0
+    	2018-08-20 15:54:30,280 INFO  [10:CharacterStream:FileStream!ActivityRegExParser] - Got nothing to parse from RAW activity data!.. | RUNTIME=27340@Howard2-PC#SERVER=Howard2-PC#NETADDR=11.0.0.24#DATACENTER=UNKNOWN#GEOADDR=0,0
+    	2018-08-20 15:54:30,280 WARN  [10:CharacterStream:FileStream!CharacterStream] - No parser accepted message: com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed$FeedR@72db4460
+    Try FIND instead of MATCH here and above:
+    -->
+    <parser name="EDI_Health_Msg_Regex_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser">
+        <!-- regex pattern will get a set of key/value pairs -->
+        <!-- Pattern should FIND a subseqeunce within the input data string (the msg) -->
+        <property name="Pattern"><![CDATA[ST\*(?<STvalue>.[^~]*)]]></property>
+        <property name="MatchStrategy" value="FIND"/>
+        <property name="ActivityDelim" value="EOF"/>
+        <property name="RequireDefault" value="false"/>    <!-- default value -->
+
+        <field name="ParserName" value="EDI_Health_Msg_Regex_Parser"/>
+
+        <!-- locator names work but try Index:
+              No failure:
+               0 : works, gets the full string, and outputs it to JSON record if transparent=false
+               1 : works, outputs string following 'ST*'
+             Restore parser-ref: works, 3
+        -->
+        <field name="ST_segment" locator="STvalue" locator-type="REMatchId" transparent="false">
+            <!--<field name="ST_segment"  locator="1"  locator-type="Index" transparent="false">-->
+            <!-- Expected value: `276*0123*005010X212` -->
+            <parser-ref name="EDI_276_ST_Parser">
+                <matchExp>regex:276</matchExp>
+            </parser-ref>
+        </field>
+
+        <field name="time1" locator="DateTime" locator-type="StreamProp" datatype="Timestamp"/>
+    </parser>
+
+    <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/swift/edi-276-msg.txt"/>
+        <!-- Can have only 1 parser ref in stream stanza -->
+        <parser-ref name="EDI_Health_Msg_Regex_Parser"/>
+    </stream>
+
+</tnt-data-source>

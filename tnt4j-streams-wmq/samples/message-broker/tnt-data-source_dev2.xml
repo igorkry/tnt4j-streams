@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <resource-ref id="IIB_MAPPINGS" type="ValuesMap" uri="iib_mappings.json"/>
+    <parser name="EventParser" class="com.jkoolcloud.tnt4j.streams.parsers.MessageActivityXmlParser">
+        <property name="SignatureDelim" value="#!#"/>
+        <property name="Namespace" value="wmb=http://www.ibm.com/xmlns/prod/websphere/messagebroker/6.1.0/monitoring/event"/>
+
+        <field name="ServerName" separator=":">
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:executionGroup/@wmb:name" locator-type="Label"
+                           required="false"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:name" locator-type="Label"
+                           required="false"/>
+        </field>
+
+        <field name="ApplName" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:messageFlow/@wmb:uniqueFlowName"
+               locator-type="Label"/>
+        <field name="ResourceName" separator=".">
+            <field-locator value="Nodename-"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeLabel" locator-type="Label"
+                           required="false"/>
+            <field-locator value=".ResName-"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:detail" locator-type="Label"
+                           required="false"/>
+            <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Name']/@wmb:value" locator-type="Label"
+                           required="false" datatype="String" format="string"/>
+        </field>
+
+        <field name="ResourceMgr">
+            <field-locator value="Broker-"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:broker/@wmb:name" locator-type="Label"
+                           required="false"/>
+            <field-locator value=".ExecGroup-"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:executionGroup/@wmb:name" locator-type="Label"
+                           required="false"/>
+        </field>
+
+        <field name="Message" locator="/wmb:event/wmb:bitstreamData/wmb:bitstream" locator-type="Label" datatype="Binary"
+               format="base64Binary"/>
+        <field name="EventName" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName"
+               locator-type="Label"/>
+        <field name="EventType" locator="/wmb:event/wmb:eventPointData/wmb:messageFlowData/wmb:node/@wmb:nodeType" locator-type="Label">
+            <field-map-ref resource="IIB_MAPPINGS.EventType"/>
+        </field>
+
+        <!-- ***
+             Correlators used to match events emitted by the same, or related, business transactions. A local transaction correlator links the events emitted by a single invocation of a message flow. A parent transaction correlator links the events from a message flow to a parent message flow or an external application. A global transaction correlator links events from a message flow to one or more related message flows or external applications. An event must contain a local transaction correlator, but need not contain a parent transaction correlator or global transaction correlator.
+        *** -->
+        <field name="Correlator" separator=".">
+            <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='SourceQueue']/@wmb:value"
+                           locator-type="Label" required="false" datatype="String" format="string"/>
+            <field-locator locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventCorrelation/@wmb:localTransactionId"
+                           locator-type="Label" datatype="String" format="string" required="false"/>
+        </field>
+
+        <field name="TrackingId" separator="#!#" value-type="signature" required="false">
+            <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgId']/@wmb:value" locator-type="Label"
+                           required="false" datatype="Binary" format="hexBinary"/>
+
+        </field>
+
+        <field name="PutDate" locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutDate']/@wmb:value"
+               locator-type="Label"
+               required="false"/>
+        <field name="PutTime" locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutTime']/@wmb:value"
+               locator-type="Label"
+               required="false"/>
+
+        <!-- ElapsedTime ? EndTime ?-->
+        <!--<field name="ElapsedTime" value="0" datatype="Number"/> -->
+        <!-- <field name="EndTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime"
+               locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timezone="GMT"/> -->
+
+        <!--field name="ReasonCode" locator="/wmb:event/wmb:eventPointData/ReasonCode" locator-type="Label" datatype="Number"/-->
+
+        <field name="MsgID" locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgId']/@wmb:value" locator-type="Label"
+               datatype="String" format="string" required="false"/>
+        <field name="FileName" locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Name']/@wmb:value" locator-type="Label"
+               required="false" datatype="String" format="string"/>
+
+        <!-- ***  Use following signature definition for message flows that contains WebSphere MQ (ie MQ Input, MQ OutPut) nodes and File
+                 (ie FTE In\Out, File Input\Output) nodes to extract unique ID from local variables formed in Event Payload or in Event
+                 Correlation in Monitoring Properties.
+                  Most events need to contain data taken from fields in the message tree or from elsewhere in the message assembly. Data
+                 taken from simple fields or complex fields appears in the event in XML character format. An event can also contain
+                 'bitstream' data, which appears in the event as hexadecimal bytes.
+                  Note that TackingId used to connect applications on the basis of appl A SEND a message and appl B RECEIVE the same
+                 message. Where Correlator used to match events from different apps into a single related activity.
+        *** -->
+
+        <!-- *** Use following signature definition for Non-WMQ messages to extract unique ID from local variables
+             formed in Event Payload or in Event Correlation.
+             *** -->
+        <!--
+        <filed-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Name']/@wmb:value" locator-type="Label" required="false" datatype="String" format="string"/> -->
+
+        <!-- *** Use following signature definition for WMQ messages *** -->
+        <!--
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgType']/@wmb:value" locator-type="Label" datatype="Number"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='Format']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='MsgId']/@wmb:value" locator-type="Label" datatype="Binary" format="hexBinary"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='UserIdentifier']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutDate']/@wmb:value" locator-type="Label"/>
+          <field-locator locator="/wmb:event/wmb:applicationData/wmb:simpleContent[@wmb:name='PutTime']/@wmb:value" locator-type="Label"/>
+        </field>
+    -->
+        <field name="StartTime" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventSequence/@wmb:creationTime"
+               locator-type="Label" datatype="DateTime" format="yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'" timezone="GMT"/>
+        <field name="CompCode" locator="/wmb:event/wmb:eventPointData/wmb:eventData/wmb:eventIdentity/@wmb:eventName" locator-type="Label">
+            <field-map source="FlowRollback" target="ERROR"/>
+            <field-map source="" target="SUCCESS"/>
+        </field>
+
+        <!--field name="Tag" locator="/wmb:event/wmb:eventPointData/Tag" locator-type="Label"/-->
+        <!--field name="UserName" locator="/wmb:event/wmb:eventPointData/UserName" locator-type="Label"/-->
+    </parser>
+
+    <!--<stream name="EventStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">-->
+
+    <!--<property name="QueueManager" value="V9Test"/>-->
+    <!--<property name="Queue" value="NASTEL.IIB.EVENTS"/>-->
+    <!--<parser-ref name="EventParser"/>-->
+    <!--<property name="UseExecutors" value="true"/>-->
+    <!--<property name="ExecutorThreadsQuantity" value="10"/>-->
+    <!--<property name="ExecutorsTerminationTimeout" value="20"/>-->
+    <!--<property name="ExecutorsBoundedModel" value="true"/>-->
+    <!--<property name="ExecutorRejectedTaskOfferTimeout" value="20"/>-->
+    <!--</stream>-->
+
+    <stream name="MessageStream" class="com.jkoolcloud.tnt4j.streams.inputs.BytesInputStream">
+        <property name="FileName" value="./tnt4j-streams-wmq/samples/message-broker/1.xml"/>
+
+        <parser-ref name="EventParser"/>
+    </stream>
+</tnt-data-source>

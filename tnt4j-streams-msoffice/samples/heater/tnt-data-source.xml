@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="ExcelRowParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityExcelRowParser">
+        <field name="MsgValue" locator="A" locator-type="Label" datatype="Number"/>
+        <field name="ServerIp" locator="B" locator-type="Label">
+            <field-transform name="ip_filter" lang="groovy">
+                $fieldValue.substring(0, $fieldValue.indexOf(':'))
+            </field-transform>
+        </field>
+        <field name="Location" locator="C" locator-type="Label"/>
+        <field name="ApplName" value="smart-heaters"/>
+        <field name="EventType" value="ACTIVITY"/>
+    </parser>
+
+    <stream name="SmartHeaterExcelStream5" class="com.jkoolcloud.tnt4j.streams.inputs.ExcelRowStream">
+        <property name="HaltIfNoParser" value="false"/>
+        <property name="FileName" value="./tnt4j-streams-msoffice/samples/heater/heaters-ip.xlsx"/>
+        <property name="RangeToStream" value="1:"/>
+        <!--<property name="SheetsToProcess" value="Sheet*"/>-->
+        <!--<property name="SheetsToProcess" value="Sheet(1|2)"/>-->
+
+        <parser-ref name="ExcelRowParser"/>
+    </stream>
+</tnt-data-source>
