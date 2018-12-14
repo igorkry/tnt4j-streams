@@ -448,6 +448,15 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 	}
 
 	/**
+	 * Returns default output source instance.
+	 * 
+	 * @return default output source
+	 */
+	protected Source getDefaultSource() {
+		return defaultSource;
+	}
+
+	/**
 	 * Sends activity data package to jKoolCloud using the specified tracker. Performs resend after defined period of
 	 * time if initial sending fails.
 	 * 

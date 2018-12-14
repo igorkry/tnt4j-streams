@@ -143,7 +143,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			}
 		}
 
-	private static void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
+	private void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
 		if (StringUtils.isNotEmpty(fqn)) {
 			Source tSrc = buildSource(tracker, ai.getSourceFQN(fqn));
 			t.setSource(tSrc);
@@ -167,6 +167,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 					}
 				}
 			}
+		} else {
+			t.setSource(getDefaultSource());
 		}
 	}
 
