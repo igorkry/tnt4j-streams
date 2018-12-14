@@ -271,7 +271,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				if (field.hasLocatorsOfType(uLocatorType)) {
 					throw new IllegalArgumentException(StreamsResources.getStringFormatted(
 							StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityParser.unsupported.locator",
-							field.getFieldTypeName(), uLocatorType.name(), this.getClass().getName()));
+							field.getFieldTypeName(), uLocatorType.name(), getClass().getName()));
 				}
 			}
 		}
@@ -323,6 +323,14 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		for (ActivityField f : fields) {
 			fieldsMap.put(f.getFieldTypeName(), f);
 		}
+		// add auto-assignable fields
+		Set<String> aaFields = new HashSet<>();
+		aaFields.add(StreamFieldType.TrackingId.name());
+		aaFields.add(StreamFieldType.StartTime.name());
+		aaFields.add(StreamFieldType.EndTime.name());
+		aaFields.add(StreamFieldType.ElapsedTime.name());
+		aaFields.add(StreamFieldType.ServerName.name());
+		aaFields.add(StreamFieldType.ServerIp.name());
 
 		// make fields references matrix and verify missing references
 		Map<ActivityField, Set<ActivityField>> refsMap = new LinkedHashMap<>(fields.size());
@@ -335,9 +343,14 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					ActivityField rf = fieldsMap.get(ref);
 
 					if (rf == null) {
-						throw new IllegalArgumentException(
-								StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-										"ActivityParser.unknown.field.reference", af.getFieldTypeName(), ref));
+						// NOTE: ignoring parent parser fields references for now.
+						if (ref.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX) || aaFields.contains(ref)) {
+							continue;
+						} else {
+							throw new IllegalArgumentException(
+									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+											"ActivityParser.unknown.field.reference", af.getFieldTypeName(), ref));
+						}
 					}
 
 					rFields.add(rf);

@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -358,7 +359,7 @@ public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
 
 		private StringEntity createHtmlStringEntity(String msg) {
 			StringEntity entity = new StringEntity(Utils.format(HTML_MSG_PATTERN, msg),
-					ContentType.create("text/html", Utils.UTF8));
+					ContentType.create("text/html", StandardCharsets.UTF_8));
 
 			return entity;
 		}

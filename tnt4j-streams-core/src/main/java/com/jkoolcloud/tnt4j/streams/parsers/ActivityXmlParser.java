@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -244,8 +245,8 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 					Document tDoc = xmlDoc.getOwnerDocument();
 					// Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
 					if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
-						xmlDoc = parseXmlDoc(
-								new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)), Utils.UTF8));
+						xmlDoc = parseXmlDoc(new ReaderInputStream(new StringReader(Utils.documentToString(xmlDoc)),
+								StandardCharsets.UTF_8));
 					}
 				}
 			} else {
@@ -253,7 +254,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (StringUtils.isEmpty(xmlString)) {
 					return null;
 				}
-				xmlDoc = parseXmlDoc(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				xmlDoc = parseXmlDoc(IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
 			}
 		} catch (Exception e) {
 			ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -238,7 +239,7 @@ public class RestStream extends AbstractWsStream<String> {
 			throw new HttpResponseException(responseCode, response.getStatusLine().getReasonPhrase());
 		}
 
-		String respStr = EntityUtils.toString(response.getEntity(), Utils.UTF8);
+		String respStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"RestStream.received.response", req.getURI(), respStr);
@@ -285,7 +286,7 @@ public class RestStream extends AbstractWsStream<String> {
 						}
 
 						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
+							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
 						}
 					}
 				}

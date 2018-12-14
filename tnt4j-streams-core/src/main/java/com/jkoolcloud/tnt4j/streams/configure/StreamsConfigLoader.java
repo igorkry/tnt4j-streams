@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.configure;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -169,7 +170,7 @@ public class StreamsConfigLoader {
 	 *             if there is an error reading the configuration data
 	 */
 	public StreamsConfigLoader(Reader configReader) throws SAXException, ParserConfigurationException, IOException {
-		load(new ReaderInputStream(configReader, Utils.UTF8));
+		load(new ReaderInputStream(configReader, StandardCharsets.UTF_8));
 	}
 
 	/**

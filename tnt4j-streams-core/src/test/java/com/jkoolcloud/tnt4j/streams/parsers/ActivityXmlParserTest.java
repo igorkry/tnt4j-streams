@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,7 @@ import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTParseableInputStream;
 import com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser;
+import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
 import com.jkoolcloud.tnt4j.streams.utils.NamespaceMap;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -152,6 +154,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		parser.addField(field);
 
 		ActivityXmlParser stackedParser1 = new ActivityXmlParser();
+		stackedParser1.setName("StackedParser1");
 		stackedParser1.setProperties(EMPTY_PROPS_MAP.entrySet());
 
 		String field1 = "StackedField1";
@@ -161,6 +164,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		stackedParser1.addField(stField1);
 
 		ActivityXmlParser stackedParser2 = new ActivityXmlParser();
+		stackedParser2.setName("StackedParser2");
 		stackedParser2.setProperties(EMPTY_PROPS_MAP.entrySet());
 
 		String field2 = "StackedField2";
@@ -169,8 +173,14 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		stField2.addLocator(new ActivityFieldLocator(ActivityFieldLocatorType.Label, "/root/test"));
 		stackedParser2.addField(stField2);
 
-		field.addStackedParser(stackedParser1, "Merge", "Field", "xpath:/root/test1");
-		field.addStackedParser(stackedParser2, "Merge", "Field", "xpath:/root/test2");
+		MatchingParserReference parserRef1 = new MatchingParserReference(stackedParser1);
+		parserRef1.addMatchExpression("xpath:/root/test1");
+
+		MatchingParserReference parserRef2 = new MatchingParserReference(stackedParser2);
+		parserRef2.addMatchExpression("xpath:/root/test2");
+
+		field.addStackedParser(parserRef1, "Merge", "Field");
+		field.addStackedParser(parserRef2, "Merge", "Field");
 
 		String testData1 = "<?xml version=\"1.0\" encoding=\"utf-8\"?><root><test>a</test><test1>1</test1></root>";
 		String testData2 = "<?xml version=\"1.0\" encoding=\"utf-8\"?><root><test>b</test><test2>2</test2></root>";
@@ -205,8 +215,8 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		Document tDoc = document.getOwnerDocument();
 		Element docElem = tDoc == null ? null : tDoc.getDocumentElement();
 		if (tDoc == null || StringUtils.isEmpty(tDoc.getNamespaceURI())) {
-			document = builder
-					.parse(new ReaderInputStream(new StringReader(Utils.documentToString(document)), Utils.UTF8));
+			document = builder.parse(
+					new ReaderInputStream(new StringReader(Utils.documentToString(document)), StandardCharsets.UTF_8));
 		}
 
 		NamespaceMap documentNamespaces = new NamespaceMap();
@@ -228,7 +238,7 @@ public class ActivityXmlParserTest extends GenericActivityParserTestBase {
 		Map<String, String> namespaces = testSuite.getNamespaces();
 
 		DocumentBuilder builder = domFactory.newDocumentBuilder();
-		Document document = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+		Document document = builder.parse(IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
 		XMLFromBinDataPreParser xmlFromBinDataPreParser = new XMLFromBinDataPreParser();
 
 		NamespaceMap nsContext = new NamespaceMap();

@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.matchers;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -87,7 +88,7 @@ public class XPathMatcher implements Matcher {
 			}
 			builderLock.lock();
 			try {
-				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, Utils.UTF8));
+				xmlDoc = builder.parse(IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
 			} finally {
 				builderLock.unlock();
 			}

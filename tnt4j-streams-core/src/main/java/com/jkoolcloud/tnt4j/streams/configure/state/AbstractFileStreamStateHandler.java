@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -373,7 +374,7 @@ public abstract class AbstractFileStreamStateHandler<T> {
 
 		if (readLen > 0) {
 			String str = new String(buff, 0, readLen);
-			byte[] bytes = str.getBytes(Utils.UTF8);
+			byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
 			crc.update(bytes, 0, bytes.length);
 		}
 
@@ -514,10 +515,10 @@ public abstract class AbstractFileStreamStateHandler<T> {
 			fileAccessState.lastReadTime = System.currentTimeMillis();
 
 			CRC32 crc = new CRC32();
-			byte[] bytes4Line = lineStr.getBytes(Utils.UTF8);
+			byte[] bytes4Line = lineStr.getBytes(StandardCharsets.UTF_8);
 			crc.update(bytes4Line, 0, bytes4Line.length);
 			fileAccessState.currentLineCrc = crc.getValue();
-		} catch (IOException exc) {
+		} catch (Exception exc) {
 			Utils.logThrowable(logger(), OpLevel.ERROR,
 					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"FileStreamStateHandler.file.error", exc);

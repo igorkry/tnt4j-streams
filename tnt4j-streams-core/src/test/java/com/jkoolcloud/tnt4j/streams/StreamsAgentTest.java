@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import org.apache.commons.io.output.WriterOutputStream;
@@ -44,8 +45,8 @@ public class StreamsAgentTest {
 		interceptConsole();
 		StreamsAgent.main("-h"); // NON-NLS
 		System.out.flush();
-		final String string = console.getBuffer().toString();
-		final String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help")
+		String string = console.getBuffer().toString();
+		String expected = StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "StreamsAgent.help")
 				+ Utils.NEW_LINE;
 		assertTrue("Console output does not contain expected string", string.contains(expected));
 		Utils.close(console);
@@ -54,10 +55,10 @@ public class StreamsAgentTest {
 	@Test
 	public void testArgumentsFail() throws Exception {
 		interceptConsole();
-		final String argument = "-test"; // NON-NLS
+		String argument = "-test"; // NON-NLS
 		StreamsAgent.main(argument);
 		System.out.flush();
-		final String string = console.getBuffer().toString();
+		String string = console.getBuffer().toString();
 		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"StreamsAgent.invalid.argument", argument);
 		expected += Utils.NEW_LINE;
@@ -70,10 +71,10 @@ public class StreamsAgentTest {
 	@Test
 	public void testFileEmptyFail() throws Exception {
 		interceptConsole();
-		final String argument = "-f:"; // NON-NLS
+		String argument = "-f:"; // NON-NLS
 		StreamsAgent.main(argument);
 		System.out.flush();
-		final String string = console.getBuffer().toString();
+		String string = console.getBuffer().toString();
 		String expected = StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 				"StreamsAgent.missing.cfg.file", argument);
 		expected += Utils.NEW_LINE;
@@ -85,8 +86,8 @@ public class StreamsAgentTest {
 
 	@Test
 	public void testRunFromAPI() throws Exception {
-		final String testStreamName = "TestStream"; // NON-NLS
-		final File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
+		String testStreamName = "TestStream"; // NON-NLS
+		File tempConfFile = File.createTempFile("testConfigutarion", ".xml");
 		FileWriter fw = new FileWriter(tempConfFile);
 		String sb = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Utils.NEW_LINE + "<tnt-data-source" + Utils.NEW_LINE // NON-NLS
 				+ "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" + Utils.NEW_LINE // NON-NLS
@@ -102,7 +103,7 @@ public class StreamsAgentTest {
 		StreamsAgent.runFromAPI(tempConfFile.getAbsolutePath());
 		Thread.sleep(500);
 		tempConfFile.delete();
-		final Set<Thread> threads = Thread.getAllStackTraces().keySet();
+		Set<Thread> threads = Thread.getAllStackTraces().keySet();
 		for (Thread thread : threads) {
 			if (thread.getName().contains(testStreamName)) {
 				return;
@@ -115,8 +116,8 @@ public class StreamsAgentTest {
 
 	private void interceptConsole() throws InterruptedException {
 		console = new StringWriter();
-		final WriterOutputStream writerOutputStream = new WriterOutputStream(console, Utils.UTF8);
-		final PrintStream out = new PrintStream(writerOutputStream);
+		WriterOutputStream writerOutputStream = new WriterOutputStream(console, StandardCharsets.UTF_8);
+		PrintStream out = new PrintStream(writerOutputStream);
 		System.setOut(out);
 		Thread.sleep(50);
 	}

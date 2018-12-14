@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.preparsers;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -122,7 +123,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 			closeWhenDone = true;
 		} else if (data instanceof Reader) {
 			Reader reader = (Reader) data;
-			is = new ReaderInputStream(reader, Utils.UTF8);
+			is = new ReaderInputStream(reader, StandardCharsets.UTF_8);
 		} else if (data instanceof InputStream) {
 			is = (InputStream) data;
 		} else {
@@ -312,7 +313,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 				try {
 					is.skip(lPos);
 					is.read(buffer);
-					String text = new String(buffer, Utils.UTF8);
+					String text = new String(buffer, StandardCharsets.UTF_8);
 					characters(text.toCharArray(), 0, text.length());
 				} finally {
 					is.reset();
