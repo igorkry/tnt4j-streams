@@ -23,7 +23,6 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -34,7 +33,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
@@ -464,7 +462,7 @@ public class WsStream extends AbstractWsStream<String> {
 								"WsStream.execute.exception", exc);
 					} finally {
 						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
+							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
 						} else {
 							if (semaphore != null && semaphore.availablePermits() < 1) {
 								semaphore.release();

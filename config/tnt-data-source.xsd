@@ -1730,10 +1730,10 @@
     </xs:complexType>
 
     <!-- Element <parser-ref> definition -->
-    <xs:complexType name="FieldParserReference">
+    <xs:complexType name="ParserReference">
         <xs:annotation>
             <xs:documentation>
-                Associates field with stacked parser reference.
+                Associates field with parser reference.
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
@@ -1748,7 +1748,27 @@
                         </xs:annotation>
                     </xs:element>
                 </xs:sequence>
+                <xs:attribute name="tags" use="optional" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Tags list (delimited using ',') for a parser. Tags are used to map incoming parseable data package with
+                            parser instance dedicated to parse it.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
+    <!-- Element <parser-ref> definition under <field> element-->
+    <xs:complexType name="FieldParserReference">
+        <xs:annotation>
+            <xs:documentation>
+                Associates field with stacked parser reference.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ParserReference">
                 <xs:attribute name="aggregation" use="optional" type="AggregationTypes" default="Merge">
                     <xs:annotation>
                         <xs:documentation>
@@ -2044,15 +2064,6 @@
             </xs:annotation>
         </xs:attributeGroup>
 
-        <xs:attribute name="tags" use="optional" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    Tags list (delimited using ',') for a parser. Tags are used to map incoming parseable data package with parser instance
-                    dedicated to parse it.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
-
         <xs:attribute name="manualFieldsOrder" use="optional" type="xs:boolean" default="false">
             <xs:annotation>
                 <xs:documentation>
@@ -2178,7 +2189,7 @@
                 </xs:annotation>
             </xs:element>
 
-            <xs:element name="parser-ref" type="Reference" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="parser-ref" type="ParserReference" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>
                         Associates a parser with this stream. If multiple parsers associated, they are applied in configuration defined

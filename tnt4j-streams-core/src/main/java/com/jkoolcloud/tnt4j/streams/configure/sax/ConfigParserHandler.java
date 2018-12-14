@@ -55,6 +55,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.outputs.TNTStreamOutput;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
+import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.*;
@@ -617,7 +618,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		String name = null;
 		String className = null;
-		String tags = null;
 		boolean autoArrange = true;
 		ActivityFieldDataType defaultDataType = null;
 		boolean defaultEmptyAsNull = true;
@@ -628,8 +628,6 @@ public class ConfigParserHandler extends DefaultHandler {
 				name = attValue;
 			} else if (CLASS_ATTR.equals(attName)) {
 				className = attValue;
-			} else if (TAGS_ATTR.equals(attName)) {
-				tags = attValue;
 			} else if (AUTO_SORT_ATTR.equals(attName)) {
 				autoArrange = !Utils.toBoolean(attValue);
 			} else if (DEFAULT_TYPE_ATTR.equals(attName)) {
@@ -661,7 +659,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 		if (currParser != null) {
 			currParser.setName(name);
-			currParser.setTags(tags);
 			currParser.setProperty(ParserProperties.PROP_AUTO_ARRANGE_FIELDS, String.valueOf(autoArrange));
 			currParser.setDefaultDataType(defaultDataType);
 			currParser.setDefaultEmptyAsNull(defaultEmptyAsNull);
@@ -1487,6 +1484,7 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 
 		String parserName = null;
+		String tags = null;
 		String aggregationType = null;
 		String applyOn = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
@@ -1494,6 +1492,8 @@ public class ConfigParserHandler extends DefaultHandler {
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				parserName = attValue;
+			} else if (TAGS_ATTR.equals(attName)) {
+				tags = attValue;
 			} else if (AGGREGATION_ATTR.equals(attName)) {
 				aggregationType = attValue;
 			} else if (APPLY_ON_ATTR.equals(attName)) {
@@ -1511,19 +1511,7 @@ public class ConfigParserHandler extends DefaultHandler {
 					"ConfigParserHandler.undefined.reference", PARSER_REF_ELMT, parserName), currParseLocation);
 		}
 
-		if (currField != null) {
-			// currField.addStackedParser(parser, aggregationType);
-			currParserRef = new ParserRefData(parser, aggregationType, applyOn);
-		} else {
-			try {
-				currStream.addReference(parser);
-			} catch (IllegalStateException exc) {
-				throw new SAXParseException(
-						StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-								"ConfigParserHandler.could.not.add.stream.parser", currStream.getName(), parserName),
-						currParseLocation, exc);
-			}
-		}
+		currParserRef = new ParserRefData(parser, aggregationType, applyOn, tags);
 	}
 
 	/**
@@ -1977,6 +1965,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				currStream = null;
 			} else if (PARSER_ELMT.equals(qName)) {
 				currParser.setProperties(applyVariableProperties(currProperties.remove(qName)));
+				currParser.organizeFields();
 				currParser = null;
 			} else if (FIELD_ELMT.equals(qName) || EMBEDDED_ACTIVITY_ELMT.equals(qName)) {
 				if (currField != null) {
@@ -2499,9 +2488,22 @@ public class ConfigParserHandler extends DefaultHandler {
 		}
 	}
 
-	private void handleParserRef(ParserRefData parserRefData) {
-		currField.field.addStackedParser(parserRefData.parser, parserRefData.aggregation, parserRefData.applyOn,
-				parserRefData.matchExps);
+	protected void handleParserRef(ParserRefData parserRefData) throws SAXException {
+		MatchingParserReference apr = new MatchingParserReference(parserRefData.parser);
+		apr.setTags(parserRefData.tags);
+		apr.setMatchExpressions(parserRefData.matchExps);
+
+		if (currField != null) {
+			currField.field.addStackedParser(apr, parserRefData.aggregation, parserRefData.applyOn);
+		} else {
+			try {
+				currStream.addReference(apr);
+			} catch (IllegalStateException exc) {
+				throw new SAXParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ConfigParserHandler.could.not.add.stream.parser", currStream.getName(),
+						parserRefData.parser.getName()), currParseLocation, exc);
+			}
+		}
 	}
 
 	/**
@@ -2686,16 +2688,18 @@ public class ConfigParserHandler extends DefaultHandler {
 		boolean transientEntry;
 	}
 
-	private static class ParserRefData {
+	protected static class ParserRefData {
 		ActivityParser parser;
 		String aggregation;
 		String applyOn;
+		String tags;
 		List<String> matchExps;
 
-		ParserRefData(ActivityParser parser, String aggregation, String applyOn) {
+		ParserRefData(ActivityParser parser, String aggregation, String applyOn, String tags) {
 			this.parser = parser;
 			this.aggregation = aggregation;
 			this.applyOn = applyOn;
+			this.tags = tags;
 		}
 
 		void addMatcherExp(String expression) {

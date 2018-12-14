@@ -29,7 +29,6 @@ import org.xml.sax.SAXParseException;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
-import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.scenario.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -242,13 +241,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 		currRequest = new RequestData();
 
-		for (int i = 0; i < attrs.getLength(); i++) {
-			String attName = attrs.getQName(i);
-			String attValue = attrs.getValue(i);
-			if (PARSER_REF_ELMT.equals(attName)) {
-				currRequest.parserRef = attValue;
-			}
-		}
+		// for (int i = 0; i < attrs.getLength(); i++) {
+		// String attName = attrs.getQName(i);
+		// String attValue = attrs.getValue(i);
+		// }
 
 		elementData = new StringBuilder();
 	}
@@ -335,19 +331,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				currStep = null;
 			} else if (REQ_ELMT.equals(qName)) {
 				if (elementData != null) {
-					WsRequest<?> currReq = currStep.addRequest(getElementData(), currRequest.parserRef);
-					if (StringUtils.isNotEmpty(currRequest.parserRef)) {
-						ActivityParser parser = getStreamsConfigData().getParser(currRequest.parserRef);
-						try {
-							currStream.addReference(parser);
-						} catch (IllegalStateException exc) {
-							throw new SAXParseException(
-									StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-											"ConfigParserHandler.could.not.add.stream.parser", currStream.getName(),
-											parser.getName()),
-									currParseLocation, exc);
-						}
-					}
+					WsRequest<?> currReq = currStep.addRequest(getElementData(), currRequest.getTags());
 					elementData = null;
 
 					for (WsRequest.Parameter param : currRequest.params) {
@@ -364,12 +348,41 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		}
 	}
 
+	@Override
+	protected void handleParserRef(ParserRefData parserRefData) throws SAXException {
+		if (currRequest != null) {
+			if (StringUtils.isEmpty(parserRefData.tags)) {
+				parserRefData.tags = parserRefData.parser.getName();
+			} else {
+				parserRefData.tags += "," + parserRefData.parser.getName(); // NON-NLS
+			}
+
+			currRequest.addParserRef(parserRefData);
+		}
+
+		super.handleParserRef(parserRefData);
+	}
+
 	private static class RequestData {
-		private String parserRef;
 		private List<WsRequest.Parameter> params = new ArrayList<>();
+		private List<ParserRefData> parserRefs = new ArrayList<>();
 
 		void addParameter(String id, String value, String type) {
 			params.add(new WsRequest.Parameter(id, value, type));
+		}
+
+		void addParserRef(ParserRefData pRef) {
+			parserRefs.add(pRef);
+		}
+
+		String[] getTags() {
+			String[] tags = new String[parserRefs.size()];
+
+			for (int i = 0; i < parserRefs.size(); i++) {
+				tags[i] = parserRefs.get(i).parser.getName();
+			}
+
+			return tags;
 		}
 	}
 

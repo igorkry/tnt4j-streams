@@ -106,9 +106,9 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
         * `hexBinary` 
         * `string`
         * any decimal or time format pattern, i.e. `#####0.000`
-        * one of number type enumerators: `integer`/`int`, `long`, `double`, `float`, `short`, `byte`, `biginteger`/`bigint`, `bigdecimal`/
-        `bigdec` and `any`. `any` will resolve any possible numeric value out of provided string, e.g. string `"30hj00"` will result value 
-        `30`.
+        * one of number type enumerators: `integer`/`int`, `long`, `double`, `float`, `short`, `byte`, `biginteger`/`bigint`/`bint`, 
+        `bigdecimal`/`bigdec`/`bdec` and `any`. `any` will resolve any possible numeric value out of provided string, e.g. string `"30hj00"` 
+        will result value `30`.
     * `value` - defines predefined (hardcoded) value of field
     * `datatype` - defines how to interpret field resolved value. Set of supported values:
         * `String` 
@@ -470,128 +470,7 @@ from) produced activity entity field value. E.g.:
 `AccessLogParserCommon` uses field `ValueFromParent` locator `^.StaticValue` to fill in value defined in `SampleJMSParser` parser field 
 `StaticValue`. After parsing, field `ValueFromParent` will have value `SampleJMSParser_Value`.
 
-#### Stacked parser matching data or parsing context
-
-It is possible to define context or data match criteria for a stacked parser reference. It allows to apply stacked parser on provided data 
-only when data or parsing context matches defined evaluation expression. One parser reference can have multiple match expressions. In that 
-case **all of them must evaluate to positive match** for stacked parser to be applied. **NOTE:** when stacked parser reference has no match 
-expressions defined, only incompatible data type prevents it from being applied.
-
-Sample:
-```xml
-    <field name="MessageFormats" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="String"
-           format="string" transparent="true">
-        <parser-ref name="BNYM_XML_Msg_Data_Parser" aggregation="Merge">
-            <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
-        </parser-ref>
-        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
-            <matchExp>jpath:[?(@.Request.header.receiver == 'SEB')]</matchExp>
-            <matchExp>${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
-        </parser-ref>
-        <parser-ref name="SWIFT_2_Parser" aggregation="Merge">
-            <matchExp>contains(:)</matchExp>
-        </parser-ref>
-    </field>
-```
-
-**NOTE:** if match expression definition breaks configuration XML validity, surround it with `<![CDATA[]]>` e.g.:
-```xml
-        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
-            <matchExp><![CDATA[
-                jpath:[?(@.Request.header.receiver == 'SEB')]
-            ]]></matchExp>
-            <matchExp><![CDATA[
-                ${ObjectName} == "PAYMENTS_QUEUE"
-            ]]></matchExp>
-        </parser-ref>
-```
-
-Types of data match evaluation expressions:
-* `String` (default) - it must contain a method name from the `StringUtils` class and arguments. The method's first parameter is implied 
-and not specified; it's always bound to the value of the message `data` being parsed. Only subsequent parameters need to be defined in the 
-expression e.g. `contains(PAYMENT)`, `isEmpty()`. To negate the expression result, start the expression definition with the `!` negate 
-character.
-
-Some samples: 
-```xml
-<parser-ref ...>
-    <matchExp>isAlpha()</matchExp> <!-- NOTE: default type is applied-->
-    <matchExp>string:startsWithIgnoreCase(SWIFT)</matchExp>
-    <matchExp>string:!isEmpty()</matchExp>
-    <matchExp>string:contains(SWIFT)</matchExp>
-</parser-ref>
-```
-* `RegEx` - should contain any valid Regular Expression (RegEx). **Positive match** is got when RegEx expression pattern matches some 
-subsequence within provided `data` string.
-```xml
-<parser-ref ...>
-    <matchExp>regex:(:33A:)(.*)(:24B:)(.*)</matchExp>
-    <matchExp>regex:((TID)=(.[^\s:,%]*))|((USER_DATA)=(.[^\s:,%]*))</matchExp>
-    <matchExp>regex:(([a-zA-Z]*):)?(.+)</matchExp>
-</parser-ref>
-```
-* `JsonPath` - should contain any valid [JsonPath](https://github.com/json-path/JsonPath) expression. If expression evaluates as `boolean`, 
-then this value is returned. If expression evaluates as `collcetion`, then to get **positive match** it must be **not empty** . In other 
-cases to get **positive match**, expression should be evaluated as **non-null object**.
-```xml
-<parser-ref ...>
-    <matchExp>jpath:$.connected</matchExp>
-    <matchExp>jpath:$.[?(@.id == 'sensor03')]</matchExp>
-    <matchExp>jpath:$.[?(@.temperature > 70)]</matchExp>
-</parser-ref>
-```
-* `XPath` - should contain any valid XPath expression. If expression evaluates as `boolean`, then this value is returned. In other cases to 
-get **positive match**, expression should be evaluated as **non-empty string**.
-```xml
-<parser-ref ...>
-    <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
-    <matchExp>xpath:/Request/genericTransFields/receiver</matchExp>
-    <matchExp>xpath:/Request/header[currency='EUR']/messageId</matchExp>
-</parser-ref>
-```
-* `Groovy` or `JavaScript` script based expressions. To access field value (data passed to stacked parser) use predefined variable 
-placeholder `$fieldValue`.
-```xml
-<parser-ref ...>
-    <matchExp>groovy:$fieldValue instanceof Map</matchExp>
-    <matchExp>javascript:$fieldValue.length > 300</matchExp>
-</parser-ref>
-```
-
-Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
-activity entity field names.
-
-Types of context evaluation expressions:
-* `Groovy` (default) - should contain valid `Groovy` language based **boolean** expression.
-```xml
-<parser-ref ...>
-    <matchExp>${ObjectName}.startsWith("SYSTEM.")</matchExp> <!-- NOTE: default type is applied-->
-    <matchExp>groovy:${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
-    <matchExp>groovy:${QueueDepth} >= 500</matchExp>
-</parser-ref>
-```
-* `JavaScript` - should contain valid `JavaScript` language based **boolean** expression.
-```xml
-<parser-ref ...>
-    <matchExp>js:${ObjectName}.toUpperCase().indexOf("PAYMENT") == 0</matchExp>
-    <matchExp>jscript:${ObjectName} != null</matchExp>
-    <matchExp>javascript:${QueueDepth} != 500</matchExp>
-</parser-ref>
-```
-* `XPath` -  should contain valid `XPath` based **boolean** expression.
-```xml
-<parser-ref ...>
-    <matchExp>xpath:boolean(${ObjectStatus})</matchExp>
-    <matchExp>xpath:${EventName} = 'foo'</matchExp>
-    <matchExp>xpath:${PaymentSum} >= 500</matchExp>
-    <matchExp>xpath:boolean(ts:getFileName(${FilePath}))</matchExp>
-</parser-ref>
-``` 
-The last match expression uses our custom XPath function `getFileName` wrapped with the XPath `boolean` function
-to test if a file name was found.
-
-There are many XPath functions that can be used. See section [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions) 
-and Oracle's [Using XPath Functions](https://docs.oracle.com/cd/E35413_01/doc.722/e35419/dev_xpath_functions.htm#autoId18) reference.
+See [Parser matching data or parsing context](#parser-matching-data-or-parsing-context) for parser reference configuration details.
 
 #### Resolved activity entities aggregation
 
@@ -1872,8 +1751,7 @@ Sample stream configuration:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
 
-    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser"
-            tags="Normal server,Delayed server">
+    <parser name="AccessLogParserCommon" class="com.jkoolcloud.tnt4j.streams.custom.parsers.ApacheAccessLogParser">
         <property name="LogPattern" value="%h %l %u %t &quot;%r&quot; %s %b"/>
 
         <field name="Location" locator="1" locator-type="Index"/>
@@ -1896,7 +1774,7 @@ Sample stream configuration:
         <property name="ActivityDelim" value="EOL"/>
 
         <field name="MsgBody" locator="$.message" locator-type="Label">
-            <parser-ref name="AccessLogParserCommon"/>
+            <parser-ref name="AccessLogParserCommon" tags="Normal server,Delayed server"/>
         </field>
         <field name="path" locator="$.path" locator-type="Label"/>
         <field name="Tag" locator="$.tags" locator-type="Label"/>
@@ -4613,6 +4491,179 @@ or
 </tnt-data-source>
 ```
 
+##### Parser reference related parameters
+
+* Attributes:
+    * `tags` - tags list (delimited using `,`) for a parser. Tags are used to map incoming parseable data package with parser instance 
+    dedicated to parse it.
+
+    sample:
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="ProgressEventParser">
+        ...
+    </parser>
+
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="SplitRelatives" value="true"/>
+        ...
+
+        <parser-ref name="ProgressEventParser" tags="Kafka,Http"/>
+    </stream>
+</tnt-data-source>
+```
+
+* Tags:
+    * `matchExp` - defines context or data match criteria (expression) for a parser reference. If match criteria does not match incoming 
+    data or parsing context, that parser will be not applied to parse the data.
+
+    sample:
+```xml
+<tnt-data-source
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/config/tnt-data-source.xsd">
+
+    <parser name="ProgressEventParser">
+        ...
+    </parser>
+
+    <stream name="WmqStream" class="com.jkoolcloud.tnt4j.streams.inputs.WmqStream">
+        <property name="SplitRelatives" value="true"/>
+        ...
+
+        <parser-ref name="ProgressEventParser">
+            <matchExp>regex:(([a-zA-Z]*):)?(.+)</matchExp>
+        </parser-ref>
+    </stream>
+</tnt-data-source>
+```
+
+###### Parser matching data or parsing context
+
+It is possible to define context or data match criteria for a parser reference. It allows to apply parser on provided data only when data or 
+parsing context matches defined evaluation expression. One parser reference can have multiple match expressions. In that case **all of them 
+must evaluate to positive match** for parser to be applied. **NOTE:** when parser reference has no match expressions defined, only 
+incompatible data type prevents it from being applied.
+
+Sample on field stacked parsers binding with match expressions:
+```xml
+    <field name="MessageFormats" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="String"
+           format="string" transparent="true">
+        <parser-ref name="BNYM_XML_Msg_Data_Parser" aggregation="Merge">
+            <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
+        </parser-ref>
+        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser" aggregation="Merge">
+            <matchExp>jpath:[?(@.Request.header.receiver == 'SEB')]</matchExp>
+            <matchExp>${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
+        </parser-ref>
+        <parser-ref name="SWIFT_2_Parser" aggregation="Merge">
+            <matchExp>contains(:)</matchExp>
+        </parser-ref>
+    </field>
+```
+
+**NOTE:** if match expression definition breaks configuration XML validity, surround it with `<![CDATA[]]>` e.g.:
+```xml
+        <parser-ref name="Test_7_Mixed_NV_Offsets_Lines_Parser">
+            <matchExp><![CDATA[
+                jpath:[?(@.Request.header.receiver == 'SEB')]
+            ]]></matchExp>
+            <matchExp><![CDATA[
+                ${ObjectName} == "PAYMENTS_QUEUE"
+            ]]></matchExp>
+        </parser-ref>
+```
+
+Types of data match evaluation expressions:
+* `String` (default) - it must contain a method name from the `StringUtils` class and arguments. The method's first parameter is implied 
+and not specified; it's always bound to the value of the message `data` being parsed. Only subsequent parameters need to be defined in the 
+expression e.g. `contains(PAYMENT)`, `isEmpty()`. To negate the expression result, start the expression definition with the `!` negate 
+character.
+
+Some samples: 
+```xml
+<parser-ref ...>
+    <matchExp>isAlpha()</matchExp> <!-- NOTE: default type is applied-->
+    <matchExp>string:startsWithIgnoreCase(SWIFT)</matchExp>
+    <matchExp>string:!isEmpty()</matchExp>
+    <matchExp>string:contains(SWIFT)</matchExp>
+</parser-ref>
+```
+* `RegEx` - should contain any valid Regular Expression (RegEx). **Positive match** is got when RegEx expression pattern matches some 
+subsequence within provided `data` string.
+```xml
+<parser-ref ...>
+    <matchExp>regex:(:33A:)(.*)(:24B:)(.*)</matchExp>
+    <matchExp>regex:((TID)=(.[^\s:,%]*))|((USER_DATA)=(.[^\s:,%]*))</matchExp>
+    <matchExp>regex:(([a-zA-Z]*):)?(.+)</matchExp>
+</parser-ref>
+```
+* `JsonPath` - should contain any valid [JsonPath](https://github.com/json-path/JsonPath) expression. If expression evaluates as `boolean`, 
+then this value is returned. If expression evaluates as `collcetion`, then to get **positive match** it must be **not empty** . In other 
+cases to get **positive match**, expression should be evaluated as **non-null object**.
+```xml
+<parser-ref ...>
+    <matchExp>jpath:$.connected</matchExp>
+    <matchExp>jpath:$.[?(@.id == 'sensor03')]</matchExp>
+    <matchExp>jpath:$.[?(@.temperature > 70)]</matchExp>
+</parser-ref>
+```
+* `XPath` - should contain any valid XPath expression. If expression evaluates as `boolean`, then this value is returned. In other cases to 
+get **positive match**, expression should be evaluated as **non-empty string**.
+```xml
+<parser-ref ...>
+    <matchExp>xpath:contains(/Request/messageDetails/tag21, 'VOLUME')</matchExp>
+    <matchExp>xpath:/Request/genericTransFields/receiver</matchExp>
+    <matchExp>xpath:/Request/header[currency='EUR']/messageId</matchExp>
+</parser-ref>
+```
+* `Groovy` or `JavaScript` script based expressions. To access field value (data passed to parser) use predefined variable placeholder 
+`$fieldValue`.
+```xml
+<parser-ref ...>
+    <matchExp>groovy:$fieldValue instanceof Map</matchExp>
+    <matchExp>javascript:$fieldValue.length > 300</matchExp>
+</parser-ref>
+```
+
+Parsing context is treated as parsers resolved fields values. So that is why context expressions should contain variables referencing 
+activity entity field names.
+
+Types of context evaluation expressions:
+* `Groovy` (default) - should contain valid `Groovy` language based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>${ObjectName}.startsWith("SYSTEM.")</matchExp> <!-- NOTE: default type is applied-->
+    <matchExp>groovy:${ObjectName} == "PAYMENTS_QUEUE"</matchExp>
+    <matchExp>groovy:${QueueDepth} >= 500</matchExp>
+</parser-ref>
+```
+* `JavaScript` - should contain valid `JavaScript` language based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>js:${ObjectName}.toUpperCase().indexOf("PAYMENT") == 0</matchExp>
+    <matchExp>jscript:${ObjectName} != null</matchExp>
+    <matchExp>javascript:${QueueDepth} != 500</matchExp>
+</parser-ref>
+```
+* `XPath` -  should contain valid `XPath` based **boolean** expression.
+```xml
+<parser-ref ...>
+    <matchExp>xpath:boolean(${ObjectStatus})</matchExp>
+    <matchExp>xpath:${EventName} = 'foo'</matchExp>
+    <matchExp>xpath:${PaymentSum} >= 500</matchExp>
+    <matchExp>xpath:boolean(ts:getFileName(${FilePath}))</matchExp>
+</parser-ref>
+``` 
+The last match expression uses our custom XPath function `getFileName` wrapped with the XPath `boolean` function
+to test if a file name was found.
+
+There are many XPath functions that can be used. See section [TNT4J-Streams predefined custom XPath functions](#tnt4j-streams-predefined-custom-xpath-functions) 
+and Oracle's [Using XPath Functions](https://docs.oracle.com/cd/E35413_01/doc.722/e35419/dev_xpath_functions.htm#autoId18) reference.
+
 #### File line stream parameters (also from Hdfs)
 
  * `FileName` - the system-dependent file name or file name pattern defined using wildcard characters `*` and `?`. (Required)
@@ -5006,9 +5057,21 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         <step name="All RabbitMQ metrics">
             <schedule-simple interval="30" units="Seconds" repeatCount="-1"/>
 
-            <request parser-ref="UsersRespParser">python rabbitmqadmin -f raw_json list users</request>
-            <request parser-ref="HostsRespParser">python rabbitmqadmin -f raw_json list vhosts</request>
-            <request parser-ref="OverviewRespParser">python rabbitmqadmin -f raw_json list overview</request>
+            <request>
+                python rabbitmqadmin -f raw_json list users
+
+                <parser-ref name="UsersRespParser"/>
+            </request>
+            <request>
+                python rabbitmqadmin -f raw_json list vhosts
+
+                <parser-ref name="HostsRespParser"/>
+            </request>
+            <request>
+                python rabbitmqadmin -f raw_json list overview
+
+                <parser-ref name="OverviewRespParser"/>
+            </request>
         </step>
     </scenario>
     <!-- Sample scenario for JDBC query invocation -->
@@ -5016,7 +5079,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
         <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
             <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
 
-            <request parser-ref="SampleResultSetParser">
+            <request>
                 <![CDATA[
                     SELECT *
                     FROM TRANS_DATA
@@ -5025,6 +5088,8 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
                     FETCH FIRST 100 ROWS ONLY
                 ]]>
                 <req-param id="1" value="${LastRecordCDate}" type="TIMESTAMP"/>
+
+                <parser-ref name="SampleResultSetParser"/>
             </request>
         </step>
     </scenario>
@@ -5154,8 +5219,6 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 ##### Attributes
 
- * `tags` - tags list (delimited using `,`) for a parser. Tags are used to map incoming parseable data package with parser instance 
- dedicated to parse it. 
  * `manualFieldsOrder` - flag indicating whether configuration defined fields order shall be preserved in streaming process. By default 
  fields are ordered by value resolution type: RAW activity data values, activity entity fields values, cache entries values. Default 
  value - `false`.
@@ -5165,7 +5228,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
     sample:
 ```xml
-    <parser name="TestParser" class="com.my.company.ActivityTestParser" tags="Kafka,Http" manualFieldsOrder="true" default-data-type="Generic" default-emptyAsNull="false">
+    <parser name="TestParser" class="com.my.company.ActivityTestParser" manualFieldsOrder="true" default-data-type="Generic" default-emptyAsNull="false">
     ...
     </parser>
 ```

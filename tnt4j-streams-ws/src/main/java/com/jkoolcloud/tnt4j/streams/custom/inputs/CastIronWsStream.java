@@ -219,7 +219,7 @@ public class CastIronWsStream extends WsStream {
 	 * @return resolved data tags array, or {@code null} if there is no tags resolved
 	 */
 	@Override
-	protected String[] getDataTags(Object data) {
+	public String[] getDataTags(Object data) {
 		try (InputStream is = new ByteArrayInputStream(String.valueOf(data).getBytes())) {
 			SOAPMessage request = MessageFactory.newInstance().createMessage(null, is);
 			String currentMethod = request.getSOAPBody().getFirstChild().getLocalName().replace("Response", ""); // NON-NLS

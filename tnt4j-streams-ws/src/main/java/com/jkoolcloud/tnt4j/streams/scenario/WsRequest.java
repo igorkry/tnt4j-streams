@@ -32,7 +32,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 2 $
  */
 public class WsRequest<T> {
-	private String tag;
+	private String[] tags;
 	private T data;
 	private Map<String, Parameter> parameters = new HashMap<>();
 
@@ -51,21 +51,21 @@ public class WsRequest<T> {
 	 *
 	 * @param requestData
 	 *            request data string
-	 * @param tag
-	 *            request tag
+	 * @param tags
+	 *            request tags
 	 */
-	public WsRequest(T requestData, String tag) {
+	public WsRequest(T requestData, String... tags) {
 		this.data = requestData;
-		this.tag = tag;
+		this.tags = tags;
 	}
 
 	/**
-	 * Returns tag string.
+	 * Returns request tag strings array.
 	 *
-	 * @return tag string
+	 * @return request tag strings array
 	 */
-	public String getTag() {
-		return tag;
+	public String[] getTags() {
+		return tags;
 	}
 
 	/**

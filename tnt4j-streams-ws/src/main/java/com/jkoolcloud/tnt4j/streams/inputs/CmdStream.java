@@ -129,7 +129,7 @@ public class CmdStream extends AbstractWsStream<String> {
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {
-						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTag()));
+						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
 					}
 				}
 			}

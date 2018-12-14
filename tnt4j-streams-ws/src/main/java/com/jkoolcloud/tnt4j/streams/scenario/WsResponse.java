@@ -41,10 +41,10 @@ public class WsResponse<T> extends WsRequest<T> {
 	 *
 	 * @param responseData
 	 *            response data string
-	 * @param tag
-	 *            response tag
+	 * @param tags
+	 *            response tags
 	 */
-	public WsResponse(T responseData, String tag) {
-		super(responseData, tag);
+	public WsResponse(T responseData, String... tags) {
+		super(responseData, tags);
 	}
 }

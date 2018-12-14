@@ -33,7 +33,7 @@
         <scenario name="Sample DB2-JDBC stream scenario">
             <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
                 <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
-                <request parser-ref="SampleResultSetParser">
+                <request>
                     <![CDATA[
                         SELECT *
                         FROM TRANS_DATA
@@ -43,6 +43,8 @@
                     ]]>
                     <!-- parameter index is incremented automatically -->
                     <req-param value="${LastRecordCDate}" type="TIMESTAMP"/>
+
+                    <parser-ref name="SampleResultSetParser"/>
                 </request>
             </step>
         </scenario>

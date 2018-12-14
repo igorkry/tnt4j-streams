@@ -97,7 +97,7 @@ public class WsScenarioStep {
 	 *            request data
 	 * @return constructed request instance
 	 *
-	 * @see #addRequest(String, String)
+	 * @see #addRequest(String, String...)
 	 */
 	public WsRequest<String> addRequest(String request) {
 		return addRequest(request, null);
@@ -108,16 +108,16 @@ public class WsScenarioStep {
 	 *
 	 * @param request
 	 *            request data
-	 * @param tag
-	 *            request tag
+	 * @param tags
+	 *            request tags
 	 * @return constructed request instance
 	 */
-	public WsRequest<String> addRequest(String request, String tag) {
+	public WsRequest<String> addRequest(String request, String... tags) {
 		if (requests == null) {
 			requests = new ArrayList<>();
 		}
 
-		WsRequest<String> req = new WsRequest<>(request, tag);
+		WsRequest<String> req = new WsRequest<>(request, tags);
 		requests.add(req);
 
 		return req;

@@ -32,6 +32,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.Feed;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.reference.ParserReference;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -143,24 +144,24 @@ public abstract class FeedInputStream<R extends Closeable, T> extends TNTParseab
 	protected abstract Feed<T> createFeedInput(R feedSource);
 
 	@Override
-	public void addParser(ActivityParser parser) throws IllegalStateException {
-		if (!parsersMap.isEmpty()) {
+	public void addParser(ParserReference parserRef) throws IllegalStateException {
+		if (!parsersSet.isEmpty()) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FeedInputStream.cannot.have.multiple.parsers"));
 		}
 
-		super.addParser(parser);
+		super.addParser(parserRef);
 	}
 
 	@Override
 	public void addParsers(Iterable<ActivityParser> parsers) throws IllegalArgumentException {
-		if (!parsersMap.isEmpty()) {
+		if (!parsersSet.isEmpty()) {
 			throw new IllegalStateException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"FeedInputStream.cannot.have.multiple.parsers"));
 		}
 
 		Iterator<ActivityParser> pi = parsers.iterator();
-		while (parsersMap.isEmpty()) {
+		while (parsersSet.isEmpty()) {
 			addParser(pi.next());
 		}
 

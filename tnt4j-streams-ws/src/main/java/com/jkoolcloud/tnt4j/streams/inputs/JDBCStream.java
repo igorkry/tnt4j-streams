@@ -441,7 +441,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 								"JDBCStream.execute.exception", exc);
 					} finally {
 						if (respRs != null) {
-							stream.addInputToBuffer(new WsResponse<>(respRs, request.getTag()));
+							stream.addInputToBuffer(new WsResponse<>(respRs, request.getTags()));
 						}
 					}
 				}

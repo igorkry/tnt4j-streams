@@ -17,10 +17,12 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
@@ -32,6 +34,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
+import com.jkoolcloud.tnt4j.streams.reference.ParserReference;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -57,9 +61,9 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, ActivityInfo> {
 
 	/**
-	 * Map of parsers being used by stream.
+	 * Set of parsers being used by stream.
 	 */
-	protected final Map<String, List<ActivityParser>> parsersMap = new LinkedHashMap<>();
+	protected final Set<ParserReference> parsersSet = new LinkedHashSet<>();
 
 	private boolean haltIfNoParser = false;
 	private String groupingActivityName = null;
@@ -114,6 +118,9 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		if (refObject instanceof ActivityParser) {
 			ActivityParser ap = (ActivityParser) refObject;
 			addParser(ap);
+		} else if (refObject instanceof ParserReference) {
+			ParserReference apr = (ParserReference) refObject;
+			addParser(apr);
 		}
 
 		super.addReference(refObject);
@@ -126,22 +133,32 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *            parser to add
 	 * @throws IllegalStateException
 	 *             if parser can't be added to stream
+	 *
+	 * @see #addParser(com.jkoolcloud.tnt4j.streams.reference.ParserReference)
 	 */
 	public void addParser(ActivityParser parser) throws IllegalStateException {
 		if (parser == null) {
 			return;
 		}
 
-		parser.organizeFields();
-		addTaggedParser(parser.getName(), parser);
+		ParserReference parserRef = new ParserReference(parser);
+		addParser(parserRef);
+	}
 
-		String[] tags = parser.getTags();
-
-		if (ArrayUtils.isNotEmpty(tags)) {
-			for (String tag : tags) {
-				addTaggedParser(tag, parser);
-			}
+	/**
+	 * Adds the specified parser reference to the list of parsers being used by this stream.
+	 *
+	 * @param parserRef
+	 *            parser reference to add
+	 * @throws IllegalStateException
+	 *             if parser can't be added to stream
+	 */
+	protected void addParser(ParserReference parserRef) throws IllegalStateException {
+		if (parserRef == null) {
+			return;
 		}
+
+		parsersSet.add(parserRef);
 	}
 
 	/**
@@ -176,17 +193,6 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		for (ActivityParser parser : parsers) {
 			addParser(parser);
 		}
-	}
-
-	private void addTaggedParser(String tag, ActivityParser parser) {
-		List<ActivityParser> tpl = parsersMap.get(tag);
-
-		if (tpl == null) {
-			tpl = new ArrayList<>();
-			parsersMap.put(tag, tpl);
-		}
-
-		tpl.add(parser);
 	}
 
 	/**
@@ -227,20 +233,39 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			return null;
 		}
 
-		Set<ActivityParser> parsers = getParsersFor(tags);
-		for (ActivityParser parser : parsers) {
-			if (parser.isDataClassSupported(data)) {
-				ActivityInfo ai = parser.parse(this, data);
+		for (ParserReference pRef : parsersSet) {
+			boolean dataMatch = pRef.getParser().isDataClassSupported(data);
+			Boolean tagsMatch = null;
+			Boolean expMatch = null;
+
+			boolean parserMatch = dataMatch;
+
+			if (parserMatch) {
+				tagsMatch = pRef.matchTags(tags);
+				parserMatch = BooleanUtils.toBooleanDefaultIfNull(tagsMatch, true);
+
+				if (parserMatch && pRef instanceof MatchingParserReference) {
+					expMatch = ((MatchingParserReference) pRef).matchExp(this, data);
+					parserMatch = BooleanUtils.toBooleanDefaultIfNull(expMatch, true);
+				}
+			}
+
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"TNTInputStream.parser.match", getName(), pRef, dataMatch, tagsMatch == null ? "----" : tagsMatch, // NON-NLS
+					expMatch == null ? "----" : expMatch); // NON-NLS
+			if (parserMatch) {
+				ActivityInfo ai = pRef.getParser().parse(this, data);
 				if (ai != null) {
 					// NOTE: TNT4J API fails if operation name is null
 					if (StringUtils.isEmpty(ai.getEventName())) {
-						ai.setEventName(getName() == null ? parser.getName() : getName());
+						ai.setEventName(getName() == null ? pRef.getParser().getName() : getName());
 					}
 
 					return ai;
 				}
 			}
 		}
+
 		return null;
 	}
 
@@ -253,34 +278,8 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 	 *
 	 * @see #applyParsers(Object, String...)
 	 */
-	protected String[] getDataTags(Object data) {
+	public String[] getDataTags(Object data) {
 		return null;
-	}
-
-	private Set<ActivityParser> getParsersFor(String[] tags) {
-		Set<ActivityParser> parsersSet = new LinkedHashSet<>();
-
-		if (ArrayUtils.isNotEmpty(tags)) {
-			for (String tag : tags) {
-				List<ActivityParser> tpl = parsersMap.get(tag);
-
-				if (tpl != null) {
-					parsersSet.addAll(tpl);
-				}
-			}
-		}
-
-		if (parsersSet.isEmpty()) {
-			Collection<List<ActivityParser>> allParsers = parsersMap.values();
-
-			for (List<ActivityParser> tpl : allParsers) {
-				if (tpl != null) {
-					parsersSet.addAll(tpl);
-				}
-			}
-		}
-
-		return parsersSet;
 	}
 
 	/**
@@ -325,6 +324,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTInputStream.no.parser", item);
 			incrementSkippedActivitiesCount();
+			rollbackTransaction();
 			if (haltIfNoParser) {
 				failureFlag.set(true);
 				notifyFailed(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -338,6 +338,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 			if (!ai.isFilteredOut()) {
 				getOutput().logItem(ai);
 			} else {
+				incrementFilteredActivitiesCount();
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"TNTInputStream.activity.filtered.out", ai);
 			}

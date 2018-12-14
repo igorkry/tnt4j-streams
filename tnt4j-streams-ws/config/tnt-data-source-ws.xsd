@@ -13,7 +13,7 @@
                                     invocation schedule expression.
                                 </xs:documentation>
                             </xs:annotation>
-                            <!-- Make sure <request parser-ref=""> points to valid <parser> name -->
+                            <!-- Make sure <request><parser-ref=""/></request> points to valid <parser> name -->
                             <!--<xs:keyref name="ValidRequestParserRef" refer="tnt-data-source:UniqueParserName">-->
                             <!--<xs:selector xpath="step/request"/>-->
                             <!--<xs:field xpath="@parser-ref"/>-->
@@ -185,15 +185,15 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:sequence>
 
-        <xs:attribute name="parser-ref" use="optional" type="xs:string">
-            <xs:annotation>
-                <xs:documentation>
-                    References parser used to parse request (or command/query/etc.) received response data.
-                </xs:documentation>
-            </xs:annotation>
-        </xs:attribute>
+            <xs:element name="parser-ref" type="ParserReference" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        References parser used to parse request (or command/query/etc.) received response data.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 
     <!-- Element <req-param> definition-->

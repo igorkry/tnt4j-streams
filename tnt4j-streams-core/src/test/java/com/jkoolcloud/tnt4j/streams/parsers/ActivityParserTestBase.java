@@ -69,11 +69,4 @@ public abstract class ActivityParserTestBase {
 	// parser.filterActivity(ai);
 	// verify(filter, times(2)).doFilterActivity(ai);
 	// }
-
-	@Test
-	public void tagsTest() {
-		String tag = "Test"; // NON-NLS
-		parser.setTags(tag);
-		assertEquals(tag, parser.getTags()[0]);
-	}
 }

@@ -25,9 +25,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.filters.AbstractEntityFilter;
 import com.jkoolcloud.tnt4j.streams.filters.AbstractExpressionFilter;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
@@ -51,7 +53,7 @@ public class ActivityField extends AbstractFieldEntity {
 	private List<ActivityFieldLocator> locators = null;
 	private String separator = null;
 	private String formattingPattern = null;
-	private Set<ParserReference> stackedParsers;
+	private Set<FieldParserReference> stackedParsers;
 	private boolean transparent = false;
 	private boolean splitCollection = false;
 	private String valueType = null;
@@ -486,30 +488,25 @@ public class ActivityField extends AbstractFieldEntity {
 	/**
 	 * Adds activity field stacked parser.
 	 *
-	 * @param parser
-	 *            the stacked parser to add
+	 * @param parserReference
+	 *            the stacked parser reference to add
 	 * @param aggregationType
 	 *            resolved activity entities aggregation type
 	 * @param applyOn
 	 *            stacked parser application phase name
-	 * @param matchExps
-	 *            match expressions list
-	 *
+	 * 
 	 * @return instance of this activity field
 	 */
-	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String applyOn,
-			List<String> matchExps) {
-		if (parser != null) {
+	public ActivityField addStackedParser(MatchingParserReference parserReference, String aggregationType,
+			String applyOn) {
+		if (parserReference != null) {
 			if (stackedParsers == null) {
 				stackedParsers = new LinkedHashSet<>(5);
 			}
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityField.adding.stacked.parser", fieldTypeName, parser.getName());
-			ParserReference pRef = new ParserReference(parser, aggregationType, applyOn);
-			if (CollectionUtils.isNotEmpty(matchExps)) {
-				pRef.setMatchExpressions(matchExps);
-			}
+					"ActivityField.adding.stacked.parser", fieldTypeName, parserReference.getParser().getName());
+			FieldParserReference pRef = new FieldParserReference(parserReference, aggregationType, applyOn);
 			stackedParsers.add(pRef);
 		}
 
@@ -517,32 +514,11 @@ public class ActivityField extends AbstractFieldEntity {
 	}
 
 	/**
-	 * Adds activity field stacked parser.
-	 *
-	 * @param parser
-	 *            the stacked parser to add
-	 * @param aggregationType
-	 *            resolved activity entities aggregation type
-	 * @param applyOn
-	 *            stacked parser application phase name
-	 * @param matchExps
-	 *            match expressions array
-	 *
-	 * @return instance of this activity field
-	 *
-	 * @see #addStackedParser(com.jkoolcloud.tnt4j.streams.parsers.ActivityParser, String, String, java.util.List)
-	 */
-	public ActivityField addStackedParser(ActivityParser parser, String aggregationType, String applyOn,
-			String... matchExps) {
-		return addStackedParser(parser, aggregationType, applyOn, matchExps == null ? null : Arrays.asList(matchExps));
-	}
-
-	/**
 	 * Gets activity field stacked parsers collection.
 	 *
 	 * @return stacked parsers collection
 	 */
-	public Collection<ParserReference> getStackedParsers() {
+	public Collection<FieldParserReference> getStackedParsers() {
 		return stackedParsers;
 	}
 
@@ -818,34 +794,23 @@ public class ActivityField extends AbstractFieldEntity {
 	/**
 	 * Field referenced stacked parser reference definition.
 	 */
-	public static class ParserReference {
-		private ActivityParser parser;
+	public static class FieldParserReference extends MatchingParserReference {
+		private MatchingParserReference parserRef;
 		private AggregationType aggregationType;
 		private ParserApplyType applyOn;
-		private List<String> matchExpressions;
 
 		/**
 		 * Constructs a new ParserReference.
 		 *
-		 * @param parser
-		 *            referenced parser instance
-		 */
-		ParserReference(ActivityParser parser) {
-			this(parser, AggregationType.Merge, ParserApplyType.Field);
-		}
-
-		/**
-		 * Constructs a new ParserReference.
-		 *
-		 * @param parser
+		 * @param parserReference
 		 *            referenced parser instance
 		 * @param aggregationType
 		 *            activity entity resolved fields aggregation type name
 		 * @param applyOn
-		 *            * stacked parser application phase type name
+		 *            stacked parser application phase type name
 		 */
-		ParserReference(ActivityParser parser, String aggregationType, String applyOn) {
-			this(parser,
+		FieldParserReference(MatchingParserReference parserReference, String aggregationType, String applyOn) {
+			this(parserReference,
 					StringUtils.isEmpty(aggregationType) ? AggregationType.Merge
 							: Utils.valueOfIgnoreCase(AggregationType.class, aggregationType),
 					StringUtils.isEmpty(applyOn) ? ParserApplyType.Field
@@ -853,28 +818,23 @@ public class ActivityField extends AbstractFieldEntity {
 		}
 
 		/**
-		 * Constructs a new ParserReference.
+		 * Constructs a new FieldParserReference.
 		 *
-		 * @param parser
+		 * @param parserReference
 		 *            referenced parser instance
 		 * @param aggregationType
 		 *            activity entity resolved fields aggregation type
 		 * @param applyOn
 		 *            stacked parser application phase type
 		 */
-		ParserReference(ActivityParser parser, AggregationType aggregationType, ParserApplyType applyOn) {
-			this.parser = parser;
+		FieldParserReference(MatchingParserReference parserReference, AggregationType aggregationType,
+				ParserApplyType applyOn) {
+			super(parserReference.getParser());
+
+			this.parserRef = parserReference;
+
 			this.aggregationType = aggregationType;
 			this.applyOn = applyOn;
-		}
-
-		/**
-		 * Returns referenced parser instance.
-		 *
-		 * @return referenced parser instance
-		 */
-		public ActivityParser getParser() {
-			return parser;
 		}
 
 		/**
@@ -895,44 +855,19 @@ public class ActivityField extends AbstractFieldEntity {
 			return applyOn;
 		}
 
-		/**
-		 * Returns activity data match evaluation expressions list used to determine if data should be parsed by
-		 * referenced parser.
-		 *
-		 * @return match evaluation expressions list
-		 */
-		public List<String> getMatchExpressions() {
-			return matchExpressions;
+		@Override
+		public Boolean matchTags(String[] dataTags) {
+			return parserRef.matchTags(dataTags);
 		}
 
-		/**
-		 * Adds activity data match evaluation expression used to determine if data should be parsed by referenced
-		 * parser.
-		 *
-		 * @param matchExpression
-		 *            match evaluation expression
-		 */
-		void addMatchExpression(String matchExpression) {
-			if (matchExpressions == null) {
-				matchExpressions = new ArrayList<>();
-			}
-			matchExpressions.add(matchExpression);
-		}
-
-		/**
-		 * Sets activity data match evaluation expressions used to determine if data should be parsed by referenced
-		 * parser.
-		 *
-		 * @param matchExpressions
-		 *            match evaluation expressions list
-		 */
-		void setMatchExpressions(List<String> matchExpressions) {
-			this.matchExpressions = matchExpressions;
+		@Override
+		public Boolean matchExp(NamedObject caller, Object value, ActivityInfo ai, ActivityField field) {
+			return parserRef.matchExp(caller, value, ai, field);
 		}
 
 		@Override
 		public String toString() {
-			return parser.getName() + ":" + aggregationType + ":" + applyOn; // NON-NLS
+			return getParser().getName() + ":" + aggregationType + ":" + applyOn; // NON-NLS
 		}
 	}
 }

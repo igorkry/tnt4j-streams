@@ -89,7 +89,7 @@
 
     </parser>
 
-    <parser name="SearchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="searchLogs">
+    <parser name="SearchLogsResponseParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="S=http://schemas.xmlsoap.org/soap/envelope/"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/lognotif/types"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/lognotif"/>
@@ -178,7 +178,7 @@
 
     </parser>
 
-    <parser name="LoginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="login">
+    <parser name="LoginParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
@@ -187,8 +187,7 @@
         <field name="Token" locator="/S:Envelope/S:Body/*/*" locator-type="Label"/>
     </parser>
 
-    <parser name="LogsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getLogCount"
-            manualFieldsOrder="true">
+    <parser name="LogsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" manualFieldsOrder="true">
         <property name="Namespace" value="sec=http://www.approuter.com/schemas/2008/1/security"/>
         <property name="Namespace" value="ns3=http://www.approuter.com/schemas/2008/1/security/03"/>
         <property name="Namespace" value="ns2=http://www.approuter.com/schemas/2008/1/security/02"/>
@@ -206,8 +205,7 @@
 
     </parser>
 
-    <parser name="JobsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" tags="getJobCount"
-            manualFieldsOrder="true">
+    <parser name="JobsCountParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser" manualFieldsOrder="true">
 
         <property name="Namespace" value="ns6=http://www.approuter.com/schemas/2004/1/orcmon"/>
         <property name="Namespace" value="ns5=http://www.approuter.com/schema/router/1000/logging.xsd"/>
@@ -269,10 +267,6 @@
         <!-- NOTE: when streaming to AutoPilot set "SendStreamStates" to false if stream START/STOP events are not in scope of interest -->
         <!--<property name="SendStreamStates" value="false"/>-->
 
-        <parser-ref name="SearchLogsResponseParser"/>
-        <parser-ref name="LoginParser"/>
-        <parser-ref name="LogsCountParser"/>
-
         <scenario name="Sample log poll scenario">
             <step name="Login" url="${WsEndpoint}/security">
                 <request>
@@ -283,6 +277,8 @@
                             <sec:password>slabs123!</sec:password>
                         </sec:login>
                     ]]>
+
+                    <parser-ref name="LoginParser"/>
                 </request>
             </step>
             <step name="PollLogs"
@@ -298,6 +294,8 @@
                             <log:status>all</log:status>
                         </log:getLogCount>
                     ]]>
+
+                    <parser-ref name="LogsCountParser"/>
                 </request>
                 <request>
                     <![CDATA[
@@ -311,6 +309,8 @@
                             <log:pageSize>${LogCountDiff}</log:pageSize>
                         </log:searchLogs>
                     ]]>
+
+                    <parser-ref name="SearchLogsResponseParser"/>
                 </request>
             </step>
         </scenario>
@@ -329,10 +329,6 @@
         <!-- NOTE: when streaming to AutoPilot set "SendStreamStates" to false if stream START/STOP events are not in scope of interest -->
         <!--<property name="SendStreamStates" value="false"/>-->
 
-        <parser-ref name="SearchJobsResponseParser"/>
-        <parser-ref name="LoginParser"/>
-        <parser-ref name="JobsCountParser"/>
-
         <scenario name="Sample job poll scenario">
             <step name="Login" url="${WsEndpoint}/security">
                 <request>
@@ -343,6 +339,8 @@
                             <sec:password>slabs123!</sec:password>
                         </sec:login>
                     ]]>
+
+                    <parser-ref name="LoginParser"/>
                 </request>
             </step>
             <step name="PollJobs"
@@ -359,6 +357,8 @@
                             <orc:status>all</orc:status>
                         </orc:getJobCount>
                     ]]>
+
+                    <parser-ref name="JobsCountParser"/>
                 </request>
                 <request>
                     <![CDATA[
@@ -373,6 +373,8 @@
                             <orc:pageSize>${JobsCountDiff}</orc:pageSize>
                         </orc:searchJobs>
                     ]]>
+
+                    <parser-ref name="SearchJobsResponseParser"/>
                 </request>
             </step>
         </scenario>

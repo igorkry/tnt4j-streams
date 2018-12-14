@@ -278,9 +278,8 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	}
 
 	@Override
-	protected String[] getDataTags(Object data) {
-		return data instanceof WsResponse<?> ? new String[] { ((WsResponse<?>) data).getTag() }
-				: super.getDataTags(data);
+	public String[] getDataTags(Object data) {
+		return data instanceof WsResponse<?> ? ((WsResponse<?>) data).getTags() : super.getDataTags(data);
 	}
 
 	@Override

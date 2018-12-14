@@ -17,18 +17,18 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.fields.*;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
-import com.jkoolcloud.tnt4j.streams.matchers.Matchers;
+import com.jkoolcloud.tnt4j.streams.inputs.TNTParseableInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -43,8 +43,6 @@ public abstract class ActivityParser implements NamedObject {
 	 * Name of activity parser
 	 */
 	private String name;
-
-	private String[] tags;
 
 	private ActivityFieldDataType defaultDataType;
 	private boolean defaultEmptyAsNull = true;
@@ -214,8 +212,7 @@ public abstract class ActivityParser implements NamedObject {
 
 		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			boolean applied = false;
-			for (ActivityField.ParserReference parserRef : field.getStackedParsers()) {
-				// TODO: tags
+			for (ActivityField.FieldParserReference parserRef : field.getStackedParsers()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityParser.stacked.parser.applying", name, parserRef, field);
 				try {
@@ -262,14 +259,28 @@ public abstract class ActivityParser implements NamedObject {
 	 */
 	@SuppressWarnings("deprecation")
 	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
-			ActivityField.ParserReference parserRef, Object value) throws ParseException {
+			ActivityField.FieldParserReference parserRef, Object value) throws ParseException {
 		boolean dataMatch = parserRef.getParser().isDataClassSupported(value);
-		boolean expMatch = dataMatch && match(parserRef, value, ai, field);
+		Boolean tagsMatch = null;
+		Boolean expMatch = null;
+
+		boolean parserMatch = dataMatch;
+
+		if (parserMatch) {
+			tagsMatch = tagsMatch(stream, value, parserRef);
+			parserMatch = BooleanUtils.toBooleanDefaultIfNull(tagsMatch, true);
+
+			if (parserMatch) {
+				expMatch = parserRef.matchExp(this, value, ai, field);
+				parserMatch = BooleanUtils.toBooleanDefaultIfNull(expMatch, true);
+			}
+		}
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"ActivityParser.stacked.parser.match", parserRef, dataMatch, dataMatch ? expMatch : "----"); // NON-NLS
+				"ActivityParser.stacked.parser.match", parserRef, dataMatch, tagsMatch == null ? "----" : tagsMatch, // NON-NLS
+				expMatch == null ? "----" : expMatch); // NON-NLS
 
-		if (dataMatch && expMatch) {
+		if (parserMatch) {
 			ActivityInfo sai = parserRef.getParser().parse(stream, value, ai);
 
 			if (sai != null) {
@@ -288,45 +299,31 @@ public abstract class ActivityParser implements NamedObject {
 	}
 
 	/**
-	 * Checks if stacked parser reference defined match evaluation expressions evaluates to positive match value for
-	 * provided activity data <tt>value</tt> or parsing context <tt>ai</tt>.
+	 * Checks if activity data provided tags matches stacked parser reference bound tags.
+	 * <p>
+	 * If data tags or parser reference bound tags are {@code null} or empty, then {@code true} is returned meaning no
+	 * tags matching shall be applicable by any of both parties: data or parser.
 	 *
+	 * @param stream
+	 *            parent stream used to resolve tags from activity data
+	 * @param value
+	 *            data value to be parsed by stacked parser
 	 * @param parserRef
 	 *            stacked parser reference
-	 * @param value
-	 *            activity data package to be parsed by stacked parser
-	 * @param ai
-	 *            activity entity providing parsing context data
-	 * @param field
-	 *            activity field
-	 * @return {@code true} if referenced stacked parser matches activity <tt>data</tt> or parsing context <tt>ai</tt>,
-	 *         {@code false} - otherwise
+	 * @return {@code null} if any of parser or data tag arrays are {@code null} or empty, {@code true} if
+	 *         {@code dataTags} or parser reference bound tags matches any element of both arrays, {@code false} -
+	 *         otherwise
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.reference.ParserReference#matchTags(String[])
 	 */
-	protected boolean match(ActivityField.ParserReference parserRef, Object value, ActivityInfo ai,
-			ActivityField field) {
-		if (CollectionUtils.isNotEmpty(parserRef.getMatchExpressions())) {
-			for (String matchExpression : parserRef.getMatchExpressions()) {
-				boolean match;
-				try {
-					match = Matchers.evaluate(matchExpression, value, ai);
-					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.match.evaluation", name, field.getFieldTypeName(),
-							parserRef.getParser().name, matchExpression, match);
-				} catch (Exception exc) {
-					Utils.logThrowable(logger(), OpLevel.WARNING,
-							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.match.evaluation.failed", name, field.getFieldTypeName(),
-							parserRef.getParser().name, matchExpression, exc);
-					match = false;
-				}
-
-				if (!match) {
-					return false;
-				}
-			}
+	protected static Boolean tagsMatch(TNTInputStream<?, ?> stream, Object value,
+			ActivityField.FieldParserReference parserRef) {
+		String[] dataTags = null;
+		if (stream instanceof TNTParseableInputStream) {
+			dataTags = ((TNTParseableInputStream<?>) stream).getDataTags(value);
 		}
 
-		return true;
+		return parserRef.matchTags(dataTags);
 	}
 
 	/**
@@ -344,10 +341,10 @@ public abstract class ActivityParser implements NamedObject {
 	 * @see #isDataClassSupported(Object)
 	 */
 	protected static <T> boolean isDataSupportedByStackedParser(ActivityField field, T data) {
-		Collection<ActivityField.ParserReference> stackedParsers = field.getStackedParsers();
+		Collection<ActivityField.FieldParserReference> stackedParsers = field.getStackedParsers();
 
 		if (stackedParsers != null) {
-			for (ActivityField.ParserReference pRef : stackedParsers) {
+			for (ActivityField.FieldParserReference pRef : stackedParsers) {
 				if (pRef.getParser().isDataClassSupported(data)) {
 					return true;
 				}
@@ -376,26 +373,6 @@ public abstract class ActivityParser implements NamedObject {
 	@Override
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Returns tag strings array of activity parser
-	 *
-	 * @return tags strings array
-	 */
-	public String[] getTags() {
-		return tags == null ? null : Arrays.copyOf(tags, tags.length);
-	}
-
-	/**
-	 * Sets activity parser tags string. Tags are separated using
-	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}.
-	 *
-	 * @param tags
-	 *            tags string
-	 */
-	public void setTags(String tags) {
-		this.tags = Utils.getTags(tags);
 	}
 
 	/**

@@ -63,7 +63,10 @@ import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
  */
 public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
-	private static final String TAG_DELIM = ","; // NON-NLS
+	/**
+	 * Tags collection string token delimiter.
+	 */
+	public static final String TAG_DELIM = ","; // NON-NLS
 	private static final String VALUE_DELIM = "\\|"; // NON-NLS
 	private static final String HEX_PREFIX = "0x"; // NON-NLS
 	private static final Pattern LINE_ENDINGS_PATTERN = Pattern.compile("(\\r\\n|\\r|\\n)"); // NON-NLS
