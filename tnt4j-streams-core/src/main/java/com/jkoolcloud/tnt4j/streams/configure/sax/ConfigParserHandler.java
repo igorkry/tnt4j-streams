@@ -358,7 +358,6 @@ public class ConfigParserHandler extends DefaultHandler {
 	 */
 	protected Locator currParseLocation = null;
 
-	private boolean processingTNT4JProperties = false;
 	private JavaObjectData javaObjectData = null;
 	protected Property currProperty = null;
 	private FieldLocatorData currLocatorData = null;
@@ -409,7 +408,6 @@ public class ConfigParserHandler extends DefaultHandler {
 		currField = null;
 		currFilter = null;
 		currLocatorData = null;
-		processingTNT4JProperties = false;
 		streamsConfigData = new StreamsConfigData();
 		javaObjectsMap = new HashMap<>();
 		processingCache = false;
@@ -1919,7 +1917,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					currParseLocation);
 		}
 
-		processingTNT4JProperties = true;
 	}
 
 	@Override
@@ -1981,7 +1978,6 @@ public class ConfigParserHandler extends DefaultHandler {
 					elementData = null;
 				}
 			} else if (TNT4J_PROPERTIES_ELMT.equals(qName)) {
-				processingTNT4JProperties = false;
 			} else if (JAVA_OBJ_ELMT.equals(qName)) {
 				if (javaObjectData != null) {
 					handleJavaObject(javaObjectData);
@@ -2222,7 +2218,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 		notNull(currProperty.value, PROPERTY_ELMT, VALUE_ATTR);
 
-		if (processingTNT4JProperties) {
+		if (isProcessingTNT4JProperties()) {
 			Map.Entry<String, String> p = new AbstractMap.SimpleEntry<>(currProperty.name, currProperty.value);
 			currStream.output().setProperty(OutputProperties.PROP_TNT4J_PROPERTY, p);
 		} else {
@@ -2242,6 +2238,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 			eProps.put(currProperty.name, currProperty.value);
 		}
+	}
+
+	private boolean isProcessingTNT4JProperties() {
+		return path != null && path.contains(TNT4J_PROPERTIES_ELMT);
 	}
 
 	private static boolean isPropValueAlreadyAdded(String cpv, String propValue) {

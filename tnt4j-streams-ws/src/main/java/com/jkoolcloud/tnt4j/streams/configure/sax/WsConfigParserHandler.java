@@ -18,7 +18,6 @@ package com.jkoolcloud.tnt4j.streams.configure.sax;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +61,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 
 	private static final String INTERVAL_ATTR = "interval"; // NON-NLS
 	private static final String REPEATS_ATTR = "repeatCount"; // NON-NLS
+	private static final String START_DELAY_ATTR = "startDelay"; // NON-NLS
+	private static final String START_DELAY_UNITS_ATTR = "startDelayUnits"; // NON-NLS
 
 	private WsScenario currScenario;
 	private WsScenarioStep currStep;
@@ -168,11 +169,17 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		}
 
 		String expression = null;
+		Integer startDelay = null;
+		String startDelayUnits = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (EXPRESSION_ATTR.equals(attName)) {
 				expression = attValue;
+			} else if (START_DELAY_ATTR.equals(attName)) {
+				startDelay = Integer.parseInt(attValue);
+			} else if (START_DELAY_UNITS_ATTR.equals(attName)) {
+				startDelayUnits = attValue;
 			} else {
 				unknownAttribute(SCHED_CRON_ELMT, attName);
 			}
@@ -180,6 +187,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		notEmpty(expression, SCHED_CRON_ELMT, EXPRESSION_ATTR);
 
 		CronSchedulerData schedData = new CronSchedulerData(expression);
+		schedData.setStartDelay(startDelay);
+		schedData.setStartDelayUnits(startDelayUnits);
 
 		currStep.setSchedulerData(schedData);
 	}
@@ -201,6 +210,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		Long interval = null;
 		String timeUnits = null;
 		Integer repeatCount = null;
+		Integer startDelay = null;
+		String startDelayUnits = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -210,6 +221,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				timeUnits = attValue;
 			} else if (REPEATS_ATTR.equals(attName)) {
 				repeatCount = Integer.parseInt(attValue);
+			} else if (START_DELAY_ATTR.equals(attName)) {
+				startDelay = Integer.parseInt(attValue);
+			} else if (START_DELAY_UNITS_ATTR.equals(attName)) {
+				startDelayUnits = attValue;
 			} else {
 				unknownAttribute(SCHED_SIMPLE_ELMT, attName);
 			}
@@ -221,9 +236,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		}
 
 		SimpleSchedulerData schedData = new SimpleSchedulerData(interval);
-		schedData.setUnits(
-				StringUtils.isEmpty(timeUnits) ? TimeUnit.MILLISECONDS : TimeUnit.valueOf(timeUnits.toUpperCase()));
+		schedData.setUnits(timeUnits);
 		schedData.setRepeatCount(repeatCount);
+		schedData.setStartDelay(startDelay);
+		schedData.setStartDelayUnits(startDelayUnits);
 
 		currStep.setSchedulerData(schedData);
 	}

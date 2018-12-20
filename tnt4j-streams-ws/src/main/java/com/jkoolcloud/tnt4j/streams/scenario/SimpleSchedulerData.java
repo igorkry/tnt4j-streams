@@ -18,12 +18,14 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * This class defines TNT4J-Streams-WS configuration simple scheduler configuration data.
  *
  * @version $Revision: 1 $
  */
-public class SimpleSchedulerData implements SchedulerData {
+public class SimpleSchedulerData extends AbstractSchedulerData {
 	private long interval = 0;
 	private TimeUnit units;
 	private Integer repeatCount;
@@ -40,9 +42,9 @@ public class SimpleSchedulerData implements SchedulerData {
 	}
 
 	/**
-	 * Returns request/call/command invocations interval
+	 * Returns request/call/command invocations interval.
 	 *
-	 * @return request /call/command invocations interval.
+	 * @return request /call/command invocations interval
 	 */
 	public long getInterval() {
 		return interval;
@@ -51,10 +53,10 @@ public class SimpleSchedulerData implements SchedulerData {
 	/**
 	 * Returns invocation interval time units.
 	 *
-	 * @return interval time units.
+	 * @return interval time units
 	 */
 	public TimeUnit getUnits() {
-		return units;
+		return units == null ? TimeUnit.MILLISECONDS : units;
 	}
 
 	/**
@@ -65,6 +67,16 @@ public class SimpleSchedulerData implements SchedulerData {
 	 */
 	public void setUnits(TimeUnit units) {
 		this.units = units;
+	}
+
+	/**
+	 * Sets invocation interval time units.
+	 *
+	 * @param unitsName
+	 *            interval time units name
+	 */
+	public void setUnits(String unitsName) {
+		this.units = StringUtils.isEmpty(unitsName) ? TimeUnit.MILLISECONDS : TimeUnit.valueOf(unitsName.toUpperCase());
 	}
 
 	/**

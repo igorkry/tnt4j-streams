@@ -17,10 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -159,12 +156,13 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 		JobDetail job = buildJob(jobId, jobAttrs);
 
 		ScheduleBuilder<?> scheduleBuilder;
+		AbstractSchedulerData schedulerData = (AbstractSchedulerData) step.getSchedulerData();
 
-		if (step.getSchedulerData() instanceof CronSchedulerData) {
-			CronSchedulerData csd = (CronSchedulerData) step.getSchedulerData();
+		if (schedulerData instanceof CronSchedulerData) {
+			CronSchedulerData csd = (CronSchedulerData) schedulerData;
 			scheduleBuilder = CronScheduleBuilder.cronSchedule(csd.getExpression());
 		} else {
-			SimpleSchedulerData ssd = (SimpleSchedulerData) step.getSchedulerData();
+			SimpleSchedulerData ssd = (SimpleSchedulerData) schedulerData;
 			Integer repCount = ssd == null ? null : ssd.getRepeatCount();
 
 			if (repCount != null && repCount == 0) {
@@ -178,17 +176,20 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 			TimeUnit timeUnit = ssd == null ? null : ssd.getUnits();
 			long interval = ssd == null ? 1 : ssd.getInterval();
 
-			if (timeUnit == null) {
-				timeUnit = TimeUnit.SECONDS;
-			}
-
 			scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
 					.withIntervalInMilliseconds(timeUnit.toMillis(interval))
 					.withRepeatCount(repCount > 0 ? repCount - 1 : repCount);
 		}
 
-		Trigger trigger = TriggerBuilder.newTrigger().withIdentity(job.getKey() + "Trigger").startNow() // NON-NLS
-				.withSchedule(scheduleBuilder).build();
+		Date startAt = schedulerData == null ? new Date() : schedulerData.getStartAt();
+		Trigger trigger = TriggerBuilder.newTrigger().withIdentity(job.getKey() + "Trigger") // NON-NLS
+				.startAt(startAt).withSchedule(scheduleBuilder).build();
+
+		if (schedulerData != null && schedulerData.getStartDelay() != null && schedulerData.getStartDelay() > 0) {
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"AbstractWsStream.stream.scenario.start.delayed", getName(), step.getScenario().getName(),
+					step.getName(), schedulerData.getStartDelay(), schedulerData.getStartDelayUnits());
+		}
 
 		scheduler.scheduleJob(job, trigger);
 	}

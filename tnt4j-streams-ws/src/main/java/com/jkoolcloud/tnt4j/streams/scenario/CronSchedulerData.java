@@ -21,7 +21,7 @@ package com.jkoolcloud.tnt4j.streams.scenario;
  *
  * @version $Revision: 1 $
  */
-public class CronSchedulerData implements SchedulerData {
+public class CronSchedulerData extends AbstractSchedulerData {
 	private String expression;
 
 	/**

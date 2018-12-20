@@ -25,6 +25,30 @@
         </xs:complexType>
     </xs:redefine>
 
+    <!-- Common scheduler attributes group definition-->
+    <xs:attributeGroup name="SchedulerAttributeGroup">
+        <xs:annotation>
+            <xs:documentation>
+                Defines attributes common to all scheduler entities.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="startDelay" use="optional" type="xs:nonNegativeInteger">
+            <xs:annotation>
+                <xs:documentation>
+                    Scheduler start delay interval.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute name="startDelayUnits" use="optional" type="UnitsTypes" default="Seconds">
+            <xs:annotation>
+                <xs:documentation>
+                    Scheduler start delay time units name.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:attributeGroup>
+
     <!-- Element <schedule-cron> definition -->
     <xs:complexType name="ScheduleCron">
         <xs:annotation>
@@ -40,6 +64,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attributeGroup ref="SchedulerAttributeGroup">
+            <xs:annotation>
+                <xs:documentation>
+                    Defines scheduler start delay values.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attributeGroup>
     </xs:complexType>
 
     <!-- Element <schedule-simple> definition -->
@@ -50,7 +82,7 @@
             </xs:documentation>
         </xs:annotation>
 
-        <xs:attribute name="interval" use="required" type="xs:nonNegativeInteger">
+        <xs:attribute name="interval" use="required" type="xs:positiveInteger">
             <xs:annotation>
                 <xs:documentation>
                     Repeat interval.
@@ -60,7 +92,7 @@
         <xs:attribute name="units" use="optional" type="UnitsTypes" default="Milliseconds">
             <xs:annotation>
                 <xs:documentation>
-                    Repeat interval units.
+                    Repeat interval time units name.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -71,6 +103,14 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
+        <xs:attributeGroup ref="SchedulerAttributeGroup">
+            <xs:annotation>
+                <xs:documentation>
+                    Defines scheduler start delay values.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attributeGroup>
     </xs:complexType>
 
     <!-- Scenario element <step> definition -->
