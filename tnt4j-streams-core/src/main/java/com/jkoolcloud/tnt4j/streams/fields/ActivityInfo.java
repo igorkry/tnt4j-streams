@@ -919,6 +919,9 @@ public class ActivityInfo {
 		if (eventStatus != null) {
 			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
 		}
+		if (StringUtils.isNotEmpty(category)) {
+			addActivityProperty(JSONFormatter.JSON_CATEGORY_FIELD, category);
+		}
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
 
@@ -963,7 +966,7 @@ public class ActivityInfo {
 	 *            collection to add built child trackables, not included into parent activity and transmitted separately
 	 * @return tracking activity instance
 	 */
-	private TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
+	protected TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
 			Collection<Trackable> chTrackables) {
 		if (StringUtils.isEmpty(trackName)) {
 			trackName = "_UNNAMED_ACTIVITY_"; // NON-NLS
@@ -1026,6 +1029,9 @@ public class ActivityInfo {
 		activity.setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		activity.setPID(processId == null ? Utils.getVMPID() : processId);
 		// activity.setSeverity(severity == null ? OpLevel.INFO : severity);
+		if (StringUtils.isNotEmpty(category)) {
+			addActivityProperty(JSONFormatter.JSON_CATEGORY_FIELD, category);
+		}
 		activity.start(startTime);
 		activity.stop(endTime, elapsedTime);
 

@@ -820,7 +820,10 @@ public abstract class TNTInputStream<T, O> implements Runnable, NamedObject {
 					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"TNTInputStream.fatal.stream.failure", name, e);
 			failureFlag.set(true);
-			notifyFailed(e.getMessage(), e, null);
+			try {
+				notifyFailed(e.getMessage(), e, null);
+			} catch (Throwable exc) {
+			}
 		} finally {
 			shutdownStream();
 		}

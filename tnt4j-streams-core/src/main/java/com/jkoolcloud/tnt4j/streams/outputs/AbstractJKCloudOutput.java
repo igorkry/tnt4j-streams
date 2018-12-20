@@ -181,6 +181,13 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTStreamOutput.tracker.not.opened", getTrackerId(tracker)));
 		}
+		Number errCount = (Number) tracker.getStats()
+				.get(Utils.qualify(getTrackerImpl(tracker), Tracker.KEY_ERROR_COUNT));
+		if (errCount != null && errCount.intValue() > 0) {
+			Utils.close(tracker);
+			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+					"TNTStreamOutput.tracker.error.flag", getTrackerId(tracker)));
+		}
 	}
 
 	private static String getTrackerId(Tracker tracker) {
