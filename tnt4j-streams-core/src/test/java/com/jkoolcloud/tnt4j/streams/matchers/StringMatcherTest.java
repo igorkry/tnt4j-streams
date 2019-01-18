@@ -31,6 +31,8 @@ public class StringMatcherTest {
 		assertTrue(Matchers.evaluate("isEmpty()", ""));
 		assertTrue(Matchers.evaluate("string:compare(blah)", "blah"));
 		assertTrue(Matchers.evaluate("string:startsWith(blah)", "blah12121"));
+		assertTrue(Matchers.evaluate("string:startsWith(0xa9059cbb)",
+				"0xa9059cbb00000000000000000000000003ee867205c02eeda0b2650f7ee02ccdb52055cc00000000000000000000000000000000000000000000000000000000000007d0"));
 		assertTrue(Matchers.evaluate("contains(:)", "blah1:2121"));
 	}
 

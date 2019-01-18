@@ -53,6 +53,10 @@ public class NumericFormatterTest {
 		NumericFormatter formatter = new NumericFormatter();
 		assertEquals(342, formatter.parse("0xAB", 2)); // NON-NLS
 		assertEquals(171, formatter.parse(0XAB));
+		assertEquals(new BigInteger("1000000000000000000000"),
+				formatter.parse("0x00000000000000000000000000000000000000000000003635c9adc5dea00000"));
+		assertEquals(new BigInteger("188100000000000000000000"),
+				formatter.parse("0x0000000000000000000000000000000000000000000027d4ebe2fb7ce0900000"));
 		assertNull(formatter.parse(null));
 	}
 
