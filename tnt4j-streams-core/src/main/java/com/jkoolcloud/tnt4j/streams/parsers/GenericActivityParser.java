@@ -67,6 +67,12 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	protected static final String DEFAULT_DELIM = ","; // NON-NLS
 
 	/**
+	 * Constant defining locator placeholder {@value}, used to resolve complete activity data package. It is useful to
+	 * redirect complete activity data to stacked parser.
+	 */
+	protected static final String LOC_FOR_COMPLETE_ACTIVITY_DATA = "$DATA$"; // NON-NLS
+
+	/**
 	 * List of supported activity fields used to extract values from RAW activity data defined by field location(s).
 	 */
 	protected final List<ActivityField> fieldList = new ArrayList<>();
@@ -998,13 +1004,15 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					val = Utils.simplifyValue(StreamsCache.getValue(cData.getActivity(), locStr, getName()));
 				} else if (locator.getBuiltInType() == ActivityFieldLocatorType.Activity) {
 					val = resolveActivityValue(locator, cData);
+				} else if (LOC_FOR_COMPLETE_ACTIVITY_DATA.equals(locator.getLocator())) {
+					val = cData.getData();
 				} else {
 					val = resolveLocatorValue(locator, cData, formattingNeeded);
 				}
 
 				// logger().log(val == null && !locator.isOptional() ? OpLevel.WARNING : OpLevel.TRACE,
 				logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.locator.resolved", locStr, toString(val));
+						"ActivityParser.locator.resolved", cData.getField(), locStr, toString(val));
 
 				if (val != null && locator.isEmptyAsNull() && Utils.isEmptyContent(val, true)) {
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
