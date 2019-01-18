@@ -240,7 +240,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 			try {
 				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
-				Utils.logThrowable(logger(), locator.isOptional() ? OpLevel.DEBUG : OpLevel.WARNING,
+				Utils.logThrowable(logger(), OpLevel.DEBUG,
 						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityJsonParser.path.exception", locStr, exc);
 			}
