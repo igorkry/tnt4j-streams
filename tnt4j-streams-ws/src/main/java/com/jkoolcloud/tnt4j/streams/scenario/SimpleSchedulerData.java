@@ -31,14 +31,29 @@ public class SimpleSchedulerData extends AbstractSchedulerData {
 	private Integer repeatCount;
 
 	/**
-	 * Constructs a new SimpleSchedulerData. Defines invocations interval in milliseconds.
+	 * Constructs a new SimpleSchedulerData. Defines invocations interval in provided time units.
 	 *
 	 * @param interval
-	 *            request/call/command invocations interval.
+	 *            request/call/command invocations interval
+	 * @param units
+	 *            interval time units
 	 */
-	public SimpleSchedulerData(long interval) {
+	public SimpleSchedulerData(long interval, TimeUnit units) {
 		this.interval = interval;
-		this.units = TimeUnit.MILLISECONDS;
+		this.units = units;
+	}
+
+	/**
+	 * Constructs a new SimpleSchedulerData. Defines invocations interval in provided time units.
+	 *
+	 * @param interval
+	 *            request/call/command invocations interval
+	 * @param unitsName
+	 *            interval time units name
+	 */
+	public SimpleSchedulerData(long interval, String unitsName) {
+		this.interval = interval;
+		setUnits(unitsName);
 	}
 
 	/**
@@ -56,7 +71,7 @@ public class SimpleSchedulerData extends AbstractSchedulerData {
 	 * @return interval time units
 	 */
 	public TimeUnit getUnits() {
-		return units == null ? TimeUnit.MILLISECONDS : units;
+		return units == null ? TimeUnit.SECONDS : units;
 	}
 
 	/**
@@ -76,7 +91,7 @@ public class SimpleSchedulerData extends AbstractSchedulerData {
 	 *            interval time units name
 	 */
 	public void setUnits(String unitsName) {
-		this.units = StringUtils.isEmpty(unitsName) ? TimeUnit.MILLISECONDS : TimeUnit.valueOf(unitsName.toUpperCase());
+		this.units = StringUtils.isEmpty(unitsName) ? TimeUnit.SECONDS : TimeUnit.valueOf(unitsName.toUpperCase());
 	}
 
 	/**

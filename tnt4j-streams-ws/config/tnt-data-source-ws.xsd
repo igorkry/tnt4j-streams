@@ -89,7 +89,7 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="units" use="optional" type="UnitsTypes" default="Milliseconds">
+        <xs:attribute name="units" use="optional" type="UnitsTypes" default="Seconds">
             <xs:annotation>
                 <xs:documentation>
                     Repeat interval time units name.

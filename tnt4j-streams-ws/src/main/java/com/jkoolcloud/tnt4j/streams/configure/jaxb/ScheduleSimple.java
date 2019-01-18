@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.*;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;attribute name="interval" use="required" type="{http://www.w3.org/2001/XMLSchema}nonNegativeInteger" />
- *       &lt;attribute name="units" type="{}UnitsTypes" default="Milliseconds" />
+ *       &lt;attribute name="units" type="{}UnitsTypes" default="Seconds" />
  *       &lt;attribute name="repeatCount" type="{http://www.w3.org/2001/XMLSchema}integer" default="1" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -103,7 +103,7 @@ public class ScheduleSimple {
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	public UnitsTypes getUnits() {
 		if (units == null) {
-			return UnitsTypes.MILLISECONDS;
+			return UnitsTypes.SECONDS;
 		} else {
 			return units;
 		}

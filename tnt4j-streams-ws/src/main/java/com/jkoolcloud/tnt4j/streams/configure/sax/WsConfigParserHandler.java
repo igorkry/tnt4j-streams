@@ -235,8 +235,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 					getLocationInfo()));
 		}
 
-		SimpleSchedulerData schedData = new SimpleSchedulerData(interval);
-		schedData.setUnits(timeUnits);
+		SimpleSchedulerData schedData = new SimpleSchedulerData(interval, timeUnits);
 		schedData.setRepeatCount(repeatCount);
 		schedData.setStartDelay(startDelay);
 		schedData.setStartDelayUnits(startDelayUnits);

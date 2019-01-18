@@ -147,6 +147,13 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 					"AbstractWsStream.null.scheduler", getName()));
 		}
 
+		String enabledProp = step.getProperty("Enabled"); // NON-NLS
+		if (StringUtils.equalsIgnoreCase("false", enabledProp)) { // NON-NLS
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"AbstractWsStream.stream.step.disabled", getName(), step.getScenario().getName(), step.getName());
+			return;
+		}
+
 		JobDataMap jobAttrs = new JobDataMap();
 		jobAttrs.put(JOB_PROP_STREAM_KEY, this);
 		jobAttrs.put(JOB_PROP_SCENARIO_STEP_KEY, step);
@@ -173,7 +180,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 				repCount = 1;
 			}
 
-			TimeUnit timeUnit = ssd == null ? null : ssd.getUnits();
+			TimeUnit timeUnit = ssd == null ? TimeUnit.SECONDS : ssd.getUnits();
 			long interval = ssd == null ? 1 : ssd.getInterval();
 
 			scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
@@ -187,7 +194,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 
 		if (schedulerData != null && schedulerData.getStartDelay() != null && schedulerData.getStartDelay() > 0) {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"AbstractWsStream.stream.scenario.start.delayed", getName(), step.getScenario().getName(),
+					"AbstractWsStream.stream.step.start.delayed", getName(), step.getScenario().getName(),
 					step.getName(), schedulerData.getStartDelay(), schedulerData.getStartDelayUnits());
 		}
 
@@ -289,8 +296,8 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	}
 
 	/**
-	 * Performs pre-processing of request/command/query body data: it can bea expressions evaluation, filling in
-	 * variable values and so on.
+	 * Performs pre-processing of request/command/query body data: it can be expressions evaluation, filling in variable
+	 * values and so on.
 	 *
 	 * @param requestData
 	 *            request/command/query body data
