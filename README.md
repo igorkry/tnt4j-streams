@@ -4679,9 +4679,12 @@ and Oracle's [Using XPath Functions](https://docs.oracle.com/cd/E35413_01/doc.72
  value - `true`. (Optional)
  * `RangeToStream` - defines the colon-separated range of file line numbers that should be parsed and streamed to jKoolCloud. Default 
  value - `1:`. (Optional)
- * `ActivityDelim` - defining activities data delimiter used by stream. Value can be: `EOL` - end of line, `EOF` - end of file/stream, or 
- any user defined symbol or string. Default value - `EOL`. (Optional)
+ * `ActivityDelim` - defines activities data delimiter used by stream. Value can be: `EOL` - end of line, `EOF` - end of file/stream, or any 
+ user defined symbol or string. Default value - `EOL`. (Optional)
  * `KeepLineSeparators` - flag indicating whether to return line separators at the end of read line. Default value - `false`. (Optional)
+ * `TruncatedFilePolicy` - defines truncated file (when size of the file decreases while it is streamed) access policy. Value can be: 
+ `START_FROM_BEGINNING` - read file from beginning, `CONTINUE_FROM_LAST` - continue reading file from last line (skipping all available 
+ lines). Default value - `START_FROM_BEGINNING`. (Optional)
 
     sample:
  ```xml
@@ -5239,7 +5242,7 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
  defined for that field in stream parser configuration or value was not resolved by parser from Raw activity data. **NOTE:** it is 
  recommended to use it for **DEBUGGING** purposes only. For a production version of your software, remove this property form stream parser 
  configuration. Default value - `false`. (Optional)
- * `ActivityDelim` - defining activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
+ * `ActivityDelim` - defines activities delimiter symbol used by parsers. Value can be one of: `EOL` - end of line, or `EOF` - end of 
  file/stream. Default value - `EOL`. (Optional)
  * `RequireDefault` - indicates that all parser fields/locators by default are required to resolve to non-null values. Default value - 
  `false`. (Optional). The `field` attribute `required="true"` (or `false`) may be used to take precedence over the `RequireDefault` 
