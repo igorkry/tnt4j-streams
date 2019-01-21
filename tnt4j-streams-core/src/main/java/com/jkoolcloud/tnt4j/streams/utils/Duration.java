@@ -139,7 +139,7 @@ public class Duration {
 	 * @see java.util.concurrent.TimeUnit#convert(long, java.util.concurrent.TimeUnit)
 	 */
 	public static long duration(long startTime, TimeUnit tUnit) {
-		return TimeUnit.MILLISECONDS.convert(duration(startTime), tUnit);
+		return tUnit.convert(duration(startTime), TimeUnit.MILLISECONDS);
 	}
 
 	/**

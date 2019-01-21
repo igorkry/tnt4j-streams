@@ -60,11 +60,15 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * entry line. If {@code false} - then all lines from available files are streamed on startup. Actual only if
  * 'FilePolling' or 'RestoreState' properties are set to {@code true}. Default value - {@code true}. (Optional)</li>
  * <li>RangeToStream - defines streamed data lines index range. Default value - {@code 1:}. (Optional)</li>
- * <li>ActivityDelim - defining activities data delimiter used by stream. Value can be: {@code "EOL"} - end of line,
+ * <li>ActivityDelim - defines activities data delimiter used by stream. Value can be: {@code "EOL"} - end of line,
  * {@code "EOF"} - end of file/stream, or any user defined symbol or string. Default value - '{@code EOL}'.
  * (Optional)</li>
  * <li>KeepLineSeparators - flag indicating whether to return line separators at the end of read line. Default value -
  * {@code false}. (Optional)</li>
+ * <li>TruncatedFilePolicy - defines truncated file (when size of the file decreases while it is streamed) access
+ * policy. Value can be: {@code "START_FROM_BEGINNING"} - read file from beginning, {@code "CONTINUE_FROM_LAST"} -
+ * continue reading file from last line (skipping all available lines). Default value - '{@code START_FROM_BEGINNING}'.
+ * (Optional)</li>
  * </ul>
  *
  * @version $Revision: 3 $
@@ -103,6 +107,7 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 	private String rangeValue = "1:"; // NON-NLS
 	private IntRange lineRange = null;
 	protected String activityDelimiter = ActivityDelim.EOL.name();
+	protected String truncatedFilePolicy = FileAccessPolicy.START_FROM_BEGINNING.name();
 	protected boolean keepLineSeparators = false;
 
 	/**
@@ -132,6 +137,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 			activityDelimiter = value;
 		} else if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
 			keepLineSeparators = Utils.toBoolean(value);
+		} else if (StreamProperties.PROP_TRUNCATED_FILE_POLICY.equalsIgnoreCase(name)) {
+			truncatedFilePolicy = value;
 		}
 	}
 
@@ -160,6 +167,9 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		}
 		if (StreamProperties.PROP_KEEP_LINE_SEPARATORS.equalsIgnoreCase(name)) {
 			return keepLineSeparators;
+		}
+		if (StreamProperties.PROP_TRUNCATED_FILE_POLICY.equalsIgnoreCase(name)) {
+			return truncatedFilePolicy;
 		}
 		return super.getProperty(name);
 	}
@@ -358,8 +368,8 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 					if (!pollingOn) {
 						shutdown();
 					} else {
-						logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-								"FileLineStream.waiting", fileWatcherDelay / 1000.0);
+						logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+								"FileLineStream.waiting", TimeUnit.MILLISECONDS.toSeconds(fileWatcherDelay));
 						StreamThread.sleep(fileWatcherDelay);
 					}
 				}
@@ -525,5 +535,20 @@ public abstract class AbstractFileLineStream<T> extends AbstractBufferedStream<A
 		 * Activity data delimiter is end-of-file.
 		 */
 		EOF,
+	}
+
+	/**
+	 * Lists predefined special case file(s) access policies.
+	 */
+	protected enum FileAccessPolicy {
+		/**
+		 * Stream shall read file(s) from beginning.
+		 */
+		START_FROM_BEGINNING,
+
+		/**
+		 * Stream shall continue reading file(s) from last line (skipping all available lines).
+		 */
+		CONTINUE_FROM_LAST,
 	}
 }

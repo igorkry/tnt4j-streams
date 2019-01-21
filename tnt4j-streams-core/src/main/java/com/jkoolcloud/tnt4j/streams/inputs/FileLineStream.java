@@ -277,6 +277,8 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 						"FileLineStream.error.rolling", exc);
 			}
 
+			int prevLineNumber = lnr.getLineNumber();
+
 			if (lnr != null) {
 				try {
 					readNewFileLines(lnr);
@@ -289,8 +291,9 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 				}
 			}
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"FileLineStream.changes.read.end", fileToRead.toAbsolutePath(), lineNumber);
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"FileLineStream.changes.read.end", fileToRead.toAbsolutePath(), lineNumber,
+					lineNumber - prevLineNumber);
 		}
 
 		private LineNumberReader rollToCurrentLine() throws IOException {
@@ -312,7 +315,7 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 			boolean skipFail = false;
 			for (int i = 0; i < lineNumber; i++) {
 				if (lnr.readLine() == null) {
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.file.shorter", lnr.getLineNumber(), lineNumber);
 
 					skipFail = true;
@@ -328,8 +331,12 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 
 					return rollToCurrentLine();
 				} else {
-					lineNumber = 0;
-					lnr.setLineNumber(lineNumber);
+					if (truncatedFilePolicy.equalsIgnoreCase(FileAccessPolicy.CONTINUE_FROM_LAST.name())) {
+						lineNumber = lnr.getLineNumber();
+					} else {
+						lineNumber = 0;
+						lnr.setLineNumber(lineNumber);
+					}
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.resetting.reader", lineNumber);
 				}
@@ -358,7 +365,7 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.swapping.to.previous", lineNumber, prevFile.toAbsolutePath());
 				} else {
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.previous");
 				}
 
@@ -381,7 +388,7 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 
 				Path nextFile = Utils.getFirstNewer(availableFiles, lastModifTime);
 
-				if (nextFile != null) {
+				if (nextFile != null && !Files.isSameFile(nextFile, fileToRead)) {
 					setFileToRead(nextFile);
 					lastModifTime = Files.getLastModifiedTime(nextFile, LinkOption.NOFOLLOW_LINKS).toMillis();
 					lineNumber = 0;
@@ -389,7 +396,7 @@ public class FileLineStream extends AbstractFileLineStream<Path> {
 					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.swapping.to.next", nextFile.toAbsolutePath());
 				} else {
-					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					logger().log(OpLevel.INFO, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"FileLineStream.no.next");
 				}
 

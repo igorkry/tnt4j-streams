@@ -46,7 +46,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * there is no mapping defined for that field in stream parser configuration or value was not resolved by parser from
  * RAW activity data. NOTE: it is recommended to use it for DEBUGGING purposes only. For a production version of your
  * software, remove this property form stream parser configuration. Default value - '{@code false}'. (Optional)</li>
- * <li>ActivityDelim - defining activities delimiter symbol used by parsers. Value can be one of: {@code "EOL"} - end of
+ * <li>ActivityDelim - defines activities delimiter symbol used by parsers. Value can be one of: {@code "EOL"} - end of
  * line, or {@code "EOF"} - end of file/stream. Default value - '{@code EOL}'. (Optional)</li>
  * <li>RequireDefault - indicates that all parser fields/locators by default requires to resolve non-null value. Default
  * value - {@code false}. (Optional)</li>

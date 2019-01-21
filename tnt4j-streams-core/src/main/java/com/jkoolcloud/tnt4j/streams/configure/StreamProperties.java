@@ -217,4 +217,9 @@ public interface StreamProperties {
 	 * Constant for name of built-in {@value} property.
 	 */
 	String PROP_PING_LOG_ACTIVITY_DELAY = "PingLogActivityDelay"; // NON-NLS
+
+	/**
+	 * Constant for name of built-in {@value} property.
+	 */
+	String PROP_TRUNCATED_FILE_POLICY = "TruncatedFilePolicy"; // NON-NLS
 }
