@@ -5008,10 +5008,16 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
  * `scenario` tag has required attribute - `name` (any string).
     * `step` tag has required attribute - `name` (any string) and optional attributes `url` (service request URL),
     `method` (`GET`/`POST` - default value `GET`).
-        * `schedule-cron` tag has required attribute `expression` (Cron expression).
-        * `schedule-simple` tag has required attribute `interval` (positive integer numeric value) and optional
-        attributes `units` (time units - default value `MILLISECONDS`), `repeatCount` (integer numeric value - default
-        value `1`, `-1` means endless).
+        * `schedule-cron` tag has attributes:
+            * `expression` - Cron expression. (Required)
+            * `startDelay` - schedule start delay interval as positive integer (zero valid) numeric value. Default value - `0`. (Optional) 
+            * `startDelayUnits` - schedule start delay time units name. Default value - `SECONDS`. (Optional)
+        * `schedule-simple` tag has required attributes: 
+            * `interval` - schedule interval as positive integer (non-zero) numeric value. (Required) 
+            * `units` - schedule interval time units name. Default value - `MILLISECONDS`. (Optional) 
+            * `repeatCount` - schedule repeats count as integer numeric value, where `-1` means endless. Default value - `1`. (Optional)
+            * `startDelay` - schedule start delay interval as positive integer (zero valid) numeric value. Default value - `0`. (Optional) 
+            * `startDelayUnits` - schedule start delay time units name. Default value - `SECONDS`. (Optional)
         * `request` is XML tag to define string represented request data (e.g., system command with parameters). To
         define XML contents it is recommended to use `<![CDATA[]]>`. It has optional attribute `parser-ref` to map received response data 
         and parser to parse it.
@@ -5080,7 +5086,7 @@ request/invocation/execution parameters and scheduler. Steps are invoked/execute
     <!-- Sample scenario for JDBC query invocation -->
     <scenario name="Sample DB2-JDBC stream scenario">
         <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
-            <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
+            <schedule-simple interval="60" units="Seconds" repeatCount="-1" startDelay="3" startDelayUnits="Minutes"/>
 
             <request>
                 <![CDATA[
