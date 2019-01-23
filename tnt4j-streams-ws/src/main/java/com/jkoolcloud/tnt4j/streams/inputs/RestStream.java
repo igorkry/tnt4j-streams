@@ -342,50 +342,16 @@ public class RestStream extends AbstractWsStream<String> {
 		public RestCallJob() {
 		}
 
-		@Override
-		public void execute(JobExecutionContext context) throws JobExecutionException {
-			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-
-			RestStream stream = (RestStream) dataMap.get(JOB_PROP_STREAM_KEY);
-			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
-			String reqMethod = scenarioStep.getMethod();
-
-			if (StringUtils.isEmpty(reqMethod)) {
-				reqMethod = ReqMethod.GET.name();
-			}
-
-			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
-				if (!scenarioStep.isEmpty()) {
-					String respStr;
-					for (WsRequest<String> request : scenarioStep.getRequests()) {
-						respStr = null;
-						try {
-							String processedRequest = stream.preProcess(request.getData());
-							respStr = executePOST(stream.client, scenarioStep.getUrlStr(), processedRequest,
-									scenarioStep.getUsername(), scenarioStep.getPassword());
-						} catch (Exception exc) {
-							Utils.logThrowable(LOGGER, OpLevel.ERROR,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-									"RestStream.execute.exception", exc);
-						}
-
-						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
-						}
-					}
-				}
-			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
-				if (scenarioStep.isEmpty()) {
-					scenarioStep.addRequest(scenarioStep.getUrlStr());
-				}
+		protected void runPOST(WsScenarioStep scenarioStep, RestStream stream) {
+			if (!scenarioStep.isEmpty()) {
 				String respStr;
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
 					respStr = null;
 					try {
-						String processedRequestURI = stream.preProcessURL(scenarioStep.getUrlStr());
-						respStr = executeGET(stream.client, processedRequestURI, scenarioStep.getUsername(),
-								scenarioStep.getPassword());
-					} catch (Exception exc) {
+						String processedRequest = stream.preProcess(request.getData());
+						respStr = executePOST(stream.client, scenarioStep.getUrlStr(), processedRequest,
+								scenarioStep.getUsername(), scenarioStep.getPassword());
+					} catch (Throwable exc) {
 						Utils.logThrowable(LOGGER, OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"RestStream.execute.exception", exc);
@@ -395,6 +361,46 @@ public class RestStream extends AbstractWsStream<String> {
 						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
 					}
 				}
+			}			
+		}
+		
+		protected void runGET(WsScenarioStep scenarioStep, RestStream stream) {
+			if (scenarioStep.isEmpty()) {
+				scenarioStep.addRequest(scenarioStep.getUrlStr());
+			}
+			String respStr;
+			for (WsRequest<String> request : scenarioStep.getRequests()) {
+				respStr = null;
+				try {
+					String processedRequestURI = stream.preProcessURL(scenarioStep.getUrlStr());
+					respStr = executeGET(stream.client, processedRequestURI, scenarioStep.getUsername(),
+							scenarioStep.getPassword());
+				} catch (Throwable exc) {
+					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							"RestStream.execute.exception", exc);
+				}
+
+				if (StringUtils.isNotEmpty(respStr)) {
+					stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+				}
+			}
+		}
+		
+		@Override
+		public void execute(JobExecutionContext context) throws JobExecutionException {
+			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+			RestStream stream = (RestStream) dataMap.get(JOB_PROP_STREAM_KEY);
+			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
+			String reqMethod = scenarioStep.getMethod();
+
+			if (StringUtils.isEmpty(reqMethod)) {
+				reqMethod = ReqMethod.GET.name();
+			}
+			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
+				runPOST(scenarioStep, stream);
+			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
+				runGET(scenarioStep, stream);
 			}
 		}
 	}
