@@ -230,6 +230,7 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 		return "MAP"; // NON-NLS
 	}
 
+	@SuppressWarnings("deprecation")
 	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
 			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.REMatchId, ActivityFieldLocatorType.Range);
 

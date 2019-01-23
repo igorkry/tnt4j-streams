@@ -16,14 +16,12 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
-import java.io.Serializable;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -32,7 +30,12 @@ import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.*;
+import com.jkoolcloud.tnt4j.streams.utils.DoubleRange;
+import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
+import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
+import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw

@@ -178,6 +178,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 		return "OBJECT"; // NON-NLS
 	}
 
+	@SuppressWarnings("deprecation")
 	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
 			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.REMatchId, ActivityFieldLocatorType.Range);
 

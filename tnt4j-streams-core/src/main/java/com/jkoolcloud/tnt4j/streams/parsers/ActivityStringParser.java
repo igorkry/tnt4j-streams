@@ -150,6 +150,7 @@ public class ActivityStringParser extends GenericActivityParser<String> {
 		return val;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
 			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.Label, ActivityFieldLocatorType.REMatchId);
 
