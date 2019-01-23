@@ -265,10 +265,8 @@ public class RestStream extends AbstractWsStream<String> {
 				String credentialsStr = username + ":" + password; // NON-NLS
 				String encoding = DatatypeConverter.printBase64Binary(credentialsStr.getBytes());
 				req.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding); // NON-NLS
-				response = client.execute(req, ctx);
-			} else {
-				response = client.execute(req, ctx);
-			}
+			} 
+			response = client.execute(req, ctx);
 			return processResponse(response, req);
 		} finally {
 			Utils.close(response);
