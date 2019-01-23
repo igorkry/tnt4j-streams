@@ -22,9 +22,10 @@ import java.nio.charset.StandardCharsets;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpResponseException;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -41,6 +42,7 @@ import org.quartz.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -53,12 +55,20 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * activity or event which should be recorded.
  * <p>
  * Service call is performed by invoking {@link org.apache.http.client.HttpClient#execute(HttpUriRequest)} with GET or
- * POST method request depending on scenario step configuration parameter 'method'. Default method is GET.
+ * POST method request depending on scenario step configuration parameter 'method'. Default method is GET. Stream uses
+ * {@link org.apache.http.impl.conn.PoolingHttpClientConnectionManager} to handle connections pool used by HTTP client.
  * <p>
  * This activity stream requires parsers that can support {@link String} data to parse
  * {@link com.jkoolcloud.tnt4j.streams.scenario.WsResponse#getData()} provided string.
  * <p>
- * This activity stream supports configuration properties from {@link AbstractWsStream} (and higher hierarchy streams).
+ * This activity stream supports the following configuration properties (in addition to those supported by
+ * {@link AbstractWsStream}):
+ * <ul>
+ * <li>MaxTotalPoolConnections - defines the maximum number of total open connections in the HTTP connections pool.
+ * Default value - {@code 5}. (Optional)</li>
+ * <li>DefaultMaxPerRouteConnections - defines the maximum number of concurrent connections per HTTP route. Default
+ * value - {@code 2}. (Optional)</li>
+ * </ul>
  *
  * @version $Revision: 2 $
  *
@@ -67,6 +77,9 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  */
 public class RestStream extends AbstractWsStream<String> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RestStream.class);
+
+	private int maxTotalPoolConnections = 5;
+	private int defaultMaxPerRouteConnections = 2;
 
 	protected CloseableHttpClient client;
 
@@ -83,6 +96,30 @@ public class RestStream extends AbstractWsStream<String> {
 	}
 
 	@Override
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
+
+		if (WsStreamProperties.PROP_MAX_TOTAL_POOL_CONNECTIONS.equalsIgnoreCase(name)) {
+			maxTotalPoolConnections = Integer.parseInt(value);
+		} else if (WsStreamProperties.PROP_DEFAULT_MAX_PER_ROUTE_CONNECTIONS.equalsIgnoreCase(name)) {
+			defaultMaxPerRouteConnections = Integer.parseInt(value);
+		}
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		if (WsStreamProperties.PROP_MAX_TOTAL_POOL_CONNECTIONS.equalsIgnoreCase(name)) {
+			return maxTotalPoolConnections;
+		}
+
+		if (WsStreamProperties.PROP_DEFAULT_MAX_PER_ROUTE_CONNECTIONS.equalsIgnoreCase(name)) {
+			return defaultMaxPerRouteConnections;
+		}
+
+		return super.getProperty(name);
+	}
+
+	@Override
 	protected long getActivityItemByteSize(WsResponse<String> item) {
 		return item == null || item.getData() == null ? 0 : item.getData().getBytes().length;
 	}
@@ -95,8 +132,8 @@ public class RestStream extends AbstractWsStream<String> {
 	@Override
 	protected void initialize() throws Exception {
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		cm.setMaxTotal(20);
-		cm.setDefaultMaxPerRoute(2);
+		cm.setMaxTotal(maxTotalPoolConnections);
+		cm.setDefaultMaxPerRoute(defaultMaxPerRouteConnections);
 		client = HttpClients.custom().setConnectionManager(cm).build();
 
 		super.initialize();
@@ -259,19 +296,25 @@ public class RestStream extends AbstractWsStream<String> {
 			response = client.execute(req, ctx);
 		}
 
-		int responseCode = response.getStatusLine().getStatusCode();
-		if (responseCode >= HttpStatus.SC_MULTIPLE_CHOICES) {
-			throw new HttpResponseException(responseCode, response.getStatusLine().getReasonPhrase());
-		}
-
+		HttpEntity entity = null;
 		try {
-			String respStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+			StatusLine sLine = response.getStatusLine();
+			int responseCode = sLine.getStatusCode();
+			if (responseCode >= HttpStatus.SC_MULTIPLE_CHOICES) {
+				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						"RestStream.received.error.response", sLine, req);
+				throw new HttpResponseException(sLine);
+			}
+
+			entity = response.getEntity();
+			String respStr = EntityUtils.toString(entity, StandardCharsets.UTF_8);
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"RestStream.received.response", req.getURI(), respStr);
 
 			return respStr;
 		} finally {
+			EntityUtils.consumeQuietly(entity);
 			Utils.close(response);
 		}
 	}
@@ -321,7 +364,7 @@ public class RestStream extends AbstractWsStream<String> {
 							respStr = executePOST(stream.client, scenarioStep.getUrlStr(), processedRequest,
 									scenarioStep.getUsername(), scenarioStep.getPassword());
 						} catch (Exception exc) {
-							Utils.logThrowable(LOGGER, OpLevel.WARNING,
+							Utils.logThrowable(LOGGER, OpLevel.ERROR,
 									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"RestStream.execute.exception", exc);
 						}
@@ -332,23 +375,25 @@ public class RestStream extends AbstractWsStream<String> {
 					}
 				}
 			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {
-				String respStr = null;
-				try {
-					String processedRequestURI = stream.preProcessURL(scenarioStep.getUrlStr());
-					respStr = executeGET(stream.client, processedRequestURI, scenarioStep.getUsername(),
-							scenarioStep.getPassword());
-				} catch (HttpResponseException exc) {
-					Utils.logThrowable(LOGGER, OpLevel.ERROR,
-							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-							"RestStream.execute.exception2", exc.getStatusCode(), exc);
-				} catch (Exception exc) {
-					Utils.logThrowable(LOGGER, OpLevel.ERROR,
-							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-							"RestStream.execute.exception", exc);
+				if (scenarioStep.isEmpty()) {
+					scenarioStep.addRequest(scenarioStep.getUrlStr());
 				}
+				String respStr;
+				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					respStr = null;
+					try {
+						String processedRequestURI = stream.preProcessURL(scenarioStep.getUrlStr());
+						respStr = executeGET(stream.client, processedRequestURI, scenarioStep.getUsername(),
+								scenarioStep.getPassword());
+					} catch (Exception exc) {
+						Utils.logThrowable(LOGGER, OpLevel.ERROR,
+								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+								"RestStream.execute.exception", exc);
+					}
 
-				if (StringUtils.isNotEmpty(respStr)) {
-					stream.addInputToBuffer(new WsResponse<>(respStr));
+					if (StringUtils.isNotEmpty(respStr)) {
+						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+					}
 				}
 			}
 		}

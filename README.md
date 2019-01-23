@@ -5139,7 +5139,15 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 ##### RestStream parameters
 
-This stream does not have any additional configuration parameters.
+ * `MaxTotalPoolConnections` - defines the maximum number of total open connections in the HTTP connections pool. Default value - `5`. 
+ (Optional)
+ * `DefaultMaxPerRouteConnections` - defines the maximum number of concurrent connections per HTTP route. Default value - `2`. (Optional)
+
+    sample:
+```xml
+    <property name="MaxTotalPoolConnections" value="10"/>
+    <property name="DefaultMaxPerRouteConnections" value="4"/>
+```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 

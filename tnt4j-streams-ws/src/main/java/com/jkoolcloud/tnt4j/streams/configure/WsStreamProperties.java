@@ -38,4 +38,12 @@ public interface WsStreamProperties extends StreamProperties {
 	 * Constant for name of built-in stream {@value} property.
 	 */
 	public static final String PROP_SYNCHRONIZE_REQUESTS = "SynchronizeRequests"; // NON-NLS
+	/**
+	 * Constant for name of built-in stream {@value} property.
+	 */
+	public static final String PROP_MAX_TOTAL_POOL_CONNECTIONS = "MaxTotalPoolConnections"; // NON-NLS
+	/**
+	 * Constant for name of built-in stream {@value} property.
+	 */
+	public static final String PROP_DEFAULT_MAX_PER_ROUTE_CONNECTIONS = "DefaultMaxPerRouteConnections"; // NON-NLS
 }
