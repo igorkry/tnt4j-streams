@@ -259,6 +259,7 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 		return "RESULT SET"; // NON-NLS
 	}
 
+	@SuppressWarnings("deprecation")
 	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
 			.of(ActivityFieldLocatorType.REMatchId, ActivityFieldLocatorType.Range);
 
