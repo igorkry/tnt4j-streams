@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -248,54 +249,33 @@ public class RestStream extends AbstractWsStream<String> {
 
 		HttpPost post = new HttpPost(uriStr);
 		StringEntity reqEntity = new StringEntity(reqData == null ? "" : reqData);
+
 		// here instead of JSON you can also have XML
 		reqEntity.setContentType("application/json"); // NON-NLS
-
-		// List<BasicNameValuePair> nameValuePairs = new
-		// ArrayList<BasicNameValuePair>(1);
-		// nameValuePairs.add(new BasicNameValuePair("name", "value"));
-		// // you can have as many name value pair as you want in the list.
-		// post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
 		post.setEntity(reqEntity);
-
-		String respStr = executeRequest(client, post, username, password);
-
-		return respStr;
+		return executeRequest(client, post, username, password);
 	}
 
 	private static String executeRequest(CloseableHttpClient client, HttpUriRequest req, String username,
-			String password) throws IOException {
-		CloseableHttpResponse response;
-		HttpContext ctx = HttpClientContext.create();
-
-		if (StringUtils.isNotEmpty(username)) {
-			// CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-			// UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-			// credentialsProvider.setCredentials(AuthScope.ANY, credentials);
-			//
-			// // HttpClient client =
-			// // HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
-			//
-			// URI reqURI = req.getURI();
-			// HttpHost targetHost = new HttpHost(reqURI.getHost(), reqURI.getPort(), reqURI.getScheme());
-			// AuthCache authCache = new BasicAuthCache();
-			// authCache.put(targetHost, new BasicScheme());
-			//
-			// HttpClientContext context = HttpClientContext.create();
-			// context.setCredentialsProvider(credentialsProvider);
-			// context.setAuthCache(authCache);
-			//
-			// response = client.execute(req, context);
-
-			String credentialsStr = username + ":" + password; // NON-NLS
-			String encoding = DatatypeConverter.printBase64Binary(credentialsStr.getBytes());
-			req.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding); // NON-NLS
-			response = client.execute(req, ctx);
-		} else {
-			response = client.execute(req, ctx);
+	        String password) throws IOException {
+		CloseableHttpResponse response = null;
+		try {
+			HttpContext ctx = HttpClientContext.create();
+			if (StringUtils.isNotEmpty(username)) {
+				String credentialsStr = username + ":" + password; // NON-NLS
+				String encoding = DatatypeConverter.printBase64Binary(credentialsStr.getBytes());
+				req.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding); // NON-NLS
+				response = client.execute(req, ctx);
+			} else {
+				response = client.execute(req, ctx);
+			}
+			return processResponse(response, req);
+		} finally {
+			Utils.close(response);
 		}
+	}
 
+	private static String processResponse(CloseableHttpResponse response, HttpUriRequest req) throws IOException {
 		HttpEntity entity = null;
 		try {
 			StatusLine sLine = response.getStatusLine();
@@ -305,20 +285,17 @@ public class RestStream extends AbstractWsStream<String> {
 						"RestStream.received.error.response", sLine, req);
 				throw new HttpResponseException(sLine);
 			}
-
 			entity = response.getEntity();
 			String respStr = EntityUtils.toString(entity, StandardCharsets.UTF_8);
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"RestStream.received.response", req.getURI(), respStr);
-
 			return respStr;
 		} finally {
 			EntityUtils.consumeQuietly(entity);
-			Utils.close(response);
-		}
+		}	
 	}
-
+	
 	/**
 	 * Performs pre-processing of request/command/query data provided over URL string: it can be expression evaluation,
 	 * filling in variable values and so on.
