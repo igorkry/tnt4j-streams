@@ -23,7 +23,9 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.*;
@@ -31,9 +33,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
-import org.apache.commons.collections4.*;
-import javax.xml.soap.SOAPMessage;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.w3c.dom.Document;
@@ -195,7 +197,7 @@ public class WsStream extends AbstractWsStream<String> {
 		RequestDataAndHeaders requestDataAndHeaders = new RequestDataAndHeaders().resolve(soapRequestData, stream);
 		soapRequestData = stream.preProcess(requestDataAndHeaders.getRequest());
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"WsStream.invoking.request.prep", url, soapRequestData);
 
 		// Create SOAP message and set request XML as body
@@ -456,8 +458,8 @@ public class WsStream extends AbstractWsStream<String> {
 						}
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
 								stream.fillInRequestData(request.getData()), stream, scenarioStep.getScenario());
-					} catch (Exception exc) {
-						Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					} catch (Throwable exc) {
+						Utils.logThrowable(LOGGER, OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"WsStream.execute.exception", exc);
 					} finally {

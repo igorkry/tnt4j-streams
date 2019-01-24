@@ -501,6 +501,15 @@ public final class StreamsAgent {
 	 */
 	protected static void run(Collection<TNTInputStream<?, ?>> streams, InputStreamListener streamListener,
 			StreamTasksListener streamTasksListener) {
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable exc) {
+				Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"StreamsAgent.uncaught.exception", t, exc);
+			}
+		});
+
 		if (streamThreads == null) {
 			streamThreads = new ThreadGroup(StreamsAgent.class.getName() + "Threads"); // NON-NLS
 		}

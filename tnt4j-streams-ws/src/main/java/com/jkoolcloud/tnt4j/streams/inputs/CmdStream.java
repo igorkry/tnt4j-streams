@@ -86,7 +86,7 @@ public class CmdStream extends AbstractWsStream<String> {
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"CmdStream.invoking.command", cmdData);
 
 		Process p = Runtime.getRuntime().exec(cmdData);
@@ -122,8 +122,8 @@ public class CmdStream extends AbstractWsStream<String> {
 					respStr = null;
 					try {
 						respStr = executeCommand(request.getData());
-					} catch (Exception exc) {
-						Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					} catch (Throwable exc) {
+						Utils.logThrowable(LOGGER, OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"CmdStream.execute.exception", exc);
 					}

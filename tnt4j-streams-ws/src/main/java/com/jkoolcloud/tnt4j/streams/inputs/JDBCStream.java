@@ -193,7 +193,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.invoking.query", url, query);
 
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -427,16 +427,18 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			WsScenarioStep scenarioStep = (WsScenarioStep) dataMap.get(JOB_PROP_SCENARIO_STEP_KEY);
 
 			if (!scenarioStep.isEmpty()) {
+				String dbQuery;
 				ResultSet respRs;
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					dbQuery = null;
 					respRs = null;
 
 					try {
+						dbQuery = stream.fillInRequestData(request.getData());
 						respRs = executeJdbcCall(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
-								scenarioStep.getPassword(), stream.fillInRequestData(request.getData()),
-								request.getParameters(), stream);
-					} catch (Exception exc) {
-						Utils.logThrowable(LOGGER, OpLevel.WARNING,
+								scenarioStep.getPassword(), dbQuery, request.getParameters(), stream);
+					} catch (Throwable exc) {
+						Utils.logThrowable(LOGGER, OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"JDBCStream.execute.exception", exc);
 					} finally {

@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -187,13 +186,12 @@ public class RestStream extends AbstractWsStream<String> {
 			return null;
 		}
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"RestStream.invoking.get.request", uriStr);
 
 		HttpGet get = new HttpGet(uriStr);
-		String respStr = executeRequest(client, get, username, password);
 
-		return respStr;
+		return executeRequest(client, get, username, password);
 	}
 
 	/**
@@ -244,29 +242,33 @@ public class RestStream extends AbstractWsStream<String> {
 			return executeGET(client, uriStr, username, password);
 		}
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"RestStream.invoking.post.request", uriStr, reqData);
 
 		HttpPost post = new HttpPost(uriStr);
-		StringEntity reqEntity = new StringEntity(reqData == null ? "" : reqData);
+		StringEntity reqEntity = new StringEntity(reqData);
 
 		// here instead of JSON you can also have XML
 		reqEntity.setContentType("application/json"); // NON-NLS
 		post.setEntity(reqEntity);
+
 		return executeRequest(client, post, username, password);
 	}
 
 	private static String executeRequest(CloseableHttpClient client, HttpUriRequest req, String username,
-	        String password) throws IOException {
+			String password) throws IOException {
 		CloseableHttpResponse response = null;
 		try {
 			HttpContext ctx = HttpClientContext.create();
+
 			if (StringUtils.isNotEmpty(username)) {
 				String credentialsStr = username + ":" + password; // NON-NLS
 				String encoding = DatatypeConverter.printBase64Binary(credentialsStr.getBytes());
 				req.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding); // NON-NLS
-			} 
+			}
+
 			response = client.execute(req, ctx);
+
 			return processResponse(response, req);
 		} finally {
 			Utils.close(response);
@@ -278,22 +280,23 @@ public class RestStream extends AbstractWsStream<String> {
 		try {
 			StatusLine sLine = response.getStatusLine();
 			int responseCode = sLine.getStatusCode();
+
 			if (responseCode >= HttpStatus.SC_MULTIPLE_CHOICES) {
-				LOGGER.log(OpLevel.ERROR, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-						"RestStream.received.error.response", sLine, req);
 				throw new HttpResponseException(sLine);
 			}
+
 			entity = response.getEntity();
 			String respStr = EntityUtils.toString(entity, StandardCharsets.UTF_8);
 
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"RestStream.received.response", req.getURI(), respStr);
+
 			return respStr;
 		} finally {
 			EntityUtils.consumeQuietly(entity);
-		}	
+		}
 	}
-	
+
 	/**
 	 * Performs pre-processing of request/command/query data provided over URL string: it can be expression evaluation,
 	 * filling in variable values and so on.
@@ -317,14 +320,24 @@ public class RestStream extends AbstractWsStream<String> {
 		public RestCallJob() {
 		}
 
+		/**
+		 * Executes JAX-RS call as HTTP POST request.
+		 *
+		 * @param scenarioStep
+		 *            scenario step to execute
+		 * @param stream
+		 *            stream instance to execute HTTP POST
+		 */
 		protected void runPOST(WsScenarioStep scenarioStep, RestStream stream) {
 			if (!scenarioStep.isEmpty()) {
+				String reqDataStr;
 				String respStr;
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					reqDataStr = null;
 					respStr = null;
 					try {
-						String processedRequest = stream.preProcess(request.getData());
-						respStr = executePOST(stream.client, scenarioStep.getUrlStr(), processedRequest,
+						reqDataStr = stream.preProcess(request.getData());
+						respStr = executePOST(stream.client, scenarioStep.getUrlStr(), reqDataStr,
 								scenarioStep.getUsername(), scenarioStep.getPassword());
 					} catch (Throwable exc) {
 						Utils.logThrowable(LOGGER, OpLevel.ERROR,
@@ -336,20 +349,30 @@ public class RestStream extends AbstractWsStream<String> {
 						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
 					}
 				}
-			}			
+			}
 		}
-		
+
+		/**
+		 * Executes JAX-RS call as HTTP GET request.
+		 *
+		 * @param scenarioStep
+		 *            scenario step to execute
+		 * @param stream
+		 *            stream instance to execute HTTP GET
+		 */
 		protected void runGET(WsScenarioStep scenarioStep, RestStream stream) {
 			if (scenarioStep.isEmpty()) {
 				scenarioStep.addRequest(scenarioStep.getUrlStr());
 			}
+
+			String reqUrl;
 			String respStr;
 			for (WsRequest<String> request : scenarioStep.getRequests()) {
+				reqUrl = null;
 				respStr = null;
 				try {
-					String processedRequestURI = stream.preProcessURL(scenarioStep.getUrlStr());
-					respStr = executeGET(stream.client, processedRequestURI, scenarioStep.getUsername(),
-							scenarioStep.getPassword());
+					reqUrl = stream.preProcessURL(scenarioStep.getUrlStr());
+					respStr = executeGET(stream.client, reqUrl, scenarioStep.getUsername(), scenarioStep.getPassword());
 				} catch (Throwable exc) {
 					Utils.logThrowable(LOGGER, OpLevel.ERROR,
 							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -361,7 +384,7 @@ public class RestStream extends AbstractWsStream<String> {
 				}
 			}
 		}
-		
+
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
@@ -372,6 +395,7 @@ public class RestStream extends AbstractWsStream<String> {
 			if (StringUtils.isEmpty(reqMethod)) {
 				reqMethod = ReqMethod.GET.name();
 			}
+
 			if (ReqMethod.POST.name().equalsIgnoreCase(reqMethod)) {
 				runPOST(scenarioStep, stream);
 			} else if (ReqMethod.GET.name().equalsIgnoreCase(reqMethod)) {

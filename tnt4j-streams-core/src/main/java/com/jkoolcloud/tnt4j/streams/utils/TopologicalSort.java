@@ -163,10 +163,8 @@ public class TopologicalSort {
 	 * Defines graph node cyclic dependencies exception.
 	 */
 	public static class CyclicDependencyException extends IllegalArgumentException {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = -8671235479620051505L;
+
 		private Object cycleNode;
 
 		/**
