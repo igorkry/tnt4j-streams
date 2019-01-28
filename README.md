@@ -5159,10 +5159,18 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
 
 ##### JDBCStream parameters
 
+ * `DropRecurrentResultSets` - flag indicating whether to drop streaming stream input buffer contained recurring result sets, when stream 
+ input scheduler invokes JDBC queries faster than they can be processed (parsed and sent to sink, e.g. because of sink/JKool limiter 
+ throttling). Default value - `false`. (Optional)
  * List of `JDBC` driver supported properties used to invoke ['DriverManager.getConnection(String, Properties)'](https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html#getConnection-java.lang.String-java.util.Properties-). 
  (Optional)
  * when `UseExecutors` is set to `true` and `ExecutorThreadsQuantity` is greater than `1`, value for that property is reset to `1` since 
  `java.sql.ResultSet` can't be accessed in multi-thread manner.
+
+    sample:
+ ```xml
+     <property name="DropRecurrentResultSets" value="true"/>
+ ```
 
 Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffered streams parameters'](#buffered-streams-parameters).
 

@@ -20,6 +20,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
@@ -28,6 +29,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -49,6 +51,9 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractWsStream}):
  * <ul>
+ * <li>DropRecurrentResultSets - flag indicating whether to drop streaming input buffer contained recurring result sets,
+ * when stream input scheduler invokes JDBC queries faster than they can be processed (parsed and sent to sink, e.g.
+ * because of sink/JKool limiter throttling). Default value - {@code false}. (Optional)</li>
  * <li>set of JDBC driver supported properties used to invoke
  * {@link DriverManager#getConnection(String, java.util.Properties)}. (Optional)</li>
  * <li>when {@value com.jkoolcloud.tnt4j.streams.configure.StreamProperties#PROP_USE_EXECUTOR_SERVICE} is set to
@@ -66,8 +71,11 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  */
 public class JDBCStream extends AbstractWsStream<ResultSet> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JDBCStream.class);
+	private static final String QUERY_NAME_PROP = "QueryName"; // NON-NLS
 
 	protected Map<String, String> jdbcProperties = new HashMap<>();
+
+	private boolean dropRecurrentResultSets = false;
 
 	/**
 	 * Constructs an empty JDBCStream. Requires configuration settings to set input stream source.
@@ -85,17 +93,25 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	public void setProperty(String name, String value) {
 		super.setProperty(name, value);
 
-		jdbcProperties.put(name, value);
+		if (WsStreamProperties.PROP_DROP_RECURRENT_RESULT_SETS.equalsIgnoreCase(name)) {
+			dropRecurrentResultSets = Utils.toBoolean(value);
+		} else {
+			jdbcProperties.put(name, value);
+		}
 	}
 
 	@Override
 	public Object getProperty(String name) {
-		String pValue = jdbcProperties.get(name);
+		if (WsStreamProperties.PROP_DROP_RECURRENT_RESULT_SETS.equalsIgnoreCase(name)) {
+			return dropRecurrentResultSets;
+		}
+
+		Object pValue = super.getProperty(name);
 		if (pValue != null) {
 			return pValue;
 		}
 
-		return super.getProperty(name);
+		return jdbcProperties.get(name);
 	}
 
 	@Override
@@ -129,9 +145,15 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			return true;
 		}
 
+		boolean drop = dropRecurrentResultSets && isRecurrentResultSet(item, inputBuffer);
+		if (drop) {
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+					"JDBCStream.rs.consumption.drop", item.getParameters().get(QUERY_NAME_PROP).getValue());
+		}
+
 		ResultSet rs = item.getData();
 		try {
-			if (rs.isClosed() || !rs.next()) {
+			if (rs.isClosed() || !rs.next() || drop) {
 				Statement st = rs.getStatement();
 				Connection conn = st == null ? null : st.getConnection();
 
@@ -139,12 +161,12 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 				Utils.close(st);
 				Utils.close(conn);
 
-				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 						"JDBCStream.rs.consumption.done");
 				return true;
 			}
 
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+			logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"JDBCStream.rs.consumption.marker.new", rs.getRow());
 			return false;
 		} catch (SQLException exc) {
@@ -153,6 +175,22 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 					"JDBCStream.rs.consumption.exception", exc);
 			return true;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected boolean isRecurrentResultSet(WsResponse<ResultSet> resp, Queue<?> buffer) {
+		for (Object item : buffer) {
+			if (item instanceof WsResponse) {
+				WsResponse<ResultSet> respItem = (WsResponse<ResultSet>) item;
+
+				if (respItem.getParameters().get(QUERY_NAME_PROP).getValue()
+						.equals(resp.getParameters().get(QUERY_NAME_PROP).getValue())) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -182,13 +220,13 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	protected static ResultSet executeJdbcCall(String url, String user, String pass, String query,
 			Map<String, WsRequest.Parameter> params, JDBCStream stream) throws SQLException {
 		if (StringUtils.isEmpty(url)) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"JDBCStream.db.conn.not.defined", url);
 			return null;
 		}
 
 		if (StringUtils.isEmpty(query)) {
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 					"JDBCStream.query.not.defined", query);
 			return null;
 		}
@@ -212,10 +250,10 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			}
 			dbConn = DriverManager.getConnection(url, connProps);
 		}
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.db.connection.obtained", url, cod.durationHMS());
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.preparing.query", query);
 
 		PreparedStatement statement = dbConn.prepareStatement(query);
@@ -226,7 +264,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 		Duration qed = Duration.arm();
 		ResultSet rs = statement.executeQuery();
 
-		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+		LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.query.execution.completed", url, qed.durationHMS(), cod.durationHMS());
 
 		return rs;
@@ -266,8 +304,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							int iValue = Integer.parseInt(value);
 							statement.setInt(pIdx, iValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -277,8 +314,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							long lValue = Long.parseLong(value);
 							statement.setLong(pIdx, lValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -288,8 +324,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							float fValue = Float.parseFloat(value);
 							statement.setFloat(pIdx, fValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -301,8 +336,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							double dValue = Double.parseDouble(value);
 							statement.setDouble(pIdx, dValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, "DOUBLE"); // NON-NLS
 						}
 						break;
@@ -312,8 +346,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							Date dtValue = Date.valueOf(value);
 							statement.setDate(pIdx, dtValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -323,8 +356,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							Time tValue = Time.valueOf(value);
 							statement.setTime(pIdx, tValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -334,8 +366,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							Timestamp tsValue = Timestamp.valueOf(value);
 							statement.setTimestamp(pIdx, tsValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -345,8 +376,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							boolean bValue = Boolean.parseBoolean(value);
 							statement.setBoolean(pIdx, bValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -356,8 +386,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						} else {
 							byte[] baValue = Utils.decodeHex(value);
 							statement.setBytes(pIdx, baValue);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, type.toUpperCase());
 						}
 						break;
@@ -367,8 +396,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 							setNullParameter(statement, pIdx, Types.VARCHAR, "VARCHAR"); // NON-NLS
 						} else {
 							statement.setString(pIdx, value);
-							LOGGER.log(OpLevel.DEBUG,
-									StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 									"JDBCStream.set.query.parameter", pIdx, value, "VARCHAR"); // NON-NLS
 						}
 						break;
@@ -429,6 +457,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			if (!scenarioStep.isEmpty()) {
 				String dbQuery;
 				ResultSet respRs;
+				int stepIdx = 0;
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
 					dbQuery = null;
 					respRs = null;
@@ -443,7 +472,10 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 								"JDBCStream.execute.exception", exc);
 					} finally {
 						if (respRs != null) {
-							stream.addInputToBuffer(new WsResponse<>(respRs, request.getTags()));
+							WsResponse<ResultSet> resp = new WsResponse<>(respRs, request.getTags());
+							resp.addParameter(new WsRequest.Parameter(QUERY_NAME_PROP,
+									(stepIdx++) + ":" + scenarioStep.getName())); // NON-NLS
+							stream.addInputToBuffer(resp);
 						}
 					}
 				}
