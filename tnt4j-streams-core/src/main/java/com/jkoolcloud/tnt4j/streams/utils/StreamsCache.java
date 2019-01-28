@@ -19,6 +19,8 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,6 +60,8 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  * Default value - {@code false}. (Optional)</li>
  * <li>FileName - defines file name to persist cache entries as XML. Default value - {@code "./persistedCache.xml"}.
  * (Optional)</li>
+ * <li>PersistingPeriod - cache persisting period in seconds. Value {@code <= 0} disables periodic persisting. Default
+ * value - {@code 0}. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 3 $
@@ -79,6 +83,9 @@ public final class StreamsCache {
 	private static long expireDuration = DEFAULT_CACHE_EXPIRE_IN_MINUTES;
 	private static boolean persistenceOn = false;
 	private static String fileName = DEFAULT_FILE_NAME;
+
+	private static ScheduledExecutorService periodicPersistingScheduler = null;
+	private static long persistingPeriodInSeconds;
 
 	private static Cache<String, CacheValue> buildCache(long cSize, long duration) {
 		return CacheBuilder.newBuilder().maximumSize(cSize).expireAfterAccess(duration, TimeUnit.MINUTES).build();
@@ -105,6 +112,8 @@ public final class StreamsCache {
 					persistenceOn = Utils.toBoolean(value);
 				} else if (CacheProperties.PROP_PERSISTED_FILE_NAME.equalsIgnoreCase(name)) {
 					fileName = value;
+				} else if (CacheProperties.PROP_PERSISTING_PERIOD.equalsIgnoreCase(name)) {
+					persistingPeriodInSeconds = Integer.parseInt(value);
 				}
 			}
 		}
@@ -120,6 +129,16 @@ public final class StreamsCache {
 
 		if (persistenceOn) {
 			loadPersisted();
+		}
+
+		if (persistingPeriodInSeconds > 0) {
+			periodicPersistingScheduler = Executors.newScheduledThreadPool(1);
+			periodicPersistingScheduler.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					persist(valuesCache.asMap());
+				}
+			}, persistingPeriodInSeconds, persistingPeriodInSeconds, TimeUnit.SECONDS);
 		}
 	}
 
@@ -382,6 +401,10 @@ public final class StreamsCache {
 			CacheRoot root = new CacheRoot();
 			root.setEntriesMap(cacheEntries);
 			File persistedFile = new File(fileName);
+			File parentPath = persistedFile.getParentFile();
+			if (parentPath != null) {
+				parentPath.mkdirs();
+			}
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"StreamsCache.persisting.file", persistedFile.getAbsolutePath());
 			marshaller.marshal(root, persistedFile);
@@ -402,11 +425,25 @@ public final class StreamsCache {
 	 *            cache entry value
 	 */
 	public static void addValue(String key, Object value) {
+		addValue(key, value, true);
+	}
+
+	/**
+	 * Adds cache entry for defined key and value.
+	 * 
+	 * @param key
+	 *            cache entry key
+	 * @param value
+	 *            cache entry value
+	 * @param transientValue
+	 *            flag indicating if value is transient
+	 */
+	public static void addValue(String key, Object value, boolean transientValue) {
 		if (!isInitialized()) {
 			initialize();
 		}
 
-		valuesCache.put(key, new CacheValue(value, true));
+		valuesCache.put(key, new CacheValue(value, transientValue));
 	}
 
 	/**
@@ -629,7 +666,7 @@ public final class StreamsCache {
 		}
 
 		public void setEntriesMap(Map<String, CacheValue> map) {
-			this.entriesMap = map;
+			entriesMap = map;
 		}
 	}
 

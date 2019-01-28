@@ -4376,6 +4376,7 @@ meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityCount`.
 * `Persisted` - flag indicating cache contents has to be persisted to file on close and loaded on initialization. Default value - `false`. 
 (Optional)
 * `FileName` - defines file name to persist cache entries as XML. Default value - `./persistedCache.xml`. (Optional)
+* `PersistingPeriod` - cache persisting period in seconds. Value `<= 0` disables periodic persisting. Default value - `0`. (Optional)
 
     sample:
 ```xml
@@ -4383,6 +4384,7 @@ meaning `NEVER`. (Optional, can be OR'ed with `PingLogActivityCount`.
     <property name="ExpireDuration" value="30"/>
     <property name="Persisted" value="true"/>
     <property name="FileName" value="./storage/MyStreamCache.xml"/>
+    <property name="PersistingPeriod" value="300"/>
 ```
 
 ##### Parseable streams parameters
