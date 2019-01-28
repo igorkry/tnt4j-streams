@@ -18,9 +18,7 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.sql.*;
 import java.text.ParseException;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -31,6 +29,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -150,18 +149,21 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 		}
 
 		if (StringUtils.isNotEmpty(locStr) && resultSet != null) {
+			ActivityFieldDataType dataType = locator.getDataType();
+			String tz = locator.getTimeZone();
+
 			try {
 				ActivityFieldLocatorType locType = locator.getBuiltInType();
 
 				if (locType != null && locType.getDataType() == Integer.class) {
-					val = getByIndex(locStr, resultSet, connTypes);
+					val = getByIndex(locStr, resultSet, connTypes, dataType, tz);
 				} else if (locType != null && locType.getDataType() == String.class) {
-					val = getByName(locStr, resultSet, connTypes);
+					val = getByName(locStr, resultSet, connTypes, dataType, tz);
 				} else {
 					try {
-						val = getByIndex(locStr, resultSet, connTypes);
+						val = getByIndex(locStr, resultSet, connTypes, dataType, tz);
 					} catch (NumberFormatException exc) {
-						val = getByName(locStr, resultSet, connTypes);
+						val = getByName(locStr, resultSet, connTypes, dataType, tz);
 					}
 				}
 			} catch (Exception exc) {
@@ -178,8 +180,8 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 		return val;
 	}
 
-	private Object getByIndex(String locStr, ResultSet resultSet, Map<String, Class<?>> driverTypes)
-			throws SQLException {
+	private Object getByIndex(String locStr, ResultSet resultSet, Map<String, Class<?>> driverTypes,
+			ActivityFieldDataType dataType, String tz) throws SQLException {
 		int index = Integer.parseInt(locStr);
 		Object objVal = null;
 		boolean valueResolved = false;
@@ -192,6 +194,16 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 						StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityJDBCResultSetParser.value.resolution.using.types.map.failed", index, exc);
 			}
+		} else {
+			if (dataType == ActivityFieldDataType.Timestamp || dataType == ActivityFieldDataType.DateTime) {
+				if (StringUtils.isEmpty(tz)) {
+					objVal = resultSet.getTimestamp(index);
+					valueResolved = true;
+				} else {
+					objVal = resultSet.getTimestamp(index, Calendar.getInstance(TimeZone.getTimeZone(tz)));
+					valueResolved = true;
+				}
+			}
 		}
 
 		if (objVal == null && !valueResolved) {
@@ -201,8 +213,8 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 		return getRealValueFromSql(objVal);
 	}
 
-	private Object getByName(String locStr, ResultSet resultSet, Map<String, Class<?>> driverTypes)
-			throws SQLException {
+	private Object getByName(String locStr, ResultSet resultSet, Map<String, Class<?>> driverTypes,
+			ActivityFieldDataType dataType, String tz) throws SQLException {
 		Object objVal = null;
 		boolean valueResolved = false;
 		if (MapUtils.isNotEmpty(typesMap)) {
@@ -213,6 +225,16 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 				Utils.logThrowable(logger(), OpLevel.WARNING,
 						StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 						"ActivityJDBCResultSetParser.value.resolution.using.types.map.failed", locStr, exc);
+			}
+		} else {
+			if (dataType == ActivityFieldDataType.Timestamp || dataType == ActivityFieldDataType.DateTime) {
+				if (StringUtils.isEmpty(tz)) {
+					objVal = resultSet.getTimestamp(locStr);
+					valueResolved = true;
+				} else {
+					objVal = resultSet.getTimestamp(locStr, Calendar.getInstance(TimeZone.getTimeZone(tz)));
+					valueResolved = true;
+				}
 			}
 		}
 
