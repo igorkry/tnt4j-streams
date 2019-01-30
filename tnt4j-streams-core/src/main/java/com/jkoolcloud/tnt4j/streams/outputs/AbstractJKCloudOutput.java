@@ -32,6 +32,8 @@ import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.sink.SinkError;
+import com.jkoolcloud.tnt4j.sink.SinkErrorListener;
 import com.jkoolcloud.tnt4j.sink.impl.BufferedEventSink;
 import com.jkoolcloud.tnt4j.source.Source;
 import com.jkoolcloud.tnt4j.source.SourceType;
@@ -71,7 +73,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  *
  * @version $Revision: 1 $
  */
-public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutput<T> {
+public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutput<T> implements SinkErrorListener {
 
 	/**
 	 * Delay between retries to submit data package to jKoolCloud if some transmission failure occurs, in milliseconds.
@@ -176,7 +178,7 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 	}
 
 	private static void checkTrackerState(Tracker tracker) throws IllegalStateException {
-		boolean tOpen = tracker != null && tracker.isOpen();
+		boolean tOpen = Utils.isOpen(tracker);
 		if (!tOpen) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTStreamOutput.tracker.not.opened", getTrackerId(tracker)));
@@ -295,6 +297,7 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 			Tracker tracker = trackersMap.get(getTrackersMapKey(t));
 			if (tracker == null) {
 				tracker = TrackingLogger.getInstance(trackerConfig.build());
+				tracker.getEventSink().addSinkErrorListener(this);
 				checkTracker(tracker);
 				trackersMap.put(getTrackersMapKey(t), tracker);
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -319,6 +322,7 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 					dumpTrackerStats(tracker);
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"TNTStreamOutput.tracker.close", getName(), getTrackerId(tracker), tracker);
+					tracker.getEventSink().removeSinkErrorListener(this);
 					Utils.close(tracker);
 
 					if (tracker instanceof TrackingLogger) {
@@ -332,14 +336,11 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 		super.cleanup();
 	}
 
-	// protected void closeTracker(String aiSourceFQN, Tracker tracker) {
-	// String trackerId = getTrackersMapKey(Thread.currentThread(), aiSourceFQN);
-	// synchronized (trackersMap) {
-	// trackersMap.remove(trackerId);
-	// }
-	// dumpTrackerStats(tracker, trackerId);
-	// Utils.close(tracker);
-	// }
+	@Override
+	public void sinkError(SinkError ev) {
+
+
+	}
 
 	protected void dumpTrackerStats(Tracker tracker) {
 		if (tracker == null) {
@@ -511,7 +512,7 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 							"TNTStreamOutput.will.retry", TimeUnit.MILLISECONDS.toSeconds(retryPeriod));
 					StreamsThread.sleep(retryPeriod);
 				}
-				resetTracker(tracker);
+				// resetTracker(tracker);
 			}
 		} while (thread != null && !thread.isStopRunning());
 	}
@@ -545,33 +546,18 @@ public abstract class AbstractJKCloudOutput<T, O> extends AbstractTNTStreamOutpu
 	protected void sendActivity(Tracker tracker, O activityData) throws IOException {
 		EventSink eSink = tracker.getEventSink();
 		boolean handleErrorInternally = !(eSink instanceof BufferedEventSink);
-		long dropCountBefore = handleErrorInternally
-				? (long) tracker.getStats().get(Utils.qualify(getTrackerImpl(tracker), Tracker.KEY_DROP_COUNT)) : -1;
 
-		ensureTrackerOpened(tracker);
+		// ensureTrackerOpened(tracker);
 
 		logJKCActivity(tracker, activityData);
 
-		// TODO: review TNT4J API to get occurred exception, complete statistics fetching is not best way...
 		if (handleErrorInternally) {
 			if (eSink.errorState()) {
 				if (eSink.getLastError() instanceof IOException) {
 					throw (IOException) eSink.getLastError();
 				}
 			}
-
-			long dropCountAfter = (long) tracker.getStats()
-					.get(Utils.qualify(getTrackerImpl(tracker), Tracker.KEY_DROP_COUNT));
-
-			if (dropCountBefore >= 0 && dropCountAfter > dropCountBefore) {
-				throw new IOException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"TNTStreamOutput.tracker.drop.detected", getTrackerId(tracker)));
-			}
 		}
-	}
-
-	private static Tracker getTrackerImpl(Tracker tracker) {
-		return tracker instanceof TrackingLogger ? ((TrackingLogger) tracker).getTracker() : tracker;
 	}
 
 	/**
