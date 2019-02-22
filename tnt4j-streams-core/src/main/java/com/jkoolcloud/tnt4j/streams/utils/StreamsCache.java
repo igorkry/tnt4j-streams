@@ -136,7 +136,9 @@ public final class StreamsCache {
 			periodicPersistingScheduler.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					persist(valuesCache.asMap());
+					if (valuesCache != null) {
+						persist(valuesCache.asMap());
+					}
 				}
 			}, persistingPeriodInSeconds, persistingPeriodInSeconds, TimeUnit.SECONDS);
 		}
@@ -267,6 +269,17 @@ public final class StreamsCache {
 	 * @see #unreferStream()
 	 */
 	public static void cleanup() {
+		if (periodicPersistingScheduler != null) {
+			periodicPersistingScheduler.shutdown();
+
+			try {
+				periodicPersistingScheduler.awaitTermination(20, TimeUnit.SECONDS);
+			} catch (InterruptedException exc) {
+			} finally {
+				periodicPersistingScheduler.shutdownNow();
+			}
+		}
+
 		if (valuesCache != null) {
 			if (persistenceOn) {
 				persist(valuesCache.asMap());
