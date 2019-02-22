@@ -74,10 +74,11 @@ public class NumericFormatterTest {
 	}
 
 	@Test
-	public void testPattern() {
+	public void testPattern() throws Exception {
 		NumericFormatter formatter = new NumericFormatter();
 		formatter.setPattern("#", null); // NON-NLS
 		assertEquals("#", formatter.getPattern());
+		formatter.parse("2");
 	}
 
 	@Test
