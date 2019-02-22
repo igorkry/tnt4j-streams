@@ -282,7 +282,15 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *            the data type for raw data field
 	 */
 	public void setDataType(ActivityFieldDataType dataType) {
-		this.dataType = dataType == null ? ActivityFieldDataType.String : dataType;
+		if (dataType == null) {
+			if (builtInType == ActivityFieldLocatorType.Activity || builtInType == ActivityFieldLocatorType.Cache) {
+				this.dataType = ActivityFieldDataType.AsInput;
+			} else {
+				this.dataType = ActivityFieldDataType.String;
+	}
+		} else {
+			this.dataType = dataType;
+		}
 	}
 
 	/**
