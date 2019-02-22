@@ -536,8 +536,9 @@ public class ActivityInfo {
 							: v >= 0 && v < field.getLocators().size() ? field.getLocators().get(v) : null; // TODO
 
 					String format = locator == null ? null : locator.getFormat();
+					String tz = locator == null ? null : locator.getTimeZone();
 					if (StringUtils.isNotEmpty(format)) {
-						sb.append(((UsecTimestamp) vArray[v]).toString(format));
+						sb.append(((UsecTimestamp) vArray[v]).toString(format, tz));
 					}
 				} else {
 					sb.append(vArray[v] == null ? "" : Utils.toString(vArray[v])); // NON-NLS
@@ -914,8 +915,7 @@ public class ActivityInfo {
 		event.getOperation().setUser(StringUtils.isEmpty(userName) ? tracker.getSource().getUser() : userName);
 		event.getOperation().setTID(threadId == null ? Thread.currentThread().getId() : threadId);
 		event.getOperation().setPID(processId == null ? Utils.getVMPID() : processId);
-		// event.getOperation().setSeverity(severity == null ? OpLevel.INFO :
-		// severity);
+		// event.getOperation().setSeverity(severity == null ? OpLevel.INFO : severity);
 		if (eventStatus != null) {
 			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
 		}
@@ -1252,8 +1252,7 @@ public class ActivityInfo {
 					if (StringUtils.isEmpty(serverName)) {
 						serverName = Utils.resolveAddressToHostName(serverIp);
 						if (StringUtils.isEmpty(serverName)) {
-							// Add entry so we don't repeatedly attempt to look
-							// up unresolvable IP Address
+							// Add entry so we don't repeatedly attempt to look up unresolvable IP Address
 							HOST_CACHE.put(serverIp, "");
 						} else {
 							HOST_CACHE.put(serverIp, serverName);
@@ -1272,8 +1271,7 @@ public class ActivityInfo {
 				if (StringUtils.isEmpty(serverIp)) {
 					serverIp = Utils.resolveHostNameToAddress(serverName);
 					if (StringUtils.isEmpty(serverIp)) {
-						// Add entry so we don't repeatedly attempt to look up
-						// unresolvable host name
+						// Add entry so we don't repeatedly attempt to look up unresolvable host name
 						HOST_CACHE.put(serverName, "");
 					} else {
 						HOST_CACHE.put(serverIp, serverName);

@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,12 +31,7 @@ import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
-import com.jkoolcloud.tnt4j.streams.utils.DoubleRange;
-import com.jkoolcloud.tnt4j.streams.utils.IntRange;
-import com.jkoolcloud.tnt4j.streams.utils.NumericFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Represents the locator rules for a specific activity data item field, defining how to locate a particular raw
@@ -621,10 +617,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	/**
-	 * Formats field value as {@link String} based on the definition of the field locator format and charset.
+	 * Formats field value as {@link String} based on the definition of the field locator attributes: {@code format},
+	 * {@code charset}, {@code locale}, {@code timezone}.
 	 * <p>
-	 * Formatting is performed if raw field value is of type {@code byte[]}.
-	 * <p>
+	 * If raw field value is of type {@code byte[]}, formatting is done using {@code format} attribute.
 	 * {@link ActivityFieldFormatType} formats processed as:
 	 * <ul>
 	 * <li>{@link ActivityFieldFormatType#base64Binary} - {@link Utils#base64EncodeStr(byte[])}</li>
@@ -632,6 +628,17 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 * <li>{@link ActivityFieldFormatType#string} - {@link Utils#getString(byte[], String)}</li>
 	 * <li>{@link ActivityFieldFormatType#bytes} - {@link Utils#toHexString(byte[])}</li>
 	 * </ul>
+	 * <p>
+	 * If raw field value is of type {@link com.jkoolcloud.tnt4j.core.UsecTimestamp}, formatting is done using
+	 * {@code format} and {@code timezone} attributes.
+	 * <p>
+	 * If raw field value is of type {@link Date}, formatting is done using {@code format}, {@code locale} and
+	 * {@code timezone} attributes.
+	 * <p>
+	 * If raw field value is of type {@link Number}, formatting is done using {@code format} and {@code locale}
+	 * attributes.
+	 * <p>
+	 * In all other cases raw field value conversion to string is performed using {@link Utils#toString(Object)} method.
 	 *
 	 * @param value
 	 *            raw field value
@@ -639,6 +646,10 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	 *         format is defined or value is not {@code byte[]}.
 	 *
 	 * @see ActivityFieldFormatType
+	 * @see com.jkoolcloud.tnt4j.core.UsecTimestamp#toString(String, String)
+	 * @see com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter#format(String, Object, String, String)
+	 * @see com.jkoolcloud.tnt4j.streams.utils.NumericFormatter#toString(String, Object, String)
+	 * @see Utils#toString(Object)
 	 */
 	protected Object formatStringValue(Object value) {
 		if (value instanceof byte[]) {
@@ -651,9 +662,15 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			} else { // if (builtInFormat == ActivityFieldFormatType.string) {
 				return Utils.getString((byte[]) value, charset);
 			}
+		} else if (value instanceof UsecTimestamp) {
+			return ((UsecTimestamp) value).toString(format, timeZone);
+		} else if (value instanceof Date) {
+			return TimestampFormatter.format(format, value, locale, timeZone);
+		} else if (value instanceof Number) {
+			return NumericFormatter.toString(format, value, locale);
+		} else {
+			return Utils.toString(value);
 		}
-
-		return value;
 	}
 
 	/**

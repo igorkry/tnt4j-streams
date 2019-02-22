@@ -279,7 +279,7 @@ public class NumericFormatter {
 			}
 
 			Exception nfe;
-			if (formatter != null && formatter.format != null) {
+			if (formatter != null && formatter.isFormatDefined()) {
 				try {
 					numValue = formatter.format.parse(strValue);
 					nfe = null;
@@ -312,7 +312,7 @@ public class NumericFormatter {
 			}
 		}
 
-		if (formatter != null) {
+		if (formatter != null && !formatter.isFormatDefined()) {
 			numValue = castNumber(numValue, formatter.pattern);
 		}
 
@@ -484,6 +484,27 @@ public class NumericFormatter {
 	}
 
 	/**
+	 * Formats the given object representing a number as a string using the specified pattern.
+	 *
+	 * @param pattern
+	 *            format pattern
+	 * @param value
+	 *            number to format
+	 * @param locale
+	 *            locale for number format to use
+	 * @return number formatted as a string
+	 */
+	public static String toString(String pattern, Object value, String locale) {
+		FormatterContext formatter = new FormatterContext(pattern, locale);
+		if (formatter.isFormatDefined()) {
+			return formatter.format.format(value);
+		} else {
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_NAME, "NumericFormatter.invalid.pattern", pattern));
+		}
+	}
+
+	/**
 	 * Number formatting context values.
 	 */
 	public static class FormatterContext {
@@ -551,6 +572,15 @@ public class NumericFormatter {
 				format = StringUtils.isEmpty(pattern) ? null : loc == null ? new DecimalFormat(pattern)
 						: new DecimalFormat(pattern, DecimalFormatSymbols.getInstance(loc));
 			}
+		}
+
+		/**
+		 * Checks if number format is defined for this formatter.
+		 *
+		 * @return {@code true} if number format is defined, {@code false} - otherwise
+		 */
+		private boolean isFormatDefined() {
+			return format != null;
 		}
 
 		/**

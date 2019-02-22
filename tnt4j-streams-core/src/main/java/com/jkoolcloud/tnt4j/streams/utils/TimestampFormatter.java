@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +73,7 @@ public class TimestampFormatter {
 	 */
 	public TimestampFormatter(String pattern, String timeZone, String locale) {
 		setPattern(pattern, locale);
-		this.timeZone = timeZone;
+		setTimeZone(timeZone);
 	}
 
 	/**
@@ -140,11 +141,15 @@ public class TimestampFormatter {
 	 */
 	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
+
+		if (formatter != null && StringUtils.isNotEmpty(timeZone)) {
+			formatter.setTimeZone(TimeZone.getTimeZone(timeZone));
+		}
 	}
 
 	/**
 	 * Parses the value into a timestamp with microsecond accuracy based on the timestamp pattern supported by this
-	 * formatter. First it tries to use simple conversion of <tt>value<tt/> to a {@link UsecTimestamp} and just if it
+	 * formatter. First it tries to use simple conversion of {@code value} to a {@link UsecTimestamp} and just if it
 	 * does not succeed, parse it.
 	 *
 	 * @param value
@@ -166,14 +171,14 @@ public class TimestampFormatter {
 	}
 
 	/**
-	 * Converts provided <tt>value</tt> to a {@link UsecTimestamp} without parsing.
+	 * Converts provided {@code value} to a {@link UsecTimestamp} without parsing.
 	 * <p>
-	 * If <tt>value</tt> is {@link UsecTimestamp}, {@link Date} or {@link Calendar}, then casted or new instance of
+	 * If {@code value} is {@link UsecTimestamp}, {@link Date} or {@link Calendar}, then casted or new instance of
 	 * {@link UsecTimestamp} is returned. Otherwise {@code null} is returned.
 	 *
 	 * @param value
 	 *            object value to convert
-	 * @return {@link UsecTimestamp} built from provided <tt>value</tt>, or {@code null} if {@link UsecTimestamp} can't
+	 * @return {@link UsecTimestamp} built from provided {@code value}, or {@code null} if {@link UsecTimestamp} can't
 	 *         be built
 	 */
 	public static UsecTimestamp getTimestamp(Object value) {
@@ -405,6 +410,24 @@ public class TimestampFormatter {
 	 */
 	public static String format(String pattern, Object value, String locale) {
 		TimestampFormatter formatter = new TimestampFormatter(pattern, null, locale);
+		return formatter.format(value);
+	}
+
+	/**
+	 * Formats the given object representing a date/time as a string using the specified pattern.
+	 *
+	 * @param pattern
+	 *            format pattern
+	 * @param value
+	 *            date/time to format
+	 * @param locale
+	 *            locale for date format to use
+	 * @param timeZone
+	 *            timezone for date format to use
+	 * @return date /time formatted as a string
+	 */
+	public static String format(String pattern, Object value, String locale, String timeZone) {
+		TimestampFormatter formatter = new TimestampFormatter(pattern, timeZone, locale);
 		return formatter.format(value);
 	}
 
