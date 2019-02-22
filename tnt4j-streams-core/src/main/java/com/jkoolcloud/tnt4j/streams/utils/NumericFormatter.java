@@ -499,8 +499,7 @@ public class NumericFormatter {
 		if (formatter.isFormatDefined()) {
 			return formatter.format.format(value);
 		} else {
-			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
-					StreamsResources.RESOURCE_BUNDLE_NAME, "NumericFormatter.invalid.pattern", pattern));
+			return String.valueOf(value);
 		}
 	}
 
