@@ -1349,6 +1349,10 @@ public class ConfigParserHandler extends DefaultHandler {
 			}
 		}
 
+		if (StringUtils.isEmpty(currTransform.name)) {
+			currTransform.name = currField.field.getFieldTypeName() + "Transform";// NON-NLS
+		}
+
 		if (StringUtils.isNoneEmpty(currTransform.beanRef, currTransform.scriptLang)) {
 			throw new SAXParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
