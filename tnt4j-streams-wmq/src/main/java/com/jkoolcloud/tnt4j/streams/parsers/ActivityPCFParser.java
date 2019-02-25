@@ -104,7 +104,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	 * Constructs a new ActivityPCFParser.
 	 */
 	public ActivityPCFParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import org.apache.commons.collections4.MapUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
@@ -113,6 +114,13 @@ public abstract class AbstractActivityMapParser extends GenericActivityParser<Ma
 	public static final String RAW_ACTIVITY_STRING_KEY = "RAW_ACTIVITY_STRING_ENTRY"; // NON-NLS
 
 	private static final String ACCESSED_PATHS_KEY = "ACCESSED_MAP_PATHS"; // NON-NLS
+
+	/**
+	 * Constructs a new AbstractActivityMapParser.
+	 */
+	protected AbstractActivityMapParser() {
+		super(ActivityFieldDataType.AsInput);
+	}
 
 	/**
 	 * Returns whether this parser supports the given format of the activity data. This is used by activity streams to

@@ -658,7 +658,9 @@ public class ConfigParserHandler extends DefaultHandler {
 		if (currParser != null) {
 			currParser.setName(name);
 			currParser.setProperty(ParserProperties.PROP_AUTO_ARRANGE_FIELDS, String.valueOf(autoArrange));
-			currParser.setDefaultDataType(defaultDataType);
+			if (defaultDataType != null) {
+				currParser.setDefaultDataType(defaultDataType);
+			}
 			currParser.setDefaultEmptyAsNull(defaultEmptyAsNull);
 			streamsConfigData.addParser(currParser);
 		}
@@ -972,6 +974,8 @@ public class ConfigParserHandler extends DefaultHandler {
 				if (StringUtils.isNotEmpty(id)) {
 					afl.setId(id);
 				}
+				afl.setDataType(currParser.getDefaultDataType() == null ? ActivityFieldDataType.AsInput
+						: currParser.getDefaultDataType());
 				currField.addLocator(afl);
 			}
 		}

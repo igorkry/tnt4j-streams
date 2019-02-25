@@ -35,6 +35,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -66,7 +67,7 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 	 * Constructs a new ActivityJsonParser.
 	 */
 	public ActivityJsonParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	@Override

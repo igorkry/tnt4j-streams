@@ -31,6 +31,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
@@ -73,7 +74,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	 * Constructs a new ActivityJavaObjectParser.
 	 */
 	public ActivityJavaObjectParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	@Override

@@ -112,6 +112,23 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	private boolean autoArrangeFields = true;
 	private ActivityField parentIdField;
 
+	/**
+	 * Constructs a new GenericActivityParser.
+	 */
+	protected GenericActivityParser() {
+		super();
+	}
+
+	/**
+	 * Constructs a new GenericActivityParser.
+	 *
+	 * @param defaultDataType
+	 *            default data type to be used by parser bound fields/locators
+	 */
+	protected GenericActivityParser(ActivityFieldDataType defaultDataType) {
+		setDefaultDataType(defaultDataType);
+	}
+
 	@Override
 	public void setProperty(String name, String value) {
 		if (ParserProperties.PROP_USE_ACTIVITY_DATA_AS_MESSAGE_FOR_UNSET.equalsIgnoreCase(name)) {

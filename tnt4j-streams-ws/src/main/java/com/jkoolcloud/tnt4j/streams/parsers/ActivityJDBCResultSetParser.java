@@ -73,7 +73,7 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 	 * Constructs a new ActivityJDBCResultSetParser.
 	 */
 	public ActivityJDBCResultSetParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	@Override

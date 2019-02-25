@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.MsOfficeParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -52,6 +53,13 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 	protected final Lock formatLock = new ReentrantLock();
 	private FormulaEvaluator evaluator;
 	protected final Lock evaluationLock = new ReentrantLock();
+
+	/**
+	 * Constructs a new AbstractExcelParser.
+	 */
+	protected AbstractExcelParser() {
+		super(ActivityFieldDataType.AsInput);
+	}
 
 	@Override
 	public void setProperty(String name, String value) {

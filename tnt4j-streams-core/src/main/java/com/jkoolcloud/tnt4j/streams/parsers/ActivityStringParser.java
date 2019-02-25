@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
@@ -81,7 +82,7 @@ public class ActivityStringParser extends GenericActivityParser<String> {
 	 * Constructs a new ActivityStringParser.
 	 */
 	public ActivityStringParser() {
-		super();
+		super(ActivityFieldDataType.String);
 	}
 
 	@Override

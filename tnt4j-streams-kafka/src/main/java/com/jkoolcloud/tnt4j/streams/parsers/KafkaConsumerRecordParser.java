@@ -25,6 +25,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
@@ -65,7 +66,7 @@ public class KafkaConsumerRecordParser extends GenericActivityParser<ConsumerRec
 	 * Constructs a new KafkaConsumerRecordParser.
 	 */
 	public KafkaConsumerRecordParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	@Override

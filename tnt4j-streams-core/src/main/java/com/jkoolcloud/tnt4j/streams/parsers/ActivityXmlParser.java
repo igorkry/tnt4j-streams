@@ -109,7 +109,7 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 	 * Constructs a new activity XML string parser.
 	 */
 	public ActivityXmlParser() {
-		super();
+		super(ActivityFieldDataType.AsInput);
 	}
 
 	/**

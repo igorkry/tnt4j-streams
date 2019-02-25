@@ -26,6 +26,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
@@ -48,7 +49,7 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	 * Constructs an SampleParser.
 	 */
 	public SampleParser() {
-		super();
+		super(ActivityFieldDataType.String);
 	}
 
 	@Override
