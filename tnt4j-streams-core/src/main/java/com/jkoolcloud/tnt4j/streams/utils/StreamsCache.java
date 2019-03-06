@@ -230,7 +230,8 @@ public final class StreamsCache {
 	 *            cache entity pattern identifier string
 	 * @param parserName
 	 *            parser name
-	 * @return resolved cached value or {@code null} if there is no such entry or data in cache
+	 * @return resolved cached value, {@code default entry value} if there is no data in cache for entry, or
+	 *         {@code null} if there is no such entry defined
 	 */
 	public static Object getValue(ActivityInfo ai, String entryIdStr, String parserName) {
 		CacheEntry cacheEntry = cacheEntries.get(entryIdStr);
@@ -238,7 +239,7 @@ public final class StreamsCache {
 			String cacheKey = fillInKeyPattern(cacheEntry.getKey(), ai, parserName);
 			if (cacheKey != null) {
 				CacheValue value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);
-				return value == null ? null : value.value();
+				return value == null ? cacheEntry.getDefaultValue() : value.value();
 			} else {
 				return cacheEntry.getDefaultValue();
 			}
@@ -251,7 +252,8 @@ public final class StreamsCache {
 	 *
 	 * @param cacheKey
 	 *            cache entry key
-	 * @return resolved cached value or {@code null} if there is no such entry or data in cache
+	 * @return resolved cached value, {@code default entry value} if there is no data in cache for entry, or
+	 *         {@code null} if there is no such entry defined
 	 */
 	public static Object getValue(String cacheKey) {
 		CacheValue value = valuesCache == null ? null : valuesCache.getIfPresent(cacheKey);

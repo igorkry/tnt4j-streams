@@ -255,6 +255,29 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 		super.cleanup();
 	}
 
+	/**
+	 * Removes all inactive jobs from stream scheduler.
+	 */
+	protected void cleanupScheduler() {
+		if (scheduler != null) {
+			try {
+				Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(null);
+				if (CollectionUtils.isNotEmpty(triggerKeys)) {
+					for (TriggerKey tKey : triggerKeys) {
+						try {
+							Trigger t = scheduler.getTrigger(tKey);
+							if (!t.mayFireAgain()) {
+								scheduler.deleteJob(t.getJobKey());
+							}
+						} catch (SchedulerException exc) {
+						}
+					}
+				}
+			} catch (SchedulerException exc) {
+			}
+		}
+	}
+
 	@Override
 	protected boolean isInputEnded() {
 		try {
