@@ -223,6 +223,10 @@ public class WmqUtils {
 
 		if (elements != null) {
 			for (Object element : elements) {
+				if (element == null) {
+					continue;
+				}
+
 				if (element instanceof MessageType) {
 					_msgDigest.update(String.valueOf(((MessageType) element).value()).getBytes());
 				} else if (element instanceof byte[]) {
