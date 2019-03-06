@@ -416,7 +416,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, ?> fromJsonToMap(Object jsonData, boolean jsonAsLine) {
-		Map<String, ?> map = new LinkedTreeMap<String, Object>();
+		Map<String, ?> map = new LinkedTreeMap<>();
 		Gson gson = new Gson();
 
 		if (jsonAsLine) {
@@ -499,7 +499,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (tagsData instanceof byte[]) {
 			return new String[] { encodeHex((byte[]) tagsData) };
 		} else if (tagsData instanceof String) {
-			return ((String) tagsData).split(TAG_DELIM);
+			return toArray((String) tagsData);
 		} else if (tagsData instanceof String[]) {
 			return (String[]) tagsData;
 		} else if (isCollection(tagsData)) {
@@ -522,6 +522,33 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Makes strings array from string containing array value serialized as string, e.g. using
+	 * {@link Arrays#toString(Object[])}.
+	 *
+	 * @param arrayString
+	 *            array value serialized as string
+	 * @return the array of strings resolved from {@code arrayString} value, or {@code null} if {@code arrayString} is
+	 *         {@code null}
+	 */
+	public static String[] toArray(String arrayString) {
+		if (arrayString == null) {
+			return null;
+		}
+
+		arrayString = arrayString.trim();
+
+		if (arrayString.isEmpty()) {
+			return ArrayUtils.EMPTY_STRING_ARRAY;
+		}
+
+		// in case it is matrix array, flatten to single level array
+		arrayString = arrayString.replace("][", TAG_DELIM).replace("][", TAG_DELIM); // NON-NLS
+		arrayString = arrayString.replace("[", "").replace("]", ""); // NON-NLS
+
+		return arrayString.split(TAG_DELIM);
 	}
 
 	/**
