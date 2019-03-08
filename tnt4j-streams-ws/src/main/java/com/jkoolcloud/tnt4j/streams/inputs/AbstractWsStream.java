@@ -258,7 +258,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	/**
 	 * Removes all inactive jobs from stream scheduler.
 	 */
-	protected void cleanupScheduler() {
+	protected void purgeInactiveSchedulerJobs() {
 		if (scheduler != null) {
 			try {
 				Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(null);
