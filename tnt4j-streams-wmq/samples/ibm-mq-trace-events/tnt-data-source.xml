@@ -4,7 +4,7 @@
 	 
     1) Set the queue manager to process 
 	2) Verify queue to read or topic if required 
-	3) Set or remove channel connection optios as required
+	3) Set or remove channel connection options as required
 	4) Verify Message, Payload and Correlator examples for desired settings
     5) Review other fields as needed
      -->
@@ -38,7 +38,7 @@
 
     </parser>
 
-	<!-- Include the MQ full trace parser, which includes most MQ data elements  -->
+    <!-- Include the MQ full trace parser, which includes most MQ data elements  -->
     <resource-ref id="MQCommon" type="Parser" uri="MQ_full_trace_parser.xml"/>
 
     <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
