@@ -279,7 +279,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private Object resolvePCFHeaderValue(ActivityFieldLocator locator, String hAttrName, PCFMessage pcfMsg) {
-		Object val = null;
+		Integer val = null;
 		Object mappedValue = null;
 		if ("command".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCommand();
@@ -296,12 +296,12 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 		} else if ("compcode".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getCompCode();
 			if (isValueTranslatable(locator.getDataType())) {
-				mappedValue = MQConstants.lookupCompCode((Integer) val);
+				mappedValue = MQConstants.lookupCompCode(val);
 			}
 		} else if ("reason".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getReason();
 			if (isValueTranslatable(locator.getDataType())) {
-				mappedValue = MQConstants.lookupReasonCode((Integer) val);
+				mappedValue = MQConstants.lookupReasonCode(val);
 			}
 		} else if ("parametercount".equals(hAttrName.toLowerCase())) { // NON-NLS
 			val = pcfMsg.getParameterCount();
@@ -311,8 +311,7 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private boolean isValueTranslatable(ActivityFieldDataType fDataType) {
-		return translateNumValues
-				&& (fDataType == ActivityFieldDataType.String || fDataType == ActivityFieldDataType.Generic);
+		return translateNumValues && isTextualLocatorDataType(fDataType);
 	}
 
 	private Object resolveMDMQHeaderValue(ActivityFieldLocator locator, String hAttrName, PCFMessage pcfMsg)
@@ -554,7 +553,17 @@ public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
 	}
 
 	private boolean isStringLocatorWithoutCharset(ActivityFieldLocator locator) {
-		return locator.getDataType() == ActivityFieldDataType.String && StringUtils.isEmpty(locator.getCharset());
+		return StringUtils.isEmpty(locator.getCharset()) && isTextualLocatorDataType(locator.getDataType());
+	}
+
+	private boolean isTextualLocatorDataType(ActivityFieldDataType fDataType) {
+		switch (fDataType) {
+		case String:
+		case Generic:
+		case AsInput:
+			return true;
+		}
+		return false;
 	}
 
 	/**
