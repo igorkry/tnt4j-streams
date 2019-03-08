@@ -32,6 +32,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
@@ -288,12 +289,18 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 			}
 
 			if (startSkip != null) {
-
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"XMLFromBinDataPreParser.skipping", startSkip, bPos);
+				logSkipRange();
 			}
 
 			Utils.close(prefixIS);
+		}
+
+		private void logSkipRange() {
+			int sIdx = absoluteLastGoodPosition == 0 ? 1 : absoluteLastGoodPosition;
+			int eIdx = absoluteLastGoodPosition == 0 ? bPos + 1 : bPos;
+			int sLength = eIdx - sIdx + 1; // NOTE: inclusive range
+			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"XMLFromBinDataPreParser.skipping", sIdx, eIdx, sLength);
 		}
 
 		/**
@@ -343,7 +350,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 				// No text nodes can be children of root (DOM006 exception)
 				if (last != document) {
 					String text = new String(ch, start, length);
-					last.appendChild(document.createTextNode(text));
+					last.appendChild(document.createTextNode(StringEscapeUtils.escapeXml10(text)));
 				}
 			}
 		}
@@ -398,12 +405,12 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 		}
 
 		private void markLastGoodPosition() {
+			if (lastSkip != null && startSkip != null) {
+				logSkipRange();
+			}
+
 			absoluteLastGoodPosition = bPos + locator.getColumnNumber();
 
-			if (lastSkip != null && startSkip != null) {
-				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"XMLFromBinDataPreParser.skipping", startSkip, lastSkip);
-			}
 			startSkip = null;
 			lastSkip = null;
 		}

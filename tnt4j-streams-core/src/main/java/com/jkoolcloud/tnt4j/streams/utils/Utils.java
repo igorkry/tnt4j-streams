@@ -46,6 +46,7 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.google.gson.Gson;
@@ -679,6 +680,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); // NON-NLS
 		transformer.setOutputProperty(OutputKeys.ENCODING, UTF8);
+		transformer.setOutputProperty(OutputKeys.VERSION, "1.1"); // NON-NLS
 
 		transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
@@ -1081,6 +1083,13 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		if (value instanceof char[]) {
 			return new String((char[]) value);
 			// return Arrays.toString((char[]) value);
+		}
+
+		if (value instanceof Document) {
+			try {
+				return documentToString((Node) value);
+			} catch (TransformerException exc) {
+			}
 		}
 		if (value instanceof Node) {
 			return ((Node) value).getTextContent();
