@@ -287,7 +287,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 				this.dataType = ActivityFieldDataType.AsInput;
 			} else {
 				this.dataType = ActivityFieldDataType.String;
-	}
+			}
 		} else {
 			this.dataType = dataType;
 		}
@@ -558,26 +558,32 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		if (cfgValue != null) {
 			return cfgValue;
 		}
-		switch (dataType) {
-		case Generic:
-			value = getPredictedValue(value);
-			break;
-		case String:
-			value = getMappedValue(value == null ? null : formatStringValue(value));
-			break;
-		case Number:
-			value = getMappedValue(value == null ? null : formatNumericValue(value));
-			break;
-		case Binary:
-			value = formatBinaryValue(value);
-			break;
-		case DateTime:
-		case Timestamp:
-			value = value == null ? null : formatDateValue(value);
-			break;
-		default:
-			break;
+
+		if (value != null) {
+			switch (dataType) {
+			case Generic:
+				value = getPredictedValue(value);
+				break;
+			case String:
+				value = formatStringValue(value);
+				break;
+			case Number:
+				value = formatNumericValue(value);
+				break;
+			case Binary:
+				value = formatBinaryValue(value);
+				break;
+			case DateTime:
+			case Timestamp:
+				value = formatDateValue(value);
+				break;
+			default:
+				break;
+			}
 		}
+
+		value = getMappedValue(value);
+
 		return value;
 	}
 
@@ -593,7 +599,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			if (StringUtils.isEmpty(format)) {
 				setFormat(NumericFormatter.FormatterContext.ANY, locale);
 			}
-			Object pValue = getMappedValue(formatNumericValue(value));
+			Object pValue = formatNumericValue(value);
 			dataType = ActivityFieldDataType.Number;
 			return pValue;
 		} catch (ParseException exc) {
@@ -616,7 +622,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 		}
 
 		// make a string eventually
-		Object pValue = getMappedValue(formatStringValue(value));
+		Object pValue = formatStringValue(value);
 		if (pValue instanceof String) {
 			dataType = ActivityFieldDataType.String;
 		}
