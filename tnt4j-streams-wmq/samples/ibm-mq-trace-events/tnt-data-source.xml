@@ -3,9 +3,9 @@
      except to process payload or remove data that is not required.
 	 
     1) Set the queue manager to process 
-	2) Verify queue to read or topic if required 
-	3) Set or remove channel connection options as required
-	4) Verify Message, Payload and Correlator examples for desired settings
+    2) Verify queue to read or topic if required 
+    3) Set or remove channel connection options as required
+    4) Verify Message, Payload and Correlator examples for desired settings
     5) Review other fields as needed
      -->
 
