@@ -348,7 +348,8 @@ public final class StreamsScriptingUtils {
 		while (m.find()) {
 			int phSIdx = m.start();
 
-			if (phSIdx == 0 || expString.charAt(phSIdx - 1) != '$') {
+			if (phSIdx == 0 || (isValidIdentifierStart(expString.charAt(phSIdx + 1))
+					&& !isPlaceholderStart(expString.charAt(phSIdx - 1)))) {
 				return false;
 			}
 		}
@@ -361,5 +362,13 @@ public final class StreamsScriptingUtils {
 		}
 
 		return true;
+	}
+
+	private static boolean isPlaceholderStart(char ch) {
+		return ch == '$';
+	}
+
+	private static boolean isValidIdentifierStart(char ch) {
+		return ch == '_' || Character.isLetter(ch);
 	}
 }
