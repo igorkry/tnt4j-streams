@@ -49,6 +49,16 @@ public class WmqUtils {
 
 	private static final MessageDigest MSG_DIGEST = Utils.getMD5Digester();
 
+	/**
+	 * Constant for WMQ binary message data conversion flag indicating to preserve DLH and XQH headers data.
+	 */
+	public static final int MQ_BIN_STR_PRESERVE_DLH_XQH = 0;
+	/**
+	 * Constant for WMQ binary message data conversion flag indicating to strip DLH and XQH headers data.
+	 */
+	public static final int MQ_BIN_STR_STRIP_DLH_XQH = 1 << 0;
+	// continue shifting 1<<1, 1<<2, 1<<3....
+
 	// ---- R&D UTILITY CODE ---
 	// private static Map<String, Set<String>> tracesMap = new HashMap<String, Set<String>>();
 	//
@@ -374,7 +384,7 @@ public class WmqUtils {
 	 * @see #getString(byte[], Object, boolean)
 	 */
 	public static String getString(byte[] strBytes, Object ccsid) throws UnsupportedEncodingException {
-		return getString(strBytes, ccsid, false);
+		return getString(strBytes, ccsid, MQ_BIN_STR_PRESERVE_DLH_XQH);
 	}
 
 	/**
@@ -396,17 +406,44 @@ public class WmqUtils {
 	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
 	 *             from the charset
 	 *
+	 * @see #getString(byte[], Object, int)
+	 */
+	public static String getString(byte[] strBytes, Object ccsid, boolean stripHeaders)
+			throws UnsupportedEncodingException {
+		return getString(strBytes, ccsid, stripHeaders ? MQ_BIN_STR_STRIP_DLH_XQH : MQ_BIN_STR_PRESERVE_DLH_XQH);
+	}
+
+	/**
+	 * Converts byte array content in the specified {@code ccsid} into a Java {@link java.lang.String}.
+	 * <p>
+	 * If {@code conversionFlags} mask contains flag {@code MQ_BIN_STR_STRIP_DLH_XQH}, and DLH/XQH headers data has
+	 * CCSID value defined ({@code > 0}) within, then that CCSID value is used to convert payload from binary to string.
+	 * In all other cases, parameter {@code ccsid} defined value is used.
+	 *
+	 * @param strBytes
+	 *            the byte array to convert
+	 * @param ccsid
+	 *            coded charset identifier, or {@code null} to use default ({@code ccsid=0}) charset
+	 * @param conversionFlags
+	 *            conversion flags mask, combination of {@link #MQ_BIN_STR_PRESERVE_DLH_XQH} and
+	 *            {@link #MQ_BIN_STR_STRIP_DLH_XQH} constants
+	 * @return the string made from provided bytes using defined {@code ccsid}, or {@code null} if {@code strBytes} is
+	 *         {@code null}
+	 * @throws UnsupportedEncodingException
+	 *             if there is no charset mapping for the supplied {@code ccsid} value or the platform cannot convert
+	 *             from the charset
+	 *
 	 * @see #getPayloadOffsetAndCCSID(byte[])
 	 * @see com.ibm.mq.headers.Charsets#convert(byte[], int, int, int)
 	 */
-	public static String getString(byte[] strBytes, Object ccsid, boolean stripHeaders)
+	public static String getString(byte[] strBytes, Object ccsid, int conversionFlags)
 			throws UnsupportedEncodingException {
 		if (strBytes == null) {
 			return null;
 		}
 
 		int offset = 0;
-		if (stripHeaders) {
+		if (Utils.matchMask(conversionFlags, MQ_BIN_STR_STRIP_DLH_XQH)) {
 			int[] hd = getPayloadOffsetAndCCSID(strBytes);
 			offset = hd[0];
 			if (offset > 0 && hd[1] > 0) {

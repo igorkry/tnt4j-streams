@@ -5642,13 +5642,16 @@ Or even more advanced case, stripping `DLH` and `XQH` structures data from binar
    <field name="MQTrace_CodedCharsetId" locator="MQGACF_ACTIVITY_TRACE.MQIA_CODED_CHAR_SET_ID" locator-type="Label" datatype="Number"/>
    <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
        <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
-           WmqUtils.getString($fieldValue, ${MQTrace_CodedCharsetId}, true)
+           WmqUtils.getString($fieldValue, ${MQTrace_CodedCharsetId}, WmqUtils.MQ_BIN_STR_STRIP_DLH_XQH)
        ]]>
        </field-transform>
    </field>
 ```
 In this case if `DLH`/`XQH` headers data has CCSID value defined (` > 0`) within, then that CCSID value is used to convert payload from 
 binary to String. If headers data does not define CCSID value, second parameter value is used.
+Third function parameter is `DLH`/`XQH` headers handling options mask and be one of:
+* `WmqUtils.MQ_BIN_STR_PRESERVE_DLH_XQH` - preserves `DLH`/`XQH` headers data
+* `WmqUtils.MQ_BIN_STR_STRIP_DLH_XQH` - strips off `DLH`/`XQH` headers data
 
 **NOTE:** `WmqUtils.getString` differs from `Utils.getString` over second parameter:
 * `WmqUtils.getString` - second parameter is CCSID (numeric value) from WMQ defined set, or `null` to use WMQ system default encoding (in 

@@ -13,7 +13,7 @@
            transparent="true"/>
     <field name="Message" locator="MQGACF_ACTIVITY_TRACE.MQBACF_MESSAGE_DATA" locator-type="Label" datatype="Binary">
         <field-transform name="MsgPayloadToString" lang="groovy"><![CDATA[
-            WmqUtils.getString($fieldValue, ${CodedCharSetValue},true)
+            WmqUtils.getString($fieldValue, ${CodedCharSetValue}, WmqUtils.MQ_BIN_STR_STRIP_DLH_XQH)
         ]]></field-transform>
     </field>
 

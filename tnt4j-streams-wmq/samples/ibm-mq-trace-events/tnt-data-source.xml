@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This sample is useful for tracing MQ activity using activity events and requires little or no alteration 
+<!-- This sample is useful for tracing MQ activity using activity events and requires little or no alteration
      except to process payload or remove data that is not required.
 	 
     1) Set the queue manager to process 
@@ -24,8 +24,7 @@
                             <quantity>3</quantity>
                            </Order>
                         </Sample>
-                        -->
-
+    -->
     <parser name="XML_Data_Parser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <property name="NamespaceAware" value="false"/>
         <property name="RequireDefault" value="false"/>
@@ -35,13 +34,12 @@
         <field name="ItemID" locator="/Sample/Order/item" locator-type="Label"/>
         <field name="Price" locator="/Sample/Order/price" locator-type="Label" datatype="Number"/>
         <field name="Quantity" locator="/Sample/Order/quantity" locator-type="Label" datatype="Number"/>
-
     </parser>
 
     <!-- Include the MQ full trace parser, which includes most MQ data elements  -->
     <resource-ref id="MQCommon" type="Parser" uri="MQ_full_trace_parser.xml"/>
 
-    <!-- this section specifies the connection to the queue manager.   It can be repeated for multiple queue managers.  -->
+    <!-- this section specifies the connection to the queue manager. It can be repeated for multiple queue managers. -->
 
     <!-- This example uses the default System Queue for activity events processing a subset of MQ operations -->
 
@@ -69,14 +67,14 @@
 
         <!-- Use the following to control which operations are being analyzed.
             As defined, only operations which process messages are passed. Browse
-            operations are excluded.   -->
+            operations are excluded. -->
         <property name="TraceOperations" value="MQXF_(PUT|PUT1|GET|CALLBACK)"/>
         <property name="SuppressBrowseGets" value="true"/>
 
         <parser-ref name="TraceEventsParser"/>
     </stream>
 
-    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations  -->
+    <!-- This example uses a topic string (MQ appliance and MQ Server V9) and requests all MQ operations -->
     <stream name="WmqActivityTraceStream2" class="com.jkoolcloud.tnt4j.streams.custom.inputs.WmqTraceStream">
         <property name="StripHeaders" value="false"/>
         <property name="RetryStateCheck" value="true"/>
