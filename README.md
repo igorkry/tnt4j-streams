@@ -3768,7 +3768,7 @@ Sample stream configuration:
         <field name="EventType" value="EVENT"/>
         <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
 
-        <field name="StartTime" separator=" " format="MM/dd/yyyy HH:mm:ss">
+        <field name="StartTimeCommon" separator=" " format="MM/dd/yyyy HH:mm:ss" datatype="DateTime" transparent="true">
             <field-locator locator="Date" locator-type="Label"/>
             <field-locator locator="Time" locator-type="Label"/>
         </field>
@@ -3786,6 +3786,27 @@ Sample stream configuration:
         <field name="Explanation" locator="Explanation" locator-type="Label"/>
         <field name="Action" locator="Action" locator-type="Label"/>
         <field name="Where" locator="Where" locator-type="Label"/>
+        
+        <!-- IBM MQ 9.1 additional attributes -->
+        <field name="Severity" locator="Severity" locator-type="Label"/>
+        <field name="StartTimeUTC" locator="TimeUTC" locator-type="Label" format="yyyy-MM-dd'T'HH:mm:ss.SSSX" datatype="DateTime"
+               transparent="true"/>
+
+        <!--        <field name="CommentInsert1" locator="CommentInsert1" locator-type="Label"/>-->
+        <!--        <field name="CommentInsert1" locator="CommentInsert2" locator-type="Label"/>-->
+        <!--        <field name="CommentInsert1" locator="CommentInsert3" locator-type="Label"/>-->
+
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+
+        <field name="StartTime" value="">
+            <field-transform lang="groovy">
+                ${StartTimeUTC} == null ? ${StartTimeCommon} : ${StartTimeUTC}
+            </field-transform>
+        </field>
+
+        <field name="AllRestLogEntryValues" locator="#" locator-type="Label"/>
     </parser>
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">
@@ -5706,6 +5727,17 @@ This parser resolved data map may contain such entries:
 * `Explanation` - resolved log entry IBM MQ error explanation message text
 * `Action` - resolved log entry IBM MQ error fix action message text
 * `Where` - resolved log entry error descriptor location string containing source code file name and line number
+
+IBM MQ versions starting `9.1` adds these additional entries:
+* `Severity` - resolved log entry severity:
+    * 'I' - INFO
+    * 'W' - WARNING
+    * 'E' - ERROR
+    * 'S' - CRITICAL
+    * 'T' - HALT
+* `TimeUTC` - resolved log entry UTC time
+* `CommentInsert(X)` - resolved log entry text attribute values, have been insert into log entry message, where `(X)` is attribute index
+* `ArithInsert(X)` - resolved log entry numeric attribute values, have been insert into log entry message, where `(X)` is attribute index
 
 #### Activity Java object (POJO) parser
 

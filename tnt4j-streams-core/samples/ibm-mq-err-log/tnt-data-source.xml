@@ -9,7 +9,7 @@
         <field name="EventType" value="EVENT"/>
         <field name="ResourceName" locator="FileName" locator-type="StreamProp"/>
 
-        <field name="StartTime" separator=" " format="MM/dd/yyyy HH:mm:ss">
+        <field name="StartTimeCommon" separator=" " format="MM/dd/yyyy HH:mm:ss" datatype="DateTime" transparent="true">
             <field-locator locator="Date" locator-type="Label"/>
             <field-locator locator="Time" locator-type="Label"/>
         </field>
@@ -28,6 +28,26 @@
         <field name="Action" locator="Action" locator-type="Label"/>
         <field name="Module" locator="Where" locator-type="Label"/>
 
+        <!-- IBM MQ 9.1 additional attributes -->
+        <field name="Severity" locator="Severity" locator-type="Label"/>
+        <field name="StartTimeUTC" locator="TimeUTC" locator-type="Label" format="yyyy-MM-dd'T'HH:mm:ss.SSSX" datatype="DateTime"
+               transparent="true"/>
+
+        <!--        <field name="CommentInsert1" locator="CommentInsert1" locator-type="Label"/>-->
+        <!--        <field name="CommentInsert1" locator="CommentInsert2" locator-type="Label"/>-->
+        <!--        <field name="CommentInsert1" locator="CommentInsert3" locator-type="Label"/>-->
+
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+        <!--        <field name="ArithInsert1" locator="ArithInsert3" locator-type="Label"/>-->
+
+        <field name="StartTime" value="">
+            <field-transform lang="groovy">
+                ${StartTimeUTC} == null ? ${StartTimeCommon} : ${StartTimeUTC}
+            </field-transform>
+        </field>
+
+        <field name="AllRestLogEntryValues" locator="#" locator-type="Label"/>
     </parser>
 
     <stream name="FileStream" class="com.jkoolcloud.tnt4j.streams.inputs.FileLineStream">

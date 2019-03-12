@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -59,10 +61,21 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * entry value</li>
  * </ul>
  * <p>
+ * IBM MQ versions starting {@code 9.1} adds these additional entries:
+ * <ul>
+ * <li>Severity - resolved log entry severity: {@code 'I' - INFO}, {@code 'W' - WARNING}, {@code 'E' - ERROR},
+ * {@code 'S' - CRITICAL}, {@code 'T' - HALT}</li>
+ * <li>TimeUTC - resolved log entry UTC time</li>
+ * <li>CommentInsert(X) - resolved log entry text attribute values have been insert into log entry message, where (X) is
+ * attribute index</li>
+ * <li>ArithInsert(X) - resolved log entry numeric attribute values have been insert into log entry message, where (X)
+ * is attribute index</li>
+ * </ul>
+ * <p>
  * This activity parser supports configuration properties from {@link AbstractActivityMapParser} (and higher hierarchy
  * parsers).
  *
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public class IBMMQLogParser extends AbstractActivityMapParser {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(IBMMQLogParser.class);
@@ -252,6 +265,8 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			String vrmf = readBetween(cb, "VRMF(", CB); // NON-NLS
 			String qMgr = readBetween(cb, "QMgr(", CB, true); // NON-NLS
 
+			Map<String, String> optMap = resolveOptionals(cb);
+
 			String errCode = readUntil(cb, COLON);
 			skipWhitespaces(cb);
 			String errText = readUntil(cb, "EXPLANATION:"); // NON-NLS
@@ -267,12 +282,12 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			}
 
 			return createFieldMap(date, time, process, user, program, host, install, vrmf, qMgr, errCode, errText,
-					explanation, action, where);
+					explanation, action, where, optMap);
 		}
 
 		private static Map<String, Object> createFieldMap(String date, String time, String process, String user,
 				String program, String host, String install, String vrmf, String qMgr, String errCode, String errText,
-				String exp, String action, String where) {
+				String exp, String action, String where, Map<String, String> optionals) {
 			Map<String, Object> map = new HashMap<>(14);
 
 			map.put("Date", date); // NON-NLS
@@ -284,7 +299,42 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			map.put("Installation", install); // NON-NLS
 			map.put("VRMF", vrmf); // NON-NLS
 			map.put("QMgr", qMgr); // NON-NLS
+
+			// retrieve 'Severity' value from 'ErrCode' and adjust 'ErrCode' value accordingly
+			char severityChar = StringUtils.isEmpty(errCode) ? 0 : errCode.charAt(errCode.length() - 1);
+			String severity;
+
+			switch (severityChar) {
+			case 'I':
+				severity = OpLevel.INFO.name();
+				errCode = errCode.substring(0, errCode.length() - 1);
+				break;
+			case 'W':
+				severity = OpLevel.WARNING.name();
+				errCode = errCode.substring(0, errCode.length() - 1);
+				break;
+			case 'E':
+				severity = OpLevel.ERROR.name();
+				errCode = errCode.substring(0, errCode.length() - 1);
+				break;
+			case 'S':
+				severity = OpLevel.CRITICAL.name();
+				errCode = errCode.substring(0, errCode.length() - 1);
+				break;
+			case 'T':
+				severity = OpLevel.HALT.name();
+				errCode = errCode.substring(0, errCode.length() - 1);
+				break;
+			case 0:
+			default:
+				severity = null;
+				break;
+			}
+
 			map.put("ErrCode", errCode); // NON-NLS
+			if (severity != null) {
+				map.put("Severity", severity); // NON-NLS
+			}
 			map.put("ErrText", StringUtils.trim(errText)); // NON-NLS
 			map.put("Explanation", StringUtils.trim(exp)); // NON-NLS
 			map.put("Action", StringUtils.trim(action)); // NON-NLS
@@ -294,6 +344,14 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			String[] pt = process.split("\\."); // NON-NLS
 			map.put("pid", pt.length > 0 ? pt[0] : null); // NON-NLS
 			map.put("tid", pt.length > 1 ? pt[1] : null); // NON-NLS
+
+			// map already has field 'Time' so rename optionals map field 'Time' to 'TimeUTC'
+			String utcTime = optionals.remove("Time");
+			if (utcTime != null) {
+				optionals.put("TimeUTC", utcTime);
+			}
+
+			map.putAll(optionals);
 
 			return map;
 		}
@@ -333,6 +391,34 @@ public class IBMMQLogParser extends AbstractActivityMapParser {
 			}
 
 			return sb.toString();
+		}
+
+		private static Map<String, String> resolveOptionals(CharBuffer cb) {
+			Map<String, String> optMap = new HashMap<>();
+			Pattern optPattern = Pattern.compile("(?<key>\\w+)\\((?<value>.+)\\)");// NON-NLS
+			Matcher optMatcher;
+
+			String line;
+			String key;
+			String value;
+			boolean matches;
+			int mp;
+			do {
+				mp = cb.position();
+				line = readLine(cb, 15);
+				optMatcher = optPattern.matcher(line.trim());
+				matches = optMatcher.matches();
+				if (matches) {
+					key = optMatcher.group("key");
+					value = optMatcher.group("value");
+
+					optMap.put(key, value);
+				}
+			} while (matches);
+
+			cb.position(mp);
+
+			return optMap;
 		}
 	}
 }
