@@ -23,7 +23,7 @@ import javax.annotation.Generated;
 import javax.xml.bind.annotation.*;
 
 /**
- * Defines scenario step request (or command) data.
+ * Defines scenario step request (or command/query/etc.) data.
  * 
  * 
  * <p>
@@ -34,14 +34,14 @@ import javax.xml.bind.annotation.*;
  * 
  * <pre>
  * &lt;complexType name="RequestType">
- *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *     	 &lt;sequence>
- *         &lt;element name="req-param" type="{}ReqParameterType" minOccurs="0" maxOccurs="unbounded"/>
+ *         &lt;element name="req-param" type="{}ReqParameterType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="parser-ref" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/simpleContent>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  * 

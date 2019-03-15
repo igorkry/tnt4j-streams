@@ -252,6 +252,14 @@ public class ObjectFactory {
 	}
 
 	/**
+	 * Create an instance of {@link ParserReference }
+	 *
+	 */
+	public ParserReference createParserReference() {
+		return new ParserReference();
+	}
+
+	/**
 	 * Create an instance of {@link RequestType }
 	 * 
 	 */

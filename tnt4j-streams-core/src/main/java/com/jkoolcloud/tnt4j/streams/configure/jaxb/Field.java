@@ -37,14 +37,14 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="Field">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
+ *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="field-locator" type="{}FieldLocator" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-map" type="{}FieldMap" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-map-ref" type="{}FieldMapRef" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field-transform" type="{}FieldTransform" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="parser-ref" type="{}FieldParserReference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="filter" type="{}Filter" minOccurs="0"/>
- *       &lt;/sequence>
+ *       &lt;/choice>
  *       &lt;attGroup ref="{}FieldLocatorAttributes"/>
  *       &lt;attribute name="name" use="required" type="{}FieldNamesAll" />
  *       &lt;attribute name="separator" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -52,8 +52,6 @@ import javax.xml.bind.annotation.*;
  *       &lt;attribute name="transparent" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="value-type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="split" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="charset" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="emptyAsNull" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>

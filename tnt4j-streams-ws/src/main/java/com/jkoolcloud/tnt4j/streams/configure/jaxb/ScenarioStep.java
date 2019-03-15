@@ -37,7 +37,8 @@ import javax.xml.bind.annotation.*;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;choice>
+ *         &lt;element name="property" type="{}Property" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;choice minOccurs="0">
  *           &lt;element name="schedule-cron" type="{}ScheduleCron"/>
  *           &lt;element name="schedule-simple" type="{}ScheduleSimple"/>
  *         &lt;/choice>
@@ -56,10 +57,12 @@ import javax.xml.bind.annotation.*;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ScenarioStep", propOrder = { "scheduleCron", "scheduleSimple", "request" })
+@XmlType(name = "ScenarioStep", propOrder = { "property", "scheduleCron", "scheduleSimple", "request" })
 @Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 public class ScenarioStep {
 
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-12-05T10:53:23+02:00", comments = "JAXB RI v2.2.4-2")
+	protected List<Property> property;
 	@XmlElement(name = "schedule-cron")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
 	protected ScheduleCron scheduleCron;
@@ -136,6 +139,43 @@ public class ScenarioStep {
 		this.method = method;
 		this.username = username;
 		this.password = password;
+	}
+
+	/**
+	 * Gets the value of the property property.
+	 *
+	 * <p>
+	 * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to
+	 * the returned list will be present inside the JAXB object. This is why there is not a <CODE>set</CODE> method for
+	 * the property property.
+	 *
+	 * <p>
+	 * For example, to add a new item, do as follows:
+	 *
+	 * <pre>
+	 * getProperty().add(newItem);
+	 * </pre>
+	 *
+	 *
+	 * <p>
+	 * Objects of the following type(s) are allowed in the list {@link Property }
+	 *
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-12-05T10:53:23+02:00", comments = "JAXB RI v2.2.4-2")
+	public List<Property> getProperty() {
+		if (property == null) {
+			property = new ArrayList<Property>();
+		}
+		return this.property;
+	}
+
+	public void addProperty(Property prop) {
+		getProperty().add(prop);
+	}
+
+	public void addProperty(String name, String value) {
+		getProperty().add(new Property(name, value));
 	}
 
 	/**

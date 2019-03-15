@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.*;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="property" type="{}StreamProperty" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="parser-ref" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="parser-ref" type="{}ParserReference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="tnt4j-properties" minOccurs="0">
  *           &lt;complexType>
@@ -71,7 +71,7 @@ public class OriginalStream {
 	protected List<StreamProperty> property;
 	@XmlElement(name = "parser-ref")
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	protected List<Reference> parserRef;
+	protected List<ParserReference> parserRef;
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
 	protected List<Reference> reference;
 	@XmlElement(name = "tnt4j-properties")
@@ -146,24 +146,24 @@ public class OriginalStream {
 	 * 
 	 * 
 	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link Reference }
+	 * Objects of the following type(s) are allowed in the list {@link ParserReference }
 	 * 
 	 * 
 	 */
 	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-05-09T06:14:43+03:00", comments = "JAXB RI v2.2.4-2")
-	public List<Reference> getParserRef() {
+	public List<ParserReference> getParserRef() {
 		if (parserRef == null) {
-			parserRef = new ArrayList<Reference>();
+			parserRef = new ArrayList<ParserReference>();
 		}
 		return this.parserRef;
 	}
 
-	public void addParserRef(Reference pr) {
+	public void addParserRef(ParserReference pr) {
 		getParserRef().add(pr);
 	}
 
 	public void addParserRef(String name) {
-		getParserRef().add(new Reference(name));
+		getParserRef().add(new ParserReference(name));
 	}
 
 	/**

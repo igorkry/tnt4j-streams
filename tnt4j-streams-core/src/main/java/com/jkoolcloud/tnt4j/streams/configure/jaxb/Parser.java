@@ -37,13 +37,13 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="Parser">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
+ *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="property" type="{}ParserProperty" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="reference" type="{}Reference" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="field" type="{}Field" maxOccurs="unbounded"/>
  *         &lt;element name="embedded-activity" type="{}EmbeddedActivity" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="filter" type="{}Filter" minOccurs="0"/>
- *       &lt;/sequence>
+ *       &lt;/choice>
  *       &lt;attGroup ref="{}EntityAttributeGroup"/>
  *       &lt;attribute name="tags" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="manualFieldsOrder" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />

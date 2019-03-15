@@ -56,8 +56,11 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="MsgMimeType"/>
  *     &lt;enumeration value="MsgEncoding"/>
  *     &lt;enumeration value="MsgCharSet"/>
+ *     &lt;enumeration value="MessageAge"/>
  *     &lt;enumeration value="Category"/>
  *     &lt;enumeration value="ParentId"/>
+ *     &lt;enumeration value="Guid"/>
+ *     &lt;enumeration value="TTL"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -328,7 +331,17 @@ public enum FieldNames {
 	 *
 	 */
 	@XmlEnumValue("Guid")
-	GUID("Guid");
+	GUID("Guid"),
+
+	/**
+	 *
+	 * Activity entity time-to-live attribute.
+	 *
+	 *
+	 */
+	@XmlEnumValue("TTL")
+	TTL("TTL");
+
 	private final String value;
 
 	FieldNames(String v) {

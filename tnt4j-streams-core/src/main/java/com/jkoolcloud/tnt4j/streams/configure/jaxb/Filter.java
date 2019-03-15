@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="Filter">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
+ *       &lt;choice maxOccurs="unbounded">
  *         &lt;element name="value" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;simpleContent>
@@ -58,7 +58,7 @@ import javax.xml.bind.annotation.*;
  *             &lt;/simpleContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *       &lt;/sequence>
+ *       &lt;/choice>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
