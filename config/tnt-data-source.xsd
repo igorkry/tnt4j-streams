@@ -965,7 +965,6 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
-
             <xs:enumeration value="ExpireDuration">
                 <xs:annotation>
                     <xs:documentation>
@@ -973,11 +972,17 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
-
             <xs:enumeration value="Persisted">
                 <xs:annotation>
                     <xs:documentation>
                         Flag indicating cache contents has to be persisted to file on close and loaded on initialization.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="FileName">
+                <xs:annotation>
+                    <xs:documentation>
+                        File name used to persist cache contents.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
