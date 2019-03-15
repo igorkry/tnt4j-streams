@@ -66,9 +66,9 @@ public final class SampleIntegration {
 				ft.start();
 			}
 		} catch (SAXException | IllegalStateException e) {
-			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error", Utils.getExceptionMessages(e)); // NON-NLS
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error: {0}", Utils.getExceptionMessages(e)); // NON-NLS
 		} catch (Exception e) {
-			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start streams", e); // NON-NLS
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start streams: {0}", e); // NON-NLS
 		}
 	}
 
@@ -85,9 +85,9 @@ public final class SampleIntegration {
 			StreamThread ft = new StreamThread(stream);
 			ft.start();
 		} catch (SAXException | IllegalStateException e) {
-			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error", Utils.getExceptionMessages(e)); // NON-NLS
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Stream configuration error: {0}", Utils.getExceptionMessages(e)); // NON-NLS
 		} catch (Exception e) {
-			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start stream", e); // NON-NLS
+			Utils.logThrowable(LOGGER, OpLevel.ERROR, "Failed to start stream: {0}", e); // NON-NLS
 		}
 	}
 }
