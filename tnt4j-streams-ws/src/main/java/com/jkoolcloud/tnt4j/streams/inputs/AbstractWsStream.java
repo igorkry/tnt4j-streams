@@ -194,10 +194,12 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 
 		if (schedulerData != null && schedulerData.getStartDelay() != null && schedulerData.getStartDelay() > 0) {
 			logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"AbstractWsStream.stream.step.start.delayed", getName(), step.getScenario().getName(),
-					step.getName(), schedulerData.getStartDelay(), schedulerData.getStartDelayUnits());
+					"AbstractWsStream.stream.step.start.delayed", getName(), jobId, schedulerData.getStartDelay(),
+					schedulerData.getStartDelayUnits());
 		}
 
+		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"AbstractWsStream.stream.scheduling.job", getName(), jobId);
 		scheduler.scheduleJob(job, trigger);
 	}
 
@@ -261,6 +263,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	protected void purgeInactiveSchedulerJobs() {
 		if (scheduler != null) {
 			try {
+				int rCount = 0;
 				Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(null);
 				if (CollectionUtils.isNotEmpty(triggerKeys)) {
 					for (TriggerKey tKey : triggerKeys) {
@@ -268,11 +271,15 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 							Trigger t = scheduler.getTrigger(tKey);
 							if (t != null && !t.mayFireAgain()) {
 								scheduler.deleteJob(t.getJobKey());
+								rCount++;
 							}
 						} catch (SchedulerException exc) {
 						}
 					}
 				}
+
+				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						"AbstractWsStream.scheduler.removed.inactive.jobs", getName(), rCount);
 			} catch (SchedulerException exc) {
 			}
 		}

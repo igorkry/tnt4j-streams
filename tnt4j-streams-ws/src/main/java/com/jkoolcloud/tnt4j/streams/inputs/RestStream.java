@@ -157,7 +157,7 @@ public class RestStream extends AbstractWsStream<String> {
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
 	 */
-	protected static String executeGET(CloseableHttpClient client, String uriStr) throws Exception {
+	public static String executeGET(CloseableHttpClient client, String uriStr) throws Exception {
 		return executeGET(client, uriStr, null, null);
 	}
 
@@ -178,7 +178,7 @@ public class RestStream extends AbstractWsStream<String> {
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
 	 */
-	protected static String executeGET(CloseableHttpClient client, String uriStr, String username, String password)
+	public static String executeGET(CloseableHttpClient client, String uriStr, String username, String password)
 			throws Exception {
 		if (StringUtils.isEmpty(uriStr)) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -190,8 +190,12 @@ public class RestStream extends AbstractWsStream<String> {
 				"RestStream.invoking.get.request", uriStr);
 
 		HttpGet get = new HttpGet(uriStr);
+		String respStr = executeRequest(client, get, username, password);
 
-		return executeRequest(client, get, username, password);
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"RestStream.received.response", uriStr, respStr);
+
+		return respStr;
 	}
 
 	/**
@@ -207,7 +211,7 @@ public class RestStream extends AbstractWsStream<String> {
 	 * @throws Exception
 	 *             if exception occurs while performing JAX-RS service call
 	 */
-	protected static String executePOST(CloseableHttpClient client, String uriStr, String reqData) throws Exception {
+	public static String executePOST(CloseableHttpClient client, String uriStr, String reqData) throws Exception {
 		return executePOST(client, uriStr, reqData, null, null);
 	}
 
@@ -252,7 +256,12 @@ public class RestStream extends AbstractWsStream<String> {
 		reqEntity.setContentType("application/json"); // NON-NLS
 		post.setEntity(reqEntity);
 
-		return executeRequest(client, post, username, password);
+		String respStr = executeRequest(client, post, username, password);
+
+		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+				"RestStream.received.response", uriStr, respStr);
+
+		return respStr;
 	}
 
 	private static String executeRequest(CloseableHttpClient client, HttpUriRequest req, String username,
@@ -269,13 +278,13 @@ public class RestStream extends AbstractWsStream<String> {
 
 			response = client.execute(req, ctx);
 
-			return processResponse(response, req);
+			return processResponse(response);
 		} finally {
 			Utils.close(response);
 		}
 	}
 
-	private static String processResponse(CloseableHttpResponse response, HttpUriRequest req) throws IOException {
+	private static String processResponse(CloseableHttpResponse response) throws IOException {
 		HttpEntity entity = null;
 		try {
 			StatusLine sLine = response.getStatusLine();
@@ -286,12 +295,7 @@ public class RestStream extends AbstractWsStream<String> {
 			}
 
 			entity = response.getEntity();
-			String respStr = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-
-			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"RestStream.received.response", req.getURI(), respStr);
-
-			return respStr;
+			return EntityUtils.toString(entity, StandardCharsets.UTF_8);
 		} finally {
 			EntityUtils.consumeQuietly(entity);
 		}
@@ -337,12 +341,12 @@ public class RestStream extends AbstractWsStream<String> {
 					respStr = null;
 					try {
 						reqDataStr = stream.preProcess(request.getData());
-						respStr = executePOST(stream.client, scenarioStep.getUrlStr(), reqDataStr,
+						respStr = stream.executePOST(stream.client, scenarioStep.getUrlStr(), reqDataStr,
 								scenarioStep.getUsername(), scenarioStep.getPassword());
 					} catch (Throwable exc) {
-						Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-								"RestStream.execute.exception", exc);
+								"RestStream.execute.exception", stream.getName(), exc);
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {
@@ -372,11 +376,12 @@ public class RestStream extends AbstractWsStream<String> {
 				respStr = null;
 				try {
 					reqUrl = stream.preProcessURL(scenarioStep.getUrlStr());
-					respStr = executeGET(stream.client, reqUrl, scenarioStep.getUsername(), scenarioStep.getPassword());
+					respStr = stream.executeGET(stream.client, reqUrl, scenarioStep.getUsername(),
+							scenarioStep.getPassword());
 				} catch (Throwable exc) {
-					Utils.logThrowable(LOGGER, OpLevel.ERROR,
+					Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-							"RestStream.execute.exception", exc);
+							"RestStream.execute.exception", stream.getName(), exc);
 				}
 
 				if (StringUtils.isNotEmpty(respStr)) {

@@ -46,6 +46,7 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -2393,8 +2394,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static void logThrowable(EventSink logger, OpLevel sev, ResourceBundle rb, String key, Object... args) {
 		Throwable ex = getThrowable(args);
-		if (ex != null && !logger.isSet(OpLevel.TRACE)) {
-			args[args.length - 1] = getExceptionMessages(ex);
+		if (ex != null) {
+			args[args.length - 1] = decorateThrowable(ex, logger);
 		}
 		logger.log(sev, rb, key, args);
 	}
@@ -2421,10 +2422,55 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static void logThrowable(EventSink logger, OpLevel sev, String msg, Object... args) {
 		Throwable ex = getThrowable(args);
-		if (ex != null && !logger.isSet(OpLevel.TRACE)) {
-			args[args.length - 1] = getExceptionMessages(ex);
+		if (ex != null) {
+			args[args.length - 1] = decorateThrowable(ex, logger);
 		}
 		logger.log(sev, msg, args);
+	}
+
+	private static Object decorateThrowable(Throwable t, EventSink logger) {
+		if (logger.isSet(OpLevel.DEBUG)) {
+			return getTruncatedException(t, 5);
+		}
+		if (logger.isSet(OpLevel.TRACE)) {
+			return t;
+		}
+		if (logger.isSet(OpLevel.NONE)) {
+			return getTruncatedException(t, 0);
+		}
+
+		return getTruncatedException(t, 1);
+	}
+
+	private static Object getTruncatedException(Throwable t, int depth) {
+		if (depth == 0) {
+			return getExceptionMessages(t);
+		}
+
+		if (depth > 0) {
+			List<Throwable> tList = ExceptionUtils.getThrowableList(t);
+			StringBuilder sb = new StringBuilder();
+
+			for (int ti = 0; ti < tList.size(); ti++) {
+				Throwable it = tList.get(ti);
+
+				if (ti == 0) {
+					sb.append(it.toString()).append("\n"); // NON-NLS
+				} else {
+					sb.append("Caused by: ").append(it.toString()).append("\n"); // NON-NLS
+				}
+
+				StackTraceElement[] strs = it.getStackTrace();
+				int sLenght = Math.min(depth, strs.length);
+				for (int si = 0; si < sLenght; si++) {
+					sb.append("\tat ").append(strs[si]).append("\n"); // NON-NLS
+				}
+			}
+
+			return sb.toString();
+		}
+
+		return t;
 	}
 
 	/**

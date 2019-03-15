@@ -459,7 +459,7 @@ public class WsStream extends AbstractWsStream<String> {
 						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
 								stream.fillInRequestData(request.getData()), stream, scenarioStep.getScenario());
 					} catch (Throwable exc) {
-						Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"WsStream.execute.exception", exc);
 					} finally {
