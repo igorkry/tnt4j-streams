@@ -266,7 +266,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 					for (TriggerKey tKey : triggerKeys) {
 						try {
 							Trigger t = scheduler.getTrigger(tKey);
-							if (!t.mayFireAgain()) {
+							if (t != null && !t.mayFireAgain()) {
 								scheduler.deleteJob(t.getJobKey());
 							}
 						} catch (SchedulerException exc) {
@@ -294,7 +294,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 				for (TriggerKey tKey : triggerKeys) {
 					try {
 						Trigger t = scheduler.getTrigger(tKey);
-						if (t.mayFireAgain()) {
+						if (t != null && t.mayFireAgain()) {
 							return false;
 						}
 					} catch (SchedulerException exc) {
