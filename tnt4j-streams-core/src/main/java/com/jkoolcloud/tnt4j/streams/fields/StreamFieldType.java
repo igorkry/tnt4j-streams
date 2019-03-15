@@ -182,7 +182,12 @@ public enum StreamFieldType {
 	/**
 	 * Identifier used to globally identify the data associated with this activity.
 	 */
-	Guid(String.class);
+	Guid(String.class),
+
+	/**
+	 * Stream activity entity time-to-live attribute.
+	 */
+	TTL(Long.class);
 
 	private final Class<?> dataType;
 

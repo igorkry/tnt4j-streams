@@ -84,6 +84,7 @@ public class ActivityInfo {
 	private Integer msgLength = null;
 	private String msgMimeType = null;
 	private long msgAge = -1L;
+	private long ttl = TTL.TTL_DEFAULT;
 
 	private Integer processId = null;
 	private Integer threadId = null;
@@ -395,6 +396,9 @@ public class ActivityInfo {
 				break;
 			case Guid:
 				guid = substitute(guid, getStringValue(fieldValue, field));
+				break;
+			case TTL:
+				ttl = substitute(ttl, getNumberValue(fieldValue, Long.class, field));
 				break;
 			default:
 				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
@@ -924,6 +928,7 @@ public class ActivityInfo {
 		}
 		event.start(startTime);
 		event.stop(endTime, elapsedTime);
+		event.setTTL(ttl);
 
 		if (activityProperties != null) {
 			for (Property ap : activityProperties.values()) {
@@ -1017,7 +1022,7 @@ public class ActivityInfo {
 
 		activity.setCompCode(compCode == null ? OpCompCode.SUCCESS : compCode);
 		activity.setReasonCode(reasonCode);
-		activity.setType(eventType);
+		// activity.setType(eventType);
 		activity.setStatus(StringUtils.isNotEmpty(exception) ? ActivityStatus.EXCEPTION
 				: eventStatus == null ? ActivityStatus.END : eventStatus);
 		activity.setException(exception);
@@ -1034,6 +1039,7 @@ public class ActivityInfo {
 		}
 		activity.start(startTime);
 		activity.stop(endTime, elapsedTime);
+		activity.setTTL(ttl);
 
 		if (activityProperties != null) {
 			for (Property ap : activityProperties.values()) {
@@ -1187,9 +1193,6 @@ public class ActivityInfo {
 		if (reasonCode > 0) {
 			snapshot.add(JSONFormatter.JSON_REASON_CODE_FIELD, reasonCode);
 		}
-		if (eventType != null) {
-			snapshot.add(JSONFormatter.JSON_TYPE_FIELD, eventType);
-		}
 		if (StringUtils.isNotEmpty(exception)) {
 			snapshot.add(JSONFormatter.JSON_EXCEPTION_FIELD, exception);
 		}
@@ -1209,6 +1212,7 @@ public class ActivityInfo {
 			snapshot.add(JSONFormatter.JSON_PID_FIELD, processId);
 		}
 		snapshot.setTimeStamp(startTime == null ? (endTime == null ? UsecTimestamp.now() : endTime) : startTime);
+		snapshot.setTTL(ttl);
 		if (eventStatus != null) {
 			addActivityProperty(JSONFormatter.JSON_STATUS_FIELD, eventStatus);
 		}
@@ -1305,7 +1309,7 @@ public class ActivityInfo {
 				endTime = new UsecTimestamp(startTime);
 				endTime.add(0L, elapsedTime);
 			} else {
-				endTime = new UsecTimestamp();
+				endTime = UsecTimestamp.now();
 			}
 		}
 		if (startTime == null) {
@@ -1434,6 +1438,9 @@ public class ActivityInfo {
 		}
 		if (msgAge == -1L) {
 			msgAge = otherAi.msgAge;
+		}
+		if (ttl == TTL.TTL_DEFAULT) {
+			ttl = otherAi.ttl;
 		}
 
 		if (processId == null) {
@@ -1729,6 +1736,15 @@ public class ActivityInfo {
 	}
 
 	/**
+	 * Gets activity entity time-to-live.
+	 *
+	 * @return the activity entity time-to-live
+	 */
+	public long getTTL() {
+		return ttl;
+	}
+
+	/**
 	 * Gets process identifier.
 	 *
 	 * @return the process identifier
@@ -1856,6 +1872,7 @@ public class ActivityInfo {
 		sb.append(", msgLength=").append(msgLength); // NON-NLS
 		sb.append(", msgMimeType=").append(Utils.sQuote(msgMimeType)); // NON-NLS
 		sb.append(", msgAge=").append(msgAge); // NON-NLS
+		sb.append(", ttl=").append(ttl); // NON-NLS
 		sb.append(", processId=").append(processId); // NON-NLS
 		sb.append(", threadId=").append(threadId); // NON-NLS
 		sb.append(", category=").append(Utils.sQuote(category)); // NON-NLS
@@ -1923,6 +1940,8 @@ public class ActivityInfo {
 				return msgMimeType;
 			case MessageAge:
 				return msgAge;
+			case TTL:
+				return ttl;
 			case ParentId:
 				return parentId;
 			case ProcessId:

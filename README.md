@@ -316,7 +316,12 @@ sample:
     /**
      * Identifier used to globally identify the data associated with this activity.
      */
-    Guid(String.class);
+    Guid(String.class),
+
+    /**
+     * Stream activity entity time-to-live attribute.
+     */
+    TTL(Long.class);
 ```
 
 **NOTE:** `EventType` field is mandatory and can't have value `null`. If this field value resolves to `null` then streams automatically sets 

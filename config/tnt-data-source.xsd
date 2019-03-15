@@ -401,6 +401,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+
+            <xs:enumeration value="TTL">
+                <xs:annotation>
+                    <xs:documentation>
+                        Activity entity time-to-live attribute.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 
