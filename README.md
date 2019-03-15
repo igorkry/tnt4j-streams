@@ -4219,7 +4219,7 @@ Configuration requires two steps:
     log4j.appender.activities_log.File=logs/tnt4j-streams-activities.log
     log4j.appender.activities_log.maxFileSize=10MB
     log4j.appender.activities_log.maxBackupIndex=3
-    log4j.appender.activities_log.layout=org.apache.log4j.PatternLayout
+    log4j.appender.activities_log.layout=org.apache.log4j.EnhancedPatternLayout
     log4j.appender.activities_log.layout.ConversionPattern=%m%n
     ```
 
