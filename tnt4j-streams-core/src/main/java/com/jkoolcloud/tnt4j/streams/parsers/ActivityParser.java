@@ -214,10 +214,13 @@ public abstract class ActivityParser implements NamedObject {
 			boolean applied = false;
 			for (ActivityField.FieldParserReference parserRef : field.getStackedParsers()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityParser.stacked.parser.applying", name, parserRef, field);
+						"ActivityParser.stacked.parser.applying", name, field, parserRef);
 				try {
 					Object valueToParse = parserRef.getApplyOn() == ParserApplyType.Activity
 							? ai.getFieldValue(field.getFieldTypeName()) : value;
+					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.stacked.parser.input.value.type", name, field, parserRef,
+							valueToParse == null ? null : valueToParse.getClass().getName());
 					applied = applyStackedParser(stream, ai, field, parserRef, valueToParse);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -229,7 +232,7 @@ public abstract class ActivityParser implements NamedObject {
 				} catch (Exception exc) {
 					Utils.logThrowable(logger(), OpLevel.WARNING,
 							StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityParser.stacked.parser.failed", name, parserRef, field, exc);
+							"ActivityParser.stacked.parser.failed", name, field, parserRef, exc);
 				}
 			}
 
