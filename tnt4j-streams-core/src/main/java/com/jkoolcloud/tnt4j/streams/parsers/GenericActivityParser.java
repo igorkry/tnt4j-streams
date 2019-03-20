@@ -1147,8 +1147,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		if (StringUtils.isNotEmpty(locStr)) {
 			if (locStr.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
 				ActivityInfo pai = cData.getParentActivity();
-				value = pai == null ? null
-						: pai.getFieldValue(locStr.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()));
+				value = pai == null ? null : pai
+						.getFieldValue(locStr.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()), getName());
 			} else {
 				value = cData.getActivity().getFieldValue(locStr);
 			}

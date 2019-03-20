@@ -262,8 +262,9 @@ public class ActivityInfoTest {
 		String[] fieldValue = { "TestValue" };
 		ai.applyField(af, fieldValue);
 		Object value = ai.getFieldValue("TestField");
-		assertEquals(value, ai.formatValue(af, af.getGroupLocator(), fieldValue[0]));
+		assertEquals(value, af.aggregateFieldValue(fieldValue, ai));
 		assertEquals(value, ai.getFieldValue("TestField"));
+		assertEquals(value, "TestValue");
 	}
 
 	/**
@@ -345,7 +346,7 @@ public class ActivityInfoTest {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField af = new ActivityField("TestField");
 		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
-		// testLocator.formatValue("1");
+		testLocator.setDataType(ActivityFieldDataType.Generic);
 		af.addLocator(testLocator);
 
 		ai.applyField(af, "1");
@@ -357,7 +358,7 @@ public class ActivityInfoTest {
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField af = new ActivityField("TestField");
 		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
-		// testLocator.formatValue("1");
+		testLocator.setDataType(ActivityFieldDataType.Generic);
 		af.addLocator(testLocator);
 
 		ai.applyField(af, "1.0333");

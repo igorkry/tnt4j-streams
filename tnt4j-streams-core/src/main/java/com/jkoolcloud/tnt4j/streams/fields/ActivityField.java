@@ -16,7 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.fields;
 
+import java.net.InetAddress;
+import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -33,6 +36,7 @@ import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
+import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -696,35 +700,6 @@ public class ActivityField extends AbstractFieldEntity {
 		return fLocators;
 	}
 
-	/**
-	 * Applies field master locator filters on provided value to check if value should be filtered out from streaming.
-	 *
-	 * @param ai
-	 *            activity info instance to alter "filtered out" flag
-	 * @param value
-	 *            value to apply filters
-	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
-	 *         passed over parameters - otherwise
-	 * @throws Exception
-	 *             if evaluation of filter fails
-	 *
-	 * @see #filterValue(Object, ActivityInfo)
-	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityInfo#setFiltered(boolean)
-	 */
-	public Object filterValue(ActivityInfo ai, Object value) throws Exception {
-		boolean filteredOut = filterValue(value, ai);
-
-		if (filteredOut) {
-			if (isOptional()) {
-				return null;
-			} else {
-				ai.setFiltered(true);
-			}
-		}
-
-		return value;
-	}
-
 	@Override
 	protected ValueTransformation.Phase getDefaultTransformationPhase() {
 		return ValueTransformation.Phase.AGGREGATED;
@@ -789,6 +764,191 @@ public class ActivityField extends AbstractFieldEntity {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Aggregates field locators resolved values into single value to be set for activity entity field.
+	 * <p>
+	 * Aggregated value transformation and filtering is also performed by this method.
+	 * <p>
+	 * When field has flag {@code emptyAsNull} set to {@code true}, aggregation produced 'empty' values (e.g. string
+	 * {@code ""}) are reset to {@code null} and suppressed by streaming process.
+	 *
+	 * @param value
+	 *            field value to aggregate
+	 * @param ai
+	 *            activity entity instance to use for aggregation
+	 * @return aggregated field value, or {@code null} if value aggregates to 'empty' (e.g. string {@code ""}) value and
+	 *         field has flag {@code emptyAsNull} set to {@code true}
+	 * @throws ParseException
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
+	 *
+	 * @see #transform(Object, ActivityInfo)
+	 * @see #filterFieldValue(Object, ActivityInfo)
+	 */
+	public Object aggregateFieldValue(Object value, ActivityInfo ai) throws ParseException {
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityField.aggregating.field", this, Utils.toString(value));
+		Object[] values = Utils.makeArray(Utils.simplifyValue(value));
+
+		if (values != null && CollectionUtils.isNotEmpty(locators)) {
+			if (values.length == 1 && locators.size() > 1) {
+				values[0] = formatValue(groupLocator, values[0]);
+			} else {
+				if (locators.size() > 1 && locators.size() != values.length) {
+					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+							"ActivityField.failed.parsing", this), 0);
+				}
+
+				ActivityFieldLocator locator;
+				Object fValue;
+				List<Object> fvList = new ArrayList<>(locators.size());
+				for (int v = 0; v < values.length; v++) {
+					locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
+					fValue = formatValue(locator, values[v]);
+					if (fValue == null && locator.isOptional()) {
+						continue;
+					}
+					fvList.add(fValue);
+				}
+
+				values = Utils.makeArray(fvList);
+			}
+
+			if (isEnumeration() && values.length > 1) {
+				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
+						"ActivityField.multiple.enum.values", this), 0);
+			}
+		}
+
+		Object fieldValue = Utils.simplifyValue(values);
+
+		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+				"ActivityField.aggregating.field.value", this, Utils.toString(fieldValue));
+
+		if (fieldValue != null) {
+			fieldValue = transform(fieldValue, ai);
+			fieldValue = filterFieldValue(fieldValue, ai);
+
+			if (fieldValue != null && isEmptyAsNull() && Utils.isEmptyContent(fieldValue, true)) {
+				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityField.field.empty.as.null", this, Utils.toStringDump(fieldValue));
+				fieldValue = null;
+			}
+		}
+
+		return fieldValue;
+	}
+
+	/**
+	 * Transforms the value for the field using defined field transformations.
+	 * <p>
+	 * Note that field value there is combination of all field locators resolved values. Transformations defined for
+	 * particular locator is already performed by parser while resolving locator value.
+	 *
+	 * @param fieldValue
+	 *            field data value to transform
+	 * @param ai
+	 *            activity entity instance to get additional value for a transformation
+	 * @return transformed field value
+	 *
+	 * @see #transformValue(Object, ActivityInfo, com.jkoolcloud.tnt4j.streams.transform.ValueTransformation.Phase)
+	 */
+	protected Object transform(Object fieldValue, ActivityInfo ai) {
+		try {
+			fieldValue = transformValue(fieldValue, ai, ValueTransformation.Phase.AGGREGATED);
+		} catch (Exception exc) {
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityField.transformation.failed", fieldTypeName, Utils.toString(fieldValue), exc);
+		}
+
+		return fieldValue;
+	}
+
+	/**
+	 * Applies filed defined filtering rules and marks this activity as filtered out or sets field value to {@code
+	 * null}, if field is set as "optional" using attribute {@code required=false}.
+	 *
+	 * @param value
+	 *            value to apply filters @param ai activity info instance to alter "filtered out" flag @return value
+	 *            after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
+	 *            passed over parameters - otherwise
+	 *
+	 * @see #filterValue(Object, ActivityInfo)
+	 */
+	protected Object filterFieldValue(Object value, ActivityInfo ai) {
+		try {
+			boolean filteredOut = filterValue(value, ai);
+
+			if (filteredOut) {
+				if (isOptional()) {
+					return null;
+				} else {
+					ai.setFiltered(true);
+				}
+			}
+
+			return value;
+		} catch (Exception exc) {
+			Utils.logThrowable(LOGGER, OpLevel.WARNING,
+					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityField.filtering.failed",
+					fieldTypeName, Utils.toString(value), exc);
+			return value;
+		}
+	}
+
+	/**
+	 * Formats the value for the field based on the required internal data type of the field and the definition of the
+	 * field.
+	 *
+	 * @param locator
+	 *            locator information for value
+	 * @param value
+	 *            raw value of field
+	 * @return formatted value of field in required internal data type
+	 */
+	protected Object formatValue(ActivityFieldLocator locator, Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (isEnumeration()) {
+			if (value instanceof String) {
+				String strValue = (String) value;
+				value = StringUtils.containsOnly(strValue, "0123456789") ? Integer.valueOf(strValue) // NON-NLS
+						: strValue.toUpperCase().trim();
+			}
+		}
+		StreamFieldType fieldType = getFieldType();
+		if (fieldType != null) {
+			switch (fieldType) {
+			case ElapsedTime:
+				try {
+					// Elapsed time needs to be converted to usec
+					if (!(value instanceof Number)) {
+						value = Long.valueOf(Utils.toString(value));
+					}
+					TimeUnit units = locator == null ? TimeUnit.MICROSECONDS : locator.getBuiltInUnits();
+					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
+				} catch (Exception e) {
+				}
+				break;
+			case ServerIp:
+				if (value instanceof InetAddress) {
+					value = ((InetAddress) value).getHostAddress();
+				}
+				break;
+			case ServerName:
+				if (value instanceof InetAddress) {
+					value = ((InetAddress) value).getHostName();
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		return value;
 	}
 
 	/**

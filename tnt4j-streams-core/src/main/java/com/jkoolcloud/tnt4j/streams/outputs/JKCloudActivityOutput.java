@@ -122,7 +122,8 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
 			if (splitRelatives && ai.hasChildren()) {
-				for (ActivityInfo cai : ai.getChildren()) {
+				List<ActivityInfo> cais = ai.getChildren();
+				for (ActivityInfo cai : cais) {
 					cai.merge(ai);
 					Trackable t = cai.buildTrackable(tracker);
 					alterTrackableSource(tracker, t, cai, aiFQN);
@@ -134,9 +135,10 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 				alterTrackableSource(tracker, t, ai, aiFQN);
 				recordActivity(tracker, CONN_RETRY_INTERVAL, t);
 
+				List<ActivityInfo> cais = ai.getChildren();
 				for (int i = 0; i < chTrackables.size(); i++) {
 					Trackable chT = chTrackables.get(i);
-					ActivityInfo cai = ai.getChildren().get(i);
+					ActivityInfo cai = cais.get(i);
 					alterTrackableSource(tracker, chT, cai, aiFQN);
 					recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
 				}

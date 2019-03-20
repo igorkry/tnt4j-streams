@@ -17,14 +17,16 @@
 package com.jkoolcloud.tnt4j.streams.fields;
 
 import java.lang.reflect.Field;
-import java.net.InetAddress;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,7 +36,6 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
-import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.TimeTracker;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
@@ -43,12 +44,15 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
 
 /**
- * This class represents an {@link Trackable} entity (e.g. activity/event/snapshot) to record to jKoolCloud.
+ * This class represents an {@link com.jkoolcloud.tnt4j.core.Trackable} entity (e.g. activity/event/snapshot) to record
+ * to jKoolCloud.
  *
  * @version $Revision: 3 $
  */
 public class ActivityInfo {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
+
+	private static final Pattern CHILD_FIELD_PATTERN = Pattern.compile("child\\[(?<child>\\S+)\\]\\.(?<field>\\S+)"); // NON-NLS
 
 	private static final Map<String, String> HOST_CACHE = new ConcurrentHashMap<>();
 	private static final String LOCAL_SERVER_NAME_KEY = "LOCAL_SERVER_NAME_KEY"; // NON-NLS
@@ -96,7 +100,7 @@ public class ActivityInfo {
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
 
 	private Map<String, Property> activityProperties;
-	private List<ActivityInfo> children;
+	private Map<String, List<ActivityInfo>> children;
 	private ActivityInfo parent;
 
 	/**
@@ -115,172 +119,46 @@ public class ActivityInfo {
 	 *            value to apply for this field, which could be an array of objects if value for field consists of
 	 *            multiple locations
 	 *
-	 * @throws ParseException
+	 * @throws java.text.ParseException
 	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
 	 *             format, etc.)
 	 */
-	public void applyField(ActivityField field, Object value) throws ParseException {
+	public void applyFieldValue(ActivityField field, Object value) throws ParseException {
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"ActivityInfo.applying.field", field, Utils.toString(value));
-		Object[] values = Utils.makeArray(Utils.simplifyValue(value));
 
-		List<ActivityFieldLocator> locators = field.getLocators();
-		if (values != null && CollectionUtils.isNotEmpty(locators)) {
-			if (values.length == 1 && locators.size() > 1) {
-				values[0] = formatValue(field, field.getGroupLocator(), values[0]);
-			} else {
-				if (locators.size() > 1 && locators.size() != values.length) {
-					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-							"ActivityInfo.failed.parsing", field), 0);
-				}
-
-				ActivityFieldLocator locator;
-				Object fValue;
-				List<Object> fvList = new ArrayList<>(locators.size());
-				for (int v = 0; v < values.length; v++) {
-					locator = locators.size() == 1 ? locators.get(0) : locators.get(v);
-					fValue = formatValue(field, locator, values[v]);
-					if (fValue == null && locator.isOptional()) {
-						continue;
-					}
-					fvList.add(fValue);
-				}
-
-				values = Utils.makeArray(fvList);
-			}
-
-			if (field.isEnumeration() && values.length > 1) {
-				throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
-						"ActivityInfo.multiple.enum.values", field), 0);
-			}
-		}
-
-		Object fieldValue = Utils.simplifyValue(values);
-
-		if (fieldValue == null) {
+		if (value == null) {
 			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityInfo.field.value.null", field);
 			return;
 		}
-		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-				"ActivityInfo.applying.field.value", field, Utils.toString(fieldValue));
-
-		fieldValue = transform(field, fieldValue);
-		fieldValue = filterFieldValue(field, fieldValue);
-
-		if (fieldValue != null && field.isEmptyAsNull() && Utils.isEmptyContent(fieldValue, true)) {
-			LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.field.empty.as.null", field, Utils.toStringDump(fieldValue));
-			fieldValue = null;
-		}
 
 		if (!field.isTransparent()) {
-			setFieldValue(field, fieldValue);
+			setFieldValue(field, value);
 		} else {
-			addActivityProperty(field.getFieldTypeName(), getPropertyValue(fieldValue, field), true);
+			addActivityProperty(field.getFieldTypeName(), getPropertyValue(value, field), true);
 		}
 	}
 
 	/**
-	 * Transforms the value for the field using defined field transformations.
-	 * <p>
-	 * Note that field value there is combination of all field locators resolved values. Transformations defined for
-	 * particular locator is already performed by parser while resolving locator value.
+	 * Aggregates and applies the given value(s) for the specified field to the appropriate internal data field for
+	 * reporting field to the jKoolCloud.
 	 *
 	 * @param field
-	 *            field whose value is to be transformed
-	 * @param fieldValue
-	 *            field data value to transform
-	 * @return transformed field value
-	 */
-	protected Object transform(ActivityField field, Object fieldValue) {
-		try {
-			fieldValue = field.transformValue(fieldValue, this, ValueTransformation.Phase.AGGREGATED);
-		} catch (Exception exc) {
-			Utils.logThrowable(LOGGER, OpLevel.WARNING,
-					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.transformation.failed", field.getFieldTypeName(), Utils.toString(fieldValue), exc);
-		}
-
-		return fieldValue;
-	}
-
-	/**
-	 * Applies filed defined filtering rules and marks this activity as filtered out or sets field value to
-	 * {@code null}, if field is set as "optional" using attribute {@code required=false}.
-	 * 
-	 * @param field
-	 *            field instance to use filter definition
-	 * @param fieldValue
-	 *            value to apply filters
-	 * @return value after filtering applied: {@code null} if value gets filtered out and field is optional, or same as
-	 *         passed over parameters - otherwise
-	 *
-	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityField#filterValue(ActivityInfo, Object)
-	 */
-	protected Object filterFieldValue(ActivityField field, Object fieldValue) {
-		try {
-			return field.filterValue(this, fieldValue);
-		} catch (Exception exc) {
-			Utils.logThrowable(LOGGER, OpLevel.WARNING,
-					StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME), "ActivityInfo.filtering.failed",
-					field.getFieldTypeName(), Utils.toString(fieldValue), exc);
-			return fieldValue;
-		}
-	}
-
-	/**
-	 * Formats the value for the field based on the required internal data type of the field and the definition of the
-	 * field.
-	 *
-	 * @param field
-	 *            field whose value is to be formatted
-	 * @param locator
-	 *            locator information for value
+	 *            field to apply
 	 * @param value
-	 *            raw value of field
-	 * @return formatted value of field in required internal data type
+	 *            value to apply for this field, which could be an array of objects if value for field consists of
+	 *            multiple locations
+	 *
+	 * @throws java.text.ParseException
+	 *             if an error parsing the specified value based on the field definition (e.g. does not match defined
+	 *             format, etc.)
+	 *
+	 * @see #applyFieldValue(ActivityField, Object)
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityField#aggregateFieldValue(Object, ActivityInfo)
 	 */
-	protected Object formatValue(ActivityField field, ActivityFieldLocator locator, Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (field.isEnumeration()) {
-			if (value instanceof String) {
-				String strValue = (String) value;
-				value = StringUtils.containsOnly(strValue, "0123456789") ? Integer.valueOf(strValue) // NON-NLS
-						: strValue.toUpperCase().trim();
-			}
-		}
-		StreamFieldType fieldType = field.getFieldType();
-		if (fieldType != null) {
-			switch (fieldType) {
-			case ElapsedTime:
-				try {
-					// Elapsed time needs to be converted to usec
-					if (!(value instanceof Number)) {
-						value = Long.valueOf(Utils.toString(value));
-					}
-					TimeUnit units = locator == null ? TimeUnit.MICROSECONDS : locator.getBuiltInUnits();
-					value = TimestampFormatter.convert((Number) value, units, TimeUnit.MICROSECONDS);
-				} catch (Exception e) {
-				}
-				break;
-			case ServerIp:
-				if (value instanceof InetAddress) {
-					value = ((InetAddress) value).getHostAddress();
-				}
-				break;
-			case ServerName:
-				if (value instanceof InetAddress) {
-					value = ((InetAddress) value).getHostName();
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		return value;
+	public void applyField(ActivityField field, Object value) throws ParseException {
+		applyFieldValue(field, field.aggregateFieldValue(value, this));
 	}
 
 	/**
@@ -291,7 +169,7 @@ public class ActivityInfo {
 	 * @param fieldValue
 	 *            formatted value based on locator definition for field
 	 *
-	 * @throws ParseException
+	 * @throws java.text.ParseException
 	 *             if there are any errors with conversion to internal format
 	 */
 	public void setFieldValue(ActivityField field, Object fieldValue) throws ParseException {
@@ -591,7 +469,7 @@ public class ActivityInfo {
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
 	 *
-	 * @see Map#put(Object, Object)
+	 * @see java.util.Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see #addActivityProperty(String, Object, boolean)
 	 */
@@ -612,7 +490,7 @@ public class ActivityInfo {
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
 	 *
-	 * @see Map#put(Object, Object)
+	 * @see java.util.Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, boolean)
 	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
@@ -634,7 +512,7 @@ public class ActivityInfo {
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
 	 *
-	 * @see Map#put(Object, Object)
+	 * @see java.util.Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, String)
 	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
@@ -654,7 +532,7 @@ public class ActivityInfo {
 	 * @return previous property value replaced by {@code propValue} or {@code null} if there was no such activity
 	 *         property set
 	 *
-	 * @see Map#put(Object, Object)
+	 * @see java.util.Map#put(Object, Object)
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
@@ -791,7 +669,7 @@ public class ActivityInfo {
 	 *            separately, e.g., activity child events
 	 *
 	 * @return trackable instance made from this activity entity data
-	 * @throws java.lang.IllegalArgumentException
+	 * @throws IllegalArgumentException
 	 *             if {@code tracker} is null
 	 * @see com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput#logItem(ActivityInfo)
 	 */
@@ -839,7 +717,7 @@ public class ActivityInfo {
 	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
 	 * 
 	 * @return trackable instance made from this activity entity data
-	 * @throws java.lang.IllegalArgumentException
+	 * @throws IllegalArgumentException
 	 *             if {@code tracker} is null
 	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
 	 */
@@ -848,7 +726,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Builds {@link TrackingEvent} for activity data recording.
+	 * Builds {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} for activity data recording.
 	 *
 	 * @param tracker
 	 *            communication gateway to use to record activity
@@ -945,7 +823,8 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			for (ActivityInfo child : children) {
+			List<ActivityInfo> cais = getChildren();
+			for (ActivityInfo child : cais) {
 				Trackable cTrackable = buildChild(tracker, child, trackId);
 				boolean consumed = addTrackableChild(event, cTrackable);
 
@@ -959,7 +838,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Builds {@link TrackingActivity} for activity data recording.
+	 * Builds {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity} for activity data recording.
 	 * 
 	 * @param tracker
 	 *            communication gateway to use to record activity
@@ -1056,7 +935,8 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			for (ActivityInfo child : children) {
+			List<ActivityInfo> cais = getChildren();
+			for (ActivityInfo child : cais) {
 				Trackable cTrackable = buildChild(tracker, child, trackId);
 				boolean consumed = addTrackableChild(activity, cTrackable);
 
@@ -1128,7 +1008,7 @@ public class ActivityInfo {
 	}
 
 	/**
-	 * Builds {@link Snapshot} for activity data recording.
+	 * Builds {@link com.jkoolcloud.tnt4j.core.Snapshot} for activity data recording.
 	 *
 	 * @param tracker
 	 *            communication gateway to use to record snapshot
@@ -1483,10 +1363,10 @@ public class ActivityInfo {
 
 		if (otherAi.hasChildren()) {
 			if (children == null) {
-				children = new ArrayList<>();
+				children = new LinkedHashMap<>();
 			}
 
-			children.addAll(otherAi.children);
+			children.putAll(otherAi.children);
 			parent = otherAi.parent;
 		}
 	}
@@ -1804,23 +1684,51 @@ public class ActivityInfo {
 	 *
 	 * @param ai
 	 *            activity entity object containing child data
+	 * @param groupName
+	 *            children group name (e.g. parser name)
 	 */
-	public void addChild(ActivityInfo ai) {
+	public void addChild(String groupName, ActivityInfo ai) {
 		if (children == null) {
-			children = new ArrayList<>();
+			children = new LinkedHashMap<>();
 		}
 
 		ai.setParent(this);
-		children.add(ai);
+
+		List<ActivityInfo> chList = children.computeIfAbsent(groupName, k -> new ArrayList<>());
+		chList.add(ai);
 	}
 
 	/**
-	 * Returns list of child activity entities.
+	 * Returns list of all child activity entities.
 	 *
 	 * @return list of child activity entities
 	 */
 	public List<ActivityInfo> getChildren() {
-		return children;
+		if (children == null) {
+			return null;
+		}
+
+		List<ActivityInfo> chList = new ArrayList<>();
+
+		for (List<ActivityInfo> childs : children.values()) {
+			if (childs != null) {
+				chList.addAll(childs);
+			}
+		}
+
+		return chList;
+	}
+
+	/**
+	 * Returns list of child group activity entities.
+	 *
+	 * @param groupName
+	 *            children group name
+	 *
+	 * @return list of child activity entities
+	 */
+	public List<ActivityInfo> getChildren(String groupName) {
+		return children == null ? null : children.get(groupName);
 	}
 
 	/**
@@ -1829,7 +1737,7 @@ public class ActivityInfo {
 	 * @return {@code false} if children list is {@code null} or empty, {@code true} - otherwise
 	 */
 	public boolean hasChildren() {
-		return CollectionUtils.isNotEmpty(children);
+		return MapUtils.isNotEmpty(children);
 	}
 
 	/**
@@ -1892,12 +1800,38 @@ public class ActivityInfo {
 	 * @param fieldName
 	 *            field name value to get
 	 * @return field contained value
+	 *
+	 * @see #getFieldValue(String, String)
 	 */
 	public Object getFieldValue(String fieldName) {
+		return getFieldValue(fieldName, null);
+	}
+
+	/**
+	 * Returns activity field value.
+	 * <p>
+	 * {@code fieldName} can also be as some expression variable having {@code "${FIELD_NAME}"} format.
+	 *
+	 * @param fieldName
+	 *            field name value to get
+	 * @param groupName
+	 *            children group name, actual only then resolving child entity field value
+	 * @return field contained value, or {@code null} if field is not found
+	 * @throws java.lang.IllegalArgumentException
+	 *             if field name does not match expected pattern
+	 * 
+	 * @see #getChildFieldValue(java.util.regex.Matcher, String, String)
+	 */
+	public Object getFieldValue(String fieldName, String groupName) throws IllegalArgumentException {
 		try {
 			if (fieldName.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
 				return parent == null ? null
 						: parent.getFieldValue(fieldName.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()));
+			}
+
+			Matcher fnMatcher = CHILD_FIELD_PATTERN.matcher(fieldName);
+			if (fnMatcher.matches()) {
+				return getChildFieldValue(fnMatcher, fieldName, groupName);
 			}
 
 			if (fieldName.startsWith(Utils.VAR_EXP_START_TOKEN)) {
@@ -1977,5 +1911,61 @@ public class ActivityInfo {
 
 			return p == null ? null : p.getValue();
 		}
+	}
+
+	/**
+	 * Returns activity child entity field value.
+	 * <p>
+	 * Field name can be defined using two patterns:
+	 * <ul>
+	 * <li>{@code 'child[childIndex].fieldName'} - where {@code 'child'} is predefined value to resolve child entity,
+	 * {@code 'childIndex'} is child index in group named by {@code defaultGroupName} parameter, {@code 'fieldName'} is
+	 * child entity field name</li>
+	 * <li>{@code 'child[groupName.childIndex].fieldName'} - where {@code 'child'} is predefined value to resolve child
+	 * entity, {@code 'groupName'} is activity children group name, {@code 'childIndex'} is child index in that group,
+	 * {@code 'fieldName'} is child entity field name</li>
+	 * </ul>
+	 *
+	 * @param fnMatcher
+	 *            field name RegEx matcher
+	 * @param fieldName
+	 *            field name value to get
+	 * @param defaultGroupName
+	 *            default group name, when {@code fieldName} does not define one
+	 * @return field contained value, or {@code null} if field is not found
+	 * @throws IllegalArgumentException
+	 *             if child field name does not match expected pattern
+	 */
+	protected Object getChildFieldValue(Matcher fnMatcher, String fieldName, String defaultGroupName)
+			throws IllegalArgumentException {
+		String fName = null;
+		String groupName = null;
+		int chIndex = -1;
+		int chtLength = 0;
+
+		try {
+			String chLocator = fnMatcher.group("child"); // NON-NLS
+			fName = fnMatcher.group("field"); // NON-NLS
+			String[] chTokens = chLocator == null ? null : chLocator.split("\\."); // NON-NLS
+			chtLength = ArrayUtils.getLength(chTokens);
+			if (chtLength == 1) {
+				groupName = defaultGroupName;
+				chIndex = Integer.parseInt(chTokens[0]);
+			} else if (chtLength > 1) {
+				groupName = chTokens[0];
+				chIndex = Integer.parseInt(chTokens[1]);
+			}
+		} catch (Exception exc) {
+		}
+
+		if (StringUtils.isEmpty(fName) || StringUtils.isEmpty(groupName) || chIndex < 0) {
+			throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+					StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.invalid.child.field.locator",
+					chtLength == 1 ? "child[childIndex].fieldName" : "child[groupName.childIndex].fieldName", // NON-NLS
+					fieldName));
+		}
+
+		List<ActivityInfo> childs = children == null ? null : children.get(groupName);
+		return childs == null || chIndex >= childs.size() ? null : childs.get(chIndex).getFieldValue(fName);
 	}
 }

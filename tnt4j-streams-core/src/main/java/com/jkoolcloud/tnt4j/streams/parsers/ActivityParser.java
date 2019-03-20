@@ -289,7 +289,7 @@ public abstract class ActivityParser implements NamedObject {
 			if (sai != null) {
 				if (parserRef.getAggregationType() == AggregationType.Join
 						|| parserRef.getAggregationType() == AggregationType.Relate) {
-					ai.addChild(sai);
+					ai.addChild(parserRef.getParser().getName(), sai);
 				} else {
 					ai.mergeAll(sai);
 				}
