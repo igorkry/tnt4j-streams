@@ -619,9 +619,7 @@ public final class StreamsCache {
 				}
 			}
 
-			MapEntry[] mapElements = new MapEntry[pEntries.size()];
-			mapElements = pEntries.toArray(mapElements);
-			return mapElements;
+			return pEntries.toArray(new MapEntry[pEntries.size()]);
 		}
 
 		@Override

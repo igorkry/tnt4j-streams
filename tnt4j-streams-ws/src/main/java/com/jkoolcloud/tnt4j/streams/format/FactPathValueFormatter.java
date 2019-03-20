@@ -156,8 +156,7 @@ public class FactPathValueFormatter extends FactNameValueFormatter {
 	@Override
 	protected StringBuilder toString(StringBuilder nvString, Trackable t, Snapshot snap) {
 		Collection<Property> list = getProperties(snap);
-		Property[] pArray = new Property[list.size()];
-		pArray = list.toArray(pArray);
+		Property[] pArray = list.toArray(new Property[list.size()]);
 		String sName = getTrackableKey(t, getSnapName(snap));
 		for (int i = 0; i < pArray.length; i++) {
 			Property p = pArray[i];
@@ -309,8 +308,7 @@ public class FactPathValueFormatter extends FactNameValueFormatter {
 		String[] levelAttrs;
 		int i = 0;
 		for (List<String> level : levelList) {
-			levelAttrs = new String[level.size()];
-			levelAttrs = level.toArray(levelAttrs);
+			levelAttrs = level.toArray(new String[level.size()]);
 
 			pathLevelAttrKeys[i++] = levelAttrs;
 		}

@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.utils;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -550,7 +551,15 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		arrayString = arrayString.replace("][", TAG_DELIM).replace("][", TAG_DELIM); // NON-NLS
 		arrayString = arrayString.replace("[", "").replace("]", ""); // NON-NLS
 
-		return arrayString.split(TAG_DELIM);
+		String[] tags = arrayString.split(TAG_DELIM);
+
+		for (int i = 0; i < tags.length; i++) {
+			if (tags[i] != null) {
+				tags[i] = tags[i].trim();
+			}
+		}
+
+		return tags;
 	}
 
 	/**
@@ -978,19 +987,31 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Makes {@link Object} type array from provided object instance.
 	 * <p>
 	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link java.util.Collection}, then method
-	 * {@link java.util.Collection#toArray()} is invoked. In all other cases - new single item array is created.
+	 * {@link #makeArray(java.util.Collection)} is invoked. If obj is {@link java.util.Map}, then method
+	 * {@link #makeArray(java.util.Map)} is invoked. In all other cases - new single item array is created.
 	 *
 	 * @param obj
 	 *            object instance to make an array
 	 * @return array made of provided object, or {@code null} if obj is {@code null}
+	 *
+	 * @see #makeArray(java.util.Collection)
 	 */
 	public static Object[] makeArray(Object obj) {
 		if (obj == null) {
 			return null;
 		}
 
-		return obj instanceof Object[] ? (Object[]) obj
-				: obj instanceof Collection ? makeArray((Collection<?>) obj) : new Object[] { obj };
+		if (isArray(obj)) {
+			return (Object[]) obj;
+		}
+		if (obj instanceof Collection) {
+			return makeArray((Collection<?>) obj);
+		}
+		// if (obj instanceof Map) {
+		// return makeArray((Map<?, ?>) obj);
+		// }
+
+		return new Object[] { obj };
 	}
 
 	/**
@@ -1000,8 +1021,58 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *            collection to make an array
 	 * @return an array containing all of the elements in provided collection
 	 */
-	public static Object[] makeArray(Collection<?> coll) {
-		return coll == null ? null : coll.toArray();
+	@SuppressWarnings("unchecked")
+	public static <T> T[] makeArray(Collection<T> coll) {
+		if (coll == null) {
+			return null;
+		}
+
+		T[] array = (T[]) Array.newInstance(determineCommonClass(coll), coll.size());
+
+		return coll.toArray(array);
+	}
+
+	/**
+	 * Determines common collection elements class.
+	 *
+	 * @param c
+	 *            collection instance to determine common elements type
+	 * @return class common for all collection elements
+	 */
+	public static Class<?> determineCommonClass(Collection<?> c) {
+		Class<?> cls = null;
+
+		if (CollectionUtils.isNotEmpty(c)) {
+			for (Object ci : c) {
+				cls = getCommonClass(ci.getClass(), cls);
+			}
+		}
+
+		return cls == null ? Object.class : cls;
+	}
+
+	/**
+	 * Determines common class for provided classes.
+	 *
+	 * @param fc
+	 *            first class
+	 * @param sc
+	 *            second class
+	 * @return common class for provided classes
+	 *
+	 * @see Class#isAssignableFrom(Class)
+	 * @see Class#getSuperclass()
+	 */
+	public static Class<?> getCommonClass(Class<?> fc, Class<?> sc) {
+		Class<?> cc = fc;
+
+		if (sc != null) {
+			while (!cc.isAssignableFrom(sc)) {
+				cc = cc.getSuperclass();
+			}
+		}
+
+		return cc;
 	}
 
 	/**
@@ -1010,9 +1081,11 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @param map
 	 *            map to make an array
 	 * @return an array containing all of the elements in provided map
+	 *
+	 * @see #makeArray(java.util.Collection)
 	 */
-	public static Object[] makeArray(Map<?, ?> map) {
-		return map == null ? null : map.entrySet().toArray();
+	public static <K, V> Map.Entry<K, V>[] makeArray(Map<K, V> map) {
+		return map == null ? null : makeArray(map.entrySet());
 	}
 
 	/**
@@ -1056,7 +1129,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 */
 	public static Object getItem(Object obj, int index) {
 		if (obj instanceof Collection) {
-			obj = ((Collection<?>) obj).toArray();
+			obj = makeArray((Collection<?>) obj);
 		}
 
 		if (obj instanceof Object[]) {
@@ -1138,7 +1211,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			return null;
 		}
 
-		return valuesList.size() == 1 ? valuesList.iterator().next() : valuesList.toArray();
+		return valuesList.size() == 1 ? valuesList.iterator().next() : makeArray(valuesList);
 	}
 
 	private static Object simplifyValue(Object[] valuesArray) {
@@ -1251,8 +1324,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 				}
 			}
 
-			pArray = new String[pList.size()];
-			return pList.toArray(pArray);
+			return pList.toArray(new String[pList.size()]);
 		}
 
 		return null;
@@ -1488,7 +1560,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 			}
 		}
 
-		return (T[]) oList.toArray();
+		return makeArray(oList);
 	}
 
 	/**

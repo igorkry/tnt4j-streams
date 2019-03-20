@@ -146,7 +146,7 @@ public class ActivityInfo {
 					fvList.add(fValue);
 				}
 
-				values = fvList.toArray();
+				values = Utils.makeArray(fvList);
 			}
 
 			if (field.isEnumeration() && values.length > 1) {
