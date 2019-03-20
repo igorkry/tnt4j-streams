@@ -266,6 +266,11 @@ public class RestStream extends AbstractWsStream<String> {
 
 	private static String executeRequest(CloseableHttpClient client, HttpUriRequest req, String username,
 			String password) throws IOException {
+		if (client == null) {
+			throw new IllegalArgumentException(
+					StreamsResources.getString(WsStreamConstants.RESOURCE_BUNDLE_NAME, "RestStream.client.null"));
+		}
+
 		CloseableHttpResponse response = null;
 		try {
 			HttpContext ctx = HttpClientContext.create();
