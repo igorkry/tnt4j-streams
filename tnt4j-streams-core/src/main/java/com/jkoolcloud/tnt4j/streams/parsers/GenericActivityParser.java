@@ -340,12 +340,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            fields list to organize
 	 * @return topologically sorted fields list
 	 */
-	protected static List<ActivityField> organizeFieldsReferences(List<ActivityField> fields) {
+	protected List<ActivityField> organizeFieldsReferences(List<ActivityField> fields) {
 		// make fields map to simplify fields access by name
-		Map<String, ActivityField> fieldsMap = new LinkedHashMap<>(fields.size());
+		Map<String, ActivityField> parserFieldsMap = new LinkedHashMap<>(fields.size());
+		Map<String, ActivityField> allFieldsMap = new LinkedHashMap<>(fields.size());
 		for (ActivityField f : fields) {
-			fieldsMap.put(f.getFieldTypeName(), f);
+			parserFieldsMap.put(f.getFieldTypeName(), f);
+			allFieldsMap.put(f.getFieldTypeName(), f);
+			collectStackedParsersFields(allFieldsMap, f);
 		}
+
 		// add auto-assignable fields
 		Set<String> aaFields = new HashSet<>();
 		aaFields.add(StreamFieldType.TrackingId.name());
@@ -363,11 +367,10 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 			if (CollectionUtils.isNotEmpty(refs)) {
 				for (String ref : refs) {
-					ActivityField rf = fieldsMap.get(ref);
+					ActivityField rf = parserFieldsMap.get(ref);
 
 					if (rf == null) {
-						// NOTE: ignoring parent parser fields references for now.
-						if (ref.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX) || aaFields.contains(ref)) {
+						if (isExtRefField(ref, aaFields, allFieldsMap)) {
 							continue;
 						} else {
 							throw new IllegalArgumentException(
@@ -407,6 +410,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 	}
 
+	private static boolean isExtRefField(String ref, Set<String> aaFields, Map<String, ActivityField> allFieldsMap) {
+		// NOTE: ignoring parent parser fields references for now.
+		return ref.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX) //
+				|| aaFields.contains(ref) //
+				|| allFieldsMap.containsKey(ref);
+	}
+
 	/**
 	 * Arranges parser fields list by field locator type: RAW, ACTIVITY, CACHE
 	 *
@@ -442,6 +452,39 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				return ftIdx;
 			}
 		});
+	}
+
+	/**
+	 * Collects fields from field stacked parsers into provided fields map. When field has no stacked parsers, nothing
+	 * new is added to map.
+	 *
+	 * @param fieldsMap
+	 *            fields map to append stacked parsers fields
+	 * @param f
+	 *            field instance to collect stacked parsers fields
+	 */
+	protected void collectStackedParsersFields(Map<String, ActivityField> fieldsMap, ActivityField f) {
+		Collection<ActivityField.FieldParserReference> sParsers = f.getStackedParsers();
+
+		if (CollectionUtils.isEmpty(sParsers)) {
+			return;
+		}
+
+		for (ActivityField.FieldParserReference spRef : sParsers) {
+			GenericActivityParser<?> p = (GenericActivityParser<?>) spRef.getParser();
+
+			for (ActivityField spf : p.fieldList) {
+				ActivityField pmf = fieldsMap.put(spf.getFieldTypeName(), spf);
+
+				if (pmf != null) {
+					logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+							"ActivityParser.stacked.field.conflict", f.getParser().getName(), f,
+							spf.getParser().getName(), spf, pmf.getParser().getName(), pmf);
+				}
+
+				p.collectStackedParsersFields(fieldsMap, spf);
+			}
+		}
 	}
 
 	/**
