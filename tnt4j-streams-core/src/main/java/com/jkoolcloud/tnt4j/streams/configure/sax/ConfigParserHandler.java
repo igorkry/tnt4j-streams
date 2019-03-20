@@ -2159,7 +2159,7 @@ public class ConfigParserHandler extends DefaultHandler {
 				ValueTransformation<Object, Object> aft = aFieldData.transformations.get(0);
 
 				if (aft.getPhase() == ValueTransformation.Phase.RAW
-						|| aft.getPhase() == ValueTransformation.Phase.FORMATTED) {
+						|| aft.getPhase() == ValueTransformation.Phase.FORMATTED || aft.getPhase() == null) {
 					aFieldData.getLocators().get(0).addTransformation(aft);
 					transformationsAdded = true;
 				}
