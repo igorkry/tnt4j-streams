@@ -1044,6 +1044,9 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 
 		if (CollectionUtils.isNotEmpty(c)) {
 			for (Object ci : c) {
+				if (ci == null) {
+					continue;
+				}	
 				cls = getCommonClass(ci.getClass(), cls);
 			}
 		}
