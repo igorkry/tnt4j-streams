@@ -61,6 +61,7 @@ public final class StreamsScriptingUtils {
 
 	private static final String SCRIPTING_CFG_PROPERTIES = "scripting.properties"; // NON-NLS
 	private static final String IMPORT_PACKAGES_PROP_KEY_SUFFIX = ".scripting.import.packages"; // NON-NLS
+	private static final String IMPORT_CLASSES_PROP_KEY_SUFFIX = ".scripting.import.classes"; // NON-NLS
 
 	private static final Pattern FIELD_VALUE_PLACEHOLDER_PATTERN = Pattern.compile("\\$(\\w+\\b)"); // NON-NLS
 	private static final Pattern FIELD_PLACEHOLDER_PATTERN = Pattern.compile("\\{\\w+\\}"); // NON-NLS
@@ -69,6 +70,7 @@ public final class StreamsScriptingUtils {
 	private static String DEFAULT_JS_CODE_IMPORTS;
 
 	private static final Set<String> DEFAULT_IMPORT_PACKAGES = new HashSet<>();
+	private static final Set<String> DEFAULT_IMPORT_CLASSES = new HashSet<>();
 
 	private static ScriptEngine GROOVY_SCRIPT_ENGINE;
 	private static ScriptEngine JS_SCRIPT_ENGINE;
@@ -95,6 +97,14 @@ public final class StreamsScriptingUtils {
 						String[] pArray = importPackages.split(";");
 
 						Collections.addAll(DEFAULT_IMPORT_PACKAGES, pArray);
+					}
+				} else if (pName.endsWith(IMPORT_CLASSES_PROP_KEY_SUFFIX)) {
+					String importClasses = p.getProperty(pName);
+
+					if (StringUtils.isNotEmpty(importClasses)) {
+						String[] cArray = importClasses.split(";");
+
+						Collections.addAll(DEFAULT_IMPORT_CLASSES, cArray);
 					}
 				}
 			}
@@ -123,6 +133,10 @@ public final class StreamsScriptingUtils {
 
 		for (String pckg : DEFAULT_IMPORT_PACKAGES) {
 			ic.addStarImports(pckg);
+		}
+
+		for (String pckg : DEFAULT_IMPORT_CLASSES) {
+			ic.addImports(pckg);
 		}
 
 		cc.addCompilationCustomizers(ic);
@@ -160,6 +174,10 @@ public final class StreamsScriptingUtils {
 			sb.append(sb.length() > 0 ? ", " : "  ").append(pckg).append("\n"); // NON-NLS
 		}
 
+		for (String cls : DEFAULT_IMPORT_CLASSES) {
+			sb.append(sb.length() > 0 ? ", " : "  ").append(cls).append("\n"); // NON-NLS
+		}
+
 		return sb.toString();
 	}
 
@@ -186,6 +204,34 @@ public final class StreamsScriptingUtils {
 			StringBuilder sb = new StringBuilder(DEFAULT_JS_CODE_IMPORTS);
 
 			sb.append(sb.length() > 0 ? ", " : "  ").append(pckg).append("\n"); // NON-NLS
+
+			DEFAULT_JS_CODE_IMPORTS = sb.toString();
+		}
+	}
+
+	/**
+	 * Adds class name to default set of Java API imported packages.
+	 *
+	 * @param cls
+	 *            class name to add
+	 */
+	public static void registerDefaultImportClass(String cls) {
+		DEFAULT_IMPORT_CLASSES.add(cls);
+
+		if (DEFAULT_GROOVY_CONFIGURATION != null) {
+			List<CompilationCustomizer> ccList = DEFAULT_GROOVY_CONFIGURATION.getCompilationCustomizers();
+
+			for (CompilationCustomizer cc : ccList) {
+				if (cc instanceof ImportCustomizer) {
+					((ImportCustomizer) cc).addImports(cls);
+				}
+			}
+		}
+
+		if (DEFAULT_JS_CODE_IMPORTS != null) {
+			StringBuilder sb = new StringBuilder(DEFAULT_JS_CODE_IMPORTS);
+
+			sb.append(sb.length() > 0 ? ", " : "  ").append(cls).append("\n"); // NON-NLS
 
 			DEFAULT_JS_CODE_IMPORTS = sb.toString();
 		}
