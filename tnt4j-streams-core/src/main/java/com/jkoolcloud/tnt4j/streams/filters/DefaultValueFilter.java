@@ -16,10 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.filters;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -101,9 +98,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 
 			valuesSet = new HashSet<>(va.length);
 
-			for (String v : va) {
-				valuesSet.add(v);
-			}
+			Collections.addAll(valuesSet, va);
 		}
 
 		// TODO: values conversions: i.e. from MQ constant names to numeric.
@@ -133,8 +128,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 			match = equals(valuesSet, fvStr);
 		}
 
-		boolean filteredOut = isFilteredOut(handleType, match);
-		return filteredOut;
+		return isFilteredOut(handleType, match);
 	}
 
 	/**
@@ -179,7 +173,7 @@ public class DefaultValueFilter extends AbstractEntityFilter<Object> {
 					return true;
 				}
 			}
-		} else if (Utils.isArray(fieldValue)) {
+		} else if (Utils.isObjArray(fieldValue)) {
 			for (Object av : (Object[]) fieldValue) {
 				String avs = Utils.toString(av);
 				if (equals(filterValues, avs)) {
