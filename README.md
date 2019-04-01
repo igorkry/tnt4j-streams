@@ -4279,9 +4279,15 @@ Or you can refer streams data source configuration file over System property nam
 
 **NOTE:** `TNT4J-Streams` can perform `tnt-data-source` configuration XML validation against XSD schema. Found validation failures are 
 listed in `TNT4J-Streams` log as `WARNING` level entries. To enable this XML-XSD validation use system property 
-`com.jkoolcloud.tnt4j.streams.validate.config`:
+`com.jkoolcloud.tnt4j.streams.validate.config.xsd`:
 ```properties
-    -Dcom.jkoolcloud.tnt4j.streams.validate.config=true
+    -Dcom.jkoolcloud.tnt4j.streams.validate.config.xsd=true
+```
+**NOTE:** by default, `TNT4J-Streams` performs `tnt-data-source` configuration defined transformations, filters and matchers script 
+expressions validation. Found validation failures are listed in `TNT4J-Streams` log as `ERROR` level entries. To disable script expressions 
+validation use system property `com.jkoolcloud.tnt4j.streams.validate.config.exp`:
+```properties
+    -Dcom.jkoolcloud.tnt4j.streams.validate.config.exp=false
 ```
 
 Program argument `-p:` is used in common with `PipedStream` and only parsers configuration from `<tnt-data-source/>` definition is used. See 

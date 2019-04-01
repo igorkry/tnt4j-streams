@@ -69,8 +69,10 @@ public final class StreamsConfigSAXParser {
 	 *
 	 * @param config
 	 *            input stream to get configuration data from
-	 * @param validate
+	 * @param validateXSD
 	 *            flag indicating whether to validate configuration XML against XSD schema
+	 * @param validateExp
+	 *            flag indicating whether to validate configuration contained script expressions
 	 * @return streams configuration data or {@code null} if configuration is erroneous (fails XML-XSD validation)
 	 * @throws ParserConfigurationException
 	 *             if there is an inconsistency in the configuration
@@ -79,11 +81,11 @@ public final class StreamsConfigSAXParser {
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
 	 */
-	public static StreamsConfigData parse(InputStream config, boolean validate)
+	public static StreamsConfigData parse(InputStream config, boolean validateXSD, boolean validateExp)
 			throws ParserConfigurationException, SAXException, IOException {
 		cfgFilePath = Utils.resolveInputFilePath(config);
 
-		if (validate) {
+		if (validateXSD) {
 			config = config.markSupported() ? config : new ByteArrayInputStream(IOUtils.toByteArray(config));
 
 			Map<OpLevel, List<SAXParseException>> validationErrors = validate(config);
@@ -104,6 +106,7 @@ public final class StreamsConfigSAXParser {
 		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 		SAXParser parser = parserFactory.newSAXParser();
 		ConfigParserHandler hndlr = getConfigHandler();
+		hndlr.setValidateScriptExpressions(validateExp);
 
 		parser.parse(config, hndlr);
 

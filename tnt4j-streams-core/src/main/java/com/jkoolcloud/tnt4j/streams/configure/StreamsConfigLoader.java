@@ -194,7 +194,10 @@ public class StreamsConfigLoader {
 	 * Loads the configuration XML using SAX parser.
 	 * <p>
 	 * Configuration XML validation against XSD schema is performed if system property
-	 * {@code com.jkoolcloud.tnt4j.streams.validate.config} is set to {@code true}.
+	 * {@code "com.jkoolcloud.tnt4j.streams.validate.config.xsd"} is set to {@code true}.
+	 * <p>
+	 * Default configuration defined transformations, filters and matchers script expressions validation can be turned
+	 * off by setting system property {@code "com.jkoolcloud.tnt4j.streams.validate.config.exp"} to {@code false}.
 	 *
 	 * @param config
 	 *            input stream to get configuration data from
@@ -204,13 +207,19 @@ public class StreamsConfigLoader {
 	 *             if there is an inconsistency in the configuration
 	 * @throws IOException
 	 *             if there is an error reading the configuration data
-	 * @see StreamsConfigSAXParser#parse(InputStream, boolean)
+	 * @see StreamsConfigSAXParser#parse(java.io.InputStream, boolean, boolean)
 	 */
 	protected void load(InputStream config) throws SAXException, ParserConfigurationException, IOException {
-		boolean validate = Utils.getBoolean("com.jkoolcloud.tnt4j.streams.validate.config", System.getProperties(), // NON-NLS
-				false);
+		String pValue = System.getProperty("com.jkoolcloud.tnt4j.streams.validate.config.xsd"); // NON-NLS
+		if (pValue == null) {
+			pValue = System.getProperty("com.jkoolcloud.tnt4j.streams.validate.config"); // NON-NLS
+		}
+
+		boolean validateXSD = Boolean.parseBoolean(pValue);
+		boolean validateExp = Utils.getBoolean("com.jkoolcloud.tnt4j.streams.validate.config.exp", // NON-NLS
+				System.getProperties(), true);
 		try {
-			streamsCfgData = StreamsConfigSAXParser.parse(config, validate);
+			streamsCfgData = StreamsConfigSAXParser.parse(config, validateXSD, validateExp);
 			erroneous = streamsCfgData == null;
 		} finally {
 			Utils.close(config);

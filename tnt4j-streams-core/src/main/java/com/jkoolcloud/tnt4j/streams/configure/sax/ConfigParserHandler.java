@@ -376,10 +376,22 @@ public class ConfigParserHandler extends DefaultHandler {
 	private boolean include = false;
 	private Stack<String> path;
 
+	private boolean validateScriptExpressions = true;
+
 	/**
 	 * Constructs a new ConfigurationParserHandler.
 	 */
 	public ConfigParserHandler() {
+	}
+
+	/**
+	 * Sets flag indicating whether to check script expressions.
+	 * 
+	 * @param validateScriptExpressions
+	 *            flag indicating whether to validate configuration contained script expressions
+	 */
+	public void setValidateScriptExpressions(boolean validateScriptExpressions) {
+		this.validateScriptExpressions = validateScriptExpressions;
 	}
 
 	/**
@@ -2383,6 +2395,10 @@ public class ConfigParserHandler extends DefaultHandler {
 	}
 
 	private void checkScriptExpression(String expString) throws SAXException {
+		if (!validateScriptExpressions) {
+			return;
+		}
+
 		if (StringUtils.isEmpty(expString)) {
 			return;
 		}

@@ -394,8 +394,7 @@ public final class StreamsScriptingUtils {
 		while (m.find()) {
 			int phSIdx = m.start();
 
-			if (phSIdx == 0 || (isValidIdentifierStart(expString.charAt(phSIdx + 1))
-					&& !isPlaceholderStart(expString.charAt(phSIdx - 1)))) {
+			if (phSIdx == 0 || (!isQuoted(expString, phSIdx) && isInvalidPlaceholder(expString, phSIdx))) {
 				return false;
 			}
 		}
@@ -410,11 +409,39 @@ public final class StreamsScriptingUtils {
 		return true;
 	}
 
+	private static boolean isInvalidPlaceholder(String expString, int phSIdx) {
+		return isValidIdentifierStart(expString.charAt(phSIdx + 1))
+				&& !isPlaceholderStart(expString.charAt(phSIdx - 1));
+	}
+
 	private static boolean isPlaceholderStart(char ch) {
 		return ch == '$';
 	}
 
 	private static boolean isValidIdentifierStart(char ch) {
 		return ch == '_' || Character.isLetter(ch);
+	}
+
+	private static boolean isQuoted(String expString, int phSIdx) {
+		int qbc = countMatches(expString, phSIdx, '"');
+		int nqIdx = expString.indexOf('"', phSIdx);
+
+		return (qbc % 2 != 0) && nqIdx > phSIdx;
+	}
+
+	private static int countMatches(CharSequence str, int toIndex, char ch) {
+		if (StringUtils.isEmpty(str)) {
+			return 0;
+		} else {
+			int count = 0;
+
+			for (int i = 0; i < toIndex; ++i) {
+				if (ch == str.charAt(i)) {
+					++count;
+				}
+			}
+
+			return count;
+		}
 	}
 }
