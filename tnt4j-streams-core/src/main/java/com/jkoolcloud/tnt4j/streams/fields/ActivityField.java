@@ -256,6 +256,23 @@ public class ActivityField extends AbstractFieldEntity {
 		return hasNoValueLocator() && hasActivityTransformations();
 	}
 
+	@Override
+	public boolean hasActivityTransformations() {
+		if (super.hasActivityTransformations()) {
+			return true;
+		}
+
+		if (locators != null) {
+			for (ActivityFieldLocator loc : locators) {
+				if (loc.hasActivityTransformations()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Checks whether any of field static or dynamic locators has type 'Activity'.
 	 *

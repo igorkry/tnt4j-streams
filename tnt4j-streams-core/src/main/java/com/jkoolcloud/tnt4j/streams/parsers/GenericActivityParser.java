@@ -418,7 +418,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	}
 
 	/**
-	 * Arranges parser fields list by field locator type: RAW, ACTIVITY, CACHE
+	 * Arranges parser fields list by field locator type: CACHE fields has to be processed last
 	 *
 	 * @param fields
 	 *            fields list to arrange
@@ -434,19 +434,15 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			}
 
 			private int fieldTypeIndex(ActivityField field) {
-				boolean af = field.hasActivityLocators();
 				boolean cf = field.hasCacheLocators();
-				boolean rf = !af && !cf;
+				boolean rf = !cf;
 
 				int ftIdx = 0;
-				if (af) {
-					ftIdx |= 1 << 1;
-				}
 				if (cf) {
 					ftIdx |= 1 << 0;
 				}
 				if (rf) {
-					ftIdx |= 1 << 2;
+					ftIdx |= 1 << 3;
 				}
 
 				return ftIdx;
