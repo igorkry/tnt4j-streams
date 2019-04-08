@@ -370,14 +370,18 @@ public class ActivityInfo {
 		}
 
 		ActivityFieldLocator fmLocator = field.getMasterLocator();
-		if (fieldValue instanceof Number) {
-			TimeUnit units = fmLocator == null ? TimeUnit.MICROSECONDS : fmLocator.getBuiltInUnits();
-			return new UsecTimestamp(units.toMicros(((Number) fieldValue).longValue()));
-		} else {
-			return TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
-					getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
-					fmLocator == null ? null : fmLocator.getLocale());
+		TimeUnit units = fmLocator == null ? TimeUnit.MICROSECONDS : fmLocator.getBuiltInUnits();
+		try {
+			timestamp = TimestampFormatter.parse(units, fieldValue);
+			if (timestamp != null) {
+				return timestamp;
+			}
+		} catch (ParseException exc) {
 		}
+
+		return TimestampFormatter.parse(fmLocator == null ? null : fmLocator.getFormat(),
+				getStringValue(fieldValue, field), fmLocator == null ? null : fmLocator.getTimeZone(),
+				fmLocator == null ? null : fmLocator.getLocale());
 	}
 
 	private static String substitute(String value, String newValue) {
