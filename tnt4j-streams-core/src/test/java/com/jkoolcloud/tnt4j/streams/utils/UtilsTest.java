@@ -249,4 +249,49 @@ public class UtilsTest {
 		Utils.searchFiles(exampleFilesPath);
 	}
 
+	@Test
+	public void testMakeArray() {
+		String str = "Some string";
+		Object[] array = new Object[] { str };
+
+		// single element arrays
+		Object[] cArray = Utils.makeArray(str);
+		assertTrue(cArray[0] instanceof String);
+		assertTrue(cArray instanceof String[]);
+
+		cArray = Utils.makeArray(array);
+		assertTrue(cArray[0] instanceof String);
+		assertTrue(cArray instanceof String[]);
+
+		cArray = Utils.makeArray(array, Object.class);
+		assertTrue(cArray[0] instanceof String);
+		assertFalse(cArray instanceof String[]);
+		assertTrue(cArray instanceof Object[]);
+
+		// multi element arrays
+		array = new Collection[] { new ArrayList(), new Vector(), new Stack() };
+		cArray = Utils.makeArray(array);
+		assertTrue(cArray[0] instanceof ArrayList);
+		assertFalse(cArray instanceof ArrayList[]);
+		assertTrue(cArray instanceof List[]);
+		assertTrue(cArray instanceof AbstractList[]);
+
+		cArray = Utils.makeArray(array, AbstractCollection.class);
+		assertTrue(cArray[0] instanceof ArrayList);
+		assertFalse(cArray instanceof ArrayList[]);
+		assertFalse(cArray instanceof AbstractList[]);
+		assertFalse(cArray instanceof List[]);
+		assertTrue(cArray instanceof AbstractCollection[]);
+		assertTrue(cArray instanceof Collection[]);
+
+		cArray = Utils.makeArray(array, Object.class);
+		assertTrue(cArray[0] instanceof ArrayList);
+		assertFalse(cArray instanceof ArrayList[]);
+		assertFalse(cArray instanceof AbstractList[]);
+		assertFalse(cArray instanceof List[]);
+		assertFalse(cArray instanceof AbstractCollection[]);
+		assertFalse(cArray instanceof Collection[]);
+		assertTrue(cArray instanceof Object[]);
+	}
+
 }

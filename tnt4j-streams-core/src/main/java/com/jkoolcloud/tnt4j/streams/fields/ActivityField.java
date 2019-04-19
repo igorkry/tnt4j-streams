@@ -811,7 +811,8 @@ public class ActivityField extends AbstractFieldEntity {
 
 		if (values != null && CollectionUtils.isNotEmpty(locators)) {
 			if (values.length == 1 && locators.size() > 1) {
-				values[0] = formatValue(groupLocator, values[0]);
+				Object fValue = formatValue(groupLocator, values[0]);
+				values = Utils.makeArray(fValue);
 			} else {
 				if (locators.size() > 1 && locators.size() != values.length) {
 					throw new ParseException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,

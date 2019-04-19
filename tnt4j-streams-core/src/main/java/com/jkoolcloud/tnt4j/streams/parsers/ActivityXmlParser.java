@@ -378,12 +378,13 @@ public class ActivityXmlParser extends GenericActivityParser<Node> {
 				if (val instanceof Node) {
 					val = getTextOnDemand((Node) val, locator, cData, formattingNeeded);
 				} else if (Utils.isCollection(val)) {
-					Object[] nodes = Utils.makeArray(val);
+					Object[] nodes = Utils.makeArray(val, Object.class);
 					for (int i = 0; i < nodes.length; i++) {
 						if (nodes[i] instanceof Node) {
 							nodes[i] = getTextOnDemand((Node) nodes[i], locator, cData, formattingNeeded);
 						}
 					}
+					val = Utils.makeArray(nodes);
 				}
 			} catch (XPathExpressionException exc) {
 				ParseException pe = new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,

@@ -986,50 +986,134 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	/**
 	 * Makes {@link Object} type array from provided object instance.
 	 * <p>
-	 * If obj is {@code Object[]}, then simple casting is performed. If obj is {@link java.util.Collection}, then method
-	 * {@link #makeArray(java.util.Collection)} is invoked. If obj is {@link java.util.Map}, then method
-	 * {@link #makeArray(java.util.Map)} is invoked. In all other cases - new single item array is created.
+	 * Acts same as {@link #makeArray(Object, Class)}, where {@code makeArray(obj, null)}.
 	 *
 	 * @param obj
 	 *            object instance to make an array
 	 * @return array made of provided object, or {@code null} if obj is {@code null}
 	 *
-	 * @see #makeArray(java.util.Collection)
+	 * @see #makeArray(Object, Class)
 	 */
 	public static Object[] makeArray(Object obj) {
+		return makeArray(obj, null);
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided object instance.
+	 * <p>
+	 * <ul>
+	 * <li>If {@code obj} is {@code Object[]}, then method {@link #makeArray(Object[], Class)} is called.</li>
+	 * <li>If {@code obj} is {@link java.util.Collection}, then method {@link #makeArray(java.util.Collection, Class)}
+	 * is called.</li>
+	 * <li>In all other cases - new single item array is created.</li>
+	 * </ul>
+	 * <p>
+	 * Particular type of produced array is most common class for all parameter {@code obj} defined array/collection
+	 * elements, but not lower level than defined {@code cls}
+	 *
+	 * @param obj
+	 *            object instance to make an array
+	 * @param cls
+	 *            desired array type class, can be {@code null} - then array type will be the most common class of all
+	 *            array/collection elements
+	 * @return array made of provided object, or {@code null} if obj is {@code null}
+	 *
+	 * @see #makeArray(Object[], Class)
+	 * @see #makeArray(java.util.Collection, Class)
+	 */
+	public static Object[] makeArray(Object obj, Class<?> cls) {
 		if (obj == null) {
 			return null;
 		}
 
 		if (isObjArray(obj)) {
-			return (Object[]) obj;
+			return makeArray((Object[]) obj, cls);
 		}
 		if (obj instanceof Collection) {
-			return makeArray((Collection<?>) obj);
+			return makeArray((Collection<?>) obj, cls);
 		}
-		// if (obj instanceof Map) {
-		// return makeArray((Map<?, ?>) obj);
-		// }
 
-		return new Object[] { obj };
+		return makeArray(new Object[] { obj }, cls);
 	}
 
 	/**
-	 * Makes {@link Object} type array from provided {@link java.util.Collection} instance {@code coll}.
+	 * Makes {@link T} type array from provided {@link java.util.Collection} instance {@code coll}.
 	 *
 	 * @param coll
 	 *            collection to make an array
 	 * @return an array containing all of the elements in provided collection
+	 *
+	 * @see #makeArray(java.util.Collection, Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] makeArray(Collection<T> coll) {
+		return (T[]) makeArray(coll, null);
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided {@link java.util.Collection} instance {@code coll}. Particular type
+	 * of produced array is most common class for all parameter {@code coll} defined collection elements, but not lower
+	 * level than defined {@code cls}.
+	 *
+	 * @param coll
+	 *            collection to make an array
+	 * @param cls
+	 *            desired array type class, can be {@code null} - then array type will be the most common class of all
+	 *            collection elements
+	 * @return an array containing all of the elements in provided collection
+	 *
+	 * @see #determineCommonClass(Iterable, Class)
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object[] makeArray(Collection<?> coll, Class<?> cls) {
 		if (coll == null) {
 			return null;
 		}
 
-		T[] array = (T[]) Array.newInstance(determineCommonClass(coll), coll.size());
+		Object[] array = (Object[]) Array.newInstance(determineCommonClass(coll, cls), coll.size());
 
 		return coll.toArray(array);
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided object {@code array}. Particular type of produced array is most
+	 * common class for all parameter {@code array} defined array elements.
+	 *
+	 * @param array
+	 *            array to change type
+	 * @return an changed type array
+	 *
+	 * @see #makeArray(Object[], Class)
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object[] makeArray(Object[] array) {
+		return makeArray(array, null);
+	}
+
+	/**
+	 * Makes {@link Object} type array from provided object {@code array}. Particular type of produced array is most *
+	 * common class for all parameter {@code array} defined array elements, but not lower level than defined
+	 * {@code cls}.
+	 *
+	 * @param array
+	 *            array to change type
+	 * @param cls
+	 *            desired array type class, can be {@code null} - then array type will be the most common class of all
+	 *            {@code array} array elements
+	 * @return an changed type array
+	 *
+	 * @see #determineCommonClass(Object[], Class)
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object[] makeArray(Object[] array, Class<?> cls) {
+		if (array == null) {
+			return null;
+		}
+
+		Object[] cArray = (Object[]) Array.newInstance(determineCommonClass(array, cls), array.length);
+		System.arraycopy(array, 0, cArray, 0, array.length);
+
+		return cArray;
 	}
 
 	/**
@@ -1037,15 +1121,42 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 *
 	 * @param c
 	 *            collection instance to determine common elements type
-	 * @return class common for all collection elements
+	 * @param clazz
+	 *            initial class level to start determination, can be {@code null} - then returned class will be the most
+	 *            common class of all {@code c} collection elements
+	 * @return class common for all collection elements, but not lower level than defined {@code clazz}
 	 */
-	public static Class<?> determineCommonClass(Collection<?> c) {
-		Class<?> cls = null;
+	public static Class<?> determineCommonClass(Iterable<?> c, Class<?> clazz) {
+		Class<?> cls = clazz;
 
-		if (CollectionUtils.isNotEmpty(c)) {
+		if (c != null) {
 			for (Object ci : c) {
 				if (ci != null) {
 					cls = getCommonClass(ci.getClass(), cls);
+				}
+			}
+		}
+
+		return cls == null ? Object.class : cls;
+	}
+
+	/**
+	 * Determines common collection elements class.
+	 *
+	 * @param a
+	 *            array instance to determine common elements type
+	 * @param clazz
+	 *            initial class level to start determination, can be {@code null} - then returned class will be the most
+	 *            common class of all {@code a} array elements
+	 * @return class common for all collection elements, but not lower level than defined {@code clazz}
+	 */
+	public static Class<?> determineCommonClass(Object[] a, Class<?> clazz) {
+		Class<?> cls = clazz;
+
+		if (ArrayUtils.isNotEmpty(a)) {
+			for (Object ai : a) {
+				if (ai != null) {
+					cls = getCommonClass(ai.getClass(), cls);
 				}
 			}
 		}
@@ -1065,8 +1176,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * @see Class#isAssignableFrom(Class)
 	 * @see Class#getSuperclass()
 	 */
-	public static Class<?> getCommonClass(Class<?> fc, Class<?> sc) {
-		Class<?> cc = fc;
+	public static <T> Class<? super T> getCommonClass(Class<T> fc, Class<?> sc) {
+		Class<? super T> cc = fc;
 
 		if (sc != null) {
 			while (!cc.isAssignableFrom(sc)) {
@@ -1078,7 +1189,7 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Makes {@link Object} type array from provided {@link java.util.Map} instance {@code map}.
+	 * Makes {@link Map.Entry} type array from provided {@link java.util.Map} instance {@code map}.
 	 *
 	 * @param map
 	 *            map to make an array
@@ -2376,10 +2487,12 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		try {
 			Field lockField = Reader.class.getDeclaredField("lock");
 			lockField.setAccessible(true);
-			Object lock = (InputStream) lockField.get(rdr);
+			Object lock = lockField.get(rdr);
 
 			if (lock instanceof InputStream) {
 				return resolveInputFilePath((InputStream) lock);
+			} else if (lock instanceof Reader && lock != rdr) {
+				return resolveReaderFilePath((Reader) lock);
 			}
 		} catch (Exception exc) {
 		}
