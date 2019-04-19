@@ -15,26 +15,25 @@
 
     <properties>
         <commons.lang3.version>3.8</commons.lang3.version>
-        <commons.collections.version>4.2</commons.collections.version>
+        <commons.collections.version>4.3</commons.collections.version>
         <commons.io.version>2.6</commons.io.version>
         <commons.daemon.version>1.1.0</commons.daemon.version>
         <gson.version>2.8.5</gson.version>
         <json.path.version>2.4.0</json.path.version>
         <jaxb.version>2.3.0</jaxb.version>
 
-        <tnt4j.version>2.11-SNAPSHOT</tnt4j.version>
         <jesl.version>0.9-SNAPSHOT</jesl.version>
 
-        <httpcomponents.version>4.5.6</httpcomponents.version>
+        <httpcomponents.version>4.5.7</httpcomponents.version>
 
-        <msgpack.version>0.8.13</msgpack.version>
+        <msgpack.version>0.8.16</msgpack.version>
 
-        <groovy.version>2.5.3</groovy.version>
+        <groovy.version>2.5.6</groovy.version>
 
-        <org.slf4j.version>1.7.25</org.slf4j.version>
+        <org.slf4j.version>1.7.26</org.slf4j.version>
         <log4j.version>1.2.17</log4j.version>
         <logback.version>1.2.3</logback.version>
-        <tnt4j.logger.version>0.3.1</tnt4j.logger.version>
+        <tnt4j.logger.version>0.3.2</tnt4j.logger.version>
     </properties>
 
     <build>
@@ -103,30 +102,20 @@
     <dependencies>
         <dependency>
             <groupId>com.jkoolcloud</groupId>
-            <artifactId>tnt4j</artifactId>
-            <version>${tnt4j.version}</version>
-            <!-- streams uses slf4j-log4j as default -->
+            <artifactId>jesl</artifactId>
+            <version>${jesl.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
+                    <groupId>com.jkoolcloud.jesl.net</groupId>
+                    <artifactId>tnt4j-syslogd</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
                 </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.jkoolcloud</groupId>
-            <artifactId>jesl</artifactId>
-            <version>${jesl.version}</version>
-            <scope>runtime</scope>
-            <!-- streams uses newer version of those -->
-            <exclusions>
                 <exclusion>
-                    <groupId>com.jkoolcloud.jesl.net</groupId>
-                    <artifactId>tnt4j-syslogd</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -219,7 +208,7 @@
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
-            <version>3.4.10</version>
+            <version>3.4.14</version>
             <!--<optional>true</optional>-->
             <exclusions>
                 <exclusion>
@@ -259,6 +248,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpcomponents.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- logging dependencies -->
