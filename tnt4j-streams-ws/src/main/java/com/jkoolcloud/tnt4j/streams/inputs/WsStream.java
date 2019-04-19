@@ -23,7 +23,6 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -34,7 +33,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
@@ -48,10 +46,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
-import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
-import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
-import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.scenario.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -121,30 +116,15 @@ public class WsStream extends AbstractWsStream<String> {
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
+	public void setProperty(String name, String value) {
+		super.setProperty(name, value);
 
-		if (CollectionUtils.isNotEmpty(props)) {
-			for (Map.Entry<String, String> prop : props) {
-				String name = prop.getKey();
-				String value = prop.getValue();
-
-				if (WsStreamProperties.PROP_DISABLE_SSL.equalsIgnoreCase(name)) {
-					disableSSL = Utils.toBoolean(value);
-				} else if (WsStreamProperties.PROP_SYNCHRONIZE_REQUESTS.equalsIgnoreCase(name)) {
-					synchronizeRequests = Utils.toBoolean(value);
-				} else {
-					wsProperties.put(name, value);
-				}
-			}
-		}
-
-		if (disableSSL) {
-			disableSslVerification();
-		}
-
-		if (synchronizeRequests) {
-			semaphore = new Semaphore(1);
+		if (WsStreamProperties.PROP_DISABLE_SSL.equalsIgnoreCase(name)) {
+			disableSSL = Utils.toBoolean(value);
+		} else if (WsStreamProperties.PROP_SYNCHRONIZE_REQUESTS.equalsIgnoreCase(name)) {
+			synchronizeRequests = Utils.toBoolean(value);
+		} else {
+			wsProperties.put(name, value);
 		}
 	}
 
@@ -159,6 +139,19 @@ public class WsStream extends AbstractWsStream<String> {
 		}
 
 		return super.getProperty(name);
+	}
+
+	@Override
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
+
+		if (disableSSL) {
+			disableSslVerification();
+		}
+
+		if (synchronizeRequests) {
+			semaphore = new Semaphore(1);
+		}
 	}
 
 	@Override
@@ -416,15 +409,13 @@ public class WsStream extends AbstractWsStream<String> {
 	}
 
 	/**
-	 * Fills in WS request fragment string having variable expressions with parameters stored in {@link #wsProperties}
-	 * map.
-	 *
-	 * @param reqDataStr
-	 *            WS request fragment string
-	 * @return variable values filled in WS request fragment string
+	 * Returns custom WS Stream requests configuration properties stored in {@link #wsProperties} map.
+	 * 
+	 * @return custom WS Stream requests configuration properties
 	 */
-	protected String fillInRequestData(String reqDataStr) {
-		return fillInRequestData(reqDataStr, wsProperties);
+	@Override
+	protected Map<String, String> getConfigProperties() {
+		return wsProperties;
 	}
 
 	/**
@@ -447,8 +438,10 @@ public class WsStream extends AbstractWsStream<String> {
 			Semaphore semaphore = (Semaphore) dataMap.get(JOB_PROP_SEMAPHORE);
 
 			if (!scenarioStep.isEmpty()) {
+				String reqStr;
 				String respStr;
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
+					reqStr = null;
 					respStr = null;
 					try {
 						if (semaphore != null) {
@@ -456,15 +449,17 @@ public class WsStream extends AbstractWsStream<String> {
 								Thread.sleep(50);
 							}
 						}
-						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()),
-								stream.fillInRequestData(request.getData()), stream, scenarioStep.getScenario());
+						reqStr = stream.fillInRequestData(request.getData());
+						request.setSentData(reqStr);
+						respStr = callWebService(stream.fillInRequestData(scenarioStep.getUrlStr()), reqStr, stream,
+								scenarioStep.getScenario());
 					} catch (Throwable exc) {
 						Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"WsStream.execute.exception", exc);
 					} finally {
 						if (StringUtils.isNotEmpty(respStr)) {
-							stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+							stream.addInputToBuffer(new WsReqResponse<>(respStr, request));
 						} else {
 							if (semaphore != null && semaphore.availablePermits() < 1) {
 								semaphore.release();

@@ -43,6 +43,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
+import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -346,6 +347,7 @@ public class RestStream extends AbstractWsStream<String> {
 					respStr = null;
 					try {
 						reqDataStr = stream.preProcess(request.getData());
+						request.setSentData(reqDataStr);
 						respStr = stream.executePOST(stream.client, scenarioStep.getUrlStr(), reqDataStr,
 								scenarioStep.getUsername(), scenarioStep.getPassword());
 					} catch (Throwable exc) {
@@ -355,7 +357,7 @@ public class RestStream extends AbstractWsStream<String> {
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {
-						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+						stream.addInputToBuffer(new WsReqResponse<>(respStr, request));
 					}
 				}
 			}
@@ -381,6 +383,7 @@ public class RestStream extends AbstractWsStream<String> {
 				respStr = null;
 				try {
 					reqUrl = stream.preProcessURL(scenarioStep.getUrlStr());
+					request.setSentData(reqUrl);
 					respStr = stream.executeGET(stream.client, reqUrl, scenarioStep.getUsername(),
 							scenarioStep.getPassword());
 				} catch (Throwable exc) {
@@ -390,7 +393,7 @@ public class RestStream extends AbstractWsStream<String> {
 				}
 
 				if (StringUtils.isNotEmpty(respStr)) {
-					stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+					stream.addInputToBuffer(new WsReqResponse<>(respStr, request));
 				}
 			}
 		}

@@ -16,17 +16,21 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.core.UsecTimestamp;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.scenario.*;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
@@ -338,6 +342,49 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	}
 
 	/**
+	 * Fills in request/query/command string having variable expressions with parameters stored in stream configuration
+	 * properties map and streams cache {@link com.jkoolcloud.tnt4j.streams.utils.StreamsCache}.
+	 *
+	 * @param reqDataStr
+	 *            JDBC query string
+	 * @return variable values filled in JDBC query string
+	 *
+	 * @see #fillInRequestData(String, String)
+	 */
+	protected String fillInRequestData(String reqDataStr) {
+		return fillInRequestData(reqDataStr, (String) null);
+	}
+
+	/**
+	 * Fills in request/query/command string having variable expressions with parameters stored in stream configuration
+	 * properties map map and streams cache {@link com.jkoolcloud.tnt4j.streams.utils.StreamsCache}.
+	 *
+	 * @param reqDataStr
+	 *            JDBC query string
+	 * @param format
+	 *            format of value to fill
+	 * @return variable values filled in JDBC query string
+	 *
+	 * @see #fillInRequestData(String, java.util.Map)
+	 * @see #fillInRequestCacheData(String, String)
+	 */
+	protected String fillInRequestData(String reqDataStr, String format) {
+		String frd = fillInRequestData(reqDataStr, getConfigProperties());
+		frd = fillInRequestCacheData(frd, format);
+
+		return frd;
+	}
+
+	/**
+	 * Returns streams specific configuration properties map.
+	 *
+	 * @return streams specific configuration properties map
+	 */
+	protected Map<String, String> getConfigProperties() {
+		return null;
+	}
+
+	/**
 	 * Fills in request/query/command string having variable expressions with parameters stored in
 	 * {@code streamProperties} map.
 	 *
@@ -348,7 +395,7 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	 * @return variable values filled in request/query/command string
 	 */
 	protected String fillInRequestData(String reqDataStr, Map<String, String> streamProperties) {
-		if (StringUtils.isEmpty(reqDataStr) || streamProperties.isEmpty()) {
+		if (StringUtils.isEmpty(reqDataStr) || MapUtils.isEmpty(streamProperties)) {
 			return reqDataStr;
 		}
 
@@ -378,9 +425,11 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 	 *
 	 * @param reqDataStr
 	 *            request/query/command string
+	 * @param format
+	 *            format of value to fill
 	 * @return variable values filled in request/query/command string
 	 */
-	protected String fillInRequestCacheData(String reqDataStr) {
+	protected String fillInRequestCacheData(String reqDataStr, String format) {
 		if (StringUtils.isEmpty(reqDataStr)) {
 			return reqDataStr;
 		}
@@ -393,7 +442,8 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 		if (CollectionUtils.isNotEmpty(vars)) {
 			String varVal;
 			for (String rdVar : vars) {
-				varVal = Utils.toString(StreamsCache.getValue(Utils.getVarName(rdVar)));
+				Object cValue = StreamsCache.getValue(Utils.getVarName(rdVar));
+				varVal = formattedValue(cValue, format);
 				if (varVal != null) {
 					reqData = reqData.replace(rdVar, varVal);
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -403,5 +453,32 @@ public abstract class AbstractWsStream<T> extends AbstractBufferedStream<WsRespo
 		}
 
 		return reqData;
+	}
+
+	/**
+	 * Formats provided value as a string using defined format pattern.
+	 *
+	 * @param cValue
+	 *            value to format
+	 * @param format
+	 *            format pattern of the value
+	 * @return formatted value string
+	 */
+	protected String formattedValue(Object cValue, String format) {
+		if (StringUtils.isNotEmpty(format)) {
+			if (cValue instanceof UsecTimestamp) {
+				return ((UsecTimestamp) cValue).toString(format);
+			} else if (cValue instanceof Date) {
+				SimpleDateFormat df = new SimpleDateFormat(format);
+				return df.format(cValue);
+			} else if (cValue instanceof Number) {
+				DecimalFormat df = new DecimalFormat(format);
+				return df.format(cValue);
+			} else {
+				return Utils.toString(cValue);
+			}
+		}
+
+		return Utils.toString(cValue);
 	}
 }

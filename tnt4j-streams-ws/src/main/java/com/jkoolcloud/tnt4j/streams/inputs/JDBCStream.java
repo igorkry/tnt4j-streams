@@ -30,6 +30,7 @@ import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
+import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -51,9 +52,9 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * This activity stream supports the following configuration properties (in addition to those supported by
  * {@link AbstractWsStream}):
  * <ul>
- * <li>DropRecurrentResultSets - flag indicating whether to drop streaming input buffer contained recurring result sets,
- * when stream input scheduler invokes JDBC queries faster than they can be processed (parsed and sent to sink, e.g.
- * because of sink/JKool limiter throttling). Default value - {@code false}. (Optional)</li>
+ * <li>DropRecurrentResultSets - flag indicating whether to drop streaming stream input buffer contained recurring
+ * result sets, when stream input scheduler invokes JDBC queries faster than they can be processed (parsed and sent to
+ * sink, e.g. because of sink/JKool limiter throttling). Default value - {@code false}. (Optional)</li>
  * <li>set of JDBC driver supported properties used to invoke
  * {@link DriverManager#getConnection(String, java.util.Properties)}. (Optional)</li>
  * <li>when {@value com.jkoolcloud.tnt4j.streams.configure.StreamProperties#PROP_USE_EXECUTOR_SERVICE} is set to
@@ -73,6 +74,9 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JDBCStream.class);
 	private static final String QUERY_NAME_PROP = "QueryName"; // NON-NLS
 
+	/**
+	 * Contains custom JDBC configuration properties.
+	 */
 	protected Map<String, String> jdbcProperties = new HashMap<>();
 
 	private boolean dropRecurrentResultSets = false;
@@ -271,6 +275,16 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 	}
 
 	/**
+	 * Returns custom JDBC configuration properties stored in {@link #jdbcProperties} map.
+	 *
+	 * @return custom JDBC configuration properties
+	 */
+	@Override
+	protected Map<String, String> getConfigProperties() {
+		return jdbcProperties;
+	}
+
+	/**
 	 * Sets prepared SQL statement parameters provided by {@code params} map.
 	 *
 	 * @param statement
@@ -290,15 +304,15 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 					int pIdx = Integer.parseInt(param.getValue().getId());
 					String type = param.getValue().getType();
 					String value = param.getValue().getValue();
+					String format = param.getValue().getFormat();
 
 					if (type == null) {
 						type = "";
 					}
 
-					value = stream.fillInRequestData(value);
-
 					switch (type.toUpperCase()) {
 					case "INTEGER": // NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.INTEGER, type.toUpperCase());
 						} else {
@@ -309,6 +323,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "BIGINT":// NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.BIGINT, type.toUpperCase());
 						} else {
@@ -319,6 +334,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "FLOAT":// NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.FLOAT, type.toUpperCase());
 						} else {
@@ -331,6 +347,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 					case "DOUBLE":// NON-NLS
 					case "REAL": // NON-NLS
 					case "DECIMAL": // NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.DOUBLE, "DOUBLE"); // NON-NLS
 						} else {
@@ -341,6 +358,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "DATE":// NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.DATE, type.toUpperCase());
 						} else {
@@ -351,6 +369,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "TIME":// NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.TIME, type.toUpperCase());
 						} else {
@@ -361,6 +380,8 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "TIMESTAMP":// NON-NLS
+						value = stream.fillInRequestData(value,
+								StringUtils.isEmpty(format) ? "yyyy-MM-dd HH:mm:ss.SSS" : format); // NON-NLS
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.TIMESTAMP, type.toUpperCase());
 						} else {
@@ -371,6 +392,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "BOOLEAN": // NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.BOOLEAN, type.toUpperCase());
 						} else {
@@ -381,6 +403,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						}
 						break;
 					case "BINARY": // NON-NLS
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.BINARY, type.toUpperCase());
 						} else {
@@ -392,6 +415,7 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 						break;
 					case "VARCHAR": // NON-NLS
 					default:
+						value = stream.fillInRequestData(value, format);
 						if ("null".equalsIgnoreCase(value)) {
 							setNullParameter(statement, pIdx, Types.VARCHAR, "VARCHAR"); // NON-NLS
 						} else {
@@ -416,24 +440,6 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 		statement.setNull(pIdx, type);
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 				"JDBCStream.set.query.parameter.null", pIdx, typeName);
-	}
-
-	/**
-	 * Fills in JDBC query string having variable expressions with parameters stored in {@link #jdbcProperties} map and
-	 * streams cache {@link com.jkoolcloud.tnt4j.streams.utils.StreamsCache}.
-	 *
-	 * @param reqDataStr
-	 *            JDBC query string
-	 * @return variable values filled in JDBC query string
-	 *
-	 * @see #fillInRequestData(String, java.util.Map)
-	 * @see #fillInRequestCacheData(String)
-	 */
-	protected String fillInRequestData(String reqDataStr) {
-		String frd = fillInRequestData(reqDataStr, jdbcProperties);
-		frd = fillInRequestCacheData(frd);
-
-		return frd;
 	}
 
 	/**
@@ -464,15 +470,16 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 
 					try {
 						dbQuery = stream.fillInRequestData(request.getData());
+						request.setSentData(dbQuery);
 						respRs = executeJdbcCall(scenarioStep.getUrlStr(), scenarioStep.getUsername(),
 								scenarioStep.getPassword(), dbQuery, request.getParameters(), stream);
 					} catch (Throwable exc) {
-						Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"JDBCStream.execute.exception", exc);
 					} finally {
 						if (respRs != null) {
-							WsResponse<ResultSet> resp = new WsResponse<>(respRs, request.getTags());
+							WsResponse<ResultSet> resp = new WsReqResponse<>(respRs, request);
 							resp.addParameter(new WsRequest.Parameter(QUERY_NAME_PROP,
 									(stepIdx++) + ":" + scenarioStep.getName())); // NON-NLS
 							stream.addInputToBuffer(resp);

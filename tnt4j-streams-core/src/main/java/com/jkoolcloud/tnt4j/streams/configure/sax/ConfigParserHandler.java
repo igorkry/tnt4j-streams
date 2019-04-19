@@ -232,7 +232,7 @@ public class ConfigParserHandler extends DefaultHandler {
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */
-	private static final String FORMAT_ATTR = "format"; // NON-NLS
+	protected static final String FORMAT_ATTR = "format"; // NON-NLS
 	/**
 	 * Constant for name of TNT4J-Streams XML configuration tag attribute {@value}.
 	 */

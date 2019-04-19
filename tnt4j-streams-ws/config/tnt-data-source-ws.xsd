@@ -265,6 +265,13 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="format" use="optional" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Parameter value format.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- Element <scenario> definition -->

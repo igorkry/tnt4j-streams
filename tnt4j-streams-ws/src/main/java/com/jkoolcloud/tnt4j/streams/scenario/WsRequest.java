@@ -34,6 +34,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 public class WsRequest<T> {
 	private String[] tags;
 	private T data;
+	private T sentData;
 	private Map<String, Parameter> parameters = new HashMap<>();
 
 	/**
@@ -80,6 +81,14 @@ public class WsRequest<T> {
 	@Override
 	public String toString() {
 		return String.valueOf(data);
+	}
+
+	public T getSentData() {
+		return sentData;
+	}
+
+	public void setSentData(T sentData) {
+		this.sentData = sentData;
 	}
 
 	/**
@@ -131,12 +140,29 @@ public class WsRequest<T> {
 	}
 
 	/**
+	 * Adds request (command/query/etc.) parameter.
+	 *
+	 * @param id
+	 *            parameter identifier
+	 * @param value
+	 *            parameter value
+	 * @param type
+	 *            parameter type
+	 * @param format
+	 *            parameter format
+	 */
+	public void addParameter(String id, String value, String type, String format) {
+		addParameter(new Parameter(id, value, type, format));
+	}
+
+	/**
 	 * Class defining request parameter properties.
 	 */
 	public static class Parameter {
 		private String id;
 		private String value;
 		private String type;
+		private String format;
 
 		/**
 		 * Constructs a new Parameter. Defines parameter identifier and value.
@@ -147,8 +173,7 @@ public class WsRequest<T> {
 		 *            parameter value
 		 */
 		public Parameter(String id, String value) {
-			this.id = id;
-			this.value = value;
+			this(id, value, null, null);
 		}
 
 		/**
@@ -162,9 +187,26 @@ public class WsRequest<T> {
 		 *            parameter type
 		 */
 		public Parameter(String id, String value, String type) {
+			this(id, value, type, null);
+		}
+
+		/**
+		 * Constructs a new Parameter. Defines parameter identifier, value and type.
+		 *
+		 * @param id
+		 *            parameter identifier
+		 * @param value
+		 *            parameter value
+		 * @param type
+		 *            parameter type
+		 * @param format
+		 *            parameter format
+		 */
+		public Parameter(String id, String value, String type, String format) {
 			this.id = id;
 			this.value = value;
 			this.type = type;
+			this.format = format;
 		}
 
 		/**
@@ -194,12 +236,22 @@ public class WsRequest<T> {
 			return type;
 		}
 
+		/**
+		 * Returns parameter format.
+		 *
+		 * @return parameter format
+		 */
+		public String getFormat() {
+			return format;
+		}
+
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder("Parameter{"); // NON-NLS
 			sb.append("id=").append(Utils.sQuote(id)); // NON-NLS
 			sb.append(", value=").append(Utils.sQuote(value)); // NON-NLS
 			sb.append(", type=").append(Utils.sQuote(type)); // NON-NLS
+			sb.append(", format=").append(Utils.sQuote(format)); // NON-NLS
 			sb.append('}'); // NON-NLS
 			return sb.toString();
 		}

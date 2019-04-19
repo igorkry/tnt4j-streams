@@ -275,6 +275,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		String id = null;
 		String value = null;
 		String type = null;
+		String format = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
@@ -284,6 +285,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 				value = attValue;
 			} else if (TYPE_ATTR.equals(attName)) {
 				type = attValue;
+			} else if (FORMAT_ATTR.equals(attName)) {
+				format = attValue;
 			} else {
 				unknownAttribute(REQ_PARAM_ELMT, attName);
 			}
@@ -292,7 +295,7 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		// notEmpty(id, REQ_PARAM_ELMT, ID_ATTR);
 		notEmpty(value, REQ_PARAM_ELMT, VALUE_ATTR);
 
-		currRequest.addParameter(id, value, type);
+		currRequest.addParameter(id, value, type, format);
 	}
 
 	@Override
@@ -382,8 +385,8 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		private List<WsRequest.Parameter> params = new ArrayList<>();
 		private List<ParserRefData> parserRefs = new ArrayList<>();
 
-		void addParameter(String id, String value, String type) {
-			params.add(new WsRequest.Parameter(id, value, type));
+		void addParameter(String id, String value, String type, String format) {
+			params.add(new WsRequest.Parameter(id, value, type, format));
 		}
 
 		void addParserRef(ParserRefData pRef) {

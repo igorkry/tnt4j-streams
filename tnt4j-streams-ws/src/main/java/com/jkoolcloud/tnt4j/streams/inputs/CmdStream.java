@@ -22,6 +22,7 @@ import org.quartz.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
@@ -121,15 +122,17 @@ public class CmdStream extends AbstractWsStream<String> {
 				for (WsRequest<String> request : scenarioStep.getRequests()) {
 					respStr = null;
 					try {
-						respStr = executeCommand(request.getData());
+						String processedRequest = stream.fillInRequestData(request.getData());
+						request.setSentData(processedRequest);
+						respStr = executeCommand(processedRequest);
 					} catch (Throwable exc) {
-						Utils.logThrowable(LOGGER, OpLevel.ERROR,
+						Utils.logThrowable(stream.logger(), OpLevel.ERROR,
 								StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 								"CmdStream.execute.exception", exc);
 					}
 
 					if (StringUtils.isNotEmpty(respStr)) {
-						stream.addInputToBuffer(new WsResponse<>(respStr, request.getTags()));
+						stream.addInputToBuffer(new WsReqResponse<>(respStr, request));
 					}
 				}
 			}
