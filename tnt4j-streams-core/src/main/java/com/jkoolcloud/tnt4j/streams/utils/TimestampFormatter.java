@@ -205,13 +205,13 @@ public class TimestampFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value based timestamp pattern supported by this formatter
 	 *
-	 * @see #parse(java.util.concurrent.TimeUnit, Object)
+	 * @see #parse(java.util.concurrent.TimeUnit, Object, String)
 	 * @see #parse(String, Object, String, String)
 	 */
 	public UsecTimestamp parse(Object value) throws ParseException {
 		if (value instanceof String || value instanceof Number) {
 			if (units != null) {
-				return parse(units, value);
+				return parse(units, value, timeZone);
 			} else if (pattern != null) {
 				return parse(pattern, value, timeZone, locale);
 			}
@@ -238,6 +238,8 @@ public class TimestampFormatter {
 	 * If {@code value} represents decimal number (as {@link Number} or {@link String}, fraction gets preserved by
 	 * scaling down {@code value} in {@code units} until numeric value expression gets with low (epsilon is
 	 * {@code 0.001}) or without fraction or {@code units} gets set to {@link TimeUnit#NANOSECONDS}.
+	 * <p>
+	 * Produced timestamp value will be for local time zone {@link java.util.TimeZone#getDefault()}.
 	 *
 	 * @param units
 	 *            units that value is in
@@ -247,10 +249,33 @@ public class TimestampFormatter {
 	 * @throws ParseException
 	 *             if an error parsing the specified value
 	 *
-	 * @see #scale(double, TimeUnit)
+	 * @see #parse(java.util.concurrent.TimeUnit, Object, String)
 	 */
 	public static UsecTimestamp parse(TimeUnit units, Object value) throws ParseException {
-		UsecTimestamp ts;
+		return parse(units, value, null);
+	}
+
+	/**
+	 * Parses the value into a timestamp with microsecond accuracy based on the specified units.
+	 * <p>
+	 * If {@code value} represents decimal number (as {@link Number} or {@link String}, fraction gets preserved by
+	 * scaling down {@code value} in {@code units} until numeric value expression gets with low (epsilon is
+	 * {@code 0.001}) or without fraction or {@code units} gets set to {@link TimeUnit#NANOSECONDS}.
+	 *
+	 * @param units
+	 *            units that value is in
+	 * @param value
+	 *            value to convert
+	 * @param tZone
+	 *            time zone identifier to compensate produced timestamp offset, {@code null} - stands for
+	 *            {@link java.util.TimeZone#getDefault()}
+	 * @return microsecond timestamp
+	 * @throws ParseException
+	 *             if an error parsing the specified value
+	 *
+	 * @see #scale(double, TimeUnit)
+	 */
+	public static UsecTimestamp parse(TimeUnit units, Object value, String tZone) throws ParseException {
 		try {
 			long time;
 			if (value instanceof Date) {
@@ -274,23 +299,32 @@ public class TimestampFormatter {
 				time = (long) dTime;
 			}
 
+			long mSecs = time;
+			long uSecs = 0;
 			switch (units) {
 			case NANOSECONDS:
 				long scale = 1000000L;
-				long mSecs = time / scale;
-				long uSecs = (time - mSecs * scale) / 1000L;
-				ts = new UsecTimestamp(mSecs, uSecs);
+				mSecs = time / scale;
+				uSecs = (time - mSecs * scale) / 1000L;
 				break;
 			case MICROSECONDS:
 				scale = 1000L;
 				mSecs = time / scale;
 				uSecs = time - mSecs * scale;
-				ts = new UsecTimestamp(mSecs, uSecs);
 				break;
 			default:
-				ts = new UsecTimestamp(units.toMicros(time));
+				mSecs = units.toMillis(time);
 				break;
 			}
+
+			int tzOffset = 0;
+			if (StringUtils.isNotEmpty(tZone)) {
+				TimeZone tz = TimeZone.getTimeZone(tZone);
+				TimeZone dtz = TimeZone.getDefault();
+				tzOffset = tz.getRawOffset() - dtz.getRawOffset() + tz.getDSTSavings() - dtz.getDSTSavings();
+			}
+
+			return new UsecTimestamp(mSecs + tzOffset, uSecs);
 		} catch (NumberFormatException nfe) {
 			ParseException pe = new ParseException(
 					StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
@@ -299,7 +333,6 @@ public class TimestampFormatter {
 			pe.initCause(nfe);
 			throw pe;
 		}
-		return ts;
 	}
 
 	/**

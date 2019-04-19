@@ -453,4 +453,21 @@ public class ActivityInfoTest {
 		Object startTime = ai.getFieldValue("startTime");
 		System.out.printf("The result: %s \n", startTime);
 	}
+
+	@Test
+	public void testTimestampString() throws ParseException {
+		String TEST_VALUE = "1555404504581";
+		System.out.printf("The value: %s \n", TEST_VALUE);
+		ActivityInfo ai = new ActivityInfo();
+		ActivityField af = new ActivityField("startTime");
+		ActivityFieldLocator testLocator = new ActivityFieldLocator(ActivityFieldLocatorType.Label, "TestLocator");
+		testLocator.setDataType(ActivityFieldDataType.Timestamp);
+		testLocator.setUnits("Milliseconds");
+		af.addLocator(testLocator);
+
+		ai.applyField(af, TEST_VALUE);
+		Object startTime = ai.getFieldValue("startTime");
+		System.out.printf("The result: %s \n", startTime);
+		assertEquals(Long.parseLong(TEST_VALUE) * 1000, ((UsecTimestamp) startTime).getTimeUsec());
+	}
 }
