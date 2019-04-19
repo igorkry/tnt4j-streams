@@ -350,6 +350,8 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 			collectStackedParsersFields(allFieldsMap, f);
 		}
 
+		boolean hasDynamicFields = hasDynamicFields(allFieldsMap);
+
 		// add auto-assignable fields
 		Set<String> aaFields = new HashSet<>();
 		aaFields.add(StreamFieldType.TrackingId.name());
@@ -370,7 +372,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 					ActivityField rf = parserFieldsMap.get(ref);
 
 					if (rf == null) {
-						if (isExtRefField(ref, aaFields, allFieldsMap)) {
+						if (isExtRefField(ref, aaFields, allFieldsMap) || hasDynamicFields) {
 							continue;
 						} else {
 							throw new IllegalArgumentException(
@@ -415,6 +417,16 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		return ref.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX) //
 				|| aaFields.contains(ref) //
 				|| allFieldsMap.containsKey(ref);
+	}
+
+	private static boolean hasDynamicFields(Map<String, ActivityField> allFieldsMap) {
+		for (Map.Entry<String, ActivityField> afme : allFieldsMap.entrySet()) {
+			if (afme.getValue().isDynamic()) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
