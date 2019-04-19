@@ -3,15 +3,38 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-    <parser name="SampleResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
+    <parser name="B2BiEventAttributesResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
+        <field name="EventType" value="EVENT"/>
+
+        <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
+        <field name="Guid" locator="EVENT_KEY" locator-type="Label"/>
+        <field name="TrackingId" locator="EVENT_KEY" locator-type="Label"/>
+
+        <field name="${FieldNameLoc}_attr" locator="EVENTATTR_VALUE" locator-type="Label">
+            <field-locator id="FieldNameLoc" locator="EVENTATTR_NAME" locator-type="Label">
+                <field-transform lang="groovy" name="AttrNameTransform"><![CDATA[
+                    Strings.replace($fieldValue, "@", "_");
+                ]]></field-transform>
+            </field-locator>
+        </field>
+
+        <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
+        <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
+        <field name="Event_Attr_ModifyTs" locator="EVENTATTR_MODIFYTS" locator-type="Label" transparent="true"/>
+
+    </parser>
+
+    <parser name="B2BiEventsResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
         <!--<property name="SQLJavaMapping" value="NUMBER=java.lang.Long"/>-->
 
         <field name="EventType" value="EVENT"/>
 
         <!-- FG_EVENT table columns -->
+        <field name="Guid" locator="EVENT_EVENT_KEY" locator-type="Label"/>
+        <field name="TrackingId" locator="EVENT_EVENT_KEY" locator-type="Label"/>
         <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
-        <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" format="long"/>
-        <field name="Event_EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
+        <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
+        <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
         <field name="Event_Counter" locator="EVENT_COUNTER" locator-type="Label" datatype="Number" format="long"/>
         <field name="Event_EventCode" locator="EVENT_EVENT_CODE" locator-type="Label"/>
         <field name="Event_LockId" locator="EVENT_LOCKID" locator-type="Label" datatype="Number" format="integer"/>
@@ -84,18 +107,23 @@
     <cache>
         <property name="Persisted" value="true"/>
 
-        <entry id="LastRecordCDate">
-            <key>LastRecordCDate</key>
-            <value>${Event_CreateTs}</value>
+        <entry id="LastEventRecordCDate">
+            <key>LastEventRecordCDate</key>
+            <value>${Event_ModifyTs}</value>
+            <default>1970-01-01 00:00:00.000</default>
+        </entry>
+        <entry id="LastEventAttrRecordCDate">
+            <key>LastEventAttrRecordCDate</key>
+            <value>${Event_Attr_ModifyTs}</value>
             <default>1970-01-01 00:00:00.000</default>
         </entry>
     </cache>
 
-    <stream name="Db2JDBCStream" class="com.jkoolcloud.tnt4j.streams.inputs.JDBCStream">
+    <stream name="B2BiDb2JDBCStream" class="com.jkoolcloud.tnt4j.streams.inputs.JDBCStream">
         <property name="HaltIfNoParser" value="false"/>
 
         <scenario name="Sample DB2-JDBC stream scenario">
-            <step name="Step Query1" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
+            <step name="B2Bi main events query" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
                 <schedule-simple interval="60" units="Seconds" repeatCount="-1"/>
                 <request>
                     <!--
@@ -113,85 +141,116 @@
                         , FD.DATA_FLOW_ID AS DELIVERY_DATA_FLOW_ID
                     -->
                     <![CDATA[
-                       SELECT FE.EVENT_KEY AS EVENT_EVENT_KEY
-                        , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
-                        , FE.TIME AS EVENT_TIME
-                        , FE.COUNTER AS EVENT_COUNTER
-                        , FE.EVENT_CODE AS EVENT_EVENT_CODE
-                        , FE.LOCKID AS EVENT_LOCKID
-                        , FE.CREATETS AS EVENT_CREATETS
-                        , FE.MODIFYTS AS EVENT_MODIFYTS
-                        , FE.CREATEUSERID AS EVENT_CREATEUSERID
-                        , FE.MODIFYUSERID AS EVENT_MODIFYUSERID
-                        , FE.CREATEPROGID AS EVENT_CREATEPROGID
-                        , FE.MODIFYPROGID AS EVENT_MODIFYPROGID
-                        , FAF.MESSAGE_ID AS AFILE_MESSAGE_ID
-                        , FAF.USER_ID AS AFILE_USER_ID
-                        , FAF.FILE_NAME AS AFILE_FILE_NAME
-                        , FAF.FILE_SIZE AS AFILE_FILE_SIZE
-                        , FAF.MAILBOX_PATH AS AFILE_MAILBOX_PATH
-                        , FAF.PROD_ORG_KEY AS AFILE_PROD_ORG_KEY
-                        , FAF.PROD_ORG_NAME AS AFILE_PROD_ORG_NAME
-                        , FAF.STATE AS AFILE_STATE
-                        , FAF.WFID AS AFILE_WFID
-                        , FAF.REVIEWED AS AFILE_REVIEWED
-                        , FAF.REPLAY_AF_KEY AS AFILE_REPLAY_AF_KEY
-                        , FAF.REPLAY_COMMENT AS AFILE_REPLAY_COMMENT
-                        , FAF.ROUTES_REMAIN AS AFILE_ROUTES_REMAIN
-                        , FAF.LOCKID AS AFILE_LOCKID
-                        , FAF.CREATETS AS AFILE_CREATETS
-                        , FAF.MODIFYTS AS AFILE_MODIFYTS
-                        , FAF.CREATEUSERID AS AFILE_CREATEUSERID
-                        , FAF.MODIFYUSERID AS AFILE_MODIFYUSERID
-                        , FAF.CREATEPROGID AS AFILE_CREATEPROGID
-                        , FAF.MODIFYPROGID AS AFILE_MODIFYPROGID
-                        , FAF.DELIVERY_STATE AS AFILE_DELIVERY_STATE
-                        , FAF.DIST_MSG_ID AS AFILE_DIST_MSG_ID
-                        , FR.ROUTCHAN_KEY AS ROUTE_ROUTCHAN_KEY
-                        , FR.CONS_ORG_KEY AS ROUTE_CONS_ORG_KEY
-                        , FR.CONS_ORG_NAME AS ROUTE_CONS_ORG_NAME
-                        , FR.P_FSTRUCT_KEY AS ROUTE_P_FSTRUCT_KEY
-                        , FR.STATE AS ROUTE_STATE
-                        , FR.START_TIME AS ROUTE_START_TIME
-                        , FR.COMPLETE_TIME AS ROUTE_COMPLETE_TIME
-                        , FR.DELIVS_REMAIN AS ROUTE_DELIVS_REMAIN
-                        , FR.LOCKID AS ROUTE_LOCKID
-                        , FR.CREATETS AS ROUTE_CREATETS
-                        , FR.MODIFYTS AS ROUTE_MODIFYTS
-                        , FR.CREATEUSERID AS ROUTE_CREATEUSERID
-                        , FR.MODIFYUSERID AS ROUTE_MODIFYUSERID
-                        , FR.CREATEPROGID AS ROUTE_CREATEPROGID
-                        , FR.MODIFYPROGID AS ROUTE_MODIFYPROGID
-                        , FD.STATE AS DELIVERY_STATE
-                        , FD.DELIVCHAN_KEY AS DELIVERY_DELIVCHAN_KEY
-                        , FD.CONSUMER_DOCID AS DELIVERY_CONSUMER_DOCID
-                        , FD.CONTENT_TYPE AS DELIVERY_CONTENT_TYPE
-                        , FD.FILENAME AS DELIVERY_FILENAME
-                        , FD.CONSDOC_TYPE AS DELIVERY_CONSDOC_TYPE
-                        , FD.MAILBOX_PATH AS DELIVERY_MAILBOX_PATH
-                        , FD.LATE_CREATE_MBX AS DELIVERY_LATE_CREATE_MBX
-                        , FD.CONSUMER_MSGID AS DELIVERY_CONSUMER_MSGID
-                        , FD.ASYNC_XFER_ID AS DELIVERY_ASYNC_XFER_ID
-                        , FD.LOCKID AS DELIVERY_LOCKID
-                        , FD.CREATETS AS DELIVERY_CREATETS
-                        , FD.MODIFYTS AS DELIVERY_MODIFYTS
-                        , FD.CREATEUSERID AS DELIVERY_CREATEUSERID
-                        , FD.MODIFYUSERID AS DELIVERY_MODIFYUSERID
-                        , FD.CREATEPROGID AS DELIVERY_CREATEPROGID
-                        , FD.MODIFYPROGID AS DELIVERY_MODIFYPROGID
-                        , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
-                        FROM FG_EVENT FE
-                        LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
-                        LEFT OUTER JOIN FG_ROUTE FR ON (FR.ARRIVEDFILE_KEY = FAF.ARRIVEDFILE_KEY)
-                        LEFT OUTER JOIN FG_DELIVERY FD ON (FD.ROUTE_KEY = FR.ROUTE_KEY)
-                        WHERE FE.CREATETS > ?
-                        ORDER BY FE.CREATETS ASC
-                        FETCH FIRST 100 ROWS ONLY
+                        SELECT FE.EVENT_KEY AS EVENT_EVENT_KEY
+						  , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
+						  , FE.TIME AS EVENT_TIME
+						  , FE.COUNTER AS EVENT_COUNTER
+						  , FE.EVENT_CODE AS EVENT_EVENT_CODE
+						  , FE.LOCKID AS EVENT_LOCKID
+						  , FE.CREATETS AS EVENT_CREATETS
+						  , FE.MODIFYTS AS EVENT_MODIFYTS
+						  , FE.CREATEUSERID AS EVENT_CREATEUSERID
+						  , FE.MODIFYUSERID AS EVENT_MODIFYUSERID
+						  , FE.CREATEPROGID AS EVENT_CREATEPROGID
+						  , FE.MODIFYPROGID AS EVENT_MODIFYPROGID
+						  , FAF.MESSAGE_ID AS AFILE_MESSAGE_ID
+						  , FAF.USER_ID AS AFILE_USER_ID
+						  , FAF.FILE_NAME AS AFILE_FILE_NAME
+						  , FAF.FILE_SIZE AS AFILE_FILE_SIZE
+						  , FAF.MAILBOX_PATH AS AFILE_MAILBOX_PATH
+						  , FAF.PROD_ORG_KEY AS AFILE_PROD_ORG_KEY
+						  , FAF.PROD_ORG_NAME AS AFILE_PROD_ORG_NAME
+						  , FAF.STATE AS AFILE_STATE
+						  , FAF.WFID AS AFILE_WFID
+						  , FAF.REVIEWED AS AFILE_REVIEWED
+						  , FAF.REPLAY_AF_KEY AS AFILE_REPLAY_AF_KEY
+						  , FAF.REPLAY_COMMENT AS AFILE_REPLAY_COMMENT
+						  , FAF.ROUTES_REMAIN AS AFILE_ROUTES_REMAIN
+						  , FAF.LOCKID AS AFILE_LOCKID
+						  , FAF.CREATETS AS AFILE_CREATETS
+						  , FAF.MODIFYTS AS AFILE_MODIFYTS
+						  , FAF.CREATEUSERID AS AFILE_CREATEUSERID
+						  , FAF.MODIFYUSERID AS AFILE_MODIFYUSERID
+						  , FAF.CREATEPROGID AS AFILE_CREATEPROGID
+						  , FAF.MODIFYPROGID AS AFILE_MODIFYPROGID
+						  , FAF.DELIVERY_STATE AS AFILE_DELIVERY_STATE
+						  , FAF.DIST_MSG_ID AS AFILE_DIST_MSG_ID
+						  , FR.ROUTCHAN_KEY AS ROUTE_ROUTCHAN_KEY
+						  , FR.CONS_ORG_KEY AS ROUTE_CONS_ORG_KEY
+						  , FR.CONS_ORG_NAME AS ROUTE_CONS_ORG_NAME
+						  , FR.P_FSTRUCT_KEY AS ROUTE_P_FSTRUCT_KEY
+						  , FR.STATE AS ROUTE_STATE
+						  , FR.START_TIME AS ROUTE_START_TIME
+						  , FR.COMPLETE_TIME AS ROUTE_COMPLETE_TIME
+						  , FR.DELIVS_REMAIN AS ROUTE_DELIVS_REMAIN
+						  , FR.LOCKID AS ROUTE_LOCKID
+						  , FR.CREATETS AS ROUTE_CREATETS
+						  , FR.MODIFYTS AS ROUTE_MODIFYTS
+						  , FR.CREATEUSERID AS ROUTE_CREATEUSERID
+						  , FR.MODIFYUSERID AS ROUTE_MODIFYUSERID
+						  , FR.CREATEPROGID AS ROUTE_CREATEPROGID
+						  , FR.MODIFYPROGID AS ROUTE_MODIFYPROGID
+						  , FD.STATE AS DELIVERY_STATE
+						  , FD.DELIVCHAN_KEY AS DELIVERY_DELIVCHAN_KEY
+						  , FD.CONSUMER_DOCID AS DELIVERY_CONSUMER_DOCID
+						  , FD.CONTENT_TYPE AS DELIVERY_CONTENT_TYPE
+						  , FD.FILENAME AS DELIVERY_FILENAME
+						  , FD.CONSDOC_TYPE AS DELIVERY_CONSDOC_TYPE
+						  , FD.MAILBOX_PATH AS DELIVERY_MAILBOX_PATH
+						  , FD.LATE_CREATE_MBX AS DELIVERY_LATE_CREATE_MBX
+						  , FD.CONSUMER_MSGID AS DELIVERY_CONSUMER_MSGID
+						  , FD.ASYNC_XFER_ID AS DELIVERY_ASYNC_XFER_ID
+						  , FD.LOCKID AS DELIVERY_LOCKID
+						  , FD.CREATETS AS DELIVERY_CREATETS
+						  , FD.MODIFYTS AS DELIVERY_MODIFYTS
+						  , FD.CREATEUSERID AS DELIVERY_CREATEUSERID
+						  , FD.MODIFYUSERID AS DELIVERY_MODIFYUSERID
+						  , FD.CREATEPROGID AS DELIVERY_CREATEPROGID
+						  , FD.MODIFYPROGID AS DELIVERY_MODIFYPROGID
+						  , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
+						FROM FG_EVENT FE
+						  LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
+						  LEFT OUTER JOIN FG_ROUTE FR ON (FR.ARRIVEDFILE_KEY = FAF.ARRIVEDFILE_KEY)
+						  LEFT OUTER JOIN FG_DELIVERY FD ON (FD.ROUTE_KEY = FR.ROUTE_KEY)
+						WHERE FE.CREATETS > ?
+						ORDER BY FE.CREATETS ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
-                    <req-param value="${LastRecordCDate}" type="TIMESTAMP"/>
+                    <req-param value="${LastEventRecordCDate}" type="TIMESTAMP"/>
 
-                    <parser-ref name="SampleResultSetParser"/>
+                    <parser-ref name="B2BiEventsResultSetParser"/>
+                </request>
+            </step>
+            <step name="B2Bi event attributes query" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
+                <schedule-simple interval="60" units="Seconds" startDelay="30" startDelayUnits="Seconds" repeatCount="-1"/>
+                <request>
+                    <![CDATA[
+                        SELECT EAT.EVENT_KEY AS EVENT_KEY
+                          -- , EAT.EVENTATTR_KEY AS EVENTATTR_KEY
+                          -- , EAT.DATA_FLOW_ID AS EVENTATTR_DATA_FLOW_ID
+                          , EAT.ORDINAL AS EVENTATTR_ORDIINAL
+                          , EAT.NAME AS EVENTATTR_NAME
+                          , EAT.VALUE AS EVENTATTR_VALUE
+                          -- , EAT.ARRIVEDFILE_KEY AS EVENTATTR_ARRIVEDFILE_KEY
+                          -- , EAT.LOCKID AS EVENTATTR_LOCKID
+                          , EAT.CREATETS AS EVENTATTR_CREATETS
+                          , EAT.MODIFYTS AS EVENTATTR_MODIFYTS
+                          -- , EAT.CREATEUSERID AS EVENTATTR_CREATRE_USER
+                          -- , EAT.MODIFYUSERID AS EVENTATTR_MODIFY_USER
+                          -- , EAT.CREATEPROGID AS EVENTATTR_CREATE_PROG
+                          -- , EAT.MODIFYPROGID AS EVENTATTR_MODIFY_PROG
+                          , EVT.ENTITY_TYPE AS EVENT_ENTITY_TYPE
+                          , EVT.TIME as EVENT_TIME
+                          , EVT.CREATETS as EVENT_CREATETS
+                          , EVT.MODIFYTS as EVENT_MODIFYTS
+                        FROM FG_EVENTATTR EAT
+                          LEFT JOIN FG_EVENT EVT ON (EVT.EVENT_KEY = EAT.EVENT_KEY)
+                        WHERE EAT.CREATETS > ?
+                        ORDER BY EAT.CREATETS ASC
+                    ]]>
+                    <req-param value="${LastEventAttrRecordCDate}" type="TIMESTAMP"/>
+
+                    <parser-ref name="B2BiEventAttributesResultSetParser"/>
                 </request>
             </step>
         </scenario>
