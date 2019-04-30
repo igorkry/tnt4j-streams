@@ -118,28 +118,23 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
-		super.logItem(ai);
-		try {
-			Tracker tracker = getTracker();
-			ai.resolveServer(resolveServer);
-			String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
+		Tracker tracker = getTracker();
+		ai.resolveServer(resolveServer);
+		String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
-			Map<Trackable, ActivityInfo> chTrackables = new LinkedHashMap<>();
-			if (splitRelatives && ai.hasChildren()) {
-				ai.buildSplitRelatives(tracker, chTrackables);
-			} else {
-				Trackable t = ai.buildTrackable(tracker, chTrackables);
-				recordActivity(tracker, t, ai, aiFQN);
-			}
+		Map<Trackable, ActivityInfo> chTrackables = new LinkedHashMap<>();
+		if (splitRelatives && ai.hasChildren()) {
+			ai.buildSplitRelatives(tracker, chTrackables);
+		} else {
+			Trackable t = ai.buildTrackable(tracker, chTrackables);
+			recordActivity(tracker, t, ai, aiFQN);
+		}
 
-			for (Map.Entry<Trackable, ActivityInfo> chTrackable : chTrackables.entrySet()) {
-				ActivityInfo cai = chTrackable.getValue();
+		for (Map.Entry<Trackable, ActivityInfo> chTrackable : chTrackables.entrySet()) {
+			ActivityInfo cai = chTrackable.getValue();
 
-				Trackable chT = chTrackable.getKey();
-				recordActivity(tracker, chT, cai, aiFQN);
-			}
-		} finally {
-			notifyLogItemFinished(ai);
+			Trackable chT = chTrackable.getKey();
+			recordActivity(tracker, chT, cai, aiFQN);
 		}
 	}
 
