@@ -1866,9 +1866,8 @@ public class ActivityInfo {
 	 */
 	public Object getFieldValue(String fieldName, String groupName) throws IllegalArgumentException {
 		try {
-			if (fieldName.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
-				return parent == null ? null
-						: parent.getFieldValue(fieldName.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()));
+			if (StreamsConstants.isParentEntityRef(fieldName)) {
+				return parent == null ? null : parent.getFieldValue(StreamsConstants.getParentFieldName(fieldName));
 			}
 
 			Matcher fnMatcher = CHILD_FIELD_PATTERN.matcher(fieldName);
