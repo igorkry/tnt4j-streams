@@ -41,7 +41,7 @@ public class WsRequest<T> {
 	 * Constructs a new WsRequest. Defines request data and tag as {@code null}.
 	 *
 	 * @param requestData
-	 *            request data string
+	 *            request data package
 	 */
 	public WsRequest(T requestData) {
 		this(requestData, null);
@@ -51,7 +51,7 @@ public class WsRequest<T> {
 	 * Constructs a new WsRequest. Defines request data and tag.
 	 *
 	 * @param requestData
-	 *            request data string
+	 *            request data package
 	 * @param tags
 	 *            request tags
 	 */
@@ -70,9 +70,9 @@ public class WsRequest<T> {
 	}
 
 	/**
-	 * Returns data string.
+	 * Returns data package.
 	 *
-	 * @return data string
+	 * @return data package
 	 */
 	public T getData() {
 		return data;

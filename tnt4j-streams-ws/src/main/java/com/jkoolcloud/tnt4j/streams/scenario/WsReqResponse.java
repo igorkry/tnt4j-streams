@@ -29,11 +29,24 @@ package com.jkoolcloud.tnt4j.streams.scenario;
 public class WsReqResponse<O, T> extends WsResponse<T> {
 	private WsRequest<O> originalRequest;
 
+	/**
+	 * Constructs a new WsReqResponse. Defines response and original request data.
+	 *
+	 * @param responseData
+	 *            response data package
+	 * @param request
+	 *            original request data
+	 */
 	public WsReqResponse(T responseData, WsRequest<O> request) {
 		super(responseData, request.getTags());
 		this.originalRequest = request;
 	}
 
+	/**
+	 * Returns original request data.
+	 * 
+	 * @return original request data
+	 */
 	public WsRequest<O> getOriginalRequest() {
 		return originalRequest;
 	}

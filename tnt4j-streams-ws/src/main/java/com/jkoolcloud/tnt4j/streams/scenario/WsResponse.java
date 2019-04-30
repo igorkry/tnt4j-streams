@@ -30,7 +30,7 @@ public class WsResponse<T> extends WsRequest<T> {
 	 * Constructs a new WsResponse. Defines response data and tag as {@code null}.
 	 *
 	 * @param responseData
-	 *            response data string
+	 *            response data package
 	 */
 	public WsResponse(T responseData) {
 		super(responseData);
@@ -40,7 +40,7 @@ public class WsResponse<T> extends WsRequest<T> {
 	 * Constructs a new WsResponse. Defines response data and tag.
 	 *
 	 * @param responseData
-	 *            response data string
+	 *            response data package
 	 * @param tags
 	 *            response tags
 	 */
