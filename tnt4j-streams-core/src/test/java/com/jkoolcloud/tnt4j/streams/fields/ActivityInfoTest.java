@@ -440,7 +440,7 @@ public class ActivityInfoTest {
 
 	@Test
 	public void testTimestampAsHex() throws ParseException {
-		Integer TEST_VALUE = 0x5bc584a2;
+		Integer TEST_VALUE = 0x5cb9c0d8;
 		System.out.printf("The decimal: %d \n", TEST_VALUE);
 		ActivityInfo ai = new ActivityInfo();
 		ActivityField af = new ActivityField("startTime");
@@ -452,6 +452,8 @@ public class ActivityInfoTest {
 		ai.applyField(af, TEST_VALUE);
 		Object startTime = ai.getFieldValue("startTime");
 		System.out.printf("The result: %s \n", startTime);
+		assertEquals((UsecTimestamp) startTime, new UsecTimestamp(1555677400000000L));
+		// assertEquals();
 	}
 
 	@Test
