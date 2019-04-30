@@ -1003,7 +1003,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				ActivityFieldLocator loc = locators.get(li);
 				values[li] = getLocatorValue(loc, cData);
 
-				if (values[li] == null && (loc.isRequired() || (requireAll && loc.isDefaultRequire()))) {
+				if (values[li] == null && isRequired(loc)) {
 					throw new MissingFieldValueException(
 							StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 									"ActivityParser.required.locator.not.found", loc, cData.getField()));
@@ -1013,6 +1013,22 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Checks if activity field locator is required.
+	 *
+	 * @param loc
+	 *            activity field locator to check
+	 * @return {@code true} if locator is set as required or has default require state and this parser has property
+	 *         {@value com.jkoolcloud.tnt4j.streams.configure.ParserProperties#PROP_REQUIRE_ALL} set to {@code true},
+	 *         {@code false} - otherwise
+	 *
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator#isRequired()
+	 * @see com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator#isDefaultRequire()
+	 */
+	protected boolean isRequired(ActivityFieldLocator loc) {
+		return loc.isRequired() || (requireAll && loc.isDefaultRequire());
 	}
 
 	private Map<String, Object> parseDynamicValues(ActivityContext cData,

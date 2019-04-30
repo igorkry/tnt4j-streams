@@ -237,13 +237,11 @@ public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
 				locStr = JSON_PATH_ROOT + JSON_PATH_SEPARATOR + locStr;
 			}
 
-			Object jsonValue = null;
+			Object jsonValue;
 			try {
 				jsonValue = cData.getData().read(locStr);
 			} catch (JsonPathException exc) {
-				Utils.logThrowable(logger(), OpLevel.DEBUG,
-						StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-						"ActivityJsonParser.path.exception", locStr, exc);
+				jsonValue = null;
 			}
 
 			if (jsonValue != null) {
