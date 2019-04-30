@@ -347,7 +347,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		for (ActivityField f : fields) {
 			parserFieldsMap.put(f.getFieldTypeName(), f);
 			allFieldsMap.put(f.getFieldTypeName(), f);
-			collectStackedParsersFields(allFieldsMap, f);
+			collectStackedParsersFields(allFieldsMap, f, this);
 		}
 
 		boolean hasDynamicFields = hasDynamicFields(allFieldsMap);
@@ -470,8 +470,11 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 	 *            fields map to append stacked parsers fields
 	 * @param f
 	 *            field instance to collect stacked parsers fields
+	 * @param pParser
+	 *            parent parser instance
 	 */
-	protected void collectStackedParsersFields(Map<String, ActivityField> fieldsMap, ActivityField f) {
+	protected void collectStackedParsersFields(Map<String, ActivityField> fieldsMap, ActivityField f,
+			ActivityParser pParser) {
 		Collection<ActivityField.FieldParserReference> sParsers = f.getStackedParsers();
 
 		if (CollectionUtils.isEmpty(sParsers)) {
@@ -479,9 +482,13 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		for (ActivityField.FieldParserReference spRef : sParsers) {
-			GenericActivityParser<?> p = (GenericActivityParser<?>) spRef.getParser();
+			GenericActivityParser<?> sParser = (GenericActivityParser<?>) spRef.getParser();
 
-			for (ActivityField spf : p.fieldList) {
+			if (sParser == pParser) {
+				continue;
+			}
+
+			for (ActivityField spf : sParser.fieldList) {
 				ActivityField pmf = fieldsMap.put(spf.getFieldTypeName(), spf);
 
 				if (pmf != null) {
@@ -490,7 +497,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 							spf.getParser().getName(), spf, pmf.getParser().getName(), pmf);
 				}
 
-				p.collectStackedParsersFields(fieldsMap, spf);
+				collectStackedParsersFields(fieldsMap, spf, sParser);
 			}
 		}
 	}
