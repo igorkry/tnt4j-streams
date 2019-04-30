@@ -16,9 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.outputs;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +60,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  *
  * @version $Revision: 1 $
  *
- * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+ * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
  */
 public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, Trackable> {
 	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudActivityOutput.class);
@@ -113,37 +114,39 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	 * {@inheritDoc}
 	 * <p>
 	 * 
-	 * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see ActivityInfo#buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 */
 	@Override
 	public void logItem(ActivityInfo ai) throws Exception {
+		super.logItem(ai);
+		try {
 			Tracker tracker = getTracker();
 			ai.resolveServer(resolveServer);
 			String aiFQN = buildFQNFromData ? StringUtils.isEmpty(sourceFQN) ? DEFAULT_SOURCE_FQN : sourceFQN : null;
 
+			Map<Trackable, ActivityInfo> chTrackables = new LinkedHashMap<>();
 			if (splitRelatives && ai.hasChildren()) {
-				List<ActivityInfo> cais = ai.getChildren();
-				for (ActivityInfo cai : cais) {
-					cai.merge(ai);
-					Trackable t = cai.buildTrackable(tracker);
-					alterTrackableSource(tracker, t, cai, aiFQN);
-					recordActivity(tracker, CONN_RETRY_INTERVAL, t);
-				}
+				ai.buildSplitRelatives(tracker, chTrackables);
 			} else {
-				List<Trackable> chTrackables = new ArrayList<>();
 				Trackable t = ai.buildTrackable(tracker, chTrackables);
-				alterTrackableSource(tracker, t, ai, aiFQN);
-				recordActivity(tracker, CONN_RETRY_INTERVAL, t);
-
-				List<ActivityInfo> cais = ai.getChildren();
-				for (int i = 0; i < chTrackables.size(); i++) {
-					Trackable chT = chTrackables.get(i);
-					ActivityInfo cai = cais.get(i);
-					alterTrackableSource(tracker, chT, cai, aiFQN);
-					recordActivity(tracker, CONN_RETRY_INTERVAL, chT);
-				}
+				recordActivity(tracker, t, ai, aiFQN);
 			}
+
+			for (Map.Entry<Trackable, ActivityInfo> chTrackable : chTrackables.entrySet()) {
+				ActivityInfo cai = chTrackable.getValue();
+
+				Trackable chT = chTrackable.getKey();
+				recordActivity(tracker, chT, cai, aiFQN);
+			}
+		} finally {
+			notifyLogItemFinished(ai);
 		}
+	}
+
+	private void recordActivity(Tracker tracker, Trackable t, ActivityInfo ai, String aiFQN) throws Exception {
+		alterTrackableSource(tracker, t, ai, aiFQN);
+		recordActivity(tracker, CONN_RETRY_INTERVAL, t);
+	}
 
 	private void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
 		if (StringUtils.isNotEmpty(fqn)) {

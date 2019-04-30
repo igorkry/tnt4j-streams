@@ -462,9 +462,8 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
-	 * Same as invoking {@link #addActivityProperty(String, Object, boolean)} setting transient flag value to
-	 * {@code false}.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)} is invoked. Same as
+	 * invoking {@link #addActivityProperty(String, Object, boolean)} setting transient flag value to {@code false}.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -474,7 +473,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see java.util.Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 * @see #addActivityProperty(String, Object, boolean)
 	 */
 	public Object addActivityProperty(String propName, Object propValue) {
@@ -483,7 +482,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -495,7 +494,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see java.util.Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, boolean)
 	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
 	 */
@@ -505,7 +504,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)} is invoked.
 	 *
 	 * @param propName
 	 *            activity item property key
@@ -517,7 +516,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see java.util.Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 * @see com.jkoolcloud.tnt4j.core.Property#Property(String, Object, String)
 	 * @see #addActivityProperty(com.jkoolcloud.tnt4j.core.Property)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
@@ -529,7 +528,7 @@ public class ActivityInfo {
 
 	/**
 	 * Adds activity item property to item properties map. Properties from map are transferred as tracking event
-	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} is invoked.
+	 * properties when {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)} is invoked.
 	 *
 	 * @param property
 	 *            property instance to add to activity entity properties map
@@ -537,7 +536,7 @@ public class ActivityInfo {
 	 *         property set
 	 *
 	 * @see java.util.Map#put(Object, Object)
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 * @see com.jkoolcloud.tnt4j.core.ValueTypes
 	 */
 	public Object addActivityProperty(Property property) {
@@ -677,7 +676,7 @@ public class ActivityInfo {
 	 *             if {@code tracker} is null
 	 * @see com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput#logItem(ActivityInfo)
 	 */
-	public Trackable buildTrackable(Tracker tracker, Collection<Trackable> chTrackables) {
+	public Trackable buildTrackable(Tracker tracker, Map<Trackable, ActivityInfo> chTrackables) {
 		if (tracker == null) {
 			throw new IllegalArgumentException(
 					StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME, "ActivityInfo.tracker.null"));
@@ -713,7 +712,7 @@ public class ActivityInfo {
 	 * {@link com.jkoolcloud.tnt4j.tracker.TrackingEvent} or {@link com.jkoolcloud.tnt4j.core.PropertySnapshot} using
 	 * the specified tracker for this activity data entity to be sent to jKoolCloud.
 	 * <p>
-	 * Does same as {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)} where
+	 * Does same as {@link #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)} where
 	 * {@code chTrackables} list is {@code null}.
 	 *
 	 * @param tracker
@@ -723,7 +722,7 @@ public class ActivityInfo {
 	 * @return trackable instance made from this activity entity data
 	 * @throws IllegalArgumentException
 	 *             if {@code tracker} is null
-	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Collection)
+	 * @see #buildTrackable(com.jkoolcloud.tnt4j.tracker.Tracker, java.util.Map)
 	 */
 	public Trackable buildTrackable(Tracker tracker) {
 		return buildTrackable(tracker, null);
@@ -743,7 +742,7 @@ public class ActivityInfo {
 	 * @return tracking event instance
 	 */
 	protected TrackingEvent buildEvent(Tracker tracker, String trackName, String trackId,
-			Collection<Trackable> chTrackables) {
+			Map<Trackable, ActivityInfo> chTrackables) {
 		if (StringUtils.isEmpty(trackName)) {
 			trackName = "_UNNAMED_EVENT_"; // NON-NLS
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -827,15 +826,7 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			List<ActivityInfo> cais = getChildren();
-			for (ActivityInfo child : cais) {
-				Trackable cTrackable = buildChild(tracker, child, trackId);
-				boolean consumed = addTrackableChild(event, cTrackable);
-
-				if (!consumed && chTrackables != null) {
-					chTrackables.add(cTrackable);
-				}
-			}
+			buildChildren(tracker, trackId, event, chTrackables);
 		}
 
 		return event;
@@ -855,7 +846,7 @@ public class ActivityInfo {
 	 * @return tracking activity instance
 	 */
 	protected TrackingActivity buildActivity(Tracker tracker, String trackName, String trackId,
-			Collection<Trackable> chTrackables) {
+			Map<Trackable, ActivityInfo> chTrackables) {
 		if (StringUtils.isEmpty(trackName)) {
 			trackName = "_UNNAMED_ACTIVITY_"; // NON-NLS
 			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -939,18 +930,65 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			List<ActivityInfo> cais = getChildren();
-			for (ActivityInfo child : cais) {
-				Trackable cTrackable = buildChild(tracker, child, trackId);
-				boolean consumed = addTrackableChild(activity, cTrackable);
-
-				if (!consumed && chTrackables != null) {
-					chTrackables.add(cTrackable);
-				}
-			}
+			buildChildren(tracker, trackId, activity, chTrackables);
 		}
 
 		return activity;
+	}
+
+	private void buildChildren(Tracker tracker, String trackId, Trackable pTrackable,
+			Map<Trackable, ActivityInfo> chTrackables) {
+		List<ActivityInfo> cais = getChildren();
+		for (ActivityInfo child : cais) {
+			if (child.filteredOut) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityInfo.filtered.child", child);
+				continue;
+			}
+
+			Trackable cTrackable = buildChild(tracker, child, trackId);
+			boolean consumed = addTrackableChild(pTrackable, cTrackable);
+
+			if (!consumed && chTrackables != null) {
+				chTrackables.put(cTrackable, child);
+			}
+		}
+	}
+
+	/**
+	 * Builds child entity trackables as split relatives by merging this (parent) activity entity data into child
+	 * entity.
+	 * <p>
+	 * If no child relatives are available, only this (parent) activity build trackable is added to {@code chTrackables}
+	 * collation.
+	 * 
+	 * @param tracker
+	 *            communication gateway to use to record activity
+	 * @param chTrackables
+	 *            collection to add built child trackables
+	 * 
+	 * @see #merge(ActivityInfo)
+	 */
+	public void buildSplitRelatives(Tracker tracker, Map<Trackable, ActivityInfo> chTrackables) {
+		List<ActivityInfo> cais = getChildren();
+		for (ActivityInfo child : cais) {
+			if (child.filteredOut) {
+				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityInfo.filtered.child", child);
+				continue;
+			}
+
+			child.merge(this);
+			Trackable t = child.buildTrackable(tracker);
+			if (chTrackables != null) {
+				chTrackables.put(t, child);
+			}
+		}
+
+		if (chTrackables != null && chTrackables.isEmpty()) {
+			Trackable t = buildTrackable(tracker);
+			chTrackables.put(t, this);
+		}
 	}
 
 	private static boolean addTrackableChild(Trackable pTrackable, Trackable chTrackable) {
