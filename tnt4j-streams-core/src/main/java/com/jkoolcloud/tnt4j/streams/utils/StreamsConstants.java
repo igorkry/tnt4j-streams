@@ -16,6 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.utils;
 
+import java.util.regex.Pattern;
+
 /**
  * TNT4J-Streams constants.
  *
@@ -80,5 +82,39 @@ public final class StreamsConstants {
 	public static final String PARENT_REFERENCE_PREFIX = "^.";// NON-NLS
 
 	private StreamsConstants() {
+	}
+
+	/**
+	 * Checks if field reference refers parent activity entity field. Parent activity entity references starts with
+	 * {@value #PARENT_REFERENCE_PREFIX} prefix.
+	 * 
+	 * @param fRef
+	 *            reference string to check
+	 * @return {@code true} if reference string starts with {@value #PARENT_REFERENCE_PREFIX}, {@code false} - otherwise
+	 */
+	public static boolean isParentEntityRef(String fRef) {
+		return fRef.startsWith(PARENT_REFERENCE_PREFIX);
+	}
+
+	/**
+	 * Removed parent activity entity reference prefix from provided field reference.
+	 * 
+	 * @param fieldName
+	 *            field name
+	 * @return field name without parent activity entity reference prefix
+	 */
+	public static String getParentFieldName(String fieldName) {
+		return fieldName.substring(PARENT_REFERENCE_PREFIX.length());
+	}
+
+	/**
+	 * Splits string containing multiple property definitions to individual properties array.
+	 * 
+	 * @param pValue
+	 *            string defining multiple properties
+	 * @return array of individual properties definitions
+	 */
+	public static String[] getMultiProperties(String pValue) {
+		return pValue.split(Pattern.quote(MULTI_PROPS_DELIMITER));
 	}
 }

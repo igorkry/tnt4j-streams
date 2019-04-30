@@ -227,7 +227,7 @@ public class ApacheAccessLogParser extends ActivityRegExParser {
 			}
 		} else if (PROP_CONF_REGEX_MAPPING.equalsIgnoreCase(name)) {
 			if (StringUtils.isNotEmpty(value)) {
-				String[] uMappings = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+				String[] uMappings = StreamsConstants.getMultiProperties(value);
 				for (String uMapping : uMappings) {
 					int idx = uMapping.indexOf('=');
 					if (idx > 0) {

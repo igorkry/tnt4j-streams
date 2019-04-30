@@ -20,7 +20,6 @@ import java.sql.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +86,7 @@ public class ActivityJDBCResultSetParser extends GenericActivityParser<ResultSet
 
 		if (WsParserProperties.PROP_SQL_JAVA_MAPPING.equalsIgnoreCase(name)) {
 			if (StringUtils.isNotEmpty(value)) {
-				String[] sqlJavaMappings = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+				String[] sqlJavaMappings = StreamsConstants.getMultiProperties(value);
 				for (String sqlJavaMapping : sqlJavaMappings) {
 					String[] nsFields = sqlJavaMapping.split("="); // NON-NLS
 					try {

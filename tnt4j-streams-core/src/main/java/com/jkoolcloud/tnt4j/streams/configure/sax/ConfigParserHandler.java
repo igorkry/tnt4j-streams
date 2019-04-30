@@ -2266,7 +2266,7 @@ public class ConfigParserHandler extends DefaultHandler {
 
 	private static boolean isPropValueAlreadyAdded(String cpv, String propValue) {
 		if (cpv != null) {
-			String[] pva = cpv.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+			String[] pva = StreamsConstants.getMultiProperties(cpv);
 
 			for (String pvt : pva) {
 				if (pvt.equals(propValue)) {

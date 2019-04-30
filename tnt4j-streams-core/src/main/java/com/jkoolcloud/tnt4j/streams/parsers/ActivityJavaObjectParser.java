@@ -20,7 +20,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -88,7 +87,7 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 
 		if (ParserProperties.PROP_SUPPORTED_CLASS.equalsIgnoreCase(name)) {
 			if (StringUtils.isNotEmpty(value)) {
-				String[] sClasses = value.split(Pattern.quote(StreamsConstants.MULTI_PROPS_DELIMITER));
+				String[] sClasses = StreamsConstants.getMultiProperties(value);
 				for (String sClass : sClasses) {
 					try {
 						supportedClasses.add(Class.forName(sClass));

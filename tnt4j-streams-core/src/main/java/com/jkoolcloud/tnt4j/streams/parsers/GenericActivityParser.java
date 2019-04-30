@@ -414,7 +414,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 
 	private static boolean isExtRefField(String ref, Set<String> aaFields, Map<String, ActivityField> allFieldsMap) {
 		// NOTE: ignoring parent parser fields references for now.
-		return ref.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX) //
+		return StreamsConstants.isParentEntityRef(ref) //
 				|| aaFields.contains(ref) //
 				|| allFieldsMap.containsKey(ref);
 	}
@@ -1176,10 +1176,9 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		Object value = null;
 		String locStr = locator.getLocator();
 		if (StringUtils.isNotEmpty(locStr)) {
-			if (locStr.startsWith(StreamsConstants.PARENT_REFERENCE_PREFIX)) {
+			if (StreamsConstants.isParentEntityRef(locStr)) {
 				ActivityInfo pai = cData.getParentActivity();
-				value = pai == null ? null : pai
-						.getFieldValue(locStr.substring(StreamsConstants.PARENT_REFERENCE_PREFIX.length()), getName());
+				value = pai == null ? null : pai.getFieldValue(StreamsConstants.getParentFieldName(locStr), getName());
 			} else {
 				value = cData.getActivity().getFieldValue(locStr);
 			}
