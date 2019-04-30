@@ -568,8 +568,8 @@ To define transformations stream configuration token `<field-transform>` shall b
  * `lang` - transformation script/expression language. Can be one of `groovy`, `javascript` or `xpath`. Default value - `javascript`.
  * `beanRef` - transformation implementing bean reference.
  * `phase` - defines activity data resolution phase, when transformation has to be applied. Can be one of `raw`, `formatted` or `aggregated`.
- `raw` and `formatted` values are applicable for field locator resolved value transformation, while `aggregated` is default for field value 
- transformation.
+ `raw` and `formatted` values are applicable for field locator resolved value transformation, while `aggregated` is default for 
+ transformation having references to activity entity fields.
 
 Token body is used to define transformation script/expression code.
 

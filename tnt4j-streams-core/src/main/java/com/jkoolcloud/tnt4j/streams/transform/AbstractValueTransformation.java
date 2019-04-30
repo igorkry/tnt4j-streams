@@ -62,6 +62,11 @@ public abstract class AbstractValueTransformation<V, T> implements ValueTransfor
 	}
 
 	@Override
+	public boolean hasActivityReferences() {
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return name + "@" + phase; // NON-NLS
 	}

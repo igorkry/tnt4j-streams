@@ -721,11 +721,6 @@ public class ActivityField extends AbstractFieldEntity {
 		return fLocators;
 	}
 
-	@Override
-	protected ValueTransformation.Phase getDefaultTransformationPhase() {
-		return ValueTransformation.Phase.AGGREGATED;
-	}
-
 	/**
 	 * Collects all references for this field from bound transformation and filter expressions. If locator type is
 	 * {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}, locator referenced field is added

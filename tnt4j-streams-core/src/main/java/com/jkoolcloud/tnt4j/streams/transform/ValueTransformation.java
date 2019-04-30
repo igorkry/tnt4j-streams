@@ -61,6 +61,14 @@ public interface ValueTransformation<V, T> extends NamedObject {
 	void setPhase(Phase phase);
 
 	/**
+	 * Checks if transformation has references to activity entity fields.
+	 * 
+	 * @return {@code true} if transformation expression contains references to activity entity fields, {@code false} -
+	 *         otherwise
+	 */
+	boolean hasActivityReferences();
+
+	/**
 	 * Supported value resolution phases.
 	 */
 	enum Phase {

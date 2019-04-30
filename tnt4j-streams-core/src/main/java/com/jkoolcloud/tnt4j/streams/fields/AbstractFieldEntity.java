@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.filters.StreamFiltersGroup;
-import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -144,7 +143,8 @@ public abstract class AbstractFieldEntity {
 		}
 
 		if (transformation.getPhase() == null) {
-			transformation.setPhase(getDefaultTransformationPhase());
+			transformation.setPhase(transformation.hasActivityReferences() ? ValueTransformation.Phase.AGGREGATED
+					: ValueTransformation.Phase.FORMATTED);
 		}
 
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -152,13 +152,6 @@ public abstract class AbstractFieldEntity {
 
 		transformations.add(transformation);
 	}
-
-	/**
-	 * Returns default activity data value resolution phase when transformation has to be applied for his entity.
-	 * 
-	 * @return default activity data value resolution phase for this entity
-	 */
-	protected abstract ValueTransformation.Phase getDefaultTransformationPhase();
 
 	/**
 	 * Transforms provided object value using defined transformations. If more than one transformation defined,
@@ -235,21 +228,18 @@ public abstract class AbstractFieldEntity {
 	}
 
 	/**
-	 * Checks if activity field/locator transformation expression contains activity field names variables.
+	 * Checks if activity field/locator transformations contains activity entity field name variables.
 	 *
-	 * @return {@code true} if activity field/locator transformation expression contains activity field names variables,
+	 * @return {@code true} if activity field/locator transformations contains activity entity field name variables,
 	 *         {@code false} - otherwise
+	 * 
+	 * @see com.jkoolcloud.tnt4j.streams.transform.ValueTransformation#hasActivityReferences()
 	 */
 	public boolean hasActivityTransformations() {
 		if (transformations != null) {
 			for (ValueTransformation<?, ?> vt : transformations) {
-				if (vt instanceof AbstractScriptTransformation) {
-					AbstractScriptTransformation<?> st = (AbstractScriptTransformation<?>) vt;
-					String script = st.getScriptCode();
-
-					if (Utils.isVariableExpression(script)) {
-						return true;
-					}
+				if (vt.hasActivityReferences()) {
+					return true;
 				}
 			}
 		}

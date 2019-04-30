@@ -2170,8 +2170,7 @@ public class ConfigParserHandler extends DefaultHandler {
 			if (aFieldData.getLocators().size() == 1 && aFieldData.transformations.size() == 1) {
 				ValueTransformation<Object, Object> aft = aFieldData.transformations.get(0);
 
-				if (aft.getPhase() == ValueTransformation.Phase.RAW
-						|| aft.getPhase() == ValueTransformation.Phase.FORMATTED || aft.getPhase() == null) {
+				if (isLocalTransformation(aft)) {
 					aFieldData.getLocators().get(0).addTransformation(aft);
 					transformationsAdded = true;
 				}
@@ -2183,6 +2182,12 @@ public class ConfigParserHandler extends DefaultHandler {
 				}
 			}
 		}
+	}
+
+	private boolean isLocalTransformation(ValueTransformation<?, ?> vt) {
+		return vt.getPhase() == ValueTransformation.Phase.RAW //
+				|| vt.getPhase() == ValueTransformation.Phase.FORMATTED //
+				|| (vt.getPhase() == null && !vt.hasActivityReferences());
 	}
 
 	private void handleJavaObject(JavaObjectData javaObjectData) throws Exception {

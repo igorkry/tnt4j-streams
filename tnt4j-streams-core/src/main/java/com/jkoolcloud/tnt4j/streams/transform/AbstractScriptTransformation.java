@@ -197,6 +197,17 @@ public abstract class AbstractScriptTransformation<V> extends AbstractValueTrans
 	}
 
 	/**
+	 * Checks if transformation has references to activity entity fields.
+	 * 
+	 * @return @return {@code true} if transformation expression contains activity entity field name variables,
+	 *         {@code false} - otherwise
+	 */
+	@Override
+	public boolean hasActivityReferences() {
+		return Utils.isVariableExpression(scriptCode);
+	}
+
+	/**
 	 * Returns set of expressions variable placeholders - usually names of referenced activity entity fields.
 	 *
 	 * @return set of expressions variable placeholders
