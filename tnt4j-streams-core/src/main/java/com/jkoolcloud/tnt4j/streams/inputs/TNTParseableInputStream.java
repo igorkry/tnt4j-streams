@@ -29,7 +29,6 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
-import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudActivityOutput;
@@ -102,10 +101,8 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 
 		if (StringUtils.isNotEmpty(groupingActivityName)) {
 			ActivityInfo gai = new ActivityInfo();
-			gai.setFieldValue(new ActivityField(StreamFieldType.EventType.name(), ActivityFieldDataType.String),
-					OpType.ACTIVITY.name());
-			gai.setFieldValue(new ActivityField(StreamFieldType.EventName.name(), ActivityFieldDataType.String),
-					groupingActivityName);
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY.name());
+			gai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), groupingActivityName);
 			output().logItem(gai);
 
 			StreamsCache.addValue(getName() + StreamsConstants.STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY,

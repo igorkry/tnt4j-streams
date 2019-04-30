@@ -123,9 +123,13 @@ public abstract class AbstractFieldEntity {
 	 * 
 	 * @param emptyAsNull
 	 *            flag indicating resolved empty value shall be treated as {@code null}
+	 *
+	 * @return instance of this field entity
 	 */
-	public void setEmptyAsNull(boolean emptyAsNull) {
+	public AbstractFieldEntity setEmptyAsNull(boolean emptyAsNull) {
 		this.emptyAsNull = emptyAsNull;
+
+		return this;
 	}
 
 	/**
@@ -194,12 +198,16 @@ public abstract class AbstractFieldEntity {
 	 *
 	 * @param ffg
 	 *            field filters group
+	 *
+	 * @return instance of this field entity
 	 */
-	public void setFilter(StreamFiltersGroup<Object> ffg) {
+	public AbstractFieldEntity setFilter(StreamFiltersGroup<Object> ffg) {
 		logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"AbstractFieldEntity.adding.filter", this, ffg.getName());
 
 		this.filter = ffg;
+
+		return this;
 	}
 
 	/**

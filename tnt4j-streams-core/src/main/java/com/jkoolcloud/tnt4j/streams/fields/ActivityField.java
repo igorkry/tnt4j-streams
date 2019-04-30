@@ -166,9 +166,13 @@ public class ActivityField extends AbstractFieldEntity {
 	 *
 	 * @param fieldTypeName
 	 *            the activity field type name
+	 * 
+	 * @return instance of this activity field
 	 */
-	public void setFieldTypeName(String fieldTypeName) {
+	public ActivityField setFieldTypeName(String fieldTypeName) {
 		this.fieldTypeName = fieldTypeName;
+
+		return this;
 	}
 
 	/**

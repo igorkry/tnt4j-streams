@@ -640,7 +640,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				.getValue(stream.getName() + StreamsConstants.STREAM_GROUPING_ACTIVITY_ID_CACHE_KEY);
 		if (StringUtils.isNotEmpty(parentId)) {
 			if (parentIdField == null) {
-				parentIdField = new ActivityField(StreamFieldType.ParentId.name(), ActivityFieldDataType.String);
+				parentIdField = new ActivityField(StreamFieldType.ParentId.name());
 			}
 
 			ai.setFieldValue(parentIdField, parentId);
