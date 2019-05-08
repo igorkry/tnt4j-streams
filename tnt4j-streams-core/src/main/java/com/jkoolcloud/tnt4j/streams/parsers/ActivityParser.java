@@ -145,8 +145,8 @@ public abstract class ActivityParser implements NamedObject {
 	 *            parent stream
 	 * @param data
 	 *            raw activity data to parse
-	 * @param pai
-	 *            parent activity info instance, or {@code null} if applied on root parser
+	 * @param cData
+	 *            parsing context data package
 	 * @return converted activity info, or {@code null} if raw activity data does not match format for this parser
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
@@ -155,7 +155,7 @@ public abstract class ActivityParser implements NamedObject {
 	 * @see #isDataClassSupported(Object)
 	 * @see GenericActivityParser#parsePreparedItem(com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser.ActivityContext)
 	 */
-	protected abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+	protected abstract ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityParserContext cData)
 			throws IllegalStateException, ParseException;
 
 	/**
@@ -191,26 +191,25 @@ public abstract class ActivityParser implements NamedObject {
 	 * field can be parsed by stacked parser, produced activity can be merged or added as a child into specified
 	 * (parent) activity depending on stacked parser reference 'aggregation' attribute value.
 	 *
-	 * @param stream
-	 *            parent stream
-	 * @param ai
-	 *            activity object whose field is to be set
 	 * @param field
 	 *            field to apply value to
 	 * @param value
 	 *            value to apply for this field
+	 * @param cData
+	 *            parsing context data package
 	 * @throws IllegalStateException
 	 *             if parser has not been properly initialized
 	 * @throws ParseException
 	 *             if an error occurs while parsing provided activity data <tt>value</tt>
 	 * @see #parse(TNTInputStream, Object)
 	 */
-	protected void applyFieldValue(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field, Object value)
+	protected void applyFieldValue(ActivityField field, Object value, ActivityParserContext cData)
 			throws IllegalStateException, ParseException {
 
+		ActivityInfo ai = cData.getActivity();
 		applyFieldValue(ai, field, value);
 
-		if (CollectionUtils.isNotEmpty(field.getStackedParsers())) {
+		if (value != null && CollectionUtils.isNotEmpty(field.getStackedParsers())) {
 			boolean applied = false;
 			for (ActivityField.FieldParserReference parserRef : field.getStackedParsers()) {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
@@ -221,7 +220,7 @@ public abstract class ActivityParser implements NamedObject {
 					logger().log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.stacked.parser.input.value.type", name, field, parserRef,
 							valueToParse == null ? null : valueToParse.getClass().getName());
-					applied = applyStackedParser(stream, ai, field, parserRef, valueToParse);
+					applied = applyStackedParser(field, parserRef, valueToParse, cData);
 
 					logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 							"ActivityParser.stacked.parser.applied", name, field, parserRef, applied);
@@ -246,23 +245,23 @@ public abstract class ActivityParser implements NamedObject {
 	/**
 	 * Applies stacked parser to parse provided activity data <tt>value</tt>.
 	 *
-	 * @param stream
-	 *            parent stream
-	 * @param ai
-	 *            activity object whose data to be altered
 	 * @param field
 	 *            activity field providing data
 	 * @param parserRef
 	 *            stacked parser reference
 	 * @param value
 	 *            data value to be parsed by stacked parser
+	 * @param cData
+	 *            parsing context data package
 	 * @return {@code true} if referenced stacked parser was applied, {@code false} - otherwise
 	 * @throws ParseException
 	 *             if an error occurs while parsing provided activity data <tt>value</tt>
 	 */
-	@SuppressWarnings("deprecation")
-	protected boolean applyStackedParser(TNTInputStream<?, ?> stream, ActivityInfo ai, ActivityField field,
-			ActivityField.FieldParserReference parserRef, Object value) throws ParseException {
+	protected boolean applyStackedParser(ActivityField field, ActivityField.FieldParserReference parserRef,
+			Object value, ActivityParserContext cData) throws ParseException {
+		TNTInputStream<?, ?> stream = cData.getStream();
+		ActivityInfo ai = cData.getActivity();
+
 		boolean dataMatch = parserRef.getParser().isDataClassSupported(value);
 		Boolean tagsMatch = null;
 		Boolean expMatch = null;
@@ -284,13 +283,11 @@ public abstract class ActivityParser implements NamedObject {
 				expMatch == null ? "----" : expMatch); // NON-NLS
 
 		if (parserMatch) {
-			ActivityInfo sai = parserRef.getParser().parse(stream, value, ai);
+			cData.setParserRef(parserRef);
+			ActivityInfo sai = parserRef.getParser().parse(stream, value, cData);
 
 			if (sai != null) {
-				if (parserRef.getAggregationType() == AggregationType.Join
-						|| parserRef.getAggregationType() == AggregationType.Relate) {
-					ai.addChild(parserRef.getParser().getName(), sai);
-				} else {
+				if (parserRef.getAggregationType() == AggregationType.Merge) {
 					ai.mergeAll(sai);
 				}
 
@@ -445,5 +442,40 @@ public abstract class ActivityParser implements NamedObject {
 	 */
 	public void setDefaultEmptyAsNull(boolean defaultEmptyAsNull) {
 		this.defaultEmptyAsNull = defaultEmptyAsNull;
+	}
+
+	/**
+	 * Base interface of activity data parsing context, providing all related data and references used by parsers to
+	 * resolve activity field values.
+	 */
+	protected interface ActivityParserContext {
+		/**
+		 * Returns instance of stream providing activity data.
+		 *
+		 * @return stream providing activity data
+		 */
+		TNTInputStream<?, ?> getStream();
+
+		/**
+		 * Returns resolved activity entity data.
+		 *
+		 * @return resolved activity entity data
+		 */
+		ActivityInfo getActivity();
+
+		/**
+		 * Sets currently used stacked parser reference.
+		 *
+		 * @param pRef
+		 *            currently used stacked parser reference
+		 */
+		void setParserRef(ActivityField.FieldParserReference pRef);
+
+		/**
+		 * Gets currently used stacked parser reference.
+		 * 
+		 * @return currently used stacked parser reference
+		 */
+		ActivityField.FieldParserReference getParserRef();
 	}
 }

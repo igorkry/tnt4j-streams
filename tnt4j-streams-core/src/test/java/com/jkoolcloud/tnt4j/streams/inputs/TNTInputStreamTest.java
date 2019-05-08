@@ -333,7 +333,7 @@ public class TNTInputStreamTest {
 		}
 
 		@Override
-		protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+		protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityParserContext cData)
 				throws IllegalStateException, ParseException {
 			if (data.equals("TESTPARSEEXCEPTION")) { // NON-NLS
 				throw new ParseException("TESTPARSEEXCEPTION", 0); // NON-NLS

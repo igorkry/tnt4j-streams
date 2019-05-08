@@ -85,13 +85,13 @@ public class SampleParser extends GenericActivityParser<String[]> {
 	}
 
 	@Override
-	protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityInfo pai)
+	protected ActivityInfo parse(TNTInputStream<?, ?> stream, Object data, ActivityParserContext cData)
 			throws IllegalStateException, ParseException {
 		if (fieldDelim == null) {
 			throw new IllegalStateException("SampleParser: field delimiter not specified or empty"); // NON-NLS
 		}
 
-		return super.parse(stream, data, pai);
+		return super.parse(stream, data, cData);
 	}
 
 	@Override

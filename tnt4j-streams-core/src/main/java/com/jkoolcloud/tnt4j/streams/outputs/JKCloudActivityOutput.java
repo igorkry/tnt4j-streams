@@ -156,7 +156,7 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 			}
 
 			if (CollectionUtils.isNotEmpty(snapshots)) {
-				List<ActivityInfo> cais = ai.getChildren();
+				List<ActivityInfo> cais = ai.getChildren(true);
 				int i = 0;
 				for (Snapshot s : snapshots) {
 					ActivityInfo cai = (cais == null || i >= cais.size()) ? null : cais.get(i++);

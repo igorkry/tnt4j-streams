@@ -331,7 +331,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 						StreamsResources.RESOURCE_BUNDLE_NAME, "TNTInputStream.could.not.parse.activity", item), item);
 			}
 		} else {
-			if (!ai.isFilteredOut()) {
+			if (ai.isDeliverable()) {
 				getOutput().logItem(ai);
 			} else {
 				logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),

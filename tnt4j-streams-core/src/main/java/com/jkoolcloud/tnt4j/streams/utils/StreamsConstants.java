@@ -81,6 +81,11 @@ public final class StreamsConstants {
 	 */
 	public static final String PARENT_REFERENCE_PREFIX = "^.";// NON-NLS
 
+	/**
+	 * The constant defining value placeholder to set child entity ordinal index within parent entity.
+	 */
+	public static final String CHILD_ORDINAL_INDEX = "$indexOf$"; // NON-NLS
+
 	private StreamsConstants() {
 	}
 

@@ -96,12 +96,14 @@ public class ActivityInfo {
 	private String category = null;
 
 	private boolean filteredOut = false;
+	private boolean complete = false;
 
 	private static final TimeTracker ACTIVITY_TIME_TRACKER = TimeTracker.newTracker(1000, TimeUnit.HOURS.toMillis(8));
 
 	private Map<String, Property> activityProperties;
 	private Map<String, List<ActivityInfo>> children;
 	private ActivityInfo parent;
+	private int ordinalIdx = 0;
 
 	/**
 	 * Constructs a new ActivityInfo object.
@@ -935,9 +937,9 @@ public class ActivityInfo {
 
 	private void buildChildren(Tracker tracker, String trackId, Trackable pTrackable,
 			Map<Trackable, ActivityInfo> chTrackables) {
-		List<ActivityInfo> cais = getChildren();
+		List<ActivityInfo> cais = getChildren(true);
 		for (ActivityInfo child : cais) {
-			if (child.filteredOut) {
+			if (!child.isDeliverable()) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityInfo.filtered.child", child);
 				continue;
@@ -967,9 +969,9 @@ public class ActivityInfo {
 	 * @see #merge(ActivityInfo)
 	 */
 	public void buildSplitRelatives(Tracker tracker, Map<Trackable, ActivityInfo> chTrackables) {
-		List<ActivityInfo> cais = getChildren();
+		List<ActivityInfo> cais = getChildren(true);
 		for (ActivityInfo child : cais) {
-			if (child.filteredOut) {
+			if (!child.isDeliverable()) {
 				LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityInfo.filtered.child", child);
 				continue;
@@ -1378,6 +1380,7 @@ public class ActivityInfo {
 		}
 
 		filteredOut |= otherAi.filteredOut;
+		// complete |= otherAi.complete;
 
 		if (otherAi.activityProperties != null) {
 			if (activityProperties == null) {
@@ -1719,6 +1722,34 @@ public class ActivityInfo {
 	}
 
 	/**
+	 * Returns activity complete flag value.
+	 *
+	 * @return activity complete flag value
+	 */
+	public boolean isComplete() {
+		return complete;
+	}
+
+	/**
+	 * Sets activity complete flag value.
+	 *
+	 * @param complete
+	 *            {@code true} if activity is complete, {@code false} - otherwise
+	 */
+	public void setComplete(boolean complete) {
+		this.complete = complete;
+	}
+
+	/**
+	 * Checks if this activity item is deliverable and shall be sent to output sink.
+	 * 
+	 * @return {@code true} if this entity is complete and not filtered out, {@code false} - otherwise
+	 */
+	public boolean isDeliverable() {
+		return complete && !filteredOut;
+	}
+
+	/**
 	 * Adds child activity entity data package.
 	 *
 	 * @param groupName
@@ -1870,9 +1901,25 @@ public class ActivityInfo {
 	 *
 	 * @param parent
 	 *            parent activity entity instance
+	 * @return instance of this activity data entity
 	 */
-	protected void setParent(ActivityInfo parent) {
+	protected ActivityInfo setParent(ActivityInfo parent) {
 		this.parent = parent;
+
+		return this;
+	}
+
+	/**
+	 * Sets ordinal index of this data entity within parent entity children entities collection.
+	 *
+	 * @param ordinalIdx
+	 *            ordinal index of this data entity
+	 * @return instance of this activity data entity
+	 */
+	protected ActivityInfo setOrdinal(int ordinalIdx) {
+		this.ordinalIdx = ordinalIdx;
+
+		return this;
 	}
 
 	@Override
@@ -1910,6 +1957,7 @@ public class ActivityInfo {
 		sb.append(", threadId=").append(threadId); // NON-NLS
 		sb.append(", category=").append(Utils.sQuote(category)); // NON-NLS
 		sb.append(", filteredOut=").append(filteredOut); // NON-NLS
+		sb.append(", complete=").append(complete); // NON-NLS
 		sb.append(", activityProperties=").append(activityProperties == null ? "NONE" : activityProperties.size());// NON-NLS
 		sb.append(", children=").append(children == null ? "NONE" : children.size()); // NON-NLS
 		sb.append(", parent=").append(parent == null ? "NONE" : parent); // NON-NLS
@@ -1950,12 +1998,16 @@ public class ActivityInfo {
 	public Object getFieldValue(String fieldName, String groupName) throws IllegalArgumentException {
 		try {
 			if (StreamsConstants.isParentEntityRef(fieldName)) {
-				return parent == null ? null : parent.getFieldValue(StreamsConstants.getParentFieldName(fieldName));
+				return getParentFieldValue(fieldName);
 			}
 
 			Matcher fnMatcher = CHILD_FIELD_PATTERN.matcher(fieldName);
 			if (fnMatcher.matches()) {
 				return getChildFieldValue(fnMatcher, fieldName, groupName);
+			}
+
+			if (StreamsConstants.CHILD_ORDINAL_INDEX.equals(fieldName)) {
+				return ordinalIdx;
 			}
 
 			if (fieldName.startsWith(Utils.VAR_EXP_START_TOKEN)) {
@@ -2035,6 +2087,29 @@ public class ActivityInfo {
 
 			return p == null ? null : p.getValue();
 		}
+	}
+
+	/**
+	 * Returns parent activity entity field value.
+	 * <p>
+	 * Field name shall start with {@value StreamsConstants#PARENT_REFERENCE_PREFIX} prefix.
+	 * 
+	 * @param fieldName
+	 *            field name value to get
+	 * @return field contained value, or {@code null} if field is not found
+	 */
+	protected Object getParentFieldValue(String fieldName) {
+		if (parent == null) {
+			return null;
+		}
+
+		Object pVal = parent.getFieldValue(StreamsConstants.getParentFieldName(fieldName));
+
+		if (pVal == null) {
+			return parent.getFieldValue(fieldName);
+		}
+
+		return pVal;
 	}
 
 	/**
