@@ -32,12 +32,12 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -58,7 +58,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 2 $
  */
 public class ActivityJsonParser extends GenericActivityParser<DocumentContext> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJsonParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityJsonParser.class);
 
 	private static final String JSON_PATH_ROOT = "$";// NON-NLS
 	private static final String JSON_PATH_SEPARATOR = StreamsConstants.DEFAULT_PATH_DELIM;

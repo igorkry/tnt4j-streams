@@ -18,13 +18,13 @@ package com.jkoolcloud.tnt4j.streams.outputs;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
 
 /**
- * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to JKoolCloud
+ * Implements TNT4J-Streams output logger for activities provided as JSON {@link String}s to be recorded to jKoolCloud
  * service over TNT4J and JESL APIs.
  * <p>
  * This output logger primarily is used by {@link com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream} to redirect
@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingEvent;
  * @see Tracker#log(OpLevel, String, Object...)
  */
 public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JKCloudJsonOutput.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(JKCloudJsonOutput.class);
 
 	/**
 	 * Constructs a new JKCloudJsonOutput.
@@ -68,7 +68,7 @@ public class JKCloudJsonOutput extends AbstractJKCloudOutput<String, String> {
 	 */
 	@Override
 	public void logItem(String ai) throws Exception {
-		recordActivity(getTracker(), CONN_RETRY_INTERVAL, ai);
+			recordActivity(getTracker(), CONN_RETRY_INTERVAL, ai);
 	}
 
 	@Override

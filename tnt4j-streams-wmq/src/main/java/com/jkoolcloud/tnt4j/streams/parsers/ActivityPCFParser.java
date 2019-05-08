@@ -35,7 +35,6 @@ import com.ibm.mq.jmqi.internal.JmqiStructureFormatter;
 import com.ibm.mq.jmqi.internal.MqiStructure;
 import com.ibm.mq.jmqi.system.JmqiTls;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -90,7 +89,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * @version $Revision: 1 $
  */
 public class ActivityPCFParser extends GenericActivityParser<PCFContent> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityPCFParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityPCFParser.class);
 
 	private static final String HEAD_MQCFH = "MQCFH"; // NON-NLS
 	private static final String HEAD_MQMD = "MQMD"; // NON-NLS

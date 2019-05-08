@@ -26,10 +26,10 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -47,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <ul>
  * <li>Topic - topic name to listen. (Required)</li>
  * <li>FileName - Kafka Consumer configuration file ({@code "consumer.properties"}) path. (Optional)</li>
- * <li>List of Kafka Consumer configuration properties. @see
+ * <li>List of Kafka Consumer configuration properties. See
  * <a href="https://kafka.apache.org/documentation/#consumerconfigs">Kafka Consumer configuration reference</a></li>.
  * </ul>
  * <p>
@@ -62,7 +62,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.inputs.KafkaStream
  */
 public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaConsumerStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(KafkaConsumerStream.class);
 
 	/**
 	 * Kafka consumer user (over stream configuration) defined configuration scope mapping key.

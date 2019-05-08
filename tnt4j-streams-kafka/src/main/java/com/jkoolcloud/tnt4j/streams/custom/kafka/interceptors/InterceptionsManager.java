@@ -30,12 +30,12 @@ import org.apache.kafka.common.ClusterResource;
 import org.apache.kafka.common.TopicPartition;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.metrics.MetricsReporter;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -67,7 +67,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter
  */
 public class InterceptionsManager {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptionsManager.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(InterceptionsManager.class);
 
 	private static final String DEFAULT_INTERCEPTORS_PROP_FILE = "interceptors.properties"; // NON-NLS
 	private static final String DEFAULT_TRACKER_CFG_FILE = "tnt4j_kafka_metrics_default.properties"; // NON-NLS

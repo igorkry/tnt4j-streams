@@ -23,8 +23,8 @@ import java.util.Map;
 
 import com.ibm.mq.headers.MQRFH2;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
@@ -48,7 +48,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * @version $Revision: 1 $
  */
 public class ActivityRFH2Parser extends AbstractActivityMapParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityRFH2Parser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityRFH2Parser.class);
 
 	/**
 	 * Constant defining root element to construct valid XML string for RFH2 folders data.

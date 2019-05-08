@@ -31,9 +31,9 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.state.FileStreamStateHandler;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -53,7 +53,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
 public class FileLineStream extends AbstractFileLineStream<Path> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileLineStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(FileLineStream.class);
 
 	/**
 	 * Constructs a new FileLineStream.

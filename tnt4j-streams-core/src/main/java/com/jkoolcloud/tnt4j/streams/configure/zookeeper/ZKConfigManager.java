@@ -25,9 +25,9 @@ import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -37,7 +37,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class ZKConfigManager implements ZKConfigConstants {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsAgent.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsAgent.class);
 
 	// create static instance for ZKConnection class.
 	private static ZKConnection conn;
@@ -287,8 +287,7 @@ public class ZKConfigManager implements ZKConfigConstants {
 	 * @param zkCfgChangeListener
 	 *            zookeeper node data change listener instance
 	 */
-	public static void handleZKStoredConfiguration(final ZooKeeper zk, final String path,
-			final ZKConfigChangeListener zkCfgChangeListener) {
+	public static void handleZKStoredConfiguration(ZooKeeper zk, String path, ZKConfigChangeListener zkCfgChangeListener) {
 		Watcher watch = new Watcher() {
 			@Override
 			public void process(WatchedEvent watchedEvent) {

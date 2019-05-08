@@ -32,9 +32,9 @@ import org.apache.kafka.common.errors.WakeupException;
 
 import com.jkoolcloud.tnt4j.config.TrackerConfigStore;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class InterceptorsTest {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(InterceptorsTest.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(InterceptorsTest.class);
 
 	private static String[] eventsPayload = {
 			"# Licensed to the Apache Software Foundation (ASF) under one or more          ", // NON-NLS
@@ -89,7 +89,7 @@ public class InterceptorsTest {
 			System.setProperty(TrackerConfigStore.TNT4J_PROPERTIES_KEY, defaultCfg.toExternalForm());
 		}
 
-		final Consumer<String, String> consumer = initConsumer();
+		Consumer<String, String> consumer = initConsumer();
 
 		Thread pt = new Thread(new Runnable() {
 			@Override

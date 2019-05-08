@@ -29,6 +29,7 @@ import com.jkoolcloud.tnt4j.format.EventFormatter;
 import com.jkoolcloud.tnt4j.sink.*;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * @author akausinis
@@ -47,7 +48,7 @@ public final class TestUtils {
 	}
 
 	public static class SimpleTestStream extends AbstractBufferedStream<Object> {
-		private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TestUtils.class);
+		private static final EventSink LOGGER = LoggerUtils.getLoggerSink(TestUtils.class);
 
 		@Override
 		protected long getActivityItemByteSize(Object activityItem) {
@@ -76,8 +77,8 @@ public final class TestUtils {
 			return;
 		}
 
-		final EventSinkFactory delegate = DefaultEventSinkFactory.getInstance();
-		final SinkLogEventListener logToConsoleEvenSinkListener = new SinkLogEventListener() {
+		EventSinkFactory delegate = DefaultEventSinkFactory.getInstance();
+		SinkLogEventListener logToConsoleEvenSinkListener = new SinkLogEventListener() {
 			private final DefaultFormatter formatter = new DefaultFormatter();
 
 			@Override

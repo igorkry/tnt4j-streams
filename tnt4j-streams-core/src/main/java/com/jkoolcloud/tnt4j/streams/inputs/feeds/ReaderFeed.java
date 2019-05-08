@@ -19,8 +19,8 @@ package com.jkoolcloud.tnt4j.streams.inputs.feeds;
 import java.io.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @see com.jkoolcloud.tnt4j.streams.inputs.RedirectTNT4JStream
  */
 public class ReaderFeed extends AbstractFeed<BufferedReader> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ReaderFeed.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ReaderFeed.class);
 
 	/**
 	 * Constructs a new ReaderFeed, buffering the specified {@link Reader}.

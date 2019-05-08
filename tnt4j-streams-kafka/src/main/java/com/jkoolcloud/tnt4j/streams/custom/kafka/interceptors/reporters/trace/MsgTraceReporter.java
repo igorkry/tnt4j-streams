@@ -39,7 +39,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.OpType;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.configure.sax.ConfigParserHandler;
@@ -52,6 +51,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
@@ -71,7 +71,7 @@ import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
  * @version $Revision: 1 $
  */
 public class MsgTraceReporter implements InterceptionsReporter {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MsgTraceReporter.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MsgTraceReporter.class);
 
 	/**
 	 * Constant defining tracing configuration dedicated topic name.
@@ -115,7 +115,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	 * @param enableCfgPolling
 	 *            flag indicating whether to enable tracing configuration pooling from dedicated Kafka topic
 	 */
-	MsgTraceReporter(KafkaObjTraceStream<ActivityInfo> stream, final Properties interceptorProperties,
+	MsgTraceReporter(KafkaObjTraceStream<ActivityInfo> stream, Properties interceptorProperties,
 			boolean enableCfgPolling) {
 		this.stream = stream;
 		mainParser = getParser("KafkaTraceParser"); // NON-NLS

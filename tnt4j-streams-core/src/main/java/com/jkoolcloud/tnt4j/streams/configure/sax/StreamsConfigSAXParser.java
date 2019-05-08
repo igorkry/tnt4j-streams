@@ -38,9 +38,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigData;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -50,7 +50,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 2 $
  */
 public final class StreamsConfigSAXParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsConfigSAXParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsConfigSAXParser.class);
 
 	private static final String SAX_CFG_PROPERTIES = "sax.properties"; // NON-NLS
 	private static final String HANDLER_PROP_KEY = "tnt4j.streams.config.sax.handler"; // NON-NLS
@@ -152,7 +152,7 @@ public final class StreamsConfigSAXParser {
 	 *             if there is an error reading the configuration data
 	 */
 	public static Map<OpLevel, List<SAXParseException>> validate(InputStream config) throws SAXException, IOException {
-		final Map<OpLevel, List<SAXParseException>> validationErrors = new HashMap<>();
+		Map<OpLevel, List<SAXParseException>> validationErrors = new HashMap<>();
 		try {
 			SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			Schema schema = factory.newSchema();

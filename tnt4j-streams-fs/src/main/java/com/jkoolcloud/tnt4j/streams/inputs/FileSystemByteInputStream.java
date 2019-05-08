@@ -18,9 +18,9 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.nio.file.FileSystem;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements a byte arrays based activity stream, where raw input source is JSR-203 compliant
@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class FileSystemByteInputStream extends BytesInputStream {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileSystemByteInputStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(FileSystemByteInputStream.class);
 
 	private FileSystemAdapter fsAdapter;
 

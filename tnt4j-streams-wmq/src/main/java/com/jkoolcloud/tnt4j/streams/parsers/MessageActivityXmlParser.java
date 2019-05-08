@@ -21,12 +21,12 @@ import java.text.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WmqParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
@@ -47,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * @version $Revision: 1 $
  */
 public class MessageActivityXmlParser extends ActivityXmlParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MessageActivityXmlParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MessageActivityXmlParser.class);
 	/**
 	 * Contains the field separator (set by {@code SignatureDelim} property) - Default:
 	 * {@value com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser#DEFAULT_DELIM}

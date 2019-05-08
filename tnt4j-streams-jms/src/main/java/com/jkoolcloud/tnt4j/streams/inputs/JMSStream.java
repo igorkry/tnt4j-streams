@@ -29,10 +29,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.JMSStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -61,7 +61,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class JMSStream extends AbstractBufferedStream<Message> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JMSStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(JMSStream.class);
 	private static final String DEFINITION_DELIMITER = ",";// NON-NLS
 
 	// Stream properties

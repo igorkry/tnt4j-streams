@@ -18,8 +18,8 @@ package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.util.Map;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class ActivityMapParser extends AbstractActivityMapParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityMapParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityMapParser.class);
 
 	/**
 	 * Constructs a new ActivityMapParser.

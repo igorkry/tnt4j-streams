@@ -26,7 +26,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.filters.AbstractEntityFilter;
@@ -35,6 +34,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.reference.MatchingParserReference;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.TimestampFormatter;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -46,7 +46,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 3 $
  */
 public class ActivityField extends AbstractFieldEntity {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityField.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityField.class);
 
 	/**
 	 * Constant for default delimiter symbol used to delimit multiple field values.

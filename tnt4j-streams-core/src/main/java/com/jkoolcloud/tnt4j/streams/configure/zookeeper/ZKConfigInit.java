@@ -28,8 +28,8 @@ import org.apache.zookeeper.ZKUtil;
 import org.apache.zookeeper.data.Stat;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class ZKConfigInit {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ZKConfigInit.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ZKConfigInit.class);
 
 	private static final String PARAM_CFG_FILE = "-f:"; // NON-NLS
 	private static final String PARAM_CLEAN = "-c"; // NON-NLS

@@ -28,7 +28,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.core.UsecTimestamp;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
@@ -40,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * @version $Revision: 2 $
  */
 public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneable {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityFieldLocator.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityFieldLocator.class);
 
 	private String type = null;
 	private String locator = null;

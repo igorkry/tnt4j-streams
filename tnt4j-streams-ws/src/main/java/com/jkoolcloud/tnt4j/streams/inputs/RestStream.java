@@ -40,13 +40,13 @@ import org.apache.http.util.EntityUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -77,7 +77,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see org.apache.http.client.HttpClient#execute(HttpUriRequest)
  */
 public class RestStream extends AbstractWsStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RestStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(RestStream.class);
 
 	private int maxTotalPoolConnections = 5;
 	private int defaultMaxPerRouteConnections = 2;

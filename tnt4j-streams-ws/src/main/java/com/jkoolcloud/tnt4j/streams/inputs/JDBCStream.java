@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
@@ -34,10 +33,7 @@ import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
-import com.jkoolcloud.tnt4j.streams.utils.Duration;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a scheduled JDBC query call activity stream, where each query call returned {@link java.sql.ResultSet} row
@@ -71,7 +67,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see java.sql.PreparedStatement#executeQuery()
  */
 public class JDBCStream extends AbstractWsStream<ResultSet> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JDBCStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(JDBCStream.class);
 	private static final String QUERY_NAME_PROP = "QueryName"; // NON-NLS
 
 	/**

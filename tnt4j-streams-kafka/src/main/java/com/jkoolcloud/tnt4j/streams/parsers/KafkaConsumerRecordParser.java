@@ -23,7 +23,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
@@ -60,7 +59,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * @version $Revision: 1 $
  */
 public class KafkaConsumerRecordParser extends GenericActivityParser<ConsumerRecord<Object, Object>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaConsumerRecordParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(KafkaConsumerRecordParser.class);
 
 	/**
 	 * Constructs a new KafkaConsumerRecordParser.

@@ -31,15 +31,11 @@ import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.KafkaStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
-import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
@@ -99,7 +95,7 @@ import kafka.server.KafkaServerStartable;
  * @see KafkaConsumerStream
  */
 public class KafkaStream extends TNTParseableInputStream<Map<String, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(KafkaStream.class);
 
 	/**
 	 * Kafka server/consumer properties scope mapping key.

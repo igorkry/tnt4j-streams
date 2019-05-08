@@ -39,9 +39,9 @@ import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -59,7 +59,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XMLFromBinDataPreParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(XMLFromBinDataPreParser.class);
 
 	private ActivityFieldFormatType format;
 

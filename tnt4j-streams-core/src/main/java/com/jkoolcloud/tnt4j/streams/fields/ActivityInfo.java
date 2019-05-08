@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.*;
 import com.jkoolcloud.tnt4j.format.JSONFormatter;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
@@ -50,7 +49,7 @@ import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
  * @version $Revision: 3 $
  */
 public class ActivityInfo {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityInfo.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityInfo.class);
 
 	private static final Pattern CHILD_FIELD_PATTERN = Pattern.compile("child\\[(?<child>\\S+)\\]\\.(?<field>\\S+)"); // NON-NLS
 

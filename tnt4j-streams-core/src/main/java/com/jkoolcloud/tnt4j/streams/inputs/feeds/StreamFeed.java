@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -36,7 +36,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see BufferedInputStream
  */
 public class StreamFeed extends AbstractFeed<BufferedInputStream> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamFeed.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamFeed.class);
 
 	/**
 	 * Constructs a new StreamFeed, buffering the specified {@link InputStream}.

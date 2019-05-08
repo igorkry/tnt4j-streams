@@ -41,12 +41,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
 import com.jkoolcloud.tnt4j.streams.scenario.*;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -81,7 +81,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see SOAPConnection#call(SOAPMessage, Object)
  */
 public class WsStream extends AbstractWsStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(WsStream.class);
 
 	/**
 	 * Constant for name of built-in scheduler job property {@value}.

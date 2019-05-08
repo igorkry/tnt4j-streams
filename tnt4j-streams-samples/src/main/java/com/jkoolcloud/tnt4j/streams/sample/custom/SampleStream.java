@@ -21,10 +21,10 @@ import java.io.FileReader;
 import java.io.LineNumberReader;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTParseableInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -33,7 +33,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class SampleStream extends TNTParseableInputStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(SampleStream.class);
 
 	private String fileName;
 	private File activityFile;

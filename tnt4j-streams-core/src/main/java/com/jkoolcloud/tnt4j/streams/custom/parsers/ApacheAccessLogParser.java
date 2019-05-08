@@ -25,9 +25,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityRegExParser;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
@@ -106,7 +106,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @version $Revision: 2 $
  */
 public class ApacheAccessLogParser extends ActivityRegExParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ApacheAccessLogParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ApacheAccessLogParser.class);
 
 	/**
 	 * Constant for name of built-in {@value} property.

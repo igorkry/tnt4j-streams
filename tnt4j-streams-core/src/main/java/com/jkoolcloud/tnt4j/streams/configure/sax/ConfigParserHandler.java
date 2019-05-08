@@ -37,7 +37,6 @@ import com.jkoolcloud.tnt4j.config.Configurable;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.configure.OutputProperties;
@@ -69,7 +68,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class ConfigParserHandler extends DefaultHandler {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ConfigParserHandler.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ConfigParserHandler.class);
 
 	/**
 	 * Constant for default location delimiter in configuration definition.

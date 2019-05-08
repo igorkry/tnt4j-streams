@@ -19,7 +19,6 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
@@ -30,7 +29,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * @see java.lang.Thread
  */
 public class StreamsThread extends Thread {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsThread.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsThread.class);
 
 	/**
 	 * Flag indicating that thread should stop running.

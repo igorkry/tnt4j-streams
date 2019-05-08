@@ -29,14 +29,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.JMSParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.StreamFieldType;
-import com.jkoolcloud.tnt4j.streams.utils.JMSStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an JMS message data structure. Message
@@ -88,7 +84,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class ActivityJMSMessageParser extends AbstractActivityMapParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityJMSMessageParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityJMSMessageParser.class);
 
 	private static final int BYTE_BUFFER_LENGTH = 1024;
 

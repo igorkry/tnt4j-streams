@@ -16,10 +16,10 @@
 
 package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements Kafka intercepted messages trace reporter stream. Stream itself does nothing and used just to initiates
@@ -31,7 +31,7 @@ import com.jkoolcloud.tnt4j.streams.inputs.AbstractBufferedStream;
  * @version $Revision: 1 $
  */
 class KafkaObjTraceStream<T> extends AbstractBufferedStream<T> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(KafkaObjTraceStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(KafkaObjTraceStream.class);
 
 	private boolean ended = false;
 

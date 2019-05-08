@@ -22,8 +22,10 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
+import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 
 /**
@@ -195,4 +197,43 @@ public class LoggerUtils {
 		return m.invoke(obj, params);
 	}
 
+	/**
+	 * Obtains default logger event sink.
+	 * <p>
+	 * Performs fallback values initialization for required system properties.
+	 *
+	 * @param clazz
+	 *            class for which to get the event sink
+	 * @return new event sink instance associated with given class
+	 *
+	 * @see com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory#defaultEventSink(Class)
+	 */
+	public static EventSink getLoggerSink(Class<?> clazz) {
+		initLoggerProperties();
+		return DefaultEventSinkFactory.defaultEventSink(clazz);
+	}
+
+	/**
+	 * Obtains default logger event sink.
+	 * <p>
+	 * Performs fallback values initialization for required system properties.
+	 *
+	 * @param name
+	 *            name of the application/event sink to get
+	 * @return new event sink instance associated with given class
+	 *
+	 * @see com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory#defaultEventSink(Class)
+	 */
+	public static EventSink getLoggerSink(String name) {
+		initLoggerProperties();
+		return DefaultEventSinkFactory.defaultEventSink(name);
+	}
+
+	private static void initLoggerProperties() {
+		String lProp = System.getProperty(DefaultEventSinkFactory.DEFAULT_EVENT_FACTORY_KEY);
+		if (StringUtils.isEmpty(lProp)) {
+			System.setProperty(DefaultEventSinkFactory.DEFAULT_EVENT_FACTORY_KEY,
+					"com.jkoolcloud.tnt4j.sink.impl.slf4j.SLF4JEventSinkFactory");
+		}
+	}
 }

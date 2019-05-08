@@ -18,8 +18,8 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import org.apache.poi.ss.usermodel.Sheet;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook
@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class ExcelSheetStream extends AbstractExcelStream<Sheet> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelSheetStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ExcelSheetStream.class);
 
 	/**
 	 * Constructs a new ExcelSheetStream. Requires configuration settings to set input stream source.

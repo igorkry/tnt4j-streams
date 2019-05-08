@@ -27,10 +27,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.parsers.AbstractActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.utils.CharBufferParser;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -78,7 +78,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 2 $
  */
 public class IBMMQLogParser extends AbstractActivityMapParser {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(IBMMQLogParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(IBMMQLogParser.class);
 
 	/**
 	 * Constant defining IBM MQ error log entries delimiter.

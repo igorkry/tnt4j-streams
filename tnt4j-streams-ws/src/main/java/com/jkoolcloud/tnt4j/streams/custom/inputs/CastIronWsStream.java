@@ -26,16 +26,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.soap.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.WsStream;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenario;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsCache;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Class implementing IBM Cast Iron WebService reported Logs, Jobs and other metrics streaming.
@@ -62,7 +58,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @version $Revision: 1 $
  */
 public class CastIronWsStream extends WsStream {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CastIronWsStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(CastIronWsStream.class);
 
 	private String tokenCacheKey = "Token"; // NON-NLS
 	private String securityResponseParserTag = "login"; // NON-NLS

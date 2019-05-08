@@ -26,10 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.jkoolcloud.tnt4j.config.ConfigException;
 import com.jkoolcloud.tnt4j.config.Configurable;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.transform.AbstractScriptTransformation;
 import com.jkoolcloud.tnt4j.streams.transform.ValueTransformation;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -49,7 +49,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class TransformationPreParser extends AbstractPreParser<Object, Object> implements Configurable {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TransformationPreParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(TransformationPreParser.class);
 
 	/**
 	 * Constant for name of pre-parser configuration property {@value} defining transformation identifier.

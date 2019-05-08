@@ -20,12 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.scenario.WsReqResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsRequest;
 import com.jkoolcloud.tnt4j.streams.scenario.WsResponse;
 import com.jkoolcloud.tnt4j.streams.scenario.WsScenarioStep;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -47,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see java.lang.Runtime#exec(String)
  */
 public class CmdStream extends AbstractWsStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(CmdStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(CmdStream.class);
 
 	/**
 	 * Constructs an empty CmdStream. Requires configuration settings to set input stream source.

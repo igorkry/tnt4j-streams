@@ -67,7 +67,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
  * @version $Revision: 3 $
  */
 public final class StreamsCache {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsCache.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsCache.class);
 
 	private static final long DEFAULT_CACHE_MAX_SIZE = 100;
 	private static final long DEFAULT_CACHE_EXPIRE_IN_MINUTES = 10;

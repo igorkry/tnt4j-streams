@@ -27,11 +27,11 @@ import org.apache.flume.sink.AbstractSink;
 
 import com.google.gson.Gson;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.StreamsAgent;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.utils.FlumeConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -41,7 +41,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class TNT4JStreamsEventSink extends AbstractSink implements Configurable {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(TNT4JStreamsEventSink.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(TNT4JStreamsEventSink.class);
 
 	/**
 	 * Constant for name of built-in sink @value} property.

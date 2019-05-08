@@ -23,7 +23,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
@@ -31,6 +30,7 @@ import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Sample custom parser.
@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.parsers.GenericActivityParser;
  * @version $Revision: 1 $
  */
 public class SampleParser extends GenericActivityParser<String[]> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(SampleParser.class);
 
 	/**
 	 * Defines field separator.

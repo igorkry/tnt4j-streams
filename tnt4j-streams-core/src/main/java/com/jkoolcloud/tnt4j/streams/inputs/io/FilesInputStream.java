@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.FileLineStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -45,7 +45,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see Utils#listFilesByName(String, java.nio.file.FileSystem)
  */
 public class FilesInputStream extends InputStream {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileLineStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(FileLineStream.class);
 
 	private Iterator<Path> files;
 	private InputStream fis;

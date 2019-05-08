@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 JKOOL, LLC.
+ * Copyright 2014-2018 JKOOL, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,20 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import com.ibm.mq.MQMessage;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a WebSphere MQ activity stream, where activity data is {@link String} made from {@link MQMessage} payload.
  * <p>
  * This activity stream requires parsers that can support {@link String} data.
  * <p>
- * This activity stream supports properties from {@link AbstractWmqStream} (and higher hierarchy streams).
+ * This activity stream supports configuration properties from {@link AbstractWmqStream} (and higher hierarchy streams).
  *
  * @version $Revision: 2 $
  */
 public class WmqStream extends AbstractWmqStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(WmqStream.class);
 
 	/**
 	 * Constructs an empty WmqStream. Requires configuration settings to set input source.

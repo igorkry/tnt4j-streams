@@ -29,16 +29,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.Feed;
 import com.jkoolcloud.tnt4j.streams.inputs.feeds.ReaderFeed;
 import com.jkoolcloud.tnt4j.streams.outputs.JKCloudJsonOutput;
-import com.jkoolcloud.tnt4j.streams.utils.RedirectTNT4JStreamFormatter;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsThread;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a redirecting activity stream, where activity data is prepared by other TNT4J based streaming libraries
@@ -73,7 +69,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see ReaderFeed
  */
 public class RedirectTNT4JStream extends TNTInputStream<String, String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(RedirectTNT4JStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(RedirectTNT4JStream.class);
 
 	private static final int DEFAULT_INPUT_BUFFER_SIZE = 1024;
 

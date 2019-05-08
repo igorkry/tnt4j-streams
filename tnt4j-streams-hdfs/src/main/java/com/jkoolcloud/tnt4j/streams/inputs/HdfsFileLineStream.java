@@ -31,9 +31,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.state.HdfsFileStreamStateHandler;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -53,7 +53,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see WildcardFileFilter#WildcardFileFilter(String)
  */
 public class HdfsFileLineStream extends AbstractFileLineStream<Path> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(HdfsFileLineStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(HdfsFileLineStream.class);
 
 	/**
 	 * Constructs a new HdfsFileLineStream.

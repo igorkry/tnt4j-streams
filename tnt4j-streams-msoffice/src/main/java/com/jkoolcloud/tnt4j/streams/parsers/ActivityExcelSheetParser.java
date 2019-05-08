@@ -26,9 +26,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
@@ -44,7 +44,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @version $Revision: 2 $
  */
 public class ActivityExcelSheetParser extends AbstractExcelParser<Sheet> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelSheetParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityExcelSheetParser.class);
 
 	/**
 	 * Constructs a new ExcelSheetParser.

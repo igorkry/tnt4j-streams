@@ -26,9 +26,9 @@ import javax.xml.xpath.XPathVariableResolver;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
@@ -46,7 +46,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsXMLUtils;
  * @see XPath#evaluate(String, Object)
  */
 public class XPathExpressionFilter extends AbstractExpressionFilter<Object> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(XPathExpressionFilter.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(XPathExpressionFilter.class);
 
 	private static final String OWN_FIELD_VALUE_KEY = "<!TNT4J_XPATH_FLTR_FLD_VALUE!>"; // NON-NLS;
 

@@ -20,8 +20,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.Reader;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements piped activity stream, where each piped RAW data line is assumed to represent a single activity or event
@@ -40,7 +40,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class PipedStream extends JavaInputStream {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(PipedStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(PipedStream.class);
 
 	/**
 	 * Constructs an empty PipedStream. Default input stream is {@link System#in}.

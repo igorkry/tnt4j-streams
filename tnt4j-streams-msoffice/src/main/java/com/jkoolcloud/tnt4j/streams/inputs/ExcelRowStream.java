@@ -21,10 +21,10 @@ import java.util.Iterator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements a MS Excel {@link org.apache.poi.ss.usermodel.Workbook} stored activity stream, where each workbook sheet
@@ -47,7 +47,7 @@ import com.jkoolcloud.tnt4j.streams.utils.IntRange;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class ExcelRowStream extends AbstractExcelStream<Row> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelRowStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ExcelRowStream.class);
 
 	private String rangeValue = "1:"; // NON-NLS
 	private IntRange rowRange = null;

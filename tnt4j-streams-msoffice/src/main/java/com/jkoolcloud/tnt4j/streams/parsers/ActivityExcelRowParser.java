@@ -25,9 +25,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @version $Revision: 2 $
  */
 public class ActivityExcelRowParser extends AbstractExcelParser<Row> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityExcelRowParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityExcelRowParser.class);
 
 	/**
 	 * Constructs a new ExcelRowParser.

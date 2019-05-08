@@ -18,9 +18,9 @@ package com.jkoolcloud.tnt4j.streams.inputs;
 
 import java.io.*;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -43,7 +43,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class JavaInputStream extends TNTParseableInputStream<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JavaInputStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(JavaInputStream.class);
 
 	private Reader rawReader;
 	private LineNumberReader inputReader;

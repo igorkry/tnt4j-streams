@@ -63,14 +63,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.MsOfficeStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
-import com.jkoolcloud.tnt4j.streams.utils.IntRange;
-import com.jkoolcloud.tnt4j.streams.utils.MsOfficeStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a MS Excel {@link org.apache.poi.xssf.streaming.SXSSFWorkbook} stored activity stream, where each workbook
@@ -97,7 +93,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ExcelSXSSFRowStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ExcelSXSSFRowStream.class);
 
 	/**
 	 * Stream attribute defining file name.

@@ -16,8 +16,8 @@
 
 package com.jkoolcloud.tnt4j.streams.inputs;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements a JSR-203 compliant {@link java.nio.file.FileSystem} provided files lines activity stream, where each line
@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityParser#isDataClassSupported(Object)
  */
 public class FileSystemLineStream extends FileLineStream {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileSystemLineStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(FileSystemLineStream.class);
 
 	private FileSystemAdapter fsAdapter;
 

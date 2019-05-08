@@ -45,7 +45,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 2 $
  */
 public final class StreamsAgent {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsAgent.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsAgent.class);
 
 	private static final String PARAM_STREAM_CFG = "-f:"; // NON-NLS
 	private static final String PARAM_PARSER_CFG = "-p:"; // NON-NLS
@@ -428,7 +428,7 @@ public final class StreamsAgent {
 	}
 
 	protected static boolean isStreamsRunning() {
-		return streamThreads == null ? false : streamThreads.activeCount() > 0;
+		return streamThreads != null && streamThreads.activeCount() > 0;
 	}
 
 	/**

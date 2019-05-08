@@ -32,15 +32,11 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
-import com.jkoolcloud.tnt4j.streams.utils.MqttStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a MQTT topics transmitted activity stream, where each message body is assumed to represent a single
@@ -75,7 +71,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see org.eclipse.paho.client.mqttv3.MqttCallback
  */
 public class MqttStream extends AbstractBufferedStream<Map<String, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MqttStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MqttStream.class);
 
 	private static final String SSL_PROTOCOL = "SSL"; // NON-NLS
 	private static final String KEYSTORE_TYPE = KeyStore.getDefaultType();

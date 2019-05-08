@@ -31,9 +31,9 @@ import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -94,7 +94,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see DefaultStreamingJob
  */
 public class DirStreamingManager {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(DirStreamingManager.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(DirStreamingManager.class);
 
 	private static final int CORE_TREAD_POOL_SIZE = 10;
 	private static final int MAX_TREAD_POOL_SIZE = 100;

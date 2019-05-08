@@ -24,8 +24,8 @@ import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class StreamsDaemon implements Daemon {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(StreamsDaemon.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(StreamsDaemon.class);
 
 	private static final String START_COMMAND = "start"; // NON-NLS
 

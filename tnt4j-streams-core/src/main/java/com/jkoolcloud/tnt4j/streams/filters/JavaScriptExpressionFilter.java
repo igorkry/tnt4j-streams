@@ -24,9 +24,9 @@ import javax.script.SimpleBindings;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.Property;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
 
@@ -39,7 +39,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsScriptingUtils;
  * @see javax.script.CompiledScript#eval(javax.script.Bindings)
  */
 public class JavaScriptExpressionFilter extends AbstractExpressionFilter<Object> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(JavaScriptExpressionFilter.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(JavaScriptExpressionFilter.class);
 
 	private CompiledScript script;
 

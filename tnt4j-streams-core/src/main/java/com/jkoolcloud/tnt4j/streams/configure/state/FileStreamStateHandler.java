@@ -25,8 +25,8 @@ import java.nio.file.Path;
 
 import javax.xml.bind.JAXBException;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 
 /**
  * Implements streamed files access state handler.
@@ -34,7 +34,7 @@ import com.jkoolcloud.tnt4j.sink.EventSink;
  * @version $Revision: 1 $
  */
 public class FileStreamStateHandler extends AbstractFileStreamStateHandler<Path> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(FileStreamStateHandler.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(FileStreamStateHandler.class);
 
 	/**
 	 * Constructs a new FileStreamStateHandler.

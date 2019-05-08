@@ -25,11 +25,11 @@ import org.logstash.beats.Server;
 import org.logstash.netty.SslSimpleBuilder;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ElasticBeatsStreamProperties;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.BeatsStreamConstants;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -63,7 +63,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @see com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser
  */
 public class ElasticBeatsStream extends AbstractBufferedStream<Map<?, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ElasticBeatsStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ElasticBeatsStream.class);
 
 	private String host = "localhost"; // NON-NLS
 	private int port = 5044;

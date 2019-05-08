@@ -58,17 +58,13 @@ import com.jkoolcloud.tnt4j.TrackingLogger;
 import com.jkoolcloud.tnt4j.config.DefaultConfigFactory;
 import com.jkoolcloud.tnt4j.config.TrackerConfig;
 import com.jkoolcloud.tnt4j.core.*;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.source.SourceType;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.InterceptionsManager;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor;
 import com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.InterceptionsReporter;
-import com.jkoolcloud.tnt4j.streams.utils.Duration;
-import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 import com.jkoolcloud.tnt4j.tracker.Tracker;
 import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 
@@ -89,7 +85,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
  * @version $Revision: 1 $
  */
 public class MetricsReporter implements InterceptionsReporter {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MetricsReporter.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MetricsReporter.class);
 
 	/**
 	 * Default metrics reporting period - {@value} seconds.

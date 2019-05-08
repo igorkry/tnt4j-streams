@@ -40,7 +40,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.ParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
@@ -69,7 +68,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * @version $Revision: 1 $
  */
 public class ActivityXmlParser extends GenericActivityParser<Node> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityXmlParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityXmlParser.class);
 
 	/**
 	 * Constant for XML tag attribute name {@value}.

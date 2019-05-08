@@ -25,8 +25,8 @@ import com.ibm.mq.headers.pcf.PCFConstants;
 import com.ibm.mq.headers.pcf.PCFContent;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
@@ -42,7 +42,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
  * @version $Revision: 2 $
  */
 public class WmqStreamPCF extends AbstractWmqStream<PCFContent> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqStreamPCF.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(WmqStreamPCF.class);
 
 	/**
 	 * Constructs an empty WmqStreamPCF. Requires configuration settings to set input source.

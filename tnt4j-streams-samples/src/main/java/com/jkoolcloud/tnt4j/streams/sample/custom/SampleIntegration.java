@@ -22,11 +22,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamsConfigLoader;
 import com.jkoolcloud.tnt4j.streams.inputs.StreamThread;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
@@ -35,7 +35,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public final class SampleIntegration {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(SampleIntegration.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(SampleIntegration.class);
 
 	/**
 	 * Configure streams and parsers, and run each stream in its own thread.

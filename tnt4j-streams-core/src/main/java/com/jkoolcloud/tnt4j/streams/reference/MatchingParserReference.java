@@ -22,13 +22,13 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.NamedObject;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityField;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityInfo;
 import com.jkoolcloud.tnt4j.streams.matchers.Matchers;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityParser;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -38,7 +38,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @version $Revision: 1 $
  */
 public class MatchingParserReference extends ParserReference {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(MatchingParserReference.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MatchingParserReference.class);
 
 	private List<String> matchExpressions;
 

@@ -22,13 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.inputs.TNTInputStream;
 import com.jkoolcloud.tnt4j.streams.utils.IntRange;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 
 /**
@@ -76,7 +76,7 @@ import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
  * @see com.jkoolcloud.tnt4j.streams.utils.IntRange
  */
 public class ActivityStringParser extends GenericActivityParser<String> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(ActivityStringParser.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(ActivityStringParser.class);
 
 	/**
 	 * Constructs a new ActivityStringParser.

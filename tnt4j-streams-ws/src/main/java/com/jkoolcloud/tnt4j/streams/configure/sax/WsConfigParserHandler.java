@@ -25,10 +25,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.inputs.AbstractWsStream;
 import com.jkoolcloud.tnt4j.streams.scenario.*;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
@@ -43,7 +43,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WsStreamConstants;
  * @see com.jkoolcloud.tnt4j.streams.configure.sax.StreamsConfigSAXParser
  */
 public class WsConfigParserHandler extends ConfigParserHandler {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WsConfigParserHandler.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(WsConfigParserHandler.class);
 
 	private static final String SCENARIO_ELMT = "scenario"; // NON-NLS
 	private static final String STEP_ELMT = "step"; // NON-NLS

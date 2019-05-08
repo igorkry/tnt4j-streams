@@ -40,10 +40,10 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.parsers.ActivityMapParser;
+import com.jkoolcloud.tnt4j.streams.utils.LoggerUtils;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
@@ -80,7 +80,7 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * @see ActivityMapParser
  */
 public class HttpStream extends AbstractBufferedStream<Map<String, ?>> {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(HttpStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(HttpStream.class);
 
 	private static final String HTML_MSG_PATTERN = "<html><body><h1>{0}</h1></body></html>"; // NON-NLS
 

@@ -1492,7 +1492,7 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		@Override
 		public void setParserRef(ActivityField.FieldParserReference pRef) {
 			put(PARSER_REF_KEY, pRef);
-	}
+		}
 
 		@Override
 		public ActivityField.FieldParserReference getParserRef() {

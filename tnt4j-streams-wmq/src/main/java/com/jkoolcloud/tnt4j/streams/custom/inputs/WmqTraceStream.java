@@ -25,14 +25,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
-import com.jkoolcloud.tnt4j.sink.DefaultEventSinkFactory;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.configure.WmqStreamProperties;
 import com.jkoolcloud.tnt4j.streams.inputs.WmqStreamPCF;
-import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-import com.jkoolcloud.tnt4j.streams.utils.Utils;
-import com.jkoolcloud.tnt4j.streams.utils.WmqStreamConstants;
-import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
+import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
  * Implements a WebSphere MQ activity traces stream, where activity data is {@link PCFContent} contained PCF parameters
@@ -67,7 +63,7 @@ import com.jkoolcloud.tnt4j.streams.utils.WmqUtils;
  * @version $Revision: 2 $
  */
 public class WmqTraceStream extends WmqStreamPCF {
-	private static final EventSink LOGGER = DefaultEventSinkFactory.defaultEventSink(WmqTraceStream.class);
+	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(WmqTraceStream.class);
 
 	private PCFContent pcfMessage;
 
