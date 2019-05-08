@@ -108,14 +108,14 @@
         <fileSet>
             <directory>../tnt4j-streams-kafka/target/config</directory>
             <includes>
-                <include>*.*</include>
+                <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../config</directory>
             <includes>
-                <include>*.*</include>
+                <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
@@ -132,14 +132,14 @@
         <fileSet>
             <directory>../tnt4j-streams-wmq/config</directory>
             <includes>
-                <include>*.*</include>
+                <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../tnt4j-streams-ws/config</directory>
             <includes>
-                <include>*.*</include>
+                <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
         </fileSet>
