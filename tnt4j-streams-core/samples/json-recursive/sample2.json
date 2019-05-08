@@ -96,7 +96,7 @@
                         "type": "CALL",
                         "from": "0x306d5e8af6aeb73359dcc5e22c894e2588f76ffb",
                         "to": "0xa287d7134fb40bef071c932286bd2cd01efccf30",
-                        "value": "0x0",
+                        "value": "0x5",
                         "gas": "0x6633b",
                         "gasUsed": "0x530",
                         "input": "0x16279055000000000000000000000000cae2df21e532d92b05d55c9ec75d579ea24d8521",

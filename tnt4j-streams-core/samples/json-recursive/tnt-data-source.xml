@@ -9,18 +9,23 @@
         <field name="from" locator="from" locator-type="Label"/>
         <field name="to" locator="to" locator-type="Label"/>
         <field name="EventName" separator="_">
-            <field-locator locator="^.transaction" locator-type="Activity"/>
-            <field-locator locator="to" locator-type="Activity"/>
-            <field-locator locator="^.Ordinal#" locator-type="Activity"/>
+            <field-locator locator="^.EventName" locator-type="Activity"/>
+            <field-locator locator="$indexOf$" locator-type="Activity"/>
         </field>
         <field name="Category" value="Inline TX entry"/>
 
         <field name="originTxFrom" locator="^.fromCall" locator-type="Activity"/>
         <field name="originTxTo" locator="^.toCall" locator-type="Activity"/>
 
+        <field name="level" locator="^.level" locator-type="Activity">
+            <field-transform lang="groovy"><![CDATA[
+                $fieldValue == null ? 1 : $fieldValue + 1
+            ]]></field-transform>
+        </field>
+
         <field name="value" locator="value" locator-type="Label" datatype="Number" format="double">
             <field-transform lang="groovy"><![CDATA[
-                ($fieldValue != null) ? $fieldValue/1000000000000000000 : null;
+                ($fieldValue != null) ? $fieldValue / 1000000000000000000 : null;
             ]]></field-transform>
         </field>
         <field name="valueWei" locator="value" locator-type="Label" datatype="Number" value-type="crypto.eth.wei"/>
@@ -30,13 +35,6 @@
         </embedded-activity>
 
         <field name="transaction" locator="^.transaction" locator-type="Activity"/>
-        <field name="cashedTimestamp" locator="txTimestamps" locator-type="Cache"/>
-        <field name="StartTime" locator="^.cashedTimestamp" locator-type="Activity"/>
-        <field name="txDate" locator="txTimestamps" locator-type="Cache" format="yyyy-MM-dd" timezone="UTC" datatype="String"/>
-        <field name="txMonth" locator="txTimestamps" locator-type="Cache" format="yyyy-MM" timezone="UTC" datatype="String"/>
-        <field name="txYear" locator="txTimestamps" locator-type="Cache" format="yyyy" timezone="UTC" datatype="String"/>
-        <field name="txWeek" locator="txTimestamps" locator-type="Cache" format="yyyy-w" timezone="UTC" datatype="String"/>
-        <field name="txHour" locator="txTimestamps" locator-type="Cache" format="yyyy-MM-dd hh" timezone="UTC" datatype="String"/>
 
         <filter name="Value Filter">
             <expression handle="exclude" lang="groovy"><![CDATA[
@@ -70,10 +68,6 @@
             ]]></field-transform>
         </field>
 
-        <field name="StartTime" locator="txTimestamps" locator-type="Cache" datatype="Timestamp" units="seconds"/>
-        <field name="cashedTimestamp" locator="txTimestamps" locator-type="Cache"/>
-
-        <field name="EndTime" locator="txTimestamps" locator-type="Cache" datatype="Timestamp" units="seconds"/>
         <field name="Error" locator="$.error.code" locator-type="Label"/>
 
         <embedded-activity name="calls" locator="$.result.calls" locator-type="Label">
@@ -82,8 +76,8 @@
     </parser>
 
     <!--TO STREAM FROM SAMPLE STATS JSON FILE-->
-    <stream name="CollectdStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
-        <property name="FileName" value="./samples/json-recursive/sample2.json"/>
+    <stream name="RecursiveSampleStream" class="com.jkoolcloud.tnt4j.streams.inputs.CharacterStream">
+        <property name="FileName" value="./tnt4j-streams-core/samples/json-recursive/sample2.json"/>
         <parser-ref name="traceParser"/>
     </stream>
 </tnt-data-source>
