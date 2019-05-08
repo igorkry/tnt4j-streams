@@ -132,6 +132,17 @@ public class ActivityFieldLocatorTest {
 	}
 
 	@Test
+	public void testDateAsStringFormatting() throws ParseException {
+		locator = new ActivityFieldLocator("TestField", "", ActivityFieldDataType.String);
+		locator.setFormat("yyyy-MM-dd", null);
+		locator.setTimeZone("UTC");
+		Object fValue = locator.formatValue(new UsecTimestamp(1556841603069193l));
+		assertEquals("2019-05-03", fValue);
+		fValue = locator.formatValue(new UsecTimestamp(1556841578430228l));
+		assertEquals("2019-05-02", fValue);
+	}
+
+	@Test
 	public void testFormatValue() throws ParseException {
 		locator = new ActivityFieldLocator("TEST"); // NON-NLS
 		assertEquals("TEST", locator.formatValue("DENY")); // NON-NLS
