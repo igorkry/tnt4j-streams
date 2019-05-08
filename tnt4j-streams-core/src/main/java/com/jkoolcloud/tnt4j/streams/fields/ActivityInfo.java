@@ -609,7 +609,6 @@ public class ActivityInfo {
 	 *
 	 * @param pattern
 	 *            fqn pattern to fill
-	 *
 	 * @return fully qualified name of this activity source, or {@code null} if no source defining attributes where
 	 *         parsed from stream.
 	 */
@@ -670,7 +669,6 @@ public class ActivityInfo {
 	 * @param chTrackables
 	 *            collection to add built child trackables, not included into parent trackable and transmitted
 	 *            separately, e.g., activity child events
-	 *
 	 * @return trackable instance made from this activity entity data
 	 * @throws IllegalArgumentException
 	 *             if {@code tracker} is null
@@ -718,7 +716,6 @@ public class ActivityInfo {
 	 * @param tracker
 	 *            {@link com.jkoolcloud.tnt4j.tracker.Tracker} instance to be used to build
 	 *            {@link com.jkoolcloud.tnt4j.core.Trackable} activity data package
-	 * 
 	 * @return trackable instance made from this activity entity data
 	 * @throws IllegalArgumentException
 	 *             if {@code tracker} is null
@@ -1715,7 +1712,7 @@ public class ActivityInfo {
 	 * Sets activity filtered out flag value.
 	 *
 	 * @param filteredOut
-	 *            {@code true} if activity is filtered out, {@code false} otherwise
+	 *            {@code true} if activity is filtered out, {@code false} - otherwise
 	 */
 	public void setFiltered(boolean filteredOut) {
 		this.filteredOut = filteredOut;
@@ -1724,41 +1721,128 @@ public class ActivityInfo {
 	/**
 	 * Adds child activity entity data package.
 	 *
-	 * @param ai
-	 *            activity entity object containing child data
 	 * @param groupName
 	 *            children group name (e.g. parser name)
+	 * @param ai
+	 *            activity entity object containing child data
+	 * 
+	 * @see #addChild(String, ActivityInfo, boolean)
 	 */
 	public void addChild(String groupName, ActivityInfo ai) {
-		if (children == null) {
-			children = new LinkedHashMap<>();
+		addChild(groupName, ai, false);
+	}
+
+	/**
+	 * Adds child activity entity data package.
+	 * 
+	 * @param groupName
+	 *            children group name (e.g. parser name)
+	 * @param ai
+	 *            activity entity object containing child data
+	 * @param flatten
+	 *            indicates if child activity shall be added as root activity child
+	 * 
+	 * @see #addChild(ActivityInfo, String, ActivityInfo)
+	 */
+	public void addChild(String groupName, ActivityInfo ai, boolean flatten) {
+		ActivityInfo parent;
+		if (flatten) {
+			parent = getRootActivity();
+		} else {
+			parent = this;
 		}
 
-		ai.setParent(this);
+		addChild(parent, groupName, ai);
+	}
 
-		List<ActivityInfo> chList = children.computeIfAbsent(groupName, k -> new ArrayList<>());
+	/**
+	 * Adds child activity entity data package to {@code parent} entity children entities collection.
+	 * 
+	 * @param parent
+	 *            parent activity entity to add child
+	 * @param groupName
+	 *            children group name (e.g. parser name)
+	 * @param ai
+	 *            activity entity object containing child data
+	 */
+	protected static void addChild(ActivityInfo parent, String groupName, ActivityInfo ai) {
+		if (parent.children == null) {
+			parent.children = new LinkedHashMap<>();
+		}
+
+		List<ActivityInfo> chList = parent.children.computeIfAbsent(groupName, k -> new ArrayList<>());
 		chList.add(ai);
+
+		ai.setParent(parent).setOrdinal(chList.size());
 	}
 
 	/**
 	 * Returns list of all child activity entities.
 	 *
 	 * @return list of child activity entities
+	 *
+	 * @see #getChildren(boolean)
 	 */
 	public List<ActivityInfo> getChildren() {
-		if (children == null) {
-			return null;
-		}
+		return getChildren(false);
+	}
 
+	/**
+	 * Returns list of all child activity entities.
+	 *
+	 * @param deepCollect
+	 *            indicates if all children of children entities shall be added to returned list (flattened children
+	 *            hierarchy)
+	 * 
+	 * @return list of child activity entities
+	 *
+	 * @see #collectChildren(ActivityInfo, java.util.Collection, boolean)
+	 */
+	public List<ActivityInfo> getChildren(boolean deepCollect) {
 		List<ActivityInfo> chList = new ArrayList<>();
 
-		for (List<ActivityInfo> childs : children.values()) {
-			if (childs != null) {
-				chList.addAll(childs);
-			}
-		}
+		collectChildren(this, chList, deepCollect);
 
 		return chList;
+	}
+
+	/**
+	 * Collects provided entity {@code ai} child entities to {@code chList} collection.
+	 * 
+	 * @param ai
+	 *            entity to collect children
+	 * @param chList
+	 *            list to add child activity entities
+	 * @param deepCollect
+	 *            indicates if all children of children entities shall be added to returned list (flattened children
+	 *            hierarchy)
+	 */
+	protected static void collectChildren(ActivityInfo ai, Collection<ActivityInfo> chList, boolean deepCollect) {
+		if (ai.children == null) {
+			return;
+		}
+
+		for (List<ActivityInfo> children : ai.children.values()) {
+			if (children != null) {
+				for (ActivityInfo child : children) {
+					chList.add(child);
+					if (deepCollect) {
+						collectChildren(child, chList, deepCollect);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns root activity entity of this entity.
+	 * <p>
+	 * Root entity is the one having no parent defined.
+	 * 
+	 * @return root entity of this entity
+	 */
+	protected ActivityInfo getRootActivity() {
+		return parent == null ? this : parent.getRootActivity();
 	}
 
 	/**
@@ -1766,7 +1850,6 @@ public class ActivityInfo {
 	 *
 	 * @param groupName
 	 *            children group name
-	 *
 	 * @return list of child activity entities
 	 */
 	public List<ActivityInfo> getChildren(String groupName) {
@@ -2006,7 +2089,7 @@ public class ActivityInfo {
 					fieldName));
 		}
 
-		List<ActivityInfo> childs = children == null ? null : children.get(groupName);
-		return childs == null || chIndex >= childs.size() ? null : childs.get(chIndex).getFieldValue(fName);
+		List<ActivityInfo> children = this.children == null ? null : this.children.get(groupName);
+		return children == null || chIndex >= children.size() ? null : children.get(chIndex).getFieldValue(fName);
 	}
 }

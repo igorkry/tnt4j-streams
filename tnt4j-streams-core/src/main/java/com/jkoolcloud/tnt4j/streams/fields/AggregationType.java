@@ -19,7 +19,7 @@ package com.jkoolcloud.tnt4j.streams.fields;
 /**
  * List the supported activity entities data aggregation types.
  * 
- * @version $Revision: 1 $
+ * @version $Revision: 2 $
  */
 public enum AggregationType {
 	/**
@@ -38,5 +38,56 @@ public enum AggregationType {
 	/**
 	 * Activity entity shall be added as a child into parent activity entity.
 	 */
-	Relate
+	Relate,
+
+	/**
+	 * Activity entity shall be added as a child into root parent activity entity.
+	 */
+	Relate_Flat;
+
+	/**
+	 * Checks if this aggregation type is of "Relate" type.
+	 * 
+	 * @return {@code true} if aggregation type is {@link #Join}, {@link #Relate} or {@link #Relate_Flat}, {@code false}
+	 *         - otherwise
+	 * 
+	 * @see #isRelate(AggregationType)
+	 */
+	public boolean isRelate() {
+		return isRelate(this);
+	}
+
+	/**
+	 * Checks if this aggregation type is of "Flatten" type.
+	 * 
+	 * @return {@code true} if aggregation type is {@link #Relate_Flat}, {@code false} - otherwise
+	 * 
+	 * @see #isFlatten(AggregationType)
+	 */
+	public boolean isFlatten() {
+		return isFlatten(this);
+	}
+
+	/**
+	 * Checks if provided aggregation type is of "Relate" type.
+	 * 
+	 * @param aggType
+	 *            aggregation type to check
+	 * @return {@code true} if aggregation type is {@link #Join}, {@link #Relate} or {@link #Relate_Flat}, {@code false}
+	 *         - otherwise
+	 */
+	public static boolean isRelate(AggregationType aggType) {
+		return aggType == Join || aggType == Relate || aggType == Relate_Flat;
+	}
+
+	/**
+	 * Checks if provided aggregation type is of "Flatten" type.
+	 * 
+	 * @param aggType
+	 *            aggregation type to check
+	 * @return {@code true} if aggregation type is {@link #Relate_Flat}, {@code false} - otherwise
+	 */
+	public static boolean isFlatten(AggregationType aggType) {
+		return aggType == Relate_Flat;
+	}
 }

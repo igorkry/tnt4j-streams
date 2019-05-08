@@ -502,8 +502,11 @@ relations:
     ```xml
         <field name="EventType" value="NOOP"/>
     ```
+* `Relate_Flat` - resolved activity entities are collected as children of root activity entity. It is useful when related activity entities 
+hierarchy can become as tree structure, but because of `EVENT` and `SNAPSHOT` hierarchy restrictions (see `Relate` definition), it can't be 
+sent to JKool directly.
 
-For a `Relate` type aggregation there is related stream output parameter `SplitRelatives`:
+For a `Relate` and `Relate_Flat` type aggregations there is related stream output parameter `SplitRelatives`:
 ```xml
     <stream name="SampleJMStream" class="com.jkoolcloud.tnt4j.streams.inputs.JMSStream">
         <property name="SplitRelatives" value="true"/>

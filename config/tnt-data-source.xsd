@@ -1059,6 +1059,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
+
+            <xs:enumeration value="Relate_Flat">
+                <xs:annotation>
+                    <xs:documentation>
+                        Add stacked parser resolved activity entity data to root activity entity as child.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
 

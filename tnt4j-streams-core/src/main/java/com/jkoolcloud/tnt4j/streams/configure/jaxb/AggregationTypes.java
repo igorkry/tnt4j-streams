@@ -71,7 +71,16 @@ public enum AggregationTypes {
 	 *
 	 */
 	@XmlEnumValue("Relate")
-	RELATE("Relate");
+	RELATE("Relate"),
+
+	/**
+	 *
+	 * Add stacked parser resolved activity entity data to root activity entity as child.
+	 *
+	 *
+	 */
+	@XmlEnumValue("Relate_Flat")
+	RELATE_FLAT("Relate_Flat");
 	private final String value;
 
 	AggregationTypes(String v) {
