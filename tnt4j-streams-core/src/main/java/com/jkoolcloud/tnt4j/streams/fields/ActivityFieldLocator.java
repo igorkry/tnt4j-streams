@@ -156,7 +156,12 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 	}
 
 	private void validateLocator() {
-		if (builtInType != null) {
+		if (builtInType == null) {
+			builtInType = StringUtils.isNumeric(locator) ? ActivityFieldLocatorType.Index
+					: ActivityFieldLocatorType.Label;
+
+			logger().log(OpLevel.WARNING, "ActivityFieldLocator.setting.default.locator.type", locator, builtInType);
+		} else {
 			if (builtInType.getDataType() == Integer.class) {
 				try {
 					int loc = Integer.parseInt(locator);
