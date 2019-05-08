@@ -3,25 +3,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
-    <parser name="B2BiEventAttributesResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
-        <field name="EventType" value="EVENT"/>
-
-        <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
-        <field name="Guid" locator="EVENT_KEY" locator-type="Label"/>
-        <field name="TrackingId" locator="EVENT_KEY" locator-type="Label"/>
-
-        <field name="${FieldNameLoc}_attr" locator="EVENTATTR_VALUE" locator-type="Label">
-            <field-locator id="FieldNameLoc" locator="EVENTATTR_NAME" locator-type="Label">
+    <parser name="B2BiEventAttributesXMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
+        <field name="${FieldNameLoc}_attr" locator="/attributes/attr[*]/EVENTATTR_VALUE" locator-type="Label">
+            <field-locator id="FieldNameLoc" locator="/attributes/attr[*]/EVENTATTR_NAME" locator-type="Label">
                 <field-transform lang="groovy" name="AttrNameTransform"><![CDATA[
                     Strings.replace($fieldValue, "@", "_");
                 ]]></field-transform>
             </field-locator>
         </field>
-
-        <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
-        <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
-        <field name="Event_Attr_ModifyTs" locator="EVENTATTR_MODIFYTS" locator-type="Label" transparent="true"/>
-
     </parser>
 
     <parser name="B2BiEventsResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
@@ -102,6 +91,43 @@
         <field name="Delivery_CreateProgId" locator="DELIVERY_CREATEPROGID" locator-type="Label"/>
         <field name="Delivery_ModifyProgId" locator="DELIVERY_MODIFYPROGID" locator-type="Label"/>
         <field name="Delivery_DistConsumerMsgId" locator="DELIVERY_DIST_CONSUMER_MSGID" locator-type="Label"/>
+        <!-- FG_EVENTATTR table columns from XML -->
+        <embedded-activity name="Event_Attrs" locator="EVT_ATTRS" locator-type="Label">
+            <parser-ref name="B2BiEventAttributesXMLParser" aggregation="Merge"/>
+        </embedded-activity>
+
+        <field name="DataflowID" locator="DataflowId_attr" locator-type="Activity" required="false"/>
+        <field name="TrackingId" formattingPattern="{0}">
+            <field-locator locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
+            <field-locator locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
+        </field>
+        <field name="ApplName" locator="CachedApplName" locator-type="Cache" required="false"/>
+        <field name="consumerOrProducer" value="">                  <!-- TODO: is correct mapping ??? -->
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
+                ${EventName} == "DELIVERY" ? "Producer" : "Consumer"
+            ]]></field-transform>
+        </field>
+        <field name="ResourceName" required="false" formattingPattern="{0}:{1}/{2}">
+            <field-locator id="consumerOrProducerResource" locator="consumerOrProducer" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerCode" locator="ProducerCode_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerPayload" locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerMailboxPath" locator="ConsumerMailboxPath_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
+        </field>
+        <field name="Correlator" required="false" separator=".">
+            <field-locator id="transferId" locator="AsyncTransferId_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerDocumentId" locator="ProducerDocumentId_attr" locator-type="Activity" required="false"/>
+            <field-locator id="documentId" locator="PrimaryDocumentId_attr" locator-type="Activity" required="false"/>
+            <field-locator id="messageName" locator="DestinationMessageName_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ConsumerFilename" locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerPayload" locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
+            <field-locator id="ProducerPayloadDocumentId" locator="ProducerPayloadDocumentId_attr" locator-type="Activity"/>
+            <field-locator id="ConsumerDocumentId" locator="ConsumerDocumentId_attr" locator-type="Activity"/>
+        </field>
+
+        <field name="ApplLookUp" required="false" separator="">
+            <field-locator locator="RoutingChannelTemplateName_attr" locator-type="Activity"/>
+        </field>
     </parser>
 
     <cache>
@@ -116,6 +142,10 @@
             <key>LastEventAttrRecordCDate</key>
             <value>${Event_Attr_ModifyTs}</value>
             <default>1970-01-01 00:00:00.000</default>
+        </entry>
+        <entry id="CachedApplName">
+            <key>${DataflowID}</key>
+            <value>${ApplLookUp}</value>
         </entry>
     </cache>
 
@@ -208,6 +238,26 @@
 						  , FD.CREATEPROGID AS DELIVERY_CREATEPROGID
 						  , FD.MODIFYPROGID AS DELIVERY_MODIFYPROGID
 						  , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
+						  , (SELECT xmlserialize(
+						              content xmlelement(
+						                name "attributes",
+						                  xmlagg(
+						                    xmlelement(
+						                      name "attr",
+						                      xmlforest(
+						                        EAT.ORDINAL as "EVENTATTR_ORDIINAL"
+						                        , EAT.NAME as "EVENTATTR_NAME"
+						                        , EAT.VALUE as "EVENTATTR_VALUE"
+						                        -- , EAT.CREATETS as "EVENTATTR_CREATETS"
+						                        -- , EAT.MODIFYTS as "EVENTATTR_MODIFYTS"
+						                      )
+						                    )
+						                  )
+						              ) AS CLOB VERSION '1.0' INCLUDING XMLDECLARATION
+						            ) AS EVT_ATTRS
+						        FROM FG_EVENTATTR EAT
+						        WHERE FE.EVENT_KEY = EAT.EVENT_KEY
+						     )
 						FROM FG_EVENT FE
 						  LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
 						  LEFT OUTER JOIN FG_ROUTE FR ON (FR.ARRIVEDFILE_KEY = FAF.ARRIVEDFILE_KEY)
@@ -219,38 +269,6 @@
                     <req-param value="${LastEventRecordCDate}" type="TIMESTAMP"/>
 
                     <parser-ref name="B2BiEventsResultSetParser"/>
-                </request>
-            </step>
-            <step name="B2Bi event attributes query" url="jdbc:db2://[HOST]:50000/SB2BIDB" username="[USER_NAME]" password="[USER_PASS]">
-                <schedule-simple interval="60" units="Seconds" startDelay="30" startDelayUnits="Seconds" repeatCount="-1"/>
-                <request>
-                    <![CDATA[
-                        SELECT EAT.EVENT_KEY AS EVENT_KEY
-                          -- , EAT.EVENTATTR_KEY AS EVENTATTR_KEY
-                          -- , EAT.DATA_FLOW_ID AS EVENTATTR_DATA_FLOW_ID
-                          , EAT.ORDINAL AS EVENTATTR_ORDIINAL
-                          , EAT.NAME AS EVENTATTR_NAME
-                          , EAT.VALUE AS EVENTATTR_VALUE
-                          -- , EAT.ARRIVEDFILE_KEY AS EVENTATTR_ARRIVEDFILE_KEY
-                          -- , EAT.LOCKID AS EVENTATTR_LOCKID
-                          , EAT.CREATETS AS EVENTATTR_CREATETS
-                          , EAT.MODIFYTS AS EVENTATTR_MODIFYTS
-                          -- , EAT.CREATEUSERID AS EVENTATTR_CREATRE_USER
-                          -- , EAT.MODIFYUSERID AS EVENTATTR_MODIFY_USER
-                          -- , EAT.CREATEPROGID AS EVENTATTR_CREATE_PROG
-                          -- , EAT.MODIFYPROGID AS EVENTATTR_MODIFY_PROG
-                          , EVT.ENTITY_TYPE AS EVENT_ENTITY_TYPE
-                          , EVT.TIME as EVENT_TIME
-                          , EVT.CREATETS as EVENT_CREATETS
-                          , EVT.MODIFYTS as EVENT_MODIFYTS
-                        FROM FG_EVENTATTR EAT
-                          LEFT JOIN FG_EVENT EVT ON (EVT.EVENT_KEY = EAT.EVENT_KEY)
-                        WHERE EAT.CREATETS > ?
-                        ORDER BY EAT.CREATETS ASC
-                    ]]>
-                    <req-param value="${LastEventAttrRecordCDate}" type="TIMESTAMP"/>
-
-                    <parser-ref name="B2BiEventAttributesResultSetParser"/>
                 </request>
             </step>
         </scenario>
