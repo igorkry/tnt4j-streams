@@ -20,7 +20,7 @@
 
         <!-- FG_EVENT table columns -->
         <field name="Guid" locator="EVENT_EVENT_KEY" locator-type="Label"/>
-        <field name="TrackingId" locator="EVENT_EVENT_KEY" locator-type="Label"/>
+        <field name="EventKey" locator="EVENT_EVENT_KEY" locator-type="Label"/>
         <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
         <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
         <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
