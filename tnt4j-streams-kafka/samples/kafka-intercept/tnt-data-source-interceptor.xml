@@ -81,7 +81,7 @@
         </field>
 
         <field name="Correlator">
-            <field-locator locator="topic" locator-type="Label"/>
+            <field-locator locator="topicPartition.topic" locator-type="Label"/>
             <field-locator locator="offset" locator-type="Label"/>
         </field>
     </parser>
