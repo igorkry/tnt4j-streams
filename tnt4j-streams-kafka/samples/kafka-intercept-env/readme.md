@@ -56,7 +56,7 @@ log4j.additivity.com.jkoolcloud.tnt4j.streams=false
 ``` 
 * Run Kafka provided console producer/consumer
 ```cmd
-kafka-console-consumer --bootstrap-server localhost:9092 --consumer.config ../../onfig/consumer.properties --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
+kafka-console-consumer --consumer.config ../../config/consumer.properties --bootstrap-server localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
 ```
 
 ```cmd
