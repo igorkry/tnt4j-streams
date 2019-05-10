@@ -1,26 +1,26 @@
 * Install Kafka (if not yet)
-* Put `tnt4j` libs to `<KAFKA_INSTALL_DIR>/libs/tnt4j`.  Maven produces `all-in-one` jar named `tnt4j-streams-kafka-[VERSION]-all.jar` when 
-building `tnt4j-streams-kafka` module. Use it alone instead of having multiple dependent jar files from built tnt4j-streams package `lib` 
-dir.
-* Alter: 
-    * *NIX: `<KAFKA_INSTALL_DIR>/bin/kafka-run-class.sh` by adding section after `# classpath addition for release` section:
-    ```bash
-     # classpath addition for tnt4j
-     for file in "$base_dir"/libs/tnt4j/*;
-     do
-       if should_include_file "$file"; then
-         CLASSPATH="$CLASSPATH":"$file"
-       fi
-     done
-    ```
-    * WIN: `<KAFKA_INSTALL_DIR>/bin/windows/kafka-run-class.bat` by adding section after `rem Classpath addition for release` section:
-    ```cmd
-    rem Classpath addition for tnt4j
-    for %%i in (%BASE_DIR%\libs\tnt4j\*) do (
-    	call :concat %%i
-    )
-    ```
-    **NOTE:** there is sample `.bat` file provided next to this manual, use it as reference.
+* Add `tnt4j-streams-kafka-[VERSION]-all.jar` to Kafka class-path:
+    * If you can put files into `<KAFKA_INSTALL_DIR>/libs` dir, then just copy it there. 
+    * If you wish to have streams lib isolated, then put jar to dedicated directory (e.g. `<KAFKA_INSTALL_DIR>/libs/tnt4j`). Then alter 
+    `<KAFKA_INSTALL_DIR>/bin/kafka-run-class` script file: 
+        * *NIX: `<KAFKA_INSTALL_DIR>/bin/kafka-run-class.sh` by adding section after `# classpath addition for release` section:
+        ```bash
+         # classpath addition for tnt4j
+         for file in "$base_dir"/libs/tnt4j/*;
+         do
+           if should_include_file "$file"; then
+             CLASSPATH="$CLASSPATH":"$file"
+           fi
+         done
+        ```
+        * WIN: `<KAFKA_INSTALL_DIR>/bin/windows/kafka-run-class.bat` by adding section after `rem Classpath addition for release` section:
+        ```cmd
+        rem Classpath addition for tnt4j
+        for %%i in (%BASE_DIR%\libs\tnt4j\*) do (
+            call :concat %%i
+        )
+        ```
+        **NOTE:** there is sample `.bat` file provided next to this manual, use it as reference.
 * Alter `<KAFKA_INSTALL_DIR>/config/consumer.properties` by adding:
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaCInterceptor
