@@ -73,6 +73,19 @@ import com.jkoolcloud.tnt4j.uuid.DefaultUUIDFactory;
 public class MsgTraceReporter implements InterceptionsReporter {
 	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(MsgTraceReporter.class);
 
+	static final String SEND = "send"; // NON-NLS
+	static final String ACK = "ack"; // NON-NLS
+	static final String CONSUME = "consume"; // NON-NLS
+	static final String COMMIT = "commit"; // NON-NLS
+	/**
+	 * Trace option enabling all interceptions.
+	 */
+	public static final String ALL = "all"; // NON-NLS
+	/**
+	 * Trace option disabling all interceptions.
+	 */
+	public static final String NONE = "none"; // NON-NLS
+
 	/**
 	 * Constant defining tracing configuration dedicated topic name.
 	 */
@@ -86,23 +99,34 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	 */
 	public static final String TRACER_PROPERTY_PREFIX = "messages.tracer.kafka."; // NON-NLS
 	/**
-	 * Constant defining interceptor parsers configuration file name.
+	 * Constant defining interceptor event parsers configuration file name.
 	 */
-	public static final String DEFAULT_PARSER_CONFIG_FILE = "tnt-data-source-interceptor.xml"; // NON-NLS
+	public static final String DEFAULT_PARSER_CONFIG_FILE = "tnt-data-source_kafka_msg_trace.xml"; // NON-NLS
+	/**
+	 * Constant defining default interceptor event parser name.
+	 */
+	public static final String DEFAULT_PARSER_NAME = "KafkaTraceParser"; // NON-NLS
+	private static final String PARSER_DELIM = "#"; // NON-NLS
 
 	private ActivityParser mainParser;
 
 	private KafkaObjTraceStream<ActivityInfo> stream;
 	private Map<String, TraceCommandDeserializer.TopicTraceCommand> traceConfig = new HashMap<>();
 	private Timer pollTimer;
+	private Set<String> traceOptions;
 
 	private static KafkaConsumer<String, TraceCommandDeserializer.TopicTraceCommand> consumer;
 
 	/**
 	 * Constructs a new MsgTraceReporter.
+	 * 
+	 * @param kafkaProperties
+	 *            Kafka interceptor configuration properties
+	 * @param traceOpts
+	 *            messages tracing options set
 	 */
-	public MsgTraceReporter(Properties kafkaProperties) {
-		this(new KafkaObjTraceStream<ActivityInfo>(), kafkaProperties, true);
+	public MsgTraceReporter(Properties kafkaProperties, Set<String> traceOpts) {
+		this(new KafkaObjTraceStream<ActivityInfo>(), kafkaProperties, true, traceOpts);
 	}
 
 	/**
@@ -114,11 +138,34 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	 *            Kafka interceptor configuration properties
 	 * @param enableCfgPolling
 	 *            flag indicating whether to enable tracing configuration pooling from dedicated Kafka topic
+	 * @param traceOpts
+	 *            messages tracing options string
 	 */
 	MsgTraceReporter(KafkaObjTraceStream<ActivityInfo> stream, Properties interceptorProperties,
-			boolean enableCfgPolling) {
+			boolean enableCfgPolling, String traceOpts) {
+		this(stream, interceptorProperties, enableCfgPolling, getTraceOptsSet(traceOpts));
+	}
+
+	/**
+	 * Constructs a new MsgTraceReporter.
+	 *
+	 * @param stream
+	 *            trace stream instance
+	 * @param interceptorProperties
+	 *            Kafka interceptor configuration properties
+	 * @param enableCfgPolling
+	 *            flag indicating whether to enable tracing configuration pooling from dedicated Kafka topic
+	 * @param traceOpts
+	 *            messages tracing options set
+	 */
+	MsgTraceReporter(KafkaObjTraceStream<ActivityInfo> stream, Properties interceptorProperties,
+			boolean enableCfgPolling, Set<String> traceOpts) {
 		this.stream = stream;
-		mainParser = getParser("KafkaTraceParser"); // NON-NLS
+		this.traceOptions = traceOpts;
+
+		String parserCfg = Utils.getString("messages.tracer.stream.parser", interceptorProperties,
+				DEFAULT_PARSER_CONFIG_FILE + PARSER_DELIM + DEFAULT_PARSER_NAME);
+		mainParser = getParser(parserCfg);
 
 		StreamsAgent.runFromAPI(stream);
 		LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
@@ -145,30 +192,72 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	/**
-	 * Loads parser name having provided {@code name} from interceptor parsers configuration file.
+	 * Loads parser name having provided {@code name} from interceptor events parsers configuration file.
+	 * <p>
+	 * Parser name is defined using {@code "parsers_cfg_file_path#parserName"} pattern. To define only parser name from
+	 * file under default parsers configuration file path - use {@code "#parserName"} pattern.
+	 * <p>
+	 * When pattern token {@code "parsers_cfg_file_path"} is omitted - {@value DEFAULT_PARSER_CONFIG_FILE} is used.
+	 * <p>
+	 * When pattern token {@code "parserName"} is omitted - {@value DEFAULT_PARSER_NAME} is used.
 	 *
 	 * @param name
-	 *            parser name
+	 *            configuration file path and parser name
 	 *
 	 * @return parser instance having provided name
 	 */
 	protected static ActivityParser getParser(String name) {
+		InputStream is = null;
 		try {
 			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 			SAXParser parser = parserFactory.newSAXParser();
 			ConfigParserHandler hndlr = new ConfigParserHandler();
 
-			InputStream is;
-
-			if (new File(DEFAULT_PARSER_CONFIG_FILE).exists()) {
-				is = new FileInputStream(DEFAULT_PARSER_CONFIG_FILE);
+			String[] nameTokens;
+			if (name.contains(PARSER_DELIM)) {
+				nameTokens = name.split(PARSER_DELIM);
+				if (nameTokens.length == 1) {
+					nameTokens = new String[] { DEFAULT_PARSER_CONFIG_FILE, name };
+				}
 			} else {
-				is = Utils.getResourceAsStream(MsgTraceReporter.class, DEFAULT_PARSER_CONFIG_FILE);
+				nameTokens = new String[] { name, DEFAULT_PARSER_NAME };
 			}
+
+			if (new File(nameTokens[0]).exists()) {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MsgTraceReporter.loading.parsers.config", nameTokens[1], nameTokens[0]);
+				is = new FileInputStream(nameTokens[0]);
+			} else {
+				String interceptorsPropFile = InterceptionsManager.getInterceptorsConfigFile();
+				File cf = new File(interceptorsPropFile);
+				String cfgFilePath = cf.getParent() + File.separator + nameTokens[0];
+				cf = new File(cfgFilePath);
+				if (cf.exists()) {
+					LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+							"MsgTraceReporter.loading.parsers.config", nameTokens[1], cfgFilePath);
+					is = new FileInputStream(cfgFilePath);
+				}
+			}
+
+			if (is == null) {
+				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"MsgTraceReporter.loading.parsers.config", nameTokens[1], nameTokens[0]);
+				is = Utils.getResourceAsStream(nameTokens[0]);
+			}
+
+			if (is == null) {
+				throw new RuntimeException(
+						StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+								"MsgTraceReporter.parsers.config.not.found", nameTokens[0]));
+			}
+
 			parser.parse(is, hndlr);
-			return hndlr.getStreamsConfigData().getParser(name);
+			return hndlr.getStreamsConfigData().getParser(nameTokens[1]);
 		} catch (Exception e) {
-			throw new RuntimeException("Can't start interceptor: " + e.getMessage() + " cause: " + e.getCause());
+			throw new RuntimeException(StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
+					"MsgTraceReporter.loading.parsers.config.failed", e.getMessage(), e.getCause()), e);
+		} finally {
+			Utils.close(is);
 		}
 	}
 
@@ -226,6 +315,44 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	}
 
 	/**
+	 * Parses provided message trace options string {@code traceOptsStr} to {@link java.util.Set} of tracing options: id
+	 * trace enabled/disabled, set of intercepted producer/ consumer methods.
+	 * 
+	 * @param traceOptsStr
+	 *            messages trace options string
+	 * @return set of messages tracing options (intercepted methods)
+	 */
+	public static Set<String> getTraceOptsSet(String traceOptsStr) {
+		String[] opts = traceOptsStr.split(","); // NON-NLS
+		Set<String> optsSet = new HashSet<>(opts.length);
+
+		for (String opt : opts) {
+			String o = opt.trim().toLowerCase();
+			if ("false".equals(o)) { // NON-NLS
+				o = NONE;
+			} else if ("true".equals(o)) { // NON-NLS
+				o = ALL;
+			}
+			optsSet.add(o);
+		}
+
+		return optsSet;
+	}
+
+	/**
+	 * Checks if messages tracing options enables tracing.
+	 * 
+	 * @param traceOptions
+	 *            set of messages tracing options
+	 * @return {@code true} if set does not contain {@code "none"}, {@code false} - otherwise
+	 */
+	public static boolean isTraceEnabled(Set<String> traceOptions) {
+		boolean disabled = traceOptions.contains(NONE); // NON-NLS
+
+		return !disabled;
+	}
+
+	/**
 	 * Extracts message tracing specific configuration properties from interceptor configuration.
 	 *
 	 * @param interceptorProperties
@@ -250,10 +377,16 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	 *            topic name event received from
 	 * @param count
 	 *            events counts
+	 * @param opName
+	 *            intercepted operation name
 	 *
 	 * @return {@code true} if message should be traced, {@code false} - otherwise
 	 */
-	protected boolean shouldSendTrace(String topic, boolean count) {
+	protected boolean shouldSendTrace(String topic, boolean count, String opName) {
+		if (!isOpTraceEnabled(opName)) {
+			return false;
+		}
+
 		TraceCommandDeserializer.TopicTraceCommand topicTraceConfig = traceConfig.get(topic);
 		if (topicTraceConfig == null) {
 			topicTraceConfig = traceConfig.get(TraceCommandDeserializer.MASTER_CONFIG);
@@ -268,12 +401,16 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		return send;
 	}
 
+	private boolean isOpTraceEnabled(String opName) {
+		return traceOptions == null || traceOptions.contains(opName) || traceOptions.contains(ALL);
+	}
+
 	@Override
 	public void send(TNTKafkaPInterceptor interceptor, ProducerRecord<Object, Object> producerRecord) {
 		if (producerRecord == null) {
 			return;
 		}
-		if (shouldSendTrace(producerRecord.topic(), true)) {
+		if (shouldSendTrace(producerRecord.topic(), true, SEND)) {
 			try {
 				KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(producerRecord,
 						MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
@@ -293,7 +430,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		if (recordMetadata == null) {
 			return;
 		}
-		if (shouldSendTrace(recordMetadata.topic(), false)) {
+		if (shouldSendTrace(recordMetadata.topic(), false, ACK)) {
 			try {
 				KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(recordMetadata, e, clusterResource,
 						MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
@@ -357,7 +494,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			if (cr == null) {
 				continue;
 			}
-			if (shouldSendTrace(cr.topic(), true)) {
+			if (shouldSendTrace(cr.topic(), true, CONSUME)) {
 				try {
 					KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(cr,
 							MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
@@ -398,7 +535,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			if (me == null) {
 				continue;
 			}
-			if (shouldSendTrace(me.getKey().topic(), false)) {
+			if (shouldSendTrace(me.getKey().topic(), false, COMMIT)) {
 				try {
 					ai = new ActivityInfo();
 					KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(me.getKey(), me.getValue(),

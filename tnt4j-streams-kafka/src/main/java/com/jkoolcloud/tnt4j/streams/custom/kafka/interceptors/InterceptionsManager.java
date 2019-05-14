@@ -84,7 +84,7 @@ public class InterceptionsManager {
 	}
 
 	private void loadProperties() {
-		interceptorsPropFile = System.getProperty("interceptors.config", DEFAULT_INTERCEPTORS_PROP_FILE); // NON-NLS
+		interceptorsPropFile = getInterceptorsConfigFile();
 
 		try (FileInputStream fis = new FileInputStream(interceptorsPropFile)) {
 			interceptorProps.load(fis);
@@ -95,26 +95,41 @@ public class InterceptionsManager {
 		}
 	}
 
+	public static String getInterceptorsConfigFile() {
+		return System.getProperty("interceptors.config", DEFAULT_INTERCEPTORS_PROP_FILE); // NON-NLS
+	}
+
 	private void initialize() {
 		loadProperties();
 
 		if (interceptorProps.isEmpty()) {
 			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"InterceptionsManager.using.defaults");
+					"InterceptionsManager.init.using.defaults");
+		} else {
+			LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.init.using.props", interceptorProps);
 		}
 
 		int reportingPeriod = Utils.getInt("metrics.report.period", interceptorProps,
 				MetricsReporter.DEFAULT_REPORTING_PERIOD_SEC);
 		int reportingDelay = Utils.getInt("metrics.report.delay", interceptorProps, reportingPeriod);
-		addReporter(new MetricsReporter(reportingPeriod, reportingDelay));
-		boolean traceMessages = Utils.getBoolean("messages.tracer.trace", interceptorProps, false); // NON-NLS
-		if (traceMessages) {
+		if (reportingPeriod > 0) {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"InterceptionsManager.msg.tracer.starting", interceptorProps);
-			addReporter(new MsgTraceReporter(interceptorProps));
+					"InterceptionsManager.metrics.reporter.starting");
+			addReporter(new MetricsReporter(reportingPeriod, reportingDelay));
 		} else {
 			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"InterceptionsManager.msg.tracer.skipping", interceptorProps);
+					"InterceptionsManager.metrics.reporter.skipping", "metrics.report.period", reportingPeriod);
+		}
+		String traceMessages = Utils.getString("messages.tracer.trace", interceptorProps, MsgTraceReporter.NONE);
+		Set<String> traceOpts = MsgTraceReporter.getTraceOptsSet(traceMessages);
+		if (MsgTraceReporter.isTraceEnabled(traceOpts)) {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.msg.tracer.starting");
+			addReporter(new MsgTraceReporter(interceptorProps, traceOpts));
+		} else {
+			LOGGER.log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"InterceptionsManager.msg.tracer.skipping", "messages.tracer.trace", traceMessages);
 		}
 	}
 
@@ -319,7 +334,7 @@ public class InterceptionsManager {
 	}
 
 	/**
-	 * Collects configurations of all class <tt>iClass</tt> matching referenced interceptors configurations.
+	 * Collects configurations of all class {@code iClass} matching referenced interceptors configurations.
 	 * Configuration of interceptor is bound over
 	 * {@link org.apache.kafka.clients.producer.ProducerInterceptor#configure(java.util.Map)} or
 	 * {@link org.apache.kafka.clients.consumer.ConsumerInterceptor#configure(java.util.Map)} methods.

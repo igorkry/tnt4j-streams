@@ -65,11 +65,28 @@ reported to dedicated Kafka topic):
 #### Interceptors configuration
 
 To configure interceptors use file `./config/intercept/interceptors.properties`. Configuration properties are:
-* `metrics.report.period` - period (in seconds) of Kafka interceptors (and JMX) collected metrics reporting to dedicated Kafka topic.
+* `metrics.report.period` - period (in seconds) of Kafka interceptors (and JMX) collected metrics reporting to dedicated Kafka topic. 
+Default value - `30`.
 * `metrics.report.delay` - delay (in seconds) before first metrics reporting is invoked. If not defined, it is equal to 
 `metrics.report.period`.
-* `messages.tracer.trace` - flag indicating whether to trace (send to jKool) intercepted Kafka messages. **NOTE:** Kafka message fields and 
-jKool events fields mapping is hardcoded for now.
+* `messages.tracer.trace` - messages tracing options, allowing to enable/disable tracing of all, none or desired set of message 
+producer/consumer intercepted operations:
+    * `send` - producer send operation
+    * `ack` - producer acknowledge operation
+    * `consume` - consumer consume operation
+    * `commit` - consumer commit operation
+    * `all` or `true` - capture all producer/consumer operations
+    * `none` or `false` - do not capture anything
+
+  Default value - `none`.
+* `messages.tracer.stream.parser` - parser reference, used to parse Kafka interceptors trace events (of class 
+`com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.KafkaTraceEventData`). Reference is defined using pattern 
+`parsers_cfg_file_name_path#parserName`, where:
+    * `parsers_cfg_file_path` - is parsers configuration file path. (Optional). Default value - `tnt-data-source_kafka_msg_trace.xml`. 
+    * `parserName` - primary parser name from referenced parsers configuration file. Default value - `KafkaTraceParser`.
+
+  To define only parser name from file under default parsers configuration file path - use `"#parserName` pattern. Default value - 
+  `tnt-data-source_kafka_msg_trace.xml#KafkaTraceParser`.
 
 ##### Kafka messages trace configuration over file
 
@@ -92,7 +109,21 @@ being registered.
 
 All other `messages.tracer.kafka.<KAFKA_CONUMER_PROP_NAME>` options are subject depending on your environment configuration.
 
-To enable trace of all messages from any topic, set `messages.tracer.trace flag enabled`.
+To enable trace of all messages from any topic, set (one of below): 
+```properties
+# to trace all intercepted message producer/consumer operations
+messages.tracer.trace=all
+# to disable messages tracing
+messages.tracer.trace=none
+# to trace only message producer operations
+messages.tracer.trace=send, ack
+# to trace only message consumer operations
+messages.tracer.trace=commit, consume
+# to trace only message producer 'send' and consumer 'consume' operations
+messages.tracer.trace=send, consume
+# to trace all listed message producer/consumer operations
+messages.tracer.trace=send, ack, consume, commit
+```
 
 ##### Kafka trace control topic commands
 

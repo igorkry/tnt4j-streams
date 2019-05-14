@@ -123,7 +123,7 @@ public class MsgTraceReporterTest {
 		KafkaObjTraceStream<ActivityInfo> stream = buildStream();
 		MsgTraceReporter reporter = getMsgTraceReporter(stream);
 
-		final ProducerRecord producerRecord = getProducerRecord();
+		ProducerRecord producerRecord = getProducerRecord();
 
 		reporter.send(mock(TNTKafkaPInterceptor.class), producerRecord);
 
@@ -141,10 +141,10 @@ public class MsgTraceReporterTest {
 		KafkaObjTraceStream<ActivityInfo> stream = buildStream();
 		MsgTraceReporter reporter = getMsgTraceReporter(stream);
 
-		final RecordMetadata recordMetadata = new RecordMetadata(getTopicPartition(), OFFSET, OFFSET, TIMESTAMP, 123L,
+		RecordMetadata recordMetadata = new RecordMetadata(getTopicPartition(), OFFSET, OFFSET, TIMESTAMP, 123L,
 				KEY.length(), MESSAGE.length());
-		final Exception e = new Exception("AAA");
-		final ClusterResource clusterResource = new ClusterResource("CLUSTERID");
+		Exception e = new Exception("AAA");
+		ClusterResource clusterResource = new ClusterResource("CLUSTERID");
 
 		reporter.acknowledge(mock(TNTKafkaPInterceptor.class), recordMetadata, e, clusterResource);
 
@@ -179,7 +179,7 @@ public class MsgTraceReporterTest {
 	}
 
 	private ProducerRecord getProducerRecord() {
-		return new ProducerRecord<String, String>(TOPIC, 0, null, "VALUE");
+		return new ProducerRecord<String, String>(TOPIC, 0, null, "VALUE"); // NON-NLS
 	}
 
 	private KafkaObjTraceStream<ActivityInfo> buildStream() throws Exception {
@@ -200,7 +200,7 @@ public class MsgTraceReporterTest {
 	private MsgTraceReporter getMsgTraceReporter(KafkaObjTraceStream<ActivityInfo> stream) throws Exception {
 		// System.setProperty("tnt4j.config", "../config/tnt4j.properties");
 
-		MsgTraceReporter reporter = new MsgTraceReporter(stream, new Properties(), false);
+		MsgTraceReporter reporter = new MsgTraceReporter(stream, new Properties(), false, "all"); // NON-NLS
 
 		return reporter;
 	}
@@ -214,7 +214,7 @@ public class MsgTraceReporterTest {
 		assertEquals(activityInfo.getFieldValue("Partition"), recordMetadata.partition()); // NON-NLS
 		assertEquals(activityInfo.getFieldValue((StreamFieldType.MsgLength.name())), MESSAGE.length() + KEY.length());
 		assertEquals(activityInfo.getFieldValue(StreamFieldType.ApplName.name()), null);
-		assertEquals(activityInfo.getFieldValue(StreamFieldType.ResourceName.name()), "QUEUE=" + TOPIC);
+		assertEquals(activityInfo.getFieldValue(StreamFieldType.ResourceName.name()), "QUEUE=" + TOPIC); // NON-NLS
 	}
 
 	private TopicPartition getTopicPartition() {
@@ -228,7 +228,7 @@ public class MsgTraceReporterTest {
 
 		HashMap<TopicPartition, OffsetAndMetadata> map = new HashMap<>();
 		map.put(getTopicPartition(), new OffsetAndMetadata(OFFSET));
-		final Map.Entry<TopicPartition, OffsetAndMetadata> me = map.entrySet().iterator().next();
+		Map.Entry<TopicPartition, OffsetAndMetadata> me = map.entrySet().iterator().next();
 		reporter.commit(mock(TNTKafkaCInterceptor.class), map);
 
 		ActivityInfo activityInfo = stream.getNextItem();
@@ -261,7 +261,7 @@ public class MsgTraceReporterTest {
 		KafkaObjTraceStream<ActivityInfo> stream = buildStream();
 		MsgTraceReporter reporter = getMsgTraceReporter(stream);
 
-		final ConsumerRecords<Object, Object> consumerRecords = getConsumerRecords();
+		ConsumerRecords<Object, Object> consumerRecords = getConsumerRecords();
 
 		reporter.consume(mock(TNTKafkaCInterceptor.class), consumerRecords, null);
 
@@ -393,7 +393,7 @@ public class MsgTraceReporterTest {
 	private ActivityParser getActivityParser(String parserName)
 			throws ParserConfigurationException, SAXException, IOException {
 
-		return MsgTraceReporter.getParser(parserName);
+		return MsgTraceReporter.getParser("#" + parserName); // NON-NLS
 	}
 
 	public interface TestActivityInfoConsumer {

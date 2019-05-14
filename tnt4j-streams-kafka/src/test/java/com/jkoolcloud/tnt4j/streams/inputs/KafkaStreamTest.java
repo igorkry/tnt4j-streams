@@ -20,12 +20,13 @@ import static com.jkoolcloud.tnt4j.streams.TestUtils.testPropertyList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.time.Duration;
+import java.util.*;
 
 import org.I0Itec.zkclient.exception.ZkTimeoutException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -35,11 +36,6 @@ import org.junit.Test;
 import com.jkoolcloud.tnt4j.streams.configure.StreamProperties;
 import com.jkoolcloud.tnt4j.streams.utils.KafkaStreamConstants;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
-
-import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerConfig;
-import kafka.javaapi.consumer.ConsumerConnector;
-import kafka.message.MessageAndMetadata;
 
 /**
  * @author akausinis
@@ -92,24 +88,23 @@ public class KafkaStreamTest {
 		props.put("client.id", "TestProducer"); // NON-NLS
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"); // NON-NLS
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"); // NON-NLS
-		final KafkaProducer<Integer, String> producer = new KafkaProducer<>(props);
+		KafkaProducer<String, String> producer = new KafkaProducer<>(props);
 
-		Thread thred = new Thread(new Runnable() {
+		Thread thread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				int messageNo = 1;
 				for (int i = 0; i <= 150; i++) {
 					System.out.println("Sending message: " + i); // NON-NLS
 					String messageStr = "0:0:0:0:0:0:0:1 - - [09/Sep/2016:15:18:34 +0300] \"GET /SimpleJSF/Index.xhtml " // NON-NLS
 							+ i + " HTTP/1.1\" 200 6561"; // NON-NLS
 					long startTime = System.currentTimeMillis();
-					producer.send(new ProducerRecord<Integer, String>(DEFAULT_TEST_TOPIC, messageStr));
+					producer.send(new ProducerRecord<>(DEFAULT_TEST_TOPIC, i + "_" + startTime, messageStr));
 				}
 			}
 		});
-		thred.start();
-		thred.join();
+		thread.start();
+		thread.join();
 		producer.close();
 	}
 
@@ -125,19 +120,20 @@ public class KafkaStreamTest {
 		props.put("auto.commit.interval.ms", "1000"); // NON-NLS
 		props.put("consumer.timeout.ms", "1000"); // NON-NLS
 
-		ConsumerConnector consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
-		Map<String, Integer> topicCountMap = new HashMap<>();
-		topicCountMap.put(DEFAULT_TEST_TOPIC, 1);
+		Collection<String> topics = new ArrayList<>();
+		topics.add(DEFAULT_TEST_TOPIC);
 
-		Map<String, List<kafka.consumer.KafkaStream<byte[], byte[]>>> consumerMap = consumer
-				.createMessageStreams(topicCountMap);
-		kafka.consumer.KafkaStream<byte[], byte[]> stream = consumerMap.get(DEFAULT_TEST_TOPIC).get(0);
+		KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(props);
+		consumer.subscribe(topics);
 
-		for (MessageAndMetadata<byte[], byte[]> aStream : stream) {
-			System.out.println(new String(aStream.message()));
+		ConsumerRecords<byte[], byte[]> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+		for (ConsumerRecord<byte[], byte[]> cRec : consumerRecords) {
+			System.out.println(new String(cRec.value()));
 		}
 
 		System.err.println();
-		consumer.shutdown();
+		consumer.wakeup();
+		consumer.unsubscribe();
+		consumer.close();
 	}
 }
