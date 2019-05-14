@@ -144,31 +144,30 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 	}
 
 	private void alterTrackableSource(Tracker tracker, Trackable t, ActivityInfo ai, String fqn) {
+		Source tSrc = getItemSource(tracker, ai, fqn);
+		t.setSource(tSrc);
+
+		Collection<Snapshot> snapshots = null;
+		if (t instanceof Activity) {
+			snapshots = ((Activity) t).getSnapshots();
+		} else if (t instanceof TrackingEvent) {
+			snapshots = ((TrackingEvent) t).getOperation().getSnapshots();
+		}
+
+		if (CollectionUtils.isNotEmpty(snapshots)) {
+			List<ActivityInfo> cais = ai.getChildren(true);
+			for (Snapshot s : snapshots) {
+				ActivityInfo cai = getChildItem(cais, s.getTrackingId());
+				s.setSource(cai == null ? tSrc : getItemSource(tracker, cai, fqn));
+			}
+		}
+	}
+
+	private Source getItemSource(Tracker tracker, ActivityInfo ai, String fqn) {
 		if (StringUtils.isNotEmpty(fqn)) {
-			Source tSrc = buildSource(tracker, ai.getSourceFQN(fqn));
-			t.setSource(tSrc);
-
-			Collection<Snapshot> snapshots = null;
-			if (t instanceof Activity) {
-				snapshots = ((Activity) t).getSnapshots();
-			} else if (t instanceof TrackingEvent) {
-				snapshots = ((TrackingEvent) t).getOperation().getSnapshots();
-			}
-
-			if (CollectionUtils.isNotEmpty(snapshots)) {
-				List<ActivityInfo> cais = ai.getChildren(true);
-				int i = 0;
-				for (Snapshot s : snapshots) {
-					ActivityInfo cai = (cais == null || i >= cais.size()) ? null : cais.get(i++);
-					if (cai == null) {
-						s.setSource(tSrc);
-					} else {
-						s.setSource(buildSource(tracker, cai.getSourceFQN(fqn)));
-					}
-				}
-			}
+			return buildSource(tracker, ai.getSourceFQN(fqn));
 		} else {
-			t.setSource(getDefaultSource());
+			return getDefaultSource();
 		}
 	}
 
@@ -182,7 +181,18 @@ public class JKCloudActivityOutput extends AbstractJKCloudOutput<ActivityInfo, T
 		source.setSSN(sf.getSSN());
 
 		return source;
+	}
 
+	private static ActivityInfo getChildItem(List<ActivityInfo> children, String tId) {
+		if (CollectionUtils.isNotEmpty(children) && StringUtils.isNotEmpty(tId)) {
+			for (ActivityInfo cai : children) {
+				if (tId.equals(cai.getTrackingId())) {
+					return cai;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	@Override
