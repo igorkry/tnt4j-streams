@@ -85,7 +85,7 @@ producer/consumer intercepted operations:
     * `parsers_cfg_file_path` - is parsers configuration file path. (Optional). Default value - `tnt-data-source_kafka_msg_trace.xml`. 
     * `parserName` - primary parser name from referenced parsers configuration file. Default value - `KafkaTraceParser`.
 
-  To define only parser name from file under default parsers configuration file path - use `"#parserName` pattern. Default value - 
+  To define only parser name from file under default parsers configuration file path - use `#parserName` pattern. Default value - 
   `tnt-data-source_kafka_msg_trace.xml#KafkaTraceParser`.
 
 ##### Kafka messages trace configuration over file
