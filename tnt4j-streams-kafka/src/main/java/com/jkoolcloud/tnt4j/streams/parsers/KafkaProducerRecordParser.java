@@ -17,6 +17,7 @@
 package com.jkoolcloud.tnt4j.streams.parsers;
 
 import java.text.ParseException;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,6 +27,7 @@ import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.sink.EventSink;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocator;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.*;
 
 /**
@@ -50,6 +52,14 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * <p>
  * This activity parser supports configuration properties from {@link GenericActivityParser} (and higher hierarchy
  * parsers).
+ * <p>
+ * This activity parser supports those activity field locator types:
+ * <ul>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#StreamProp}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Cache}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
+ * </ul>
  *
  * @version $Revision: 1 $
  */
@@ -121,11 +131,11 @@ public class KafkaProducerRecordParser extends GenericActivityParser<ProducerRec
 	}
 
 	/**
-	 * Resolves {@link org.apache.kafka.clients.producer.ProducerRecord} instance field value defined by
-	 * <tt>pRecord</tt> fields names <tt>path<tt> array.
+	 * Resolves {@link org.apache.kafka.clients.producer.ProducerRecord} instance field value defined by {@code pRecord}
+	 * fields names {@code path} array.
 	 * <p>
-	 * If producer record <tt>key</tt> and <tt>value</tt> fields classes are known, it can be processed further defining
-	 * field names of those classes as <tt>path</path> elements.
+	 * If producer record {@code key} and {@code value} fields classes are known, it can be processed further defining
+	 * field names of those classes as {@code path} elements.
 	 *
 	 * @param path
 	 *            fields path as array of producer record field names
@@ -163,5 +173,24 @@ public class KafkaProducerRecordParser extends GenericActivityParser<ProducerRec
 		}
 
 		return val;
+	}
+
+	@SuppressWarnings("deprecation")
+	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
+			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.Range, ActivityFieldLocatorType.REMatchId);
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Unsupported activity locator types are:
+	 * <ul>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Index}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#REMatchId}</li>
+	 * </ul>
+	 */
+	@Override
+	protected EnumSet<ActivityFieldLocatorType> getUnsupportedLocatorTypes() {
+		return UNSUPPORTED_LOCATOR_TYPES;
 	}
 }

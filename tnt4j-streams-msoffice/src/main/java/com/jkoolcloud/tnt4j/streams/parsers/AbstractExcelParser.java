@@ -16,6 +16,7 @@
 
 package com.jkoolcloud.tnt4j.streams.parsers;
 
+import java.util.EnumSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -24,6 +25,7 @@ import org.apache.poi.ss.usermodel.*;
 import com.jkoolcloud.tnt4j.core.OpLevel;
 import com.jkoolcloud.tnt4j.streams.configure.MsOfficeParserProperties;
 import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldDataType;
+import com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType;
 import com.jkoolcloud.tnt4j.streams.utils.StreamsResources;
 import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
@@ -41,6 +43,14 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * field/locator RAW data. When this flag is set to {@code true} - original cell value provided by Apache POI API is
  * used e.g., making all numeric cells values as decimals ({@code double}) what is not very comfortable when entered
  * cell value is integer. Default value - {@code false}. (Optional)</li>
+ * </ul>
+ * <p>
+ * This activity parser supports those activity field locator types:
+ * <ul>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Label}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#StreamProp}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Cache}</li>
+ * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Activity}</li>
  * </ul>
  *
  * @version $Revision: 1 $
@@ -169,5 +179,24 @@ public abstract class AbstractExcelParser<T> extends GenericActivityParser<T> {
 		default:
 			return cellValue.formatAsString();
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private static final EnumSet<ActivityFieldLocatorType> UNSUPPORTED_LOCATOR_TYPES = EnumSet
+			.of(ActivityFieldLocatorType.Index, ActivityFieldLocatorType.Range, ActivityFieldLocatorType.REMatchId);
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Unsupported activity locator types are:
+	 * <ul>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Index}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#Range}</li>
+	 * <li>{@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldLocatorType#REMatchId}</li>
+	 * </ul>
+	 */
+	@Override
+	protected EnumSet<ActivityFieldLocatorType> getUnsupportedLocatorTypes() {
+		return UNSUPPORTED_LOCATOR_TYPES;
 	}
 }

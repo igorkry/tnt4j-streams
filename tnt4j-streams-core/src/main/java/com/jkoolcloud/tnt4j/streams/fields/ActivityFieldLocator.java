@@ -159,7 +159,8 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			builtInType = StringUtils.isNumeric(locator) ? ActivityFieldLocatorType.Index
 					: ActivityFieldLocatorType.Label;
 
-			logger().log(OpLevel.WARNING, "ActivityFieldLocator.setting.default.locator.type", locator, builtInType);
+			logger().log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+					"ActivityFieldLocator.setting.default.locator.type", locator, builtInType);
 		} else {
 			if (builtInType.getDataType() == Integer.class) {
 				try {
@@ -540,7 +541,7 @@ public class ActivityFieldLocator extends AbstractFieldEntity implements Cloneab
 			if (target == null) {
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityFieldLocator.mapped.default", type);
-				target = mapCatchAll != null ? mapCatchAll : source;
+				target = mapCatchAll == null ? source : mapCatchAll;
 			}
 		}
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
