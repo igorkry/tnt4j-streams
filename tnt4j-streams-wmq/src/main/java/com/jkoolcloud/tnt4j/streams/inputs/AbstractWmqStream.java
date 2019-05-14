@@ -219,8 +219,8 @@ public abstract class AbstractWmqStream<T> extends TNTParseableInputStream<T> {
 	}
 
 	/**
-	 * Initiates open options value used to access queue or topic. <tt>optionsStr</tt> can define numeric options value
-	 * or concatenation of MQ constant names/values delimited by {@code '|'} symbol. If <tt>optionsStr</tt> starts with
+	 * Initiates open options value used to access queue or topic. {@code optionsStr} can define numeric options value
+	 * or concatenation of MQ constant names/values delimited by {@code '|'} symbol. If {@code optionsStr} starts with
 	 * {@value #FORCE_OPEN_OPTION}, it means that this options set should be used as complete and passed to Queue
 	 * Manager without changes. By default these open options are appended to predefined set of:
 	 * <p>

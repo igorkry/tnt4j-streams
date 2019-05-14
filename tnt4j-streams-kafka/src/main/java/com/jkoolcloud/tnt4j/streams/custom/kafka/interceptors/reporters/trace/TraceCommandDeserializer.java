@@ -90,7 +90,7 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 	private StringDeserializer cmdDeserializer = new StringDeserializer();
 
 	/**
-	 * Parses trace command <tt>message</tt> and builds command instance handling topic messages tracing activity.
+	 * Parses trace command {@code message} and builds command instance handling topic messages tracing activity.
 	 *
 	 * @param message
 	 *            command message to interpret
@@ -189,7 +189,7 @@ public class TraceCommandDeserializer implements Deserializer<TraceCommandDeseri
 		Long endAt;
 
 		/**
-		 * Checks if <tt>topic</tt> matches messages tracing command state and message should be traced.
+		 * Checks if {@code topic} matches messages tracing command state and message should be traced.
 		 * <p>
 		 * Match is positive if:
 		 * <ul>

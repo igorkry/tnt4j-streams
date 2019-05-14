@@ -533,7 +533,7 @@ public class MetricsReporter implements InterceptionsReporter {
 	}
 
 	/**
-	 * Collects JMX attributes of MBeans defined by <tt>objNameStr</tt>.
+	 * Collects JMX attributes of MBeans defined by {@code objNameStr}.
 	 *
 	 * @param objNameStr
 	 *            MBeans object name pattern to query

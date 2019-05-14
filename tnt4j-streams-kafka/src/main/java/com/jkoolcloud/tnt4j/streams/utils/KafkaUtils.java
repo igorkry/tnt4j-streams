@@ -27,8 +27,8 @@ import org.apache.kafka.common.header.Headers;
  */
 public class KafkaUtils {
 	/**
-	 * Resolves {@link org.apache.kafka.common.header.Headers} contained header value defined by <tt>headers</tt>
-	 * keys/indices <tt>path<tt> array.
+	 * Resolves {@link org.apache.kafka.common.header.Headers} contained header value defined by {@code headers}
+	 * keys/indices {@code path} array.
 	 *
 	 * @param path
 	 *            keys/indices path as array of consumer record headers
@@ -67,8 +67,8 @@ public class KafkaUtils {
 	}
 
 	/**
-	 * Resolves {@link org.apache.kafka.common.header.Header} value from <tt>headers</tt> collection defined by
-	 * keys/indices <tt>path<tt> array.
+	 * Resolves {@link org.apache.kafka.common.header.Header} value from {@code headers} collection defined by
+	 * keys/indices {@code path} array.
 	 * <p>
 	 * If path does not terminate at header value level, then remaining path is processed using resolved header value as
 	 * Java object (POJO) over {@link Utils#getFieldValue(String[], Object, int)}.
@@ -111,10 +111,10 @@ public class KafkaUtils {
 	}
 
 	/**
-	 * Resolves consumer record header value defined by header index <tt>hIdx</tt>.
+	 * Resolves consumer record header value defined by header index {@code hIdx}.
 	 * <p>
-	 * Value gets resolved only if <tt>headers</tt> is not {@code null} and <tt>hIdx</tt> is less than size of
-	 * <tt>headers</tt> collection.
+	 * Value gets resolved only if {@code headers} is not {@code null} and {@code hIdx} is less than size of
+	 * {@code headers} collection.
 	 *
 	 * @param headers
 	 *            consumer record headers collection to resolve value

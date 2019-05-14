@@ -621,16 +621,16 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 		}
 
 		/**
-		 * Formats provided <tt>value</tt> as date when <tt>cell</tt> has date formatting. If <tt>cell</tt> has number
-		 * formatting, formats <tt>value</tt> as decimal number. In all other cases returns <tt>value</tt> without
+		 * Formats provided {@code value} as date when {@code cell} has date formatting. If {@code cell} has number
+		 * formatting, formats {@code value} as decimal number. In all other cases returns {@code value} without
 		 * changes.
 		 *
 		 * @param cell
 		 *            cell instance containing value
 		 * @param value
 		 *            number/date value
-		 * @return date string built from <tt>value</tt> if <tt>cell</tt> has date formatting, formatted <tt>value</tt>
-		 *         number string if <tt>cell</tt> has number formatting, plain <tt>value</tt> - otherwise.
+		 * @return date string built from {@code value} if {@code cell} has date formatting, formatted {@code value}
+		 *         number string if {@code cell} has number formatting, plain {@code value} - otherwise.
 		 */
 		private Object formatNumberValue(CellValueRecordInterface cell, double value) {
 			if (formatListener == null) {

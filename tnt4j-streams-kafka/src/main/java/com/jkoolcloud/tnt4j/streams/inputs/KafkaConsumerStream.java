@@ -374,7 +374,7 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 		}
 
 		/**
-		 * Adds consumer records from provided <tt>records</tt> collection to stream input buffer.
+		 * Adds consumer records from provided {@code records} collection to stream input buffer.
 		 *
 		 * @param records
 		 *            records collection to add to stream input buffer

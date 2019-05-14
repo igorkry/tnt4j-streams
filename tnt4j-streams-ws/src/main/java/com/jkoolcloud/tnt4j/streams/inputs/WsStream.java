@@ -337,8 +337,8 @@ public class WsStream extends AbstractWsStream<String> {
 	}
 
 	/**
-	 * Makes {@link org.w3c.dom.Document} from provided SOAP request body data string <tt>soapRequestData</tt> and adds
-	 * is to SOAP message body <tt>body</tt> element.
+	 * Makes {@link org.w3c.dom.Document} from provided SOAP request body data string {@code soapRequestData} and adds
+	 * is to SOAP message body {@code body} element.
 	 *
 	 * @param body
 	 *            SOAP message body element

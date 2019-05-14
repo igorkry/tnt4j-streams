@@ -94,7 +94,7 @@ public class CastIronWsStream extends WsStream {
 	}
 
 	/**
-	 * Resolves variable expressions (e.g. ${name}) in <tt>soapRequestData</tt> and fills in with values from streams
+	 * Resolves variable expressions (e.g. ${name}) in {@code soapRequestData} and fills in with values from streams
 	 * cache entries.
 	 *
 	 * @param soapRequestData

@@ -150,7 +150,7 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Reads JMS message payload data from provided {@link java.io.InputStream} <tt>is</tt>. It can be de-serialized
+	 * Reads JMS message payload data from provided {@link java.io.InputStream} {@code is}. It can be de-serialized
 	 * object instance or byte array.
 	 * <p>
 	 * If stream does not provide serialized object data (stream bytes at current position should be
@@ -191,7 +191,7 @@ public class ActivityRFH2Parser extends AbstractActivityMapParser {
 	}
 
 	/**
-	 * Builds valid XML document string for provided array of RFH2 folder strings array <tt>fStrings</tt>.
+	 * Builds valid XML document string for provided array of RFH2 folder strings array {@code fStrings}.
 	 *
 	 * @param fStrings
 	 *            RFH2 folder data strings array

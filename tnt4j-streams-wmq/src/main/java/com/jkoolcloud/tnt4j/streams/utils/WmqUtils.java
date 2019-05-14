@@ -267,7 +267,7 @@ public class WmqUtils {
 	 *            signature delimiter
 	 * @param logger
 	 *            logger to log result trace messages
-	 * @return unique message signature, or {@code null} if <tt>value</tt> contained signature calculation items are
+	 * @return unique message signature, or {@code null} if {@code value} contained signature calculation items are
 	 *         empty
 	 *
 	 * @see #computeSignature(Object...)
@@ -337,7 +337,7 @@ public class WmqUtils {
 	 *
 	 * @param id
 	 *            identifier to check
-	 * @return {@code true} if <tt>is</tt> is {@code null} and contains only {@code 0} elements, {@code false} -
+	 * @return {@code true} if {@code id} is {@code null} and contains only {@code 0} elements, {@code false} -
 	 *         otherwise
 	 */
 	private static boolean isEmptyId(byte[] id) {
