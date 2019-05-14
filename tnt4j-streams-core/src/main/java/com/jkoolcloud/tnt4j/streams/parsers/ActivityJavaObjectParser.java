@@ -39,10 +39,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
 
 /**
  * Implements an activity data parser that assumes each activity data item is an plain java {@link Object} (POJO) data
- * structure, where each field is represented by declared class field and the field name is used to map each field into
- * its corresponding activity field.
+ * structure, where each field or non-args method is represented by declared class field/method. Name of POJO
+ * field/method is used to map its value into corresponding activity field.
  * <p>
- * If field is complex object, sub-fields can be accessed using
+ * If field is (or method returns) complex object, sub-fields can be accessed using
  * {@value com.jkoolcloud.tnt4j.streams.utils.StreamsConstants#DEFAULT_PATH_DELIM} as naming hierarchy separator: e.g.,
  * 'header.author.name'.
  * <p>
@@ -141,15 +141,18 @@ public class ActivityJavaObjectParser extends GenericActivityParser<Object> {
 	}
 
 	/**
-	 * Gets field raw data value resolved by locator.
+	 * Gets field or non-arg method raw data value resolved by locator.
 	 *
 	 * @param locator
-	 *            activity field locator
+	 *            POJO field or non-arg method name
 	 * @param cData
 	 *            activity data carrier object
 	 * @param formattingNeeded
 	 *            flag to set if value formatting is not needed
 	 * @return raw value resolved by locator, or {@code null} if value is not resolved
+	 * 
+	 * @see Utils#getNodePath(String, String)
+	 * @see Utils#getFieldValue(String[], Object, int)
 	 */
 	@Override
 	protected Object resolveLocatorValue(ActivityFieldLocator locator, ActivityContext cData,

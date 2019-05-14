@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.utils;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -2501,7 +2502,8 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
-	 * Resolves Java object (POJO) instance field value defined by {@code dataObj} fields names {@code path} array.
+	 * Resolves Java object (POJO) instance {@code dataObj} field or non-arg method value, defined by field/method names
+	 * {@code path} array.
 	 * <p>
 	 * If {@code path} level resolved value is primitive type ({@link Class#isPrimitive()}), then value resolution
 	 * terminates at that level.
@@ -2509,17 +2511,19 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	 * Value resolution also terminates if path element index {@code i} is {@code i >= path.length}.
 	 *
 	 * @param path
-	 *            fields path as array of objects field names
+	 *            strings array as path of objects fields and non-arg methods names
 	 * @param dataObj
-	 *            Java object instance to resolve value
+	 *            POJO instance to resolve value
 	 * @param i
 	 *            processed locator path element index
-	 * @return resolved Java object field value, or {@code null} if value is not resolved
+	 * @return resolved POJO field/method value, or {@code null} if value is not resolved
 	 * @throws java.lang.RuntimeException
-	 *             if field can't be found or accessed
+	 *             if field/method can't be found or accessed
 	 *
 	 * @see #getNodePath(String, String)
 	 * @see Class#isPrimitive()
+	 * @see Field#get(Object)
+	 * @see Method#invoke(Object, Object...)
 	 */
 	public static Object getFieldValue(String[] path, Object dataObj, int i) throws RuntimeException {
 		if (ArrayUtils.isEmpty(path) || dataObj == null) {
@@ -2531,10 +2535,22 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 		}
 
 		try {
-			Field f = dataObj.getClass().getDeclaredField(path[i]);
-			f.setAccessible(true);
+			Object fVal = null;
+			try {
+				Field f = dataObj.getClass().getDeclaredField(path[i]);
+				f.setAccessible(true);
+				fVal = f.get(dataObj);
+			} catch (NoSuchFieldException nfe) {
+				try {
+					Method m = dataObj.getClass().getDeclaredMethod(path[i]);
+					m.setAccessible(true);
+					fVal = m.invoke(dataObj);
+				} catch (NoSuchMethodException nme) {
+					throw nfe;
+				}
+			}
 
-			return getFieldValue(path, f.get(dataObj), i + 1);
+			return getFieldValue(path, fVal, i + 1);
 		} catch (Exception exc) {
 			throw new RuntimeException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"Utils.could.not.get.declared.field", path[i], dataObj.getClass().getSimpleName(),
