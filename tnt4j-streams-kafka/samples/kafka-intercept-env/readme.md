@@ -29,7 +29,7 @@ interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKa
 ```properties
 interceptor.classes=com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.TNTKafkaPInterceptor
 ```
-* Alter `<KAFKA_INSTALL_DIR>/config/log4j.properties` by adding:
+* Alter `<KAFKA_INSTALL_DIR>/config/tools-log4j.properties` by adding:
 ```properties
 ######################## TNT4J ########################
 
@@ -43,17 +43,32 @@ log4j.appender.tnt4jAppender.layout.ConversionPattern=%d{ISO8601} %-5p [%t!%c{1}
 log4j.appender.tnt4jAppender.Threshold=TRACE
 #log4j.appender.tnt4jAppender.bufferSize=512
 
+### branch for sink written activity entities logger ###
+log4j.appender.activities_log=org.apache.log4j.RollingFileAppender
+log4j.appender.activities_log.File=${kafka.logs.dir}/tnt4j-streams-activities.log
+log4j.appender.activities_log.maxFileSize=10MB
+log4j.appender.activities_log.maxBackupIndex=3
+log4j.appender.activities_log.layout=org.apache.log4j.EnhancedPatternLayout
+log4j.appender.activities_log.layout.ConversionPattern=%m%n
+#log4j.appender.activities_log.Threshold=INFO
+#log4j.appender.activities_log.bufferSize=512
+
 log4j.logger.com.jkoolcloud.tnt4j.streams=DEBUG, tnt4jAppender
 ### if streams are not subject to log ###
 #log4j.logger.com.jkoolcloud.tnt4j.streams=OFF
-#log4j.additivity.com.jkoolcloud.tnt4j.streams=false
-```
-* Alter `<KAFKA_INSTALL_DIR>/config/tools-log4j.properties` by adding (to disable streams logging to sample consumer/producer console):
-```properties
-######################## TNT4J ########################
-log4j.logger.com.jkoolcloud.tnt4j.streams=OFF
 log4j.additivity.com.jkoolcloud.tnt4j.streams=false
-``` 
+log4j.logger.com.jkoolcloud.tnt4j.streams.activities_log=INFO, activities_log
+log4j.additivity.com.jkoolcloud.tnt4j.streams.activities_log=false
+```
+* Add producer (`kafka-console-producer`) and consumer (`kafka-console-consumer`) JVM system properties, referring TNT4J, interceptors and 
+optionally LOG4J configuration files, e.g.:
+```cmd
+set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties
+```
+or with custom LOG4J configuration:
+```cmd
+set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties -Dlog4j.configuration="file:../../config/my_log4j.properties"
+```
 * Run Kafka provided console producer/consumer
 ```cmd
 kafka-console-consumer --consumer.config ../../config/consumer.properties --bootstrap-server localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
@@ -62,3 +77,13 @@ kafka-console-consumer --consumer.config ../../config/consumer.properties --boot
 ```cmd
 kafka-console-producer --producer.config ../../config/producer.properties --broker-list localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits
 ```
+* If you need to change interceptor events parser configuration:
+    * If using default parsers configuration from `tnt4j-streams-kafka-[VERSION]-all.jar` package:
+        * Extract `tnt-data-source_kafka_msg_trace.xml` file from `tnt4j-streams-kafka-[VERSION]-all.jar`
+        * Make required changes
+        * Put changed `tnt-data-source_kafka_msg_trace.xml` file back to `tnt4j-streams-kafka-[VERSION]-all.jar` package (make sure file is 
+        not used while repackaging).
+    * If you want use custom interceptor events parser configuration:
+        * define custom `interceptors.properties` property `messages.tracer.stream.parser` value, having path to your custom interceptor 
+        events parser configuration file and your custom major parser name, e.g.: 
+        `/usr/me/kafka-interceptors/tnt-data-source_my_kafka_trace.xml#MyKafkaMessageTraceParser`.
