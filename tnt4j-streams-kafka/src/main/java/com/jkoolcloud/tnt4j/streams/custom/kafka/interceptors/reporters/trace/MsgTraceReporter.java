@@ -223,16 +223,17 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				nameTokens = new String[] { name, DEFAULT_PARSER_NAME };
 			}
 
-			if (new File(nameTokens[0]).exists()) {
+			File configFile = new File(nameTokens[0]);
+			if (configFile.exists()) {
 				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MsgTraceReporter.loading.parsers.config", nameTokens[1], nameTokens[0]);
 				is = new FileInputStream(nameTokens[0]);
 			} else {
 				String interceptorsPropFile = InterceptionsManager.getInterceptorsConfigFile();
-				File cf = new File(interceptorsPropFile);
-				String cfgFilePath = cf.getParent() + File.separator + nameTokens[0];
-				cf = new File(cfgFilePath);
-				if (cf.exists()) {
+				configFile = new File(interceptorsPropFile);
+				String cfgFilePath = configFile.getParent() + File.separator + nameTokens[0];
+				configFile = new File(cfgFilePath);
+				if (configFile.exists()) {
 					LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 							"MsgTraceReporter.loading.parsers.config", nameTokens[1], cfgFilePath);
 					is = new FileInputStream(cfgFilePath);
@@ -240,19 +241,29 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			}
 
 			if (is == null) {
+				configFile = null;
 				LOGGER.log(OpLevel.INFO, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
 						"MsgTraceReporter.loading.parsers.config", nameTokens[1], nameTokens[0]);
 				is = Utils.getResourceAsStream(nameTokens[0]);
 			}
 
 			if (is == null) {
-				throw new RuntimeException(
+				throw new FileNotFoundException(
 						StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 								"MsgTraceReporter.parsers.config.not.found", nameTokens[0]));
 			}
 
 			parser.parse(is, hndlr);
-			return hndlr.getStreamsConfigData().getParser(nameTokens[1]);
+
+			ActivityParser mainParser = hndlr.getStreamsConfigData().getParser(nameTokens[1]);
+
+			if (mainParser == null) {
+				throw new IllegalArgumentException(StreamsResources.getStringFormatted(
+						KafkaStreamConstants.RESOURCE_BUNDLE_NAME, "MsgTraceReporter.parser.not.found", nameTokens[1],
+						configFile == null ? nameTokens[0] : configFile.getCanonicalFile()));
+			}
+
+			return mainParser;
 		} catch (Exception e) {
 			throw new RuntimeException(StreamsResources.getStringFormatted(KafkaStreamConstants.RESOURCE_BUNDLE_NAME,
 					"MsgTraceReporter.loading.parsers.config.failed", e.getMessage(), e.getCause()), e);
