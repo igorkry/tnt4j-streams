@@ -87,6 +87,7 @@ producer/consumer intercepted operations:
 
   To define only parser name from file under default parsers configuration file path - use `#parserName` pattern. Default value - 
   `tnt-data-source_kafka_msg_trace.xml#KafkaTraceParser`.
+* `messages.tracer.stream.name` - Kafka interceptors trace events stream name.
 
 ##### Kafka messages trace configuration over file
 

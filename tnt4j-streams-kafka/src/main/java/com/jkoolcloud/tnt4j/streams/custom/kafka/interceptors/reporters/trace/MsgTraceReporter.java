@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -29,6 +30,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -120,13 +122,13 @@ public class MsgTraceReporter implements InterceptionsReporter {
 	/**
 	 * Constructs a new MsgTraceReporter.
 	 * 
-	 * @param kafkaProperties
+	 * @param interceptorProperties
 	 *            Kafka interceptor configuration properties
 	 * @param traceOpts
 	 *            messages tracing options set
 	 */
-	public MsgTraceReporter(Properties kafkaProperties, Set<String> traceOpts) {
-		this(new KafkaObjTraceStream<ActivityInfo>(), kafkaProperties, true, traceOpts);
+	public MsgTraceReporter(Properties interceptorProperties, Set<String> traceOpts) {
+		this(new KafkaObjTraceStream<ActivityInfo>(), interceptorProperties, true, traceOpts);
 	}
 
 	/**
@@ -162,6 +164,15 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			boolean enableCfgPolling, Set<String> traceOpts) {
 		this.stream = stream;
 		this.traceOptions = traceOpts;
+
+		String streamName = interceptorProperties.getProperty("messages.tracer.stream.name");
+		if (StringUtils.isEmpty(streamName)) {
+			streamName = interceptorProperties.getProperty("messages.tracer.kafka.client.id");
+		}
+
+		if (StringUtils.isNotEmpty(streamName)) {
+			stream.setName(streamName); // NON-NLS
+		}
 
 		String parserCfg = Utils.getString("messages.tracer.stream.parser", interceptorProperties,
 				DEFAULT_PARSER_CONFIG_FILE + PARSER_DELIM + DEFAULT_PARSER_NAME);
@@ -548,7 +559,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			}
 			if (shouldSendTrace(me.getKey().topic(), false, COMMIT)) {
 				try {
-					ai = new ActivityInfo();
 					KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(me.getKey(), me.getValue(),
 							MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
 					kafkaTraceData.setParentId(tid);
