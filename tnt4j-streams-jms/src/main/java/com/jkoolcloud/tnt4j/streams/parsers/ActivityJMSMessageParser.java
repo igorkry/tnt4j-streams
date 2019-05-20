@@ -39,13 +39,13 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * payload data is put into map entry using key defined in {@link StreamsConstants#ACTIVITY_DATA_KEY}. This parser
  * supports JMS messages of those types:
  * <ul>
- * <li>{@link TextMessage} - activity data is message text</li>
- * <li>{@link BytesMessage} - activity data is message {@code byte[]} or string made from message {@code byte[]}
- * depending on property 'ConvertToString' value</li>
- * <li>{@link MapMessage} - activity data is message map entries</li>
- * <li>{@link StreamMessage} - activity data is message {@code byte[]} or string made from message {@code byte[]}
- * depending on property 'ConvertToString' value</li>
- * <li>{@link ObjectMessage} - activity data is message serializable object</li>
+ * <li>{@link javax.jms.TextMessage} - activity data is message text</li>
+ * <li>{@link javax.jms.BytesMessage} - activity data is message {@code byte[]} or string made from message
+ * {@code byte[]} depending on property 'ConvertToString' value</li>
+ * <li>{@link javax.jms.MapMessage} - activity data is message map entries</li>
+ * <li>{@link javax.jms.StreamMessage} - activity data is message {@code byte[]} or string made from message
+ * {@code byte[]} depending on property 'ConvertToString' value</li>
+ * <li>{@link javax.jms.ObjectMessage} - activity data is message serializable object</li>
  * </ul>
  * <p>
  * NOTE: Custom messages parsing not implemented and puts just log entry.
@@ -78,7 +78,7 @@ import com.jkoolcloud.tnt4j.streams.utils.*;
  * {@link AbstractActivityMapParser}):
  * <ul>
  * <li>ConvertToString - flag indicating whether to convert message payload {@code byte[]} data to string. Applicable to
- * {@link BytesMessage} and {@link StreamMessage}. Default value - 'false'. (Optional)</li>
+ * {@link javax.jms.BytesMessage} and {@link javax.jms.StreamMessage}. Default value - 'false'. (Optional)</li>
  * </ul>
  *
  * @version $Revision: 1 $
