@@ -54,11 +54,15 @@ public class KafkaTraceEventData {
 	 */
 	public static final String COMMIT = "commit"; // NON-NLS
 
+	// send
 	private ProducerRecord<?, ?> producerRecord;
+	// consume
 	private ConsumerRecord<?, ?> consumerRecord;
+	// ack
 	private RecordMetadata recordMetadata;
 	private Exception exception;
 	private ClusterResource clusterResource;
+	// commit
 	private TopicPartition topicPartition;
 	private OffsetAndMetadata offsetAndMetadata;
 
