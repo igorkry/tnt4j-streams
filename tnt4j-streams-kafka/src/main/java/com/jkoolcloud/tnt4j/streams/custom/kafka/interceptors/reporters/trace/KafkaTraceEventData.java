@@ -54,22 +54,28 @@ public class KafkaTraceEventData {
 	 */
 	public static final String COMMIT = "commit"; // NON-NLS
 
+	/////// PRODUCER DATA ///////////////
 	// send
 	private ProducerRecord<?, ?> producerRecord;
-	// consume
-	private ConsumerRecord<?, ?> consumerRecord;
 	// ack
 	private RecordMetadata recordMetadata;
 	private Exception exception;
 	private ClusterResource clusterResource;
+	/////////////////////////////////////
+	/////// CONSUMER DATA ///////////////
+	// consume
+	private ConsumerRecord<?, ?> consumerRecord;
 	// commit
 	private TopicPartition topicPartition;
 	private OffsetAndMetadata offsetAndMetadata;
+	/////////////////////////////////////
 
+	/////// METADATA ////////////////////
 	private String type;
 	private String signature;
 	private String appInfo;
 	private String parentId;
+	/////////////////////////////////////
 
 	/**
 	 * Constructs a new KafkaTraceEventData for Kafka producer {@code "send"} event.

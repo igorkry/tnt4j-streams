@@ -456,8 +456,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 			try {
 				KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(recordMetadata, e, clusterResource,
 						MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
-				kafkaTraceData.setSignature(
-						calcSignature(recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset()));
 				stream.addInputToBuffer(mainParser.parse(stream, kafkaTraceData));
 			} catch (Exception exc) {
 				Utils.logThrowable(LOGGER, OpLevel.ERROR,
@@ -466,10 +464,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 				exc.printStackTrace();
 			}
 		}
-	}
-
-	private static String createCorrelator(String topic, long offset) {
-		return topic + "_" + offset; // NON-NLS
 	}
 
 	/**
@@ -521,7 +515,6 @@ public class MsgTraceReporter implements InterceptionsReporter {
 					KafkaTraceEventData kafkaTraceData = new KafkaTraceEventData(cr,
 							MapUtils.getString(interceptor.getConfig(), ProducerConfig.CLIENT_ID_CONFIG));
 					kafkaTraceData.setParentId(tid);
-					kafkaTraceData.setSignature(calcSignature(cr.topic(), cr.partition(), cr.offset()));
 					stream.addInputToBuffer(mainParser.parse(stream, kafkaTraceData));
 				} catch (Exception exc) {
 					Utils.logThrowable(LOGGER, OpLevel.ERROR,
@@ -583,31 +576,81 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		}
 	}
 
-	private final MessageDigest MSG_DIGEST = Utils.getMD5Digester();
+	private static final MessageDigest MSG_DIGEST = Utils.getMD5Digester();
 
 	/**
 	 * Generates a new unique message event signature.
 	 *
-	 * @param topic
-	 *            topic name
-	 * @param partition
-	 *            partition index
-	 * @param offset
-	 *            offset index
+	 * @param elements
+	 *            elements array to calculate signature
 	 *
 	 * @return unique message event signature
 	 */
-	protected String calcSignature(String topic, int partition, long offset) {
+	public static String calcSignature(Object... elements) {
 		synchronized (MSG_DIGEST) {
-			MSG_DIGEST.reset();
-			if (topic != null) {
-				MSG_DIGEST.update(topic.getBytes());
-			}
-			MSG_DIGEST.update(ByteBuffer.allocate(4).putInt(partition).array());
-			MSG_DIGEST.update(ByteBuffer.allocate(8).putLong(offset).array());
-
-			return Utils.base64EncodeStr(MSG_DIGEST.digest());
+			return calcSignature(MSG_DIGEST, elements);
 		}
+	}
+
+	/**
+	 * Generates a new unique message event signature.
+	 *
+	 * @param _msgDigest
+	 *            message type
+	 * @param elements
+	 *            elements array to calculate signature
+	 *
+	 * @return unique message event signature
+	 */
+	protected static String calcSignature(MessageDigest _msgDigest, Object... elements) {
+		_msgDigest.reset();
+
+		if (elements != null) {
+			for (Object element : elements) {
+				if (element == null) {
+					continue;
+				}
+
+				if (element instanceof byte[]) {
+					_msgDigest.update((byte[]) element);
+				} else if (element instanceof String) {
+					_msgDigest.update(((String) element).trim().getBytes());
+				} else if (element instanceof Number) {
+					if (element instanceof Integer
+							|| (element.getClass().isPrimitive() && element.getClass() == Integer.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(4).putInt(((Number) element).intValue()).array());
+					} else if (element instanceof Long
+							|| (element.getClass().isPrimitive() && element.getClass() == Long.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(8).putLong(((Number) element).longValue()).array());
+					} else if (element instanceof Double
+							|| (element.getClass().isPrimitive() && element.getClass() == Double.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(8).putDouble(((Number) element).doubleValue()).array());
+					} else if (element instanceof Float
+							|| (element.getClass().isPrimitive() && element.getClass() == Float.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(4).putFloat(((Number) element).floatValue()).array());
+					} else if (element instanceof Short
+							|| (element.getClass().isPrimitive() && element.getClass() == Short.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(2).putShort(((Number) element).shortValue()).array());
+					} else if (element instanceof Byte
+							|| (element.getClass().isPrimitive() && element.getClass() == Byte.TYPE)) {
+						_msgDigest.update(ByteBuffer.allocate(1).put(((Number) element).byteValue()).array());
+					}
+				} else if (element instanceof Character
+						|| (element.getClass().isPrimitive() && element.getClass() == Character.TYPE)) {
+					_msgDigest.update(ByteBuffer.allocate(2).putChar((Character) element).array());
+				} else if (element instanceof Boolean
+						|| (element.getClass().isPrimitive() && element.getClass() == Boolean.TYPE)) {
+					_msgDigest.update(ByteBuffer.allocate(1).put(((Boolean) element) ? (byte) 1 : (byte) 0).array());
+				} else if (element.getClass().isEnum()) {
+					_msgDigest.update(((Enum<?>) element).name().getBytes());
+				} else {
+					String elemStr = Utils.toString(element);
+					_msgDigest.update(elemStr.trim().getBytes());
+				}
+			}
+		}
+
+		return Utils.base64EncodeStr(_msgDigest.digest());
 	}
 
 }

@@ -26,12 +26,24 @@
 
         <field name="Message" locator="value" locator-type="Label" datatype="String"/>
 
-        <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="EndTime" locator="StartTime" locator-type="Activity"/>
+        <field name="StreamTime" locator="DateTime" locator-type="StreamProp" datatype="DateTime" units="Milliseconds" transparent="true"/>
+        <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds">
+            <field-transform lang="groovy" name="ProducerStartTimeTransform"><![CDATA[
+                $fieldValue == null ? ${StreamTime} : $fieldValue;
+            ]]></field-transform>
+        </field>
+        <field name="Correlator" value="">
+            <field-transform lang="groovy" name="ValueCorrelatorTransform"><![CDATA[
+                ${Value} == null
+                    ? null
+                    : com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter.calcSignature(${Topic}, ${Value})
+            ]]></field-transform>
+        </field>
 
-        <embedded-activity name="Headers" locator="headers.headers" locator-type="Label">
+        <!-- un-comment if your Kafka version >= 0.11-->
+        <!--embedded-activity name="Headers" locator="headers.headers" locator-type="Label">
             <parser-ref name="HeadersParser"/>
-        </embedded-activity>
+        </embedded-activity-->
     </parser>
 
     <parser name="RecordMetadataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJavaObjectParser">
@@ -43,10 +55,9 @@
 
         <field name="Topic" locator="topic" locator-type="Label"/>
         <field name="Partition" locator="partition" datatype="Number" locator-type="Label"/>
-
         <field name="Offset" locator="offset" datatype="Number" locator-type="Label"/>
+
         <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="EndTime" locator="StartTime" locator-type="Activity"/>
 
         <field name="serializedKeySize" locator="serializedKeySize" datatype="Number" locator-type="Label"/>
         <field name="serializedValueSize" locator="serializedValueSize" datatype="Number" locator-type="Label"/>
@@ -76,7 +87,6 @@
         <field name="Offset" locator="offset" datatype="Number" locator-type="Label"/>
 
         <field name="StartTime" locator="timestamp" locator-type="Label" datatype="Timestamp" units="Milliseconds"/>
-        <field name="EndTime" locator="StartTime" locator-type="Activity"/>
 
         <field name="TimestampType" locator="timestampType" locator-type="Label"/>
         <field name="Key" locator="key" locator-type="Label"/>
@@ -97,9 +107,18 @@
                    : 0)
            ]]></field-transform>
         </field>
-        <embedded-activity name="Headers" locator="headers.headers" locator-type="Label">
+        <field name="Correlator" value="">
+            <field-transform lang="groovy" name="ValueCorrelatorTransform"><![CDATA[
+                ${Value} == null
+                    ? null
+                    : com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter.calcSignature(${Topic}, ${Value})
+            ]]></field-transform>
+        </field>
+
+        <!-- un-comment if your Kafka version >= 0.11-->
+        <!--embedded-activity name="Headers" locator="headers.headers" locator-type="Label">
             <parser-ref name="HeadersParser"/>
-        </embedded-activity>
+        </embedded-activity-->
     </parser>
 
     <parser name="OffsetAndMetadataParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJavaObjectParser">
@@ -109,6 +128,7 @@
         <field name="EventName" value="Kafka_Consumer_Commit_Record"/>
         <field name="Offset" locator="offset" datatype="Number" locator-type="Label"/>
         <field name="Metadata" locator="metadata" locator-type="Label"/>
+        <field name="StartTime" locator="DateTime" locator-type="StreamProp" datatype="DateTime" units="Milliseconds"/>
     </parser>
 
     <parser name="TopicPartitionParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJavaObjectParser">
@@ -132,6 +152,8 @@
         <field name="recordMetadata" locator="recordMetadata" locator-type="Label" transparent="true">
             <parser-ref name="RecordMetadataParser" aggregation="Merge"/>
         </field>
+        <field name="Exception" locator="exception.getMessage" locator-type="Label"/>
+        <field name="ClusterId" locator="clusterResource.clusterId" locator-type="Label"/>
         <!-- ACK end -->
 
         <!-- CONSUME Fields -->
@@ -153,10 +175,16 @@
         <!-- COMMON Fields -->
         <field name="KafkaType" locator="type" locator-type="Label"/>
         <field name="ApplName" locator="appInfo" locator-type="Label"/>
-        <field name="TrackingId" locator="signature" locator-type="Label"/>
+        <field name="TrackingId" locator="signature" locator-type="Label">
+            <field-transform lang="groovy" name="SignatureTransform"><![CDATA[
+                StringUtils.isNotEmpty($fieldValue)
+                    ? $fieldValue
+                    : ${Offset} == null
+                        ? null
+                        : com.jkoolcloud.tnt4j.streams.custom.kafka.interceptors.reporters.trace.MsgTraceReporter.calcSignature(${Topic}, ${Partition}, ${Offset})
+            ]]></field-transform>
+        </field>
         <field name="ParentID" locator="parentId" locator-type="Label"/>
-
-        <field name="Exception" locator="exception.getMessage" locator-type="Label"/>
 
         <field name="ResourceName" formattingPattern="QUEUE={0}">
             <field-locator locator="Topic" locator-type="Activity"/>
@@ -165,5 +193,6 @@
             <field-locator locator="Topic" locator-type="Activity" required="false"/>
             <field-locator locator="Offset" locator-type="Activity" required="false"/>
         </field>
+        <field name="EndTime" locator="StartTime" locator-type="Activity"/>
     </parser>
 </tnt-data-source>
