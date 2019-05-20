@@ -844,10 +844,10 @@ public class ActivityField extends AbstractFieldEntity {
 		LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 				"ActivityField.aggregating.field.value", this, Utils.toString(fieldValue));
 
-		if (fieldValue != null) {
-			fieldValue = transform(fieldValue, ai);
-			fieldValue = filterFieldValue(fieldValue, ai);
+		fieldValue = transform(fieldValue, ai);
+		fieldValue = filterFieldValue(fieldValue, ai);
 
+		if (fieldValue != null) {
 			if (fieldValue != null && isEmptyAsNull() && Utils.isEmptyContent(fieldValue, true)) {
 				LOGGER.log(OpLevel.TRACE, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 						"ActivityField.field.empty.as.null", this, Utils.toStringDump(fieldValue));
