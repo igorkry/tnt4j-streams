@@ -111,6 +111,16 @@ public class ActivityInfo {
 	}
 
 	/**
+	 * Constructs a new ActivityInfo object.
+	 * 
+	 * @param complete
+	 *            {@code true} if activity is complete, {@code false} - otherwise
+	 */
+	public ActivityInfo(boolean complete) {
+		this.complete = complete;
+	}
+
+	/**
 	 * Applies the given value(s) for the specified field to the appropriate internal data field for reporting field to
 	 * the jKoolCloud.
 	 *

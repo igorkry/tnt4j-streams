@@ -100,7 +100,7 @@ public abstract class TNTParseableInputStream<T> extends TNTInputStream<T, Activ
 		super.initialize();
 
 		if (StringUtils.isNotEmpty(groupingActivityName)) {
-			ActivityInfo gai = new ActivityInfo();
+			ActivityInfo gai = new ActivityInfo(true);
 			gai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY.name());
 			gai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), groupingActivityName);
 			output().logItem(gai);

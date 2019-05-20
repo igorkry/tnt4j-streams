@@ -499,7 +499,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		String tid = null;
 		ActivityInfo ai = null;
 		try {
-			ai = new ActivityInfo();
+			ai = new ActivityInfo(true);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Consume"); // NON-NLS
 			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
@@ -540,7 +540,7 @@ public class MsgTraceReporter implements InterceptionsReporter {
 		String tid = null;
 		ActivityInfo ai;
 		try {
-			ai = new ActivityInfo();
+			ai = new ActivityInfo(true);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventType.name()), OpType.ACTIVITY);
 			ai.setFieldValue(new ActivityField(StreamFieldType.EventName.name()), "Kafka_Consumer_Commit"); // NON-NLS
 			ai.setFieldValue(new ActivityField(StreamFieldType.TrackingId.name()),
