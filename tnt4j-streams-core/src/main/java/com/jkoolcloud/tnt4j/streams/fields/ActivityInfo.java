@@ -198,8 +198,7 @@ public class ActivityInfo {
 				applName = substitute(applName, getStringValue(fieldValue, field));
 				break;
 			case Correlator:
-				addCorrelator(Utils.getTags(fieldValue));
-				// addCorrelator(Utils.getTags(formatTagsObject(fieldValue, field)));
+				addCorrelator(getStringsValue(fieldValue, field));
 				break;
 			case ElapsedTime:
 				elapsedTime = substitute(elapsedTime, getNumberValue(fieldValue, Long.class, field));
@@ -241,7 +240,7 @@ public class ActivityInfo {
 				compCode = substitute(compCode, cc);
 				break;
 			case Tag:
-				addTag(Utils.getTags(fieldValue));
+				addTag(getStringsValue(fieldValue, field));
 				break;
 			case UserName:
 				userName = substitute(userName, getStringValue(fieldValue, field));
@@ -459,6 +458,16 @@ public class ActivityInfo {
 		}
 
 		return mf.format(vArray);
+	}
+
+	private static String[] getStringsValue(Object value, ActivityField field) {
+		String[] strings = Utils.getTags(value);
+
+		if (ArrayUtils.getLength(strings) > 1 && field.isArrayFormattable()) {
+			strings = new String[] { formatValuesArray(strings, field) };
+		}
+
+		return strings;
 	}
 
 	/**
