@@ -105,7 +105,7 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
         * `base64Binary`
         * `hexBinary` 
         * `string`
-        * any decimal or time format pattern, i.e. `#####0.000`
+        * any decimal or time format pattern, e.g. `#####0.000`
         * one of number type enumerators: `integer`/`int`, `long`, `double`, `float`, `short`, `byte`, `biginteger`/`bigint`/`bint`, 
         `bigdecimal`/`bigdec`/`bdec` and `any`. `any` will resolve any possible numeric value out of provided string, e.g. string `"30hj00"` 
         will result value `30`.
@@ -137,8 +137,13 @@ Mapping of streamed data to activity event fields are performed by parser. To ma
     * `charset` - defines a [Java supported charset/encoding](https://docs.oracle.com/javase/7/docs/technotes/guides/intl/encoding.doc.html) 
     name (in string format) for field Raw binary data; used to convert between Unicode and a number of other character encodings. Default 
     value is the running streams JVM default charset (in most cases `UTF8`).
-    * `emptyAsNull` - flag indicating an empty resolved value (i.e. string `""`, `0` size array/collection, array/collection having all 
-    `null` or `""` elements) shall be mapped as `null`. Default value - `true`.
+    * `emptyAsNull` - flag indicating an "empty" parser resolved value, e.g.: 
+        * string `""` 
+        * `0` size array/collection,
+        * array/collection having all `null` or `""` elements
+
+      shall be treated as `null` value, and consequently not added to produced activity entity values set. In most cases, some initialized 
+      object having no "payload" - is "useless" same way as it is not defined at all (equals `null`). Default value - `true`.
 
 * tags:
     * `field-map` - tag is used to perform manual mapping from streamed data value `source` to field value `target.`
@@ -448,8 +453,12 @@ named `AccessLogParserCommon`.
 After processing one JMS message TNT4J activity event will contain fields mapped by both `SampleJMSParser` and
 `AccessLogParserCommon` in the end.
 
-**NOTE:** when using stacked parser, `Activity` type locator prefix `^.` can be used to access parent parser (one stacked parser was invoked 
-from) produced activity entity field value. E.g.:
+See [Parser matching data or parsing context](#parser-matching-data-or-parsing-context) for parser reference configuration details.
+
+#### Relative locators
+
+ * `^.fieldName` - stacked parser `Activity` type locator prefix `^.` can be used to access parent parser (one stacked parser was invoked from) 
+ produced activity entity field value, where field name is defined by locator token `fieldName`. E.g.:
 ```xml
 <tnt-data-source
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -907,7 +916,7 @@ Sample of using another `field` resolved value in locator definition:
 Sample configuration defines parser field `Direction` resolving value e.g., `source` or `destination`. Then field `ResourceName` locators 
 use this value when constructing actual XPath expression e.g., `/transaction/${Direction}Agent/@agent` to resolve value from XML data.
 
-**NOTE:** when using `field`/`field-locator` attribute `locator-type="Activity"` define field name as locator value without `${}`, i.e.:
+**NOTE:** when using `field`/`field-locator` attribute `locator-type="Activity"` define field name as locator value without `${}`, e.g.:
 ```xml
     <.../>
     <parser name="TransferSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
@@ -921,7 +930,7 @@ use this value when constructing actual XPath expression e.g., `/transaction/${D
 
 ### Caching of streamed data field values
 
-`TNT4J-Streams` provides temporary storage (i.e. cache) for a resolved activity fields values. It is useful when there are some related 
+`TNT4J-Streams` provides temporary storage (e.g. cache) for a resolved activity fields values. It is useful when there are some related 
 activities streamed and particular jKool prepared activity entity requires data values form previously streamed activities.
 
 Sample streamed values caching configuration:
@@ -5022,7 +5031,7 @@ Also see ['WMQ Stream parameters'](#wmq-stream-parameters).
 #### Zipped file line stream parameters (also from Hdfs)
 
  * `FileName` - defines zip file path and concrete zip file entry name or entry name pattern defined using characters `*`
- and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. I.e.:
+ and `?`. Definition pattern is `zipFilePath!entryNameWildcard`. E.g.:
  `./tnt4j-streams-core/samples/zip-stream/sample.zip!2/*.txt`. (Required)
  * `ArchType` - defines archive type. Can be one of: `ZIP`, `GZIP`, `JAR`. Default value - `ZIP`. (Optional)
 
@@ -5317,6 +5326,11 @@ Also see ['Generic streams parameters'](#generic-streams-parameters) and ['Buffe
     <property name="RequireDefault" value="true"/>
     <property name="AutoArrangeFields" value="false"/>
 ```
+
+##### Common locators
+
+ * `$DATA$` - allows to set complete activity data package as field value and redirect it to stacked parser if such is defined for that 
+ field.
 
 #### Activity Name-Value parser
 
