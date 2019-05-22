@@ -119,13 +119,18 @@ public abstract class AbstractExcelStream<T> extends TNTParseableInputStream<T> 
 	}
 
 	@Override
-	protected void initialize() throws Exception {
-		super.initialize();
+	protected void applyProperties() throws Exception {
+		super.applyProperties();
 
 		if (StringUtils.isEmpty(fileName)) {
 			throw new IllegalStateException(StreamsResources.getStringFormatted(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"TNTInputStream.property.undefined", StreamProperties.PROP_FILENAME));
 		}
+	}
+
+	@Override
+	protected void initialize() throws Exception {
+		super.initialize();
 
 		File wbFile = new File(fileName);
 		if (!wbFile.exists()) {

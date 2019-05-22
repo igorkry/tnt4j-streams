@@ -93,24 +93,6 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 	}
 
 	@Override
-	public void setProperties(Collection<Map.Entry<String, String>> props) {
-		super.setProperties(props);
-
-		if (StringUtils.isNotEmpty(cfgFileName)) {
-			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-					"KafkaConsumerStream.consumer.cfgFile.load", cfgFileName);
-			try {
-				Properties fCfgProps = Utils.loadPropertiesFile(cfgFileName);
-				userKafkaProps.put(PROP_SCOPE_CONSUMER, fCfgProps);
-			} catch (IOException exc) {
-				Utils.logThrowable(logger(), OpLevel.WARNING,
-						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
-						"KafkaConsumerStream.consumer.cfgFile.load.failed", exc);
-			}
-		}
-	}
-
-	@Override
 	public void setProperty(String name, String value) {
 		super.setProperty(name, value);
 
@@ -264,6 +246,18 @@ public class KafkaConsumerStream extends AbstractBufferedStream<ConsumerRecord<?
 					"TNTInputStream.property.undefined", StreamProperties.PROP_TOPIC_NAME));
 		}
 
+		if (StringUtils.isNotEmpty(cfgFileName)) {
+			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+					"KafkaConsumerStream.consumer.cfgFile.load", cfgFileName);
+			try {
+				Properties fCfgProps = Utils.loadPropertiesFile(cfgFileName);
+				userKafkaProps.put(PROP_SCOPE_CONSUMER, fCfgProps);
+			} catch (IOException exc) {
+				Utils.logThrowable(logger(), OpLevel.WARNING,
+						StreamsResources.getBundle(KafkaStreamConstants.RESOURCE_BUNDLE_NAME),
+						"KafkaConsumerStream.consumer.cfgFile.load.failed", exc);
+			}
+		}
 	}
 
 	@Override
