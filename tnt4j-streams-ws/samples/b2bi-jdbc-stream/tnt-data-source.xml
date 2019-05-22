@@ -3,6 +3,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/Nastel/tnt4j-streams/master/tnt4j-streams-ws/config/tnt-data-source-ws.xsd">
 
+    <resource-ref id="EVENT_CODE_MAPPINGS" type="ValuesMap" uri="b2bi_mappings.json"/>
+
     <parser name="B2BiEventAttributesXMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
         <field name="${FieldNameLoc}_attr" locator="/attributes/attr[*]/EVENTATTR_VALUE" locator-type="Label">
             <field-locator id="FieldNameLoc" locator="/attributes/attr[*]/EVENTATTR_NAME" locator-type="Label">
@@ -15,8 +17,6 @@
 
     <parser name="B2BiEventsResultSetParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityJDBCResultSetParser">
         <!--<property name="SQLJavaMapping" value="NUMBER=java.lang.Long"/>-->
-
-        <field name="EventType" value="EVENT"/>
 
         <!-- FG_EVENT table columns -->
         <field name="Guid" locator="EVENT_EVENT_KEY" locator-type="Label"/>
@@ -33,6 +33,20 @@
         <field name="Event_ModifyUserId" locator="EVENT_MODIFYUSERID" locator-type="Label"/>
         <field name="Event_CreateProgId" locator="EVENT_CREATEPROGID" locator-type="Label"/>
         <field name="Event_ModifyProgId" locator="EVENT_MODIFYPROGID" locator-type="Label"/>
+
+        <field name="EventCode" locator="Event_EventCode" locator-type="Activity">
+            <field-map-ref resource="EVENT_CODE_MAPPINGS.EventCode"/>
+        </field>
+        <field name="EventType" value="">
+            <field-transform lang="groovy" name="DiffTransform"><![CDATA[
+                ${Event_EventCode} == "FG_0504"
+                    ? "SEND"
+                    : ${Event_EventCode} == "FG_0701"
+                        ? "RECEIVE"
+                        : "EVENT"
+            ]]></field-transform>
+        </field>
+
         <!-- FG_ARRIVEDFILE table columns-->
         <field name="AFile_MessageId" locator="AFILE_MESSAGE_ID" locator-type="Label" datatype="Number" format="long"/>
         <field name="AFile_UserId" locator="AFILE_USER_ID" locator-type="Label"/>
@@ -91,38 +105,41 @@
         <field name="Delivery_CreateProgId" locator="DELIVERY_CREATEPROGID" locator-type="Label"/>
         <field name="Delivery_ModifyProgId" locator="DELIVERY_MODIFYPROGID" locator-type="Label"/>
         <field name="Delivery_DistConsumerMsgId" locator="DELIVERY_DIST_CONSUMER_MSGID" locator-type="Label"/>
+        <field name="Event_DataFlowId" locator="EVENT_DATA_FLOW_ID" locator-type="Label"/>
         <!-- FG_EVENTATTR table columns from XML -->
         <embedded-activity name="Event_Attrs" locator="EVT_ATTRS" locator-type="Label">
             <parser-ref name="B2BiEventAttributesXMLParser" aggregation="Merge"/>
         </embedded-activity>
-
-        <field name="DataflowID" locator="DataflowId_attr" locator-type="Activity" required="false"/>
+        <field name="DataflowId" locator="DataflowId_attr" locator-type="Activity" required="false"/>
         <field name="TrackingId" formattingPattern="{0}">
             <field-locator locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
             <field-locator locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
         </field>
-        <field name="ApplName" locator="CachedApplName" locator-type="Cache" required="false"/>
-        <field name="consumerOrProducer" value="">                  <!-- TODO: is correct mapping ??? -->
+        <field name="ConsumerOrProducer" value="">
             <field-transform lang="groovy" name="DiffTransform"><![CDATA[
-                ${EventName} == "DELIVERY" ? "Producer" : "Consumer"
+                ${EventName} == "ARRIVED_FILE" ? "Producer" : "Consumer"
             ]]></field-transform>
         </field>
-        <field name="ResourceName" required="false" formattingPattern="{0}:{1}/{2}">
-            <field-locator id="consumerOrProducerResource" locator="consumerOrProducer" locator-type="Activity" required="false"/>
+        <field name="ApplName" formattingPattern="{0}:{1}">
+            <field-locator locator="CachedApplName" locator-type="Cache" required="false"/>
+            <field-locator locator="ConsumerOrProducer" locator-type="Activity" required="false"/>
+        </field>
+        <field name="ResourceName" required="false" formattingPattern="{0}:{1}">
             <field-locator id="ProducerCode" locator="ProducerCode_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayload" locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerMailboxPath" locator="ConsumerMailboxPath_attr" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerFilename" locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
         </field>
         <field name="Correlator" required="false" separator=".">
-            <field-locator id="transferId" locator="AsyncTransferId_attr" locator-type="Activity" required="false"/>
+            <field-locator id="TransferId" locator="AsyncTransferId_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerDocumentId" locator="ProducerDocumentId_attr" locator-type="Activity" required="false"/>
-            <field-locator id="documentId" locator="PrimaryDocumentId_attr" locator-type="Activity" required="false"/>
-            <field-locator id="messageName" locator="DestinationMessageName_attr" locator-type="Activity" required="false"/>
+            <field-locator id="DocumentId" locator="PrimaryDocumentId_attr" locator-type="Activity" required="false"/>
+            <field-locator id="MessageName" locator="DestinationMessageName_attr" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerFilename" locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayload" locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayloadDocumentId" locator="ProducerPayloadDocumentId_attr" locator-type="Activity"/>
             <field-locator id="ConsumerDocumentId" locator="ConsumerDocumentId_attr" locator-type="Activity"/>
+            <field-locator id="Event_DataFlowId" locator="Event_DataFlowId" locator-type="Activity"/>
         </field>
 
         <field name="ApplLookUp" required="false" separator="">
@@ -144,7 +161,7 @@
             <default>1970-01-01 00:00:00.000</default>
         </entry>
         <entry id="CachedApplName">
-            <key>${DataflowID}</key>
+            <key>${DataflowId}</key>
             <value>${ApplLookUp}</value>
         </entry>
     </cache>
@@ -159,7 +176,6 @@
                     <!--
                         , FE.ENTITY_KEY AS EVENT_ENTITY_KEY
                         , FE.ARRIVEDFILE_KEY AS EVENT_ARRIVEDFILE_KEY
-                        , FE.DATA_FLOW_ID AS EVENT_DATA_FLOW_ID
                         , FAF.ARRIVEDFILE_KEY AS AFILE_ARRIVEDFILE_KEY
                         , FAF.DATA_FLOW_ID AS AFILE_DATA_FLOW_ID
                         , FAF.DOCUMENT_ID AS AFILE_DOCUMENT_ID
@@ -172,98 +188,99 @@
                     -->
                     <![CDATA[
                         SELECT FE.EVENT_KEY AS EVENT_EVENT_KEY
-						  , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
-						  , FE.TIME AS EVENT_TIME
-						  , FE.COUNTER AS EVENT_COUNTER
-						  , FE.EVENT_CODE AS EVENT_EVENT_CODE
-						  , FE.LOCKID AS EVENT_LOCKID
-						  , FE.CREATETS AS EVENT_CREATETS
-						  , FE.MODIFYTS AS EVENT_MODIFYTS
-						  , FE.CREATEUSERID AS EVENT_CREATEUSERID
-						  , FE.MODIFYUSERID AS EVENT_MODIFYUSERID
-						  , FE.CREATEPROGID AS EVENT_CREATEPROGID
-						  , FE.MODIFYPROGID AS EVENT_MODIFYPROGID
-						  , FAF.MESSAGE_ID AS AFILE_MESSAGE_ID
-						  , FAF.USER_ID AS AFILE_USER_ID
-						  , FAF.FILE_NAME AS AFILE_FILE_NAME
-						  , FAF.FILE_SIZE AS AFILE_FILE_SIZE
-						  , FAF.MAILBOX_PATH AS AFILE_MAILBOX_PATH
-						  , FAF.PROD_ORG_KEY AS AFILE_PROD_ORG_KEY
-						  , FAF.PROD_ORG_NAME AS AFILE_PROD_ORG_NAME
-						  , FAF.STATE AS AFILE_STATE
-						  , FAF.WFID AS AFILE_WFID
-						  , FAF.REVIEWED AS AFILE_REVIEWED
-						  , FAF.REPLAY_AF_KEY AS AFILE_REPLAY_AF_KEY
-						  , FAF.REPLAY_COMMENT AS AFILE_REPLAY_COMMENT
-						  , FAF.ROUTES_REMAIN AS AFILE_ROUTES_REMAIN
-						  , FAF.LOCKID AS AFILE_LOCKID
-						  , FAF.CREATETS AS AFILE_CREATETS
-						  , FAF.MODIFYTS AS AFILE_MODIFYTS
-						  , FAF.CREATEUSERID AS AFILE_CREATEUSERID
-						  , FAF.MODIFYUSERID AS AFILE_MODIFYUSERID
-						  , FAF.CREATEPROGID AS AFILE_CREATEPROGID
-						  , FAF.MODIFYPROGID AS AFILE_MODIFYPROGID
-						  , FAF.DELIVERY_STATE AS AFILE_DELIVERY_STATE
-						  , FAF.DIST_MSG_ID AS AFILE_DIST_MSG_ID
-						  , FR.ROUTCHAN_KEY AS ROUTE_ROUTCHAN_KEY
-						  , FR.CONS_ORG_KEY AS ROUTE_CONS_ORG_KEY
-						  , FR.CONS_ORG_NAME AS ROUTE_CONS_ORG_NAME
-						  , FR.P_FSTRUCT_KEY AS ROUTE_P_FSTRUCT_KEY
-						  , FR.STATE AS ROUTE_STATE
-						  , FR.START_TIME AS ROUTE_START_TIME
-						  , FR.COMPLETE_TIME AS ROUTE_COMPLETE_TIME
-						  , FR.DELIVS_REMAIN AS ROUTE_DELIVS_REMAIN
-						  , FR.LOCKID AS ROUTE_LOCKID
-						  , FR.CREATETS AS ROUTE_CREATETS
-						  , FR.MODIFYTS AS ROUTE_MODIFYTS
-						  , FR.CREATEUSERID AS ROUTE_CREATEUSERID
-						  , FR.MODIFYUSERID AS ROUTE_MODIFYUSERID
-						  , FR.CREATEPROGID AS ROUTE_CREATEPROGID
-						  , FR.MODIFYPROGID AS ROUTE_MODIFYPROGID
-						  , FD.STATE AS DELIVERY_STATE
-						  , FD.DELIVCHAN_KEY AS DELIVERY_DELIVCHAN_KEY
-						  , FD.CONSUMER_DOCID AS DELIVERY_CONSUMER_DOCID
-						  , FD.CONTENT_TYPE AS DELIVERY_CONTENT_TYPE
-						  , FD.FILENAME AS DELIVERY_FILENAME
-						  , FD.CONSDOC_TYPE AS DELIVERY_CONSDOC_TYPE
-						  , FD.MAILBOX_PATH AS DELIVERY_MAILBOX_PATH
-						  , FD.LATE_CREATE_MBX AS DELIVERY_LATE_CREATE_MBX
-						  , FD.CONSUMER_MSGID AS DELIVERY_CONSUMER_MSGID
-						  , FD.ASYNC_XFER_ID AS DELIVERY_ASYNC_XFER_ID
-						  , FD.LOCKID AS DELIVERY_LOCKID
-						  , FD.CREATETS AS DELIVERY_CREATETS
-						  , FD.MODIFYTS AS DELIVERY_MODIFYTS
-						  , FD.CREATEUSERID AS DELIVERY_CREATEUSERID
-						  , FD.MODIFYUSERID AS DELIVERY_MODIFYUSERID
-						  , FD.CREATEPROGID AS DELIVERY_CREATEPROGID
-						  , FD.MODIFYPROGID AS DELIVERY_MODIFYPROGID
-						  , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
-						  , (SELECT xmlserialize(
-						              content xmlelement(
-						                name "attributes",
-						                  xmlagg(
-						                    xmlelement(
-						                      name "attr",
-						                      xmlforest(
-						                        EAT.ORDINAL as "EVENTATTR_ORDIINAL"
-						                        , EAT.NAME as "EVENTATTR_NAME"
-						                        , EAT.VALUE as "EVENTATTR_VALUE"
-						                        -- , EAT.CREATETS as "EVENTATTR_CREATETS"
-						                        -- , EAT.MODIFYTS as "EVENTATTR_MODIFYTS"
-						                      )
-						                    )
-						                  )
-						              ) AS CLOB VERSION '1.0' INCLUDING XMLDECLARATION
-						            ) AS EVT_ATTRS
-						        FROM FG_EVENTATTR EAT
-						        WHERE FE.EVENT_KEY = EAT.EVENT_KEY
-						     )
-						FROM FG_EVENT FE
-						  LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
-						  LEFT OUTER JOIN FG_ROUTE FR ON (FR.ARRIVEDFILE_KEY = FAF.ARRIVEDFILE_KEY)
-						  LEFT OUTER JOIN FG_DELIVERY FD ON (FD.ROUTE_KEY = FR.ROUTE_KEY)
-						WHERE FE.CREATETS > ?
-						ORDER BY FE.CREATETS ASC
+                          , FE.ENTITY_TYPE AS EVENT_ENTITY_TYPE
+                          , FE.DATA_FLOW_ID AS EVENT_DATA_FLOW_ID
+                          , FE.TIME AS EVENT_TIME
+                          , FE.COUNTER AS EVENT_COUNTER
+                          , FE.EVENT_CODE AS EVENT_EVENT_CODE
+                          , FE.LOCKID AS EVENT_LOCKID
+                          , FE.CREATETS AS EVENT_CREATETS
+                          , FE.MODIFYTS AS EVENT_MODIFYTS
+                          , FE.CREATEUSERID AS EVENT_CREATEUSERID
+                          , FE.MODIFYUSERID AS EVENT_MODIFYUSERID
+                          , FE.CREATEPROGID AS EVENT_CREATEPROGID
+                          , FE.MODIFYPROGID AS EVENT_MODIFYPROGID
+                          , FAF.MESSAGE_ID AS AFILE_MESSAGE_ID
+                          , FAF.USER_ID AS AFILE_USER_ID
+                          , FAF.FILE_NAME AS AFILE_FILE_NAME
+                          , FAF.FILE_SIZE AS AFILE_FILE_SIZE
+                          , FAF.MAILBOX_PATH AS AFILE_MAILBOX_PATH
+                          , FAF.PROD_ORG_KEY AS AFILE_PROD_ORG_KEY
+                          , FAF.PROD_ORG_NAME AS AFILE_PROD_ORG_NAME
+                          , FAF.STATE AS AFILE_STATE
+                          , FAF.WFID AS AFILE_WFID
+                          , FAF.REVIEWED AS AFILE_REVIEWED
+                          , FAF.REPLAY_AF_KEY AS AFILE_REPLAY_AF_KEY
+                          , FAF.REPLAY_COMMENT AS AFILE_REPLAY_COMMENT
+                          , FAF.ROUTES_REMAIN AS AFILE_ROUTES_REMAIN
+                          , FAF.LOCKID AS AFILE_LOCKID
+                          , FAF.CREATETS AS AFILE_CREATETS
+                          , FAF.MODIFYTS AS AFILE_MODIFYTS
+                          , FAF.CREATEUSERID AS AFILE_CREATEUSERID
+                          , FAF.MODIFYUSERID AS AFILE_MODIFYUSERID
+                          , FAF.CREATEPROGID AS AFILE_CREATEPROGID
+                          , FAF.MODIFYPROGID AS AFILE_MODIFYPROGID
+                          , FAF.DELIVERY_STATE AS AFILE_DELIVERY_STATE
+                          , FAF.DIST_MSG_ID AS AFILE_DIST_MSG_ID
+                          , FR.ROUTCHAN_KEY AS ROUTE_ROUTCHAN_KEY
+                          , FR.CONS_ORG_KEY AS ROUTE_CONS_ORG_KEY
+                          , FR.CONS_ORG_NAME AS ROUTE_CONS_ORG_NAME
+                          , FR.P_FSTRUCT_KEY AS ROUTE_P_FSTRUCT_KEY
+                          , FR.STATE AS ROUTE_STATE
+                          , FR.START_TIME AS ROUTE_START_TIME
+                          , FR.COMPLETE_TIME AS ROUTE_COMPLETE_TIME
+                          , FR.DELIVS_REMAIN AS ROUTE_DELIVS_REMAIN
+                          , FR.LOCKID AS ROUTE_LOCKID
+                          , FR.CREATETS AS ROUTE_CREATETS
+                          , FR.MODIFYTS AS ROUTE_MODIFYTS
+                          , FR.CREATEUSERID AS ROUTE_CREATEUSERID
+                          , FR.MODIFYUSERID AS ROUTE_MODIFYUSERID
+                          , FR.CREATEPROGID AS ROUTE_CREATEPROGID
+                          , FR.MODIFYPROGID AS ROUTE_MODIFYPROGID
+                          , FD.STATE AS DELIVERY_STATE
+                          , FD.DELIVCHAN_KEY AS DELIVERY_DELIVCHAN_KEY
+                          , FD.CONSUMER_DOCID AS DELIVERY_CONSUMER_DOCID
+                          , FD.CONTENT_TYPE AS DELIVERY_CONTENT_TYPE
+                          , FD.FILENAME AS DELIVERY_FILENAME
+                          , FD.CONSDOC_TYPE AS DELIVERY_CONSDOC_TYPE
+                          , FD.MAILBOX_PATH AS DELIVERY_MAILBOX_PATH
+                          , FD.LATE_CREATE_MBX AS DELIVERY_LATE_CREATE_MBX
+                          , FD.CONSUMER_MSGID AS DELIVERY_CONSUMER_MSGID
+                          , FD.ASYNC_XFER_ID AS DELIVERY_ASYNC_XFER_ID
+                          , FD.LOCKID AS DELIVERY_LOCKID
+                          , FD.CREATETS AS DELIVERY_CREATETS
+                          , FD.MODIFYTS AS DELIVERY_MODIFYTS
+                          , FD.CREATEUSERID AS DELIVERY_CREATEUSERID
+                          , FD.MODIFYUSERID AS DELIVERY_MODIFYUSERID
+                          , FD.CREATEPROGID AS DELIVERY_CREATEPROGID
+                          , FD.MODIFYPROGID AS DELIVERY_MODIFYPROGID
+                          , FD.DIST_CONSUMER_MSGID AS DELIVERY_DIST_CONSUMER_MSGID
+                          , (SELECT xmlserialize(
+                                      content xmlelement(
+                                        name "attributes",
+                                          xmlagg(
+                                            xmlelement(
+                                              name "attr",
+                                              xmlforest(
+                                                EAT.ORDINAL as "EVENTATTR_ORDIINAL"
+                                                , EAT.NAME as "EVENTATTR_NAME"
+                                                , EAT.VALUE as "EVENTATTR_VALUE"
+                                                -- , EAT.CREATETS as "EVENTATTR_CREATETS"
+                                                -- , EAT.MODIFYTS as "EVENTATTR_MODIFYTS"
+                                              )
+                                            )
+                                          )
+                                      ) AS CLOB VERSION '1.0' INCLUDING XMLDECLARATION
+                                    ) AS EVT_ATTRS
+                                FROM FG_EVENTATTR EAT
+                                WHERE FE.EVENT_KEY = EAT.EVENT_KEY
+                             )
+                        FROM FG_EVENT FE
+                          LEFT OUTER JOIN FG_ARRIVEDFILE FAF ON (FAF.ARRIVEDFILE_KEY = FE.ARRIVEDFILE_KEY)
+                          LEFT OUTER JOIN FG_ROUTE FR ON (FR.ARRIVEDFILE_KEY = FAF.ARRIVEDFILE_KEY)
+                          LEFT OUTER JOIN FG_DELIVERY FD ON (FD.ROUTE_KEY = FR.ROUTE_KEY)
+                        WHERE FE.CREATETS > ?
+                        ORDER BY FE.CREATETS ASC
                     ]]>
                     <!-- parameter index is incremented automatically -->
                     <req-param value="${LastEventRecordCDate}" type="TIMESTAMP"/>
