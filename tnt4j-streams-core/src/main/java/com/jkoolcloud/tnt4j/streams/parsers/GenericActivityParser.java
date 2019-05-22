@@ -320,7 +320,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 				fieldList.clear();
 				fieldList.addAll(sortedRefs);
 			}
-			arrangeFieldsByType(fieldList);
 
 			logger().log(OpLevel.DEBUG, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
 					"ActivityParser.fields.auto.order", fieldList.toString());
@@ -432,39 +431,6 @@ public abstract class GenericActivityParser<T> extends ActivityParser {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Arranges parser fields list by field locator type: CACHE fields has to be processed last
-	 *
-	 * @param fields
-	 *            fields list to arrange
-	 */
-	protected static void arrangeFieldsByType(List<ActivityField> fields) {
-		Collections.sort(fields, new Comparator<ActivityField>() {
-			@Override
-			public int compare(ActivityField f1, ActivityField f2) {
-				int fi1 = fieldTypeIndex(f1);
-				int fi2 = fieldTypeIndex(f2);
-
-				return fi2 - fi1;
-			}
-
-			private int fieldTypeIndex(ActivityField field) {
-				boolean cf = field.hasCacheLocators();
-				boolean rf = !cf;
-
-				int ftIdx = 0;
-				if (cf) {
-					ftIdx |= 1 << 0;
-				}
-				if (rf) {
-					ftIdx |= 1 << 3;
-				}
-
-				return ftIdx;
-			}
-		});
 	}
 
 	/**
