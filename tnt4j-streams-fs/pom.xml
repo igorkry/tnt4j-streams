@@ -99,7 +99,7 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.54</version>
+            <version>0.1.55</version>
         </dependency>
         <dependency>
             <groupId>com.github.lucastheisen</groupId>
@@ -109,7 +109,7 @@
         <dependency>
             <groupId>com.github.robtimus</groupId>
             <artifactId>sftp-fs</artifactId>
-            <version>sftp-fs-1.2.1</version>
+            <version>1.2.1</version>
         </dependency>
         <!-- HTTP file system support -->
         <!--<dependency>-->

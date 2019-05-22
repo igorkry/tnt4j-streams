@@ -36,17 +36,17 @@ import org.apache.poi.hssf.eventusermodel.HSSFRequest;
 import org.apache.poi.hssf.record.*;
 import org.apache.poi.hssf.record.crypto.Biff8EncryptionKey;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.ooxml.util.SAXHelper;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.DirectoryNode;
 import org.apache.poi.poifs.filesystem.DocumentFactoryHelper;
 import org.apache.poi.poifs.filesystem.FileMagic;
-import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.util.SAXHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
@@ -275,12 +275,12 @@ public class ExcelSXSSFRowStream extends AbstractBufferedStream<Row> {
 	 *             if excel file or workbook can't be read
 	 */
 	protected void readXLS(File xlsFile) throws IOException {
-		NPOIFSFileSystem fs = null;
+		POIFSFileSystem fs = null;
 		InputStream dis = null;
 		boolean passwordSet = false;
 
 		try {
-			fs = new NPOIFSFileSystem(xlsFile, true);
+			fs = new POIFSFileSystem(xlsFile, true);
 			DirectoryNode root = fs.getRoot();
 			if (root.hasEntry("EncryptedPackage")) { // NON-NLS
 				dis = DocumentFactoryHelper.getDecryptedStream(fs, wbPass);
