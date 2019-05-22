@@ -24,6 +24,7 @@
         <field name="EventName" locator="EVENT_ENTITY_TYPE" locator-type="Label"/>
         <field name="StartTime" locator="EVENT_TIME" locator-type="Label" datatype="Number" units="Milliseconds" timezone="GMT-04:00"/>
         <field name="EndTime" locator="EVENT_MODIFYTS" locator-type="Label"/>
+        <field name="Event_DataFlowId" locator="EVENT_DATA_FLOW_ID" locator-type="Label"/>
         <field name="Event_Counter" locator="EVENT_COUNTER" locator-type="Label" datatype="Number" format="long"/>
         <field name="Event_EventCode" locator="EVENT_EVENT_CODE" locator-type="Label"/>
         <field name="Event_LockId" locator="EVENT_LOCKID" locator-type="Label" datatype="Number" format="integer"/>
@@ -105,12 +106,10 @@
         <field name="Delivery_CreateProgId" locator="DELIVERY_CREATEPROGID" locator-type="Label"/>
         <field name="Delivery_ModifyProgId" locator="DELIVERY_MODIFYPROGID" locator-type="Label"/>
         <field name="Delivery_DistConsumerMsgId" locator="DELIVERY_DIST_CONSUMER_MSGID" locator-type="Label"/>
-        <field name="Event_DataFlowId" locator="EVENT_DATA_FLOW_ID" locator-type="Label"/>
         <!-- FG_EVENTATTR table columns from XML -->
         <embedded-activity name="Event_Attrs" locator="EVT_ATTRS" locator-type="Label">
             <parser-ref name="B2BiEventAttributesXMLParser" aggregation="Merge"/>
         </embedded-activity>
-        <field name="DataflowId" locator="DataflowId_attr" locator-type="Activity" required="false"/>
         <field name="TrackingId" formattingPattern="{0}">
             <field-locator locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
             <field-locator locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
@@ -120,17 +119,23 @@
                 ${EventName} == "ARRIVED_FILE" ? "Producer" : "Consumer"
             ]]></field-transform>
         </field>
-        <field name="ApplName" formattingPattern="{0}:{1}">
-            <field-locator locator="CachedApplName" locator-type="Cache" required="false"/>
+        <field name="ApplLookUp" locator="RoutingChannelTemplateName_attr" locator-type="Activity"/>
+        <field name="CacheApplLookUp" locator="CachedApplName" locator-type="Cache" transparent="true"/>
+        <field name="ApplName" separator=":">
+            <field-locator locator="ApplLookUp" locator-type="Activity" required="false">
+                <field-transform lang="groovy" name="AppLookUpTransform" phase="raw"><![CDATA[
+                    StringUtils.isEmpty($fieldValue) ? ${CacheApplLookUp} : $fieldValue
+                ]]></field-transform>
+            </field-locator>
             <field-locator locator="ConsumerOrProducer" locator-type="Activity" required="false"/>
         </field>
-        <field name="ResourceName" required="false" formattingPattern="{0}:{1}">
+        <field name="ResourceName" separator=":">
             <field-locator id="ProducerCode" locator="ProducerCode_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerPayload" locator="ProducerPayload_attr" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerMailboxPath" locator="ConsumerMailboxPath_attr" locator-type="Activity" required="false"/>
             <field-locator id="ConsumerFilename" locator="ConsumerFilename_attr" locator-type="Activity" required="false"/>
         </field>
-        <field name="Correlator" required="false" separator=".">
+        <field name="Correlator" separator=".">
             <field-locator id="TransferId" locator="AsyncTransferId_attr" locator-type="Activity" required="false"/>
             <field-locator id="ProducerDocumentId" locator="ProducerDocumentId_attr" locator-type="Activity" required="false"/>
             <field-locator id="DocumentId" locator="PrimaryDocumentId_attr" locator-type="Activity" required="false"/>
@@ -140,10 +145,6 @@
             <field-locator id="ProducerPayloadDocumentId" locator="ProducerPayloadDocumentId_attr" locator-type="Activity"/>
             <field-locator id="ConsumerDocumentId" locator="ConsumerDocumentId_attr" locator-type="Activity"/>
             <field-locator id="Event_DataFlowId" locator="Event_DataFlowId" locator-type="Activity"/>
-        </field>
-
-        <field name="ApplLookUp" required="false" separator="">
-            <field-locator locator="RoutingChannelTemplateName_attr" locator-type="Activity"/>
         </field>
     </parser>
 
@@ -155,13 +156,8 @@
             <value>${Event_ModifyTs}</value>
             <default>1970-01-01 00:00:00.000</default>
         </entry>
-        <entry id="LastEventAttrRecordCDate">
-            <key>LastEventAttrRecordCDate</key>
-            <value>${Event_Attr_ModifyTs}</value>
-            <default>1970-01-01 00:00:00.000</default>
-        </entry>
         <entry id="CachedApplName">
-            <key>${DataflowId}</key>
+            <key>${Event_DataFlowId}</key>
             <value>${ApplLookUp}</value>
         </entry>
     </cache>
