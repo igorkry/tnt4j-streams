@@ -102,19 +102,34 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		}
 
 		String name = null;
+		String url = null;
+		String method = null;
+		String username = null;
+		String password = null;
 		for (int i = 0; i < attrs.getLength(); i++) {
 			String attName = attrs.getQName(i);
 			String attValue = attrs.getValue(i);
 			if (NAME_ATTR.equals(attName)) {
 				name = attValue;
+			} else if (URL_ATTR.equals(attName)) {
+				url = attValue;
+			} else if (METHOD_ATTR.equals(attName)) {
+				method = attValue;
+			} else if (USERMAME_ATTR.equals(attName)) {
+				username = attValue;
+			} else if (PASSWORD_ATTR.equals(attName)) {
+				password = attValue;
 			} else {
-				unknownAttribute(SCENARIO_ELMT, attName);
+				unknownAttribute(STEP_ELMT, attName);
 			}
 		}
 
 		notEmpty(name, SCENARIO_ELMT, NAME_ATTR);
 
 		currScenario = new WsScenario(name);
+		currScenario.setUrlStr(url);
+		currScenario.setMethod(method);
+		currScenario.setCredentials(username, password);
 	}
 
 	private void processScenarioStep(Attributes attrs) throws SAXException {
@@ -149,9 +164,10 @@ public class WsConfigParserHandler extends ConfigParserHandler {
 		notEmpty(name, STEP_ELMT, NAME_ATTR);
 
 		currStep = new WsScenarioStep(name);
-		currStep.setUrlStr(url);
-		currStep.setMethod(method);
-		currStep.setCredentials(username, password);
+		currStep.setUrlStr(url == null ? currScenario.getUrlStr() : url);
+		currStep.setMethod(method == null ? currScenario.getMethod() : method);
+		currStep.setCredentials(username == null ? currScenario.getUsername() : username,
+				password == null ? currScenario.getPassword() : password);
 	}
 
 	private void processCronScheduler(Attributes attrs) throws SAXException {

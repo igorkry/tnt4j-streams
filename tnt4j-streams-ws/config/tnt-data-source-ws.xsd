@@ -160,13 +160,32 @@
             </xs:element>
         </xs:sequence>
 
+        <xs:attributeGroup ref="ScenarioEntityAttributes">
+            <xs:annotation>
+                <xs:documentation>
+                    Defines common scenario step attributes.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attributeGroup>
+
+    </xs:complexType>
+
+    <!-- Common attributes used by scenario/step -->
+    <xs:attributeGroup name="ScenarioEntityAttributes">
+        <xs:annotation>
+            <xs:documentation>
+                Defines attributes common for WS configuration entities: scenario, step, etc.
+            </xs:documentation>
+        </xs:annotation>
+
         <xs:attribute name="name" use="required" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
-                    Name of scenario step.
+                    Name of scenario entity.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+
         <xs:attribute name="url" use="optional" type="xs:string">
             <xs:annotation>
                 <xs:documentation>
@@ -195,7 +214,8 @@
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
-    </xs:complexType>
+
+    </xs:attributeGroup>
 
     <!-- Element <request> definition-->
     <xs:complexType name="RequestType" mixed="true">
@@ -286,12 +306,12 @@
             </xs:element>
         </xs:sequence>
 
-        <xs:attribute name="name" use="required" type="xs:string">
+        <xs:attributeGroup ref="ScenarioEntityAttributes">
             <xs:annotation>
                 <xs:documentation>
-                    Name of scenario.
+                    Defines common scenario attributes.
                 </xs:documentation>
             </xs:annotation>
-        </xs:attribute>
+        </xs:attributeGroup>
     </xs:complexType>
 </xs:schema>

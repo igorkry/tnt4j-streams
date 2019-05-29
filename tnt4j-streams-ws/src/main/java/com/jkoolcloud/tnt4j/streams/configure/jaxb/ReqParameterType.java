@@ -36,9 +36,10 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType name="ReqParameterType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *     &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="format" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -48,18 +49,21 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ReqParameterType")
-@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2018-07-20T10:29:31+03:00", comments = "JAXB RI v2.2.4-2")
+@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 public class ReqParameterType {
 
 	@XmlAttribute(name = "id")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	protected String id;
 	@XmlAttribute(name = "value", required = true)
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	protected String value;
 	@XmlAttribute(name = "type")
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	protected String type;
+	@XmlAttribute(name = "format")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
+	protected String format;
 
 	public ReqParameterType() {
 
@@ -82,7 +86,7 @@ public class ReqParameterType {
 	 * @return possible object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public String getId() {
 		return id;
 	}
@@ -94,7 +98,7 @@ public class ReqParameterType {
 	 *            allowed object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public void setId(String value) {
 		this.id = value;
 	}
@@ -105,7 +109,7 @@ public class ReqParameterType {
 	 * @return possible object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public String getValue() {
 		return value;
 	}
@@ -117,7 +121,7 @@ public class ReqParameterType {
 	 *            allowed object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public void setValue(String value) {
 		this.value = value;
 	}
@@ -128,7 +132,7 @@ public class ReqParameterType {
 	 * @return possible object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public String getType() {
 		return type;
 	}
@@ -140,8 +144,32 @@ public class ReqParameterType {
 	 *            allowed object is {@link String }
 	 *
 	 */
-	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2017-04-25T06:08:33+03:00", comments = "JAXB RI v2.2.4-2")
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
 	public void setType(String value) {
 		this.type = value;
 	}
+
+	/**
+	 * Gets the value of the format property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
+	public String getFormat() {
+		return format;
+	}
+
+	/**
+	 * Sets the value of the format property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	@Generated(value = "com.sun.tools.internal.xjc.Driver", date = "2019-05-28T11:13:40+03:00", comments = "JAXB RI v2.2.8-b130911.1802")
+	public void setFormat(String value) {
+		this.format = value;
+	}
+
 }

@@ -36,10 +36,10 @@ import javax.xml.bind.annotation.*;
  * &lt;complexType name="RequestType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *     	 &lt;sequence>
+ *       &lt;sequence>
  *         &lt;element name="req-param" type="{}ReqParameterType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="parser-ref" type="{}ParserReference" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="parser-ref" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>

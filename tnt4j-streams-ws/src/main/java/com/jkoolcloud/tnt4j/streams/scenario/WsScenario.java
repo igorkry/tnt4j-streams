@@ -26,8 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
  *
  * @version $Revision: 1 $
  */
-public class WsScenario {
-	private String name;
+public class WsScenario extends WsScenarioEntity {
 	private List<WsScenarioStep> stepsList;
 	private WsScenarioStep loginStep;
 
@@ -38,16 +37,7 @@ public class WsScenario {
 	 *            scenario name
 	 */
 	public WsScenario(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Returns scenario name.
-	 *
-	 * @return scenario name
-	 */
-	public String getName() {
-		return name;
+		super(name);
 	}
 
 	/**

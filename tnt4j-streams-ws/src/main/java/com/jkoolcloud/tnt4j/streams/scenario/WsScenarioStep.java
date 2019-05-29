@@ -25,14 +25,10 @@ import org.apache.commons.collections4.CollectionUtils;
  *
  * @version $Revision: 1 $
  */
-public class WsScenarioStep {
-	private String name;
-	private String urlStr;
+public class WsScenarioStep extends WsScenarioEntity {
 	private List<WsRequest<String>> requests;
 	private Map<String, String> properties;
-	private String method;
-	private String username;
-	private String password;
+
 	private SchedulerData schedulerData;
 
 	private WsScenario scenario;
@@ -44,41 +40,7 @@ public class WsScenarioStep {
 	 *            scenario step name
 	 */
 	public WsScenarioStep(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Returns scenario step name.
-	 *
-	 * @return scenario step name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Returns service URL string.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream} and
-	 * {@link com.jkoolcloud.tnt4j.streams.inputs.WsStream}.
-	 *
-	 * @return service URL string.
-	 */
-	public String getUrlStr() {
-		return urlStr;
-	}
-
-	/**
-	 * Sets service URL string.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream} and
-	 * {@link com.jkoolcloud.tnt4j.streams.inputs.WsStream}.
-	 *
-	 * @param urlStr
-	 *            service URL string.
-	 */
-	public void setUrlStr(String urlStr) {
-		this.urlStr = urlStr;
+		super(name);
 	}
 
 	/**
@@ -133,29 +95,6 @@ public class WsScenarioStep {
 	}
 
 	/**
-	 * Returns request invocation method name.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 *
-	 * @return request invocation method name
-	 */
-	public String getMethod() {
-		return method;
-	}
-
-	/**
-	 * Sets request invocation method name. It can be GET or POST.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 *
-	 * @param method
-	 *            request invocation method name
-	 */
-	public void setMethod(String method) {
-		this.method = method;
-	}
-
-	/**
 	 * Returns request/command scheduler configuration data.
 	 *
 	 * @return scheduler configuration data
@@ -172,43 +111,6 @@ public class WsScenarioStep {
 	 */
 	public void setSchedulerData(SchedulerData schedulerData) {
 		this.schedulerData = schedulerData;
-	}
-
-	/**
-	 * Sets user credentials (user name and password) used to perform request if service authentication is needed.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 *
-	 * @param username
-	 *            user name used for authentication
-	 * @param password
-	 *            password used for authentication
-	 */
-	public void setCredentials(String username, String password) {
-		this.username = username;
-		this.password = password;
-	}
-
-	/**
-	 * Returns user name used to perform request if service authentication is needed.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 *
-	 * @return user name used for authentication
-	 */
-	public String getUsername() {
-		return username;
-	}
-
-	/**
-	 * Returns password used to perform request if service authentication is needed.
-	 * <p>
-	 * Used by {@link com.jkoolcloud.tnt4j.streams.inputs.RestStream}.
-	 *
-	 * @return password used for authentication
-	 */
-	public String getPassword() {
-		return password;
 	}
 
 	/**
@@ -275,5 +177,4 @@ public class WsScenarioStep {
 			}
 		}
 	}
-
 }

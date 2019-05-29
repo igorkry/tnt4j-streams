@@ -19,6 +19,7 @@ package com.jkoolcloud.tnt4j.streams.format;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ import com.jkoolcloud.tnt4j.tracker.TrackingActivity;
 public class FactNameValueFormatterTest {
 
 	@Test
-	public void testFormat() {
+	public void testFormat() throws IOException {
 		FactNameValueFormatter formatter = new FactNameValueFormatter();
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("PathLevelAttributes", "StartTime;Severity");

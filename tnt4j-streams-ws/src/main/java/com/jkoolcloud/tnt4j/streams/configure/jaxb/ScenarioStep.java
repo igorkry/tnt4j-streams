@@ -44,11 +44,7 @@ import javax.xml.bind.annotation.*;
  *         &lt;/choice>
  *         &lt;element name="request" type="{}RequestType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="url" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="method" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="username" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="password" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attGroup ref="{}ScenarioEntityAttributes"/>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
