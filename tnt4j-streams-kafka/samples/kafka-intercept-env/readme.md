@@ -13,7 +13,8 @@
            fi
          done
         ```
-        * WIN: `<KAFKA_INSTALL_DIR>/bin/windows/kafka-run-class.bat` by adding section after `rem Classpath addition for release` section:
+        * Windows: `<KAFKA_INSTALL_DIR>/bin/windows/kafka-run-class.bat` by adding section after `rem Classpath addition for release` 
+        section:
         ```cmd
         rem Classpath addition for tnt4j
         for %%i in (%BASE_DIR%\libs\tnt4j\*) do (
@@ -62,21 +63,39 @@ log4j.additivity.com.jkoolcloud.tnt4j.streams.activities_log=false
 ```
 * Add producer (`kafka-console-producer`) and consumer (`kafka-console-consumer`) JVM system properties, referring TNT4J, interceptors and 
 optionally LOG4J configuration files, e.g.:
-```cmd
-set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties
-```
-or with custom LOG4J configuration:
-```cmd
-set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties -Dlog4j.configuration="file:../../config/my_log4j.properties"
-```
-* Run Kafka provided console producer/consumer
-```cmd
-kafka-console-consumer --consumer.config ../../config/consumer.properties --bootstrap-server localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
-```
+    * *NIX:
+    ```bash
+    export KAFKA_OPTS="-Dtnt4j.config=../config/tnt4j_kafka.properties -Dinterceptors.config=../config/interceptors.properties"    
+    ```
+    * Windows:
+    ```cmd
+    set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties
+    ```
+  or with custom LOG4J configuration:
+    * *NIX:
+    ```bash
+    export KAFKA_OPTS="-Dtnt4j.config=../config/tnt4j_kafka.properties -Dinterceptors.config=../config/interceptors.properties -Dlog4j.configuration=file:../config/my_log4j.properties"    
+    ```
+    * Windows:
+    ```cmd
+    set KAFKA_OPTS=-Dtnt4j.config=../../config/tnt4j_kafka.properties -Dinterceptors.config=../../config/interceptors.properties -Dlog4j.configuration="file:../../config/my_log4j.properties"
+    ```
 
-```cmd
-kafka-console-producer --producer.config ../../config/producer.properties --broker-list localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits
-```
+* Run Kafka provided console producer/consumer
+    * *UIX:
+    ```bash
+    kafka-console-consumer.sh --consumer.config ../config/consumer.properties --bootstrap-server localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
+    ```    
+    ```bash
+    kafka-console-producer.sh --producer.config ../config/producer.properties --broker-list localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits
+    ```
+    * Windows:
+    ```cmd
+    kafka-console-consumer --consumer.config ../../config/consumer.properties --bootstrap-server localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits --from-beginning
+    ```    
+    ```cmd
+    kafka-console-producer --producer.config ../../config/producer.properties --broker-list localhost:9092 --topic tnt4j_streams_kafka_intercept_test_page_visits
+    ```
 * If you need to change interceptor events parser configuration:
     * If using default parsers configuration from `tnt4j-streams-kafka-[VERSION]-all.jar` package:
         * Extract `tnt-data-source_kafka_msg_trace.xml` file from `tnt4j-streams-kafka-[VERSION]-all.jar`
