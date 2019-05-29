@@ -145,21 +145,27 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 			return true;
 		}
 
-		boolean drop = dropRecurrentResultSets && isRecurrentResultSet(item, inputBuffer);
-		if (drop) {
-			logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
-					"JDBCStream.rs.consumption.drop", item.getParameters().get(QUERY_NAME_PROP).getValue());
+		if (dropRecurrentResultSets) {
+			WsResponse<ResultSet> recurringItem = getRecurrentResultSet(item, inputBuffer);
+
+			if (recurringItem != null) {
+				logger().log(OpLevel.WARNING, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+						"JDBCStream.rs.consumption.drop", item.getParameters().get(QUERY_NAME_PROP).getValue());
+				inputBuffer.remove(recurringItem);
+				try {
+					closeRS(recurringItem.getData());
+				} catch (SQLException exc) {
+					Utils.logThrowable(logger(), OpLevel.WARNING,
+							StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
+							"JDBCStream.rs.consumption.exception", exc);
+				}
+			}
 		}
 
 		ResultSet rs = item.getData();
 		try {
-			if (rs.isClosed() || !rs.next() || drop) {
-				Statement st = rs.getStatement();
-				Connection conn = st == null ? null : st.getConnection();
-
-				Utils.close(rs);
-				Utils.close(st);
-				Utils.close(conn);
+			if (rs.isClosed() || !rs.next()) {
+				closeRS(rs);
 
 				logger().log(OpLevel.INFO, StreamsResources.getBundle(WsStreamConstants.RESOURCE_BUNDLE_NAME),
 						"JDBCStream.rs.consumption.done");
@@ -177,20 +183,29 @@ public class JDBCStream extends AbstractWsStream<ResultSet> {
 		}
 	}
 
+	private static void closeRS(ResultSet rs) throws SQLException {
+		Statement st = rs.getStatement();
+		Connection conn = st == null ? null : st.getConnection();
+
+		Utils.close(rs);
+		Utils.close(st);
+		Utils.close(conn);
+	}
+
 	@SuppressWarnings("unchecked")
-	protected boolean isRecurrentResultSet(WsResponse<ResultSet> resp, Queue<?> buffer) {
+	protected WsResponse<ResultSet> getRecurrentResultSet(WsResponse<ResultSet> resp, Queue<?> buffer) {
 		for (Object item : buffer) {
 			if (item instanceof WsResponse) {
 				WsResponse<ResultSet> respItem = (WsResponse<ResultSet>) item;
 
 				if (respItem.getParameters().get(QUERY_NAME_PROP).getValue()
 						.equals(resp.getParameters().get(QUERY_NAME_PROP).getValue())) {
-					return true;
+					return respItem;
 				}
 			}
 		}
 
-		return false;
+		return null;
 	}
 
 	@Override
