@@ -1,6 +1,6 @@
 @echo on
 setlocal
-rem set JDBC_LIBPATH=.\lib\db2\*
+set JDBC_LIBPATH=.\lib\db2\*
 rem set JDBC_LIBPATH=.\lib\postgres\*
 rem set JDBC_LIBPATH=.\lib\mssql\*
 rem set JDBC_LIBPATH=.\lib\oracle\*
