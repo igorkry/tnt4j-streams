@@ -419,7 +419,7 @@ public class ActivityInfo {
 
 	private static String formatValuesArray(Object[] vArray, ActivityField field) {
 		if (StringUtils.isNotEmpty(field.getFormattingPattern())) {
-			return formatArrayPattern(field.getFormattingPattern(), vArray);
+			return formatArrayPattern(field.getFormattingPattern(), vArray, field);
 		} else {
 			StringBuilder sb = new StringBuilder();
 			for (int v = 0; v < vArray.length; v++) {
@@ -445,7 +445,7 @@ public class ActivityInfo {
 		}
 	}
 
-	private static String formatArrayPattern(String pattern, Object[] vArray) {
+	private static String formatArrayPattern(String pattern, Object[] vArray, ActivityField field) {
 		MessageFormat mf = new MessageFormat(pattern);
 
 		try {
@@ -457,11 +457,17 @@ public class ActivityInfo {
 				f.setAccessible(true);
 				int[] ana = (int[]) f.get(mf);
 				int maxIndex = ana[maxOffset];
+				int arrayLength = ArrayUtils.getLength(vArray);
 
-				if (maxIndex >= vArray.length) {
+				if (maxIndex >= arrayLength) {
 					LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-							"ActivityInfo.formatting.arguments.mismatch", pattern, maxIndex,
-							ArrayUtils.getLength(vArray));
+							"ActivityInfo.formatting.arguments.mismatch", pattern, maxIndex, arrayLength, field);
+
+					Object[] pvArray = new Object[maxIndex + 1];
+					for (int i = 0; i < pvArray.length; i++) {
+						pvArray[i] = i < arrayLength ? vArray[i] : "";
+					}
+					vArray = pvArray;
 				}
 			}
 		} catch (Exception exc) {
@@ -843,7 +849,7 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			buildChildren(tracker, trackId, event, chTrackables);
+			buildChildren(tracker, event, chTrackables);
 		}
 
 		return event;
@@ -851,7 +857,7 @@ public class ActivityInfo {
 
 	/**
 	 * Builds {@link com.jkoolcloud.tnt4j.tracker.TrackingActivity} for activity data recording.
-	 * 
+	 *
 	 * @param tracker
 	 *            communication gateway to use to record activity
 	 * @param trackName
@@ -947,14 +953,13 @@ public class ActivityInfo {
 		}
 
 		if (hasChildren()) {
-			buildChildren(tracker, trackId, activity, chTrackables);
+			buildChildren(tracker, activity, chTrackables);
 		}
 
 		return activity;
 	}
 
-	private void buildChildren(Tracker tracker, String trackId, Trackable pTrackable,
-			Map<Trackable, ActivityInfo> chTrackables) {
+	private void buildChildren(Tracker tracker, Trackable pTrackable, Map<Trackable, ActivityInfo> chTrackables) {
 		List<ActivityInfo> cais = getChildren(true);
 		for (ActivityInfo child : cais) {
 			if (!child.isDeliverable()) {
@@ -963,7 +968,7 @@ public class ActivityInfo {
 				continue;
 			}
 
-			Trackable cTrackable = buildChild(tracker, child, trackId);
+			Trackable cTrackable = buildChild(tracker, child, pTrackable.getTrackingId());
 			boolean consumed = addTrackableChild(pTrackable, cTrackable);
 
 			if (!consumed && chTrackables != null) {
@@ -978,12 +983,12 @@ public class ActivityInfo {
 	 * <p>
 	 * If no child relatives are available, only this (parent) activity build trackable is added to {@code chTrackables}
 	 * collation.
-	 * 
+	 *
 	 * @param tracker
 	 *            communication gateway to use to record activity
 	 * @param chTrackables
 	 *            collection to add built child trackables
-	 * 
+	 *
 	 * @see #merge(ActivityInfo)
 	 */
 	public void buildSplitRelatives(Tracker tracker, Map<Trackable, ActivityInfo> chTrackables) {
@@ -1025,9 +1030,13 @@ public class ActivityInfo {
 				return chTrackable instanceof Snapshot;
 			}
 
-			LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
-					"ActivityInfo.invalid.child", resolveTrackableType(chTrackable), resolveTrackableType(pTrackable),
-					resolveChildTypesFor(pTrackable), chTrackable.getTrackingId(), pTrackable.getTrackingId());
+			if (StringUtils.equals(chTrackable.getParentId(), pTrackable.getTrackingId())) {
+				LOGGER.log(OpLevel.WARNING, StreamsResources.getBundle(StreamsResources.RESOURCE_BUNDLE_NAME),
+						"ActivityInfo.invalid.child", resolveTrackableType(chTrackable),
+						resolveTrackableType(pTrackable), resolveChildTypesFor(pTrackable), chTrackable.getTrackingId(),
+						pTrackable.getTrackingId());
+			}
+
 		}
 
 		return false;
@@ -1058,7 +1067,9 @@ public class ActivityInfo {
 	}
 
 	private static Trackable buildChild(Tracker tracker, ActivityInfo child, String parentId) {
-		child.parentId = parentId;
+		if (StringUtils.isEmpty(child.parentId)) {
+			child.parentId = parentId;
+		}
 
 		// child.resolveServer(false);
 		// child.determineTimes();
@@ -1987,7 +1998,7 @@ public class ActivityInfo {
 	 * Returns activity field value.
 	 * <p>
 	 * {@code fieldName} can also be as some expression variable having {@code "${FIELD_NAME}"} format.
-	 * 
+	 *
 	 * @param fieldName
 	 *            field name value to get
 	 * @return field contained value
