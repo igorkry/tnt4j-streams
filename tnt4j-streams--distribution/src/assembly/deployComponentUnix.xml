@@ -34,8 +34,14 @@
                         <excludes>
                             <exclude>**/*.bat</exclude>
                             <exclude>**/*.sh</exclude>
+                            <exclude>**/*.zip</exclude>
+                            <exclude>**/*.gz</exclude>
+                            <exclude>**/*.jar</exclude>
+                            <exclude>**/*.xls</exclude>
+                            <exclude>**/*.xlsx</exclude>
                         </excludes>
                         <directory>samples</directory>
+                        <lineEnding>unix</lineEnding>
                     </fileSet>
                     <fileSet>
                         <outputDirectory>samples</outputDirectory>
@@ -53,6 +59,17 @@
                         <directory>samples</directory>
                         <fileMode>0777</fileMode>
                         <lineEnding>unix</lineEnding>
+                    </fileSet>
+                    <fileSet>
+                        <outputDirectory>samples</outputDirectory>
+                        <includes>
+                            <include>**/*.zip</include>
+                            <include>**/*.gz</include>
+                            <include>**/*.jar</include>
+                            <include>**/*.xls</include>
+                            <include>**/*.xlsx</include>
+                        </includes>
+                        <directory>samples</directory>
                     </fileSet>
                     <!-- produced jars -->
                     <fileSet>
@@ -86,6 +103,7 @@
                 <exclude>**/*.sh</exclude>
             </excludes>
             <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>../bin</directory>
@@ -111,6 +129,7 @@
                 <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>../config</directory>
@@ -118,6 +137,7 @@
                 <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>../tnt4j-streams-kafka/config</directory>
@@ -128,6 +148,7 @@
                 <exclude>**/tnt4j*.properties</exclude>
             </excludes>
             <outputDirectory>config</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>../tnt4j-streams-wmq/config</directory>
@@ -135,6 +156,7 @@
                 <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>../tnt4j-streams-ws/config</directory>
@@ -142,6 +164,7 @@
                 <include>**/*.*</include>
             </includes>
             <outputDirectory>config</outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <!-- static content -->
         <fileSet>
@@ -152,6 +175,7 @@
                 <include>NOTICE*</include>
             </includes>
             <outputDirectory></outputDirectory>
+            <lineEnding>unix</lineEnding>
         </fileSet>
 
         <!-- JavaDocs -->
@@ -161,6 +185,7 @@
         <!--<include>*-javadoc.*</include>-->
         <!--</includes>-->
         <!--<outputDirectory>docs</outputDirectory>-->
+        <!--<lineEnding>unix</lineEnding>-->
         <!--</fileSet>-->
     </fileSets>
 </component>
