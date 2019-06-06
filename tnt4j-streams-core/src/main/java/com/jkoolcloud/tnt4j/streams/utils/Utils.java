@@ -143,6 +143,76 @@ public final class Utils extends com.jkoolcloud.tnt4j.utils.Utils {
 	}
 
 	/**
+	 * Base64 decodes into {@link String} using defined {@link java.nio.charset.Charset}.
+	 *
+	 * @param src
+	 *            byte sequence to decode
+	 * @param charset
+	 *            charset instance to use for decoding, or {@code null} to use system default charset
+	 * @return string constructed from decoded bytes array
+	 * 
+	 * @see #base64Decode(byte[])
+	 * @see #getString(byte[], java.nio.charset.Charset)
+	 */
+	public static String base64Decode(byte[] src, Charset charset) {
+		byte[] payload = base64Decode(src);
+		return getString(payload, charset);
+	}
+
+	/**
+	 * Base64 decodes into {@link String} using defined {@link java.nio.charset.Charset}.
+	 *
+	 * @param src
+	 *            base64 encoded string to decode
+	 * @param charset
+	 *            charset instance to use for decoding, or {@code null} to use system default charset
+	 * @return string constructed from decoded bytes array
+	 * 
+	 * @see #base64Decode(String)
+	 * @see #getString(byte[], java.nio.charset.Charset)
+	 */
+	public static String base64Decode(String src, Charset charset) {
+		byte[] payload = base64Decode(src);
+		return getString(payload, charset);
+	}
+
+	/**
+	 * Base64 decodes into {@link String} using defined {@code charsetName}.
+	 *
+	 * @param src
+	 *            byte sequence to decode
+	 * @param charsetName
+	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use system
+	 *            default charset
+	 * @return string constructed from decoded bytes array
+	 * 
+	 * @see #base64Decode(byte[])
+	 * @see #getString(byte[], String)
+	 */
+	public static String base64Decode(byte[] src, String charsetName) {
+		byte[] payload = base64Decode(src);
+		return getString(payload, charsetName);
+	}
+
+	/**
+	 * Base64 decodes into {@link String} using defined {@code charsetName}.
+	 *
+	 * @param src
+	 *            base64 encoded string to decode
+	 * @param charsetName
+	 *            the name of a supported {@linkplain java.nio.charset.Charset charset}, or {@code null} to use system
+	 *            default charset
+	 * @return string constructed from decoded bytes array
+	 * 
+	 * @see #base64Decode(String)
+	 * @see #getString(byte[], String)
+	 */
+	public static String base64Decode(String src, String charsetName) {
+		byte[] payload = base64Decode(src);
+		return getString(payload, charsetName);
+	}
+
+	/**
 	 * Converts an array of bytes into a string representing the hexadecimal bytes values.
 	 *
 	 * @param src

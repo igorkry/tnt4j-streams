@@ -18,6 +18,7 @@ package com.jkoolcloud.tnt4j.streams.preparsers;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -55,6 +56,10 @@ import com.jkoolcloud.tnt4j.streams.utils.Utils;
  * <p>
  * If resolved XML has multiple nodes in root level, to make XML valid those nodes gets surrounded by single root node
  * named {@value com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser.XMLBinSAXHandler#ROOT_ELEMENT}.
+ * <p>
+ * Default {@link Charset} used to convert between binary and string data is
+ * {@link java.nio.charset.StandardCharsets#UTF_8}. Custom charset can be defined using constructor parameter
+ * {@code charsetName}.
  *
  * @version $Revision: 1 $
  */
@@ -62,6 +67,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 	private static final EventSink LOGGER = LoggerUtils.getLoggerSink(XMLFromBinDataPreParser.class);
 
 	private ActivityFieldFormatType format;
+	private Charset charset = StandardCharsets.UTF_8;
 
 	/**
 	 * Constructs a new XMLFromBinDataPreParser.
@@ -77,6 +83,20 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 	 * Constructs a new XMLFromBinDataPreParser.
 	 *
 	 * @param format
+	 *            RAW activity data format name from {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType}
+	 *            enumeration
+	 *
+	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
+	 */
+	public XMLFromBinDataPreParser(String format) throws ParserConfigurationException {
+		this(ActivityFieldFormatType.valueOf(format));
+	}
+
+	/**
+	 * Constructs a new XMLFromBinDataPreParser.
+	 *
+	 * @param format
 	 *            RAW activity data format
 	 *
 	 * @throws ParserConfigurationException
@@ -84,6 +104,39 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 	 */
 	public XMLFromBinDataPreParser(ActivityFieldFormatType format) throws ParserConfigurationException {
 		this.format = format;
+	}
+
+	/**
+	 * Constructs a new XMLFromBinDataPreParser.
+	 *
+	 * @param format
+	 *            RAW activity data format name from {@link com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType}
+	 *            enumeration
+	 * @param charsetName
+	 *            RAW activity data charset
+	 *
+	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
+	 */
+	public XMLFromBinDataPreParser(String format, String charsetName) throws ParserConfigurationException {
+		this(ActivityFieldFormatType.valueOf(format), charsetName);
+	}
+
+	/**
+	 * Constructs a new XMLFromBinDataPreParser.
+	 *
+	 * @param format
+	 *            RAW activity data format
+	 * @param charsetName
+	 *            RAW activity data charset
+	 *
+	 * @throws ParserConfigurationException
+	 *             if initialization of SAX parser fails
+	 */
+	public XMLFromBinDataPreParser(ActivityFieldFormatType format, String charsetName)
+			throws ParserConfigurationException {
+		this.format = format;
+		this.charset = Charset.forName(charsetName);
 	}
 
 	/**
@@ -102,19 +155,21 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 		InputStream is;
 		boolean closeWhenDone = false;
 		if (data instanceof String) {
+			String dStr;
 			switch (format) {
 			case base64Binary:
-				is = new ByteArrayInputStream(Utils.base64Decode((String) data));
+				dStr = Utils.base64Decode((String) data, charset);
 				break;
 			case hexBinary:
-				is = new ByteArrayInputStream(Utils.decodeHex((String) data));
+				dStr = Utils.getString(Utils.decodeHex((String) data), charset);
 				break;
 			case bytes:
 			case string:
 			default:
-				is = new ByteArrayInputStream(((String) data).getBytes());
+				dStr = (String) data;
 				break;
 			}
+			is = new ByteArrayInputStream(dStr.getBytes(charset));
 			closeWhenDone = true;
 		} else if (data instanceof byte[]) {
 			is = new ByteArrayInputStream((byte[]) data);
@@ -124,7 +179,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 			closeWhenDone = true;
 		} else if (data instanceof Reader) {
 			Reader reader = (Reader) data;
-			is = new ReaderInputStream(reader, StandardCharsets.UTF_8);
+			is = new ReaderInputStream(reader, charset);
 		} else if (data instanceof InputStream) {
 			is = (InputStream) data;
 		} else {
@@ -145,7 +200,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 		}
 
 		try {
-			documentHandler.parseBinInput(is);
+			documentHandler.parseBinInput(is, charset);
 		} catch (IOException e) {
 			throw new ParseException(StreamsResources.getString(StreamsResources.RESOURCE_BUNDLE_NAME,
 					"XMLFromBinDataPreParser.bin.data.parse.failure"), 0);
@@ -250,14 +305,16 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 		 *
 		 * @param is
 		 *            input stream to read
+		 * @param charset
+		 *            input stream charset
 		 * @throws IOException
 		 *             if I/O exception occurs while reading input stream
 		 */
-		public void parseBinInput(InputStream is) throws IOException {
-			InputStream prefixIS = new ByteArrayInputStream(XML_PREFIX.getBytes());
+		public void parseBinInput(InputStream is, Charset charset) throws IOException {
+			InputStream prefixIS = new ByteArrayInputStream(XML_PREFIX.getBytes(charset));
 			SequenceInputStream sIS = new SequenceInputStream(Collections.enumeration(Arrays.asList(prefixIS, is)));
 			InputSource parserInputSource = new InputSource(sIS);
-			parserInputSource.setEncoding(Utils.UTF8);
+			parserInputSource.setEncoding(charset.name());
 
 			while (bPos <= is.available()) {
 				try {
@@ -282,7 +339,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 					is.reset();
 
 					if (bPos >= is.available()) {
-						handleTrailingText(is);
+						handleTrailingText(is, charset);
 						break;
 					}
 				}
@@ -308,10 +365,12 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 		 *
 		 * @param is
 		 *            input stream to read
+		 * @param charset
+		 *            input stream charset
 		 * @throws IOException
 		 *             if I/O exception occurs while reading input stream
 		 */
-		protected void handleTrailingText(InputStream is) throws IOException {
+		protected void handleTrailingText(InputStream is, Charset charset) throws IOException {
 			int lPos = absoluteLastGoodPosition - 1;
 			int textLength = bPos - lPos;
 
@@ -320,7 +379,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 				try {
 					is.skip(lPos);
 					is.read(buffer);
-					String text = new String(buffer, StandardCharsets.UTF_8);
+					String text = new String(buffer, charset);
 					characters(text.toCharArray(), 0, text.length());
 				} finally {
 					is.reset();
@@ -350,7 +409,7 @@ public class XMLFromBinDataPreParser extends AbstractPreParser<Object, Document>
 				// No text nodes can be children of root (DOM006 exception)
 				if (last != document) {
 					String text = new String(ch, start, length);
-					last.appendChild(document.createTextNode(StringEscapeUtils.escapeXml10(text)));
+					last.appendChild(document.createTextNode(StringEscapeUtils.escapeXml11(text)));
 				}
 			}
 		}

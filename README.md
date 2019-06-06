@@ -5846,8 +5846,9 @@ Sample stream configuration using `XMLFromBinDataPreParser` pre-parser:
 
     <java-object name="XMLFromRFH2PreParser" class="com.jkoolcloud.tnt4j.streams.preparsers.XMLFromBinDataPreParser">
         <!--IF Raw ACTIVITY DATA STRING IS ENCODED - USE "format" PARAMETER. SEE BELOW -->
-        <!--<param name="format" value="base64Binary" type="com.jkoolcloud.tnt4j.streams.fields.ActivityFieldFormatType"/>-->
         <!--<param name="format" value="base64Binary" type="java.lang.String"/>-->
+        <!-- IF RAW ACTIVITY DATA IS ENCODED USING CHARSET - USE "charsetName" PARAMETER. SEE BELOW -->
+        <!--<param name="charsetName" value="UTF-16" type="java.lang.String"/>-->
     </java-object>
 
     <parser name="RFH2XMLParser" class="com.jkoolcloud.tnt4j.streams.parsers.ActivityXmlParser">
